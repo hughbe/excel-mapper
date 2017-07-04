@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "ExcelMapper.Tests": {
+      "commandName": "Project"
+    }
+  }
+}
