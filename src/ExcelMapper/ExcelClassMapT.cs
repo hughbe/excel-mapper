@@ -80,7 +80,7 @@ namespace ExcelMapper
             return propertyMap;
         }
 
-        public MultiPipeline<TProperty, TElement> MultiMap<TProperty, TElement>(Expression<Func< TProperty>> expression, IEnumerable<int> indices)
+        public MultiPipeline<TProperty, TElement> MultiMap<TProperty, TElement>(Expression<Func<T, TProperty>> expression, IEnumerable<int> indices)
         {
             return MultiMap<TProperty, TElement>(expression, indices?.ToArray());
         }

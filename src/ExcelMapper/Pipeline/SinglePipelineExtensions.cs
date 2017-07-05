@@ -7,22 +7,6 @@ namespace ExcelMapper.Pipeline
 {
     public static class SinglePipelineExtensions
     {
-        public static TPipeline WithAdditionalItems<TPipeline, T>(this TPipeline pipeline, params PipelineItem<T>[] items) where TPipeline : SinglePipeline<T>
-        {
-            return WithAdditionalItems(pipeline, (IEnumerable<PipelineItem<T>>)items);
-        }
-
-        public static TPipeline WithAdditionalItems<TPipeline, T>(this TPipeline pipeline, IEnumerable<PipelineItem<T>> items) where TPipeline : SinglePipeline<T>
-        {
-            if (items == null)
-            {
-                throw new ArgumentNullException(nameof(items));
-            }
-
-            pipeline.Items = pipeline.Items.Concat(items).ToList();
-            return pipeline;
-        }
-
         public static TPipeline WithMapping<TPipeline, T>(this TPipeline pipeline, Dictionary<string, T> mapping) where TPipeline : SinglePipeline<T>
         {
             var item = new MapStringValuePipelineItem<T>(mapping);

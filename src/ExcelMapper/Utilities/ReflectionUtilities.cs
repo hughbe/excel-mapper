@@ -9,8 +9,13 @@ namespace ExcelMapper.Utilities
     {
         public static Type GetIEnumerableType(this Type type)
         {
+            if (type.IsGenericInterface(typeof(IEnumerable<>)))
+            {
+                return type.GenericTypeArguments[0];
+            }
+
             IEnumerable<Type> interfaces = type.GetTypeInfo().ImplementedInterfaces;
-            Type ienumerableType = interfaces.FirstOrDefault(parameterType => parameterType.ImplementsGenericInterface(typeof(IEnumerable<>)));
+            Type ienumerableType = interfaces.FirstOrDefault(parameterType => parameterType.IsGenericInterface(typeof(IEnumerable<>)));
 
             return ienumerableType?.GenericTypeArguments[0];
         }
@@ -20,7 +25,7 @@ namespace ExcelMapper.Utilities
             return type.GetTypeInfo().ImplementedInterfaces.Any(t => t == interfaceType);
         }
 
-        public static bool ImplementsGenericInterface(this Type type, Type interfaceType)
+        public static bool IsGenericInterface(this Type type, Type interfaceType)
         {
             if (!type.GetTypeInfo().IsGenericType)
             {

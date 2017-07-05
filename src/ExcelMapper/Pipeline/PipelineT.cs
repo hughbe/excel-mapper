@@ -10,5 +10,31 @@ namespace ExcelMapper.Pipeline
         public List<PipelineItem<T>> Items { get; internal set; } = new List<PipelineItem<T>>();
         public PipelineItem<T> EmptyFallback { get; internal set; }
         public PipelineItem<T> InvalidFallback { get; internal set; }
+
+        protected T CompletePipeline(string stringValue)
+        {
+            PipelineResult<T> result = new PipelineResult<T>(PipelineStatus.Began, stringValue, default(T));
+            for (int i = 0; i < Items.Count; i++)
+            {
+                PipelineItem<T> item = Items[i];
+                result = item.TryMap(result);
+                if (result.Status == PipelineStatus.Completed)
+                {
+                    return result.Result;
+                }
+            }
+
+            if (result.Status == PipelineStatus.Empty && EmptyFallback != null)
+            {
+                result = EmptyFallback.TryMap(result);
+            }
+
+            if (result.Status == PipelineStatus.Invalid && InvalidFallback != null)
+            {
+                result = InvalidFallback.TryMap(result);
+            }
+
+            return result.Result;
+        }
     }
 }

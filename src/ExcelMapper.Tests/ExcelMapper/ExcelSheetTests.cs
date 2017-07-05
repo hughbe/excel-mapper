@@ -16,7 +16,7 @@ namespace ExcelMapper.Tests
                 ExcelHeading heading = sheet.ReadHeading();
                 Assert.Same(heading, sheet.Heading);
 
-                Assert.Equal(new string[] { "Int Value", "StringValue", "Bool Value", "Enum Value", "DateValue", "ArrayValue", "SplitValue1", "SplitValue2", "SplitValue3", "SplitValue4", "SplitValue5" }, heading.ColumnNames);
+                Assert.Equal(new string[] { "Int Value", "StringValue", "Bool Value", "Enum Value", "DateValue", "ArrayValue" }, heading.ColumnNames);
             }
         }
 
@@ -57,7 +57,7 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_Sheets_ReturnsExpected()
+        public void ReadRow_Map_ReturnsExpected()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
@@ -73,8 +73,6 @@ namespace ExcelMapper.Tests
                 Assert.Equal(PrimitiveSheet1Enum.Government, row1.EnumValue);
                 Assert.Equal(new DateTime(2017, 07, 04), row1.DateValue);
                 Assert.Equal(new string[] { "a", "b", "c" }, row1.ArrayValue);
-                Assert.Equal(new int[] { 1, 2, 3 }, row1.MultiMapName);
-                Assert.Equal(new string[] { "a", "b" }, row1.MultiMapIndex);
 
                 PrimitiveSheet1 row2 = sheet.ReadRow<PrimitiveSheet1>();
                 Assert.Equal(2, row2.IntValue);
@@ -83,8 +81,6 @@ namespace ExcelMapper.Tests
                 Assert.Equal(PrimitiveSheet1Enum.Government, row2.EnumValue);
                 Assert.Equal(new DateTime(2017, 07, 04), row2.DateValue);
                 Assert.Equal(new string[] { "empty" }, row2.ArrayValue);
-                Assert.Equal(new int[] { 1, -1, 3 }, row2.MultiMapName);
-                Assert.Equal(new string[] { null, null }, row2.MultiMapIndex);
 
                 PrimitiveSheet1 row3 = sheet.ReadRow<PrimitiveSheet1>();
                 Assert.Equal(-1, row3.IntValue);
@@ -93,8 +89,6 @@ namespace ExcelMapper.Tests
                 Assert.Equal(PrimitiveSheet1Enum.NGO, row3.EnumValue);
                 Assert.Equal(new DateTime(10), row3.DateValue);
                 Assert.Equal(new string[] { "a" }, row3.ArrayValue);
-                Assert.Equal(new int[] { -1, -1, -1 }, row3.MultiMapName);
-                Assert.Equal(new string[] { null, "d" }, row3.MultiMapIndex);
 
                 PrimitiveSheet1 row4 = sheet.ReadRow<PrimitiveSheet1>();
                 Assert.Equal(-2, row4.IntValue);
@@ -103,8 +97,6 @@ namespace ExcelMapper.Tests
                 Assert.Equal(PrimitiveSheet1Enum.Unknown, row4.EnumValue);
                 Assert.Equal(new DateTime(20), row4.DateValue);
                 Assert.Equal(new string[] { "a", "b", "c", "d", "e" }, row4.ArrayValue);
-                Assert.Equal(new int[] { -2, -2, 3 }, row4.MultiMapName);
-                Assert.Equal(new string[] { "d", null }, row4.MultiMapIndex);
             }
         }
 
@@ -116,8 +108,6 @@ namespace ExcelMapper.Tests
             public PrimitiveSheet1Enum EnumValue { get; set; }
             public DateTime DateValue { get; set; }
             public string[] ArrayValue { get; set; }
-            public int[] MultiMapName { get; set; }
-            public string[] MultiMapIndex { get; set; }
         }
 
         public enum PrimitiveSheet1Enum
@@ -161,12 +151,75 @@ namespace ExcelMapper.Tests
                 Map(p => p.ArrayValue)
                     .WithNewDelimiters<DefaultPipeline<string[]>, string[], string>(',', ';')
                     .WithEmptyFallback(new string[] { "empty" });
+            }
+        }
 
-                MultiMap<int[], int>(p => p.MultiMapName, "SplitValue1", "SplitValue2", "SplitValue3")
+        [Fact]
+        public void ReadRow_MultiMap_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("MultiMap.xlsx"))
+            {
+                importer.Configuration.RegisterMapping(new MultiMapRowMapping());
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                MultiMapRow row1 = sheet.ReadRow<MultiMapRow>();
+                Assert.Equal(new int[] { 1, 2, 3 }, row1.MultiMapName);
+                Assert.Equal(new string[] { "a", "b" }, row1.MultiMapIndex);
+                Assert.Equal(new int[] { 1, 2 }, row1.IEnumerableInt);
+                Assert.Equal(new bool[] { true, false }, row1.ICollectionBool);
+                Assert.Equal(new string[] { "1", "2" }, row1.ListString);
+
+                MultiMapRow row2 = sheet.ReadRow<MultiMapRow>();
+                Assert.Equal(new int[] { 1, -1, 3 }, row2.MultiMapName);
+                Assert.Equal(new string[] { null, null }, row2.MultiMapIndex);
+                Assert.Equal(new int[] { 0, 0 }, row2.IEnumerableInt);
+                Assert.Equal(new bool[] { false, true }, row2.ICollectionBool);
+                Assert.Equal(new string[] { "3", "4" }, row2.ListString);
+
+                MultiMapRow row3 = sheet.ReadRow<MultiMapRow>();
+                Assert.Equal(new int[] { -1, -1, -1 }, row3.MultiMapName);
+                Assert.Equal(new string[] { null, "d" }, row3.MultiMapIndex);
+                Assert.Equal(new int[] { 5, 6 }, row3.IEnumerableInt);
+                Assert.Equal(new bool[] { false, false }, row3.ICollectionBool);
+                Assert.Equal(new string[] { "5", "6" }, row3.ListString);
+
+                MultiMapRow row4 = sheet.ReadRow<MultiMapRow>();
+                Assert.Equal(new int[] { -2, -2, 3 }, row4.MultiMapName);
+                Assert.Equal(new string[] { "d", null }, row4.MultiMapIndex);
+                Assert.Equal(new int[] { 7, 8 }, row4.IEnumerableInt);
+                Assert.Equal(new bool[] { false, true }, row4.ICollectionBool);
+                Assert.Equal(new string[] { "7", "8" }, row4.ListString);
+            }
+        }
+
+        public class MultiMapRow
+        {
+            public int[] MultiMapName { get; set; }
+            public string[] MultiMapIndex { get; set; }
+            public IEnumerable<int> IEnumerableInt { get; set; }
+            public ICollection<bool> ICollectionBool { get; set; }
+            public List<string> ListString { get; set; }
+        }
+
+        public class MultiMapRowMapping : ExcelClassMap<MultiMapRow>
+        {
+            public MultiMapRowMapping() : base()
+            {
+                MultiMap<int[], int>(p => p.MultiMapName, "MultiMapName1", "MultiMapName2", "MultiMapName3")
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2);
 
-                MultiMap<string[], string>(p => p.MultiMapIndex, 9, 10);
+                MultiMap<string[], string>(p => p.MultiMapIndex, 3, 4);
+
+                MultiMap<IEnumerable<int>, int>(p => p.IEnumerableInt, new List<string> { "IEnumerableInt1", "IEnumerableInt2" })
+                    .WithValueFallback(default(int));
+
+                MultiMap<ICollection<bool>, bool>(p => p.ICollectionBool, new List<int> { 7, 8 })
+                    .WithValueFallback(default(bool));
+
+                MultiMap<List<string>, string>(p => p.ListString, "ListString1", "ListString2");
             }
         }
     }

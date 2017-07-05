@@ -34,8 +34,7 @@ namespace ExcelMapper.Pipeline
                 throw new ExcelMappingException();
             }
 
-            EmptyFallback = new FixedValuePipelineItem<TElement>(default(TElement));
-            InvalidFallback = new ThrowIfStatusPipelineItem<TElement>(PipelineStatus.Invalid);
+            AutoMapper.AutoMap(this);
         }
 
         protected object CompletePipeline(IEnumerable<string> stringValues)
@@ -44,33 +43,8 @@ namespace ExcelMapper.Pipeline
 
             foreach (string stringValue in stringValues)
             {
-                if (stringValue == null)
-                {
-                    if (EmptyFallback != null)
-                    {
-                        var result = new PipelineResult<TElement>(PipelineStatus.Empty, stringValue, default(TElement));
-                        result = EmptyFallback.TryMap(result);
-                        elements.Add(result.Result);
-                    }
-                    else
-                    {
-                        elements.Add(default(TElement));
-                    }
-    
-                    continue;
-                }
-
-                try
-                {
-                    TElement element = (TElement)Convert.ChangeType(stringValue, typeof(TElement));
-                    elements.Add(element);
-                }
-                catch when (InvalidFallback != null)
-                {
-                    var result = new PipelineResult<TElement>(PipelineStatus.Invalid, stringValue, default(TElement));
-                    result = InvalidFallback.TryMap(result);
-                    elements.Add(result.Result);
-                }
+                TElement element = CompletePipeline(stringValue);
+                elements.Add(element);
             }
 
             if (Type == EnumerableType.Array)

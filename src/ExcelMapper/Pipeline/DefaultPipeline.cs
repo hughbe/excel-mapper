@@ -12,7 +12,7 @@ namespace ExcelMapper.Pipeline
 
         public DefaultPipeline(MemberInfo member) : base(member.Name, member)
         {
-            AutoMap();
+            AutoMapper.AutoMap(this);
         }
 
         public ColumnPipeline<TProperty> WithColumnName(string columnName)
@@ -49,68 +49,6 @@ namespace ExcelMapper.Pipeline
             }
 
             return base.Execute(sheet, row);
-        }
-
-        private void AutoMap()
-        {
-            var pipelineItems = new List<PipelineItem<TProperty>>();
-
-            void AddItem(PipelineItem<TProperty> item)
-            {
-                item.Automapped = true;
-                pipelineItems.Add(item);
-            }
-
-            Type type = typeof(TProperty);
-            Type[] interfaces = type.GetTypeInfo().ImplementedInterfaces.ToArray();
-
-            if (type == typeof(DateTime))
-            {
-                var item = new ParseAsDateTimePipelineItem() as PipelineItem<TProperty>;
-                AddItem(item);
-
-                this.DisallowEmptyOrInvalid<DefaultPipeline<TProperty>, TProperty>();
-            }
-            else if (type == typeof(bool))
-            {
-                var item = new ParseAsBoolPipelineItem() as PipelineItem<TProperty>;
-                AddItem(item);
-
-                this.DisallowEmptyOrInvalid<DefaultPipeline<TProperty>, TProperty>();
-            }
-            else if (type.GetTypeInfo().BaseType == typeof(Enum))
-            {
-                Type itemType = typeof(ParseAsEnumPipelineItem<>).MakeGenericType(type);
-                object item = Activator.CreateInstance(itemType);
-                AddItem((PipelineItem<TProperty>)item);
-
-                this.DisallowEmptyOrInvalid<DefaultPipeline<TProperty>, TProperty>();
-            }
-            else if (type == typeof(string))
-            {
-                AddItem(ParseAsStringPipelineItem.Instance as PipelineItem<TProperty>);
-            }
-            else if (interfaces.Any(t => t == typeof(IConvertible)))
-            {
-                var item = new ChangeTypePipelineItem<TProperty>();
-                AddItem(item);
-
-                this.DisallowEmptyOrInvalid<DefaultPipeline<TProperty>, TProperty>();
-            }
-            else
-            {
-                Type ienumerableType = interfaces.FirstOrDefault(t => t.GetTypeInfo().IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
-                if (ienumerableType != null)
-                {
-                    Type elementType = ienumerableType.GenericTypeArguments[0];
-                    Type parserType = typeof(SplitWithDelimiterPipelineItem<,>).MakeGenericType(typeof(TProperty), elementType);
-
-                    PipelineItem<TProperty> parser = (PipelineItem<TProperty>)Activator.CreateInstance(parserType);
-                    AddItem(parser);
-                }
-            }
-
-            this.WithAdditionalItems(pipelineItems);
         }
     }
 }
