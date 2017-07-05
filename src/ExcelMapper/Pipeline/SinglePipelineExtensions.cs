@@ -23,9 +23,16 @@ namespace ExcelMapper.Pipeline
             return pipeline;
         }
 
-        public static TPipeline WithMapped<TPipeline, T>(this TPipeline pipeline, Dictionary<string, T> mapping) where TPipeline : SinglePipeline<T>
+        public static TPipeline WithMapping<TPipeline, T>(this TPipeline pipeline, Dictionary<string, T> mapping) where TPipeline : SinglePipeline<T>
         {
             var item = new MapStringValuePipelineItem<T>(mapping);
+            pipeline.Items.Add(item);
+            return pipeline;
+        }
+
+        public static TPipeline WithConverter<TPipeline, T>(this TPipeline pipeline, ConvertUsingSimple<T> mapping) where TPipeline : SinglePipeline<T>
+        {
+            var item = new ConvertUsingPipelineItem<T>(mapping);
             pipeline.Items.Add(item);
             return pipeline;
         }

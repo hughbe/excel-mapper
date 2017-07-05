@@ -8,7 +8,7 @@ using ExcelMapper.Utilities;
 
 namespace ExcelMapper
 {
-    public class ExcelClassMap<T> : ExcelClassMap where T : new()
+    public class ExcelClassMap<T> : ExcelClassMap
     {
         public ExcelClassMap() : base(typeof(T)) { }
 

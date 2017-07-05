@@ -42,14 +42,14 @@ namespace ExcelMapper
             return heading;
         }
 
-        public IEnumerable<ExcelRow> ReadRows()
+        public IEnumerable<T> ReadRows<T>()
         {
             if (HasHeading && Heading == null)
             {
                 ReadHeading();
             }
 
-            while (TryReadRow(out ExcelRow row))
+            while (TryReadRow(out T row))
             {
                 yield return row;
             }

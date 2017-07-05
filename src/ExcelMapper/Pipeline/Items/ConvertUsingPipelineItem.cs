@@ -2,7 +2,7 @@
 
 namespace ExcelMapper.Pipeline.Items
 {
-    public delegate bool ConvertUsingSimple<T>(string stringVaule, out T result);
+    public delegate T ConvertUsingSimple<T>(string stringValue);
 
     public class ConvertUsingPipelineItem<T> : PipelineItem<T>
     {
@@ -22,12 +22,8 @@ namespace ExcelMapper.Pipeline.Items
 
             Converter = item =>
             {
-                if (!converter(item.StringValue, out T result))
-                {
-                    return item.MakeInvalid();
-                }
-
-                return item.MakeCompleted(result);
+                T value = converter(item.StringValue);
+                return item.MakeCompleted(value);
             };
         }
 

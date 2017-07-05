@@ -146,7 +146,7 @@ namespace ExcelMapper.Tests
 
                 Map(p => p.EnumValue)
                     .WithColumnName("Enum Value")
-                    .WithMapped(new Dictionary<string, PrimitiveSheet1Enum>
+                    .WithMapping(new Dictionary<string, PrimitiveSheet1Enum>
                     {
                         { "Gov't", PrimitiveSheet1Enum.Government }
                     })
