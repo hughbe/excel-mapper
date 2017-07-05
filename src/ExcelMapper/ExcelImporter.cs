@@ -62,50 +62,5 @@ namespace ExcelMapper
             excelSheet = new ExcelSheet(Reader, SheetIndex, Configuration);
             return true;
         }
-
-        private IEnumerable<T> ReadTraining<T>(IExcelDataReader reader)
-        {
-            foreach (Dictionary<string, object> result in ReadRows(reader))
-            {
-                Console.WriteLine(result.Count);
-            }
-
-            return null;
-        }
-
-        private static IEnumerable<Dictionary<string, object>> ReadRows(IExcelDataReader reader)
-        {
-            Dictionary<string, int> columnMappings = GetColumnMappings(reader);
-            while (reader.Read())
-            {
-                yield return ReadRow(reader, columnMappings);
-            }
-        }
-
-        private static Dictionary<string, object> ReadRow(IExcelDataReader reader, Dictionary<string, int> columnMappings)
-        {
-            var result = new Dictionary<string, object>(columnMappings.Count);
-            foreach (KeyValuePair<string, int> mapping in columnMappings)
-            {
-                string value = reader.GetString(mapping.Value);
-                result.Add(mapping.Key, value);
-            }
-
-            return result;
-        }
-
-        private static Dictionary<string, int> GetColumnMappings(IExcelDataReader reader)
-        {
-            reader.Read();
-
-            var columnNames = new Dictionary<string, int>(reader.FieldCount);
-            for (int columnIndex = 0; columnIndex < reader.FieldCount; columnIndex++)
-            {
-                string name = reader.GetString(columnIndex);
-                columnNames.Add(name, columnIndex);
-            }
-
-            return columnNames;
-        }
     }
 }
