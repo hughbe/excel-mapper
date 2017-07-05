@@ -257,6 +257,7 @@ namespace ExcelMapper.Tests
                 Assert.False(row1.BoolValue);
                 Assert.Equal((EmptyValuesEnum)0, row1.EnumValue);
                 Assert.Equal(DateTime.MinValue, row1.DateValue);
+                Assert.Equal(new int[] { 0, 0 }, row1.ArrayValue);
             }
         }
 
@@ -267,6 +268,7 @@ namespace ExcelMapper.Tests
             public bool BoolValue { get; set; }
             public EmptyValuesEnum EnumValue { get; set; }
             public DateTime DateValue { get; set; }
+            public int[] ArrayValue { get; set; }
         }
 
         public enum EmptyValuesEnum
@@ -283,6 +285,59 @@ namespace ExcelMapper.Tests
                 Map(e => e.BoolValue);
                 Map(e => e.EnumValue);
                 Map(e => e.DateValue);
+                MultiMap<int[], int>(e => e.ArrayValue, "ArrayValue1", "ArrayValue2");
+            }
+        }
+
+        [Fact]
+        public void ReadRow_NullableValues_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("EmptyValues.xlsx"))
+            {
+                importer.Configuration.RegisterMapping(new NullableValuesMapping());
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                NullableValues row1 = sheet.ReadRow<NullableValues>();
+                Assert.Null(row1.IntValue);
+                Assert.Null(row1.BoolValue);
+                Assert.Null(row1.EnumValue);
+                Assert.Null(row1.DateValue);
+                Assert.Equal(new int?[] { null, null }, row1.ArrayValue);
+
+                NullableValues row2 = sheet.ReadRow<NullableValues>();
+                Assert.Equal(1, row2.IntValue);
+                Assert.True(row2.BoolValue);
+                Assert.Equal(NullableValuesEnum.Test, row2.EnumValue);
+                Assert.Equal(new DateTime(2017, 07, 05), row2.DateValue);
+                Assert.Equal(new int?[] { 1, 2 }, row2.ArrayValue);
+            }
+        }
+
+        public class NullableValues
+        {
+            public int? IntValue { get; set; }
+            public bool? BoolValue { get; set; }
+            public NullableValuesEnum? EnumValue { get; set; }
+            public DateTime? DateValue { get; set; }
+            public int?[] ArrayValue { get; set; }
+        }
+
+        public enum NullableValuesEnum
+        {
+            Test = 1
+        }
+
+        public class NullableValuesMapping : ExcelClassMap<NullableValues>
+        {
+            public NullableValuesMapping() : base(EmptyValueStrategy.SetToDefaultValue)
+            {
+                Map(n => n.IntValue);
+                Map(n => n.BoolValue);
+                Map(n => n.EnumValue);
+                Map(n => n.DateValue);
+                MultiMap<int?[], int?>(n => n.ArrayValue, "ArrayValue1", "ArrayValue2");
             }
         }
     }

@@ -20,33 +20,66 @@ namespace ExcelMapper.Pipeline
             }
 
             Type type = typeof(TProperty);
+
+            // String nullable from types.
+            bool isNullable = false;
+            if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                isNullable = true;
+                type = type.GenericTypeArguments[0];
+            }
+
             Type[] interfaces = type.GetTypeInfo().ImplementedInterfaces.ToArray();
 
             EmptyValueStrategy emptyStrategyToPursue = EmptyValueStrategy.SetToDefaultValue;
 
             if (type == typeof(DateTime))
             {
-                var item = new ParseAsDateTimePipelineItem() as PipelineItem<TProperty>;
-                AddItem(item);
+                var item = new ParseAsDateTimePipelineItem();
+                if (isNullable)
+                {
+                    AddItem(new CastPipelineItem<TProperty, DateTime>(item));
+                }
+                else
+                {
+                    AddItem(item as PipelineItem<TProperty>);
+                    emptyStrategyToPursue = EmptyValueStrategy.ThrowIfPrimitive;
+                }
 
-                emptyStrategyToPursue = EmptyValueStrategy.ThrowIfPrimitive;
                 pipeline.WithThrowingInvalidFallback<Pipeline<TProperty>, TProperty>();
             }
             else if (type == typeof(bool))
             {
-                var item = new ParseAsBoolPipelineItem() as PipelineItem<TProperty>;
-                AddItem(item);
+                var item = new ParseAsBoolPipelineItem();
+                if (isNullable)
+                {
+                    AddItem(new CastPipelineItem<TProperty, bool>(item));
+                }
+                else
+                {
+                    AddItem(item as PipelineItem<TProperty>);
+                    emptyStrategyToPursue = EmptyValueStrategy.ThrowIfPrimitive;
+                }
 
-                emptyStrategyToPursue = EmptyValueStrategy.ThrowIfPrimitive;
                 pipeline.WithThrowingInvalidFallback<Pipeline<TProperty>, TProperty>();
             }
             else if (type.GetTypeInfo().BaseType == typeof(Enum))
             {
                 Type itemType = typeof(ParseAsEnumPipelineItem<>).MakeGenericType(type);
                 object item = Activator.CreateInstance(itemType);
-                AddItem((PipelineItem<TProperty>)item);
 
-                emptyStrategyToPursue = EmptyValueStrategy.ThrowIfPrimitive;
+                if (isNullable)
+                {
+                    Type castType = typeof(CastPipelineItem<,>).MakeGenericType(typeof(TProperty), type);
+                    object castItem = Activator.CreateInstance(castType, new object[] { item });
+                    AddItem(castItem as PipelineItem<TProperty>);
+                }
+                else
+                {
+                    AddItem(item as PipelineItem<TProperty>);
+                    emptyStrategyToPursue = EmptyValueStrategy.ThrowIfPrimitive;
+                }
+
                 pipeline.WithThrowingInvalidFallback<Pipeline<TProperty>, TProperty>();
             }
             else if (type == typeof(string))
@@ -55,10 +88,14 @@ namespace ExcelMapper.Pipeline
             }
             else if (interfaces.Any(t => t == typeof(IConvertible)))
             {
-                var item = new ChangeTypePipelineItem<TProperty>();
+                var item = new ChangeTypePipelineItem<TProperty>(type);
                 AddItem(item);
 
-                emptyStrategyToPursue = EmptyValueStrategy.ThrowIfPrimitive;
+                if (isNullable)
+                {
+                    emptyStrategyToPursue = EmptyValueStrategy.ThrowIfPrimitive;
+                }
+
                 pipeline.WithThrowingInvalidFallback<Pipeline<TProperty>, TProperty>();
             }
             else
