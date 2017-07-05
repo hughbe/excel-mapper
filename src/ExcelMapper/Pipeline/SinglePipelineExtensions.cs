@@ -7,9 +7,9 @@ namespace ExcelMapper.Pipeline
 {
     public static class SinglePipelineExtensions
     {
-        public static TPipeline WithMapping<TPipeline, T>(this TPipeline pipeline, Dictionary<string, T> mapping) where TPipeline : SinglePipeline<T>
+        public static TPipeline WithMapping<TPipeline, T>(this TPipeline pipeline, IDictionary<string, T> mapping, IEqualityComparer<string> comparer = null) where TPipeline : SinglePipeline<T>
         {
-            var item = new MapStringValuePipelineItem<T>(mapping);
+            var item = new MapStringValuePipelineItem<T>(mapping, comparer);
             pipeline.Items.Add(item);
             return pipeline;
         }

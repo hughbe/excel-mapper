@@ -9,7 +9,8 @@
 
         public override PipelineResult<string> TryMap(PipelineResult<string> item)
         {
-            return item.MakeCompleted(item.Context.StringValue);
+            // Set the Result value to Context.StringValue.
+            return new PipelineResult<string>(PipelineStatus.Success, item.Context, item.Context.StringValue);
         }
     }
 }

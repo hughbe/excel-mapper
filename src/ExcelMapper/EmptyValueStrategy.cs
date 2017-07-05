@@ -1,4 +1,4 @@
-﻿namespace ExcelMapper.Pipeline
+﻿namespace ExcelMapper
 {
     public enum EmptyValueStrategy
     {

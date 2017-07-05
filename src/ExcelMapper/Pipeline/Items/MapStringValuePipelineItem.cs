@@ -6,15 +6,17 @@ namespace ExcelMapper.Pipeline.Items
     public class MapStringValuePipelineItem<T> : PipelineItem<T>
     {
         public IReadOnlyDictionary<string, T> Mapping { get; }
+        public IEqualityComparer<string> Comparer { get; }
 
-        public MapStringValuePipelineItem(IDictionary<string, T> mapping)
+        internal MapStringValuePipelineItem(IDictionary<string, T> mapping, IEqualityComparer<string> comparer)
         {
             if (mapping == null)
             {
                 throw new ArgumentNullException();
             }
 
-            Mapping = new Dictionary<string, T>(mapping);
+            Mapping = new Dictionary<string, T>(mapping, comparer);
+            Comparer = comparer;
         }
 
         public override PipelineResult<T> TryMap(PipelineResult<T> item)
