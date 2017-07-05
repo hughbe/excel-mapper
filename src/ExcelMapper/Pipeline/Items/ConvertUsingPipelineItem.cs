@@ -22,7 +22,7 @@ namespace ExcelMapper.Pipeline.Items
 
             Converter = item =>
             {
-                T value = converter(item.StringValue);
+                T value = converter(item.Context.StringValue);
                 return item.MakeCompleted(value);
             };
         }

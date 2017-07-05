@@ -22,12 +22,12 @@ namespace ExcelMapper.Pipeline
             ColumnName = columnName;
         }
 
-        protected internal override object Execute(ExcelSheet sheet, ExcelRow row)
+        protected internal override object Execute(PipelineContext context)
         {
-            int index = sheet.Heading.GetColumnIndex(ColumnName);
-            string stringValue = row.GetString(index);
+            int index = context.Sheet.Heading.GetColumnIndex(ColumnName);
+            context.SetColumnIndex(index);
 
-            return CompletePipeline(stringValue);
+            return CompletePipeline(context);
         }
     }
 }

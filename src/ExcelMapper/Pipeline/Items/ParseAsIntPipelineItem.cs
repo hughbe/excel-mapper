@@ -22,12 +22,12 @@ namespace ExcelMapper.Pipeline.Items
 
         public override PipelineResult<int> TryMap(PipelineResult<int> item)
         {
-            if (string.IsNullOrEmpty(item.StringValue))
+            if (string.IsNullOrEmpty(item.Context.StringValue))
             {
                 return item.MakeEmpty();
             }
 
-            if (!int.TryParse(item.StringValue, out int result))
+            if (!int.TryParse(item.Context.StringValue, out int result))
             {
                 return item.MakeInvalid();
             }

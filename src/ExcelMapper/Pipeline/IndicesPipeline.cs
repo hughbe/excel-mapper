@@ -14,10 +14,10 @@ namespace ExcelMapper.Pipeline
             Indices = indices;
         }
 
-        protected internal override object Execute(ExcelSheet sheet, ExcelRow row)
+        protected internal override object Execute(PipelineContext context)
         {
-            IEnumerable<string> stringValues = Indices.Select(index => row.GetString(index));
-            return CompletePipeline(stringValues);
+            IEnumerable<string> stringValues = Indices.Select(index => context.Reader.GetString(index));
+            return CompletePipeline(context, stringValues);
         }
     }
 }

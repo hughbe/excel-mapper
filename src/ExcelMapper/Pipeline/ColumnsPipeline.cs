@@ -14,14 +14,14 @@ namespace ExcelMapper.Pipeline
             ColumnNames = columnNames;
         }
 
-        protected internal override object Execute(ExcelSheet sheet, ExcelRow row)
+        protected internal override object Execute(PipelineContext context)
         {
             IEnumerable<string> stringValues = ColumnNames.Select(columnName =>
             {
-                int index = sheet.Heading.GetColumnIndex(columnName);
-                return row.GetString(index);
+                int index = context.Sheet.Heading.GetColumnIndex(columnName);
+                return context.Reader.GetString(index);
             });
-            return CompletePipeline(stringValues);
+            return CompletePipeline(context, stringValues);
         }
     }
 }

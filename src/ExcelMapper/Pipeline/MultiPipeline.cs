@@ -46,13 +46,14 @@ namespace ExcelMapper.Pipeline
             AutoMapper.AutoMap(this);
         }
 
-        protected object CompletePipeline(IEnumerable<string> stringValues)
+        protected object CompletePipeline(PipelineContext context, IEnumerable<string> stringValues)
         {
             ICollection<TElement> elements = Factory();
 
             foreach (string stringValue in stringValues)
             {
-                TElement element = CompletePipeline(stringValue);
+                context.StringValue = stringValue;
+                TElement element = CompletePipeline(context);
                 elements.Add(element);
             }
 

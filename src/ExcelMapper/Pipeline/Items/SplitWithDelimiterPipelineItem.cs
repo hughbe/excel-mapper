@@ -60,7 +60,7 @@ namespace ExcelMapper.Pipeline.Items
                 isICollection = true;
             }
 
-            if (string.IsNullOrEmpty(item.StringValue))
+            if (string.IsNullOrEmpty(item.Context.StringValue))
             {
                 T empty;
                 if (isArray || isICollection)
@@ -76,10 +76,10 @@ namespace ExcelMapper.Pipeline.Items
                     empty = Activator.CreateInstance<T>();
                 }
 
-                return new PipelineResult<T>(PipelineStatus.Empty, item.StringValue, empty);
+                return new PipelineResult<T>(PipelineStatus.Empty, item.Context, empty);
             }
 
-            string[] results = item.StringValue.Split(Delimiters, Options);
+            string[] results = item.Context.StringValue.Split(Delimiters, Options);
 
             ICollection<TElement> collection;
             if (isArray || isIEnumerable || isICollection)

@@ -37,14 +37,14 @@ namespace ExcelMapper.Pipeline
             return pipeline;
         }
 
-        protected internal override object Execute(ExcelSheet sheet, ExcelRow row)
+        protected internal override object Execute(PipelineContext context)
         {
             if (Override != null)
             {
-                return Override.Execute(sheet, row);
+                return Override.Execute(context);
             }
 
-            return base.Execute(sheet, row);
+            return base.Execute(context);
         }
     }
 }

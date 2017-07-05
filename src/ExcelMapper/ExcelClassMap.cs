@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using ExcelMapper.Pipeline;
 
 namespace ExcelMapper
 {
@@ -17,13 +18,13 @@ namespace ExcelMapper
             Mappings.Add(pipeline);
         }
 
-        internal object Execute(ExcelSheet sheet, ExcelRow row)
+        internal object Execute(PipelineContext context)
         {
             object value = Activator.CreateInstance(Type);
 
             foreach (Pipeline.Pipeline pipeline in Mappings)
             {
-                pipeline.SetValue(value, sheet, row);
+                pipeline.SetValue(value, context);
             }
 
             return value;

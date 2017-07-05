@@ -4,22 +4,23 @@
     {
         public override PipelineResult<bool> TryMap(PipelineResult<bool> item)
         {
-            if (string.IsNullOrEmpty(item.StringValue))
+            if (string.IsNullOrEmpty(item.Context.StringValue))
             {
                 return item.MakeEmpty();
             }
 
-            if (!bool.TryParse(item.StringValue, out bool result))
+            // Excel transforms bool values such as "true" or "false" to "1" or "0".
+            if (item.Context.StringValue == "1")
             {
-                if (item.StringValue == "1")
-                {
-                    return item.MakeCompleted(true);
-                }
-                else if (item.StringValue == "0")
-                {
-                    return item.MakeCompleted(false);
-                }
+                return item.MakeCompleted(true);
+            }
+            else if (item.Context.StringValue == "0")
+            {
+                return item.MakeCompleted(false);
+            }
 
+            if (!bool.TryParse(item.Context.StringValue, out bool result))
+            {
                 return item.MakeInvalid();
             }
 

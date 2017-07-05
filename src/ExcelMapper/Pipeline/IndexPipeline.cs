@@ -17,10 +17,10 @@ namespace ExcelMapper.Pipeline
             Index = index;
         }
 
-        protected internal override object Execute(ExcelSheet sheet, ExcelRow row)
+        protected internal override object Execute(PipelineContext context)
         {
-            string stringValue = row.GetString(Index);
-            return CompletePipeline(stringValue);
+            context.SetColumnIndex(Index);
+            return CompletePipeline(context);
         }
     }
 }

@@ -41,12 +41,12 @@ namespace ExcelMapper.Pipeline.Items
 
         public override PipelineResult<DateTime> TryMap(PipelineResult<DateTime> item)
         {
-            if (string.IsNullOrEmpty(item.StringValue))
+            if (string.IsNullOrEmpty(item.Context.StringValue))
             {
                 return item.MakeEmpty();
             }
 
-            if (!DateTime.TryParseExact(item.StringValue, Formats, Provider, Style, out DateTime result))
+            if (!DateTime.TryParseExact(item.Context.StringValue, Formats, Provider, Style, out DateTime result))
             {
                 return item.MakeInvalid();
             }

@@ -12,9 +12,9 @@ namespace ExcelMapper.Pipeline
             Member = member ?? throw new ArgumentNullException(nameof(member));
         }
 
-        internal void SetValue(object value, ExcelSheet sheet, ExcelRow row)
+        internal void SetValue(object value, PipelineContext context)
         {
-            object propertyValue = Execute(sheet, row);
+            object propertyValue = Execute(context);
             if (Member is FieldInfo field)
             {
                 field.SetValue(value, propertyValue);
@@ -29,6 +29,6 @@ namespace ExcelMapper.Pipeline
             }
         }
 
-        protected internal abstract object Execute(ExcelSheet sheet, ExcelRow row);
+        protected internal abstract object Execute(PipelineContext context);
     }
 }

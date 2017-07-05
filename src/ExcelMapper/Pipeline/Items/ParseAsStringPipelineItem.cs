@@ -9,7 +9,7 @@
 
         public override PipelineResult<string> TryMap(PipelineResult<string> item)
         {
-            return item.MakeCompleted(item.StringValue);
+            return item.MakeCompleted(item.Context.StringValue);
         }
     }
 }

@@ -4,12 +4,13 @@
     {
         public override PipelineResult<T> TryMap(PipelineResult<T> item)
         {
-            if (string.IsNullOrEmpty(item.StringValue))
+            if (string.IsNullOrEmpty(item.Context.StringValue))
             {
                 return item.MakeEmpty();
             }
 
-            return item.MakeSuccess(item.StringValue.Trim());
+            item.Context.StringValue = item.Context.StringValue.Trim();
+            return item.MakeSuccess(item.Context);
         }
     }
 }

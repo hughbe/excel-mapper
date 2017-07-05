@@ -19,12 +19,12 @@ namespace ExcelMapper.Pipeline.Items
 
         public override PipelineResult<T> TryMap(PipelineResult<T> item)
         {
-            if (string.IsNullOrEmpty(item.StringValue))
+            if (string.IsNullOrEmpty(item.Context.StringValue))
             {
                 return item.MakeEmpty();
             }
 
-            if (!Mapping.TryGetValue(item.StringValue, out T result))
+            if (!Mapping.TryGetValue(item.Context.StringValue, out T result))
             {
                 return item.MakeInvalid();
             }

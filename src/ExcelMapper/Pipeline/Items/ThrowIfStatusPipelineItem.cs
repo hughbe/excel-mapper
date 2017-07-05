@@ -20,7 +20,7 @@ namespace ExcelMapper.Pipeline.Items
         {
             if (item.Status == Status)
             {
-                throw new ExcelMappingException($"{item.Status} result for parameter \"{item.StringValue}\" of type \"{typeof(T)}\".");
+                throw new ExcelMappingException($"{item.Status} result for parameter \"{item.Context.StringValue}\" of type \"{typeof(T)}\"", item.Context);
             }
 
             return item;

@@ -11,9 +11,9 @@ namespace ExcelMapper.Pipeline
         public PipelineItem<T> EmptyFallback { get; internal set; }
         public PipelineItem<T> InvalidFallback { get; internal set; }
 
-        protected T CompletePipeline(string stringValue)
+        protected T CompletePipeline(PipelineContext context)
         {
-            PipelineResult<T> result = new PipelineResult<T>(PipelineStatus.Began, stringValue, default(T));
+            PipelineResult<T> result = new PipelineResult<T>(PipelineStatus.Began, context, default(T));
             for (int i = 0; i < Items.Count; i++)
             {
                 PipelineItem<T> item = Items[i];
