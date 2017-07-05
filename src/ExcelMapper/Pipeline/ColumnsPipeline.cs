@@ -9,7 +9,7 @@ namespace ExcelMapper.Pipeline
         public string[] ColumnNames { get; }
         private EnumerableType Type { get; }
 
-        internal ColumnsPipeline(string[] columnNames, MemberInfo member) : base(columnNames.Length, member)
+        internal ColumnsPipeline(string[] columnNames, MemberInfo member, EmptyValueStrategy emptyValueStrategy) : base(columnNames.Length, member, emptyValueStrategy)
         {
             ColumnNames = columnNames;
         }

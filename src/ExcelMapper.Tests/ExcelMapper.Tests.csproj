@@ -16,6 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Resources\EmptyValues.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\MultiMap.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

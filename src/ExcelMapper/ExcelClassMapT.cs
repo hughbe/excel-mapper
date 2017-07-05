@@ -10,13 +10,25 @@ namespace ExcelMapper
 {
     public class ExcelClassMap<T> : ExcelClassMap
     {
+        public EmptyValueStrategy EmptyValueStrategy { get; }
+
         public ExcelClassMap() : base(typeof(T)) { }
+
+        public ExcelClassMap(EmptyValueStrategy emptyValueStrategy) : this()
+        {
+            if (!Enum.IsDefined(typeof(EmptyValueStrategy), emptyValueStrategy))
+            {
+                throw new ArgumentException($"Invalid value \"{emptyValueStrategy}\".", nameof(emptyValueStrategy));
+            }
+
+            EmptyValueStrategy = emptyValueStrategy;
+        }
 
         public DefaultPipeline<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
         {
             MemberExpression memberExpression = ValidateExpression(expression);
 
-            var propertyMap = new DefaultPipeline<TProperty>(memberExpression.Member);
+            var propertyMap = new DefaultPipeline<TProperty>(memberExpression.Member, EmptyValueStrategy);
             AddMapping(propertyMap);
             return propertyMap;
         }
@@ -41,9 +53,9 @@ namespace ExcelMapper
             }
 
             Type mapType = typeof(ColumnsPipeline<,>).MakeGenericType(typeof(TProperty), elementType);
-            ConstructorInfo constructor = mapType.GetConstructor(new Type[] { typeof(string[]), typeof(MemberInfo) });
+            ConstructorInfo constructor = mapType.GetConstructor(new Type[] { typeof(string[]), typeof(MemberInfo), typeof(EmptyValueStrategy) });
 
-            MultiPipeline<TProperty, TElement> propertyMap = (MultiPipeline<TProperty, TElement>)constructor.Invoke(new object[] { columnNames, memberExpression.Member });
+            MultiPipeline<TProperty, TElement> propertyMap = (MultiPipeline<TProperty, TElement>)constructor.Invoke(new object[] { columnNames, memberExpression.Member, EmptyValueStrategy });
             AddMapping(propertyMap);
             return propertyMap;
         }
@@ -73,9 +85,9 @@ namespace ExcelMapper
             }
 
             Type mapType = typeof(IndicesPipeline<,>).MakeGenericType(typeof(TProperty), elementType);
-            ConstructorInfo constructor = mapType.GetConstructor(new Type[] { typeof(int[]), typeof(MemberInfo) });
+            ConstructorInfo constructor = mapType.GetConstructor(new Type[] { typeof(int[]), typeof(MemberInfo), typeof(EmptyValueStrategy) });
 
-            MultiPipeline<TProperty, TElement> propertyMap = (MultiPipeline<TProperty, TElement>)constructor.Invoke(new object[] { indices, memberExpression.Member });
+            MultiPipeline<TProperty, TElement> propertyMap = (MultiPipeline<TProperty, TElement>)constructor.Invoke(new object[] { indices, memberExpression.Member, EmptyValueStrategy });
             AddMapping(propertyMap);
             return propertyMap;
         }

@@ -11,7 +11,7 @@ namespace ExcelMapper.Pipeline
         private EnumerableType Type { get; }
         private Func<ICollection<TElement>> Factory { get; }
 
-        public MultiPipeline(int capacity, MemberInfo member) : base(member)
+        internal MultiPipeline(int capacity, MemberInfo member, EmptyValueStrategy emptyValueStrategy) : base(member)
         {
             Type typeofT = typeof(T);
             TypeInfo tInfo = typeof(T).GetTypeInfo();
@@ -43,7 +43,7 @@ namespace ExcelMapper.Pipeline
                 throw new ExcelMappingException();
             }
 
-            AutoMapper.AutoMap(this);
+            AutoMapper.AutoMap(this, emptyValueStrategy);
         }
 
         protected object CompletePipeline(PipelineContext context, IEnumerable<string> stringValues)

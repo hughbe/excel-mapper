@@ -6,9 +6,9 @@ namespace ExcelMapper.Pipeline
     {
         private SinglePipeline<TProperty> Override { get; set; }
 
-        public DefaultPipeline(MemberInfo member) : base(member.Name, member)
+        internal DefaultPipeline(MemberInfo member, EmptyValueStrategy emptyValueStrategy) : base(member.Name, member)
         {
-            AutoMapper.AutoMap(this);
+            AutoMapper.AutoMap(this, emptyValueStrategy);
         }
 
         public ColumnPipeline<TProperty> WithColumnName(string columnName)

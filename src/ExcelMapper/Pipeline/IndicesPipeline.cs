@@ -9,7 +9,7 @@ namespace ExcelMapper.Pipeline
         public int[] Indices { get; }
         private EnumerableType Type { get; }
 
-        internal IndicesPipeline(int[] indices, MemberInfo member) : base(indices.Length, member)
+        internal IndicesPipeline(int[] indices, MemberInfo member, EmptyValueStrategy emptyValueStrategy) : base(indices.Length, member, emptyValueStrategy)
         {
             Indices = indices;
         }

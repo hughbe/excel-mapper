@@ -33,7 +33,19 @@ namespace ExcelMapper.Pipeline
         public static TPipeline WithThrowingFallback<TPipeline, T>(this TPipeline pipeline) where TPipeline : Pipeline<T>
         {
             return pipeline
-                .WithEmptyFallbackItem(new ThrowIfStatusPipelineItem<T>(PipelineStatus.Empty))
+                .WithThrowingEmptyFallback<TPipeline, T>()
+                .WithThrowingInvalidFallback<TPipeline, T>();
+        }
+
+        public static TPipeline WithThrowingEmptyFallback<TPipeline, T>(this TPipeline pipeline) where TPipeline : Pipeline<T>
+        {
+            return pipeline
+                .WithInvalidFallbackItem(new ThrowIfStatusPipelineItem<T>(PipelineStatus.Empty));
+        }
+
+        public static TPipeline WithThrowingInvalidFallback<TPipeline, T>(this TPipeline pipeline) where TPipeline : Pipeline<T>
+        {
+            return pipeline
                 .WithInvalidFallbackItem(new ThrowIfStatusPipelineItem<T>(PipelineStatus.Invalid));
         }
 

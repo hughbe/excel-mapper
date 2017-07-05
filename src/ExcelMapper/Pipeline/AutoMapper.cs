@@ -9,7 +9,7 @@ namespace ExcelMapper.Pipeline
 {
     internal static class AutoMapper
     {
-        public static void AutoMap<TProperty>(Pipeline<TProperty> pipeline)
+        public static void AutoMap<TProperty>(Pipeline<TProperty> pipeline, EmptyValueStrategy emptyValueStrategy)
         {
             var pipelineItems = new List<PipelineItem<TProperty>>();
 
@@ -22,19 +22,23 @@ namespace ExcelMapper.Pipeline
             Type type = typeof(TProperty);
             Type[] interfaces = type.GetTypeInfo().ImplementedInterfaces.ToArray();
 
+            EmptyValueStrategy emptyStrategyToPursue = EmptyValueStrategy.SetToDefaultValue;
+
             if (type == typeof(DateTime))
             {
                 var item = new ParseAsDateTimePipelineItem() as PipelineItem<TProperty>;
                 AddItem(item);
 
-                pipeline.WithThrowingFallback<Pipeline<TProperty>, TProperty>();
+                emptyStrategyToPursue = EmptyValueStrategy.ThrowIfPrimitive;
+                pipeline.WithThrowingInvalidFallback<Pipeline<TProperty>, TProperty>();
             }
             else if (type == typeof(bool))
             {
                 var item = new ParseAsBoolPipelineItem() as PipelineItem<TProperty>;
                 AddItem(item);
 
-                pipeline.WithThrowingFallback<Pipeline<TProperty>, TProperty>();
+                emptyStrategyToPursue = EmptyValueStrategy.ThrowIfPrimitive;
+                pipeline.WithThrowingInvalidFallback<Pipeline<TProperty>, TProperty>();
             }
             else if (type.GetTypeInfo().BaseType == typeof(Enum))
             {
@@ -42,7 +46,8 @@ namespace ExcelMapper.Pipeline
                 object item = Activator.CreateInstance(itemType);
                 AddItem((PipelineItem<TProperty>)item);
 
-                pipeline.WithThrowingFallback<Pipeline<TProperty>, TProperty>();
+                emptyStrategyToPursue = EmptyValueStrategy.ThrowIfPrimitive;
+                pipeline.WithThrowingInvalidFallback<Pipeline<TProperty>, TProperty>();
             }
             else if (type == typeof(string))
             {
@@ -53,7 +58,8 @@ namespace ExcelMapper.Pipeline
                 var item = new ChangeTypePipelineItem<TProperty>();
                 AddItem(item);
 
-                pipeline.WithThrowingFallback<Pipeline<TProperty>, TProperty>();
+                emptyStrategyToPursue = EmptyValueStrategy.ThrowIfPrimitive;
+                pipeline.WithThrowingInvalidFallback<Pipeline<TProperty>, TProperty>();
             }
             else
             {
@@ -67,7 +73,20 @@ namespace ExcelMapper.Pipeline
                 }
             }
 
-            pipeline.WithAdditionalItems<Pipeline<TProperty>, TProperty>(pipelineItems);
+            if (emptyStrategyToPursue == EmptyValueStrategy.ThrowIfPrimitive)
+            {
+                // The user specified that we should set to the default value if it was empty.
+                if (emptyValueStrategy == EmptyValueStrategy.SetToDefaultValue)
+                {
+                    pipeline.WithEmptyFallback(default(TProperty));
+                }
+                else
+                {
+                    pipeline.WithThrowingEmptyFallback<Pipeline<TProperty>, TProperty>();
+                }
+            }
+
+            pipeline.WithAdditionalItems(pipelineItems);
         }
     }
 }
