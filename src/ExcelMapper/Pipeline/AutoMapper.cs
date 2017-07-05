@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using ExcelMapper.Pipeline.Items;
+using ExcelMapper.Utilities;
 
 namespace ExcelMapper.Pipeline
 {
@@ -56,10 +57,9 @@ namespace ExcelMapper.Pipeline
             }
             else
             {
-                Type ienumerableType = interfaces.FirstOrDefault(t => t.GetTypeInfo().IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
-                if (ienumerableType != null)
+                Type elementType = interfaces.GetIEnumerableElementType();
+                if (elementType != null)
                 {
-                    Type elementType = ienumerableType.GenericTypeArguments[0];
                     Type parserType = typeof(SplitWithDelimiterPipelineItem<,>).MakeGenericType(typeof(TProperty), elementType);
 
                     PipelineItem<TProperty> parser = (PipelineItem<TProperty>)Activator.CreateInstance(parserType);

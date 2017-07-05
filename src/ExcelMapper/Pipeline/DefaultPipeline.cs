@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using ExcelMapper.Pipeline.Items;
+﻿using System.Reflection;
 
 namespace ExcelMapper.Pipeline
 {
