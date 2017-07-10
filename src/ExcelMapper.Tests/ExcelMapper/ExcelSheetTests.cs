@@ -16,7 +16,7 @@ namespace ExcelMapper.Tests
                 ExcelHeading heading = sheet.ReadHeading();
                 Assert.Same(heading, sheet.Heading);
 
-                Assert.Equal(new string[] { "Int Value", "StringValue", "Bool Value", "Enum Value", "DateValue", "ArrayValue", "MappedValue" }, heading.ColumnNames);
+                Assert.Equal(new string[] { "Int Value", "StringValue", "Bool Value", "Enum Value", "DateValue", "ArrayValue", "MappedValue", "TrimmedValue" }, heading.ColumnNames);
             }
         }
 
@@ -74,6 +74,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new DateTime(2017, 07, 04), row1.DateValue);
                 Assert.Equal(new string[] { "a", "b", "c" }, row1.ArrayValue);
                 Assert.Equal("MappedA", row1.MappedValue);
+                Assert.Equal(string.Empty, row1.TrimmedValue);
 
                 PrimitiveSheet1 row2 = sheet.ReadRow<PrimitiveSheet1>();
                 Assert.Equal(2, row2.IntValue);
@@ -83,6 +84,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new DateTime(2017, 07, 04), row2.DateValue);
                 Assert.Equal(new string[] { "empty" }, row2.ArrayValue);
                 Assert.Equal("MappedB", row2.MappedValue);
+                Assert.Equal("a", row2.TrimmedValue);
 
                 PrimitiveSheet1 row3 = sheet.ReadRow<PrimitiveSheet1>();
                 Assert.Equal(-1, row3.IntValue);
@@ -92,6 +94,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new DateTime(10), row3.DateValue);
                 Assert.Equal(new string[] { "a" }, row3.ArrayValue);
                 Assert.Equal("MappedB", row3.MappedValue);
+                Assert.Equal("b", row3.TrimmedValue);
 
                 PrimitiveSheet1 row4 = sheet.ReadRow<PrimitiveSheet1>();
                 Assert.Equal(-2, row4.IntValue);
@@ -101,6 +104,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new DateTime(20), row4.DateValue);
                 Assert.Equal(new string[] { "a", "b", "c", "d", "e" }, row4.ArrayValue);
                 Assert.Equal("D", row4.MappedValue);
+                Assert.Equal("c", row4.TrimmedValue);
             }
         }
 
@@ -113,6 +117,7 @@ namespace ExcelMapper.Tests
             public DateTime DateValue { get; set; }
             public string[] ArrayValue { get; set; }
             public string MappedValue { get; set; }
+            public string TrimmedValue { get; set; }
         }
 
         public enum PrimitiveSheet1Enum
@@ -157,11 +162,15 @@ namespace ExcelMapper.Tests
                     .WithNewDelimiters<DefaultPipeline<string[]>, string[], string>(',', ';')
                     .WithEmptyFallback(new string[] { "empty" });
 
-                Map(p => p.MappedValue).WithMapping(new Dictionary<string, string>
-                {
-                    { "a", "MappedA" },
-                    { "b", "MappedB" }
-                }, StringComparer.OrdinalIgnoreCase);
+                Map(p => p.MappedValue)
+                    .WithMapping(new Dictionary<string, string>
+                    {
+                        { "a", "MappedA" },
+                        { "b", "MappedB" }
+                    }, StringComparer.OrdinalIgnoreCase);
+
+                Map(p => p.TrimmedValue)
+                    .WithTrim<DefaultPipeline<string>, string>();
             }
         }
 

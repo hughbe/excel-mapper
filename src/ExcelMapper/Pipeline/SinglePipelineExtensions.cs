@@ -14,6 +14,13 @@ namespace ExcelMapper.Pipeline
             return pipeline;
         }
 
+        public static TPipeline WithTrim<TPipeline, T>(this TPipeline pipeline) where TPipeline : SinglePipeline<T>
+        {
+            var item = new TrimStringValuePipelineItem<T>();
+            pipeline.Items.Insert(0, item);
+            return pipeline;
+        }
+
         public static TPipeline WithConverter<TPipeline, T>(this TPipeline pipeline, ConvertUsingSimple<T> mapping) where TPipeline : SinglePipeline<T>
         {
             var item = new ConvertUsingPipelineItem<T>(mapping);
