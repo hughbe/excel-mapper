@@ -13,9 +13,9 @@ namespace ExcelMapper
 
         internal ExcelClassMap(Type type) => Type = type;
 
-        protected internal void AddMapping(PropertyMapping pipeline)
+        protected internal void AddMapping(PropertyMapping mapping)
         {
-            Mappings.Add(pipeline);
+            Mappings.Add(mapping);
         }
 
         internal object Execute(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)

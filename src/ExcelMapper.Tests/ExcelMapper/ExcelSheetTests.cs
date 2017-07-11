@@ -192,6 +192,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new bool[] { true, false }, row1.ICollectionBool);
                 Assert.Equal(new string[] { "a", "b" }, row1.IListString);
                 Assert.Equal(new string[] { "1", "2" }, row1.ListString);
+                Assert.Equal(new string[] { "1", "2" }, row1.ConcreteICollection);
 
                 MultiMapRow row2 = sheet.ReadRow<MultiMapRow>();
                 Assert.Equal(new int[] { 1, -1, 3 }, row2.MultiMapName);
@@ -200,6 +201,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new bool[] { false, true }, row2.ICollectionBool);
                 Assert.Equal(new string[] { "c", "d" }, row2.IListString);
                 Assert.Equal(new string[] { "3", "4" }, row2.ListString);
+                Assert.Equal(new string[] { "3", "4" }, row2.ConcreteICollection);
 
                 MultiMapRow row3 = sheet.ReadRow<MultiMapRow>();
                 Assert.Equal(new int[] { -1, -1, -1 }, row3.MultiMapName);
@@ -208,6 +210,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new bool[] { false, false }, row3.ICollectionBool);
                 Assert.Equal(new string[] { "e", "f" }, row3.IListString);
                 Assert.Equal(new string[] { "5", "6" }, row3.ListString);
+                Assert.Equal(new string[] { "5", "6" }, row3.ConcreteICollection);
 
                 MultiMapRow row4 = sheet.ReadRow<MultiMapRow>();
                 Assert.Equal(new int[] { -2, -2, 3 }, row4.MultiMapName);
@@ -216,6 +219,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new bool[] { false, true }, row4.ICollectionBool);
                 Assert.Equal(new string[] { "g", "h" }, row4.IListString);
                 Assert.Equal(new string[] { "7", "8" }, row4.ListString);
+                Assert.Equal(new string[] { "7", "8" }, row4.ConcreteICollection);
             }
         }
 
@@ -227,6 +231,7 @@ namespace ExcelMapper.Tests
             public ICollection<bool> ICollectionBool { get; set; }
             public IList<string> IListString { get; set; }
             public List<string> ListString { get; set; }
+            public SortedSet<string> ConcreteICollection { get; set; }
         }
 
         public class MultiMapRowMapping : ExcelClassMap<MultiMapRow>
@@ -259,6 +264,9 @@ namespace ExcelMapper.Tests
                     .WithColumnNames("IListString1", "IListString2");
 
                 Map<string>(p => p.ListString)
+                    .WithColumnNames("ListString1", "ListString2");
+
+                Map<string>(p => p.ConcreteICollection)
                     .WithColumnNames("ListString1", "ListString2");
             }
         }

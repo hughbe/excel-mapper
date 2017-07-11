@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using ExcelMapper.Mappings.MultiItems;
+using ExcelMapper.Utilities;
 
 namespace ExcelMapper
 {
@@ -36,27 +37,21 @@ namespace ExcelMapper
         {
             MemberExpression memberExpression = ValidateExpression(expression);
 
-            var mapping = new AssignableFromListMapping<TProperty>(memberExpression.Member, EmptyValueStrategy);
-            AddMapping(mapping);
-            return mapping;
+            return MultiMap<TProperty>(memberExpression);
         }
 
         public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, ICollection<TProperty>>> expression)
         {
             MemberExpression memberExpression = ValidateExpression(expression);
 
-            var mapping = new AssignableFromListMapping<TProperty>(memberExpression.Member, EmptyValueStrategy);
-            AddMapping(mapping);
-            return mapping;
+            return MultiMap<TProperty>(memberExpression);
         }
 
         public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, IList<TProperty>>> expression)
         {
             MemberExpression memberExpression = ValidateExpression(expression);
 
-            var mapping = new AssignableFromListMapping<TProperty>(memberExpression.Member, EmptyValueStrategy);
-            AddMapping(mapping);
-            return mapping;
+            return MultiMap<TProperty>(memberExpression);
         }
 
         public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, TProperty[]>> expression)
@@ -66,6 +61,33 @@ namespace ExcelMapper
             var mapping = new ArrayMapping<TProperty>(memberExpression.Member, EmptyValueStrategy);
             AddMapping(mapping);
             return mapping;
+        }
+
+        private EnumerablePropertyMapping<TProperty> MultiMap<TProperty>(MemberExpression memberExpression)
+        {
+            var mapping = GetMultiMapping<TProperty>(memberExpression.Member);
+            AddMapping(mapping);
+            return mapping;
+        }
+
+        private EnumerablePropertyMapping<TProperty> GetMultiMapping<TProperty>(MemberInfo member)
+        {
+            Type type = member.MemberType();
+            TypeInfo typeInfo = type.GetTypeInfo();
+
+            if (typeInfo.IsInterface)
+            {
+                if (type.IsAssignableFrom(typeof(List<TProperty>)))
+                {
+                    return new InterfaceAssignableFromListMapping<TProperty>(member, EmptyValueStrategy);
+                }
+            }
+            else if (type.ImplementsInterface(typeof(ICollection<TProperty>)))
+            {
+                return new ConcreteICollectionMapping<TProperty>(type, member, EmptyValueStrategy);
+            }
+
+            throw new ExcelMappingException($"No known way to instantiate type \"{type}\". It must be an array, be assignable from List<T> or implement ICollection<T>.");
         }
     }
 }
