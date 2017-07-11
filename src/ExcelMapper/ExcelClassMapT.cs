@@ -54,6 +54,13 @@ namespace ExcelMapper
             return MultiMap<TProperty>(memberExpression);
         }
 
+        public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, List<TProperty>>> expression)
+        {
+            MemberExpression memberExpression = ValidateExpression(expression);
+
+            return MultiMap<TProperty>(memberExpression);
+        }
+
         public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, TProperty[]>> expression)
         {
             MemberExpression memberExpression = ValidateExpression(expression);
