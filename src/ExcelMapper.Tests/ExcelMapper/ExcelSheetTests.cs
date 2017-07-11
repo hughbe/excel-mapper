@@ -360,8 +360,68 @@ namespace ExcelMapper.Tests
                 Map(n => n.BoolValue);
                 Map(n => n.EnumValue);
                 Map(n => n.DateValue);
-                Map<int?>(n => n.ArrayValue)
+                Map(n => n.ArrayValue)
                     .WithColumnNames("ArrayValue1", "ArrayValue2");
+            }
+        }
+
+        [Fact]
+        public void ReadRow_OptionalMapping_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<OptionalValueMapping>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                OptionalValue row1 = sheet.ReadRow<OptionalValue>();
+                Assert.Equal(-1, row1.NoSuchColumnNoName);
+                Assert.Equal(-2, row1.NoSuchColumnWithNameBefore);
+                Assert.Equal(-3, row1.NoSuchColumnWithNameAfter);
+                Assert.Equal(-4, row1.NoSuchColumnWithIndexBefore);
+                Assert.Equal(-5, row1.NoSuchColumnWithIndexAfter);
+            }
+        }
+
+        public class OptionalValue
+        {
+            public int NoSuchColumnNoName { get; set; }
+
+            public int NoSuchColumnWithNameBefore { get; set; }
+            public int NoSuchColumnWithNameAfter { get; set; }
+
+            public int NoSuchColumnWithIndexBefore { get; set; }
+            public int NoSuchColumnWithIndexAfter { get; set; }
+        }
+
+        public class OptionalValueMapping : ExcelClassMap<OptionalValue>
+        {
+            public OptionalValueMapping()
+            {
+                Map(v => v.NoSuchColumnNoName)
+                    .MakeOptional()
+                    .WithEmptyFallback(-1);
+
+                Map(v => v.NoSuchColumnWithNameBefore)
+                    .WithColumnName("NoSuchColumn")
+                    .MakeOptional()
+                    .WithEmptyFallback(-2);
+
+                Map(v => v.NoSuchColumnWithNameAfter)
+                    .MakeOptional()
+                    .WithColumnName("NoSuchColumn")
+                    .WithEmptyFallback(-3);
+
+                Map(v => v.NoSuchColumnWithIndexBefore)
+                    .WithIndex(10)
+                    .MakeOptional()
+                    .WithEmptyFallback(-4);
+
+                Map(v => v.NoSuchColumnWithIndexAfter)
+                    .MakeOptional()
+                    .WithIndex(10)
+                    .WithEmptyFallback(-5);
             }
         }
     }

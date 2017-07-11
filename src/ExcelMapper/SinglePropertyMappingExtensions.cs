@@ -16,13 +16,38 @@ namespace ExcelMapper
     {
         public static T WithColumnName<T>(this T mapping, string columnName) where T : ISinglePropertyMapping
         {
-            mapping.Mapper = new ColumnPropertyMapper(columnName);
-            return mapping;
+            return mapping
+                .WithMapper(new ColumnPropertyMapper(columnName));
         }
 
         public static T WithIndex<T>(this T mapping, int index) where T : ISinglePropertyMapping
         {
-            mapping.Mapper = new IndexPropertyMapper(index);
+            return mapping
+                .WithMapper(new IndexPropertyMapper(index));
+        }
+
+        public static T WithMapper<T>(this T mapping, ISinglePropertyMapper mapper) where T : ISinglePropertyMapping
+        {
+            if (mapping.Mapper is OptionalMapping optionalMapping)
+            {
+                optionalMapping.Mapper = mapper;
+            }
+            else
+            {
+                mapping.Mapper = mapper;
+            }
+
+            return mapping;
+        }
+
+        public static T MakeOptional<T>(this T mapping) where T : ISinglePropertyMapping
+        {
+            if (mapping.Mapper is OptionalMapping)
+            {
+                throw new ExcelMappingException("Mapping is already optional.");
+            }
+
+            mapping.Mapper = new OptionalMapping(mapping.Mapper);
             return mapping;
         }
 
