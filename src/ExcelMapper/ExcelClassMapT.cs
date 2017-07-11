@@ -84,7 +84,7 @@ namespace ExcelMapper
 
             if (typeInfo.IsInterface)
             {
-                if (type.IsAssignableFrom(typeof(List<TProperty>)))
+                if (typeInfo.IsAssignableFrom(typeof(List<TProperty>).GetTypeInfo()))
                 {
                     return new InterfaceAssignableFromListMapping<TProperty>(member, EmptyValueStrategy);
                 }

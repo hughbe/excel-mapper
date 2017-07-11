@@ -43,7 +43,38 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void GetMapping_NullMapping_ThrowsArgumentNullException()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                ExcelClassMap mapping = null;
+
+                Assert.Throws<ArgumentNullException>("type", () => importer.Configuration.GetMapping(null));
+                Assert.Throws<ArgumentNullException>("type", () => importer.Configuration.TryGetMapping(null, out mapping));
+                Assert.Null(mapping);
+            }
+        }
+
+        [Fact]
         public void GetMapping_NoSuchMapping_ThrowsExcelMappingException()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<OtherTestMap>();
+
+                Assert.False(importer.Configuration.TryGetMapping<TestMap>(out ExcelClassMap mapping));
+                Assert.Null(mapping);
+
+                Assert.False(importer.Configuration.TryGetMapping(typeof(TestMap), out mapping));
+                Assert.Null(mapping);
+
+                Assert.Throws<ExcelMappingException>(() => importer.Configuration.GetMapping<TestMap>());
+                Assert.Throws<ExcelMappingException>(() => importer.Configuration.GetMapping(typeof(TestMap)));
+            }
+        }
+
+        [Fact]
+        public void GetMapping_NoMappings_ThrowsExcelMappingException()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
@@ -79,5 +110,6 @@ namespace ExcelMapper.Tests
         }
 
         private class TestMap : ExcelClassMap<int> { }
+        private class OtherTestMap : ExcelClassMap<int> { }
     }
 }

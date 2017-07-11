@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace ExcelMapper.Tests
@@ -19,6 +22,26 @@ namespace ExcelMapper.Tests
 
             string filePath = Path.GetFullPath(Path.Combine("Resources", name));
             return File.OpenRead(filePath);
+        }
+
+        public class TestClass
+        {
+            public string Value { get; set; }
+            public DateTime DateValue { get; set; }
+            public IListInterface UnknownInterfaceValue { get; set; }
+            public ConcreteIEnumerable ConcreteIEnumerable { get; set; }
+
+            public event EventHandler Event { add { } remove { } }
+        }
+
+        public interface IListInterface : IList<string>
+        {
+        }
+
+        public class ConcreteIEnumerable : IEnumerable<string>
+        {
+            public IEnumerator<string> GetEnumerator() => throw new NotImplementedException();
+            IEnumerator IEnumerable.GetEnumerator() => throw new NotImplementedException();
         }
     }
 }

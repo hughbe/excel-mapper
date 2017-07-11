@@ -10,14 +10,12 @@ namespace ExcelMapper
     public abstract class EnumerablePropertyMapping<T> : EnumerablePropertyMapping
     {
         public SinglePropertyMapping<T> ElementMapping { get; private set; }
-        public EmptyValueStrategy EmptyValueStrategy { get; }
 
         public IMultiPropertyMapper Mapper { get; internal set; }
 
-        internal EnumerablePropertyMapping(MemberInfo member, EmptyValueStrategy emptyValueStrategy) : base(member)
+        public EnumerablePropertyMapping(MemberInfo member, EmptyValueStrategy emptyValueStrategy) : base(member)
         {
             ElementMapping = new SinglePropertyMapping<T>(member, emptyValueStrategy);
-            EmptyValueStrategy = emptyValueStrategy;
 
             var columnMapper = new ColumnPropertyMapper(member.Name);
             Mapper = new SplitPropertyMapper(columnMapper); 
@@ -25,7 +23,12 @@ namespace ExcelMapper
 
         public EnumerablePropertyMapping<T> WithElementMapping(Func<SinglePropertyMapping<T>, SinglePropertyMapping<T>> elementMapping)
         {
-            ElementMapping = elementMapping(ElementMapping);
+            if (elementMapping == null)
+            {
+                throw new ArgumentNullException(nameof(elementMapping));
+            }
+
+            ElementMapping = elementMapping(ElementMapping) ?? throw new ArgumentNullException(nameof(elementMapping));
             return this;
         }
 
@@ -44,5 +47,73 @@ namespace ExcelMapper
         }
 
         public abstract object CreateFromElements(IEnumerable<T> elements);
+
+        public EnumerablePropertyMapping<T> WithColumnName(string columnName)
+        {
+            var mapper = new ColumnPropertyMapper(columnName);
+            if (Mapper is SplitPropertyMapper splitPropertyMapper)
+            {
+                splitPropertyMapper.Mapper = mapper;
+            }
+            else
+            {
+                Mapper = new SplitPropertyMapper(mapper);
+            }
+
+            return this;
+        }
+
+        public EnumerablePropertyMapping<T> WithIndex(int index)
+        {
+            var mapper = new IndexPropertyMapper(index);
+            if (Mapper is SplitPropertyMapper splitPropertyMapper)
+            {
+                splitPropertyMapper.Mapper = mapper;
+            }
+            else
+            {
+                Mapper = new SplitPropertyMapper(mapper);
+            }
+
+            return this;
+        }
+
+        public EnumerablePropertyMapping<T> WithSeparators(params char[] separators)
+        {
+            if (!(Mapper is SplitPropertyMapper splitPropertyMapper))
+            {
+                throw new ExcelMappingException("The mapping comes from multiple columns, so cannot be split.");
+            }
+
+            splitPropertyMapper.Separators = separators;
+            return this;
+        }
+
+        public EnumerablePropertyMapping<T> WithSeparators(IEnumerable<char> separators)
+        {
+            return WithSeparators(separators?.ToArray());
+        }
+
+        public EnumerablePropertyMapping<T> WithColumnNames(params string[] columnNames)
+        {
+            Mapper = new ColumnsNamesPropertyMapper(columnNames);
+            return this;
+        }
+
+        public EnumerablePropertyMapping<T> WithColumnNames(IEnumerable<string> columnNames)
+        {
+            return WithColumnNames(columnNames?.ToArray());
+        }
+
+        public EnumerablePropertyMapping<T> WithIndices(params int[] indices)
+        {
+            Mapper = new ColumnIndicesPropertyMapper(indices);
+            return this;
+        }
+
+        public EnumerablePropertyMapping<T> WithIndices(IEnumerable<int> indices)
+        {
+            return WithIndices(indices?.ToArray());
+        }
     }
 }

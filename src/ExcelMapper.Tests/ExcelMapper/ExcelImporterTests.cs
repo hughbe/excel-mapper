@@ -9,9 +9,30 @@ namespace ExcelMapper.Tests
     public class ExcelImporterTests
     {
         [Fact]
+        public void Ctor_Stream()
+        {
+            using (var stream = Helpers.GetResource("Primitives.xlsx"))
+            using (var importer = new ExcelImporter(stream))
+            {
+                Assert.Equal("Primitives", importer.ReadSheet().Name);
+            }
+        }
+
+        [Fact]
         public void Ctor_NullStream_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>("stream", () => new ExcelImporter((Stream)null));
+        }
+
+        [Fact]
+        public void Ctor_IExcelDataReader()
+        {
+            using (var stream = Helpers.GetResource("Primitives.xlsx"))
+            using (var reader = ExcelReaderFactory.CreateReader(stream))
+            using (var importer = new ExcelImporter(reader))
+            {
+                Assert.Equal("Primitives", importer.ReadSheet().Name);
+            }
         }
 
         [Fact]
@@ -39,16 +60,19 @@ namespace ExcelMapper.Tests
             {
                 ExcelSheet sheet = importer.ReadSheet();
                 Assert.Equal("Primitives", sheet.Name);
+                Assert.Equal(0, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
 
                 Assert.True(importer.TryReadSheet(out sheet));
                 Assert.Equal("Empty", sheet.Name);
+                Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
 
                 Assert.True(importer.TryReadSheet(out sheet));
                 Assert.Equal("Third Sheet", sheet.Name);
+                Assert.Equal(2, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
             }

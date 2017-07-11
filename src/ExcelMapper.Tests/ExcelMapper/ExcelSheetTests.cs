@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace ExcelMapper.Tests
@@ -56,6 +57,56 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRows_NotReadHeading_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<PrimitiveSheet1Mapping>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                IEnumerable<PrimitiveSheet1> rows = sheet.ReadRows<PrimitiveSheet1>().ToArray();
+                Assert.Equal(new int[] { 1, 2, -1, -2 }, rows.Select(p => p.IntValue));
+
+                Assert.NotNull(sheet.Heading);
+                Assert.True(sheet.HasHeading);
+            }
+        }
+
+        [Fact]
+        public void ReadRows_ReadHeading_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<PrimitiveSheet1Mapping>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                IEnumerable<PrimitiveSheet1> rows = sheet.ReadRows<PrimitiveSheet1>().ToArray();
+                Assert.Equal(new int[] { 1, 2, -1, -2 }, rows.Select(p => p.IntValue));
+
+                Assert.NotNull(sheet.Heading);
+                Assert.True(sheet.HasHeading);
+            }
+        }
+
+        [Fact]
+        public void ReadRow_NoMoreRows_ThrowsExcelMappingException()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<PrimitiveSheet1Mapping>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadRows<PrimitiveSheet1>().ToArray();
+
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<PrimitiveSheet1>());
+                Assert.False(sheet.TryReadRow(out PrimitiveSheet1 row));
+                Assert.Null(row);
+            }
+        }
+
+        [Fact]
         public void ReadRow_Map_ReturnsExpected()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
@@ -71,6 +122,7 @@ namespace ExcelMapper.Tests
                 Assert.True(row1.BoolValue);
                 Assert.Equal(PrimitiveSheet1Enum.Government, row1.EnumValue);
                 Assert.Equal(new DateTime(2017, 07, 04), row1.DateValue);
+                Assert.Equal(new DateTime(2017, 07, 04), row1.DateValue2);
                 Assert.Equal(new string[] { "a", "b", "c" }, row1.ArrayValue);
                 Assert.Equal("MappedA", row1.MappedValue);
                 Assert.Equal(string.Empty, row1.TrimmedValue);
@@ -81,6 +133,7 @@ namespace ExcelMapper.Tests
                 Assert.True(row2.BoolValue);
                 Assert.Equal(PrimitiveSheet1Enum.Government, row2.EnumValue);
                 Assert.Equal(new DateTime(2017, 07, 04), row2.DateValue);
+                Assert.Equal(new DateTime(2017, 07, 04), row2.DateValue2);
                 Assert.Equal(new string[] { }, row2.ArrayValue);
                 Assert.Equal("MappedB", row2.MappedValue);
                 Assert.Equal("a", row2.TrimmedValue);
@@ -91,9 +144,10 @@ namespace ExcelMapper.Tests
                 Assert.True(row3.BoolValue);
                 Assert.Equal(PrimitiveSheet1Enum.NGO, row3.EnumValue);
                 Assert.Equal(new DateTime(10), row3.DateValue);
+                Assert.Equal(new DateTime(10), row3.DateValue2);
                 Assert.Equal(new string[] { "a" }, row3.ArrayValue);
                 Assert.Equal("MappedB", row3.MappedValue);
-                Assert.Equal("b", row3.TrimmedValue);
+                Assert.Null(row3.TrimmedValue);
 
                 PrimitiveSheet1 row4 = sheet.ReadRow<PrimitiveSheet1>();
                 Assert.Equal(-2, row4.IntValue);
@@ -101,6 +155,7 @@ namespace ExcelMapper.Tests
                 Assert.True(row4.BoolValue);
                 Assert.Equal(PrimitiveSheet1Enum.Unknown, row4.EnumValue);
                 Assert.Equal(new DateTime(20), row4.DateValue);
+                Assert.Equal(new DateTime(20), row4.DateValue2);
                 Assert.Equal(new string[] { "a", "b", "c", "d", "e" }, row4.ArrayValue);
                 Assert.Equal("D", row4.MappedValue);
                 Assert.Equal("c", row4.TrimmedValue);
@@ -114,6 +169,7 @@ namespace ExcelMapper.Tests
             public bool BoolValue { get; set; }
             public PrimitiveSheet1Enum EnumValue { get; set; }
             public DateTime DateValue { get; set; }
+            public DateTime DateValue2 { get; set; }
             public string[] ArrayValue { get; set; }
             public string MappedValue { get; set; }
             public string TrimmedValue { get; set; }
@@ -153,7 +209,13 @@ namespace ExcelMapper.Tests
                     .WithInvalidFallback(PrimitiveSheet1Enum.Unknown);
 
                 Map(p => p.DateValue)
-                    .WithAdditionalDateFormats("dd-MM-yyyy")
+                    .WithDateFormats("G", "dd-MM-yyyy")
+                    .WithEmptyFallback(new DateTime(10))
+                    .WithInvalidFallback(new DateTime(20));
+
+                Map(p => p.DateValue2)
+                    .WithColumnName("DateValue")
+                    .WithDateFormats(new List<string> { "G", "dd-MM-yyyy" })
                     .WithEmptyFallback(new DateTime(10))
                     .WithInvalidFallback(new DateTime(20));
 
@@ -192,7 +254,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new bool[] { true, false }, row1.ICollectionBool);
                 Assert.Equal(new string[] { "a", "b" }, row1.IListString);
                 Assert.Equal(new string[] { "1", "2" }, row1.ListString);
-                Assert.Equal(new string[] { "1", "2" }, row1.ConcreteICollection);
+                Assert.Equal(new string[] { "1", "2" }, row1._concreteICollection);
 
                 MultiMapRow row2 = sheet.ReadRow<MultiMapRow>();
                 Assert.Equal(new int[] { 1, -1, 3 }, row2.MultiMapName);
@@ -201,7 +263,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new bool[] { false, true }, row2.ICollectionBool);
                 Assert.Equal(new string[] { "c", "d" }, row2.IListString);
                 Assert.Equal(new string[] { "3", "4" }, row2.ListString);
-                Assert.Equal(new string[] { "3", "4" }, row2.ConcreteICollection);
+                Assert.Equal(new string[] { "3", "4" }, row2._concreteICollection);
 
                 MultiMapRow row3 = sheet.ReadRow<MultiMapRow>();
                 Assert.Equal(new int[] { -1, -1, -1 }, row3.MultiMapName);
@@ -210,7 +272,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new bool[] { false, false }, row3.ICollectionBool);
                 Assert.Equal(new string[] { "e", "f" }, row3.IListString);
                 Assert.Equal(new string[] { "5", "6" }, row3.ListString);
-                Assert.Equal(new string[] { "5", "6" }, row3.ConcreteICollection);
+                Assert.Equal(new string[] { "5", "6" }, row3._concreteICollection);
 
                 MultiMapRow row4 = sheet.ReadRow<MultiMapRow>();
                 Assert.Equal(new int[] { -2, -2, 3 }, row4.MultiMapName);
@@ -219,7 +281,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new bool[] { false, true }, row4.ICollectionBool);
                 Assert.Equal(new string[] { "g", "h" }, row4.IListString);
                 Assert.Equal(new string[] { "7", "8" }, row4.ListString);
-                Assert.Equal(new string[] { "7", "8" }, row4.ConcreteICollection);
+                Assert.Equal(new string[] { "7", "8" }, row4._concreteICollection);
             }
         }
 
@@ -231,7 +293,7 @@ namespace ExcelMapper.Tests
             public ICollection<bool> ICollectionBool { get; set; }
             public IList<string> IListString { get; set; }
             public List<string> ListString { get; set; }
-            public SortedSet<string> ConcreteICollection { get; set; }
+            public SortedSet<string> _concreteICollection;
         }
 
         public class MultiMapRowMapping : ExcelClassMap<MultiMapRow>
@@ -266,8 +328,75 @@ namespace ExcelMapper.Tests
                 Map(p => p.ListString)
                     .WithColumnNames("ListString1", "ListString2");
 
-                Map<string>(p => p.ConcreteICollection)
+                Map<string>(p => p._concreteICollection)
                     .WithColumnNames("ListString1", "ListString2");
+            }
+        }
+
+        [Fact]
+        public void ReadRow_SplitWithSeparator_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("MultiMap.xlsx"))
+            {
+                importer.Configuration.RegisterMapping(new SplitWithSeparatorMapping());
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                SplitWithSeparatorClass row1 = sheet.ReadRow<SplitWithSeparatorClass>();
+                Assert.Equal(new string[] { "1", "2", "3" }, row1.CommaSeparator);
+
+                Assert.Equal(new string[] { "1", "2", "3" }, row1.CommaSeparatorWithColumnName);
+                Assert.Equal(new string[] { "1", "2", "3" }, row1.CommaSeparatorWithIndex);
+
+                Assert.Equal(new string[] { "1", "2", "3" }, row1.CommaSeparatorWithColumnNameAcrossMultiColumnNames);
+                Assert.Equal(new string[] { "1", "2", "3" }, row1.CommaSeparatorWithColumnNameAcrossMultiColumnIndices);
+
+                Assert.Equal(new string[] { "1", "2", "3" }, row1.CommaSeparatorWithColumnIndexAcrossMultiColumnNames);
+                Assert.Equal(new string[] { "1", "2", "3" }, row1.CommaSeparatorWithColumnIndexAcrossMultiColumnIndices);
+            }
+        }
+
+        public class SplitWithSeparatorClass
+        {
+            public string[] CommaSeparator { get; set; }
+            public string[] CommaSeparatorWithColumnName { get; set; }
+            public string[] CommaSeparatorWithIndex { get; set; }
+
+            public string[] CommaSeparatorWithColumnNameAcrossMultiColumnNames { get; set; }
+            public string[] CommaSeparatorWithColumnNameAcrossMultiColumnIndices { get; set; }
+
+            public string[] CommaSeparatorWithColumnIndexAcrossMultiColumnNames { get; set; }
+            public string[] CommaSeparatorWithColumnIndexAcrossMultiColumnIndices { get; set; }
+        }
+
+        public class SplitWithSeparatorMapping : ExcelClassMap<SplitWithSeparatorClass>
+        {
+            public SplitWithSeparatorMapping() : base()
+            {
+                Map(p => p.CommaSeparator);
+
+                Map(p => p.CommaSeparatorWithColumnName)
+                    .WithColumnName("CommaSeparator");
+
+                Map(p => p.CommaSeparatorWithIndex)
+                    .WithIndex(13);
+
+                Map(p => p.CommaSeparatorWithColumnNameAcrossMultiColumnNames)
+                    .WithColumnNames("IListString1", "IListString2")
+                    .WithColumnName("CommaSeparator");
+
+                Map(p => p.CommaSeparatorWithColumnNameAcrossMultiColumnIndices)
+                    .WithIndices(9, 10)
+                    .WithColumnName("CommaSeparator");
+
+                Map(p => p.CommaSeparatorWithColumnIndexAcrossMultiColumnNames)
+                    .WithColumnNames("IListString1", "IListString2")
+                    .WithIndex(13);
+
+                Map(p => p.CommaSeparatorWithColumnIndexAcrossMultiColumnIndices)
+                    .WithIndices(9, 10)
+                    .WithIndex(13);
             }
         }
 
@@ -430,6 +559,35 @@ namespace ExcelMapper.Tests
                     .MakeOptional()
                     .WithIndex(10)
                     .WithEmptyFallback(-5);
+            }
+        }
+
+        [Fact]
+        public void ReadRow_ConvertUsingMapping_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<ConvertUsingValueMapping>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                ConvertUsingValue row1 = sheet.ReadRow<ConvertUsingValue>();
+                Assert.Equal("aextra", row1.StringValue);
+            }
+        }
+
+        public class ConvertUsingValue
+        {
+            public string StringValue { get; set; }
+        }
+
+        public class ConvertUsingValueMapping : ExcelClassMap<ConvertUsingValue>
+        {
+            public ConvertUsingValueMapping()
+            {
+                Map(c => c.StringValue)
+                    .WithConverter(s => s + "extra");
             }
         }
     }

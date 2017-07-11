@@ -4,7 +4,7 @@ namespace ExcelMapper
 {
     public abstract class EnumerablePropertyMapping : PropertyMapping
     {
-        internal EnumerablePropertyMapping(MemberInfo member) : base(member)
+        public EnumerablePropertyMapping(MemberInfo member) : base(member)
         {
         }
     }

@@ -35,7 +35,7 @@ namespace ExcelMapper
         {
             if (!(expression.Body is MemberExpression memberExpression))
             {
-                throw new InvalidOperationException("Not a member expression.");
+                throw new ArgumentException("Not a member expression.", nameof(expression));
             }
 
             return memberExpression;
