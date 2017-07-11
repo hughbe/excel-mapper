@@ -6,7 +6,7 @@
 
   <PropertyGroup>
     <PackageId>ExcelDataReader.Mapping</PackageId>
-    <PackageVersion>0.3</PackageVersion>
+    <PackageVersion>0.4</PackageVersion>
     <Authors>Hugh Bellamy</Authors>
     <Title>Excel Mapping Helper</Title>
     <Description>An extension of ExcelDataReader that supports fluent mapping of rows to C# objects.</Description>
