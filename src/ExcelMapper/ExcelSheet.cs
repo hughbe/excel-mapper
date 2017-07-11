@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using ExcelDataReader;
-using ExcelMapper.Pipeline;
 
 namespace ExcelMapper
 {
@@ -75,10 +74,9 @@ namespace ExcelMapper
             }
 
             CurrentIndex++;
-            PipelineContext context = new PipelineContext(this, CurrentIndex, Reader);
 
             ExcelClassMap mapping = Configuration.GetMapping<T>();
-            value = (T)mapping.Execute(context);
+            value = (T)mapping.Execute(this, CurrentIndex, Reader);
             return true;
         }
     }

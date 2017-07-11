@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using ExcelMapper.Pipeline;
+using ExcelDataReader;
 
 namespace ExcelMapper
 {
@@ -9,25 +9,26 @@ namespace ExcelMapper
     {
         public Type Type { get; }
 
-        private List<Pipeline.Pipeline> Mappings { get; } = new List<Pipeline.Pipeline>();
+        private List<PropertyMapping> Mappings { get; } = new List<PropertyMapping>();
 
         internal ExcelClassMap(Type type) => Type = type;
 
-        protected internal void AddMapping(Pipeline.Pipeline pipeline)
+        protected internal void AddMapping(PropertyMapping pipeline)
         {
             Mappings.Add(pipeline);
         }
 
-        internal object Execute(PipelineContext context)
+        internal object Execute(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            object value = Activator.CreateInstance(Type);
+            object instance = Activator.CreateInstance(Type);
 
-            foreach (Pipeline.Pipeline pipeline in Mappings)
+            foreach (PropertyMapping pipeline in Mappings)
             {
-                pipeline.SetValue(value, context);
+                object propertyValue = pipeline.GetPropertyValue(sheet, rowIndex, reader);
+                pipeline.SetPropertyFactory(instance, propertyValue);
             }
 
-            return value;
+            return instance;
         }
 
         protected internal static MemberExpression ValidateExpression<T, TProperty>(Expression<Func<T, TProperty>> expression)

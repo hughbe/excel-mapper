@@ -54,5 +54,15 @@ namespace ExcelMapper.Utilities
             IEnumerable<Type> parameterTypes = method.GetParameters().Select(p => p.ParameterType);
             return parameterTypes.SequenceEqual(parameters);
         }
+
+        public static object DefaultValue(this Type type)
+        {
+            if (type.GetTypeInfo().IsValueType)
+            {
+                return Activator.CreateInstance(type);
+            }
+
+            return null;
+        }
     }
 }

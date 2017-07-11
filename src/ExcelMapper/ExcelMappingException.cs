@@ -1,5 +1,5 @@
 ﻿using System;
-using ExcelMapper.Pipeline;
+using ExcelMapper.Mappings;
 
 namespace ExcelMapper
 {
@@ -11,22 +11,22 @@ namespace ExcelMapper
 
         public ExcelMappingException(string message, Exception innerException) : base(message, innerException) { }
 
-        public ExcelMappingException(string message, PipelineContext context) : base(GetMessage(message, context)) { }
+        public ExcelMappingException(string message, ExcelSheet sheet, int rowIndex, int columnIndex) : base(GetMessage(message, sheet, rowIndex, columnIndex)) { }
 
-        private static string GetMessage(string message, PipelineContext context)
+        private static string GetMessage(string message, ExcelSheet sheet, int rowIndex, int columnIndex)
         {
             string position;
-            if (context.Sheet.HasHeading)
+            if (sheet.HasHeading)
             {
-                position = $"\"{context.Sheet.Heading.GetColumnName(context.ColumnIndex)}\"";
+                position = $"\"{sheet.Heading.GetColumnName(columnIndex)}\"";
             }
             else
             {
-                position = $"in position \"{context.ColumnIndex}\"";
+                position = $"in position \"{columnIndex}\"";
             }
 
 
-            return $"{message} {position} on row {context.RowIndex} in sheet \"{context.Sheet?.Name}\".";
+            return $"{message} {position} on row {rowIndex} in sheet \"{sheet?.Name}\".";
         }
     }
 }
