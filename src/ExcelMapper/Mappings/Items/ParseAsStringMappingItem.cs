@@ -4,9 +4,9 @@ namespace ExcelMapper.Mappings.Items
 {
     internal class ParseAsStringMappingItem : ISinglePropertyMappingItem
     {
-        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, int columnIndex, string stringValue)
+        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult result)
         {
-            return PropertyMappingResult.Success(stringValue);
+            return PropertyMappingResult.Began(result.StringValue);
         }
     }
 }

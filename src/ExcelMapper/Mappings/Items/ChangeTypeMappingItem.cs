@@ -12,11 +12,11 @@ namespace ExcelMapper.Mappings.Items
             Type = type;
         }
 
-        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, int columnIndex, string stringValue)
+        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
         {
             try
             {
-                object value = Convert.ChangeType(stringValue, Type);
+                object value = Convert.ChangeType(mapResult.StringValue, Type);
                 return PropertyMappingResult.Success(value);
             }
             catch

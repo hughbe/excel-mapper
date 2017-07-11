@@ -29,6 +29,16 @@ namespace ExcelMapper
             _mappingItems.Add(item);
         }
 
+        public void InsertMappingItem(int index, ISinglePropertyMappingItem item)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            _mappingItems.Insert(index, item);
+        }
+
         public void AddStringValueTransformer(IStringValueTransformer transformer)
         {
             if (transformer == null)
@@ -51,23 +61,22 @@ namespace ExcelMapper
 
         public override object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            int columnIndex = Mapper.GetColumnIndex(sheet, rowIndex, reader);
-            return GetPropertyValue(sheet, rowIndex, reader, columnIndex);
+            MapResult mapResult = Mapper.GetValue(sheet, rowIndex, reader);
+            return GetPropertyValue(sheet, rowIndex, reader, mapResult);
         }
 
-        internal object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, int columnIndex)
+        internal object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
         {
-            string stringValue = reader.GetString(columnIndex);
-            if (stringValue == null && EmptyFallback != null)
+            if (mapResult.StringValue == null && EmptyFallback != null)
             {
-                PropertyMappingResult fallbackResult = EmptyFallback.GetProperty(sheet, rowIndex, reader, columnIndex, stringValue);
+                PropertyMappingResult fallbackResult = EmptyFallback.GetProperty(sheet, rowIndex, reader, mapResult);
                 return fallbackResult.Value;
             }
 
             for (int i = 0; i < _transformers.Count; i++)
             {
                 IStringValueTransformer transformer = _transformers[i];
-                stringValue = transformer.TransformStringValue(sheet, rowIndex, reader, columnIndex, stringValue);
+                mapResult.StringValue = transformer.TransformStringValue(sheet, rowIndex, reader, mapResult);
             }
 
             var result = new PropertyMappingResult();
@@ -75,12 +84,21 @@ namespace ExcelMapper
             {
                 ISinglePropertyMappingItem mappingItem = _mappingItems[i];
 
-                result = mappingItem.GetProperty(sheet, rowIndex, reader, columnIndex, stringValue);
-                if (result.Type == PropertyMappingResultType.Invalid && InvalidFallback != null)
+                PropertyMappingResult subResult = mappingItem.GetProperty(sheet, rowIndex, reader, mapResult);
+                if (subResult.Type == PropertyMappingResultType.Success)
                 {
-                    PropertyMappingResult fallbackResult = InvalidFallback.GetProperty(sheet, rowIndex, reader, columnIndex, stringValue);
-                    return fallbackResult.Value;
+                    return subResult.Value;
                 }
+                else if (subResult.Type != PropertyMappingResultType.Continue)
+                {
+                    result = subResult;
+                }
+            }
+
+            if (result.Type != PropertyMappingResultType.Began && InvalidFallback != null)
+            {
+                PropertyMappingResult fallbackResult = InvalidFallback.GetProperty(sheet, rowIndex, reader, mapResult);
+                return fallbackResult.Value;
             }
 
             return result.Value;

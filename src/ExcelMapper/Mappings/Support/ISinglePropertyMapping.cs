@@ -12,6 +12,7 @@ namespace ExcelMapper.Mappings.Support
         void AddStringValueTransformer(IStringValueTransformer transformer);
 
         IEnumerable<ISinglePropertyMappingItem> MappingItems { get; }
-        void AddMappingItem(ISinglePropertyMappingItem mappingItem);
+        void AddMappingItem(ISinglePropertyMappingItem item);
+        void InsertMappingItem(int index, ISinglePropertyMappingItem item);
     }
 }

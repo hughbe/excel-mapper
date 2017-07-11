@@ -28,11 +28,13 @@ namespace ExcelMapper.Mappings
             ColumnNames = columnNames.ToArray();
         }
 
-        public int CapacityEstimate => ColumnNames.Length;
-
-        public IEnumerable<int> GetColumnIndices(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public IEnumerable<MapResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            return ColumnNames.Select(columnName => sheet.Heading.GetColumnIndex(columnName));
+            return ColumnNames.Select(columnName =>
+            {
+                int index = sheet.Heading.GetColumnIndex(columnName);
+                return new MapResult(index, reader.GetString(index));
+            });
         }
     }
 }

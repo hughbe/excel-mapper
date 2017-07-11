@@ -23,11 +23,11 @@ namespace ExcelMapper.Mappings.Items
             EnumType = enumType;
         }
 
-        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, int columnIndex, string stringValue)
+        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
         {
             try
             {
-                object value = Enum.Parse(EnumType, stringValue);
+                object value = Enum.Parse(EnumType, mapResult.StringValue);
                 return PropertyMappingResult.Success(value);
             }
             catch

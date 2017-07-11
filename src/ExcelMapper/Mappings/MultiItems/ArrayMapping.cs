@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace ExcelMapper.Mappings.MultiItems
 {
-    internal class ArrayMapping<T> : MultiPropertyMapping<T>
+    internal class ArrayMapping<T> : EnumerablePropertyMapping<T>
     {
         public ArrayMapping(MemberInfo member, EmptyValueStrategy emptyValueStrategy) : base(member, emptyValueStrategy)
         {

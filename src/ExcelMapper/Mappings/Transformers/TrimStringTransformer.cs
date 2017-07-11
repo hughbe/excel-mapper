@@ -4,14 +4,14 @@ namespace ExcelMapper.Mappings.Transformers
 {
     internal class TrimStringTransformer : IStringValueTransformer
     {
-        public string TransformStringValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, int columnIndex, string stringValue)
+        public string TransformStringValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
         {
-            if (stringValue == null)
+            if (mapResult.StringValue == null)
             {
-                return stringValue;
+                return mapResult.StringValue;
             }
 
-            return stringValue.Trim();
+            return mapResult.StringValue.Trim();
         }
     }
 }

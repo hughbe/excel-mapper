@@ -5,21 +5,21 @@ namespace ExcelMapper.Mappings
 {
     internal sealed class IndexPropertyMapper : ISinglePropertyMapper
     {
-        public int Index { get; }
+        public int ColumnIndex { get; }
 
-        public IndexPropertyMapper(int index)
+        public IndexPropertyMapper(int columnIndex)
         {
-            if (index < 0)
+            if (columnIndex < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(index));
+                throw new ArgumentOutOfRangeException(nameof(columnIndex), columnIndex, $"Column index {columnIndex} must be greater or equal to zero.");
             }
 
-            Index = index;
+            ColumnIndex = columnIndex;
         }
 
-        public int GetColumnIndex(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public MapResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            return Index;
+            return new MapResult(ColumnIndex, reader.GetString(ColumnIndex));
         }
     }
 }

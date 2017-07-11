@@ -16,15 +16,16 @@ namespace ExcelMapper.Mappings
 
             if (columnName.Length == 0)
             {
-                throw new ArgumentException(nameof(columnName));
+                throw new ArgumentException("Column name cannot be empty.", nameof(columnName));
             }
 
             ColumnName = columnName;
         }
 
-        public int GetColumnIndex(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public MapResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            return sheet.Heading.GetColumnIndex(ColumnName);
+            int index = sheet.Heading.GetColumnIndex(ColumnName);
+            return new MapResult(index, reader.GetString(index));
         }
     }
 }

@@ -81,7 +81,7 @@ namespace ExcelMapper.Tests
                 Assert.True(row2.BoolValue);
                 Assert.Equal(PrimitiveSheet1Enum.Government, row2.EnumValue);
                 Assert.Equal(new DateTime(2017, 07, 04), row2.DateValue);
-                Assert.Equal(new string[] { "empty" }, row2.ArrayValue);
+                Assert.Equal(new string[] { }, row2.ArrayValue);
                 Assert.Equal("MappedB", row2.MappedValue);
                 Assert.Equal("a", row2.TrimmedValue);
 
@@ -158,8 +158,10 @@ namespace ExcelMapper.Tests
                     .WithInvalidFallback(new DateTime(20));
 
                 Map(p => p.ArrayValue)
-                    .WithDelimiters(',', ';')
-                    .WithEmptyFallback(new string[] { "empty" });
+                    .WithSeparators(',', ';')
+                    .WithElementMapping(e => e
+                        .WithEmptyFallback("empty")
+                    );
 
                 Map(p => p.MappedValue)
                     .WithMapping(new Dictionary<string, string>
@@ -231,32 +233,32 @@ namespace ExcelMapper.Tests
         {
             public MultiMapRowMapping() : base()
             {
-                MultiMap(p => p.MultiMapName)
+                Map(p => p.MultiMapName)
                     .WithColumnNames("MultiMapName1", "MultiMapName2", "MultiMapName3")
-                    .WithElementMapping(e => e
+                    .WithElementMapping((SinglePropertyMapping<int> e) => e
                         .WithEmptyFallback(-1)
                         .WithInvalidFallback(-2)
                     );
 
-                MultiMap(p => p.MultiMapIndex)
+                Map(p => p.MultiMapIndex)
                     .WithIndices(3, 4);
 
-                MultiMap(p => p.IEnumerableInt)
+                Map(p => p.IEnumerableInt)
                     .WithColumnNames(new List<string> { "IEnumerableInt1", "IEnumerableInt2" })
                     .WithElementMapping(e => e
                         .WithValueFallback(default(int))
                     );
 
-                MultiMap(p => p.ICollectionBool)
+                Map(p => p.ICollectionBool)
                     .WithIndices(new List<int> { 7, 8 })
-                    .WithElementMapping(e => e
+                    .WithElementMapping((SinglePropertyMapping<bool> e) => e
                         .WithValueFallback(default(bool))
                     );
 
-                MultiMap(p => p.IListString)
+                Map(p => p.IListString)
                     .WithColumnNames("IListString1", "IListString2");
 
-                MultiMap(p => p.ListString)
+                Map<string>(p => p.ListString)
                     .WithColumnNames("ListString1", "ListString2");
             }
         }
@@ -305,7 +307,7 @@ namespace ExcelMapper.Tests
                 Map(e => e.BoolValue);
                 Map(e => e.EnumValue);
                 Map(e => e.DateValue);
-                MultiMap(e => e.ArrayValue)
+                Map<int>(e => e.ArrayValue)
                     .WithColumnNames("ArrayValue1", "ArrayValue2");
             }
         }
@@ -358,7 +360,7 @@ namespace ExcelMapper.Tests
                 Map(n => n.BoolValue);
                 Map(n => n.EnumValue);
                 Map(n => n.DateValue);
-                MultiMap(n => n.ArrayValue)
+                Map<int?>(n => n.ArrayValue)
                     .WithColumnNames("ArrayValue1", "ArrayValue2");
             }
         }

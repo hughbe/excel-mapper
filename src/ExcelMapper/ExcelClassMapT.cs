@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Reflection;
 using ExcelMapper.Mappings.MultiItems;
 
 namespace ExcelMapper
@@ -24,22 +25,41 @@ namespace ExcelMapper
         public SinglePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
         {
             MemberExpression memberExpression = ValidateExpression(expression);
+            MemberInfo member = memberExpression.Member;
 
-            var mapping = new SinglePropertyMapping<TProperty>(memberExpression.Member, EmptyValueStrategy);
+            var mapping = new SinglePropertyMapping<TProperty>(member, EmptyValueStrategy);
             AddMapping(mapping);
             return mapping;
         }
 
-        public MultiPropertyMapping<TProperty> MultiMap<TProperty>(Expression<Func<T, IEnumerable<TProperty>>> expression)
+        public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, IEnumerable<TProperty>>> expression)
         {
             MemberExpression memberExpression = ValidateExpression(expression);
 
-            var mapping = new IEnumerableMapping<TProperty>(memberExpression.Member, EmptyValueStrategy);
+            var mapping = new AssignableFromListMapping<TProperty>(memberExpression.Member, EmptyValueStrategy);
             AddMapping(mapping);
             return mapping;
         }
 
-        public MultiPropertyMapping<TProperty> MultiMap<TProperty>(Expression<Func<T, TProperty[]>> expression)
+        public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, ICollection<TProperty>>> expression)
+        {
+            MemberExpression memberExpression = ValidateExpression(expression);
+
+            var mapping = new AssignableFromListMapping<TProperty>(memberExpression.Member, EmptyValueStrategy);
+            AddMapping(mapping);
+            return mapping;
+        }
+
+        public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, IList<TProperty>>> expression)
+        {
+            MemberExpression memberExpression = ValidateExpression(expression);
+
+            var mapping = new AssignableFromListMapping<TProperty>(memberExpression.Member, EmptyValueStrategy);
+            AddMapping(mapping);
+            return mapping;
+        }
+
+        public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, TProperty[]>> expression)
         {
             MemberExpression memberExpression = ValidateExpression(expression);
 

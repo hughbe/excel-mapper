@@ -64,5 +64,19 @@ namespace ExcelMapper.Utilities
 
             return null;
         }
+
+        public static Type MemberType(this MemberInfo member)
+        {
+            if (member is PropertyInfo property)
+            {
+                return property.PropertyType;
+            }
+            else if (member is FieldInfo field)
+            {
+                return field.FieldType;
+            }
+
+            throw new ExcelMappingException($"Member {member.Name} is not a field or property.");
+        }
     }
 }

@@ -20,11 +20,11 @@ namespace ExcelMapper.Mappings.Items
             Comparer = comparer;
         }
 
-        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, int columnIndex, string stringValue)
+        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
         {
-            if (!Mapping.TryGetValue(stringValue, out T result))
+            if (!Mapping.TryGetValue(mapResult.StringValue, out T result))
             {
-                return PropertyMappingResult.Invalid();
+                return PropertyMappingResult.Continue();
             }
 
             return PropertyMappingResult.Success(result);

@@ -3,9 +3,9 @@ using System.Reflection;
 
 namespace ExcelMapper.Mappings.MultiItems
 {
-    internal class IEnumerableMapping<T> : MultiPropertyMapping<T>
+    internal class AssignableFromListMapping<T> : EnumerablePropertyMapping<T>
     {
-        public IEnumerableMapping(MemberInfo member, EmptyValueStrategy emptyValueStrategy) : base(member, emptyValueStrategy)
+        public AssignableFromListMapping(MemberInfo member, EmptyValueStrategy emptyValueStrategy) : base(member, emptyValueStrategy)
         {
         }
 

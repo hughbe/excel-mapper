@@ -79,17 +79,7 @@ namespace ExcelMapper.Mappings
             }
             else
             {
-                Type elementType = interfaces.GetIEnumerableElementType();
-                if (elementType != null)
-                {
-                    // TODO.
-                    SplitWithDelimiterMappingItem item = null;
-                    pipeline.AddMappingItem(item);
-                }
-                else
-                {
-                    throw new ExcelMappingException($"Don't know how to map type {type}.");
-                }
+                throw new ExcelMappingException($"Don't know how to map type {type}.");
             }
 
             if (emptyStrategyToPursue == EmptyValueStrategy.SetToDefaultValue || emptyValueStrategy == EmptyValueStrategy.SetToDefaultValue)

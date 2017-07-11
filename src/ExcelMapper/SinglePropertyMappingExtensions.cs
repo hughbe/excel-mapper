@@ -63,31 +63,6 @@ namespace ExcelMapper
             return mapping;
         }
 
-        public static T WithDelimiters<T>(this T pipeline, params char[] delimiters) where T : ISinglePropertyMapping<IEnumerable>
-        {
-            return pipeline
-                .WithDelimiters((IEnumerable<char>)delimiters);
-        }
-
-        public static T WithDelimiters<T>(this T mapping, IEnumerable<char> delimiters) where T : ISinglePropertyMapping<IEnumerable>
-        {
-            if (delimiters == null)
-            {
-                throw new ArgumentNullException(nameof(delimiters));
-            }
-
-            SplitWithDelimiterMappingItem splitItem = (SplitWithDelimiterMappingItem)mapping.MappingItems.FirstOrDefault(item => item is SplitWithDelimiterMappingItem);
-            if (splitItem == null)
-            {
-                // TODO.
-                splitItem = null;
-                mapping.AddMappingItem(splitItem);
-            }
-
-            splitItem.Delimiters = delimiters.ToArray();
-            return mapping;
-        }
-
         public static TMapping WithConverter<TMapping, T>(this TMapping mapping, ConvertUsingSimpleMappingDelegate<T> converter) where TMapping : ISinglePropertyMapping<T>
         {
             if (converter == null)
@@ -95,11 +70,11 @@ namespace ExcelMapper
                 throw new ArgumentNullException(nameof(converter));
             }
 
-            ConvertUsingMappingDelegate actualConverter = (stringValue) =>
+            ConvertUsingMappingDelegate actualConverter = (mapResult) =>
             {
                 try
                 {
-                    T value = converter(stringValue);
+                    T value = converter(mapResult.StringValue);
                     return PropertyMappingResult.Success(value);
                 }
                 catch

@@ -1,5 +1,4 @@
 ﻿using System;
-using ExcelMapper.Mappings;
 
 namespace ExcelMapper
 {

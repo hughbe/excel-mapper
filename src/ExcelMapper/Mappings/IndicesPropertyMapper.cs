@@ -28,11 +28,9 @@ namespace ExcelMapper.Mappings
             Indices = indices.ToArray();
         }
 
-        public int CapacityEstimate => Indices.Length;
-
-        public IEnumerable<int> GetColumnIndices(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public IEnumerable<MapResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            return Indices;
+            return Indices.Select(i => new MapResult(i, reader.GetString(i)));
         }
     }
 }

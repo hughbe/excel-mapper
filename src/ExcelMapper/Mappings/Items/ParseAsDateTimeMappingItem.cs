@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using ExcelDataReader;
 
 namespace ExcelMapper.Mappings.Items
@@ -17,9 +15,9 @@ namespace ExcelMapper.Mappings.Items
 
         public DateTimeStyles Style { get; internal set; }
 
-        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, int columnIndex, string stringValue)
+        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
         {
-            if (!DateTime.TryParseExact(stringValue, Formats, Provider, Style, out DateTime result))
+            if (!DateTime.TryParseExact(mapResult.StringValue, Formats, Provider, Style, out DateTime result))
             {
                 return PropertyMappingResult.Invalid();
             }
