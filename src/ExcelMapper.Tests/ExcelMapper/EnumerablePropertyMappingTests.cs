@@ -108,11 +108,11 @@ namespace ExcelMapper.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
-        public void WithIndex_SplitColumnIndex_Success(int columnIndex)
+        public void WithColumnIndex_SplitColumnIndex_Success(int columnIndex)
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive);
-            Assert.Same(mapping, mapping.WithIndex(columnIndex));
+            Assert.Same(mapping, mapping.WithColumnIndex(columnIndex));
 
             SplitPropertyMapper mapper = Assert.IsType<SplitPropertyMapper>(mapping.Mapper);
             IndexPropertyMapper innerMapper = Assert.IsType<IndexPropertyMapper>(mapper.Mapper);
@@ -122,11 +122,11 @@ namespace ExcelMapper.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
-        public void WithIndex_MultiColumnIndex_Success(int columnIndex)
+        public void WithColumnIndex_MultiColumnIndex_Success(int columnIndex)
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive).WithColumnNames("ColumnName");
-            Assert.Same(mapping, mapping.WithIndex(columnIndex));
+            Assert.Same(mapping, mapping.WithColumnIndex(columnIndex));
 
             SplitPropertyMapper mapper = Assert.IsType<SplitPropertyMapper>(mapping.Mapper);
             IndexPropertyMapper innerMapper = Assert.IsType<IndexPropertyMapper>(mapper.Mapper);
@@ -134,12 +134,12 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void WithIndex_NegativeColumnIndex_ThrowsArgumentOutOfRangeException()
+        public void WithColumnIndex_NegativeColumnIndex_ThrowsArgumentOutOfRangeException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive);
 
-            Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => mapping.WithIndex(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => mapping.WithColumnIndex(-1));
         }
 
         public static IEnumerable<object[]> Separators_TestData()
@@ -260,57 +260,57 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void WithIndices_ParamsInt_Success()
+        public void WithColumnIndices_ParamsInt_Success()
         {
             var columnIndices = new int[] { 0, 1 };
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive).WithColumnNames("ColumnNames");
-            Assert.Same(mapping, mapping.WithIndices(columnIndices));
+            Assert.Same(mapping, mapping.WithColumnIndices(columnIndices));
 
             ColumnIndicesPropertyMapper mapper = Assert.IsType<ColumnIndicesPropertyMapper>(mapping.Mapper);
             Assert.Same(columnIndices, mapper.ColumnIndices);
         }
 
         [Fact]
-        public void WithIndices_IEnumerableInt_Success()
+        public void WithColumnIndices_IEnumerableInt_Success()
         {
             var columnIndices = new List<int> { 0, 1 };
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive).WithColumnNames("ColumnNames");
-            Assert.Same(mapping, mapping.WithIndices(columnIndices));
+            Assert.Same(mapping, mapping.WithColumnIndices(columnIndices));
 
             ColumnIndicesPropertyMapper mapper = Assert.IsType<ColumnIndicesPropertyMapper>(mapping.Mapper);
             Assert.Equal(columnIndices, mapper.ColumnIndices);
         }
 
         [Fact]
-        public void WithIndices_NullColumnIndices_ThrowsArgumentNullException()
+        public void WithColumnIndices_NullColumnIndices_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive).WithColumnNames("ColumnNames");
 
-            Assert.Throws<ArgumentNullException>("columnIndices", () => mapping.WithIndices(null));
-            Assert.Throws<ArgumentNullException>("columnIndices", () => mapping.WithIndices((IEnumerable<int>)null));
+            Assert.Throws<ArgumentNullException>("columnIndices", () => mapping.WithColumnIndices(null));
+            Assert.Throws<ArgumentNullException>("columnIndices", () => mapping.WithColumnIndices((IEnumerable<int>)null));
         }
 
         [Fact]
-        public void WithIndices_EmptyColumnIndices_ThrowsArgumentException()
+        public void WithColumnIndices_EmptyColumnIndices_ThrowsArgumentException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive).WithColumnNames("ColumnNames");
 
-            Assert.Throws<ArgumentException>("columnIndices", () => mapping.WithIndices(new int[0]));
-            Assert.Throws<ArgumentException>("columnIndices", () => mapping.WithIndices(new List<int>()));
+            Assert.Throws<ArgumentException>("columnIndices", () => mapping.WithColumnIndices(new int[0]));
+            Assert.Throws<ArgumentException>("columnIndices", () => mapping.WithColumnIndices(new List<int>()));
         }
 
         [Fact]
-        public void WithIndices_NegativeValueInColumnIndices_ThrowsArgumentOutOfRangeException()
+        public void WithColumnIndices_NegativeValueInColumnIndices_ThrowsArgumentOutOfRangeException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive).WithColumnNames("ColumnNames");
 
-            Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => mapping.WithIndices(new int[] { -1 }));
-            Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => mapping.WithIndices(new List<int> { -1 }));
+            Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => mapping.WithColumnIndices(new int[] { -1 }));
+            Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => mapping.WithColumnIndices(new List<int> { -1 }));
         }
 
         private class SubPropertyMapping : EnumerablePropertyMapping<string>

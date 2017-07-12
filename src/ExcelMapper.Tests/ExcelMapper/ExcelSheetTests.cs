@@ -195,7 +195,7 @@ namespace ExcelMapper.Tests
                 Map(p => p.StringValue);
 
                 Map(p => p.BoolValue)
-                    .WithIndex(2)
+                    .WithColumnIndex(2)
                     .WithInvalidFallback(true)
                     .WithEmptyFallback(true);
 
@@ -308,7 +308,7 @@ namespace ExcelMapper.Tests
                     );
 
                 Map(p => p.MultiMapIndex)
-                    .WithIndices(3, 4);
+                    .WithColumnIndices(3, 4);
 
                 Map(p => p.IEnumerableInt)
                     .WithColumnNames(new List<string> { "IEnumerableInt1", "IEnumerableInt2" })
@@ -317,7 +317,7 @@ namespace ExcelMapper.Tests
                     );
 
                 Map(p => p.ICollectionBool)
-                    .WithIndices(new List<int> { 7, 8 })
+                    .WithColumnIndices(new List<int> { 7, 8 })
                     .WithElementMapping((SinglePropertyMapping<bool> e) => e
                         .WithValueFallback(default(bool))
                     );
@@ -347,7 +347,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new string[] { "1", "2", "3" }, row1.CommaSeparator);
 
                 Assert.Equal(new string[] { "1", "2", "3" }, row1.CommaSeparatorWithColumnName);
-                Assert.Equal(new string[] { "1", "2", "3" }, row1.CommaSeparatorWithIndex);
+                Assert.Equal(new string[] { "1", "2", "3" }, row1.CommaSeparatorWithColumnIndex);
 
                 Assert.Equal(new string[] { "1", "2", "3" }, row1.CommaSeparatorWithColumnNameAcrossMultiColumnNames);
                 Assert.Equal(new string[] { "1", "2", "3" }, row1.CommaSeparatorWithColumnNameAcrossMultiColumnIndices);
@@ -361,7 +361,7 @@ namespace ExcelMapper.Tests
         {
             public string[] CommaSeparator { get; set; }
             public string[] CommaSeparatorWithColumnName { get; set; }
-            public string[] CommaSeparatorWithIndex { get; set; }
+            public string[] CommaSeparatorWithColumnIndex { get; set; }
 
             public string[] CommaSeparatorWithColumnNameAcrossMultiColumnNames { get; set; }
             public string[] CommaSeparatorWithColumnNameAcrossMultiColumnIndices { get; set; }
@@ -379,24 +379,24 @@ namespace ExcelMapper.Tests
                 Map(p => p.CommaSeparatorWithColumnName)
                     .WithColumnName("CommaSeparator");
 
-                Map(p => p.CommaSeparatorWithIndex)
-                    .WithIndex(13);
+                Map(p => p.CommaSeparatorWithColumnIndex)
+                    .WithColumnIndex(13);
 
                 Map(p => p.CommaSeparatorWithColumnNameAcrossMultiColumnNames)
                     .WithColumnNames("IListString1", "IListString2")
                     .WithColumnName("CommaSeparator");
 
                 Map(p => p.CommaSeparatorWithColumnNameAcrossMultiColumnIndices)
-                    .WithIndices(9, 10)
+                    .WithColumnIndices(9, 10)
                     .WithColumnName("CommaSeparator");
 
                 Map(p => p.CommaSeparatorWithColumnIndexAcrossMultiColumnNames)
                     .WithColumnNames("IListString1", "IListString2")
-                    .WithIndex(13);
+                    .WithColumnIndex(13);
 
                 Map(p => p.CommaSeparatorWithColumnIndexAcrossMultiColumnIndices)
-                    .WithIndices(9, 10)
-                    .WithIndex(13);
+                    .WithColumnIndices(9, 10)
+                    .WithColumnIndex(13);
             }
         }
 
@@ -557,13 +557,13 @@ namespace ExcelMapper.Tests
                     .WithEmptyFallback(-3);
 
                 Map(v => v.NoSuchColumnWithIndexBefore)
-                    .WithIndex(10)
+                    .WithColumnIndex(10)
                     .MakeOptional()
                     .WithEmptyFallback(-4);
 
                 Map(v => v.NoSuchColumnWithIndexAfter)
                     .MakeOptional()
-                    .WithIndex(10)
+                    .WithColumnIndex(10)
                     .WithEmptyFallback(-5);
             }
         }

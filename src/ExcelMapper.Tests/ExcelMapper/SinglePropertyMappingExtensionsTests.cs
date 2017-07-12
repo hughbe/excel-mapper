@@ -49,20 +49,20 @@ namespace ExcelMapper.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
-        public void WithIndex_ValidColumnIndex_Success(int columnIndex)
+        public void WithColumnIndex_ValidColumnIndex_Success(int columnIndex)
         {
             SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Same(mapping, mapping.WithIndex(columnIndex));
+            Assert.Same(mapping, mapping.WithColumnIndex(columnIndex));
 
             IndexPropertyMapper mapper = Assert.IsType<IndexPropertyMapper>(mapping.Mapper);
             Assert.Equal(columnIndex, mapper.ColumnIndex);
         }
 
         [Fact]
-        public void WithIndex_OptionalColumn_Success()
+        public void WithColumnIndex_OptionalColumn_Success()
         {
             SinglePropertyMapping<string> mapping = Map(t => t.Value).MakeOptional();
-            Assert.Same(mapping, mapping.WithIndex(1));
+            Assert.Same(mapping, mapping.WithColumnIndex(1));
 
             OptionalPropertyMapper mapper = Assert.IsType<OptionalPropertyMapper>(mapping.Mapper);
             IndexPropertyMapper innerMapper = Assert.IsType<IndexPropertyMapper>(mapper.Mapper);
@@ -70,10 +70,10 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void WithIndex_NegativeColumnIndex_ThrowsArgumentOutOfRangeException()
+        public void WithColumnIndex_NegativeColumnIndex_ThrowsArgumentOutOfRangeException()
         {
             SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => mapping.WithIndex(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => mapping.WithColumnIndex(-1));
         }
 
         [Fact]
@@ -135,7 +135,7 @@ namespace ExcelMapper.Tests
         [Fact]
         public void MakeOptional_AlreadyOptional_ThrowsExcelMappingException()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value).WithIndex(1).MakeOptional();
+            SinglePropertyMapping<string> mapping = Map(t => t.Value).WithColumnIndex(1).MakeOptional();
 
             Assert.Throws<ExcelMappingException>(() => mapping.MakeOptional());
         }

@@ -63,7 +63,7 @@ namespace ExcelMapper
             return this;
         }
 
-        public EnumerablePropertyMapping<T> WithIndex(int index)
+        public EnumerablePropertyMapping<T> WithColumnIndex(int index)
         {
             var mapper = new IndexPropertyMapper(index);
             if (Mapper is SplitPropertyMapper splitPropertyMapper)
@@ -105,15 +105,15 @@ namespace ExcelMapper
             return WithColumnNames(columnNames?.ToArray());
         }
 
-        public EnumerablePropertyMapping<T> WithIndices(params int[] indices)
+        public EnumerablePropertyMapping<T> WithColumnIndices(params int[] indices)
         {
             Mapper = new ColumnIndicesPropertyMapper(indices);
             return this;
         }
 
-        public EnumerablePropertyMapping<T> WithIndices(IEnumerable<int> indices)
+        public EnumerablePropertyMapping<T> WithColumnIndices(IEnumerable<int> indices)
         {
-            return WithIndices(indices?.ToArray());
+            return WithColumnIndices(indices?.ToArray());
         }
     }
 }

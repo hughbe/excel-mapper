@@ -19,7 +19,7 @@ namespace ExcelMapper
                 .WithMapper(new ColumnPropertyMapper(columnName));
         }
 
-        public static T WithIndex<T>(this T mapping, int columnIndex) where T : ISinglePropertyMapping
+        public static T WithColumnIndex<T>(this T mapping, int columnIndex) where T : ISinglePropertyMapping
         {
             return mapping
                 .WithMapper(new IndexPropertyMapper(columnIndex));
