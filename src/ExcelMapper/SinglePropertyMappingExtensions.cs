@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ExcelMapper.Mappings;
 using ExcelMapper.Mappings.Fallbacks;
-using ExcelMapper.Mappings.Items;
+using ExcelMapper.Mappings.Mappers;
 using ExcelMapper.Mappings.Readers;
 using ExcelMapper.Mappings.Support;
 using ExcelMapper.Mappings.Transformers;
@@ -65,7 +65,7 @@ namespace ExcelMapper
 
         public static TMapping WithMapping<TMapping, T>(this TMapping mapping, IDictionary<string, T> mappingDictionary, IEqualityComparer<string> comparer = null) where TMapping : ISinglePropertyMapping<T>
         {
-            var item = new MapStringValueMappingItem<T>(mappingDictionary, comparer);
+            var item = new DictionaryMapper<T>(mappingDictionary, comparer);
             mapping.AddMappingItem(item);
             return mapping;
         }
@@ -104,10 +104,10 @@ namespace ExcelMapper
                 throw new ArgumentException("Formats cannot be empty.", nameof(formats));
             }
 
-            ParseAsDateTimeMappingItem dateTimeItem = (ParseAsDateTimeMappingItem)mapping.MappingItems.FirstOrDefault(item => item is ParseAsDateTimeMappingItem);
+            DateTimeMapper dateTimeItem = (DateTimeMapper)mapping.MappingItems.FirstOrDefault(item => item is DateTimeMapper);
             if (dateTimeItem == null)
             {
-                dateTimeItem = new ParseAsDateTimeMappingItem();
+                dateTimeItem = new DateTimeMapper();
                 mapping.AddMappingItem(dateTimeItem);
             }
 
@@ -121,20 +121,20 @@ namespace ExcelMapper
                 throw new ArgumentNullException(nameof(converter));
             }
 
-            ConvertUsingMappingDelegate actualConverter = (mapResult) =>
+            ConvertUsingMappingDelegate actualConverter = (ReadResult mapResult, ref object value) =>
             {
                 try
                 {
-                    T value = converter(mapResult.StringValue);
-                    return PropertyMappingResult.Success(value);
+                    value = converter(mapResult.StringValue);
+                    return PropertyMappingResultType.Success;
                 }
                 catch
                 {
-                    return PropertyMappingResult.Invalid();
+                    return PropertyMappingResultType.Invalid;
                 }
             };
 
-            var item = new ConvertUsingMappingItem(actualConverter);
+            var item = new ConvertUsingMapper(actualConverter);
             mapping.AddMappingItem(item);
             return mapping;
         }

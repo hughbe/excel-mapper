@@ -1,22 +1,22 @@
 ﻿using System;
 using Xunit;
 
-namespace ExcelMapper.Mappings.Items.Tests
+namespace ExcelMapper.Mappings.Mappers.Tests
 {
-    public class ParseAsEnumTests
+    public class EnumMapperTests
     {
         [Theory]
         [InlineData(typeof(ConsoleColor))]
         public void Ctor_Type(Type enumType)
         {
-            var item = new ParseAsEnumMappingItem(enumType);
+            var item = new EnumMapper(enumType);
             Assert.Same(enumType, item.EnumType);
         }
 
         [Fact]
         public void Ctor_NullEnumType_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("enumType", () => new ParseAsEnumMappingItem(null));
+            Assert.Throws<ArgumentNullException>("enumType", () => new EnumMapper(null));
         }
 
         [Theory]
@@ -24,18 +24,19 @@ namespace ExcelMapper.Mappings.Items.Tests
         [InlineData(typeof(Enum))]
         public void Ctor_EnumTypeNotEnum_ThrowsArgumentException(Type enumType)
         {
-            Assert.Throws<ArgumentException>("enumType", () => new ParseAsEnumMappingItem(enumType));
+            Assert.Throws<ArgumentException>("enumType", () => new EnumMapper(enumType));
         }
 
         [Theory]
         [InlineData(typeof(ConsoleColor), "Black", ConsoleColor.Black)]
         public void GetProperty_ValidStringValue_ReturnsSuccess(Type enumType, string stringValue, Enum expected)
         {
-            var item = new ParseAsEnumMappingItem(enumType);
+            var item = new EnumMapper(enumType);
 
-            PropertyMappingResult result = item.GetProperty(new ReadResult(-1, stringValue));
-            Assert.Equal(PropertyMappingResultType.Success, result.Type);
-            Assert.Equal(expected, result.Value);
+            object value = null;
+            PropertyMappingResultType result = item.GetProperty(new ReadResult(-1, stringValue), ref value);
+            Assert.Equal(PropertyMappingResultType.Success, result);
+            Assert.Equal(expected, value);
         }
 
         [Theory]
@@ -44,11 +45,12 @@ namespace ExcelMapper.Mappings.Items.Tests
         [InlineData(typeof(ConsoleColor), "Invalid")]
         public void GetProperty_InvalidStringValue_ReturnsInvalid(Type enumType, string stringValue)
         {
-            var item = new ParseAsEnumMappingItem(enumType);
+            var item = new EnumMapper(enumType);
 
-            PropertyMappingResult result = item.GetProperty(new ReadResult(-1, stringValue));
-            Assert.Equal(PropertyMappingResultType.Invalid, result.Type);
-            Assert.Null(result.Value);
+            object value = 1;
+            PropertyMappingResultType result = item.GetProperty(new ReadResult(-1, stringValue), ref value);
+            Assert.Equal(PropertyMappingResultType.Invalid, result);
+            Assert.Equal(1, value);
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ExcelMapper.Mappings;
 using ExcelMapper.Mappings.Fallbacks;
-using ExcelMapper.Mappings.Items;
+using ExcelMapper.Mappings.Mappers;
 using ExcelMapper.Mappings.Readers;
 using ExcelMapper.Mappings.Transformers;
 using Xunit;
@@ -115,7 +115,7 @@ namespace ExcelMapper.Tests
             SinglePropertyMapping<DateTime> mapping = Map(t => t.DateValue);
             Assert.Same(mapping, mapping.WithMapping(dictionaryMapping, comparer));
 
-            MapStringValueMappingItem<DateTime> item = mapping.MappingItems.OfType<MapStringValueMappingItem<DateTime>>().Single();
+            DictionaryMapper<DateTime> item = mapping.MappingItems.OfType<DictionaryMapper<DateTime>>().Single();
             Assert.NotSame(dictionaryMapping, item.MappingDictionary);
             Assert.Equal(dictionaryMapping, item.MappingDictionary);
 
@@ -174,7 +174,7 @@ namespace ExcelMapper.Tests
             SinglePropertyMapping<DateTime> mapping = Map(t => t.DateValue);
             Assert.Same(mapping, mapping.WithDateFormats(formatsArray));
 
-            ParseAsDateTimeMappingItem item = mapping.MappingItems.OfType<ParseAsDateTimeMappingItem>().Single();
+            DateTimeMapper item = mapping.MappingItems.OfType<DateTimeMapper>().Single();
             Assert.Same(formatsArray, item.Formats);
         }
 
@@ -189,7 +189,7 @@ namespace ExcelMapper.Tests
 
             Assert.Same(mapping, mapping.WithDateFormats(formatsArray));
 
-            ParseAsDateTimeMappingItem item = mapping.MappingItems.OfType<ParseAsDateTimeMappingItem>().Single();
+            DateTimeMapper item = mapping.MappingItems.OfType<DateTimeMapper>().Single();
             Assert.Same(formatsArray, item.Formats);
         }
 
@@ -200,7 +200,7 @@ namespace ExcelMapper.Tests
             SinglePropertyMapping<DateTime> mapping = Map(t => t.DateValue);
             Assert.Same(mapping, mapping.WithDateFormats(formats));
 
-            ParseAsDateTimeMappingItem item = mapping.MappingItems.OfType<ParseAsDateTimeMappingItem>().Single();
+            DateTimeMapper item = mapping.MappingItems.OfType<DateTimeMapper>().Single();
             Assert.Equal(formats, item.Formats);
         }
 
@@ -213,7 +213,7 @@ namespace ExcelMapper.Tests
 
             Assert.Same(mapping, mapping.WithDateFormats(formats));
 
-            ParseAsDateTimeMappingItem item = mapping.MappingItems.OfType<ParseAsDateTimeMappingItem>().Single();
+            DateTimeMapper item = mapping.MappingItems.OfType<DateTimeMapper>().Single();
             Assert.Equal(formats, item.Formats);
         }
 
@@ -244,7 +244,7 @@ namespace ExcelMapper.Tests
             SinglePropertyMapping<DateTime?> mapping = Map(t => t.NullableDateValue);
             Assert.Same(mapping, mapping.WithDateFormats(formatsArray));
 
-            ParseAsDateTimeMappingItem item = mapping.MappingItems.OfType<ParseAsDateTimeMappingItem>().Single();
+            DateTimeMapper item = mapping.MappingItems.OfType<DateTimeMapper>().Single();
             Assert.Same(formatsArray, item.Formats);
         }
 
@@ -259,7 +259,7 @@ namespace ExcelMapper.Tests
 
             Assert.Same(mapping, mapping.WithDateFormats(formatsArray));
 
-            ParseAsDateTimeMappingItem item = mapping.MappingItems.OfType<ParseAsDateTimeMappingItem>().Single();
+            DateTimeMapper item = mapping.MappingItems.OfType<DateTimeMapper>().Single();
             Assert.Same(formatsArray, item.Formats);
         }
 
@@ -270,7 +270,7 @@ namespace ExcelMapper.Tests
             SinglePropertyMapping<DateTime?> mapping = Map(t => t.NullableDateValue);
             Assert.Same(mapping, mapping.WithDateFormats(formats));
 
-            ParseAsDateTimeMappingItem item = mapping.MappingItems.OfType<ParseAsDateTimeMappingItem>().Single();
+            DateTimeMapper item = mapping.MappingItems.OfType<DateTimeMapper>().Single();
             Assert.Equal(formats, item.Formats);
         }
 
@@ -283,7 +283,7 @@ namespace ExcelMapper.Tests
 
             Assert.Same(mapping, mapping.WithDateFormats(formats));
 
-            ParseAsDateTimeMappingItem item = mapping.MappingItems.OfType<ParseAsDateTimeMappingItem>().Single();
+            DateTimeMapper item = mapping.MappingItems.OfType<DateTimeMapper>().Single();
             Assert.Equal(formats, item.Formats);
         }
 
@@ -316,11 +316,12 @@ namespace ExcelMapper.Tests
 
             SinglePropertyMapping<string> mapping = Map(t => t.Value);
             Assert.Same(mapping, mapping.WithConverter(converter));
-            ConvertUsingMappingItem item = mapping.MappingItems.OfType<ConvertUsingMappingItem>().Single();
+            ConvertUsingMapper item = mapping.MappingItems.OfType<ConvertUsingMapper>().Single();
 
-            PropertyMappingResult result = item.Converter(new ReadResult(-1, "stringValue"));
-            Assert.Equal(PropertyMappingResultType.Success, result.Type);
-            Assert.Equal("abc", result.Value);
+            object value = null;
+            PropertyMappingResultType result = item.Converter(new ReadResult(-1, "stringValue"), ref value);
+            Assert.Equal(PropertyMappingResultType.Success, result);
+            Assert.Equal("abc", value);
         }
 
         [Fact]
@@ -334,11 +335,12 @@ namespace ExcelMapper.Tests
 
             SinglePropertyMapping<string> mapping = Map(t => t.Value);
             Assert.Same(mapping, mapping.WithConverter(converter));
-            ConvertUsingMappingItem item = mapping.MappingItems.OfType<ConvertUsingMappingItem>().Single();
+            ConvertUsingMapper item = mapping.MappingItems.OfType<ConvertUsingMapper>().Single();
 
-            PropertyMappingResult result = item.Converter(new ReadResult(-1, "stringValue"));
-            Assert.Equal(PropertyMappingResultType.Invalid, result.Type);
-            Assert.Null(result.Value);
+            object value = 1;
+            PropertyMappingResultType result = item.Converter(new ReadResult(-1, "stringValue"), ref value);
+            Assert.Equal(PropertyMappingResultType.Invalid, result);
+            Assert.Equal(1, value);
         }
 
         [Fact]

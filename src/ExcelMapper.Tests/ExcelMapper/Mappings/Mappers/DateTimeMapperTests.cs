@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using Xunit;
 
-namespace ExcelMapper.Mappings.Items.Tests
+namespace ExcelMapper.Mappings.Mappers.Tests
 {
-    public class ParseAsDateTimeMappingItemTests
+    public class DateTimeMapperTests
     {
         [Fact]
         public void Ctor_Default()
         {
-            var item = new ParseAsDateTimeMappingItem();
+            var item = new DateTimeMapper();
             Assert.Equal(new string[] { "G" }, item.Formats);
             Assert.Null(item.Provider);
             Assert.Equal(DateTimeStyles.None, item.Style);
@@ -20,21 +20,21 @@ namespace ExcelMapper.Mappings.Items.Tests
         public void Formats_SetValid_GetReturnsExpected()
         {
             var formats = new string[] { null, "", "abc" };
-            var item = new ParseAsDateTimeMappingItem { Formats = formats };
+            var item = new DateTimeMapper { Formats = formats };
             Assert.Same(formats, item.Formats);
         }
 
         [Fact]
         public void Formats_SetNull_ThrowsArgumentNullException()
         {
-            var item = new ParseAsDateTimeMappingItem();
+            var item = new DateTimeMapper();
             Assert.Throws<ArgumentNullException>("value", () => item.Formats = null);
         }
 
         [Fact]
         public void Formats_SetEmpty_ThrowsArgumentException()
         {
-            var item = new ParseAsDateTimeMappingItem();
+            var item = new DateTimeMapper();
             Assert.Throws<ArgumentException>("value", () => item.Formats = new string[0]);
         }
 
@@ -42,7 +42,7 @@ namespace ExcelMapper.Mappings.Items.Tests
         public void Provider_Set_GetReturnsExpected()
         {
             IFormatProvider provider = CultureInfo.CurrentCulture;
-            var item = new ParseAsDateTimeMappingItem { Provider = provider};
+            var item = new DateTimeMapper { Provider = provider};
             Assert.Same(provider, item.Provider);
         }
 
@@ -51,7 +51,7 @@ namespace ExcelMapper.Mappings.Items.Tests
         [InlineData((DateTimeStyles)int.MaxValue)]
         public void Styles_Set_GetReturnsExpected(DateTimeStyles style)
         {
-            var item = new ParseAsDateTimeMappingItem { Style = style };
+            var item = new DateTimeMapper { Style = style };
             Assert.Equal(style, item.Style);
         }
 
@@ -66,15 +66,16 @@ namespace ExcelMapper.Mappings.Items.Tests
         [MemberData(nameof(GetProperty_Valid_TestData))]
         public void GetProperty_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, DateTimeStyles style, DateTime expected)
         {
-            var item = new ParseAsDateTimeMappingItem
+            var item = new DateTimeMapper
             {
                 Formats = formats,
                 Style = style
             };
 
-            PropertyMappingResult result = item.GetProperty(new ReadResult(-1, stringValue));
-            Assert.Equal(PropertyMappingResultType.Success, result.Type);
-            Assert.Equal(expected, result.Value);
+            object value = null;
+            PropertyMappingResultType result = item.GetProperty(new ReadResult(-1, stringValue), ref value);
+            Assert.Equal(PropertyMappingResultType.Success, result);
+            Assert.Equal(expected, value);
         }
 
         [Theory]
@@ -84,11 +85,12 @@ namespace ExcelMapper.Mappings.Items.Tests
         [InlineData("12/07/2017 07:57:61")]
         public void GetProperty_InvalidStringValue_ReturnsInvalid(string stringValue)
         {
-            var item = new ParseAsDateTimeMappingItem();
+            var item = new DateTimeMapper();
 
-            PropertyMappingResult result = item.GetProperty(new ReadResult(-1, stringValue));
-            Assert.Equal(PropertyMappingResultType.Invalid, result.Type);
-            Assert.Null(result.Value);
+            object value = 1;
+            PropertyMappingResultType result = item.GetProperty(new ReadResult(-1, stringValue), ref value);
+            Assert.Equal(PropertyMappingResultType.Invalid, result);
+            Assert.Equal(1, value);
         }
     }
 }

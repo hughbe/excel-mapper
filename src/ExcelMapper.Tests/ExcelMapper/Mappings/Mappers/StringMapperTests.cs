@@ -1,0 +1,21 @@
+﻿using Xunit;
+
+namespace ExcelMapper.Mappings.Mappers.Tests
+{
+    public class StringMapperTests
+    {
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("abc")]
+        public void GetProperty_Invoke_ReturnsBegan(string stringValue)
+        {
+            var item = new StringMapper();
+
+            object value = 1;
+            PropertyMappingResultType result = item.GetProperty(new ReadResult(-1, stringValue), ref value);
+            Assert.Equal(PropertyMappingResultType.Continue, result);
+            Assert.Same(stringValue, value);
+        }
+    }
+}

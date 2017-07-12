@@ -44,14 +44,14 @@ namespace ExcelMapper.Mappings.Readers
 
         public IEnumerable<ReadResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            ReadResult mapResult = ColumnReader.GetValue(sheet, rowIndex, reader);
-            if (mapResult.StringValue == null)
+            ReadResult readResult = ColumnReader.GetValue(sheet, rowIndex, reader);
+            if (readResult.StringValue == null)
             {
                 return Enumerable.Empty<ReadResult>();
             }
 
-            string[] splitStringValues = mapResult.StringValue.Split(Separators, Options);
-            return splitStringValues.Select(s => new ReadResult(mapResult.ColumnIndex, s));
+            string[] splitStringValues = readResult.StringValue.Split(Separators, Options);
+            return splitStringValues.Select(s => new ReadResult(readResult.ColumnIndex, s));
         }
     }
 }

@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using Xunit;
 
-namespace ExcelMapper.Mappings.Items.Tests
+namespace ExcelMapper.Mappings.Mappers.Tests
 {
-    public class MapStringValueMappingItemTests
+    public class DictionaryMapperTests
     {
         [Fact]
         public void Ctor_Dictionary_ReturnsExpected()
         {
             var mapping = new Dictionary<string, object> { { "key", "value" } };
             var comparer = StringComparer.CurrentCulture;
-            var item = new MapStringValueMappingItem<object>(mapping, comparer);
+            var item = new DictionaryMapper<object>(mapping, comparer);
 
             Dictionary<string, object> itemMapping = Assert.IsType<Dictionary<string, object>>(item.MappingDictionary);
             Assert.Equal(mapping, itemMapping);
@@ -21,7 +21,7 @@ namespace ExcelMapper.Mappings.Items.Tests
         [Fact]
         public void Ctor_NullDictionary_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("mappingDictionary", () => new MapStringValueMappingItem<int>(null, StringComparer.CurrentCulture));
+            Assert.Throws<ArgumentNullException>("mappingDictionary", () => new DictionaryMapper<int>(null, StringComparer.CurrentCulture));
         }
 
         [Theory]
@@ -32,11 +32,12 @@ namespace ExcelMapper.Mappings.Items.Tests
         {
             var mapping = new Dictionary<string, object> { { "key", "value" }, { "KEY2", 10 } };
             var comparer = StringComparer.OrdinalIgnoreCase;
-            var item = new MapStringValueMappingItem<object>(mapping, comparer);
+            var item = new DictionaryMapper<object>(mapping, comparer);
 
-            PropertyMappingResult result = item.GetProperty(new ReadResult(-1, stringValue));
-            Assert.Equal(expectedType, result.Type);
-            Assert.Equal(expectedValue, result.Value);
+            object value = null;
+            PropertyMappingResultType result = item.GetProperty(new ReadResult(-1, stringValue), ref value);
+            Assert.Equal(expectedType, result);
+            Assert.Equal(expectedValue, value);
         }
     }
 }

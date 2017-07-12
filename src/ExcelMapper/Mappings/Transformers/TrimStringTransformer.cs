@@ -2,14 +2,14 @@
 {
     public class TrimStringTransformer : IStringValueTransformer
     {
-        public string TransformStringValue(ExcelSheet sheet, int rowIndex, ReadResult mapResult)
+        public string TransformStringValue(ExcelSheet sheet, int rowIndex, ReadResult readResult)
         {
-            if (mapResult.StringValue == null)
+            if (readResult.StringValue == null)
             {
-                return mapResult.StringValue;
+                return readResult.StringValue;
             }
 
-            return mapResult.StringValue.Trim();
+            return readResult.StringValue.Trim();
         }
     }
 }

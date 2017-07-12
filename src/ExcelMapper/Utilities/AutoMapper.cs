@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using ExcelMapper.Mappings.Fallbacks;
-using ExcelMapper.Mappings.Items;
+using ExcelMapper.Mappings.Mappers;
 
 namespace ExcelMapper.Utilities
 {
@@ -26,8 +26,8 @@ namespace ExcelMapper.Utilities
 
             if (type == typeof(DateTime))
             {
-                var item = new ParseAsDateTimeMappingItem();
-                pipeline.AddMappingItem(item);
+                var mapper = new DateTimeMapper();
+                pipeline.AddMappingItem(mapper);
 
                 if (!isNullable)
                 {
@@ -38,8 +38,8 @@ namespace ExcelMapper.Utilities
             }
             else if (type == typeof(bool))
             {
-                var item = new ParseAsBoolMappingItem();
-                pipeline.AddMappingItem(item);
+                var mapper = new BoolMapper();
+                pipeline.AddMappingItem(mapper);
 
                 if (!isNullable)
                 {
@@ -50,8 +50,8 @@ namespace ExcelMapper.Utilities
             }
             else if (type.GetTypeInfo().IsEnum)
             {
-                var item = new ParseAsEnumMappingItem(type);
-                pipeline.AddMappingItem(item);
+                var mapper = new EnumMapper(type);
+                pipeline.AddMappingItem(mapper);
 
                 if (!isNullable)
                 {
@@ -62,13 +62,13 @@ namespace ExcelMapper.Utilities
             }
             else if (type == typeof(string))
             {
-                var item = new ParseAsStringMappingItem();
-                pipeline.AddMappingItem(item);
+                var mapper = new StringMapper();
+                pipeline.AddMappingItem(mapper);
             }
             else if (interfaces.Any(t => t == typeof(IConvertible)))
             {
-                var item = new ChangeTypeMappingItem(type);
-                pipeline.AddMappingItem(item);
+                var mapper = new ChangeTypeMapper(type);
+                pipeline.AddMappingItem(mapper);
 
                 if (!isNullable)
                 {
@@ -84,8 +84,8 @@ namespace ExcelMapper.Utilities
 
             if (emptyStrategyToPursue == EmptyValueStrategy.SetToDefaultValue || emptyValueStrategy == EmptyValueStrategy.SetToDefaultValue)
             {
-                var fallback = new FixedValueFallback(isNullable ? null : type.DefaultValue());
-                pipeline.EmptyFallback = fallback;
+                var emptyFallback = new FixedValueFallback(isNullable ? null : type.DefaultValue());
+                pipeline.EmptyFallback = emptyFallback;
             }
             else
             {

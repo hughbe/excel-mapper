@@ -2,6 +2,6 @@
 {
     public interface IFallbackItem
     {
-        object PerformFallback(ExcelSheet sheet, int rowIndex, ReadResult result);
+        object PerformFallback(ExcelSheet sheet, int rowIndex, ReadResult readResult);
     }
 }

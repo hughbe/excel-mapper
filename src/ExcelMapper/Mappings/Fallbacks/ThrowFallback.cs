@@ -2,9 +2,9 @@
 {
     public class ThrowFallback : IFallbackItem
     {
-        public object PerformFallback(ExcelSheet sheet, int rowIndex, ReadResult mapResult)
+        public object PerformFallback(ExcelSheet sheet, int rowIndex, ReadResult readResult)
         {
-            throw new ExcelMappingException($"Invalid result for parameter \"{mapResult.StringValue}\" of type \"TODO\"", sheet, rowIndex, mapResult.ColumnIndex);
+            throw new ExcelMappingException($"Invalid result for parameter \"{readResult.StringValue}\" of type \"TODO\"", sheet, rowIndex, readResult.ColumnIndex);
         }
     }
 }

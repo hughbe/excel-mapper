@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Reflection;
-using ExcelDataReader;
 
-namespace ExcelMapper.Mappings.Items
+namespace ExcelMapper.Mappings.Mappers
 {
-    public class ParseAsEnumMappingItem : ISinglePropertyMappingItem
+    public class EnumMapper : IStringValueMapper
     {
         public Type EnumType { get; }
 
-        public ParseAsEnumMappingItem(Type enumType)
+        public EnumMapper(Type enumType)
         {
             if (enumType == null)
             {
@@ -23,16 +22,16 @@ namespace ExcelMapper.Mappings.Items
             EnumType = enumType;
         }
 
-        public PropertyMappingResult GetProperty(ReadResult mapResult)
+        public PropertyMappingResultType GetProperty(ReadResult readResult, ref object value)
         {
             try
             {
-                object value = Enum.Parse(EnumType, mapResult.StringValue);
-                return PropertyMappingResult.Success(value);
+                value = Enum.Parse(EnumType, readResult.StringValue);
+                return PropertyMappingResultType.Success;
             }
             catch
             {
-                return PropertyMappingResult.Invalid();
+                return PropertyMappingResultType.Invalid;
             }
         }
     }

@@ -1,6 +1,4 @@
-﻿using ExcelDataReader;
-
-namespace ExcelMapper.Mappings
+﻿namespace ExcelMapper.Mappings
 {
     public interface IStringValueTransformer
     {

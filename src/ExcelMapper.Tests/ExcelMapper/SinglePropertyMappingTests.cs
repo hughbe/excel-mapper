@@ -2,7 +2,7 @@
 using System.Reflection;
 using ExcelMapper.Mappings;
 using ExcelMapper.Mappings.Fallbacks;
-using ExcelMapper.Mappings.Items;
+using ExcelMapper.Mappings.Mappers;
 using ExcelMapper.Mappings.Transformers;
 using Xunit;
 
@@ -75,13 +75,13 @@ namespace ExcelMapper.Tests
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var mapping = new SinglePropertyMapping(propertyInfo, typeof(int), EmptyValueStrategy.SetToDefaultValue);
-            ISinglePropertyMappingItem originalItem = Assert.Single(mapping.MappingItems);
-            var item1 = new ParseAsBoolMappingItem();
-            var item2 = new ParseAsBoolMappingItem();
+            IStringValueMapper originalItem = Assert.Single(mapping.MappingItems);
+            var item1 = new BoolMapper();
+            var item2 = new BoolMapper();
 
             mapping.AddMappingItem(item1);
             mapping.AddMappingItem(item2);
-            Assert.Equal(new ISinglePropertyMappingItem[] { originalItem, item1, item2 }, mapping.MappingItems);
+            Assert.Equal(new IStringValueMapper[] { originalItem, item1, item2 }, mapping.MappingItems);
         }
 
         [Fact]

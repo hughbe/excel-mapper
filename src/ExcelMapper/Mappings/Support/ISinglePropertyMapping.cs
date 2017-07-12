@@ -11,7 +11,7 @@ namespace ExcelMapper.Mappings.Support
         IEnumerable<IStringValueTransformer> StringValueTransformers { get; }
         void AddStringValueTransformer(IStringValueTransformer transformer);
 
-        IEnumerable<ISinglePropertyMappingItem> MappingItems { get; }
-        void AddMappingItem(ISinglePropertyMappingItem item);
+        IEnumerable<IStringValueMapper> MappingItems { get; }
+        void AddMappingItem(IStringValueMapper item);
     }
 }

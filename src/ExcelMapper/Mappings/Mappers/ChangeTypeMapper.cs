@@ -1,14 +1,13 @@
 ﻿using System;
-using ExcelDataReader;
 using ExcelMapper.Utilities;
 
-namespace ExcelMapper.Mappings.Items
+namespace ExcelMapper.Mappings.Mappers
 {
-    public class ChangeTypeMappingItem : ISinglePropertyMappingItem
+    public class ChangeTypeMapper : IStringValueMapper
     {
         public Type Type { get; }
 
-        public ChangeTypeMappingItem(Type type)
+        public ChangeTypeMapper(Type type)
         {
             if (type == null)
             {
@@ -23,16 +22,16 @@ namespace ExcelMapper.Mappings.Items
             Type = type;
         }
 
-        public PropertyMappingResult GetProperty(ReadResult mapResult)
+        public PropertyMappingResultType GetProperty(ReadResult readResult, ref object value)
         {
             try
             {
-                object value = Convert.ChangeType(mapResult.StringValue, Type);
-                return PropertyMappingResult.Success(value);
+                value = Convert.ChangeType(readResult.StringValue, Type);
+                return PropertyMappingResultType.Success;
             }
             catch
             {
-                return PropertyMappingResult.Invalid();
+                return PropertyMappingResultType.Invalid;
             }
         }
     }

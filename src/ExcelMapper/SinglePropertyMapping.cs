@@ -12,16 +12,16 @@ namespace ExcelMapper
     public class SinglePropertyMapping : PropertyMapping, ISinglePropertyMapping
     {
         private List<IStringValueTransformer> _transformers = new List<IStringValueTransformer>();
-        private List<ISinglePropertyMappingItem> _mappingItems = new List<ISinglePropertyMappingItem>();
+        private List<IStringValueMapper> _mappingItems = new List<IStringValueMapper>();
 
         public Type Type { get; }
 
         public ISingleValueReader Reader { get; set; }
 
         public IEnumerable<IStringValueTransformer> StringValueTransformers => _transformers;
-        public IEnumerable<ISinglePropertyMappingItem> MappingItems => _mappingItems;
+        public IEnumerable<IStringValueMapper> MappingItems => _mappingItems;
 
-        public void AddMappingItem(ISinglePropertyMappingItem item)
+        public void AddMappingItem(IStringValueMapper item)
         {
             if (item == null)
             {
@@ -65,45 +65,43 @@ namespace ExcelMapper
 
         public override object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            ReadResult mapResult = Reader.GetValue(sheet, rowIndex, reader);
-            return GetPropertyValue(sheet, rowIndex, reader, mapResult);
+            ReadResult readResult = Reader.GetValue(sheet, rowIndex, reader);
+            return GetPropertyValue(sheet, rowIndex, reader, readResult);
         }
 
-        internal object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult mapResult)
+        internal object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult readResult)
         {
             for (int i = 0; i < _transformers.Count; i++)
             {
                 IStringValueTransformer transformer = _transformers[i];
-                mapResult = new ReadResult(mapResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, mapResult));
+                readResult = new ReadResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult));
             }
 
-            if (mapResult.StringValue == null && EmptyFallback != null)
+            if (readResult.StringValue == null && EmptyFallback != null)
             {
-                return EmptyFallback.PerformFallback(sheet, rowIndex, mapResult);
+                return EmptyFallback.PerformFallback(sheet, rowIndex, readResult);
             }
 
-            var result = new PropertyMappingResult();
+            PropertyMappingResultType resultType = PropertyMappingResultType.Success;
+            object value = null;
+
             for (int i = 0; i < _mappingItems.Count; i++)
             {
-                ISinglePropertyMappingItem mappingItem = _mappingItems[i];
+                IStringValueMapper mappingItem = _mappingItems[i];
 
-                PropertyMappingResult subResult = mappingItem.GetProperty(mapResult);
-                if (subResult.Type == PropertyMappingResultType.Success)
+                resultType  = mappingItem.GetProperty(readResult, ref value);
+                if (resultType  == PropertyMappingResultType.Success)
                 {
-                    return subResult.Value;
-                }
-                else if (subResult.Type != PropertyMappingResultType.Continue)
-                {
-                    result = subResult;
+                    return value;
                 }
             }
 
-            if (result.Type != PropertyMappingResultType.Began && InvalidFallback != null)
+            if (resultType != PropertyMappingResultType.Success && InvalidFallback != null)
             {
-                return InvalidFallback.PerformFallback(sheet, rowIndex, mapResult);
+                return InvalidFallback.PerformFallback(sheet, rowIndex, readResult);
             }
 
-            return result.Value;
+            return value;
         }
     }
 }

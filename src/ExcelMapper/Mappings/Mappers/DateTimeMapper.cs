@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Globalization;
-using ExcelDataReader;
 
-namespace ExcelMapper.Mappings.Items
+namespace ExcelMapper.Mappings.Mappers
 {
-    public class ParseAsDateTimeMappingItem : ISinglePropertyMappingItem
+    public class DateTimeMapper : IStringValueMapper
     {
         private string[] _formats = new string[] { "G" };
 
@@ -34,14 +33,15 @@ namespace ExcelMapper.Mappings.Items
 
         public DateTimeStyles Style { get; set; }
 
-        public PropertyMappingResult GetProperty(ReadResult mapResult)
+        public PropertyMappingResultType GetProperty(ReadResult readResult, ref object value)
         {
-            if (!DateTime.TryParseExact(mapResult.StringValue, Formats, Provider, Style, out DateTime result))
+            if (!DateTime.TryParseExact(readResult.StringValue, Formats, Provider, Style, out DateTime result))
             {
-                return PropertyMappingResult.Invalid();
+                return PropertyMappingResultType.Invalid;
             }
 
-            return PropertyMappingResult.Success(result);
+            value = result;
+            return PropertyMappingResultType.Success;
         }
     }
 }
