@@ -5,8 +5,8 @@ namespace ExcelMapper.Mappings.Support
     public interface ISinglePropertyMapping
     {
         ISingleValueReader Reader { get; set; }
-        ISinglePropertyMappingItem EmptyFallback { get; set; }
-        ISinglePropertyMappingItem InvalidFallback { get; set; }
+        IFallbackItem EmptyFallback { get; set; }
+        IFallbackItem InvalidFallback { get; set; }
 
         IEnumerable<IStringValueTransformer> StringValueTransformers { get; }
         void AddStringValueTransformer(IStringValueTransformer transformer);

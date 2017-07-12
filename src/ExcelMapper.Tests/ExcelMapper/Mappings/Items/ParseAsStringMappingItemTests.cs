@@ -12,7 +12,7 @@ namespace ExcelMapper.Mappings.Items.Tests
         {
             var item = new ParseAsStringMappingItem();
 
-            PropertyMappingResult result = item.GetProperty(null, 0, null, new ReadResult(-1, stringValue));
+            PropertyMappingResult result = item.GetProperty(new ReadResult(-1, stringValue));
             Assert.Equal(PropertyMappingResultType.Began, result.Type);
             Assert.Same(stringValue, result.Value);
         }

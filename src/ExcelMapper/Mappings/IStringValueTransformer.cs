@@ -4,6 +4,6 @@ namespace ExcelMapper.Mappings
 {
     public interface IStringValueTransformer
     {
-        string TransformStringValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult stringValue);
+        string TransformStringValue(ExcelSheet sheet, int rowIndex, ReadResult stringValue);
     }
 }

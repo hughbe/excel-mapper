@@ -395,7 +395,7 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithEmptyFallbackItem_ValidFallbackItem_Success()
         {
-            ISinglePropertyMappingItem fallback = new FixedValueFallback(10);
+            IFallbackItem fallback = new FixedValueFallback(10);
             SinglePropertyMapping<string> mapping = Map(t => t.Value);
             Assert.Same(mapping, mapping.WithEmptyFallbackItem(fallback));
 
@@ -432,7 +432,7 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithInvalidFallbackItem_ValidFallbackItem_Success()
         {
-            ISinglePropertyMappingItem fallback = new FixedValueFallback(10);
+            IFallbackItem fallback = new FixedValueFallback(10);
             SinglePropertyMapping<string> mapping = Map(t => t.Value);
             Assert.Same(mapping, mapping.WithInvalidFallbackItem(fallback));
 

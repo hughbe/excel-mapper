@@ -34,7 +34,7 @@ namespace ExcelMapper.Mappings.Items.Tests
             var comparer = StringComparer.OrdinalIgnoreCase;
             var item = new MapStringValueMappingItem<object>(mapping, comparer);
 
-            PropertyMappingResult result = item.GetProperty(null, 0, null, new ReadResult(-1, stringValue));
+            PropertyMappingResult result = item.GetProperty(new ReadResult(-1, stringValue));
             Assert.Equal(expectedType, result.Type);
             Assert.Equal(expectedValue, result.Value);
         }

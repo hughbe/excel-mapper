@@ -31,7 +31,7 @@ namespace ExcelMapper.Mappings.Items.Tests
             };
             var item = new ConvertUsingMappingItem(converter);
 
-            PropertyMappingResult result = item.GetProperty(null, 0, null, new ReadResult(-1, "string"));
+            PropertyMappingResult result = item.GetProperty(new ReadResult(-1, "string"));
             Assert.Equal(PropertyMappingResultType.Success, result.Type);
             Assert.Equal(10, result.Value);
         }

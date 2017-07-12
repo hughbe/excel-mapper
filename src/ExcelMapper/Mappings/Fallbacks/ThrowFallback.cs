@@ -1,10 +1,8 @@
-﻿using ExcelDataReader;
-
-namespace ExcelMapper.Mappings.Fallbacks
+﻿namespace ExcelMapper.Mappings.Fallbacks
 {
-    public class ThrowFallback : ISinglePropertyMappingItem
+    public class ThrowFallback : IFallbackItem
     {
-        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult mapResult)
+        public object PerformFallback(ExcelSheet sheet, int rowIndex, ReadResult mapResult)
         {
             throw new ExcelMappingException($"Invalid result for parameter \"{mapResult.StringValue}\" of type \"TODO\"", sheet, rowIndex, mapResult.ColumnIndex);
         }

@@ -4,13 +4,12 @@ using System.Linq;
 using System.Reflection;
 using ExcelMapper.Mappings.Fallbacks;
 using ExcelMapper.Mappings.Items;
-using ExcelMapper.Utilities;
 
-namespace ExcelMapper.Mappings
+namespace ExcelMapper.Utilities
 {
     internal static class AutoMapper
     {
-        public static void AutoMap(SinglePropertyMapping pipeline, EmptyValueStrategy emptyValueStrategy)
+        public static void AutoMap(this SinglePropertyMapping pipeline, EmptyValueStrategy emptyValueStrategy)
         {
             // String nullable from types.
             Type type = pipeline.Type;

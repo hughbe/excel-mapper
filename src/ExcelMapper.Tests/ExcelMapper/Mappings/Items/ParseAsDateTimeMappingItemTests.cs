@@ -72,7 +72,7 @@ namespace ExcelMapper.Mappings.Items.Tests
                 Style = style
             };
 
-            PropertyMappingResult result = item.GetProperty(null, 0, null, new ReadResult(-1, stringValue));
+            PropertyMappingResult result = item.GetProperty(new ReadResult(-1, stringValue));
             Assert.Equal(PropertyMappingResultType.Success, result.Type);
             Assert.Equal(expected, result.Value);
         }
@@ -86,7 +86,7 @@ namespace ExcelMapper.Mappings.Items.Tests
         {
             var item = new ParseAsDateTimeMappingItem();
 
-            PropertyMappingResult result = item.GetProperty(null, 0, null, new ReadResult(-1, stringValue));
+            PropertyMappingResult result = item.GetProperty(new ReadResult(-1, stringValue));
             Assert.Equal(PropertyMappingResultType.Invalid, result.Type);
             Assert.Null(result.Value);
         }

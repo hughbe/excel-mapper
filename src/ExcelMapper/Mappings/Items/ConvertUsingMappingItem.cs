@@ -14,7 +14,7 @@ namespace ExcelMapper.Mappings.Items
             Converter = converter ?? throw new ArgumentNullException(nameof(converter));
         }
 
-        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult mapResult)
+        public PropertyMappingResult GetProperty(ReadResult mapResult)
         {
             return Converter(mapResult);
         }

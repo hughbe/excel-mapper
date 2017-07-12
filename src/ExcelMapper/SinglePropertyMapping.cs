@@ -5,6 +5,7 @@ using ExcelDataReader;
 using ExcelMapper.Mappings;
 using ExcelMapper.Mappings.Readers;
 using ExcelMapper.Mappings.Support;
+using ExcelMapper.Utilities;
 
 namespace ExcelMapper
 {
@@ -42,8 +43,8 @@ namespace ExcelMapper
             _transformers.Add(transformer);
         }
 
-        public ISinglePropertyMappingItem EmptyFallback { get; set; }
-        public ISinglePropertyMappingItem InvalidFallback { get; set; }
+        public IFallbackItem EmptyFallback { get; set; }
+        public IFallbackItem InvalidFallback { get; set; }
 
         public SinglePropertyMapping(MemberInfo member, Type type, EmptyValueStrategy emptyValueStrategy) : base(member)
         {
@@ -59,7 +60,7 @@ namespace ExcelMapper
 
             Reader = new ColumnNameReader(member.Name);
             Type = type;
-            AutoMapper.AutoMap(this, emptyValueStrategy);
+            this.AutoMap(emptyValueStrategy);
         }
 
         public override object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
@@ -73,13 +74,12 @@ namespace ExcelMapper
             for (int i = 0; i < _transformers.Count; i++)
             {
                 IStringValueTransformer transformer = _transformers[i];
-                mapResult = new ReadResult(mapResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, reader, mapResult));
+                mapResult = new ReadResult(mapResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, mapResult));
             }
 
             if (mapResult.StringValue == null && EmptyFallback != null)
             {
-                PropertyMappingResult fallbackResult = EmptyFallback.GetProperty(sheet, rowIndex, reader, mapResult);
-                return fallbackResult.Value;
+                return EmptyFallback.PerformFallback(sheet, rowIndex, mapResult);
             }
 
             var result = new PropertyMappingResult();
@@ -87,7 +87,7 @@ namespace ExcelMapper
             {
                 ISinglePropertyMappingItem mappingItem = _mappingItems[i];
 
-                PropertyMappingResult subResult = mappingItem.GetProperty(sheet, rowIndex, reader, mapResult);
+                PropertyMappingResult subResult = mappingItem.GetProperty(mapResult);
                 if (subResult.Type == PropertyMappingResultType.Success)
                 {
                     return subResult.Value;
@@ -100,8 +100,7 @@ namespace ExcelMapper
 
             if (result.Type != PropertyMappingResultType.Began && InvalidFallback != null)
             {
-                PropertyMappingResult fallbackResult = InvalidFallback.GetProperty(sheet, rowIndex, reader, mapResult);
-                return fallbackResult.Value;
+                return InvalidFallback.PerformFallback(sheet, rowIndex, mapResult);
             }
 
             return result.Value;

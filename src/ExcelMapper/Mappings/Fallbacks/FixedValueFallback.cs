@@ -1,16 +1,14 @@
-﻿using ExcelDataReader;
-
-namespace ExcelMapper.Mappings.Fallbacks
+﻿namespace ExcelMapper.Mappings.Fallbacks
 {
-    public class FixedValueFallback : ISinglePropertyMappingItem
+    public class FixedValueFallback : IFallbackItem
     {
         public object Value { get; }
 
-        public FixedValueFallback(object value) => Value = value;
+        public FixedValueFallback(object value) => Value = value;        
 
-        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult mapResult)
+        public object PerformFallback(ExcelSheet sheet, int rowIndex, ReadResult result)
         {
-            return PropertyMappingResult.Success(Value);
+            return Value;
         }
     }
 }

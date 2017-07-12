@@ -4,7 +4,7 @@ namespace ExcelMapper.Mappings.Items
 {
     public class ParseAsStringMappingItem : ISinglePropertyMappingItem
     {
-        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult result)
+        public PropertyMappingResult GetProperty(ReadResult result)
         {
             return PropertyMappingResult.Began(result.StringValue);
         }

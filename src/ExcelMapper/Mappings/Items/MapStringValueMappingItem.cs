@@ -18,7 +18,7 @@ namespace ExcelMapper.Mappings.Items
             MappingDictionary = new Dictionary<string, T>(mappingDictionary, comparer);
         }
 
-        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult mapResult)
+        public PropertyMappingResult GetProperty(ReadResult mapResult)
         {
             if (!MappingDictionary.TryGetValue(mapResult.StringValue, out T result))
             {

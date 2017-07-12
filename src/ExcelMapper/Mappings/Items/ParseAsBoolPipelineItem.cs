@@ -4,7 +4,7 @@ namespace ExcelMapper.Mappings.Items
 {
     public class ParseAsBoolMappingItem : ISinglePropertyMappingItem
     {
-        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult mapResult)
+        public PropertyMappingResult GetProperty(ReadResult mapResult)
         {
             // Excel transforms bool values such as "true" or "false" to "1" or "0".
             if (mapResult.StringValue == "1")

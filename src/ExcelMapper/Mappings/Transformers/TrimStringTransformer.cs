@@ -1,10 +1,8 @@
-﻿using ExcelDataReader;
-
-namespace ExcelMapper.Mappings.Transformers
+﻿namespace ExcelMapper.Mappings.Transformers
 {
     public class TrimStringTransformer : IStringValueTransformer
     {
-        public string TransformStringValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult mapResult)
+        public string TransformStringValue(ExcelSheet sheet, int rowIndex, ReadResult mapResult)
         {
             if (mapResult.StringValue == null)
             {
