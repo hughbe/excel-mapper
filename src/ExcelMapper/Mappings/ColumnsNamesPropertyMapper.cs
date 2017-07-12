@@ -6,26 +6,31 @@ using ExcelMapper.Utilities;
 
 namespace ExcelMapper.Mappings
 {
-    internal sealed class ColumnsPropertyMapper : IMultiPropertyMapper
+    public sealed class ColumnsNamesPropertyMapper : IMultiPropertyMapper
     {
         public string[] ColumnNames { get; }
 
-        internal ColumnsPropertyMapper(IEnumerable<string> columnNames)
+        public ColumnsNamesPropertyMapper(string[] columnNames)
         {
             if (columnNames == null)
             {
                 throw new ArgumentNullException(nameof(columnNames));
             }
 
+            if (columnNames.Length == 0)
+            {
+                throw new ArgumentException("Column names cannot be empty.", nameof(columnNames));
+            }
+            
             foreach (string columnName in columnNames)
             {
-                if (columnNames == null)
+                if (columnName == null)
                 {
                     throw new ArgumentException($"Null column name in {columnNames.ArrayJoin()}.", nameof(columnNames));
                 }
             }
 
-            ColumnNames = columnNames.ToArray();
+            ColumnNames = columnNames;
         }
 
         public IEnumerable<MapResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)

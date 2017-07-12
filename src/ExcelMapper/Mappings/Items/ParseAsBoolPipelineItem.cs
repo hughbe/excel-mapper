@@ -2,7 +2,7 @@
 
 namespace ExcelMapper.Mappings.Items
 {
-    internal class ParseAsBoolMappingItem : ISinglePropertyMappingItem
+    public class ParseAsBoolMappingItem : ISinglePropertyMappingItem
     {
         public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
         {

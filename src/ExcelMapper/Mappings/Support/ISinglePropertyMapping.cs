@@ -13,6 +13,5 @@ namespace ExcelMapper.Mappings.Support
 
         IEnumerable<ISinglePropertyMappingItem> MappingItems { get; }
         void AddMappingItem(ISinglePropertyMappingItem item);
-        void InsertMappingItem(int index, ISinglePropertyMappingItem item);
     }
 }

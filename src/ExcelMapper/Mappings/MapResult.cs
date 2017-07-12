@@ -3,11 +3,11 @@
     public struct MapResult
     {
         public int ColumnIndex { get; }
-        public string StringValue { get; set; }
+        public string StringValue { get; }
 
-        public MapResult(int index, string stringValue)
+        public MapResult(int coolumnIndex, string stringValue)
         {
-            ColumnIndex = index;
+            ColumnIndex = coolumnIndex;
             StringValue = stringValue;
         }
     }

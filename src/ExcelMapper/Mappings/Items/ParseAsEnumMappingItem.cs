@@ -17,7 +17,7 @@ namespace ExcelMapper.Mappings.Items
 
             if (!enumType.GetTypeInfo().IsEnum)
             {
-                throw new ArgumentException(nameof(enumType), $"Type {enumType} is not an Enum.");
+                throw new ArgumentException($"Type {enumType} is not an Enum.", nameof(enumType));
             }
 
             EnumType = enumType;

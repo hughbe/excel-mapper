@@ -3,11 +3,11 @@ using ExcelDataReader;
 
 namespace ExcelMapper.Mappings
 {
-    internal sealed class ColumnPropertyMapper : ISinglePropertyMapper
+    public sealed class ColumnPropertyMapper : ISinglePropertyMapper
     {
         public string ColumnName { get; }
 
-        internal ColumnPropertyMapper(string columnName)
+        public ColumnPropertyMapper(string columnName)
         {
             if (columnName == null)
             {

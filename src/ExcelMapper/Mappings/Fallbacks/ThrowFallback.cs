@@ -2,7 +2,7 @@
 
 namespace ExcelMapper.Mappings.Fallbacks
 {
-    internal class ThrowFallback : ISinglePropertyMappingItem
+    public class ThrowFallback : ISinglePropertyMappingItem
     {
         public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
         {

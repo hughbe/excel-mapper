@@ -4,16 +4,35 @@ using ExcelDataReader;
 
 namespace ExcelMapper.Mappings.Items
 {
-    internal class ParseAsDateTimeMappingItem : ISinglePropertyMappingItem
+    public class ParseAsDateTimeMappingItem : ISinglePropertyMappingItem
     {
+        private string[] _formats = new string[] { "G" };
+
         /// <summary>
         /// Defaults to "G" - the default Excel format.
         /// </summary>
-        public string[] Formats { get; internal set; } = new string[] { "G" };
+        public string[] Formats
+        {
+            get => _formats;
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
 
-        public IFormatProvider Provider { get; internal set; }
+                if (value.Length == 0)
+                {
+                    throw new ArgumentException("Formats cannot be empty.", nameof(value));
+                }
 
-        public DateTimeStyles Style { get; internal set; }
+                _formats = value;
+            }
+        }
+
+        public IFormatProvider Provider { get; set; }
+
+        public DateTimeStyles Style { get; set; }
 
         public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
         {

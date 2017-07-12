@@ -5,9 +5,29 @@ using ExcelDataReader;
 
 namespace ExcelMapper.Mappings
 {
-    internal class SplitPropertyMapper : IMultiPropertyMapper
+    public class SplitPropertyMapper : IMultiPropertyMapper
     {
-        public char[] Separators { get; set; } = new char[] { ',' };
+        private char[] _separators = new char[] { ',' };
+
+        public char[] Separators
+        {
+            get => _separators;
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                if (value.Length == 0)
+                {
+                    throw new ArgumentException("Separators cannot be empty.", nameof(value));
+                }
+
+                _separators = value;
+            }
+        }
+
         public StringSplitOptions Options { get; set; }
 
         private ISinglePropertyMapper _mapper;

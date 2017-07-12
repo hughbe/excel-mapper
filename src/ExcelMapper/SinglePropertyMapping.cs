@@ -29,15 +29,7 @@ namespace ExcelMapper
             _mappingItems.Add(item);
         }
 
-        public void InsertMappingItem(int index, ISinglePropertyMappingItem item)
-        {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
-
-            _mappingItems.Insert(index, item);
-        }
+        public void RemoveMappingItem(int index) => _mappingItems.RemoveAt(index);
 
         public void AddStringValueTransformer(IStringValueTransformer transformer)
         {
@@ -54,6 +46,16 @@ namespace ExcelMapper
 
         public SinglePropertyMapping(MemberInfo member, Type type, EmptyValueStrategy emptyValueStrategy) : base(member)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            if (!Enum.IsDefined(typeof(EmptyValueStrategy), emptyValueStrategy))
+            {
+                throw new ArgumentException($"Invalid EmptyValueStategy \"{emptyValueStrategy}\".", nameof(emptyValueStrategy));
+            }
+
             Mapper = new ColumnPropertyMapper(member.Name);
             Type = type;
             AutoMapper.AutoMap(this, emptyValueStrategy);
@@ -67,16 +69,16 @@ namespace ExcelMapper
 
         internal object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
         {
+            for (int i = 0; i < _transformers.Count; i++)
+            {
+                IStringValueTransformer transformer = _transformers[i];
+                mapResult = new MapResult(mapResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, reader, mapResult));
+            }
+
             if (mapResult.StringValue == null && EmptyFallback != null)
             {
                 PropertyMappingResult fallbackResult = EmptyFallback.GetProperty(sheet, rowIndex, reader, mapResult);
                 return fallbackResult.Value;
-            }
-
-            for (int i = 0; i < _transformers.Count; i++)
-            {
-                IStringValueTransformer transformer = _transformers[i];
-                mapResult.StringValue = transformer.TransformStringValue(sheet, rowIndex, reader, mapResult);
             }
 
             var result = new PropertyMappingResult();

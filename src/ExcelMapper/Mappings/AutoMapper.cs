@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using ExcelMapper.Mappings.Fallbacks;
@@ -14,7 +15,7 @@ namespace ExcelMapper.Mappings
             // String nullable from types.
             Type type = pipeline.Type;
             bool isNullable = false;
-            if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            if (type.IsNullable())
             {
                 isNullable = true;
                 type = type.GenericTypeArguments[0];
@@ -87,8 +88,10 @@ namespace ExcelMapper.Mappings
                 var fallback = new FixedValueFallback(isNullable ? null : type.DefaultValue());
                 pipeline.EmptyFallback = fallback;
             }
-            else if (emptyStrategyToPursue == EmptyValueStrategy.ThrowIfPrimitive)
+            else
             {
+                Debug.Assert(emptyValueStrategy == EmptyValueStrategy.ThrowIfPrimitive);
+
                 // The user specified that we should set to the default value if it was empty.
                 pipeline = pipeline.WithThrowingEmptyFallback();
             }

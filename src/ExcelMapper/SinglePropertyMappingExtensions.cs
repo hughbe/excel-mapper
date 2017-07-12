@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ExcelMapper.Mappings;
@@ -20,15 +19,20 @@ namespace ExcelMapper
                 .WithMapper(new ColumnPropertyMapper(columnName));
         }
 
-        public static T WithIndex<T>(this T mapping, int index) where T : ISinglePropertyMapping
+        public static T WithIndex<T>(this T mapping, int columnIndex) where T : ISinglePropertyMapping
         {
             return mapping
-                .WithMapper(new IndexPropertyMapper(index));
+                .WithMapper(new IndexPropertyMapper(columnIndex));
         }
 
         public static T WithMapper<T>(this T mapping, ISinglePropertyMapper mapper) where T : ISinglePropertyMapping
         {
-            if (mapping.Mapper is OptionalMapping optionalMapping)
+            if (mapper == null)
+            {
+                throw new ArgumentNullException(nameof(mapper));
+            }
+
+            if (mapping.Mapper is OptionalPropertyMapper optionalMapping)
             {
                 optionalMapping.Mapper = mapper;
             }
@@ -42,12 +46,12 @@ namespace ExcelMapper
 
         public static T MakeOptional<T>(this T mapping) where T : ISinglePropertyMapping
         {
-            if (mapping.Mapper is OptionalMapping)
+            if (mapping.Mapper is OptionalPropertyMapper)
             {
                 throw new ExcelMappingException("Mapping is already optional.");
             }
 
-            mapping.Mapper = new OptionalMapping(mapping.Mapper);
+            mapping.Mapper = new OptionalPropertyMapper(mapping.Mapper);
             return mapping;
         }
 
@@ -65,16 +69,16 @@ namespace ExcelMapper
             return mapping;
         }
 
-        public static T WithAdditionalDateFormats<T>(this T mapping, params string[] formats) where T : SinglePropertyMapping<DateTime>
-        {
-            return mapping.WithAdditionalDateFormats((IEnumerable<string>)formats);
-        }
-
-        public static T WithAdditionalDateFormats<T>(this T mapping, IEnumerable<string> formats) where T : SinglePropertyMapping<DateTime>
+        public static T WithDateFormats<T>(this T mapping, params string[] formats) where T : SinglePropertyMapping<DateTime>
         {
             if (formats == null)
             {
                 throw new ArgumentNullException(nameof(formats));
+            }
+            
+            if (formats.Length == 0)
+            {
+                throw new ArgumentException("Formats cannot be empty.", nameof(formats));
             }
 
             ParseAsDateTimeMappingItem dateTimeItem = (ParseAsDateTimeMappingItem)mapping.MappingItems.FirstOrDefault(item => item is ParseAsDateTimeMappingItem);
@@ -84,8 +88,13 @@ namespace ExcelMapper
                 mapping.AddMappingItem(dateTimeItem);
             }
 
-            dateTimeItem.Formats = dateTimeItem.Formats.Concat(formats).ToArray();
+            dateTimeItem.Formats = formats;
             return mapping;
+        }
+
+        public static T WithDateFormats<T>(this T mapping, IEnumerable<string> formats) where T : SinglePropertyMapping<DateTime>
+        {
+            return mapping.WithDateFormats(formats?.ToArray());
         }
 
         public static TMapping WithConverter<TMapping, T>(this TMapping mapping, ConvertUsingSimpleMappingDelegate<T> converter) where TMapping : ISinglePropertyMapping<T>
@@ -135,7 +144,7 @@ namespace ExcelMapper
 
         public static TMapping WithEmptyFallbackItem<TMapping>(this TMapping mapping, ISinglePropertyMappingItem fallbackItem) where TMapping : ISinglePropertyMapping
         {
-            mapping.EmptyFallback = fallbackItem;
+            mapping.EmptyFallback = fallbackItem ?? throw new ArgumentNullException(nameof(fallbackItem));
             return mapping;
         }
 
@@ -159,7 +168,7 @@ namespace ExcelMapper
 
         public static TMapping WithInvalidFallbackItem<TMapping>(this TMapping mapping, ISinglePropertyMappingItem fallbackItem) where TMapping : ISinglePropertyMapping
         {
-            mapping.InvalidFallback = fallbackItem;
+            mapping.InvalidFallback = fallbackItem ?? throw new ArgumentNullException(nameof(fallbackItem));
             return mapping;
         }
     }

@@ -3,11 +3,17 @@ using ExcelDataReader;
 
 namespace ExcelMapper.Mappings
 {
-    internal class OptionalMapping : ISinglePropertyMapper
+    public class OptionalPropertyMapper : ISinglePropertyMapper
     {
-        public ISinglePropertyMapper Mapper { get; set; }
+        public ISinglePropertyMapper _mapper;
 
-        public OptionalMapping(ISinglePropertyMapper mapper)
+        public ISinglePropertyMapper Mapper
+        {
+            get => _mapper;
+            set => _mapper = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        public OptionalPropertyMapper(ISinglePropertyMapper mapper)
         {
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }

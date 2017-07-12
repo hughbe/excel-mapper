@@ -3,7 +3,7 @@ using ExcelDataReader;
 
 namespace ExcelMapper.Mappings
 {
-    internal sealed class IndexPropertyMapper : ISinglePropertyMapper
+    public sealed class IndexPropertyMapper : ISinglePropertyMapper
     {
         public int ColumnIndex { get; }
 

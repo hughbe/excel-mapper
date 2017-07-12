@@ -5,7 +5,7 @@ namespace ExcelMapper.Mappings.Items
 {
     public delegate PropertyMappingResult ConvertUsingMappingDelegate(MapResult mapResult);
 
-    internal class ConvertUsingMappingItem : ISinglePropertyMappingItem
+    public class ConvertUsingMappingItem : ISinglePropertyMappingItem
     {
         public ConvertUsingMappingDelegate Converter { get; }
 

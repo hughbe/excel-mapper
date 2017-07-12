@@ -20,15 +20,22 @@ namespace ExcelMapper
 
             if (member is PropertyInfo property)
             {
+                if (!property.CanWrite)
+                {
+                    throw new ArgumentException($"Property \"{member.Name}\" is read-only.", nameof(member));
+                }
+
+                Member = member;
                 SetPropertyFactory = (instance, value) => property.SetValue(instance, value);
             }
             else if (member is FieldInfo field)
             {
+                Member = member;
                 SetPropertyFactory = (instance, value) => field.SetValue(instance, value);
             }
             else
             {
-                throw new ExcelMappingException($"Member {member.Name} is not a field or property.");
+                throw new ArgumentException($"Member \"{member.Name}\" is not a field or property.", nameof(member));
             }
         }
 

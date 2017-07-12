@@ -2,7 +2,7 @@
 
 namespace ExcelMapper.Mappings.Fallbacks
 {
-    internal class FixedValueFallback : ISinglePropertyMappingItem
+    public class FixedValueFallback : ISinglePropertyMappingItem
     {
         public object Value { get; }
 

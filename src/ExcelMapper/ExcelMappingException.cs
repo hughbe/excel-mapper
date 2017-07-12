@@ -15,8 +15,13 @@ namespace ExcelMapper
         private static string GetMessage(string message, ExcelSheet sheet, int rowIndex, int columnIndex)
         {
             string position;
-            if (sheet.HasHeading)
+            if (sheet != null && sheet.HasHeading)
             {
+                if (sheet.Heading == null)
+                {
+                    sheet.ReadHeading();
+                }
+
                 position = $"\"{sheet.Heading.GetColumnName(columnIndex)}\"";
             }
             else
