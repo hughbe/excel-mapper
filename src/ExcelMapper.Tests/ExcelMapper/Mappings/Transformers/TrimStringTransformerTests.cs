@@ -11,7 +11,7 @@ namespace ExcelMapper.Mappings.Transformers.Tests
         public void TransformStringValue_Invoke_ReturnsExpected(string stringValue, string expected)
         {
             var transformer = new TrimStringTransformer();
-            Assert.Equal(expected, transformer.TransformStringValue(null, 0, null, new MapResult(-1, stringValue)));
+            Assert.Equal(expected, transformer.TransformStringValue(null, 0, null, new ReadResult(-1, stringValue)));
         }
     }
 }

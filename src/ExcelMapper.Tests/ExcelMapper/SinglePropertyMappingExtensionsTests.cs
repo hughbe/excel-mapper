@@ -4,6 +4,7 @@ using System.Linq;
 using ExcelMapper.Mappings;
 using ExcelMapper.Mappings.Fallbacks;
 using ExcelMapper.Mappings.Items;
+using ExcelMapper.Mappings.Readers;
 using ExcelMapper.Mappings.Transformers;
 using Xunit;
 
@@ -17,8 +18,8 @@ namespace ExcelMapper.Tests
             SinglePropertyMapping<string> mapping = Map(t => t.Value);
             Assert.Same(mapping, mapping.WithColumnName("ColumnName"));
 
-            ColumnPropertyMapper mapper = Assert.IsType<ColumnPropertyMapper>(mapping.Mapper);
-            Assert.Equal("ColumnName", mapper.ColumnName);
+            ColumnNameReader reader = Assert.IsType<ColumnNameReader>(mapping.Reader);
+            Assert.Equal("ColumnName", reader.ColumnName);
         }
 
         [Fact]
@@ -27,9 +28,9 @@ namespace ExcelMapper.Tests
             SinglePropertyMapping<string> mapping = Map(t => t.Value).MakeOptional();
             Assert.Same(mapping, mapping.WithColumnName("ColumnName"));
 
-            OptionalPropertyMapper mapper = Assert.IsType<OptionalPropertyMapper>(mapping.Mapper);
-            ColumnPropertyMapper innerMapper = Assert.IsType<ColumnPropertyMapper>(mapper.Mapper);
-            Assert.Equal("ColumnName", innerMapper.ColumnName);
+            OptionalColumnReader reader = Assert.IsType<OptionalColumnReader>(mapping.Reader);
+            ColumnNameReader innerReader = Assert.IsType<ColumnNameReader>(reader.InnerReader);
+            Assert.Equal("ColumnName", innerReader.ColumnName);
         }
 
         [Fact]
@@ -54,8 +55,8 @@ namespace ExcelMapper.Tests
             SinglePropertyMapping<string> mapping = Map(t => t.Value);
             Assert.Same(mapping, mapping.WithColumnIndex(columnIndex));
 
-            IndexPropertyMapper mapper = Assert.IsType<IndexPropertyMapper>(mapping.Mapper);
-            Assert.Equal(columnIndex, mapper.ColumnIndex);
+            ColumnIndexReader reader = Assert.IsType<ColumnIndexReader>(mapping.Reader);
+            Assert.Equal(columnIndex, reader.ColumnIndex);
         }
 
         [Fact]
@@ -64,9 +65,9 @@ namespace ExcelMapper.Tests
             SinglePropertyMapping<string> mapping = Map(t => t.Value).MakeOptional();
             Assert.Same(mapping, mapping.WithColumnIndex(1));
 
-            OptionalPropertyMapper mapper = Assert.IsType<OptionalPropertyMapper>(mapping.Mapper);
-            IndexPropertyMapper innerMapper = Assert.IsType<IndexPropertyMapper>(mapper.Mapper);
-            Assert.Equal(1, innerMapper.ColumnIndex);
+            OptionalColumnReader reader = Assert.IsType<OptionalColumnReader>(mapping.Reader);
+            ColumnIndexReader innerReader = Assert.IsType<ColumnIndexReader>(reader.InnerReader);
+            Assert.Equal(1, innerReader.ColumnIndex);
         }
 
         [Fact]
@@ -79,27 +80,34 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithMapper_ValidMapper_Success()
         {
-            var mapper = new ColumnPropertyMapper("ColumnName");
+            var reader = new ColumnNameReader("ColumnName");
             SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Same(mapping, mapping.WithMapper(mapper));
+            Assert.Same(mapping, mapping.WithReader(reader));
 
-            Assert.Same(mapper, mapping.Mapper);
+            Assert.Same(reader, mapping.Reader);
         }
 
         [Fact]
-        public void WithMapping_OptionalColumn_Success()
+        public void WithReader_OptionalColumn_Success()
         {
-            var innerMapper = new ColumnPropertyMapper("ColumnName");
+            var innerReader = new ColumnNameReader("ColumnName");
 
             SinglePropertyMapping<string> mapping = Map(t => t.Value).MakeOptional();
-            Assert.Same(mapping, mapping.WithMapper(innerMapper));
+            Assert.Same(mapping, mapping.WithReader(innerReader));
 
-            OptionalPropertyMapper mapper = Assert.IsType<OptionalPropertyMapper>(mapping.Mapper);
-            Assert.Same(innerMapper, mapper.Mapper);
+            OptionalColumnReader reader = Assert.IsType<OptionalColumnReader>(mapping.Reader);
+            Assert.Same(innerReader, reader.InnerReader);
         }
 
         [Fact]
-        public void WithMapping_ValidMapper_Success()
+        public void WithReader_NullReader_ThrowsArgumentNullException()
+        {
+            SinglePropertyMapping<string> mapping = Map(t => t.Value);
+            Assert.Throws<ArgumentNullException>("reader", () => mapping.WithReader(null));
+        }
+
+        [Fact]
+        public void WithMapping_ValidReader_Success()
         {
             var dictionaryMapping = new Dictionary<string, DateTime> { { "key", DateTime.MinValue } };
             StringComparer comparer = StringComparer.CurrentCultureIgnoreCase;
@@ -108,28 +116,28 @@ namespace ExcelMapper.Tests
             Assert.Same(mapping, mapping.WithMapping(dictionaryMapping, comparer));
 
             MapStringValueMappingItem<DateTime> item = mapping.MappingItems.OfType<MapStringValueMappingItem<DateTime>>().Single();
-            Assert.NotSame(dictionaryMapping, item.Mapping);
-            Assert.Equal(dictionaryMapping, item.Mapping);
+            Assert.NotSame(dictionaryMapping, item.MappingDictionary);
+            Assert.Equal(dictionaryMapping, item.MappingDictionary);
 
-            Assert.Same(comparer, Assert.IsType<Dictionary<string, DateTime>>(item.Mapping).Comparer);
+            Assert.Same(comparer, Assert.IsType<Dictionary<string, DateTime>>(item.MappingDictionary).Comparer);
         }
 
         [Fact]
-        public void WithMapping_NullMapper_ThrowsArgumentNullException()
+        public void WithMapping_NullMapping_ThrowsArgumentNullException()
         {
             SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Throws<ArgumentNullException>("mapper", () => mapping.WithMapper(null));
+            Assert.Throws<ArgumentNullException>("mappingDictionary", () => mapping.WithMapping((Dictionary<string, string>)null));
         }
 
         [Fact]
         public void MakeOptional_HasMapper_ReturnsExpected()
         {
-            var indexMapper = new IndexPropertyMapper(1);
-            SinglePropertyMapping<string> mapping = Map(t => t.Value).WithMapper(indexMapper);
+            var innerReader = new ColumnIndexReader(1);
+            SinglePropertyMapping<string> mapping = Map(t => t.Value).WithReader(innerReader);
             Assert.Same(mapping, mapping.MakeOptional());
 
-            OptionalPropertyMapper mapper = Assert.IsType<OptionalPropertyMapper>(mapping.Mapper);
-            Assert.Same(indexMapper, mapper.Mapper);
+            OptionalColumnReader reader = Assert.IsType<OptionalColumnReader>(mapping.Reader);
+            Assert.Same(innerReader, reader.InnerReader);
         }
 
         [Fact]
@@ -310,7 +318,7 @@ namespace ExcelMapper.Tests
             Assert.Same(mapping, mapping.WithConverter(converter));
             ConvertUsingMappingItem item = mapping.MappingItems.OfType<ConvertUsingMappingItem>().Single();
 
-            PropertyMappingResult result = item.Converter(new MapResult(-1, "stringValue"));
+            PropertyMappingResult result = item.Converter(new ReadResult(-1, "stringValue"));
             Assert.Equal(PropertyMappingResultType.Success, result.Type);
             Assert.Equal("abc", result.Value);
         }
@@ -328,7 +336,7 @@ namespace ExcelMapper.Tests
             Assert.Same(mapping, mapping.WithConverter(converter));
             ConvertUsingMappingItem item = mapping.MappingItems.OfType<ConvertUsingMappingItem>().Single();
 
-            PropertyMappingResult result = item.Converter(new MapResult(-1, "stringValue"));
+            PropertyMappingResult result = item.Converter(new ReadResult(-1, "stringValue"));
             Assert.Equal(PropertyMappingResultType.Invalid, result.Type);
             Assert.Null(result.Value);
         }

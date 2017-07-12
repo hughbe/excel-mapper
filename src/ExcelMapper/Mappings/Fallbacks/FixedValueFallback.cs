@@ -8,7 +8,7 @@ namespace ExcelMapper.Mappings.Fallbacks
 
         public FixedValueFallback(object value) => Value = value;
 
-        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
+        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult mapResult)
         {
             return PropertyMappingResult.Success(Value);
         }

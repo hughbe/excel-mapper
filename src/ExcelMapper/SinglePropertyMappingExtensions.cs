@@ -4,6 +4,7 @@ using System.Linq;
 using ExcelMapper.Mappings;
 using ExcelMapper.Mappings.Fallbacks;
 using ExcelMapper.Mappings.Items;
+using ExcelMapper.Mappings.Readers;
 using ExcelMapper.Mappings.Support;
 using ExcelMapper.Mappings.Transformers;
 
@@ -16,29 +17,29 @@ namespace ExcelMapper
         public static T WithColumnName<T>(this T mapping, string columnName) where T : ISinglePropertyMapping
         {
             return mapping
-                .WithMapper(new ColumnPropertyMapper(columnName));
+                .WithReader(new ColumnNameReader(columnName));
         }
 
         public static T WithColumnIndex<T>(this T mapping, int columnIndex) where T : ISinglePropertyMapping
         {
             return mapping
-                .WithMapper(new IndexPropertyMapper(columnIndex));
+                .WithReader(new ColumnIndexReader(columnIndex));
         }
 
-        public static T WithMapper<T>(this T mapping, ISinglePropertyMapper mapper) where T : ISinglePropertyMapping
+        public static T WithReader<T>(this T mapping, ISingleValueReader reader) where T : ISinglePropertyMapping
         {
-            if (mapper == null)
+            if (reader == null)
             {
-                throw new ArgumentNullException(nameof(mapper));
+                throw new ArgumentNullException(nameof(reader));
             }
 
-            if (mapping.Mapper is OptionalPropertyMapper optionalMapping)
+            if (mapping.Reader is OptionalColumnReader optionalMapping)
             {
-                optionalMapping.Mapper = mapper;
+                optionalMapping.InnerReader = reader;
             }
             else
             {
-                mapping.Mapper = mapper;
+                mapping.Reader = reader;
             }
 
             return mapping;
@@ -46,12 +47,12 @@ namespace ExcelMapper
 
         public static T MakeOptional<T>(this T mapping) where T : ISinglePropertyMapping
         {
-            if (mapping.Mapper is OptionalPropertyMapper)
+            if (mapping.Reader is OptionalColumnReader)
             {
                 throw new ExcelMappingException("Mapping is already optional.");
             }
 
-            mapping.Mapper = new OptionalPropertyMapper(mapping.Mapper);
+            mapping.Reader = new OptionalColumnReader(mapping.Reader);
             return mapping;
         }
 

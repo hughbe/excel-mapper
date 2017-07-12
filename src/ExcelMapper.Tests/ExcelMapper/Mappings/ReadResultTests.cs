@@ -2,12 +2,12 @@
 
 namespace ExcelMapper.Mappings.Tests
 {
-    public class MapResultTests
+    public class ReadResultTests
     {
         [Fact]
         public void Ctor_Default()
         {
-            var result = new MapResult();
+            var result = new ReadResult();
             Assert.Equal(0, result.ColumnIndex);
             Assert.Null(result.StringValue);
         }
@@ -18,7 +18,7 @@ namespace ExcelMapper.Mappings.Tests
         [InlineData(2, "abc")]
         public void Ctor_ColumnIndex_StringValue(int columnIndex, string stringValue)
         {
-            var result = new MapResult(columnIndex, stringValue);
+            var result = new ReadResult(columnIndex, stringValue);
             Assert.Equal(columnIndex, result.ColumnIndex);
             Assert.Equal(stringValue, result.StringValue);
         }

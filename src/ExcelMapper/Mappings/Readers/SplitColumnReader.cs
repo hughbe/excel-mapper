@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using ExcelDataReader;
 
-namespace ExcelMapper.Mappings
+namespace ExcelMapper.Mappings.Readers
 {
-    public class SplitPropertyMapper : IMultiPropertyMapper
+    public class SplitColumnReader : IMultipleValuesReader
     {
         private char[] _separators = new char[] { ',' };
 
@@ -30,28 +30,28 @@ namespace ExcelMapper.Mappings
 
         public StringSplitOptions Options { get; set; }
 
-        private ISinglePropertyMapper _mapper;
-        public ISinglePropertyMapper Mapper
+        private ISingleValueReader _columnReader;
+        public ISingleValueReader ColumnReader
         {
-            get => _mapper;
-            set => _mapper = value ?? throw new ArgumentNullException(nameof(value));
+            get => _columnReader;
+            set => _columnReader = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public SplitPropertyMapper(ISinglePropertyMapper mapper)
+        public SplitColumnReader(ISingleValueReader columnReader)
         {
-            Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            ColumnReader = columnReader ?? throw new ArgumentNullException(nameof(columnReader));
         }
 
-        public IEnumerable<MapResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public IEnumerable<ReadResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            MapResult mapResult = Mapper.GetValue(sheet, rowIndex, reader);
+            ReadResult mapResult = ColumnReader.GetValue(sheet, rowIndex, reader);
             if (mapResult.StringValue == null)
             {
-                return Enumerable.Empty<MapResult>();
+                return Enumerable.Empty<ReadResult>();
             }
 
             string[] splitStringValues = mapResult.StringValue.Split(Separators, Options);
-            return splitStringValues.Select(s => new MapResult(mapResult.ColumnIndex, s));
+            return splitStringValues.Select(s => new ReadResult(mapResult.ColumnIndex, s));
         }
     }
 }

@@ -4,13 +4,16 @@ using System.Linq;
 using ExcelDataReader;
 using ExcelMapper.Utilities;
 
-namespace ExcelMapper.Mappings
+namespace ExcelMapper.Mappings.Readers
 {
-    public sealed class ColumnsNamesPropertyMapper : IMultiPropertyMapper
+    /// <summary>
+    /// Reads a multiple values of one or more columns given the zero-based index of each column.
+    /// </summary>
+    public sealed class MultipleColumnNamesReader : IMultipleValuesReader
     {
         public string[] ColumnNames { get; }
 
-        public ColumnsNamesPropertyMapper(string[] columnNames)
+        public MultipleColumnNamesReader(string[] columnNames)
         {
             if (columnNames == null)
             {
@@ -33,12 +36,12 @@ namespace ExcelMapper.Mappings
             ColumnNames = columnNames;
         }
 
-        public IEnumerable<MapResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public IEnumerable<ReadResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
             return ColumnNames.Select(columnName =>
             {
                 int index = sheet.Heading.GetColumnIndex(columnName);
-                return new MapResult(index, reader.GetString(index));
+                return new ReadResult(index, reader.GetString(index));
             });
         }
     }

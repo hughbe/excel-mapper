@@ -1,13 +1,13 @@
 ﻿namespace ExcelMapper.Mappings
 {
-    public struct MapResult
+    public struct ReadResult
     {
         public int ColumnIndex { get; }
         public string StringValue { get; }
 
-        public MapResult(int coolumnIndex, string stringValue)
+        public ReadResult(int columnIndex, string stringValue)
         {
-            ColumnIndex = coolumnIndex;
+            ColumnIndex = columnIndex;
             StringValue = stringValue;
         }
     }

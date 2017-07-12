@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
 using ExcelMapper.Mappings;
+using ExcelMapper.Mappings.Readers;
 
 namespace ExcelMapper
 {
@@ -11,14 +12,14 @@ namespace ExcelMapper
     {
         public SinglePropertyMapping<T> ElementMapping { get; private set; }
 
-        public IMultiPropertyMapper Mapper { get; internal set; }
+        public IMultipleValuesReader ColumnsReader { get; internal set; }
 
         public EnumerablePropertyMapping(MemberInfo member, EmptyValueStrategy emptyValueStrategy) : base(member)
         {
             ElementMapping = new SinglePropertyMapping<T>(member, emptyValueStrategy);
 
-            var columnMapper = new ColumnPropertyMapper(member.Name);
-            Mapper = new SplitPropertyMapper(columnMapper); 
+            var columnReader = new ColumnNameReader(member.Name);
+            ColumnsReader = new SplitColumnReader(columnReader); 
         }
 
         public EnumerablePropertyMapping<T> WithElementMapping(Func<SinglePropertyMapping<T>, SinglePropertyMapping<T>> elementMapping)
@@ -34,7 +35,7 @@ namespace ExcelMapper
 
         public override object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            MapResult[] values = Mapper.GetValues(sheet, rowIndex, reader).ToArray();
+            ReadResult[] values = ColumnsReader.GetValues(sheet, rowIndex, reader).ToArray();
             var elements = new List<T>(values.Length);
 
             for (int i = 0; i < values.Length; i++)
@@ -50,14 +51,14 @@ namespace ExcelMapper
 
         public EnumerablePropertyMapping<T> WithColumnName(string columnName)
         {
-            var mapper = new ColumnPropertyMapper(columnName);
-            if (Mapper is SplitPropertyMapper splitPropertyMapper)
+            var columnReader = new ColumnNameReader(columnName);
+            if (ColumnsReader is SplitColumnReader splitColumnReader)
             {
-                splitPropertyMapper.Mapper = mapper;
+                splitColumnReader.ColumnReader = columnReader;
             }
             else
             {
-                Mapper = new SplitPropertyMapper(mapper);
+                ColumnsReader = new SplitColumnReader(columnReader);
             }
 
             return this;
@@ -65,14 +66,14 @@ namespace ExcelMapper
 
         public EnumerablePropertyMapping<T> WithColumnIndex(int index)
         {
-            var mapper = new IndexPropertyMapper(index);
-            if (Mapper is SplitPropertyMapper splitPropertyMapper)
+            var reader = new ColumnIndexReader(index);
+            if (ColumnsReader is SplitColumnReader splitColumnReader)
             {
-                splitPropertyMapper.Mapper = mapper;
+                splitColumnReader.ColumnReader = reader;
             }
             else
             {
-                Mapper = new SplitPropertyMapper(mapper);
+                ColumnsReader = new SplitColumnReader(reader);
             }
 
             return this;
@@ -80,12 +81,12 @@ namespace ExcelMapper
 
         public EnumerablePropertyMapping<T> WithSeparators(params char[] separators)
         {
-            if (!(Mapper is SplitPropertyMapper splitPropertyMapper))
+            if (!(ColumnsReader is SplitColumnReader splitColumnReader))
             {
                 throw new ExcelMappingException("The mapping comes from multiple columns, so cannot be split.");
             }
 
-            splitPropertyMapper.Separators = separators;
+            splitColumnReader.Separators = separators;
             return this;
         }
 
@@ -96,7 +97,7 @@ namespace ExcelMapper
 
         public EnumerablePropertyMapping<T> WithColumnNames(params string[] columnNames)
         {
-            Mapper = new ColumnsNamesPropertyMapper(columnNames);
+            ColumnsReader = new MultipleColumnNamesReader(columnNames);
             return this;
         }
 
@@ -107,7 +108,7 @@ namespace ExcelMapper
 
         public EnumerablePropertyMapping<T> WithColumnIndices(params int[] indices)
         {
-            Mapper = new ColumnIndicesPropertyMapper(indices);
+            ColumnsReader = new MultipleColumnIndicesReader(indices);
             return this;
         }
 

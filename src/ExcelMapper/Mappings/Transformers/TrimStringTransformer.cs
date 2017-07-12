@@ -4,7 +4,7 @@ namespace ExcelMapper.Mappings.Transformers
 {
     public class TrimStringTransformer : IStringValueTransformer
     {
-        public string TransformStringValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
+        public string TransformStringValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult mapResult)
         {
             if (mapResult.StringValue == null)
             {

@@ -4,7 +4,7 @@ namespace ExcelMapper.Mappings.Support
 {
     public interface ISinglePropertyMapping
     {
-        ISinglePropertyMapper Mapper { get; set; }
+        ISingleValueReader Reader { get; set; }
         ISinglePropertyMappingItem EmptyFallback { get; set; }
         ISinglePropertyMappingItem InvalidFallback { get; set; }
 

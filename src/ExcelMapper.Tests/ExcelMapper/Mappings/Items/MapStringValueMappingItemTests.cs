@@ -13,7 +13,7 @@ namespace ExcelMapper.Mappings.Items.Tests
             var comparer = StringComparer.CurrentCulture;
             var item = new MapStringValueMappingItem<object>(mapping, comparer);
 
-            Dictionary<string, object> itemMapping = Assert.IsType<Dictionary<string, object>>(item.Mapping);
+            Dictionary<string, object> itemMapping = Assert.IsType<Dictionary<string, object>>(item.MappingDictionary);
             Assert.Equal(mapping, itemMapping);
             Assert.Same(comparer, itemMapping.Comparer);
         }
@@ -21,7 +21,7 @@ namespace ExcelMapper.Mappings.Items.Tests
         [Fact]
         public void Ctor_NullDictionary_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("mapping", () => new MapStringValueMappingItem<int>(null, StringComparer.CurrentCulture));
+            Assert.Throws<ArgumentNullException>("mappingDictionary", () => new MapStringValueMappingItem<int>(null, StringComparer.CurrentCulture));
         }
 
         [Theory]
@@ -34,7 +34,7 @@ namespace ExcelMapper.Mappings.Items.Tests
             var comparer = StringComparer.OrdinalIgnoreCase;
             var item = new MapStringValueMappingItem<object>(mapping, comparer);
 
-            PropertyMappingResult result = item.GetProperty(null, 0, null, new MapResult(-1, stringValue));
+            PropertyMappingResult result = item.GetProperty(null, 0, null, new ReadResult(-1, stringValue));
             Assert.Equal(expectedType, result.Type);
             Assert.Equal(expectedValue, result.Value);
         }

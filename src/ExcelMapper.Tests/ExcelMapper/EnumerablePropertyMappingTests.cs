@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using ExcelMapper.Mappings;
+using ExcelMapper.Mappings.Readers;
 using Xunit;
 
 namespace ExcelMapper.Tests
@@ -70,9 +71,9 @@ namespace ExcelMapper.Tests
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive);
             Assert.Same(mapping, mapping.WithColumnName("ColumnName"));
 
-            SplitPropertyMapper mapper = Assert.IsType<SplitPropertyMapper>(mapping.Mapper);
-            ColumnPropertyMapper innerMapper = Assert.IsType<ColumnPropertyMapper>(mapper.Mapper);
-            Assert.Equal("ColumnName", innerMapper.ColumnName);
+            SplitColumnReader reader = Assert.IsType<SplitColumnReader>(mapping.ColumnsReader);
+            ColumnNameReader innerReader = Assert.IsType<ColumnNameReader>(reader.ColumnReader);
+            Assert.Equal("ColumnName", innerReader.ColumnName);
         }
 
         [Fact]
@@ -82,9 +83,9 @@ namespace ExcelMapper.Tests
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive).WithColumnNames("ColumnName");
             Assert.Same(mapping, mapping.WithColumnName("ColumnName"));
 
-            SplitPropertyMapper mapper = Assert.IsType<SplitPropertyMapper>(mapping.Mapper);
-            ColumnPropertyMapper innerMapper = Assert.IsType<ColumnPropertyMapper>(mapper.Mapper);
-            Assert.Equal("ColumnName", innerMapper.ColumnName);
+            SplitColumnReader reader = Assert.IsType<SplitColumnReader>(mapping.ColumnsReader);
+            ColumnNameReader innerReader = Assert.IsType<ColumnNameReader>(reader.ColumnReader);
+            Assert.Equal("ColumnName", innerReader.ColumnName);
         }
 
         [Fact]
@@ -114,9 +115,9 @@ namespace ExcelMapper.Tests
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive);
             Assert.Same(mapping, mapping.WithColumnIndex(columnIndex));
 
-            SplitPropertyMapper mapper = Assert.IsType<SplitPropertyMapper>(mapping.Mapper);
-            IndexPropertyMapper innerMapper = Assert.IsType<IndexPropertyMapper>(mapper.Mapper);
-            Assert.Equal(columnIndex, innerMapper.ColumnIndex);
+            SplitColumnReader reader = Assert.IsType<SplitColumnReader>(mapping.ColumnsReader);
+            ColumnIndexReader innerReader = Assert.IsType<ColumnIndexReader>(reader.ColumnReader);
+            Assert.Equal(columnIndex, innerReader.ColumnIndex);
         }
 
         [Theory]
@@ -128,9 +129,9 @@ namespace ExcelMapper.Tests
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive).WithColumnNames("ColumnName");
             Assert.Same(mapping, mapping.WithColumnIndex(columnIndex));
 
-            SplitPropertyMapper mapper = Assert.IsType<SplitPropertyMapper>(mapping.Mapper);
-            IndexPropertyMapper innerMapper = Assert.IsType<IndexPropertyMapper>(mapper.Mapper);
-            Assert.Equal(columnIndex, innerMapper.ColumnIndex);
+            SplitColumnReader reader = Assert.IsType<SplitColumnReader>(mapping.ColumnsReader);
+            ColumnIndexReader innerReader = Assert.IsType<ColumnIndexReader>(reader.ColumnReader);
+            Assert.Equal(columnIndex, innerReader.ColumnIndex);
         }
 
         [Fact]
@@ -159,8 +160,8 @@ namespace ExcelMapper.Tests
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive);
             Assert.Same(mapping, mapping.WithSeparators(separatorsArray));
 
-            SplitPropertyMapper mapper = Assert.IsType<SplitPropertyMapper>(mapping.Mapper);
-            Assert.Same(separatorsArray, mapper.Separators);
+            SplitColumnReader reader = Assert.IsType<SplitColumnReader>(mapping.ColumnsReader);
+            Assert.Same(separatorsArray, reader.Separators);
         }
 
         [Theory]
@@ -171,8 +172,8 @@ namespace ExcelMapper.Tests
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive);
             Assert.Same(mapping, mapping.WithSeparators(separators));
 
-            SplitPropertyMapper mapper = Assert.IsType<SplitPropertyMapper>(mapping.Mapper);
-            Assert.Equal(separators, mapper.Separators);
+            SplitColumnReader reader = Assert.IsType<SplitColumnReader>(mapping.ColumnsReader);
+            Assert.Equal(separators, reader.Separators);
         }
 
         [Fact]
@@ -213,8 +214,8 @@ namespace ExcelMapper.Tests
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive).WithColumnNames("ColumnNames");
             Assert.Same(mapping, mapping.WithColumnNames(columnNames));
 
-            ColumnsNamesPropertyMapper mapper = Assert.IsType<ColumnsNamesPropertyMapper>(mapping.Mapper);
-            Assert.Same(columnNames, mapper.ColumnNames);
+            MultipleColumnNamesReader reader = Assert.IsType<MultipleColumnNamesReader>(mapping.ColumnsReader);
+            Assert.Same(columnNames, reader.ColumnNames);
         }
 
         [Fact]
@@ -225,8 +226,8 @@ namespace ExcelMapper.Tests
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive).WithColumnNames("ColumnNames");
             Assert.Same(mapping, mapping.WithColumnNames(columnNames));
 
-            ColumnsNamesPropertyMapper mapper = Assert.IsType<ColumnsNamesPropertyMapper>(mapping.Mapper);
-            Assert.Equal(columnNames, mapper.ColumnNames);
+            MultipleColumnNamesReader reader = Assert.IsType<MultipleColumnNamesReader>(mapping.ColumnsReader);
+            Assert.Equal(columnNames, reader.ColumnNames);
         }
 
         [Fact]
@@ -267,8 +268,8 @@ namespace ExcelMapper.Tests
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive).WithColumnNames("ColumnNames");
             Assert.Same(mapping, mapping.WithColumnIndices(columnIndices));
 
-            ColumnIndicesPropertyMapper mapper = Assert.IsType<ColumnIndicesPropertyMapper>(mapping.Mapper);
-            Assert.Same(columnIndices, mapper.ColumnIndices);
+            MultipleColumnIndicesReader reader = Assert.IsType<MultipleColumnIndicesReader>(mapping.ColumnsReader);
+            Assert.Same(columnIndices, reader.ColumnIndices);
         }
 
         [Fact]
@@ -279,8 +280,8 @@ namespace ExcelMapper.Tests
             var mapping = new SubPropertyMapping(propertyInfo, EmptyValueStrategy.ThrowIfPrimitive).WithColumnNames("ColumnNames");
             Assert.Same(mapping, mapping.WithColumnIndices(columnIndices));
 
-            ColumnIndicesPropertyMapper mapper = Assert.IsType<ColumnIndicesPropertyMapper>(mapping.Mapper);
-            Assert.Equal(columnIndices, mapper.ColumnIndices);
+            MultipleColumnIndicesReader reader = Assert.IsType<MultipleColumnIndicesReader>(mapping.ColumnsReader);
+            Assert.Equal(columnIndices, reader.ColumnIndices);
         }
 
         [Fact]

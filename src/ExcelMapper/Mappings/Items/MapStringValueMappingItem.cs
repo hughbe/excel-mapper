@@ -6,21 +6,21 @@ namespace ExcelMapper.Mappings.Items
 {
     public class MapStringValueMappingItem<T> : ISinglePropertyMappingItem
     {
-        public IReadOnlyDictionary<string, T> Mapping { get; }
+        public IReadOnlyDictionary<string, T> MappingDictionary { get; }
 
-        public MapStringValueMappingItem(IDictionary<string, T> mapping, IEqualityComparer<string> comparer)
+        public MapStringValueMappingItem(IDictionary<string, T> mappingDictionary, IEqualityComparer<string> comparer)
         {
-            if (mapping == null)
+            if (mappingDictionary == null)
             {
-                throw new ArgumentNullException(nameof(mapping));
+                throw new ArgumentNullException(nameof(mappingDictionary));
             }
 
-            Mapping = new Dictionary<string, T>(mapping, comparer);
+            MappingDictionary = new Dictionary<string, T>(mappingDictionary, comparer);
         }
 
-        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
+        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult mapResult)
         {
-            if (!Mapping.TryGetValue(mapResult.StringValue, out T result))
+            if (!MappingDictionary.TryGetValue(mapResult.StringValue, out T result))
             {
                 return PropertyMappingResult.Continue();
             }

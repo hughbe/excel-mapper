@@ -34,7 +34,7 @@ namespace ExcelMapper.Mappings.Items
 
         public DateTimeStyles Style { get; set; }
 
-        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
+        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult mapResult)
         {
             if (!DateTime.TryParseExact(mapResult.StringValue, Formats, Provider, Style, out DateTime result))
             {

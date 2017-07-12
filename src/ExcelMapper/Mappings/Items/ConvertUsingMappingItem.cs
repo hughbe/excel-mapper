@@ -3,7 +3,7 @@ using ExcelDataReader;
 
 namespace ExcelMapper.Mappings.Items
 {
-    public delegate PropertyMappingResult ConvertUsingMappingDelegate(MapResult mapResult);
+    public delegate PropertyMappingResult ConvertUsingMappingDelegate(ReadResult mapResult);
 
     public class ConvertUsingMappingItem : ISinglePropertyMappingItem
     {
@@ -14,7 +14,7 @@ namespace ExcelMapper.Mappings.Items
             Converter = converter ?? throw new ArgumentNullException(nameof(converter));
         }
 
-        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
+        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult mapResult)
         {
             return Converter(mapResult);
         }

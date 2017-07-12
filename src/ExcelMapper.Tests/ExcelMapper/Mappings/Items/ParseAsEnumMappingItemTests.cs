@@ -33,7 +33,7 @@ namespace ExcelMapper.Mappings.Items.Tests
         {
             var item = new ParseAsEnumMappingItem(enumType);
 
-            PropertyMappingResult result = item.GetProperty(null, 0, null, new MapResult(-1, stringValue));
+            PropertyMappingResult result = item.GetProperty(null, 0, null, new ReadResult(-1, stringValue));
             Assert.Equal(PropertyMappingResultType.Success, result.Type);
             Assert.Equal(expected, result.Value);
         }
@@ -46,7 +46,7 @@ namespace ExcelMapper.Mappings.Items.Tests
         {
             var item = new ParseAsEnumMappingItem(enumType);
 
-            PropertyMappingResult result = item.GetProperty(null, 0, null, new MapResult(-1, stringValue));
+            PropertyMappingResult result = item.GetProperty(null, 0, null, new ReadResult(-1, stringValue));
             Assert.Equal(PropertyMappingResultType.Invalid, result.Type);
             Assert.Null(result.Value);
         }

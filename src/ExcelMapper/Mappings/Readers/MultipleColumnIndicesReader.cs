@@ -4,13 +4,16 @@ using System.Linq;
 using ExcelDataReader;
 using ExcelMapper.Utilities;
 
-namespace ExcelMapper.Mappings
+namespace ExcelMapper.Mappings.Readers
 {
-    public sealed class ColumnIndicesPropertyMapper : IMultiPropertyMapper
+    /// <summary>
+    /// Reads a multiple values of one or more columns given the name of each column.
+    /// </summary>
+    public sealed class MultipleColumnIndicesReader : IMultipleValuesReader
     {
         public int[] ColumnIndices { get; }
 
-        public ColumnIndicesPropertyMapper(int[] columnIndices)
+        public MultipleColumnIndicesReader(int[] columnIndices)
         {
             if (columnIndices == null)
             {
@@ -33,9 +36,9 @@ namespace ExcelMapper.Mappings
             ColumnIndices = columnIndices;
         }
 
-        public IEnumerable<MapResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public IEnumerable<ReadResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            return ColumnIndices.Select(i => new MapResult(i, reader.GetString(i)));
+            return ColumnIndices.Select(i => new ReadResult(i, reader.GetString(i)));
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using ExcelDataReader;
 using ExcelMapper.Mappings;
+using ExcelMapper.Mappings.Readers;
 using ExcelMapper.Mappings.Support;
 
 namespace ExcelMapper
@@ -14,7 +15,7 @@ namespace ExcelMapper
 
         public Type Type { get; }
 
-        public ISinglePropertyMapper Mapper { get; set; }
+        public ISingleValueReader Reader { get; set; }
 
         public IEnumerable<IStringValueTransformer> StringValueTransformers => _transformers;
         public IEnumerable<ISinglePropertyMappingItem> MappingItems => _mappingItems;
@@ -56,23 +57,23 @@ namespace ExcelMapper
                 throw new ArgumentException($"Invalid EmptyValueStategy \"{emptyValueStrategy}\".", nameof(emptyValueStrategy));
             }
 
-            Mapper = new ColumnPropertyMapper(member.Name);
+            Reader = new ColumnNameReader(member.Name);
             Type = type;
             AutoMapper.AutoMap(this, emptyValueStrategy);
         }
 
         public override object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            MapResult mapResult = Mapper.GetValue(sheet, rowIndex, reader);
+            ReadResult mapResult = Reader.GetValue(sheet, rowIndex, reader);
             return GetPropertyValue(sheet, rowIndex, reader, mapResult);
         }
 
-        internal object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
+        internal object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult mapResult)
         {
             for (int i = 0; i < _transformers.Count; i++)
             {
                 IStringValueTransformer transformer = _transformers[i];
-                mapResult = new MapResult(mapResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, reader, mapResult));
+                mapResult = new ReadResult(mapResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, reader, mapResult));
             }
 
             if (mapResult.StringValue == null && EmptyFallback != null)

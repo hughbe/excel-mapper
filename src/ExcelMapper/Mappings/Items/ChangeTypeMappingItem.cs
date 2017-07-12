@@ -23,7 +23,7 @@ namespace ExcelMapper.Mappings.Items
             Type = type;
         }
 
-        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MapResult mapResult)
+        public PropertyMappingResult GetProperty(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadResult mapResult)
         {
             try
             {

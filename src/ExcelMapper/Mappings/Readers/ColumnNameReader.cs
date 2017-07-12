@@ -1,13 +1,16 @@
 ﻿using System;
 using ExcelDataReader;
 
-namespace ExcelMapper.Mappings
+namespace ExcelMapper.Mappings.Readers
 {
-    public sealed class ColumnPropertyMapper : ISinglePropertyMapper
+    /// <summary>
+    /// Reads a single value of a column given the name of the column.
+    /// </summary>
+    public sealed class ColumnNameReader : ISingleValueReader
     {
         public string ColumnName { get; }
 
-        public ColumnPropertyMapper(string columnName)
+        public ColumnNameReader(string columnName)
         {
             if (columnName == null)
             {
@@ -22,10 +25,10 @@ namespace ExcelMapper.Mappings
             ColumnName = columnName;
         }
 
-        public MapResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public ReadResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
             int index = sheet.Heading.GetColumnIndex(ColumnName);
-            return new MapResult(index, reader.GetString(index));
+            return new ReadResult(index, reader.GetString(index));
         }
     }
 }
