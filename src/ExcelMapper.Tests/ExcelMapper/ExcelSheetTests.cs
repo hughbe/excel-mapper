@@ -464,6 +464,7 @@ namespace ExcelMapper.Tests
                 Assert.Null(row1.BoolValue);
                 Assert.Null(row1.EnumValue);
                 Assert.Null(row1.DateValue);
+                Assert.Null(row1.DateValueWithFormats);
                 Assert.Equal(new int?[] { null, null }, row1.ArrayValue);
 
                 NullableValues row2 = sheet.ReadRow<NullableValues>();
@@ -471,6 +472,7 @@ namespace ExcelMapper.Tests
                 Assert.True(row2.BoolValue);
                 Assert.Equal(NullableValuesEnum.Test, row2.EnumValue);
                 Assert.Equal(new DateTime(2017, 07, 05), row2.DateValue);
+                Assert.Equal(new DateTime(2017, 07, 05), row2.DateValueWithFormats);
                 Assert.Equal(new int?[] { 1, 2 }, row2.ArrayValue);
             }
         }
@@ -481,6 +483,7 @@ namespace ExcelMapper.Tests
             public bool? BoolValue { get; set; }
             public NullableValuesEnum? EnumValue { get; set; }
             public DateTime? DateValue { get; set; }
+            public DateTime? DateValueWithFormats { get; set; }
             public int?[] ArrayValue { get; set; }
         }
 
@@ -497,6 +500,9 @@ namespace ExcelMapper.Tests
                 Map(n => n.BoolValue);
                 Map(n => n.EnumValue);
                 Map(n => n.DateValue);
+                Map(n => n.DateValueWithFormats)
+                    .WithColumnName("DateValue")
+                    .WithDateFormats("G");
                 Map(n => n.ArrayValue)
                     .WithColumnNames("ArrayValue1", "ArrayValue2");
             }

@@ -28,6 +28,7 @@ namespace ExcelMapper.Tests
         {
             public string Value { get; set; }
             public DateTime DateValue { get; set; }
+            public DateTime? NullableDateValue { get; set; }
             public IListInterface UnknownInterfaceValue { get; set; }
             public ConcreteIEnumerable ConcreteIEnumerable { get; set; }
 

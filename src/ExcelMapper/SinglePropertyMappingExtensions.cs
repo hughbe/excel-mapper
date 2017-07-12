@@ -69,13 +69,35 @@ namespace ExcelMapper
             return mapping;
         }
 
-        public static T WithDateFormats<T>(this T mapping, params string[] formats) where T : SinglePropertyMapping<DateTime>
+        public static SinglePropertyMapping<DateTime> WithDateFormats(this SinglePropertyMapping<DateTime> mapping, params string[] formats)
+        {
+            mapping.AddFormats(formats);
+            return mapping;
+        }
+
+        public static SinglePropertyMapping<DateTime> WithDateFormats(this SinglePropertyMapping<DateTime> mapping, IEnumerable<string> formats) 
+        {
+            return mapping.WithDateFormats(formats?.ToArray());
+        }
+
+        public static SinglePropertyMapping<DateTime?> WithDateFormats(this SinglePropertyMapping<DateTime?> mapping, params string[] formats)
+        {
+            mapping.AddFormats(formats);
+            return mapping;
+        }
+
+        public static SinglePropertyMapping<DateTime?> WithDateFormats(this SinglePropertyMapping<DateTime?> mapping, IEnumerable<string> formats)
+        {
+            return mapping.WithDateFormats(formats?.ToArray());
+        }
+
+        private static void AddFormats(this ISinglePropertyMapping mapping, string[] formats)
         {
             if (formats == null)
             {
                 throw new ArgumentNullException(nameof(formats));
             }
-            
+
             if (formats.Length == 0)
             {
                 throw new ArgumentException("Formats cannot be empty.", nameof(formats));
@@ -89,12 +111,6 @@ namespace ExcelMapper
             }
 
             dateTimeItem.Formats = formats;
-            return mapping;
-        }
-
-        public static T WithDateFormats<T>(this T mapping, IEnumerable<string> formats) where T : SinglePropertyMapping<DateTime>
-        {
-            return mapping.WithDateFormats(formats?.ToArray());
         }
 
         public static TMapping WithConverter<TMapping, T>(this TMapping mapping, ConvertUsingSimpleMappingDelegate<T> converter) where TMapping : ISinglePropertyMapping<T>

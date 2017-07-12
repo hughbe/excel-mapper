@@ -227,6 +227,76 @@ namespace ExcelMapper.Tests
             Assert.Throws<ArgumentException>("formats", () => mapping.WithDateFormats(new List<string>()));
         }
 
+        [Theory]
+        [MemberData(nameof(Formats_TestData))]
+        public void WithDateFormats_NullableAutoMappedStringArray_Success(IEnumerable<string> formats)
+        {
+            var formatsArray = formats.ToArray();
+
+            SinglePropertyMapping<DateTime?> mapping = Map(t => t.NullableDateValue);
+            Assert.Same(mapping, mapping.WithDateFormats(formatsArray));
+
+            ParseAsDateTimeMappingItem item = mapping.MappingItems.OfType<ParseAsDateTimeMappingItem>().Single();
+            Assert.Same(formatsArray, item.Formats);
+        }
+
+        [Theory]
+        [MemberData(nameof(Formats_TestData))]
+        public void WithDateFormats_NullableNotMappedStringArray_Success(IEnumerable<string> formats)
+        {
+            var formatsArray = formats.ToArray();
+
+            SinglePropertyMapping<DateTime?> mapping = Map(t => t.NullableDateValue);
+            mapping.RemoveMappingItem(0);
+
+            Assert.Same(mapping, mapping.WithDateFormats(formatsArray));
+
+            ParseAsDateTimeMappingItem item = mapping.MappingItems.OfType<ParseAsDateTimeMappingItem>().Single();
+            Assert.Same(formatsArray, item.Formats);
+        }
+
+        [Theory]
+        [MemberData(nameof(Formats_TestData))]
+        public void WithDateFormats_NullableAutoMappedIEnumerableString_Success(IEnumerable<string> formats)
+        {
+            SinglePropertyMapping<DateTime?> mapping = Map(t => t.NullableDateValue);
+            Assert.Same(mapping, mapping.WithDateFormats(formats));
+
+            ParseAsDateTimeMappingItem item = mapping.MappingItems.OfType<ParseAsDateTimeMappingItem>().Single();
+            Assert.Equal(formats, item.Formats);
+        }
+
+        [Theory]
+        [MemberData(nameof(Formats_TestData))]
+        public void WithDateFormats_NullableNotMappedIEnumerableString_Success(IEnumerable<string> formats)
+        {
+            SinglePropertyMapping<DateTime?> mapping = Map(t => t.NullableDateValue);
+            mapping.RemoveMappingItem(0);
+
+            Assert.Same(mapping, mapping.WithDateFormats(formats));
+
+            ParseAsDateTimeMappingItem item = mapping.MappingItems.OfType<ParseAsDateTimeMappingItem>().Single();
+            Assert.Equal(formats, item.Formats);
+        }
+
+        [Fact]
+        public void WithDateFormats_NullableNullFormats_ThrowsArgumentNullException()
+        {
+            SinglePropertyMapping<DateTime?> mapping = Map(t => t.NullableDateValue);
+
+            Assert.Throws<ArgumentNullException>("formats", () => mapping.WithDateFormats(null));
+            Assert.Throws<ArgumentNullException>("formats", () => mapping.WithDateFormats((IEnumerable<string>)null));
+        }
+
+        [Fact]
+        public void WithDateFormats_NullableEmptyFormats_ThrowsArgumentException()
+        {
+            SinglePropertyMapping<DateTime?> mapping = Map(t => t.NullableDateValue);
+
+            Assert.Throws<ArgumentException>("formats", () => mapping.WithDateFormats(new string[0]));
+            Assert.Throws<ArgumentException>("formats", () => mapping.WithDateFormats(new List<string>()));
+        }
+
         [Fact]
         public void WithConverter_SuccessConverter_ReturnsExpected()
         {
