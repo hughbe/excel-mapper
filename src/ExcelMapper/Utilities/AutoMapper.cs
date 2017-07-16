@@ -13,108 +13,35 @@ namespace ExcelMapper.Utilities
     internal static class AutoMapper
     {
         private static MethodInfo s_mappingMethod;
-
         private static MethodInfo MappingMethod => s_mappingMethod ?? (s_mappingMethod = typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(InferMapping)));
 
-        private static bool InferMapping<T>(this MemberInfo member, bool isEnumerable, EmptyValueStrategy emptyValueStrategy, out PropertyMapping mapping)
+        private static MethodInfo s_autoMapEnumerableMethod;
+        private static MethodInfo AutoMapEnumerableMethod => s_autoMapEnumerableMethod ?? (s_autoMapEnumerableMethod = typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(AutoMapEnumerable)));
+
+        private static bool InferMapping<T>(this MemberInfo member, EmptyValueStrategy emptyValueStrategy, out PropertyMapping mapping)
         {
-            if (!isEnumerable && AutoMap(member, emptyValueStrategy, out SinglePropertyMapping<T> singleMapping))
+            if (member.AutoMap(emptyValueStrategy, out SinglePropertyMapping<T> singleMapping))
             {
                 mapping = singleMapping;
                 return true;
             }
 
-            if (AutoMap(member, emptyValueStrategy, out EnumerablePropertyMapping<T> enumerableMapping))
+            if (member.MemberType().GetElementTypeOrEnumerableType(out Type elementType))
             {
-                mapping = enumerableMapping;
-                return true;
-            }
+                MethodInfo method = AutoMapEnumerableMethod.MakeGenericMethod(elementType);
 
-            if (!isEnumerable && AutoMap(emptyValueStrategy, out ExcelClassMap<T> classMap))
-            {
-                mapping = new ObjectPropertyMapping<T>(member, classMap);
-                return true;
-            }
-
-            mapping = null;
-            return false;
-        }
-
-        public static bool AutoMap<T>(this MemberInfo member, EmptyValueStrategy emptyValueStrategy, out ObjectPropertyMapping<T> mapping)
-        {
-            if (!AutoMap(emptyValueStrategy, out ExcelClassMap<T> excelClassMap))
-            {
-                mapping = null;
-                return false;
-            }
-
-            mapping = new ObjectPropertyMapping<T>(member, excelClassMap);
-            return true;
-        }
-
-        public static bool AutoMap<T>(EmptyValueStrategy emptyValueStrategy, out ExcelClassMap<T> classMap)
-        {
-            Type type = typeof(T);
-
-            if (type.GetTypeInfo().IsInterface)
-            {
-                classMap = null;
-                return false;
-            }
-
-            var map = new ExcelClassMap<T>();
-            IEnumerable<MemberInfo> properties = type.GetRuntimeProperties().Where(p => p.CanWrite);
-            IEnumerable<MemberInfo> fields = type.GetRuntimeFields().Where(f => f.IsPublic);
-
-            foreach (MemberInfo member in properties.Concat(fields))
-            {
-                Type memberType = member.MemberType();
-                bool isEnumerable = memberType.GetElementTypeOrEnumerableType(out Type elementType);
-
-                MethodInfo method = MappingMethod.MakeGenericMethod(isEnumerable ? elementType : memberType);
-                var parameters = new object[] { member, isEnumerable, emptyValueStrategy, null };
-
+                var parameters = new object[] { member, emptyValueStrategy, null };
                 bool result = (bool)method.Invoke(null, parameters);
-                if (!result)
+                if (result)
                 {
-                    classMap = null;
-                    return false;
-                }
-
-                map.AddMapping((PropertyMapping)parameters[3]);
-            }
-
-            classMap = map;
-            return true;
-        }
-
-        public static bool AutoMap<T>(this MemberInfo member, EmptyValueStrategy emptyValueStrategy, out EnumerablePropertyMapping<T> mapping)
-        {
-            Type rawType = member.MemberType();
-            TypeInfo rawTypeInfo = rawType.GetTypeInfo();
-
-            if (!member.AutoMap(emptyValueStrategy, out SinglePropertyMapping<T> elementMapping))
-            {
-                mapping = null;
-                return false;
-            }
-
-            if (rawType.IsArray)
-            {
-                mapping = new ArrayMapping<T>(member, elementMapping);
-                return true;
-            }
-            else if (rawTypeInfo.IsInterface)
-            {
-                if (rawTypeInfo.IsAssignableFrom(typeof(List<T>).GetTypeInfo()))
-                {
-                    mapping = new InterfaceAssignableFromListMapping<T>(member, elementMapping);
+                    mapping = (PropertyMapping)parameters[2];
                     return true;
                 }
             }
-            else if (rawType.ImplementsInterface(typeof(ICollection<T>)))
+
+            if (member.AutoMapObject(emptyValueStrategy, out ObjectPropertyMapping<T> objectMapping))
             {
-                mapping = new ConcreteICollectionMapping<T>(rawType, member, elementMapping);
+                mapping = objectMapping;
                 return true;
             }
 
@@ -124,7 +51,7 @@ namespace ExcelMapper.Utilities
 
         public static bool AutoMap<T>(this MemberInfo member, EmptyValueStrategy emptyValueStrategy, out SinglePropertyMapping<T> mapping)
         {
-            if (!AutoMap(member, typeof(T), emptyValueStrategy, out IStringValueMapper mapper, out IFallbackItem emptyFallback, out IFallbackItem invalidFallback))
+            if (!typeof(T).AutoMap(emptyValueStrategy, out IStringValueMapper mapper, out IFallbackItem emptyFallback, out IFallbackItem invalidFallback))
             {
                 mapping = null;
                 return false;
@@ -137,9 +64,9 @@ namespace ExcelMapper.Utilities
             return true;
         }
 
-        private static bool AutoMap(this MemberInfo member, Type rawType, EmptyValueStrategy emptyValueStrategy, out IStringValueMapper mapper, out IFallbackItem emptyFallback, out IFallbackItem invalidFallback)
+        private static bool AutoMap(this Type memberType, EmptyValueStrategy emptyValueStrategy, out IStringValueMapper mapper, out IFallbackItem emptyFallback, out IFallbackItem invalidFallback)
         {
-            Type type = rawType.GetNullableTypeOrThis(out bool isNullable);
+            Type type = memberType.GetNullableTypeOrThis(out bool isNullable);
 
             Type[] interfaces = type.GetTypeInfo().ImplementedInterfaces.ToArray();
 
@@ -202,6 +129,86 @@ namespace ExcelMapper.Utilities
                 return false;
             }
 
+            return true;
+        }
+
+        public static bool AutoMapEnumerable<T>(this MemberInfo member, EmptyValueStrategy emptyValueStrategy, out EnumerablePropertyMapping<T> mapping)
+        {
+            Type rawType = member.MemberType();
+            TypeInfo rawTypeInfo = rawType.GetTypeInfo();
+
+            if (!member.AutoMap(emptyValueStrategy, out SinglePropertyMapping<T> elementMapping))
+            {
+                mapping = null;
+                return false;
+            }
+
+            if (rawType.IsArray)
+            {
+                mapping = new ArrayMapping<T>(member, elementMapping);
+                return true;
+            }
+            else if (rawTypeInfo.IsInterface)
+            {
+                if (rawTypeInfo.IsAssignableFrom(typeof(List<T>).GetTypeInfo()))
+                {
+                    mapping = new InterfaceAssignableFromListMapping<T>(member, elementMapping);
+                    return true;
+                }
+            }
+            else if (rawType.ImplementsInterface(typeof(ICollection<T>)))
+            {
+                mapping = new ConcreteICollectionMapping<T>(rawType, member, elementMapping);
+                return true;
+            }
+
+            mapping = null;
+            return false;
+        }
+
+        public static bool AutoMapObject<T>(this MemberInfo member, EmptyValueStrategy emptyValueStrategy, out ObjectPropertyMapping<T> mapping)
+        {
+            if (!AutoMapClass(emptyValueStrategy, out ExcelClassMap<T> excelClassMap))
+            {
+                mapping = null;
+                return false;
+            }
+
+            mapping = new ObjectPropertyMapping<T>(member, excelClassMap);
+            return true;
+        }
+
+        public static bool AutoMapClass<T>(EmptyValueStrategy emptyValueStrategy, out ExcelClassMap<T> classMap)
+        {
+            Type type = typeof(T);
+
+            if (type.GetTypeInfo().IsInterface)
+            {
+                classMap = null;
+                return false;
+            }
+
+            var map = new ExcelClassMap<T>();
+            IEnumerable<MemberInfo> properties = type.GetRuntimeProperties().Where(p => p.CanWrite);
+            IEnumerable<MemberInfo> fields = type.GetRuntimeFields().Where(f => f.IsPublic);
+
+            foreach (MemberInfo member in properties.Concat(fields))
+            {
+                Type memberType = member.MemberType();
+                MethodInfo method = MappingMethod.MakeGenericMethod(memberType);
+
+                var parameters = new object[] { member, emptyValueStrategy, null };
+                bool result = (bool)method.Invoke(null, parameters);
+                if (!result)
+                {
+                    classMap = null;
+                    return false;
+                }
+
+                map.AddMapping((PropertyMapping)parameters[2]);
+            }
+
+            classMap = map;
             return true;
         }
     }

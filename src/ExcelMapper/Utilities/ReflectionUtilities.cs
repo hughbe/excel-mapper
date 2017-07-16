@@ -68,12 +68,6 @@ namespace ExcelMapper.Utilities
 
         public static bool GetElementTypeOrEnumerableType(this Type type, out Type elementType)
         {
-            if (type == typeof(string))
-            {
-                elementType = null;
-                return false;
-            }
-
             if (type.IsArray)
             {
                 elementType = type.GetElementType();

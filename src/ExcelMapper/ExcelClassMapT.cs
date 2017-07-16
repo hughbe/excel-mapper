@@ -73,7 +73,7 @@ namespace ExcelMapper
             MemberExpression memberExpression = ValidateExpression(expression);
             MemberInfo member = memberExpression.Member;
 
-            if (!member.AutoMap(EmptyValueStrategy, out ObjectPropertyMapping<TProperty> mapping))
+            if (!member.AutoMapObject(EmptyValueStrategy, out ObjectPropertyMapping<TProperty> mapping))
             {
                 throw new ExcelMappingException($"Could not map object of type \"{typeof(TProperty)}\".");
             }
@@ -91,7 +91,7 @@ namespace ExcelMapper
 
         private EnumerablePropertyMapping<TProperty> GetMultiMapping<TProperty>(MemberInfo member)
         {
-            if (!member.AutoMap(EmptyValueStrategy, out EnumerablePropertyMapping<TProperty> mapping))
+            if (!member.AutoMapEnumerable(EmptyValueStrategy, out EnumerablePropertyMapping<TProperty> mapping))
             {
                 throw new ExcelMappingException($"No known way to instantiate type \"{typeof(TProperty)}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
             }
