@@ -48,6 +48,18 @@ namespace ExcelMapper.Tests
             Assert.Throws<ExcelMappingException>(() => MapObject(p => p.InvalidMemberType));
         }
 
+        [Fact]
+        public void Map_InvalidTargetType_ThrowsArgumentException()
+        {
+            var otherType = new OtherType();
+            Assert.Throws<ArgumentException>("expression", () => Map(p => otherType.Value));
+        }
+
+        public class OtherType
+        {
+            public string Value { get; set; }
+        }
+
         [Theory]
         [InlineData(EmptyValueStrategy.ThrowIfPrimitive)]
         [InlineData(EmptyValueStrategy.SetToDefaultValue)]

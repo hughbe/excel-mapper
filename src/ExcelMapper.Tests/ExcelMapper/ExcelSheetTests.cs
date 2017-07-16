@@ -1155,7 +1155,10 @@ namespace ExcelMapper.Tests
             public ObjectValueInnerMapping() : base()
             {
                 Map(p => p.SubValue1.StringValue);
-                Map(p => p.SubValue2.IntValue).WithColumnName("Int Value");
+                Map(p => p.SubValue1.SplitStringValue);
+                Map(p => p.SubValue2.IntValue);
+                Map(p => p.SubValue2.SubValue.SubInt);
+                Map(p => p.SubValue2.SubValue.SubString);
             }
         }
     }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Reflection;
 using ExcelDataReader;
+using ExcelMapper.Utilities;
 
 namespace ExcelMapper
 {
@@ -33,12 +35,28 @@ namespace ExcelMapper
 
         protected internal static MemberExpression ValidateExpression<T, TProperty>(Expression<Func<T, TProperty>> expression)
         {
-            if (!(expression.Body is MemberExpression memberExpression))
+            if (!(expression.Body is MemberExpression rootMemberExpression))
             {
                 throw new ArgumentException("Not a member expression.", nameof(expression));
             }
 
-            return memberExpression;
+            Expression expressionBody = rootMemberExpression.Expression;
+            while (expressionBody != null)
+            {
+                if (!(expressionBody is MemberExpression memberExpressionBody))
+                {
+                    // Each mapping is of the form (parameter => member).
+                    if (expressionBody is ParameterExpression parameterExpression)
+                    {
+                        break;
+                    }
+
+                    throw new ArgumentException($"Expression can only contain member accesses, but found {expressionBody}.", nameof(expression));
+                }
+
+                expressionBody = memberExpressionBody.Expression;
+            }
+            return rootMemberExpression;
         }
     }
 }
