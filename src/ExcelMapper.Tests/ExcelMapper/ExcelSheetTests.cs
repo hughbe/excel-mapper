@@ -728,7 +728,7 @@ namespace ExcelMapper.Tests
             }
         }
 
-        //[Fact]
+        [Fact]
         public void ReadRow_ObjectWithCustomClassMap_ReturnsExpected()
         {
             using (var importer = Helpers.GetImporter("Objects.xlsx"))
@@ -740,7 +740,10 @@ namespace ExcelMapper.Tests
 
                 ObjectValue row1 = sheet.ReadRow<ObjectValue>();
                 Assert.Equal("a", row1.SubValue1.StringValue);
+                Assert.Equal(new string[] { "a", "b" }, row1.SubValue1.SplitStringValue);
                 Assert.Equal(1, row1.SubValue2.IntValue);
+                Assert.Equal(10, row1.SubValue2.SubValue.SubInt);
+                Assert.Equal("c", row1.SubValue2.SubValue.SubString);
             }
         }
 
@@ -751,6 +754,7 @@ namespace ExcelMapper.Tests
                 MapObject(p => p.SubValue1).WithClassMap(m =>
                 {
                     m.Map(s => s.StringValue);
+                    m.Map(s => s.SplitStringValue);
                 });
 
                 MapObject(p => p.SubValue2).WithClassMap(new SubValueMapping());
