@@ -205,7 +205,7 @@ namespace ExcelMapper.Utilities
                     return false;
                 }
 
-                map.AddMapping((PropertyMapping)parameters[2]);
+                map.Mappings.Add((PropertyMapping)parameters[2]);
             }
 
             classMap = map;

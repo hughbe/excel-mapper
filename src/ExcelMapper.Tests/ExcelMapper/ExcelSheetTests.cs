@@ -1134,10 +1134,10 @@ namespace ExcelMapper.Tests
             }
         }
 
-        //[Fact]
+        [Fact]
         public void ReadRow_ObjectInnerMapping_ReturnsExpected()
         {
-            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            using (var importer = Helpers.GetImporter("NestedObjects.xlsx"))
             {
                 importer.Configuration.RegisterMapping<ObjectValueInnerMapping>();
 
@@ -1146,7 +1146,10 @@ namespace ExcelMapper.Tests
 
                 NestedObjectValue row1 = sheet.ReadRow<NestedObjectValue>();
                 Assert.Equal("a", row1.SubValue1.StringValue);
+                Assert.Equal(new string[] { "a", "b" }, row1.SubValue1.SplitStringValue);
                 Assert.Equal(1, row1.SubValue2.IntValue);
+                Assert.Equal(10, row1.SubValue2.SubValue.SubInt);
+                Assert.Equal("c", row1.SubValue2.SubValue.SubString);
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using ExcelDataReader;
@@ -11,14 +12,9 @@ namespace ExcelMapper
     {
         public Type Type { get; }
 
-        private List<PropertyMapping> Mappings { get; } = new List<PropertyMapping>();
+        internal List<PropertyMapping> Mappings { get; } = new List<PropertyMapping>();
 
         internal ExcelClassMap(Type type) => Type = type;
-
-        protected internal void AddMapping(PropertyMapping mapping)
-        {
-            Mappings.Add(mapping);
-        }
 
         internal object Execute(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
@@ -33,30 +29,52 @@ namespace ExcelMapper
             return instance;
         }
 
-        protected internal static MemberExpression ValidateExpression<T, TProperty>(Expression<Func<T, TProperty>> expression)
+        protected PropertyMapping CreateObjectMap(PropertyMapping propertyMapping, Stack<MemberExpression> memberExpressions)
         {
-            if (!(expression.Body is MemberExpression rootMemberExpression))
+            MemberExpression memberExpression = memberExpressions.Pop();
+            if (memberExpressions.Count == 0)
             {
-                throw new ArgumentException("Not a member expression.", nameof(expression));
+                // This is the final member.
+                Mappings.Add(propertyMapping);
+                return propertyMapping;
             }
 
-            Expression expressionBody = rootMemberExpression.Expression;
-            while (expressionBody != null)
+            Type memberType = memberExpression.Member.MemberType();
+
+            MethodInfo method = MapObjectMethod.MakeGenericMethod(memberType);
+            try
             {
-                if (!(expressionBody is MemberExpression memberExpressionBody))
-                {
-                    // Each mapping is of the form (parameter => member).
-                    if (expressionBody is ParameterExpression parameterExpression)
-                    {
-                        break;
-                    }
-
-                    throw new ArgumentException($"Expression can only contain member accesses, but found {expressionBody}.", nameof(expression));
-                }
-
-                expressionBody = memberExpressionBody.Expression;
+                return (PropertyMapping)method.Invoke(this, new object[] { propertyMapping, memberExpression, memberExpressions });
             }
-            return rootMemberExpression;
+            catch (TargetInvocationException exception)
+            {
+                throw exception.InnerException;
+            }
         }
+
+        private PropertyMapping CreateObjectMapGeneric<TProperty>(PropertyMapping propertyMapping, MemberExpression memberExpression, Stack<MemberExpression> memberExpressions)
+        {
+            PropertyMapping mapping = Mappings.FirstOrDefault(m => m.Member.Equals(memberExpression.Member));
+
+            ObjectPropertyMapping<TProperty> objectPropertyMapping;
+            if (mapping == null)
+            {
+                objectPropertyMapping = new ObjectPropertyMapping<TProperty>(memberExpression.Member, new ExcelClassMap<TProperty>());
+                Mappings.Add(objectPropertyMapping);
+            }
+            else if (!(mapping is ObjectPropertyMapping<TProperty> existingMapping))
+            {
+                throw new InvalidOperationException($"Expression is already mapped differently.");
+            }
+            else
+            {
+                objectPropertyMapping = existingMapping;
+            }
+
+            return objectPropertyMapping.ClassMap.CreateObjectMap(propertyMapping, memberExpressions);
+        }
+
+        private static MethodInfo s_mapObjectMethod;
+        private static MethodInfo MapObjectMethod => s_mapObjectMethod ?? (s_mapObjectMethod = typeof(ExcelClassMap).GetTypeInfo().GetDeclaredMethod(nameof(CreateObjectMapGeneric)));
     }
 }

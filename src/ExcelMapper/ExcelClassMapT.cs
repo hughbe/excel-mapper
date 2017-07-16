@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using ExcelMapper.Mappings.MultiItems;
 using ExcelMapper.Utilities;
 
 namespace ExcelMapper
@@ -25,7 +25,7 @@ namespace ExcelMapper
 
         public SinglePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
         {
-            MemberExpression memberExpression = ValidateExpression(expression);
+            MemberExpression memberExpression = GetMemberExpression(expression);
             MemberInfo member = memberExpression.Member;
 
             bool canMap = member.AutoMap(EmptyValueStrategy, out SinglePropertyMapping<TProperty> mapping);
@@ -34,43 +34,58 @@ namespace ExcelMapper
                 throw new ExcelMappingException($"Don't know how to map type {typeof(TProperty)}.");
             }
 
-            AddMapping(mapping);
+            AddMapping(mapping, expression);
             return mapping;
         }
 
         public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, IEnumerable<TProperty>>> expression)
         {
-            MemberExpression memberExpression = ValidateExpression(expression);
-            return MultiMap<TProperty>(memberExpression);
+            MemberExpression memberExpression = GetMemberExpression(expression);
+            var mapping = GetMultiMapping<TProperty>(memberExpression.Member);
+
+            AddMapping(mapping, expression);
+            return mapping;
         }
 
         public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, ICollection<TProperty>>> expression)
         {
-            MemberExpression memberExpression = ValidateExpression(expression);
-            return MultiMap<TProperty>(memberExpression);
+            MemberExpression memberExpression = GetMemberExpression(expression);
+            var mapping = GetMultiMapping<TProperty>(memberExpression.Member);
+
+            AddMapping(mapping, expression);
+            return mapping;
         }
 
         public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, IList<TProperty>>> expression)
         {
-            MemberExpression memberExpression = ValidateExpression(expression);
-            return MultiMap<TProperty>(memberExpression);
+            MemberExpression memberExpression = GetMemberExpression(expression);
+            var mapping = GetMultiMapping<TProperty>(memberExpression.Member);
+
+            AddMapping(mapping, expression);
+            return mapping;
         }
 
         public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, List<TProperty>>> expression)
         {
-            MemberExpression memberExpression = ValidateExpression(expression);
-            return MultiMap<TProperty>(memberExpression);
+            MemberExpression memberExpression = GetMemberExpression(expression);
+            var mapping = GetMultiMapping<TProperty>(memberExpression.Member);
+
+            AddMapping(mapping, expression);
+            return mapping;
         }
 
         public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, TProperty[]>> expression)
         {
-            MemberExpression memberExpression = ValidateExpression(expression);
-            return MultiMap<TProperty>(memberExpression);
+            MemberExpression memberExpression = GetMemberExpression(expression);
+            var mapping = GetMultiMapping<TProperty>(memberExpression.Member);
+
+            AddMapping(mapping, expression);
+            return mapping;
         }
 
         public ObjectPropertyMapping<TProperty> MapObject<TProperty>(Expression<Func<T, TProperty>> expression)
         {
-            MemberExpression memberExpression = ValidateExpression(expression);
+            MemberExpression memberExpression = GetMemberExpression(expression);
             MemberInfo member = memberExpression.Member;
 
             if (!member.AutoMapObject(EmptyValueStrategy, out ObjectPropertyMapping<TProperty> mapping))
@@ -78,14 +93,7 @@ namespace ExcelMapper
                 throw new ExcelMappingException($"Could not map object of type \"{typeof(TProperty)}\".");
             }
 
-            AddMapping(mapping);
-            return mapping;
-        }
-
-        private EnumerablePropertyMapping<TProperty> MultiMap<TProperty>(MemberExpression memberExpression)
-        {
-            var mapping = GetMultiMapping<TProperty>(memberExpression.Member);
-            AddMapping(mapping);
+            AddMapping(mapping, expression);
             return mapping;
         }
 
@@ -97,6 +105,50 @@ namespace ExcelMapper
             }
 
             return mapping;
+        }
+
+        protected internal MemberExpression GetMemberExpression<TProperty>(Expression<Func<T, TProperty>> expression)
+        {
+            if (!(expression.Body is MemberExpression rootMemberExpression))
+            {
+                throw new ArgumentException("Not a member expression.", nameof(expression));
+            }
+
+            return rootMemberExpression;
+        }
+
+        protected internal void AddMapping<TProperty>(PropertyMapping mapping, Expression<Func<T, TProperty>> expression)
+        {
+            Expression expressionBody = expression.Body;
+            var expressions = new Stack<MemberExpression>();
+            while (expressionBody != null)
+            {
+                if (!(expressionBody is MemberExpression memberExpressionBody))
+                {
+                    // Each mapping is of the form (parameter => member).
+                    if (expressionBody is ParameterExpression parameterExpression)
+                    {
+                        break;
+                    }
+
+                    throw new ArgumentException($"Expression can only contain member accesses, but found {expressionBody}.", nameof(expression));
+                }
+                
+                expressions.Push(memberExpressionBody);
+                expressionBody = memberExpressionBody.Expression;
+            }
+
+            if (expressions.Count == 1)
+            {
+                // Simple case: parameter => prop
+                Mappings.Add(mapping);
+            }
+            else
+            {
+                // Go through the chain of members and make sure that they are valid.
+                // E.g. parameter => parameter.prop.subprop.field.
+                CreateObjectMap(mapping, expressions);
+            }
         }
     }
 }
