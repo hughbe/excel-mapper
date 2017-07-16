@@ -609,5 +609,71 @@ namespace ExcelMapper.Tests
                     .WithConverter(s => s + "extra");
             }
         }
+
+        [Fact]
+        public void ReadRow_UriWithCustomFallback_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Uris.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<UriValueFallbackMapping>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                UriValue row1 = sheet.ReadRow<UriValue>();
+                Assert.Equal(new Uri("http://google.com"), row1.Uri);
+
+                UriValue row2 = sheet.ReadRow<UriValue>();
+                Assert.Equal(new Uri("http://empty.com"), row2.Uri);
+
+                UriValue row3 = sheet.ReadRow<UriValue>();
+                Assert.Equal(new Uri("http://invalid.com"), row3.Uri);
+            }
+        }
+
+        [Fact]
+        public void ReadRow_UriWithDefaultFallback_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Uris.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<UriDefaultFallbackMapping>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                UriValue row1 = sheet.ReadRow<UriValue>();
+                Assert.Equal(new Uri("http://google.com"), row1.Uri);
+
+                // Defaults to null if empty.
+                UriValue row2 = sheet.ReadRow<UriValue>();
+                Assert.Null(row2.Uri);
+
+                // Defaults to throw if invalid.
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<UriValue>());
+            }
+        }
+
+        public class UriValue
+        {
+            public Uri Uri { get; set; }
+        }
+
+        public class UriValueFallbackMapping : ExcelClassMap<UriValue>
+        {
+            public UriValueFallbackMapping() : base()
+            {
+                Map(u => u.Uri)
+                    .WithEmptyFallback(new Uri("http://empty.com/"))
+                    .WithInvalidFallback(new Uri("http://invalid.com/"));
+            }
+        }
+
+        public class UriDefaultFallbackMapping : ExcelClassMap<UriValue>
+        {
+            public UriDefaultFallbackMapping() : base()
+            {
+                Map(u => u.Uri);
+            }
+        }
     }
 }

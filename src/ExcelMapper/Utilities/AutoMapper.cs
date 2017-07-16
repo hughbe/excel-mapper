@@ -65,6 +65,13 @@ namespace ExcelMapper.Utilities
                 var mapper = new StringMapper();
                 pipeline.AddMappingItem(mapper);
             }
+            else if (type == typeof(Uri))
+            {
+                var mapper = new UriMapper();
+                pipeline.AddMappingItem(mapper);
+
+                pipeline = pipeline.WithThrowingInvalidFallback();
+            }
             else if (interfaces.Any(t => t == typeof(IConvertible)))
             {
                 var mapper = new ChangeTypeMapper(type);
