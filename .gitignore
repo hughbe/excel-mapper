@@ -303,3 +303,4 @@ $RECYCLE.BIN/
 *.lnk
 
 resources/coverage
+coverage.xml

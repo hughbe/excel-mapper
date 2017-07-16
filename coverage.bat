@@ -18,6 +18,8 @@ set test_name=src\%project_name%.Tests\bin\Debug\net46\%project_name%.Tests.exe
 set report_name=coverage.xml
 set report_path=resources\coverage
 
+dotnet build src
+
 %open_cover% -register:user -output:"%report_name%" -filter:"+[*]* -[%project_name%.Tests]*" -target:"%xunit%" -targetargs:"%test_name% -noshadow"
 
 %report_generator% -reports:"%report_name%" -targetdir:"%report_path%"
