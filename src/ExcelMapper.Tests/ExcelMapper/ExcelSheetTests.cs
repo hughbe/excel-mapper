@@ -173,8 +173,8 @@ namespace ExcelMapper.Tests
             public ObjectValueFallbackMapper() : base()
             {
                 Map(o => o.Value)
-                    .WithEmptyFallback((object)"empty")
-                    .WithInvalidFallback((object)"invalid");
+                    .WithEmptyFallback("empty")
+                    .WithInvalidFallback("invalid");
             }
         }
 
@@ -291,8 +291,8 @@ namespace ExcelMapper.Tests
             public IConvertibleValueFallbackMapper() : base()
             {
                 Map(o => o.Value)
-                    .WithEmptyFallback((IConvertible)"empty")
-                    .WithInvalidFallback((IConvertible)"invalid");
+                    .WithEmptyFallback("empty")
+                    .WithInvalidFallback("invalid");
             }
         }
 

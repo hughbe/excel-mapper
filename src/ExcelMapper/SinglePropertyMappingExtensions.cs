@@ -154,7 +154,7 @@ namespace ExcelMapper
             return mapping;
         }
 
-        public static TMapping WithValueFallback<TMapping, T>(this TMapping mapping, T defaultValue) where TMapping : ISinglePropertyMapping<T>
+        public static TMapping WithValueFallback<TMapping>(this TMapping mapping, object defaultValue) where TMapping : ISinglePropertyMapping
         {
             return mapping
                 .WithEmptyFallback(defaultValue)
@@ -168,7 +168,7 @@ namespace ExcelMapper
                 .WithThrowingInvalidFallback();
         }
 
-        public static TMapping WithEmptyFallback<TMapping, T>(this TMapping mapping, T fallbackValue) where TMapping : ISinglePropertyMapping<T>
+        public static TMapping WithEmptyFallback<TMapping>(this TMapping mapping, object fallbackValue) where TMapping : ISinglePropertyMapping
         {
             return mapping
                 .WithEmptyFallbackItem(new FixedValueFallback(fallbackValue));
@@ -192,7 +192,7 @@ namespace ExcelMapper
                 .WithInvalidFallbackItem(new ThrowFallback());
         }
 
-        public static TMapping WithInvalidFallback<TMapping, T>(this TMapping mapping, T fallbackValue) where TMapping : ISinglePropertyMapping<T>
+        public static TMapping WithInvalidFallback<TMapping>(this TMapping mapping, object fallbackValue) where TMapping : ISinglePropertyMapping
         {
             return mapping
                 .WithInvalidFallbackItem(new FixedValueFallback(fallbackValue));
