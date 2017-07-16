@@ -179,6 +179,124 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRow_StringValueWithDefaultMapper_Success()
+        {
+            using (var importer = Helpers.GetImporter("Objects.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<StringValueDefaultMapper>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                StringValue row1 = sheet.ReadRow<StringValue>();
+                Assert.Equal("value", row1.Value);
+
+                StringValue row2 = sheet.ReadRow<StringValue>();
+                Assert.Null(row2.Value);
+            }
+        }
+
+        public class StringValue
+        {
+            public string Value { get; set; }
+        }
+
+        public class StringValueDefaultMapper : ExcelClassMap<StringValue>
+        {
+            public StringValueDefaultMapper() : base()
+            {
+                Map(o => o.Value);
+            }
+        }
+
+        [Fact]
+        public void ReadRow_StringValueWithFallbackMapper_Success()
+        {
+            using (var importer = Helpers.GetImporter("Objects.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<StringValueFallbackMapper>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                StringValue row1 = sheet.ReadRow<StringValue>();
+                Assert.Equal("value", row1.Value);
+
+                StringValue row2 = sheet.ReadRow<StringValue>();
+                Assert.Equal("empty", row2.Value);
+            }
+        }
+
+        public class StringValueFallbackMapper : ExcelClassMap<StringValue>
+        {
+            public StringValueFallbackMapper() : base()
+            {
+                Map(o => o.Value)
+                    .WithEmptyFallback("empty")
+                    .WithInvalidFallback("invalid");
+            }
+        }
+
+        [Fact]
+        public void ReadRow_IConvertibleValueWithDefaultMapper_Success()
+        {
+            using (var importer = Helpers.GetImporter("Objects.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<IConvertibleValueDefaultMapper>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                IConvertibleValue row1 = sheet.ReadRow<IConvertibleValue>();
+                Assert.Equal("value", row1.Value);
+
+                IConvertibleValue row2 = sheet.ReadRow<IConvertibleValue>();
+                Assert.Null(row2.Value);
+            }
+        }
+
+        public class IConvertibleValue
+        {
+            public IConvertible Value { get; set; }
+        }
+
+        public class IConvertibleValueDefaultMapper : ExcelClassMap<IConvertibleValue>
+        {
+            public IConvertibleValueDefaultMapper() : base()
+            {
+                Map(o => o.Value);
+            }
+        }
+
+        [Fact]
+        public void ReadRow_IConvertibleValueWithFallbackMapper_Success()
+        {
+            using (var importer = Helpers.GetImporter("Objects.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<IConvertibleValueFallbackMapper>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                IConvertibleValue row1 = sheet.ReadRow<IConvertibleValue>();
+                Assert.Equal("value", row1.Value);
+
+                IConvertibleValue row2 = sheet.ReadRow<IConvertibleValue>();
+                Assert.Equal("empty", row2.Value);
+            }
+        }
+
+        public class IConvertibleValueFallbackMapper : ExcelClassMap<IConvertibleValue>
+        {
+            public IConvertibleValueFallbackMapper() : base()
+            {
+                Map(o => o.Value)
+                    .WithEmptyFallback((IConvertible)"empty")
+                    .WithInvalidFallback((IConvertible)"invalid");
+            }
+        }
+
+        [Fact]
         public void ReadRow_Map_ReturnsExpected()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
