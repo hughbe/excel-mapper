@@ -8,23 +8,32 @@ namespace ExcelMapper
     {
         internal ExcelHeading(IExcelDataReader reader)
         {
-            var indexMapping = new Dictionary<int, string>(reader.FieldCount);
             var nameMapping = new Dictionary<string, int>(reader.FieldCount);
+            var columnNames = new string[reader.FieldCount];
+
             for (int columnIndex = 0; columnIndex < reader.FieldCount; columnIndex++)
             {
                 string columnName = reader.GetString(columnIndex);
-                indexMapping.Add(columnIndex, columnName);
-                nameMapping.Add(columnName, columnIndex);
+                if (columnName == null)
+                {
+                    columnNames[columnIndex] = string.Empty;
+
+                }
+                else
+                {
+                    nameMapping.Add(columnName, columnIndex);
+                    columnNames[columnIndex] = columnName;
+                }
             }
 
-            IndexMapping = indexMapping;
             NameMapping = nameMapping;
+            _columnNames = columnNames;
         }
 
-        private Dictionary<int, string> IndexMapping { get; }
+        private string[] _columnNames{ get; }
         private Dictionary<string, int> NameMapping { get; }
 
-        public string GetColumnName(int index) => IndexMapping[index];
+        public string GetColumnName(int index) => _columnNames[index];
 
         public int GetColumnIndex(string columnName)
         {
@@ -37,6 +46,6 @@ namespace ExcelMapper
             return index;
         }
 
-        public IEnumerable<string> ColumnNames => NameMapping.Keys;
+        public IEnumerable<string> ColumnNames => _columnNames;
     }
 }

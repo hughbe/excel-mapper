@@ -22,6 +22,9 @@
     <Content Include="Resources\MultiMap.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\EmptyColumns.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\Primitives.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

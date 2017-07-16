@@ -21,6 +21,19 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadHeading_EmptyColumnName_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("EmptyColumns.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+                ExcelHeading heading = sheet.ReadHeading();
+                Assert.Same(heading, sheet.Heading);
+
+                Assert.Equal(new string[] { "", "Column2", "", " Column4 " }, heading.ColumnNames);
+            }
+        }
+
+        [Fact]
         public void ReadHeading_AlreadyReadHeading_ThrowsExcelMappingException()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
