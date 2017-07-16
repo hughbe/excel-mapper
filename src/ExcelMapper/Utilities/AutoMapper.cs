@@ -176,7 +176,7 @@ namespace ExcelMapper.Utilities
                 emptyFallback = ReconcileFallback(EmptyValueStrategy.ThrowIfPrimitive);
                 invalidFallback = ReconcileFallback(EmptyValueStrategy.ThrowIfPrimitive);
             }
-            else if (type == typeof(string))
+            else if (type == typeof(string) || type == typeof(object))
             {
                 mapper = new StringMapper();
                 emptyFallback = ReconcileFallback(EmptyValueStrategy.SetToDefaultValue);

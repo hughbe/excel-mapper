@@ -120,6 +120,65 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRow_ObjectValueWithDefaultMapper_Success()
+        {
+            using (var importer = Helpers.GetImporter("Objects.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<ObjectValueDefaultMapper>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                ObjectValue row1 = sheet.ReadRow<ObjectValue>();
+                Assert.Equal("value", row1.Value);
+
+                ObjectValue row2 = sheet.ReadRow<ObjectValue>();
+                Assert.Null(row2.Value);
+            }
+        }
+
+        public class ObjectValue
+        {
+            public object Value { get; set; }
+        }
+
+        public class ObjectValueDefaultMapper : ExcelClassMap<ObjectValue>
+        {
+            public ObjectValueDefaultMapper() : base()
+            {
+                Map(o => o.Value);
+            }
+        }
+
+        [Fact]
+        public void ReadRow_ObjectValueWithFallbackMapper_Success()
+        {
+            using (var importer = Helpers.GetImporter("Objects.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<ObjectValueFallbackMapper>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                ObjectValue row1 = sheet.ReadRow<ObjectValue>();
+                Assert.Equal("value", row1.Value);
+
+                ObjectValue row2 = sheet.ReadRow<ObjectValue>();
+                Assert.Equal("empty", row2.Value);
+            }
+        }
+
+        public class ObjectValueFallbackMapper : ExcelClassMap<ObjectValue>
+        {
+            public ObjectValueFallbackMapper() : base()
+            {
+                Map(o => o.Value)
+                    .WithEmptyFallback((object)"empty")
+                    .WithInvalidFallback((object)"invalid");
+            }
+        }
+
+        [Fact]
         public void ReadRow_Map_ReturnsExpected()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
@@ -679,14 +738,14 @@ namespace ExcelMapper.Tests
         [Fact]
         public void ReadRow_Object_ReturnsExpected()
         {
-            using (var importer = Helpers.GetImporter("Objects.xlsx"))
+            using (var importer = Helpers.GetImporter("NestedObjects.xlsx"))
             {
                 importer.Configuration.RegisterMapping<ObjectValueDefaultClassMapMapping>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
 
-                ObjectValue row1 = sheet.ReadRow<ObjectValue>();
+                NestedObjectValue row1 = sheet.ReadRow<NestedObjectValue>();
                 Assert.Equal("a", row1.SubValue1.StringValue);
                 Assert.Equal(new string[] { "a", "b" }, row1.SubValue1.SplitStringValue);
                 Assert.Equal(1, row1.SubValue2.IntValue);
@@ -695,7 +754,7 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class ObjectValue
+        public class NestedObjectValue
         {
             public SubValue1 SubValue1 { get; set; }
             public SubValue2 SubValue2 { get; set; }
@@ -719,7 +778,7 @@ namespace ExcelMapper.Tests
             public int SubInt { get; set; }
         }
 
-        public class ObjectValueDefaultClassMapMapping : ExcelClassMap<ObjectValue>
+        public class ObjectValueDefaultClassMapMapping : ExcelClassMap<NestedObjectValue>
         {
             public ObjectValueDefaultClassMapMapping() : base()
             {
@@ -731,14 +790,14 @@ namespace ExcelMapper.Tests
         [Fact]
         public void ReadRow_ObjectWithCustomClassMap_ReturnsExpected()
         {
-            using (var importer = Helpers.GetImporter("Objects.xlsx"))
+            using (var importer = Helpers.GetImporter("NestedObjects.xlsx"))
             {
                 importer.Configuration.RegisterMapping<ObjectValueCustomClassMapMapping>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
 
-                ObjectValue row1 = sheet.ReadRow<ObjectValue>();
+                NestedObjectValue row1 = sheet.ReadRow<NestedObjectValue>();
                 Assert.Equal("a", row1.SubValue1.StringValue);
                 Assert.Equal(new string[] { "a", "b" }, row1.SubValue1.SplitStringValue);
                 Assert.Equal(1, row1.SubValue2.IntValue);
@@ -747,7 +806,7 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class ObjectValueCustomClassMapMapping : ExcelClassMap<ObjectValue>
+        public class ObjectValueCustomClassMapMapping : ExcelClassMap<NestedObjectValue>
         {
             public ObjectValueCustomClassMapMapping() : base()
             {
@@ -781,13 +840,13 @@ namespace ExcelMapper.Tests
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
 
-                ObjectValue row1 = sheet.ReadRow<ObjectValue>();
+                NestedObjectValue row1 = sheet.ReadRow<NestedObjectValue>();
                 Assert.Equal("a", row1.SubValue1.StringValue);
                 Assert.Equal(1, row1.SubValue2.IntValue);
             }
         }
 
-        public class ObjectValueInnerMapping : ExcelClassMap<ObjectValue>
+        public class ObjectValueInnerMapping : ExcelClassMap<NestedObjectValue>
         {
             public ObjectValueInnerMapping() : base()
             {

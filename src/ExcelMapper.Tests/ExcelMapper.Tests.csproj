@@ -25,6 +25,9 @@
     <Content Include="Resources\EmptyColumns.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\NestedObjects.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\Objects.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
