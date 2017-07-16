@@ -5,7 +5,7 @@
         public PropertyMappingResultType GetProperty(ReadResult result, ref object value)
         {
             value = result.StringValue;
-            return PropertyMappingResultType.Continue;
+            return PropertyMappingResultType.SuccessIfNoOtherSuccess;
         }
     }
 }

@@ -5,7 +5,7 @@ using ExcelDataReader;
 
 namespace ExcelMapper
 {
-    public abstract class ExcelClassMap
+    public class ExcelClassMap
     {
         public Type Type { get; }
 

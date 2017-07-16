@@ -10,19 +10,17 @@ namespace ExcelMapper.Tests
 {
     public class SinglePropertyMappingTests
     {
-        [Theory]
-        [InlineData(EmptyValueStrategy.SetToDefaultValue)]
-        [InlineData(EmptyValueStrategy.ThrowIfPrimitive)]
-        public void Ctor_Member_Type_EmptyValueStrategy(EmptyValueStrategy emptyValueStrategy)
+        [Fact]
+        public void Ctor_Member_Type_EmptyValueStrategy()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             Type type = typeof(int);
 
-            var mapping = new SinglePropertyMapping(propertyInfo, type, emptyValueStrategy);
+            var mapping = new SinglePropertyMapping(propertyInfo, type);
             Assert.Same(propertyInfo, mapping.Member);
             Assert.Same(type, mapping.Type);
 
-            Assert.Single(mapping.MappingItems);
+            Assert.Empty(mapping.MappingItems);
             Assert.Empty(mapping.StringValueTransformers);
         }
 
@@ -30,23 +28,14 @@ namespace ExcelMapper.Tests
         public void Ctor_NullType_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            Assert.Throws<ArgumentNullException>("type", () => new SinglePropertyMapping(propertyInfo, null, EmptyValueStrategy.SetToDefaultValue));
-        }
-
-        [Theory]
-        [InlineData(EmptyValueStrategy.SetToDefaultValue + 1)]
-        [InlineData(EmptyValueStrategy.ThrowIfPrimitive - 1)]
-        public void Ctor_InvalidEmptyValueStrategy_ThrowsArgumentException(EmptyValueStrategy emptyValueStrategy)
-        {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            Assert.Throws<ArgumentException>("emptyValueStrategy", () => new SinglePropertyMapping(propertyInfo, typeof(int), emptyValueStrategy));
+            Assert.Throws<ArgumentNullException>("type", () => new SinglePropertyMapping(propertyInfo, null));
         }
 
         [Fact]
         public void EmptyFallback_Set_GetReturnsExpected()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var mapping = new SinglePropertyMapping(propertyInfo, typeof(int), EmptyValueStrategy.SetToDefaultValue);
+            var mapping = new SinglePropertyMapping(propertyInfo, typeof(int));
 
             var fallback = new FixedValueFallback(10);
             mapping.EmptyFallback = fallback;
@@ -60,7 +49,7 @@ namespace ExcelMapper.Tests
         public void InvalidFallback_Set_GetReturnsExpected()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var mapping = new SinglePropertyMapping(propertyInfo, typeof(int), EmptyValueStrategy.SetToDefaultValue);
+            var mapping = new SinglePropertyMapping(propertyInfo, typeof(int));
 
             var fallback = new FixedValueFallback(10);
             mapping.InvalidFallback = fallback;
@@ -74,21 +63,20 @@ namespace ExcelMapper.Tests
         public void AddMappingItem_ValidItem_Success()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var mapping = new SinglePropertyMapping(propertyInfo, typeof(int), EmptyValueStrategy.SetToDefaultValue);
-            IStringValueMapper originalItem = Assert.Single(mapping.MappingItems);
+            var mapping = new SinglePropertyMapping(propertyInfo, typeof(int));
             var item1 = new BoolMapper();
             var item2 = new BoolMapper();
 
             mapping.AddMappingItem(item1);
             mapping.AddMappingItem(item2);
-            Assert.Equal(new IStringValueMapper[] { originalItem, item1, item2 }, mapping.MappingItems);
+            Assert.Equal(new IStringValueMapper[] { item1, item2 }, mapping.MappingItems);
         }
 
         [Fact]
         public void AddMappingItem_NullItem_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var mapping = new SinglePropertyMapping(propertyInfo, typeof(int), EmptyValueStrategy.SetToDefaultValue);
+            var mapping = new SinglePropertyMapping(propertyInfo, typeof(int));
 
             Assert.Throws<ArgumentNullException>("item", () => mapping.AddMappingItem(null));
         }
@@ -97,7 +85,8 @@ namespace ExcelMapper.Tests
         public void RemoveMappingItem_Index_Success()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var mapping = new SinglePropertyMapping(propertyInfo, typeof(int), EmptyValueStrategy.SetToDefaultValue);
+            var mapping = new SinglePropertyMapping(propertyInfo, typeof(int));
+            mapping.AddMappingItem(new BoolMapper());
 
             mapping.RemoveMappingItem(0);
             Assert.Empty(mapping.MappingItems);
@@ -107,7 +96,7 @@ namespace ExcelMapper.Tests
         public void AddStringValueTransformer_ValidTransformer_Success()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var mapping = new SinglePropertyMapping(propertyInfo, typeof(int), EmptyValueStrategy.SetToDefaultValue);
+            var mapping = new SinglePropertyMapping(propertyInfo, typeof(int));
             var transformer1 = new TrimStringTransformer();
             var transformer2 = new TrimStringTransformer();
 
@@ -120,7 +109,7 @@ namespace ExcelMapper.Tests
         public void AddStringValueTransformer_NullTransformer_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var mapping = new SinglePropertyMapping(propertyInfo, typeof(int), EmptyValueStrategy.SetToDefaultValue);
+            var mapping = new SinglePropertyMapping(propertyInfo, typeof(int));
 
             Assert.Throws<ArgumentNullException>("transformer", () => mapping.AddStringValueTransformer(null));
         }

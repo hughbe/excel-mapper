@@ -6,7 +6,7 @@ namespace ExcelMapper.Mappings.MultiItems
 {
     internal class ArrayMapping<T> : EnumerablePropertyMapping<T>
     {
-        public ArrayMapping(MemberInfo member, EmptyValueStrategy emptyValueStrategy) : base(member, emptyValueStrategy)
+        public ArrayMapping(MemberInfo member, SinglePropertyMapping<T> elementMapping) : base(member, elementMapping)
         {
         }
 

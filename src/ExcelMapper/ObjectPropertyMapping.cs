@@ -4,7 +4,7 @@ using ExcelDataReader;
 
 namespace ExcelMapper
 {
-    public class ObjectPropertyMapping<T> : PropertyMapping
+    public class ObjectPropertyMapping<T> : SinglePropertyMapping<T>
     {
         private ExcelClassMap<T> _classMap;
 
@@ -14,9 +14,9 @@ namespace ExcelMapper
             set => _classMap = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public ObjectPropertyMapping(MemberInfo member) : base(member)
+        public ObjectPropertyMapping(MemberInfo member, ExcelClassMap<T> classMap) : base(member)
         {
-            ClassMap = new ExcelClassMap<T>();
+            ClassMap = classMap ?? throw new ArgumentNullException(nameof(classMap));
         }
 
         public ObjectPropertyMapping<T> WithClassMap(Action<ExcelClassMap<T>> classMapFactory)

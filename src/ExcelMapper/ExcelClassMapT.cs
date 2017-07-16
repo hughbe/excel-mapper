@@ -28,7 +28,12 @@ namespace ExcelMapper
             MemberExpression memberExpression = ValidateExpression(expression);
             MemberInfo member = memberExpression.Member;
 
-            var mapping = new SinglePropertyMapping<TProperty>(member, EmptyValueStrategy);
+            bool canMap = member.AutoMap(EmptyValueStrategy, out SinglePropertyMapping<TProperty> mapping);
+            if (!canMap)
+            {
+                throw new ExcelMappingException($"Don't know how to map type {typeof(TProperty)}.");
+            }
+
             AddMapping(mapping);
             return mapping;
         }
@@ -36,45 +41,43 @@ namespace ExcelMapper
         public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, IEnumerable<TProperty>>> expression)
         {
             MemberExpression memberExpression = ValidateExpression(expression);
-
             return MultiMap<TProperty>(memberExpression);
         }
 
         public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, ICollection<TProperty>>> expression)
         {
             MemberExpression memberExpression = ValidateExpression(expression);
-
             return MultiMap<TProperty>(memberExpression);
         }
 
         public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, IList<TProperty>>> expression)
         {
             MemberExpression memberExpression = ValidateExpression(expression);
-
             return MultiMap<TProperty>(memberExpression);
         }
 
         public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, List<TProperty>>> expression)
         {
             MemberExpression memberExpression = ValidateExpression(expression);
-
             return MultiMap<TProperty>(memberExpression);
         }
 
         public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, TProperty[]>> expression)
         {
             MemberExpression memberExpression = ValidateExpression(expression);
-
-            var mapping = new ArrayMapping<TProperty>(memberExpression.Member, EmptyValueStrategy);
-            AddMapping(mapping);
-            return mapping;
+            return MultiMap<TProperty>(memberExpression);
         }
 
         public ObjectPropertyMapping<TProperty> MapObject<TProperty>(Expression<Func<T, TProperty>> expression)
         {
             MemberExpression memberExpression = ValidateExpression(expression);
+            MemberInfo member = memberExpression.Member;
 
-            var mapping = new ObjectPropertyMapping<TProperty>(memberExpression.Member);
+            if (!member.AutoMap(EmptyValueStrategy, out ObjectPropertyMapping<TProperty> mapping))
+            {
+                throw new ExcelMappingException($"Could not map object of type \"{typeof(TProperty)}\".");
+            }
+
             AddMapping(mapping);
             return mapping;
         }
@@ -88,22 +91,12 @@ namespace ExcelMapper
 
         private EnumerablePropertyMapping<TProperty> GetMultiMapping<TProperty>(MemberInfo member)
         {
-            Type type = member.MemberType();
-            TypeInfo typeInfo = type.GetTypeInfo();
-
-            if (typeInfo.IsInterface)
+            if (!member.AutoMap(EmptyValueStrategy, out EnumerablePropertyMapping<TProperty> mapping))
             {
-                if (typeInfo.IsAssignableFrom(typeof(List<TProperty>).GetTypeInfo()))
-                {
-                    return new InterfaceAssignableFromListMapping<TProperty>(member, EmptyValueStrategy);
-                }
-            }
-            else if (type.ImplementsInterface(typeof(ICollection<TProperty>)))
-            {
-                return new ConcreteICollectionMapping<TProperty>(type, member, EmptyValueStrategy);
+                throw new ExcelMappingException($"No known way to instantiate type \"{typeof(TProperty)}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
             }
 
-            throw new ExcelMappingException($"No known way to instantiate type \"{type}\". It must be an array, be assignable from List<T> or implement ICollection<T>.");
+            return mapping;
         }
     }
 }

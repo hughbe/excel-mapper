@@ -5,7 +5,6 @@ using ExcelDataReader;
 using ExcelMapper.Mappings;
 using ExcelMapper.Mappings.Readers;
 using ExcelMapper.Mappings.Support;
-using ExcelMapper.Utilities;
 
 namespace ExcelMapper
 {
@@ -46,21 +45,15 @@ namespace ExcelMapper
         public IFallbackItem EmptyFallback { get; set; }
         public IFallbackItem InvalidFallback { get; set; }
 
-        public SinglePropertyMapping(MemberInfo member, Type type, EmptyValueStrategy emptyValueStrategy) : base(member)
+        public SinglePropertyMapping(MemberInfo member, Type type) : base(member)
         {
             if (type == null)
             {
                 throw new ArgumentNullException(nameof(type));
             }
 
-            if (!Enum.IsDefined(typeof(EmptyValueStrategy), emptyValueStrategy))
-            {
-                throw new ArgumentException($"Invalid EmptyValueStategy \"{emptyValueStrategy}\".", nameof(emptyValueStrategy));
-            }
-
             Reader = new ColumnNameReader(member.Name);
             Type = type;
-            this.AutoMap(emptyValueStrategy);
         }
 
         public override object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
@@ -89,14 +82,18 @@ namespace ExcelMapper
             {
                 IStringValueMapper mappingItem = _mappingItems[i];
 
-                resultType  = mappingItem.GetProperty(readResult, ref value);
-                if (resultType  == PropertyMappingResultType.Success)
+                PropertyMappingResultType newResultType  = mappingItem.GetProperty(readResult, ref value);
+                if (newResultType == PropertyMappingResultType.Success)
                 {
                     return value;
                 }
+                else if (newResultType != PropertyMappingResultType.Continue)
+                {
+                    resultType = newResultType;
+                }
             }
 
-            if (resultType != PropertyMappingResultType.Success && InvalidFallback != null)
+            if (resultType != PropertyMappingResultType.Success && resultType != PropertyMappingResultType.SuccessIfNoOtherSuccess && InvalidFallback != null)
             {
                 return InvalidFallback.PerformFallback(sheet, rowIndex, readResult);
             }

@@ -30,6 +30,24 @@ namespace ExcelMapper.Tests
             Assert.Throws<ExcelMappingException>(() => Map<string>(p => p.ConcreteIEnumerable));
         }
 
+        [Fact]
+        public void MultiMap_CantMapIEnumerableElementType_ThrowsExcelMappingException()
+        {
+            Assert.Throws<ExcelMappingException>(() => Map(p => p.CantMapElementType));
+        }
+
+        [Fact]
+        public void MapObject_Interface_ThrowsExcelMappingException()
+        {
+            Assert.Throws<ExcelMappingException>(() => MapObject(p => p.UnknownInterfaceValue));
+        }
+
+        [Fact]
+        public void MapObject_InvalidMemberType_ThrowsExcelMappingException()
+        {
+            Assert.Throws<ExcelMappingException>(() => MapObject(p => p.InvalidMemberType));
+        }
+
         [Theory]
         [InlineData(EmptyValueStrategy.ThrowIfPrimitive)]
         [InlineData(EmptyValueStrategy.SetToDefaultValue)]

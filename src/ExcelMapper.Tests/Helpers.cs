@@ -31,8 +31,17 @@ namespace ExcelMapper.Tests
             public DateTime? NullableDateValue { get; set; }
             public IListInterface UnknownInterfaceValue { get; set; }
             public ConcreteIEnumerable ConcreteIEnumerable { get; set; }
+            public IList<IList<string>> CantMapElementType { get; set; }
+            public string[,] MultiDimensionalArray { get; set; }
+
+            public InvalidMemberType InvalidMemberType { get; set; }
 
             public event EventHandler Event { add { } remove { } }
+        }
+
+        public class InvalidMemberType
+        {
+            public IListInterface ConcreteIEnumerable { get; set; }
         }
 
         public interface IListInterface : IList<string>

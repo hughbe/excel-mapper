@@ -5,7 +5,7 @@ namespace ExcelMapper.Mappings.MultiItems
 {
     internal class InterfaceAssignableFromListMapping<T> : EnumerablePropertyMapping<T>
     {
-        public InterfaceAssignableFromListMapping(MemberInfo member, EmptyValueStrategy emptyValueStrategy) : base(member, emptyValueStrategy)
+        public InterfaceAssignableFromListMapping(MemberInfo member, SinglePropertyMapping<T> elementMapping) : base(member, elementMapping)
         {
         }
 

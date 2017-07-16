@@ -63,6 +63,21 @@ namespace ExcelMapper
             return mapping;
         }
 
+        public static TMapping WithMappingItems<TMapping>(this TMapping mapping, params IStringValueMapper[] mappings) where TMapping : ISinglePropertyMapping
+        {
+            if (mappings == null)
+            {
+                throw new ArgumentNullException(nameof(mappings));
+            }
+
+            foreach (IStringValueMapper mappingItem in mappings)
+            {
+                mapping.AddMappingItem(mappingItem);
+            }
+
+            return mapping;
+        }
+
         public static TMapping WithMapping<TMapping, T>(this TMapping mapping, IDictionary<string, T> mappingDictionary, IEqualityComparer<string> comparer = null) where TMapping : ISinglePropertyMapping<T>
         {
             var item = new DictionaryMapper<T>(mappingDictionary, comparer);

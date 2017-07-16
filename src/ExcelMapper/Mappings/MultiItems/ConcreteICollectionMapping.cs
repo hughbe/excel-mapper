@@ -8,7 +8,7 @@ namespace ExcelMapper.Mappings.MultiItems
     {
         public Type CollectionType { get; }
 
-        public ConcreteICollectionMapping(Type type, MemberInfo member, EmptyValueStrategy emptyValueStrategy) : base(member, emptyValueStrategy)
+        public ConcreteICollectionMapping(Type type, MemberInfo member, SinglePropertyMapping<T> elementMapping) : base(member, elementMapping)
         {
             CollectionType = type;
         }

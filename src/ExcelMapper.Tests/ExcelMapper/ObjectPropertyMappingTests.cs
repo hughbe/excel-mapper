@@ -11,7 +11,7 @@ namespace ExcelMapper.Tests
         {
             bool calledClassMapFactory = false;
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var mapping = new ObjectPropertyMapping<string>(propertyInfo);
+            var mapping = new ObjectPropertyMapping<string>(propertyInfo, new ExcelClassMap<string>());
             Action<ExcelClassMap<string>> classMapFactory = classMap =>
             {
                 calledClassMapFactory = true;
@@ -26,7 +26,7 @@ namespace ExcelMapper.Tests
         public void WithClassMap_NullClassMapFactory_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var mapping = new ObjectPropertyMapping<string>(propertyInfo);
+            var mapping = new ObjectPropertyMapping<string>(propertyInfo, new ExcelClassMap<string>());
 
             Assert.Throws<ArgumentNullException>("classMapFactory", () => mapping.WithClassMap((Action<ExcelClassMap<string>>)null));
         }
@@ -37,7 +37,7 @@ namespace ExcelMapper.Tests
             var classMap = new ExcelClassMap<string>();
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
 
-            var mapping = new ObjectPropertyMapping<string>(propertyInfo);
+            var mapping = new ObjectPropertyMapping<string>(propertyInfo, new ExcelClassMap<string>());
             Assert.Same(mapping, mapping.WithClassMap(classMap));
             Assert.Same(classMap, mapping.ClassMap);
         }
@@ -46,7 +46,7 @@ namespace ExcelMapper.Tests
         public void WithClassMap_NullClassMap_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var mapping = new ObjectPropertyMapping<string>(propertyInfo);
+            var mapping = new ObjectPropertyMapping<string>(propertyInfo, new ExcelClassMap<string>());
 
             Assert.Throws<ArgumentNullException>("classMap", () => mapping.WithClassMap((ExcelClassMap<string>)null));
         }

@@ -457,7 +457,7 @@ namespace ExcelMapper.Tests
                 Map(e => e.BoolValue);
                 Map(e => e.EnumValue);
                 Map(e => e.DateValue);
-                Map<int>(e => e.ArrayValue)
+                Map(e => e.ArrayValue)
                     .WithColumnNames("ArrayValue1", "ArrayValue2");
             }
         }
@@ -679,16 +679,19 @@ namespace ExcelMapper.Tests
         [Fact]
         public void ReadRow_Object_ReturnsExpected()
         {
-            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            using (var importer = Helpers.GetImporter("Objects.xlsx"))
             {
-                importer.Configuration.RegisterMapping<ObjectValueMapping>();
+                importer.Configuration.RegisterMapping<ObjectValueDefaultClassMapMapping>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
 
                 ObjectValue row1 = sheet.ReadRow<ObjectValue>();
                 Assert.Equal("a", row1.SubValue1.StringValue);
+                Assert.Equal(new string[] { "a", "b" }, row1.SubValue1.SplitStringValue);
                 Assert.Equal(1, row1.SubValue2.IntValue);
+                Assert.Equal(10, row1.SubValue2.SubValue.SubInt);
+                Assert.Equal("c", row1.SubValue2.SubValue.SubString);
             }
         }
 
@@ -701,18 +704,51 @@ namespace ExcelMapper.Tests
         public class SubValue1
         {
             public string StringValue { get; set; }
+            public string[] SplitStringValue { get; set; }
         }
 
         public class SubValue2
         {
             public int IntValue { get; set; }
+            public SubValue3 SubValue { get; set; }
         }
 
-        public class ObjectValueMapping : ExcelClassMap<ObjectValue>
+        public class SubValue3
         {
-            public ObjectValueMapping() : base()
+            public string SubString { get; set; }
+            public int SubInt { get; set; }
+        }
+
+        public class ObjectValueDefaultClassMapMapping : ExcelClassMap<ObjectValue>
+        {
+            public ObjectValueDefaultClassMapMapping() : base()
             {
-                MapObject(p => p.SubValue1).WithClassMap(m  =>
+                MapObject(p => p.SubValue1);
+                MapObject(p => p.SubValue2);
+            }
+        }
+
+        //[Fact]
+        public void ReadRow_ObjectWithCustomClassMap_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Objects.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<ObjectValueCustomClassMapMapping>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                ObjectValue row1 = sheet.ReadRow<ObjectValue>();
+                Assert.Equal("a", row1.SubValue1.StringValue);
+                Assert.Equal(1, row1.SubValue2.IntValue);
+            }
+        }
+
+        public class ObjectValueCustomClassMapMapping : ExcelClassMap<ObjectValue>
+        {
+            public ObjectValueCustomClassMapMapping() : base()
+            {
+                MapObject(p => p.SubValue1).WithClassMap(m =>
                 {
                     m.Map(s => s.StringValue);
                 });
@@ -725,8 +761,34 @@ namespace ExcelMapper.Tests
         {
             public SubValueMapping() : base()
             {
-                Map(s => s.IntValue)
-                    .WithColumnName("Int Value");
+                Map(s => s.IntValue);
+
+                MapObject(s => s.SubValue);
+            }
+        }
+
+        //[Fact]
+        public void ReadRow_ObjectInnerMapping_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<ObjectValueInnerMapping>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                ObjectValue row1 = sheet.ReadRow<ObjectValue>();
+                Assert.Equal("a", row1.SubValue1.StringValue);
+                Assert.Equal(1, row1.SubValue2.IntValue);
+            }
+        }
+
+        public class ObjectValueInnerMapping : ExcelClassMap<ObjectValue>
+        {
+            public ObjectValueInnerMapping() : base()
+            {
+                Map(p => p.SubValue1.StringValue);
+                Map(p => p.SubValue2.IntValue).WithColumnName("Int Value");
             }
         }
     }

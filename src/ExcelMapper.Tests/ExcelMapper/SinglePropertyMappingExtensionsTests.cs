@@ -107,6 +107,24 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void WithMappingItems_ValidMappingItems_ThrowsArgumentNullException()
+        {
+            SinglePropertyMapping<string> mapping = Map(t => t.Value);
+            IStringValueMapper mapper1 = Assert.Single(mapping.MappingItems);
+            IStringValueMapper mapper2 = new BoolMapper(); ;
+
+            Assert.Same(mapping, mapping.WithMappingItems(mapper2));
+            Assert.Equal(new IStringValueMapper[] { mapper1, mapper2 }, mapping.MappingItems);
+        }
+
+        [Fact]
+        public void WithMappingItems_NullMappingItems_ThrowsArgumentNullException()
+        {
+            SinglePropertyMapping<string> mapping = Map(t => t.Value);
+            Assert.Throws<ArgumentNullException>("mappings", () => mapping.WithMappingItems(null));
+        }
+
+        [Fact]
         public void WithMapping_ValidReader_Success()
         {
             var dictionaryMapping = new Dictionary<string, DateTime> { { "key", DateTime.MinValue } };

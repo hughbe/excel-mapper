@@ -14,9 +14,9 @@ namespace ExcelMapper
 
         public IMultipleValuesReader ColumnsReader { get; internal set; }
 
-        public EnumerablePropertyMapping(MemberInfo member, EmptyValueStrategy emptyValueStrategy) : base(member)
+        public EnumerablePropertyMapping(MemberInfo member, SinglePropertyMapping<T> elementMapping) : base(member)
         {
-            ElementMapping = new SinglePropertyMapping<T>(member, emptyValueStrategy);
+            ElementMapping = elementMapping ?? throw new ArgumentNullException(nameof(elementMapping));
 
             var columnReader = new ColumnNameReader(member.Name);
             ColumnsReader = new SplitColumnReader(columnReader); 

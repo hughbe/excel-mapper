@@ -14,7 +14,7 @@ namespace ExcelMapper.Mappings.Mappers.Tests
 
             object value = 1;
             PropertyMappingResultType result = item.GetProperty(new ReadResult(-1, stringValue), ref value);
-            Assert.Equal(PropertyMappingResultType.Continue, result);
+            Assert.Equal(PropertyMappingResultType.SuccessIfNoOtherSuccess, result);
             Assert.Same(stringValue, value);
         }
     }
