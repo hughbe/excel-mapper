@@ -48,6 +48,14 @@ namespace ExcelMapper.Tests
             Assert.Throws<ArgumentException>("emptyValueStrategy", () => new TestClassMap(emptyValueStrategy));
         }
 
+        [Fact]
+        public void MapObject_ClassMapFactory_ReturnsExpected()
+        {
+            var map = new TestClassMap(EmptyValueStrategy.ThrowIfPrimitive);
+            ObjectPropertyMapping<string> mapping = map.MapObject(t => t.Value);
+            Assert.NotNull(mapping.ClassMap);
+        }
+
         private class TestClassMap : ExcelClassMap<Helpers.TestClass>
         {
             public TestClassMap(EmptyValueStrategy emptyValueStrategy) : base(emptyValueStrategy) { }

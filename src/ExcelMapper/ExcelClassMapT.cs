@@ -70,6 +70,15 @@ namespace ExcelMapper
             return mapping;
         }
 
+        public ObjectPropertyMapping<TProperty> MapObject<TProperty>(Expression<Func<T, TProperty>> expression)
+        {
+            MemberExpression memberExpression = ValidateExpression(expression);
+
+            var mapping = new ObjectPropertyMapping<TProperty>(memberExpression.Member);
+            AddMapping(mapping);
+            return mapping;
+        }
+
         private EnumerablePropertyMapping<TProperty> MultiMap<TProperty>(MemberExpression memberExpression)
         {
             var mapping = GetMultiMapping<TProperty>(memberExpression.Member);

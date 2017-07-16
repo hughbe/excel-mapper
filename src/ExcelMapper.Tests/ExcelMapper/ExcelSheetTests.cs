@@ -675,5 +675,59 @@ namespace ExcelMapper.Tests
                 Map(u => u.Uri);
             }
         }
+
+        [Fact]
+        public void ReadRow_Object_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<ObjectValueMapping>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                ObjectValue row1 = sheet.ReadRow<ObjectValue>();
+                Assert.Equal("a", row1.SubValue1.StringValue);
+                Assert.Equal(1, row1.SubValue2.IntValue);
+            }
+        }
+
+        public class ObjectValue
+        {
+            public SubValue1 SubValue1 { get; set; }
+            public SubValue2 SubValue2 { get; set; }
+        }
+
+        public class SubValue1
+        {
+            public string StringValue { get; set; }
+        }
+
+        public class SubValue2
+        {
+            public int IntValue { get; set; }
+        }
+
+        public class ObjectValueMapping : ExcelClassMap<ObjectValue>
+        {
+            public ObjectValueMapping() : base()
+            {
+                MapObject(p => p.SubValue1).WithClassMap(m  =>
+                {
+                    m.Map(s => s.StringValue);
+                });
+
+                MapObject(p => p.SubValue2).WithClassMap(new SubValueMapping());
+            }
+        }
+
+        public class SubValueMapping : ExcelClassMap<SubValue2>
+        {
+            public SubValueMapping() : base()
+            {
+                Map(s => s.IntValue)
+                    .WithColumnName("Int Value");
+            }
+        }
     }
 }
