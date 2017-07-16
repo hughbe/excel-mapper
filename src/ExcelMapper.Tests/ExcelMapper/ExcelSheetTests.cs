@@ -297,6 +297,192 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRow_DoubleValueWithDefaultMapper_Success()
+        {
+            using (var importer = Helpers.GetImporter("Doubles.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<DoubleValueDefaultMapper>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                DoubleValue row1 = sheet.ReadRow<DoubleValue>();
+                Assert.Equal(2.2345, row1.Value);
+
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DoubleValue>());
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DoubleValue>());
+            }
+        }
+
+        public class DoubleValue
+        {
+            public double Value { get; set; }
+        }
+
+        public class DoubleValueDefaultMapper : ExcelClassMap<DoubleValue>
+        {
+            public DoubleValueDefaultMapper() : base()
+            {
+                Map(o => o.Value);
+            }
+        }
+
+        [Fact]
+        public void ReadRow_DoubleValueWithFallbackMapper_Success()
+        {
+            using (var importer = Helpers.GetImporter("Doubles.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<DoubleValueFallbackMapper>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                DoubleValue row1 = sheet.ReadRow<DoubleValue>();
+                Assert.Equal(2.2345, row1.Value);
+
+                DoubleValue row2 = sheet.ReadRow<DoubleValue>();
+                Assert.Equal(-10, row2.Value);
+
+                DoubleValue row3 = sheet.ReadRow<DoubleValue>();
+                Assert.Equal(10, row3.Value);
+            }
+        }
+
+        public class DoubleValueFallbackMapper : ExcelClassMap<DoubleValue>
+        {
+            public DoubleValueFallbackMapper() : base()
+            {
+                Map(o => o.Value)
+                    .WithEmptyFallback(-10)
+                    .WithInvalidFallback(10);
+            }
+        }
+
+        [Fact]
+        public void ReadRow_FloatValueWithDefaultMapper_Success()
+        {
+            using (var importer = Helpers.GetImporter("Doubles.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<FloatValueDefaultMapper>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                FloatValue row1 = sheet.ReadRow<FloatValue>();
+                Assert.Equal(2.2345f, row1.Value);
+
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FloatValue>());
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FloatValue>());
+            }
+        }
+
+        public class FloatValue
+        {
+            public float Value { get; set; }
+        }
+
+        public class FloatValueDefaultMapper : ExcelClassMap<FloatValue>
+        {
+            public FloatValueDefaultMapper() : base()
+            {
+                Map(o => o.Value);
+            }
+        }
+
+        [Fact]
+        public void ReadRow_FloatValueWithFallbackMapper_Success()
+        {
+            using (var importer = Helpers.GetImporter("Doubles.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<FloatValueFallbackMapper>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                FloatValue row1 = sheet.ReadRow<FloatValue>();
+                Assert.Equal(2.2345f, row1.Value);
+
+                FloatValue row2 = sheet.ReadRow<FloatValue>();
+                Assert.Equal(-10, row2.Value);
+
+                FloatValue row3 = sheet.ReadRow<FloatValue>();
+                Assert.Equal(10, row3.Value);
+            }
+        }
+
+        public class FloatValueFallbackMapper : ExcelClassMap<FloatValue>
+        {
+            public FloatValueFallbackMapper() : base()
+            {
+                Map(o => o.Value)
+                    .WithEmptyFallback(-10)
+                    .WithInvalidFallback(10);
+            }
+        }
+
+        [Fact]
+        public void ReadRow_DecimalValueWithDefaultMapper_Success()
+        {
+            using (var importer = Helpers.GetImporter("Doubles.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<DecimalValueDefaultMapper>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                DecimalValue row1 = sheet.ReadRow<DecimalValue>();
+                Assert.Equal(2.2345m, row1.Value);
+
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DecimalValue>());
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DecimalValue>());
+            }
+        }
+
+        public class DecimalValue
+        {
+            public decimal Value { get; set; }
+        }
+
+        public class DecimalValueDefaultMapper : ExcelClassMap<DecimalValue>
+        {
+            public DecimalValueDefaultMapper() : base()
+            {
+                Map(o => o.Value);
+            }
+        }
+
+        [Fact]
+        public void ReadRow_DecimalValueWithFallbackMapper_Success()
+        {
+            using (var importer = Helpers.GetImporter("Doubles.xlsx"))
+            {
+                importer.Configuration.RegisterMapping<DecimalValueFallbackMapper>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                DecimalValue row1 = sheet.ReadRow<DecimalValue>();
+                Assert.Equal(2.2345m, row1.Value);
+
+                DecimalValue row2 = sheet.ReadRow<DecimalValue>();
+                Assert.Equal(-10, row2.Value);
+
+                DecimalValue row3 = sheet.ReadRow<DecimalValue>();
+                Assert.Equal(10, row3.Value);
+            }
+        }
+
+        public class DecimalValueFallbackMapper : ExcelClassMap<DecimalValue>
+        {
+            public DecimalValueFallbackMapper() : base()
+            {
+                Map(o => o.Value)
+                    .WithEmptyFallback(-10m)
+                    .WithInvalidFallback(10m);
+            }
+        }
+
+        [Fact]
         public void ReadRow_Map_ReturnsExpected()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
