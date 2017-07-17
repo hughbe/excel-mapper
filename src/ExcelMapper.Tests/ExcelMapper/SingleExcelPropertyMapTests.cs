@@ -3,12 +3,13 @@ using System.Reflection;
 using ExcelMapper.Mappings;
 using ExcelMapper.Mappings.Fallbacks;
 using ExcelMapper.Mappings.Mappers;
+using ExcelMapper.Mappings.Readers;
 using ExcelMapper.Mappings.Transformers;
 using Xunit;
 
 namespace ExcelMapper.Tests
 {
-    public class SinglePropertyMapTests
+    public class SingleExcelPropertyMapTests
     {
         [Fact]
         public void Ctor_Member_Type_EmptyValueStrategy()
@@ -103,6 +104,28 @@ namespace ExcelMapper.Tests
             var propertyMap = new SingleExcelPropertyMap(propertyInfo);
 
             Assert.Throws<ArgumentNullException>("transformer", () => propertyMap.AddCellValueTransformer(null));
+        }
+
+        [Fact]
+        public void CellReader_SetValid_GetReturnsExpected()
+        {
+            var cellReader = new ColumnNameValueReader("ColumnName");
+            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
+            var propertyMap = new SingleExcelPropertyMap(propertyInfo)
+            {
+                CellReader = cellReader
+            };
+
+            Assert.Same(cellReader, propertyMap.CellReader);
+        }
+
+        [Fact]
+        public void CellReader_SetNull_ThrowsArgumentNullException()
+        {
+            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
+            var propertyMap = new SingleExcelPropertyMap(propertyInfo);
+
+            Assert.Throws<ArgumentNullException>("value", () => propertyMap.CellReader = null);
         }
 
         private class TestClass

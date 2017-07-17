@@ -184,7 +184,7 @@ namespace ExcelMapper
         {
             Expression expressionBody = expression.Body;
             var expressions = new Stack<MemberExpression>();
-            while (expressionBody != null)
+            while (true)
             {
                 if (!(expressionBody is MemberExpression memberExpressionBody))
                 {

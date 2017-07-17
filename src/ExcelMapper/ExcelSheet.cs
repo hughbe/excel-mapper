@@ -60,8 +60,10 @@ namespace ExcelMapper
                 throw new ExcelMappingException($"Already read heading in sheet \"{Name}\".");
             }
 
-            // TODO: check for invalid.
-            Reader.Read();
+            if (!Reader.Read())
+            {
+                throw new ExcelMappingException($"Sheet \"{Name}\" has no rows.");
+            }
 
             var heading = new ExcelHeading(Reader);
             Heading = heading;

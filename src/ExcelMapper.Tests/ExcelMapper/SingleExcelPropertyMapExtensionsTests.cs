@@ -10,7 +10,7 @@ using Xunit;
 
 namespace ExcelMapper.Tests
 {
-    public class SinglePropertyMappingExtensionsTests : ExcelClassMap<Helpers.TestClass>
+    public class SingleExcelPropertyMapExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         [Fact]
         public void WithColumnName_ValidColumnName_Success()

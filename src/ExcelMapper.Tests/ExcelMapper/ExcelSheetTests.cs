@@ -58,6 +58,18 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadHeading_NoRows_ThrowsExcelMappingException()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.ReadSheet();
+
+                ExcelSheet emptySheet = importer.ReadSheet();
+                Assert.Throws<ExcelMappingException>(() => emptySheet.ReadHeading());
+            }
+        }
+
+        [Fact]
         public void ReadRow_NoSuchMapping_ThrowsExcelMappingException()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
@@ -100,6 +112,17 @@ namespace ExcelMapper.Tests
 
                 Assert.NotNull(sheet.Heading);
                 Assert.True(sheet.HasHeading);
+            }
+        }
+
+        [Fact]
+        public void ReadRow_CantMapType_ThrowsExcelMappingException()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<Helpers.IListInterface>());
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IConvertible>());
             }
         }
 
@@ -669,7 +692,9 @@ namespace ExcelMapper.Tests
             public ICollection<bool> ICollectionBool { get; set; }
             public IList<string> IListString { get; set; }
             public List<string> ListString { get; set; }
+#pragma warning disable 0649
             public SortedSet<string> _concreteICollection;
+#pragma warning restore 0649
         }
 
         private class MultiMapRowMap : ExcelClassMap<MultiMapRow>

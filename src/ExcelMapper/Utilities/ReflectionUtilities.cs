@@ -44,21 +44,18 @@ namespace ExcelMapper.Utilities
             {
                 return property.PropertyType;
             }
+            else if (member is FieldInfo field)
+            {
+                return field.FieldType;
+            }
 
-            Debug.Assert(member is FieldInfo);
-            return ((FieldInfo)member).FieldType;
+            throw new ArgumentException($"Member \"{member.Name}\" is not a property or field.", nameof(member));
         }
 
         public static Type GetNullableTypeOrThis(this Type type, out bool isNullable)
         {
             isNullable = type.IsNullable();
-
-            if (isNullable)
-            {
-                return type.GenericTypeArguments[0];
-            }
-
-            return type;
+            return isNullable ? type.GenericTypeArguments[0] : type;
         }
 
         public static bool IsNullable(this Type type)

@@ -15,7 +15,7 @@ namespace ExcelMapper
     /// <summary>
     /// Extensions on SinglePropertyMapping to enable fluent "With" method chaining.
     /// </summary>
-    public static class SinglePropertyMappingExtensions
+    public static class SinglePropertyMapExtensions
     {
         /// <summary>
         /// Sets the reader of the property map to read the value of a single cell contained in the column with

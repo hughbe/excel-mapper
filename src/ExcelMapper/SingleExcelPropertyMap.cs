@@ -16,12 +16,16 @@ namespace ExcelMapper
     {
         private readonly List<ICellValueTransformer> _cellValueTransformers = new List<ICellValueTransformer>();
         private readonly List<ICellValueMapper> _cellValueMappers = new List<ICellValueMapper>();
+        private ICellValueReader _reader;
 
         /// <summary>
         /// Gets or sets the object that takes a sheet and row index and produces the value of a cell.
-        /// TODO: check for null. 
         /// </summary>
-        public ICellValueReader CellReader { get; set; }
+        public ICellValueReader CellReader
+        {
+            get => _reader;
+            set => _reader = value ?? throw new ArgumentNullException(nameof(value));
+        }
 
         /// <summary>
         /// Gets the list of objects that take the initial string value read from a cell and
@@ -110,7 +114,7 @@ namespace ExcelMapper
 
             if (readResult.StringValue == null && EmptyFallback != null)
             {
-                return EmptyFallback.PerformFallback(sheet, rowIndex, readResult);
+                return EmptyFallback.PerformFallback(sheet, rowIndex, readResult, Member);
             }
 
             PropertyMapperResultType resultType = PropertyMapperResultType.Success;
@@ -132,7 +136,7 @@ namespace ExcelMapper
 
             if (resultType != PropertyMapperResultType.Success && resultType != PropertyMapperResultType.SuccessIfNoOtherSuccess && InvalidFallback != null)
             {
-                return InvalidFallback.PerformFallback(sheet, rowIndex, readResult);
+                return InvalidFallback.PerformFallback(sheet, rowIndex, readResult, Member);
             }
 
             return value;

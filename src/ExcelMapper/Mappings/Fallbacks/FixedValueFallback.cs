@@ -1,4 +1,6 @@
-﻿namespace ExcelMapper.Mappings.Fallbacks
+﻿using System.Reflection;
+
+namespace ExcelMapper.Mappings.Fallbacks
 {
     /// <summary>
     /// A fallback that returns a fixed given value when falling back.
@@ -16,6 +18,6 @@
         /// <param name="value">The fixed value returned when falling back.</param>
         public FixedValueFallback(object value) => Value = value;        
 
-        public object PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellValueResult result) => Value;
+        public object PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellValueResult result, MemberInfo member) => Value;
     }
 }
