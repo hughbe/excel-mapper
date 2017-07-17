@@ -3,10 +3,21 @@ using ExcelMapper.Utilities;
 
 namespace ExcelMapper.Mappings.Mappers
 {
-    public class ChangeTypeMapper : IStringValueMapper
+    /// <summary>
+    /// A mapper that tries to map the value of a cell to an IConvertible object using Convert.ChangeType.
+    /// </summary>
+    public class ChangeTypeMapper : ICellValueMapper
     {
+        /// <summary>
+        /// Gets the type of the IConvertible object to map the value of a cell to.
+        /// </summary>
         public Type Type { get; }
 
+        /// <summary>
+        /// Constructs a mapper that tries to map the value of a cell to an IConvertible object using
+        /// Convert.ChangeType.
+        /// </summary>
+        /// <param name="type">The type of the IConvertible object to map the value of a cell to.</param>
         public ChangeTypeMapper(Type type)
         {
             if (type == null)
@@ -22,7 +33,7 @@ namespace ExcelMapper.Mappings.Mappers
             Type = type;
         }
 
-        public PropertyMappingResultType GetProperty(ReadResult readResult, ref object value)
+        public PropertyMappingResultType GetProperty(ReadCellValueResult readResult, ref object value)
         {
             try
             {

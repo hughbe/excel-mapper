@@ -2,9 +2,12 @@
 
 namespace ExcelMapper.Mappings.Mappers
 {
-    public class UriMapper : IStringValueMapper
+    /// <summary>
+    /// Tries to map the value of a cell to an absolute Uri.
+    /// </summary>
+    public class UriMapper : ICellValueMapper
     {
-        public PropertyMappingResultType GetProperty(ReadResult readResult, ref object value)
+        public PropertyMappingResultType GetProperty(ReadCellValueResult readResult, ref object value)
         {
             if (!Uri.TryCreate(readResult.StringValue, UriKind.Absolute, out Uri result))
             {

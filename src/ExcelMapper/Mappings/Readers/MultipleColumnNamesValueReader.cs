@@ -7,13 +7,21 @@ using ExcelMapper.Utilities;
 namespace ExcelMapper.Mappings.Readers
 {
     /// <summary>
-    /// Reads a multiple values of one or more columns given the zero-based index of each column.
+    /// Reads a multiple values of one or more columns given the name of each column.
     /// </summary>
-    public sealed class MultipleColumnNamesReader : IMultipleValuesReader
+    public sealed class MultipleColumnNamesValueReader : IMultipleCellValuesReader
     {
+        /// <summary>
+        /// Gets the names of each column to read.
+        /// </summary>
         public string[] ColumnNames { get; }
 
-        public MultipleColumnNamesReader(string[] columnNames)
+        /// <summary>
+        /// Constructs a reader that reads the values of one or more columns with a given name
+        /// and returns the string value of for each column.
+        /// </summary>
+        /// <param name="columnNames">The names of each column to read.</param>
+        public MultipleColumnNamesValueReader(string[] columnNames)
         {
             if (columnNames == null)
             {
@@ -36,12 +44,12 @@ namespace ExcelMapper.Mappings.Readers
             ColumnNames = columnNames;
         }
 
-        public IEnumerable<ReadResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public IEnumerable<ReadCellValueResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
             return ColumnNames.Select(columnName =>
             {
                 int index = sheet.Heading.GetColumnIndex(columnName);
-                return new ReadResult(index, reader.GetString(index));
+                return new ReadCellValueResult(index, reader.GetString(index));
             });
         }
     }

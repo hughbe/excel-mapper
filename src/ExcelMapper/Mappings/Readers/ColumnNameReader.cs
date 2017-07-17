@@ -4,13 +4,20 @@ using ExcelDataReader;
 namespace ExcelMapper.Mappings.Readers
 {
     /// <summary>
-    /// Reads a single value of a column given the name of the column.
+    /// Reads the value of a single cell given the name of it's column.
     /// </summary>
-    public sealed class ColumnNameReader : ISingleValueReader
+    public sealed class ColumnNameValueReader : ICellValueReader
     {
+        /// <summary>
+        /// The name of the column to read.
+        /// </summary>
         public string ColumnName { get; }
 
-        public ColumnNameReader(string columnName)
+        /// <summary>
+        /// Constructs a reader that reads the value of a single cell given the name of it's column.
+        /// </summary>
+        /// <param name="columnName">The name of the column to read.</param>
+        public ColumnNameValueReader(string columnName)
         {
             if (columnName == null)
             {
@@ -25,10 +32,10 @@ namespace ExcelMapper.Mappings.Readers
             ColumnName = columnName;
         }
 
-        public ReadResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public ReadCellValueResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
             int index = sheet.Heading.GetColumnIndex(ColumnName);
-            return new ReadResult(index, reader.GetString(index));
+            return new ReadCellValueResult(index, reader.GetString(index));
         }
     }
 }

@@ -4,14 +4,14 @@ namespace ExcelMapper.Mappings.Support
 {
     public interface ISinglePropertyMapping
     {
-        ISingleValueReader Reader { get; set; }
+        ICellValueReader CellReader { get; set; }
         IFallbackItem EmptyFallback { get; set; }
         IFallbackItem InvalidFallback { get; set; }
 
-        IEnumerable<IStringValueTransformer> StringValueTransformers { get; }
-        void AddStringValueTransformer(IStringValueTransformer transformer);
+        IEnumerable<ICellValueTransformer> CellValueTransformers { get; }
+        void AddCellValueTransformer(ICellValueTransformer transformer);
 
-        IEnumerable<IStringValueMapper> MappingItems { get; }
-        void AddMappingItem(IStringValueMapper item);
+        IEnumerable<ICellValueMapper> CellValueMappers { get; }
+        void AddCellValueMapper(ICellValueMapper item);
     }
 }

@@ -17,29 +17,29 @@ namespace ExcelMapper
         public static T WithColumnName<T>(this T mapping, string columnName) where T : ISinglePropertyMapping
         {
             return mapping
-                .WithReader(new ColumnNameReader(columnName));
+                .WithReader(new ColumnNameValueReader(columnName));
         }
 
         public static T WithColumnIndex<T>(this T mapping, int columnIndex) where T : ISinglePropertyMapping
         {
             return mapping
-                .WithReader(new ColumnIndexReader(columnIndex));
+                .WithReader(new ColumnIndexValueReader(columnIndex));
         }
 
-        public static T WithReader<T>(this T mapping, ISingleValueReader reader) where T : ISinglePropertyMapping
+        public static T WithReader<T>(this T mapping, ICellValueReader reader) where T : ISinglePropertyMapping
         {
             if (reader == null)
             {
                 throw new ArgumentNullException(nameof(reader));
             }
 
-            if (mapping.Reader is OptionalColumnReader optionalMapping)
+            if (mapping.CellReader is OptionalCellValueReader optionalMapping)
             {
                 optionalMapping.InnerReader = reader;
             }
             else
             {
-                mapping.Reader = reader;
+                mapping.CellReader = reader;
             }
 
             return mapping;
@@ -47,32 +47,32 @@ namespace ExcelMapper
 
         public static T MakeOptional<T>(this T mapping) where T : ISinglePropertyMapping
         {
-            if (mapping.Reader is OptionalColumnReader)
+            if (mapping.CellReader is OptionalCellValueReader)
             {
                 throw new ExcelMappingException("Mapping is already optional.");
             }
 
-            mapping.Reader = new OptionalColumnReader(mapping.Reader);
+            mapping.CellReader = new OptionalCellValueReader(mapping.CellReader);
             return mapping;
         }
 
         public static T WithTrim<T>(this T mapping) where T : ISinglePropertyMapping
         {
-            var transformer = new TrimStringTransformer();
-            mapping.AddStringValueTransformer(transformer);
+            var transformer = new TrimCellValueTransformer();
+            mapping.AddCellValueTransformer(transformer);
             return mapping;
         }
 
-        public static TMapping WithMappingItems<TMapping>(this TMapping mapping, params IStringValueMapper[] mappings) where TMapping : ISinglePropertyMapping
+        public static TMapping WithMappingItems<TMapping>(this TMapping mapping, params ICellValueMapper[] mappings) where TMapping : ISinglePropertyMapping
         {
             if (mappings == null)
             {
                 throw new ArgumentNullException(nameof(mappings));
             }
 
-            foreach (IStringValueMapper mappingItem in mappings)
+            foreach (ICellValueMapper mappingItem in mappings)
             {
-                mapping.AddMappingItem(mappingItem);
+                mapping.AddCellValueMapper(mappingItem);
             }
 
             return mapping;
@@ -81,28 +81,28 @@ namespace ExcelMapper
         public static TMapping WithMapping<TMapping, T>(this TMapping mapping, IDictionary<string, T> mappingDictionary, IEqualityComparer<string> comparer = null) where TMapping : ISinglePropertyMapping<T>
         {
             var item = new DictionaryMapper<T>(mappingDictionary, comparer);
-            mapping.AddMappingItem(item);
+            mapping.AddCellValueMapper(item);
             return mapping;
         }
 
-        public static SinglePropertyMapping<DateTime> WithDateFormats(this SinglePropertyMapping<DateTime> mapping, params string[] formats)
+        public static SingleExcelPropertyMap<DateTime> WithDateFormats(this SingleExcelPropertyMap<DateTime> mapping, params string[] formats)
         {
             mapping.AddFormats(formats);
             return mapping;
         }
 
-        public static SinglePropertyMapping<DateTime> WithDateFormats(this SinglePropertyMapping<DateTime> mapping, IEnumerable<string> formats) 
+        public static SingleExcelPropertyMap<DateTime> WithDateFormats(this SingleExcelPropertyMap<DateTime> mapping, IEnumerable<string> formats) 
         {
             return mapping.WithDateFormats(formats?.ToArray());
         }
 
-        public static SinglePropertyMapping<DateTime?> WithDateFormats(this SinglePropertyMapping<DateTime?> mapping, params string[] formats)
+        public static SingleExcelPropertyMap<DateTime?> WithDateFormats(this SingleExcelPropertyMap<DateTime?> mapping, params string[] formats)
         {
             mapping.AddFormats(formats);
             return mapping;
         }
 
-        public static SinglePropertyMapping<DateTime?> WithDateFormats(this SinglePropertyMapping<DateTime?> mapping, IEnumerable<string> formats)
+        public static SingleExcelPropertyMap<DateTime?> WithDateFormats(this SingleExcelPropertyMap<DateTime?> mapping, IEnumerable<string> formats)
         {
             return mapping.WithDateFormats(formats?.ToArray());
         }
@@ -119,11 +119,11 @@ namespace ExcelMapper
                 throw new ArgumentException("Formats cannot be empty.", nameof(formats));
             }
 
-            DateTimeMapper dateTimeItem = (DateTimeMapper)mapping.MappingItems.FirstOrDefault(item => item is DateTimeMapper);
+            DateTimeMapper dateTimeItem = (DateTimeMapper)mapping.CellValueMappers.FirstOrDefault(item => item is DateTimeMapper);
             if (dateTimeItem == null)
             {
                 dateTimeItem = new DateTimeMapper();
-                mapping.AddMappingItem(dateTimeItem);
+                mapping.AddCellValueMapper(dateTimeItem);
             }
 
             dateTimeItem.Formats = formats;
@@ -136,7 +136,7 @@ namespace ExcelMapper
                 throw new ArgumentNullException(nameof(converter));
             }
 
-            ConvertUsingMappingDelegate actualConverter = (ReadResult mapResult, ref object value) =>
+            ConvertUsingMappingDelegate actualConverter = (ReadCellValueResult mapResult, ref object value) =>
             {
                 try
                 {
@@ -150,7 +150,7 @@ namespace ExcelMapper
             };
 
             var item = new ConvertUsingMapper(actualConverter);
-            mapping.AddMappingItem(item);
+            mapping.AddCellValueMapper(item);
             return mapping;
         }
 

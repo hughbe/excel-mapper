@@ -9,11 +9,19 @@ namespace ExcelMapper.Mappings.Readers
     /// <summary>
     /// Reads a multiple values of one or more columns given the name of each column.
     /// </summary>
-    public sealed class MultipleColumnIndicesReader : IMultipleValuesReader
+    public sealed class MultipleColumnIndicesValueReader : IMultipleCellValuesReader
     {
+        /// <summary>
+        /// Gets the zero-based index of each column to read.
+        /// </summary>
         public int[] ColumnIndices { get; }
 
-        public MultipleColumnIndicesReader(int[] columnIndices)
+        /// <summary>
+        /// Constructs a reader that reads the values of one or more columns with a given zero-based
+        /// index and returns the string value of for each column.
+        /// </summary>
+        /// <param name="columnIndices">The list of zero-based column indices to read.</param>
+        public MultipleColumnIndicesValueReader(int[] columnIndices)
         {
             if (columnIndices == null)
             {
@@ -36,9 +44,9 @@ namespace ExcelMapper.Mappings.Readers
             ColumnIndices = columnIndices;
         }
 
-        public IEnumerable<ReadResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public IEnumerable<ReadCellValueResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            return ColumnIndices.Select(i => new ReadResult(i, reader.GetString(i)));
+            return ColumnIndices.Select(i => new ReadCellValueResult(i, reader.GetString(i)));
         }
     }
 }

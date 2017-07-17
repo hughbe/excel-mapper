@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using ExcelDataReader;
+using ExcelMapper.Utilities;
 
 namespace ExcelMapper
 {
@@ -75,8 +76,18 @@ namespace ExcelMapper
 
             CurrentIndex++;
 
-            ExcelClassMap mapping = Configuration.GetMapping<T>();
-            value = (T)mapping.Execute(this, CurrentIndex, Reader);
+            if (!Configuration.TryGetClassMap<T>(out ExcelClassMap classMap))
+            {
+                if (!AutoMapper.AutoMapClass(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<T> autoClassMap))
+                {
+                    throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\".");
+                }
+
+                classMap = autoClassMap;
+                Configuration.RegisterClassMap(autoClassMap);
+            }
+
+            value = (T)classMap.Execute(this, CurrentIndex, Reader);
             return true;
         }
     }

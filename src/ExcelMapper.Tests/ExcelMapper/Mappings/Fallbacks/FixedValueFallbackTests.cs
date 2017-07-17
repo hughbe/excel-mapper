@@ -13,7 +13,7 @@ namespace ExcelMapper.Mappings.Fallbacks.Tests
             var fallback = new FixedValueFallback(value);
             Assert.Same(value, value);
 
-            object result = fallback.PerformFallback(null, 0, new ReadResult());
+            object result = fallback.PerformFallback(null, 0, new ReadCellValueResult());
             Assert.Same(value, result);
         }
     }

@@ -9,13 +9,13 @@ namespace ExcelMapper
 {
     public class ExcelClassMap<T> : ExcelClassMap
     {
-        public EmptyValueStrategy EmptyValueStrategy { get; }
+        public FallbackStrategy EmptyValueStrategy { get; }
 
         public ExcelClassMap() : base(typeof(T)) { }
 
-        public ExcelClassMap(EmptyValueStrategy emptyValueStrategy) : this()
+        public ExcelClassMap(FallbackStrategy emptyValueStrategy) : this()
         {
-            if (!Enum.IsDefined(typeof(EmptyValueStrategy), emptyValueStrategy))
+            if (!Enum.IsDefined(typeof(FallbackStrategy), emptyValueStrategy))
             {
                 throw new ArgumentException($"Invalid value \"{emptyValueStrategy}\".", nameof(emptyValueStrategy));
             }
@@ -23,12 +23,12 @@ namespace ExcelMapper
             EmptyValueStrategy = emptyValueStrategy;
         }
 
-        public SinglePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
+        public SingleExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
             MemberInfo member = memberExpression.Member;
 
-            bool canMap = member.AutoMap(EmptyValueStrategy, out SinglePropertyMapping<TProperty> mapping);
+            bool canMap = member.AutoMap(EmptyValueStrategy, out SingleExcelPropertyMap<TProperty> mapping);
             if (!canMap)
             {
                 throw new ExcelMappingException($"Don't know how to map type {typeof(TProperty)}.");
@@ -38,7 +38,7 @@ namespace ExcelMapper
             return mapping;
         }
 
-        public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, IEnumerable<TProperty>>> expression)
+        public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, IEnumerable<TProperty>>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
             var mapping = GetMultiMapping<TProperty>(memberExpression.Member);
@@ -47,7 +47,7 @@ namespace ExcelMapper
             return mapping;
         }
 
-        public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, ICollection<TProperty>>> expression)
+        public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, ICollection<TProperty>>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
             var mapping = GetMultiMapping<TProperty>(memberExpression.Member);
@@ -56,7 +56,7 @@ namespace ExcelMapper
             return mapping;
         }
 
-        public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, IList<TProperty>>> expression)
+        public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, IList<TProperty>>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
             var mapping = GetMultiMapping<TProperty>(memberExpression.Member);
@@ -65,7 +65,7 @@ namespace ExcelMapper
             return mapping;
         }
 
-        public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, List<TProperty>>> expression)
+        public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, List<TProperty>>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
             var mapping = GetMultiMapping<TProperty>(memberExpression.Member);
@@ -74,7 +74,7 @@ namespace ExcelMapper
             return mapping;
         }
 
-        public EnumerablePropertyMapping<TProperty> Map<TProperty>(Expression<Func<T, TProperty[]>> expression)
+        public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty[]>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
             var mapping = GetMultiMapping<TProperty>(memberExpression.Member);
@@ -83,12 +83,12 @@ namespace ExcelMapper
             return mapping;
         }
 
-        public ObjectPropertyMapping<TProperty> MapObject<TProperty>(Expression<Func<T, TProperty>> expression)
+        public ObjectExcelPropertyMap<TProperty> MapObject<TProperty>(Expression<Func<T, TProperty>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
             MemberInfo member = memberExpression.Member;
 
-            if (!member.AutoMapObject(EmptyValueStrategy, out ObjectPropertyMapping<TProperty> mapping))
+            if (!member.AutoMapObject(EmptyValueStrategy, out ObjectExcelPropertyMap<TProperty> mapping))
             {
                 throw new ExcelMappingException($"Could not map object of type \"{typeof(TProperty)}\".");
             }
@@ -97,9 +97,9 @@ namespace ExcelMapper
             return mapping;
         }
 
-        private EnumerablePropertyMapping<TProperty> GetMultiMapping<TProperty>(MemberInfo member)
+        private EnumerableExcelPropertyMap<TProperty> GetMultiMapping<TProperty>(MemberInfo member)
         {
-            if (!member.AutoMapEnumerable(EmptyValueStrategy, out EnumerablePropertyMapping<TProperty> mapping))
+            if (!member.AutoMapEnumerable(EmptyValueStrategy, out EnumerableExcelPropertyMap<TProperty> mapping))
             {
                 throw new ExcelMappingException($"No known way to instantiate type \"{typeof(TProperty)}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
             }
@@ -117,7 +117,7 @@ namespace ExcelMapper
             return rootMemberExpression;
         }
 
-        protected internal void AddMapping<TProperty>(PropertyMapping mapping, Expression<Func<T, TProperty>> expression)
+        protected internal void AddMapping<TProperty>(ExcelPropertyMap mapping, Expression<Func<T, TProperty>> expression)
         {
             Expression expressionBody = expression.Body;
             var expressions = new Stack<MemberExpression>();

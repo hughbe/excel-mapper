@@ -3,22 +3,25 @@ using ExcelDataReader;
 
 namespace ExcelMapper.Mappings.Readers
 {
-    public class OptionalColumnReader : ISingleValueReader
+    /// <summary>
+    /// Reads the value of a cell and 
+    /// </summary>
+    public class OptionalCellValueReader : ICellValueReader
     {
-        public ISingleValueReader _innerReader;
+        private ICellValueReader _innerReader;
 
-        public ISingleValueReader InnerReader
+        public ICellValueReader InnerReader
         {
             get => _innerReader;
             set => _innerReader = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public OptionalColumnReader(ISingleValueReader innerReader)
+        public OptionalCellValueReader(ICellValueReader innerReader)
         {
             InnerReader = innerReader ?? throw new ArgumentNullException(nameof(innerReader));
         }
 
-        public ReadResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public ReadCellValueResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
             try
             {
@@ -26,7 +29,7 @@ namespace ExcelMapper.Mappings.Readers
             }
             catch
             {
-                return new ReadResult(0, null);
+                return new ReadCellValueResult(0, null);
             }
         }
     }

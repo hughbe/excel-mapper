@@ -3,12 +3,16 @@ using System.Globalization;
 
 namespace ExcelMapper.Mappings.Mappers
 {
-    public class DateTimeMapper : IStringValueMapper
+    /// <summary>
+    /// A mapper that tries to map the value of a cell to a DateTime.
+    /// </summary>
+    public class DateTimeMapper : ICellValueMapper
     {
         private string[] _formats = new string[] { "G" };
 
         /// <summary>
-        /// Defaults to "G" - the default Excel format.
+        /// Gets or sets the date formats used to map the value to a DateTime.
+        /// This defaults to "G" - the default Excel format.
         /// </summary>
         public string[] Formats
         {
@@ -29,11 +33,17 @@ namespace ExcelMapper.Mappings.Mappers
             }
         }
 
+        /// <summary>
+        /// Gets or sets the IFormatProvider used to map the value to a DateTime.
+        /// </summary>
         public IFormatProvider Provider { get; set; }
 
+        /// <summary>
+        /// Gets or sets the DateTimeStyles used to map the value to a DateTime.
+        /// </summary>
         public DateTimeStyles Style { get; set; }
 
-        public PropertyMappingResultType GetProperty(ReadResult readResult, ref object value)
+        public PropertyMappingResultType GetProperty(ReadCellValueResult readResult, ref object value)
         {
             if (!DateTime.TryParseExact(readResult.StringValue, Formats, Provider, Style, out DateTime result))
             {

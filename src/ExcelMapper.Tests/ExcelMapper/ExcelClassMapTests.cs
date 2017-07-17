@@ -166,9 +166,9 @@ namespace ExcelMapper.Tests
         }
 
         [Theory]
-        [InlineData(EmptyValueStrategy.ThrowIfPrimitive)]
-        [InlineData(EmptyValueStrategy.SetToDefaultValue)]
-        public void Ctor_EmptyValueStrategy(EmptyValueStrategy emptyValueStrategy)
+        [InlineData(FallbackStrategy.ThrowIfPrimitive)]
+        [InlineData(FallbackStrategy.SetToDefaultValue)]
+        public void Ctor_EmptyValueStrategy(FallbackStrategy emptyValueStrategy)
         {
             var map = new TestClassMap(emptyValueStrategy);
             Assert.Equal(emptyValueStrategy, map.EmptyValueStrategy);
@@ -176,9 +176,9 @@ namespace ExcelMapper.Tests
         }
 
         [Theory]
-        [InlineData(EmptyValueStrategy.ThrowIfPrimitive - 1)]
-        [InlineData(EmptyValueStrategy.SetToDefaultValue + 1)]
-        public void Ctor_InvalidEmptyValueStrategy_ThrowsArgumentException(EmptyValueStrategy emptyValueStrategy)
+        [InlineData(FallbackStrategy.ThrowIfPrimitive - 1)]
+        [InlineData(FallbackStrategy.SetToDefaultValue + 1)]
+        public void Ctor_InvalidEmptyValueStrategy_ThrowsArgumentException(FallbackStrategy emptyValueStrategy)
         {
             Assert.Throws<ArgumentException>("emptyValueStrategy", () => new TestClassMap(emptyValueStrategy));
         }
@@ -186,14 +186,14 @@ namespace ExcelMapper.Tests
         [Fact]
         public void MapObject_ClassMapFactory_ReturnsExpected()
         {
-            var map = new TestClassMap(EmptyValueStrategy.ThrowIfPrimitive);
-            ObjectPropertyMapping<string> mapping = map.MapObject(t => t.Value);
+            var map = new TestClassMap(FallbackStrategy.ThrowIfPrimitive);
+            ObjectExcelPropertyMap<string> mapping = map.MapObject(t => t.Value);
             Assert.NotNull(mapping.ClassMap);
         }
 
         private class TestClassMap : ExcelClassMap<Helpers.TestClass>
         {
-            public TestClassMap(EmptyValueStrategy emptyValueStrategy) : base(emptyValueStrategy) { }
+            public TestClassMap(FallbackStrategy emptyValueStrategy) : base(emptyValueStrategy) { }
         }
     }
 }

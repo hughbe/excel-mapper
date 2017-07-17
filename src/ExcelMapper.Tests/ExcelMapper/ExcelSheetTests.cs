@@ -74,7 +74,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                importer.Configuration.RegisterMapping<PrimitiveSheet1Mapping>();
+                importer.Configuration.RegisterClassMap<PrimitiveSheet1Map>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 IEnumerable<PrimitiveSheet1> rows = sheet.ReadRows<PrimitiveSheet1>().ToArray();
@@ -90,7 +90,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                importer.Configuration.RegisterMapping<PrimitiveSheet1Mapping>();
+                importer.Configuration.RegisterClassMap<PrimitiveSheet1Map>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -108,10 +108,10 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                importer.Configuration.RegisterMapping<PrimitiveSheet1Mapping>();
+                importer.Configuration.RegisterClassMap<PrimitiveSheet1Map>();
 
                 ExcelSheet sheet = importer.ReadSheet();
-                sheet.ReadRows<PrimitiveSheet1>().ToArray();
+                Assert.NotEmpty(sheet.ReadRows<PrimitiveSheet1>().ToArray());
 
                 Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<PrimitiveSheet1>());
                 Assert.False(sheet.TryReadRow(out PrimitiveSheet1 row));
@@ -120,11 +120,11 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_ObjectValueWithDefaultMapper_Success()
+        public void ReadRow_ObjectValueWithDefaultMap_Success()
         {
             using (var importer = Helpers.GetImporter("Objects.xlsx"))
             {
-                importer.Configuration.RegisterMapping<ObjectValueDefaultMapper>();
+                importer.Configuration.RegisterClassMap<ObjectValueDefaultMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -142,20 +142,20 @@ namespace ExcelMapper.Tests
             public object Value { get; set; }
         }
 
-        public class ObjectValueDefaultMapper : ExcelClassMap<ObjectValue>
+        private class ObjectValueDefaultMap : ExcelClassMap<ObjectValue>
         {
-            public ObjectValueDefaultMapper() : base()
+            public ObjectValueDefaultMap()
             {
                 Map(o => o.Value);
             }
         }
 
         [Fact]
-        public void ReadRow_ObjectValueWithFallbackMapper_Success()
+        public void ReadRow_ObjectValueWithFallbackMap_Success()
         {
             using (var importer = Helpers.GetImporter("Objects.xlsx"))
             {
-                importer.Configuration.RegisterMapping<ObjectValueFallbackMapper>();
+                importer.Configuration.RegisterClassMap<ObjectValueFallbackMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -168,9 +168,9 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class ObjectValueFallbackMapper : ExcelClassMap<ObjectValue>
+        private class ObjectValueFallbackMap : ExcelClassMap<ObjectValue>
         {
-            public ObjectValueFallbackMapper() : base()
+            public ObjectValueFallbackMap()
             {
                 Map(o => o.Value)
                     .WithEmptyFallback("empty")
@@ -179,11 +179,11 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_StringValueWithDefaultMapper_Success()
+        public void ReadRow_StringValueWithDefaultMap_Success()
         {
             using (var importer = Helpers.GetImporter("Objects.xlsx"))
             {
-                importer.Configuration.RegisterMapping<StringValueDefaultMapper>();
+                importer.Configuration.RegisterClassMap<StringValueDefaultMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -201,20 +201,20 @@ namespace ExcelMapper.Tests
             public string Value { get; set; }
         }
 
-        public class StringValueDefaultMapper : ExcelClassMap<StringValue>
+        private class StringValueDefaultMap : ExcelClassMap<StringValue>
         {
-            public StringValueDefaultMapper() : base()
+            public StringValueDefaultMap()
             {
                 Map(o => o.Value);
             }
         }
 
         [Fact]
-        public void ReadRow_StringValueWithFallbackMapper_Success()
+        public void ReadRow_StringValueWithFallbackMap_Success()
         {
             using (var importer = Helpers.GetImporter("Objects.xlsx"))
             {
-                importer.Configuration.RegisterMapping<StringValueFallbackMapper>();
+                importer.Configuration.RegisterClassMap<StringValueFallbackMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -227,9 +227,9 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class StringValueFallbackMapper : ExcelClassMap<StringValue>
+        private class StringValueFallbackMap : ExcelClassMap<StringValue>
         {
-            public StringValueFallbackMapper() : base()
+            public StringValueFallbackMap()
             {
                 Map(o => o.Value)
                     .WithEmptyFallback("empty")
@@ -238,57 +238,57 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_IConvertibleValueWithDefaultMapper_Success()
+        public void ReadRow_IConvertibleValueWithDefaultMap_Success()
         {
             using (var importer = Helpers.GetImporter("Objects.xlsx"))
             {
-                importer.Configuration.RegisterMapping<IConvertibleValueDefaultMapper>();
+                importer.Configuration.RegisterClassMap<ConvertibleValueDefaultMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
 
-                IConvertibleValue row1 = sheet.ReadRow<IConvertibleValue>();
+                ConvertibleValue row1 = sheet.ReadRow<ConvertibleValue>();
                 Assert.Equal("value", row1.Value);
 
-                IConvertibleValue row2 = sheet.ReadRow<IConvertibleValue>();
+                ConvertibleValue row2 = sheet.ReadRow<ConvertibleValue>();
                 Assert.Null(row2.Value);
             }
         }
 
-        public class IConvertibleValue
+        private class ConvertibleValue
         {
             public IConvertible Value { get; set; }
         }
 
-        public class IConvertibleValueDefaultMapper : ExcelClassMap<IConvertibleValue>
+        private class ConvertibleValueDefaultMap : ExcelClassMap<ConvertibleValue>
         {
-            public IConvertibleValueDefaultMapper() : base()
+            public ConvertibleValueDefaultMap()
             {
                 Map(o => o.Value);
             }
         }
 
         [Fact]
-        public void ReadRow_IConvertibleValueWithFallbackMapper_Success()
+        public void ReadRow_IConvertibleValueWithFallbackMap_Success()
         {
             using (var importer = Helpers.GetImporter("Objects.xlsx"))
             {
-                importer.Configuration.RegisterMapping<IConvertibleValueFallbackMapper>();
+                importer.Configuration.RegisterClassMap<ConvertibleValueFallbackMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
 
-                IConvertibleValue row1 = sheet.ReadRow<IConvertibleValue>();
+                ConvertibleValue row1 = sheet.ReadRow<ConvertibleValue>();
                 Assert.Equal("value", row1.Value);
 
-                IConvertibleValue row2 = sheet.ReadRow<IConvertibleValue>();
+                ConvertibleValue row2 = sheet.ReadRow<ConvertibleValue>();
                 Assert.Equal("empty", row2.Value);
             }
         }
 
-        public class IConvertibleValueFallbackMapper : ExcelClassMap<IConvertibleValue>
+        private class ConvertibleValueFallbackMap : ExcelClassMap<ConvertibleValue>
         {
-            public IConvertibleValueFallbackMapper() : base()
+            public ConvertibleValueFallbackMap()
             {
                 Map(o => o.Value)
                     .WithEmptyFallback("empty")
@@ -297,11 +297,11 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_DoubleValueWithDefaultMapper_Success()
+        public void ReadRow_DoubleValueWithDefaultMap_Success()
         {
             using (var importer = Helpers.GetImporter("Doubles.xlsx"))
             {
-                importer.Configuration.RegisterMapping<DoubleValueDefaultMapper>();
+                importer.Configuration.RegisterClassMap<DoubleValueDefaultMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -314,25 +314,25 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class DoubleValue
+        private class DoubleValue
         {
             public double Value { get; set; }
         }
 
-        public class DoubleValueDefaultMapper : ExcelClassMap<DoubleValue>
+        private class DoubleValueDefaultMap : ExcelClassMap<DoubleValue>
         {
-            public DoubleValueDefaultMapper() : base()
+            public DoubleValueDefaultMap()
             {
                 Map(o => o.Value);
             }
         }
 
         [Fact]
-        public void ReadRow_DoubleValueWithFallbackMapper_Success()
+        public void ReadRow_DoubleValueWithFallbackMap_Success()
         {
             using (var importer = Helpers.GetImporter("Doubles.xlsx"))
             {
-                importer.Configuration.RegisterMapping<DoubleValueFallbackMapper>();
+                importer.Configuration.RegisterClassMap<DoubleValueFallbackMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -348,9 +348,9 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class DoubleValueFallbackMapper : ExcelClassMap<DoubleValue>
+        private class DoubleValueFallbackMap : ExcelClassMap<DoubleValue>
         {
-            public DoubleValueFallbackMapper() : base()
+            public DoubleValueFallbackMap()
             {
                 Map(o => o.Value)
                     .WithEmptyFallback(-10)
@@ -359,11 +359,11 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_FloatValueWithDefaultMapper_Success()
+        public void ReadRow_FloatValueWithDefaultMap_Success()
         {
             using (var importer = Helpers.GetImporter("Doubles.xlsx"))
             {
-                importer.Configuration.RegisterMapping<FloatValueDefaultMapper>();
+                importer.Configuration.RegisterClassMap<FloatValueDefaultMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -376,25 +376,25 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class FloatValue
+        private class FloatValue
         {
             public float Value { get; set; }
         }
 
-        public class FloatValueDefaultMapper : ExcelClassMap<FloatValue>
+        private class FloatValueDefaultMap : ExcelClassMap<FloatValue>
         {
-            public FloatValueDefaultMapper() : base()
+            public FloatValueDefaultMap()
             {
                 Map(o => o.Value);
             }
         }
 
         [Fact]
-        public void ReadRow_FloatValueWithFallbackMapper_Success()
+        public void ReadRow_FloatValueWithFallbackMap_Success()
         {
             using (var importer = Helpers.GetImporter("Doubles.xlsx"))
             {
-                importer.Configuration.RegisterMapping<FloatValueFallbackMapper>();
+                importer.Configuration.RegisterClassMap<FloatValueFallbackMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -410,9 +410,9 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class FloatValueFallbackMapper : ExcelClassMap<FloatValue>
+        private class FloatValueFallbackMap : ExcelClassMap<FloatValue>
         {
-            public FloatValueFallbackMapper() : base()
+            public FloatValueFallbackMap()
             {
                 Map(o => o.Value)
                     .WithEmptyFallback(-10)
@@ -421,11 +421,11 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_DecimalValueWithDefaultMapper_Success()
+        public void ReadRow_DecimalValueWithDefaultMap_Success()
         {
             using (var importer = Helpers.GetImporter("Doubles.xlsx"))
             {
-                importer.Configuration.RegisterMapping<DecimalValueDefaultMapper>();
+                importer.Configuration.RegisterClassMap<DecimalValueDefaultMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -438,25 +438,25 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class DecimalValue
+        private class DecimalValue
         {
             public decimal Value { get; set; }
         }
 
-        public class DecimalValueDefaultMapper : ExcelClassMap<DecimalValue>
+        private class DecimalValueDefaultMap : ExcelClassMap<DecimalValue>
         {
-            public DecimalValueDefaultMapper() : base()
+            public DecimalValueDefaultMap()
             {
                 Map(o => o.Value);
             }
         }
 
         [Fact]
-        public void ReadRow_DecimalValueWithFallbackMapper_Success()
+        public void ReadRow_DecimalValueWithFallbackMap_Success()
         {
             using (var importer = Helpers.GetImporter("Doubles.xlsx"))
             {
-                importer.Configuration.RegisterMapping<DecimalValueFallbackMapper>();
+                importer.Configuration.RegisterClassMap<DecimalValueFallbackMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -472,9 +472,9 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class DecimalValueFallbackMapper : ExcelClassMap<DecimalValue>
+        private class DecimalValueFallbackMap : ExcelClassMap<DecimalValue>
         {
-            public DecimalValueFallbackMapper() : base()
+            public DecimalValueFallbackMap()
             {
                 Map(o => o.Value)
                     .WithEmptyFallback(-10m)
@@ -487,7 +487,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                importer.Configuration.RegisterMapping<PrimitiveSheet1Mapping>();
+                importer.Configuration.RegisterClassMap<PrimitiveSheet1Map>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -538,7 +538,7 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class PrimitiveSheet1
+        private class PrimitiveSheet1
         {
             public int IntValue { get; set; }
             public string StringValue { get; set; }
@@ -551,7 +551,7 @@ namespace ExcelMapper.Tests
             public string TrimmedValue { get; set; }
         }
 
-        public enum PrimitiveSheet1Enum
+        private enum PrimitiveSheet1Enum
         {
             Unknown = 1,
             Empty,
@@ -559,9 +559,9 @@ namespace ExcelMapper.Tests
             NGO
         }
 
-        public class PrimitiveSheet1Mapping : ExcelClassMap<PrimitiveSheet1>
+        private class PrimitiveSheet1Map : ExcelClassMap<PrimitiveSheet1>
         {
-            public PrimitiveSheet1Mapping() : base()
+            public PrimitiveSheet1Map()
             {
                 Map(p => p.IntValue)
                     .WithColumnName("Int Value")
@@ -597,7 +597,7 @@ namespace ExcelMapper.Tests
 
                 Map(p => p.ArrayValue)
                     .WithSeparators(',', ';')
-                    .WithElementMapping(e => e
+                    .WithElementMap(e => e
                         .WithEmptyFallback("empty")
                     );
 
@@ -618,7 +618,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("MultiMap.xlsx"))
             {
-                importer.Configuration.RegisterMapping(new MultiMapRowMapping());
+                importer.Configuration.RegisterClassMap(new MultiMapRowMap());
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -661,7 +661,7 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class MultiMapRow
+        private class MultiMapRow
         {
             public int[] MultiMapName { get; set; }
             public string[] MultiMapIndex { get; set; }
@@ -672,13 +672,13 @@ namespace ExcelMapper.Tests
             public SortedSet<string> _concreteICollection;
         }
 
-        public class MultiMapRowMapping : ExcelClassMap<MultiMapRow>
+        private class MultiMapRowMap : ExcelClassMap<MultiMapRow>
         {
-            public MultiMapRowMapping() : base()
+            public MultiMapRowMap()
             {
                 Map(p => p.MultiMapName)
                     .WithColumnNames("MultiMapName1", "MultiMapName2", "MultiMapName3")
-                    .WithElementMapping((SinglePropertyMapping<int> e) => e
+                    .WithElementMap(e => e
                         .WithEmptyFallback(-1)
                         .WithInvalidFallback(-2)
                     );
@@ -688,13 +688,13 @@ namespace ExcelMapper.Tests
 
                 Map(p => p.IEnumerableInt)
                     .WithColumnNames(new List<string> { "IEnumerableInt1", "IEnumerableInt2" })
-                    .WithElementMapping(e => e
+                    .WithElementMap(e => e
                         .WithValueFallback(default(int))
                     );
 
                 Map(p => p.ICollectionBool)
                     .WithColumnIndices(new List<int> { 7, 8 })
-                    .WithElementMapping((SinglePropertyMapping<bool> e) => e
+                    .WithElementMap(e => e
                         .WithValueFallback(default(bool))
                     );
 
@@ -714,7 +714,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("MultiMap.xlsx"))
             {
-                importer.Configuration.RegisterMapping(new SplitWithSeparatorMapping());
+                importer.Configuration.RegisterClassMap(new SplitWithSeparatorMap());
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -746,9 +746,9 @@ namespace ExcelMapper.Tests
             public string[] CommaSeparatorWithColumnIndexAcrossMultiColumnIndices { get; set; }
         }
 
-        public class SplitWithSeparatorMapping : ExcelClassMap<SplitWithSeparatorClass>
+        public class SplitWithSeparatorMap : ExcelClassMap<SplitWithSeparatorClass>
         {
-            public SplitWithSeparatorMapping() : base()
+            public SplitWithSeparatorMap()
             {
                 Map(p => p.CommaSeparator);
 
@@ -781,7 +781,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("EmptyValues.xlsx"))
             {
-                importer.Configuration.RegisterMapping(new EmptyValueStrategyMapping());
+                importer.Configuration.RegisterClassMap(new EmptyValueStrategyMap());
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -811,9 +811,9 @@ namespace ExcelMapper.Tests
             Test = 1
         }
 
-        public class EmptyValueStrategyMapping : ExcelClassMap<EmptyValues>
+        public class EmptyValueStrategyMap : ExcelClassMap<EmptyValues>
         {
-            public EmptyValueStrategyMapping() : base(EmptyValueStrategy.SetToDefaultValue)
+            public EmptyValueStrategyMap() : base(FallbackStrategy.SetToDefaultValue)
             {
                 Map(e => e.IntValue);
                 Map(e => e.StringValue);
@@ -830,7 +830,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("EmptyValues.xlsx"))
             {
-                importer.Configuration.RegisterMapping(new NullableValuesMapping());
+                importer.Configuration.RegisterClassMap(new NullableValuesMap());
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -853,7 +853,7 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class NullableValues
+        private class NullableValues
         {
             public int? IntValue { get; set; }
             public bool? BoolValue { get; set; }
@@ -863,14 +863,14 @@ namespace ExcelMapper.Tests
             public int?[] ArrayValue { get; set; }
         }
 
-        public enum NullableValuesEnum
+        private enum NullableValuesEnum
         {
             Test = 1
         }
 
-        public class NullableValuesMapping : ExcelClassMap<NullableValues>
+        private class NullableValuesMap : ExcelClassMap<NullableValues>
         {
-            public NullableValuesMapping() : base(EmptyValueStrategy.SetToDefaultValue)
+            public NullableValuesMap() : base(FallbackStrategy.SetToDefaultValue)
             {
                 Map(n => n.IntValue);
                 Map(n => n.BoolValue);
@@ -885,11 +885,11 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_OptionalMapping_ReturnsExpected()
+        public void ReadRow_OptionalMap_ReturnsExpected()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                importer.Configuration.RegisterMapping<OptionalValueMapping>();
+                importer.Configuration.RegisterClassMap<OptionalValueMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -903,7 +903,7 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class OptionalValue
+        private class OptionalValue
         {
             public int NoSuchColumnNoName { get; set; }
 
@@ -914,9 +914,9 @@ namespace ExcelMapper.Tests
             public int NoSuchColumnWithIndexAfter { get; set; }
         }
 
-        public class OptionalValueMapping : ExcelClassMap<OptionalValue>
+        private class OptionalValueMap : ExcelClassMap<OptionalValue>
         {
-            public OptionalValueMapping()
+            public OptionalValueMap()
             {
                 Map(v => v.NoSuchColumnNoName)
                     .MakeOptional()
@@ -945,11 +945,11 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_ConvertUsingMapping_ReturnsExpected()
+        public void ReadRow_ConvertUsingMap_ReturnsExpected()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                importer.Configuration.RegisterMapping<ConvertUsingValueMapping>();
+                importer.Configuration.RegisterClassMap<ConvertUsingValueMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -959,14 +959,14 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class ConvertUsingValue
+        private class ConvertUsingValue
         {
             public string StringValue { get; set; }
         }
 
-        public class ConvertUsingValueMapping : ExcelClassMap<ConvertUsingValue>
+        private class ConvertUsingValueMap : ExcelClassMap<ConvertUsingValue>
         {
-            public ConvertUsingValueMapping()
+            public ConvertUsingValueMap()
             {
                 Map(c => c.StringValue)
                     .WithConverter(s => s + "extra");
@@ -978,7 +978,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Uris.xlsx"))
             {
-                importer.Configuration.RegisterMapping<UriValueFallbackMapping>();
+                importer.Configuration.RegisterClassMap<UriValueFallbackMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -999,7 +999,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Uris.xlsx"))
             {
-                importer.Configuration.RegisterMapping<UriDefaultFallbackMapping>();
+                importer.Configuration.RegisterClassMap<UriDefaultFallbackMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -1016,14 +1016,14 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class UriValue
+        private class UriValue
         {
             public Uri Uri { get; set; }
         }
 
-        public class UriValueFallbackMapping : ExcelClassMap<UriValue>
+        private class UriValueFallbackMap : ExcelClassMap<UriValue>
         {
-            public UriValueFallbackMapping() : base()
+            public UriValueFallbackMap()
             {
                 Map(u => u.Uri)
                     .WithEmptyFallback(new Uri("http://empty.com/"))
@@ -1031,9 +1031,9 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class UriDefaultFallbackMapping : ExcelClassMap<UriValue>
+        private class UriDefaultFallbackMap : ExcelClassMap<UriValue>
         {
-            public UriDefaultFallbackMapping() : base()
+            public UriDefaultFallbackMap()
             {
                 Map(u => u.Uri);
             }
@@ -1044,7 +1044,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("NestedObjects.xlsx"))
             {
-                importer.Configuration.RegisterMapping<ObjectValueDefaultClassMapMapping>();
+                importer.Configuration.RegisterClassMap<ObjectValueDefaultClassMapMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -1058,33 +1058,33 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class NestedObjectValue
+        private class NestedObjectValue
         {
             public SubValue1 SubValue1 { get; set; }
             public SubValue2 SubValue2 { get; set; }
         }
 
-        public class SubValue1
+        private class SubValue1
         {
             public string StringValue { get; set; }
             public string[] SplitStringValue { get; set; }
         }
 
-        public class SubValue2
+        private class SubValue2
         {
             public int IntValue { get; set; }
             public SubValue3 SubValue { get; set; }
         }
 
-        public class SubValue3
+        private class SubValue3
         {
             public string SubString { get; set; }
             public int SubInt { get; set; }
         }
 
-        public class ObjectValueDefaultClassMapMapping : ExcelClassMap<NestedObjectValue>
+        private class ObjectValueDefaultClassMapMap : ExcelClassMap<NestedObjectValue>
         {
-            public ObjectValueDefaultClassMapMapping() : base()
+            public ObjectValueDefaultClassMapMap()
             {
                 MapObject(p => p.SubValue1);
                 MapObject(p => p.SubValue2);
@@ -1096,7 +1096,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("NestedObjects.xlsx"))
             {
-                importer.Configuration.RegisterMapping<ObjectValueCustomClassMapMapping>();
+                importer.Configuration.RegisterClassMap<ObjectValueCustomClassMapMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -1110,9 +1110,9 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class ObjectValueCustomClassMapMapping : ExcelClassMap<NestedObjectValue>
+        private class ObjectValueCustomClassMapMap : ExcelClassMap<NestedObjectValue>
         {
-            public ObjectValueCustomClassMapMapping() : base()
+            public ObjectValueCustomClassMapMap()
             {
                 MapObject(p => p.SubValue1).WithClassMap(m =>
                 {
@@ -1120,13 +1120,13 @@ namespace ExcelMapper.Tests
                     m.Map(s => s.SplitStringValue);
                 });
 
-                MapObject(p => p.SubValue2).WithClassMap(new SubValueMapping());
+                MapObject(p => p.SubValue2).WithClassMap(new SubValueMap());
             }
         }
 
-        public class SubValueMapping : ExcelClassMap<SubValue2>
+        private class SubValueMap : ExcelClassMap<SubValue2>
         {
-            public SubValueMapping() : base()
+            public SubValueMap()
             {
                 Map(s => s.IntValue);
 
@@ -1135,11 +1135,11 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_ObjectInnerMapping_ReturnsExpected()
+        public void ReadRow_ObjectInnerMap_ReturnsExpected()
         {
             using (var importer = Helpers.GetImporter("NestedObjects.xlsx"))
             {
-                importer.Configuration.RegisterMapping<ObjectValueInnerMapping>();
+                importer.Configuration.RegisterClassMap<ObjectValueInnerMap>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
@@ -1153,9 +1153,9 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class ObjectValueInnerMapping : ExcelClassMap<NestedObjectValue>
+        private class ObjectValueInnerMap : ExcelClassMap<NestedObjectValue>
         {
-            public ObjectValueInnerMapping() : base()
+            public ObjectValueInnerMap()
             {
                 Map(p => p.SubValue1.StringValue);
                 Map(p => p.SubValue1.SplitStringValue);

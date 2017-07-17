@@ -5,68 +5,51 @@ namespace ExcelMapper
 {
     public class ExcelImporterConfiguration
     {
-        private List<ExcelClassMap> Mappings { get; } = new List<ExcelClassMap>();
+        private List<ExcelClassMap> ClassMaps { get; } = new List<ExcelClassMap>();
 
         internal ExcelImporterConfiguration() { }
 
-        public bool TryGetMapping(Type type, out ExcelClassMap mapping)
+        public bool TryGetClassMap(Type classType, out ExcelClassMap classMap)
         {
-            if (type == null)
+            if (classType == null)
             {
-                throw new ArgumentNullException(nameof(type));
+                throw new ArgumentNullException(nameof(classType));
             }
 
-            foreach (ExcelClassMap registeredMapping in Mappings)
+            foreach (ExcelClassMap registeredMap in ClassMaps)
             {
-                if (registeredMapping.Type == type)
+                if (registeredMap.Type == classType)
                 {
-                    mapping = registeredMapping;
+                    classMap = registeredMap;
                     return true;
                 }
             }
 
-            mapping = null;
+            classMap = null;
             return false;
         }
 
-        public bool TryGetMapping<T>(out ExcelClassMap mapping) => TryGetMapping(typeof(T), out mapping);
+        public bool TryGetClassMap<T>(out ExcelClassMap mapping) => TryGetClassMap(typeof(T), out mapping);
 
-        public ExcelClassMap GetMapping(Type type)
+        public void RegisterClassMap<T>() where T : ExcelClassMap, new()
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            if (!TryGetMapping(type, out ExcelClassMap mapping))
-            {
-                throw new ExcelMappingException($"No registered mapping for type \"{type.FullName}\".");
-            }
-
-            return mapping;
+            T classMap = Activator.CreateInstance<T>();
+            RegisterClassMap(classMap);
         }
 
-        public ExcelClassMap GetMapping<T>() => GetMapping(typeof(T));
-
-        public void RegisterMapping<T>() where T : ExcelClassMap, new()
+        public void RegisterClassMap(ExcelClassMap classMap)
         {
-            T mapping = Activator.CreateInstance<T>();
-            RegisterMapping(mapping);
-        }
-
-        public void RegisterMapping(ExcelClassMap mapping)
-        {
-            if (mapping == null)
+            if (classMap == null)
             {
-                throw new ArgumentNullException(nameof(mapping));
+                throw new ArgumentNullException(nameof(classMap));
             }
 
-            if (TryGetMapping(mapping.Type, out ExcelClassMap registeredMapping))
+            if (TryGetClassMap(classMap.Type, out ExcelClassMap registeredClassMap))
             {
-                throw new ExcelMappingException($"Mapping already type \"{mapping.Type.FullName}\"");
+                throw new ExcelMappingException($"Class map already type \"{classMap.Type.FullName}\"");
             }
 
-            Mappings.Add(mapping);
+            ClassMaps.Add(classMap);
         }
 
         public Func<ExcelSheet, bool> HasHeading { get; set; }

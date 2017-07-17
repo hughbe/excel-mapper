@@ -5,18 +5,18 @@ using Xunit;
 
 namespace ExcelMapper.Tests
 {
-    public class ExcelPropertyMappingTests
+    public class ExcelPropertyMapTests
     {
         [Fact]
         public void Ctor_PropertyInfoMember_Success()
         {
             MemberInfo propertyInfo = typeof(ClassWithEvent).GetProperty(nameof(ClassWithEvent.Property));
 
-            var mapping = new SubPropertyMapping(propertyInfo);
-            Assert.Same(propertyInfo, mapping.Member);
+            var propertyMap = new SubPropertyMap(propertyInfo);
+            Assert.Same(propertyInfo, propertyMap.Member);
 
             var instance = new ClassWithEvent();
-            mapping.SetPropertyFactory(instance, 10);
+            propertyMap.SetPropertyFactory(instance, 10);
             Assert.Equal(10, instance.Property);
         }
 
@@ -25,32 +25,32 @@ namespace ExcelMapper.Tests
         {
             MemberInfo fieldInfo = typeof(ClassWithEvent).GetField(nameof(ClassWithEvent._field));
 
-            var mapping = new SubPropertyMapping(fieldInfo);
-            Assert.Same(fieldInfo, mapping.Member);
+            var propertyMap = new SubPropertyMap(fieldInfo);
+            Assert.Same(fieldInfo, propertyMap.Member);
 
             var instance = new ClassWithEvent();
-            mapping.SetPropertyFactory(instance, 10);
+            propertyMap.SetPropertyFactory(instance, 10);
             Assert.Equal(10, instance._field);
         }
 
         [Fact]
         public void Ctor_NullMember_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("member", () => new SubPropertyMapping(null));
+            Assert.Throws<ArgumentNullException>("member", () => new SubPropertyMap(null));
         }
 
         [Fact]
         public void Ctor_MemberNotFieldOrProperty_ThrowsArgumentException()
         {
             MemberInfo eventInfo = typeof(ClassWithEvent).GetEvent(nameof(ClassWithEvent.Event));
-            Assert.Throws<ArgumentException>("member", () => new SubPropertyMapping(eventInfo));
+            Assert.Throws<ArgumentException>("member", () => new SubPropertyMap(eventInfo));
         }
 
         [Fact]
         public void Ctor_PropertyReadOnly_ThrowsArgumentException()
         {
             MemberInfo propertyInfo = typeof(ClassWithEvent).GetProperty(nameof(ClassWithEvent.ReadOnlyProperty));
-            Assert.Throws<ArgumentException>("member", () => new SubPropertyMapping(propertyInfo));
+            Assert.Throws<ArgumentException>("member", () => new SubPropertyMap(propertyInfo));
         }
 
         private class ClassWithEvent
@@ -65,9 +65,9 @@ namespace ExcelMapper.Tests
             public int ReadOnlyProperty { get; }
         }
 
-        private class SubPropertyMapping : PropertyMapping
+        private class SubPropertyMap : ExcelPropertyMap
         {
-            public SubPropertyMapping(MemberInfo member) : base(member) { }
+            public SubPropertyMap(MemberInfo member) : base(member) { }
 
             public override object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
             {

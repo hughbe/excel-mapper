@@ -6,106 +6,92 @@ namespace ExcelMapper.Tests
     public class ExcelImporterConfigurationTests
     {
         [Fact]
-        public void RegisterMapping_ValidMappingType_Success()
+        public void RegisterClassMap_ValidClassMapType_Success()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                importer.Configuration.RegisterMapping<TestMap>();
+                importer.Configuration.RegisterClassMap<TestMap>();
 
-                Assert.True(importer.Configuration.TryGetMapping<int>(out ExcelClassMap mapping));
-                Assert.IsType<TestMap>(mapping);
+                Assert.True(importer.Configuration.TryGetClassMap<int>(out ExcelClassMap classMap));
+                Assert.IsType<TestMap>(classMap);
 
-                Assert.True(importer.Configuration.TryGetMapping(typeof(int), out mapping));
-                Assert.IsType<TestMap>(mapping);
-
-                Assert.IsType<TestMap>(importer.Configuration.GetMapping<int>());
-                Assert.IsType<TestMap>(importer.Configuration.GetMapping(typeof(int)));
+                Assert.True(importer.Configuration.TryGetClassMap(typeof(int), out classMap));
+                Assert.IsType<TestMap>(classMap);
             }
         }
 
         [Fact]
-        public void RegisterMapping_ValidMappingObject_Success()
+        public void RegisterClassMap_ValidClassMapObject_Success()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
                 var map = new TestMap();
-                importer.Configuration.RegisterMapping(map);
+                importer.Configuration.RegisterClassMap(map);
 
-                Assert.True(importer.Configuration.TryGetMapping<int>(out ExcelClassMap mapping));
-                Assert.Same(map, mapping);
+                Assert.True(importer.Configuration.TryGetClassMap<int>(out ExcelClassMap classMap));
+                Assert.Same(map, classMap);
 
-                Assert.True(importer.Configuration.TryGetMapping(typeof(int), out mapping));
-                Assert.Same(map, mapping);
-
-                Assert.Same(map, importer.Configuration.GetMapping<int>());
-                Assert.Same(map, importer.Configuration.GetMapping(typeof(int)));
+                Assert.True(importer.Configuration.TryGetClassMap(typeof(int), out classMap));
+                Assert.Same(map, classMap);
             }
         }
 
         [Fact]
-        public void GetMapping_NullMapping_ThrowsArgumentNullException()
+        public void TryGetClassMap_NullClassType_ThrowsArgumentNullException()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                ExcelClassMap mapping = null;
-
-                Assert.Throws<ArgumentNullException>("type", () => importer.Configuration.GetMapping(null));
-                Assert.Throws<ArgumentNullException>("type", () => importer.Configuration.TryGetMapping(null, out mapping));
-                Assert.Null(mapping);
+                ExcelClassMap classMap = null;                
+                Assert.Throws<ArgumentNullException>("classType", () => importer.Configuration.TryGetClassMap(null, out classMap));
+                Assert.Null(classMap);
             }
         }
 
         [Fact]
-        public void GetMapping_NoSuchMapping_ThrowsExcelMappingException()
+        public void TryGetClassMap_NoSuchClassType_ReturnsFalse()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                importer.Configuration.RegisterMapping<OtherTestMap>();
+                importer.Configuration.RegisterClassMap<OtherTestMap>();
 
-                Assert.False(importer.Configuration.TryGetMapping<TestMap>(out ExcelClassMap mapping));
-                Assert.Null(mapping);
+                Assert.False(importer.Configuration.TryGetClassMap<TestMap>(out ExcelClassMap classMap));
+                Assert.Null(classMap);
 
-                Assert.False(importer.Configuration.TryGetMapping(typeof(TestMap), out mapping));
-                Assert.Null(mapping);
-
-                Assert.Throws<ExcelMappingException>(() => importer.Configuration.GetMapping<TestMap>());
-                Assert.Throws<ExcelMappingException>(() => importer.Configuration.GetMapping(typeof(TestMap)));
+                Assert.False(importer.Configuration.TryGetClassMap(typeof(TestMap), out classMap));
+                Assert.Null(classMap);
             }
         }
 
         [Fact]
-        public void GetMapping_NoMappings_ThrowsExcelMappingException()
+        public void TryGetClassMap_NoRegisteredClassMaps_ReturnsFalse()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.False(importer.Configuration.TryGetMapping<TestMap>(out ExcelClassMap mapping));
-                Assert.Null(mapping);
+                Assert.False(importer.Configuration.TryGetClassMap<TestMap>(out ExcelClassMap classMap));
+                Assert.Null(classMap);
 
-                Assert.False(importer.Configuration.TryGetMapping(typeof(TestMap), out mapping));
-                Assert.Null(mapping);
-
-                Assert.Throws<ExcelMappingException>(() => importer.Configuration.GetMapping<TestMap>());
-                Assert.Throws<ExcelMappingException>(() => importer.Configuration.GetMapping(typeof(TestMap)));
+                Assert.False(importer.Configuration.TryGetClassMap(typeof(TestMap), out classMap));
+                Assert.Null(classMap);
             }
         }
 
         [Fact]
-        public void RegisterMapping_NullMapping_ThrowsArgumentNullException()
+        public void RegisterClassMap_NullClassMap_ThrowsArgumentNullException()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.Throws<ArgumentNullException>("mapping", () => importer.Configuration.RegisterMapping(null));
+                Assert.Throws<ArgumentNullException>("classMap", () => importer.Configuration.RegisterClassMap(null));
             }
         }
 
         [Fact]
-        public void RegisterMapping_MappingAlreadyRegistered_ThrowsExcelMappingException()
+        public void RegisterClassMap_ClassTypeAlreadyRegistered_ThrowsExcelMappingException()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                importer.Configuration.RegisterMapping<TestMap>();
-                Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterMapping<TestMap>());
-                Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterMapping(new TestMap()));
+                importer.Configuration.RegisterClassMap<TestMap>();
+                Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<TestMap>());
+                Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new TestMap()));
             }
         }
 

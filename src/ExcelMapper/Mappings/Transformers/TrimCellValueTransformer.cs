@@ -1,8 +1,8 @@
 ﻿namespace ExcelMapper.Mappings.Transformers
 {
-    public class TrimStringTransformer : IStringValueTransformer
+    public class TrimCellValueTransformer : ICellValueTransformer
     {
-        public string TransformStringValue(ExcelSheet sheet, int rowIndex, ReadResult readResult)
+        public string TransformStringValue(ExcelSheet sheet, int rowIndex, ReadCellValueResult readResult)
         {
             if (readResult.StringValue == null)
             {

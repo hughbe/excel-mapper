@@ -15,36 +15,36 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnName_ValidColumnName_Success()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Same(mapping, mapping.WithColumnName("ColumnName"));
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+            Assert.Same(propertyMap, propertyMap.WithColumnName("ColumnName"));
 
-            ColumnNameReader reader = Assert.IsType<ColumnNameReader>(mapping.Reader);
+            ColumnNameValueReader reader = Assert.IsType<ColumnNameValueReader>(propertyMap.CellReader);
             Assert.Equal("ColumnName", reader.ColumnName);
         }
 
         [Fact]
         public void WithColumnName_OptionalColumn_Success()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value).MakeOptional();
-            Assert.Same(mapping, mapping.WithColumnName("ColumnName"));
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value).MakeOptional();
+            Assert.Same(propertyMap, propertyMap.WithColumnName("ColumnName"));
 
-            OptionalColumnReader reader = Assert.IsType<OptionalColumnReader>(mapping.Reader);
-            ColumnNameReader innerReader = Assert.IsType<ColumnNameReader>(reader.InnerReader);
+            OptionalCellValueReader reader = Assert.IsType<OptionalCellValueReader>(propertyMap.CellReader);
+            ColumnNameValueReader innerReader = Assert.IsType<ColumnNameValueReader>(reader.InnerReader);
             Assert.Equal("ColumnName", innerReader.ColumnName);
         }
 
         [Fact]
         public void WithColumnName_NullColumnName_ThrowsArgumentNullException()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Throws<ArgumentNullException>("columnName", () => mapping.WithColumnName(null));
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+            Assert.Throws<ArgumentNullException>("columnName", () => propertyMap.WithColumnName(null));
         }
 
         [Fact]
         public void WithColumnName_EmptyColumnName_ThrowsArgumentException()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Throws<ArgumentException>("columnName", () => mapping.WithColumnName(string.Empty));
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+            Assert.Throws<ArgumentException>("columnName", () => propertyMap.WithColumnName(string.Empty));
         }
 
         [Theory]
@@ -52,76 +52,79 @@ namespace ExcelMapper.Tests
         [InlineData(1)]
         public void WithColumnIndex_ValidColumnIndex_Success(int columnIndex)
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Same(mapping, mapping.WithColumnIndex(columnIndex));
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+            Assert.Same(propertyMap, propertyMap.WithColumnIndex(columnIndex));
 
-            ColumnIndexReader reader = Assert.IsType<ColumnIndexReader>(mapping.Reader);
+            ColumnIndexValueReader reader = Assert.IsType<ColumnIndexValueReader>(propertyMap.CellReader);
             Assert.Equal(columnIndex, reader.ColumnIndex);
         }
 
         [Fact]
         public void WithColumnIndex_OptionalColumn_Success()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value).MakeOptional();
-            Assert.Same(mapping, mapping.WithColumnIndex(1));
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value).MakeOptional();
+            Assert.Same(propertyMap, propertyMap.WithColumnIndex(1));
 
-            OptionalColumnReader reader = Assert.IsType<OptionalColumnReader>(mapping.Reader);
-            ColumnIndexReader innerReader = Assert.IsType<ColumnIndexReader>(reader.InnerReader);
+            OptionalCellValueReader reader = Assert.IsType<OptionalCellValueReader>(propertyMap.CellReader);
+            ColumnIndexValueReader innerReader = Assert.IsType<ColumnIndexValueReader>(reader.InnerReader);
             Assert.Equal(1, innerReader.ColumnIndex);
         }
 
         [Fact]
         public void WithColumnIndex_NegativeColumnIndex_ThrowsArgumentOutOfRangeException()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => mapping.WithColumnIndex(-1));
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+
+            Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => propertyMap.WithColumnIndex(-1));
         }
 
         [Fact]
         public void WithMapper_ValidMapper_Success()
         {
-            var reader = new ColumnNameReader("ColumnName");
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Same(mapping, mapping.WithReader(reader));
+            var reader = new ColumnNameValueReader("ColumnName");
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+            Assert.Same(propertyMap, propertyMap.WithReader(reader));
 
-            Assert.Same(reader, mapping.Reader);
+            Assert.Same(reader, propertyMap.CellReader);
         }
 
         [Fact]
         public void WithReader_OptionalColumn_Success()
         {
-            var innerReader = new ColumnNameReader("ColumnName");
+            var innerReader = new ColumnNameValueReader("ColumnName");
 
-            SinglePropertyMapping<string> mapping = Map(t => t.Value).MakeOptional();
-            Assert.Same(mapping, mapping.WithReader(innerReader));
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value).MakeOptional();
+            Assert.Same(propertyMap, propertyMap.WithReader(innerReader));
 
-            OptionalColumnReader reader = Assert.IsType<OptionalColumnReader>(mapping.Reader);
+            OptionalCellValueReader reader = Assert.IsType<OptionalCellValueReader>(propertyMap.CellReader);
             Assert.Same(innerReader, reader.InnerReader);
         }
 
         [Fact]
         public void WithReader_NullReader_ThrowsArgumentNullException()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Throws<ArgumentNullException>("reader", () => mapping.WithReader(null));
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+
+            Assert.Throws<ArgumentNullException>("reader", () => propertyMap.WithReader(null));
         }
 
         [Fact]
         public void WithMappingItems_ValidMappingItems_ThrowsArgumentNullException()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            IStringValueMapper mapper1 = Assert.Single(mapping.MappingItems);
-            IStringValueMapper mapper2 = new BoolMapper(); ;
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+            ICellValueMapper mapper1 = Assert.Single(propertyMap.CellValueMappers);
+            ICellValueMapper mapper2 = new BoolMapper(); ;
 
-            Assert.Same(mapping, mapping.WithMappingItems(mapper2));
-            Assert.Equal(new IStringValueMapper[] { mapper1, mapper2 }, mapping.MappingItems);
+            Assert.Same(propertyMap, propertyMap.WithMappingItems(mapper2));
+            Assert.Equal(new ICellValueMapper[] { mapper1, mapper2 }, propertyMap.CellValueMappers);
         }
 
         [Fact]
         public void WithMappingItems_NullMappingItems_ThrowsArgumentNullException()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Throws<ArgumentNullException>("mappings", () => mapping.WithMappingItems(null));
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+
+            Assert.Throws<ArgumentNullException>("mappings", () => propertyMap.WithMappingItems(null));
         }
 
         [Fact]
@@ -130,10 +133,10 @@ namespace ExcelMapper.Tests
             var dictionaryMapping = new Dictionary<string, DateTime> { { "key", DateTime.MinValue } };
             StringComparer comparer = StringComparer.CurrentCultureIgnoreCase;
 
-            SinglePropertyMapping<DateTime> mapping = Map(t => t.DateValue);
-            Assert.Same(mapping, mapping.WithMapping(dictionaryMapping, comparer));
+            SingleExcelPropertyMap<DateTime> propertyMap = Map(t => t.DateValue);
+            Assert.Same(propertyMap, propertyMap.WithMapping(dictionaryMapping, comparer));
 
-            DictionaryMapper<DateTime> item = mapping.MappingItems.OfType<DictionaryMapper<DateTime>>().Single();
+            DictionaryMapper<DateTime> item = propertyMap.CellValueMappers.OfType<DictionaryMapper<DateTime>>().Single();
             Assert.NotSame(dictionaryMapping, item.MappingDictionary);
             Assert.Equal(dictionaryMapping, item.MappingDictionary);
 
@@ -143,37 +146,38 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithMapping_NullMapping_ThrowsArgumentNullException()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Throws<ArgumentNullException>("mappingDictionary", () => mapping.WithMapping((Dictionary<string, string>)null));
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+
+            Assert.Throws<ArgumentNullException>("mappingDictionary", () => propertyMap.WithMapping((Dictionary<string, string>)null));
         }
 
         [Fact]
         public void MakeOptional_HasMapper_ReturnsExpected()
         {
-            var innerReader = new ColumnIndexReader(1);
-            SinglePropertyMapping<string> mapping = Map(t => t.Value).WithReader(innerReader);
-            Assert.Same(mapping, mapping.MakeOptional());
+            var innerReader = new ColumnIndexValueReader(1);
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value).WithReader(innerReader);
+            Assert.Same(propertyMap, propertyMap.MakeOptional());
 
-            OptionalColumnReader reader = Assert.IsType<OptionalColumnReader>(mapping.Reader);
+            OptionalCellValueReader reader = Assert.IsType<OptionalCellValueReader>(propertyMap.CellReader);
             Assert.Same(innerReader, reader.InnerReader);
         }
 
         [Fact]
         public void MakeOptional_AlreadyOptional_ThrowsExcelMappingException()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value).WithColumnIndex(1).MakeOptional();
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value).WithColumnIndex(1).MakeOptional();
 
-            Assert.Throws<ExcelMappingException>(() => mapping.MakeOptional());
+            Assert.Throws<ExcelMappingException>(() => propertyMap.MakeOptional());
         }
 
         [Fact]
         public void WithTrim_Invoke_Success()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Same(mapping, mapping.WithTrim());
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+            Assert.Same(propertyMap, propertyMap.WithTrim());
 
-            IStringValueTransformer transformer = Assert.Single(mapping.StringValueTransformers);
-            Assert.IsType<TrimStringTransformer>(transformer);
+            ICellValueTransformer transformer = Assert.Single(propertyMap.CellValueTransformers);
+            Assert.IsType<TrimCellValueTransformer>(transformer);
         }
 
         public static IEnumerable<object[]> Formats_TestData()
@@ -189,10 +193,10 @@ namespace ExcelMapper.Tests
         {
             var formatsArray = formats.ToArray();
 
-            SinglePropertyMapping<DateTime> mapping = Map(t => t.DateValue);
-            Assert.Same(mapping, mapping.WithDateFormats(formatsArray));
+            SingleExcelPropertyMap<DateTime> propertyMap = Map(t => t.DateValue);
+            Assert.Same(propertyMap, propertyMap.WithDateFormats(formatsArray));
 
-            DateTimeMapper item = mapping.MappingItems.OfType<DateTimeMapper>().Single();
+            DateTimeMapper item = propertyMap.CellValueMappers.OfType<DateTimeMapper>().Single();
             Assert.Same(formatsArray, item.Formats);
         }
 
@@ -202,12 +206,12 @@ namespace ExcelMapper.Tests
         {
             var formatsArray = formats.ToArray();
 
-            SinglePropertyMapping<DateTime> mapping = Map(t => t.DateValue);
-            mapping.RemoveMappingItem(0);
+            SingleExcelPropertyMap<DateTime> propertyMap = Map(t => t.DateValue);
+            propertyMap.RemoveCellValueMapper(0);
 
-            Assert.Same(mapping, mapping.WithDateFormats(formatsArray));
+            Assert.Same(propertyMap, propertyMap.WithDateFormats(formatsArray));
 
-            DateTimeMapper item = mapping.MappingItems.OfType<DateTimeMapper>().Single();
+            DateTimeMapper item = propertyMap.CellValueMappers.OfType<DateTimeMapper>().Single();
             Assert.Same(formatsArray, item.Formats);
         }
 
@@ -215,10 +219,10 @@ namespace ExcelMapper.Tests
         [MemberData(nameof(Formats_TestData))]
         public void WithDateFormats_AutoMappedIEnumerableString_Success(IEnumerable<string> formats)
         {
-            SinglePropertyMapping<DateTime> mapping = Map(t => t.DateValue);
-            Assert.Same(mapping, mapping.WithDateFormats(formats));
+            SingleExcelPropertyMap<DateTime> propertyMap = Map(t => t.DateValue);
+            Assert.Same(propertyMap, propertyMap.WithDateFormats(formats));
 
-            DateTimeMapper item = mapping.MappingItems.OfType<DateTimeMapper>().Single();
+            DateTimeMapper item = propertyMap.CellValueMappers.OfType<DateTimeMapper>().Single();
             Assert.Equal(formats, item.Formats);
         }
 
@@ -226,31 +230,31 @@ namespace ExcelMapper.Tests
         [MemberData(nameof(Formats_TestData))]
         public void WithDateFormats_NotMappedIEnumerableString_Success(IEnumerable<string> formats)
         {
-            SinglePropertyMapping<DateTime> mapping = Map(t => t.DateValue);
-            mapping.RemoveMappingItem(0);
+            SingleExcelPropertyMap<DateTime> propertyMap = Map(t => t.DateValue);
+            propertyMap.RemoveCellValueMapper(0);
 
-            Assert.Same(mapping, mapping.WithDateFormats(formats));
+            Assert.Same(propertyMap, propertyMap.WithDateFormats(formats));
 
-            DateTimeMapper item = mapping.MappingItems.OfType<DateTimeMapper>().Single();
+            DateTimeMapper item = propertyMap.CellValueMappers.OfType<DateTimeMapper>().Single();
             Assert.Equal(formats, item.Formats);
         }
 
         [Fact]
         public void WithDateFormats_NullFormats_ThrowsArgumentNullException()
         {
-            SinglePropertyMapping<DateTime> mapping = Map(t => t.DateValue);
+            SingleExcelPropertyMap<DateTime> propertyMap = Map(t => t.DateValue);
 
-            Assert.Throws<ArgumentNullException>("formats", () => mapping.WithDateFormats(null));
-            Assert.Throws<ArgumentNullException>("formats", () => mapping.WithDateFormats((IEnumerable<string>)null));
+            Assert.Throws<ArgumentNullException>("formats", () => propertyMap.WithDateFormats(null));
+            Assert.Throws<ArgumentNullException>("formats", () => propertyMap.WithDateFormats((IEnumerable<string>)null));
         }
 
         [Fact]
         public void WithDateFormats_EmptyFormats_ThrowsArgumentException()
         {
-            SinglePropertyMapping<DateTime> mapping = Map(t => t.DateValue);
+            SingleExcelPropertyMap<DateTime> propertyMap = Map(t => t.DateValue);
 
-            Assert.Throws<ArgumentException>("formats", () => mapping.WithDateFormats(new string[0]));
-            Assert.Throws<ArgumentException>("formats", () => mapping.WithDateFormats(new List<string>()));
+            Assert.Throws<ArgumentException>("formats", () => propertyMap.WithDateFormats(new string[0]));
+            Assert.Throws<ArgumentException>("formats", () => propertyMap.WithDateFormats(new List<string>()));
         }
 
         [Theory]
@@ -259,10 +263,10 @@ namespace ExcelMapper.Tests
         {
             var formatsArray = formats.ToArray();
 
-            SinglePropertyMapping<DateTime?> mapping = Map(t => t.NullableDateValue);
-            Assert.Same(mapping, mapping.WithDateFormats(formatsArray));
+            SingleExcelPropertyMap<DateTime?> propertyMap = Map(t => t.NullableDateValue);
+            Assert.Same(propertyMap, propertyMap.WithDateFormats(formatsArray));
 
-            DateTimeMapper item = mapping.MappingItems.OfType<DateTimeMapper>().Single();
+            DateTimeMapper item = propertyMap.CellValueMappers.OfType<DateTimeMapper>().Single();
             Assert.Same(formatsArray, item.Formats);
         }
 
@@ -272,12 +276,12 @@ namespace ExcelMapper.Tests
         {
             var formatsArray = formats.ToArray();
 
-            SinglePropertyMapping<DateTime?> mapping = Map(t => t.NullableDateValue);
-            mapping.RemoveMappingItem(0);
+            SingleExcelPropertyMap<DateTime?> propertyMap = Map(t => t.NullableDateValue);
+            propertyMap.RemoveCellValueMapper(0);
 
-            Assert.Same(mapping, mapping.WithDateFormats(formatsArray));
+            Assert.Same(propertyMap, propertyMap.WithDateFormats(formatsArray));
 
-            DateTimeMapper item = mapping.MappingItems.OfType<DateTimeMapper>().Single();
+            DateTimeMapper item = propertyMap.CellValueMappers.OfType<DateTimeMapper>().Single();
             Assert.Same(formatsArray, item.Formats);
         }
 
@@ -285,10 +289,10 @@ namespace ExcelMapper.Tests
         [MemberData(nameof(Formats_TestData))]
         public void WithDateFormats_NullableAutoMappedIEnumerableString_Success(IEnumerable<string> formats)
         {
-            SinglePropertyMapping<DateTime?> mapping = Map(t => t.NullableDateValue);
-            Assert.Same(mapping, mapping.WithDateFormats(formats));
+            SingleExcelPropertyMap<DateTime?> propertyMap = Map(t => t.NullableDateValue);
+            Assert.Same(propertyMap, propertyMap.WithDateFormats(formats));
 
-            DateTimeMapper item = mapping.MappingItems.OfType<DateTimeMapper>().Single();
+            DateTimeMapper item = propertyMap.CellValueMappers.OfType<DateTimeMapper>().Single();
             Assert.Equal(formats, item.Formats);
         }
 
@@ -296,19 +300,19 @@ namespace ExcelMapper.Tests
         [MemberData(nameof(Formats_TestData))]
         public void WithDateFormats_NullableNotMappedIEnumerableString_Success(IEnumerable<string> formats)
         {
-            SinglePropertyMapping<DateTime?> mapping = Map(t => t.NullableDateValue);
-            mapping.RemoveMappingItem(0);
+            SingleExcelPropertyMap<DateTime?> propertyMap = Map(t => t.NullableDateValue);
+            propertyMap.RemoveCellValueMapper(0);
 
-            Assert.Same(mapping, mapping.WithDateFormats(formats));
+            Assert.Same(propertyMap, propertyMap.WithDateFormats(formats));
 
-            DateTimeMapper item = mapping.MappingItems.OfType<DateTimeMapper>().Single();
+            DateTimeMapper item = propertyMap.CellValueMappers.OfType<DateTimeMapper>().Single();
             Assert.Equal(formats, item.Formats);
         }
 
         [Fact]
         public void WithDateFormats_NullableNullFormats_ThrowsArgumentNullException()
         {
-            SinglePropertyMapping<DateTime?> mapping = Map(t => t.NullableDateValue);
+            SingleExcelPropertyMap<DateTime?> mapping = Map(t => t.NullableDateValue);
 
             Assert.Throws<ArgumentNullException>("formats", () => mapping.WithDateFormats(null));
             Assert.Throws<ArgumentNullException>("formats", () => mapping.WithDateFormats((IEnumerable<string>)null));
@@ -317,10 +321,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithDateFormats_NullableEmptyFormats_ThrowsArgumentException()
         {
-            SinglePropertyMapping<DateTime?> mapping = Map(t => t.NullableDateValue);
+            SingleExcelPropertyMap<DateTime?> propertyMap = Map(t => t.NullableDateValue);
 
-            Assert.Throws<ArgumentException>("formats", () => mapping.WithDateFormats(new string[0]));
-            Assert.Throws<ArgumentException>("formats", () => mapping.WithDateFormats(new List<string>()));
+            Assert.Throws<ArgumentException>("formats", () => propertyMap.WithDateFormats(new string[0]));
+            Assert.Throws<ArgumentException>("formats", () => propertyMap.WithDateFormats(new List<string>()));
         }
 
         [Fact]
@@ -332,12 +336,12 @@ namespace ExcelMapper.Tests
                 return "abc";
             };
 
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Same(mapping, mapping.WithConverter(converter));
-            ConvertUsingMapper item = mapping.MappingItems.OfType<ConvertUsingMapper>().Single();
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+            Assert.Same(propertyMap, propertyMap.WithConverter(converter));
+            ConvertUsingMapper item = propertyMap.CellValueMappers.OfType<ConvertUsingMapper>().Single();
 
             object value = null;
-            PropertyMappingResultType result = item.Converter(new ReadResult(-1, "stringValue"), ref value);
+            PropertyMappingResultType result = item.Converter(new ReadCellValueResult(-1, "stringValue"), ref value);
             Assert.Equal(PropertyMappingResultType.Success, result);
             Assert.Equal("abc", value);
         }
@@ -351,12 +355,12 @@ namespace ExcelMapper.Tests
                 throw new NotSupportedException();
             };
 
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Same(mapping, mapping.WithConverter(converter));
-            ConvertUsingMapper item = mapping.MappingItems.OfType<ConvertUsingMapper>().Single();
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+            Assert.Same(propertyMap, propertyMap.WithConverter(converter));
+            ConvertUsingMapper item = propertyMap.CellValueMappers.OfType<ConvertUsingMapper>().Single();
 
             object value = 1;
-            PropertyMappingResultType result = item.Converter(new ReadResult(-1, "stringValue"), ref value);
+            PropertyMappingResultType result = item.Converter(new ReadCellValueResult(-1, "stringValue"), ref value);
             Assert.Equal(PropertyMappingResultType.Invalid, result);
             Assert.Equal(1, value);
         }
@@ -364,20 +368,20 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithConverter_NullConverter_ThrowsArgumentNullException()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
 
             ConvertUsingSimpleMappingDelegate<string> converter = null;
-            Assert.Throws<ArgumentNullException>("converter", () => mapping.WithConverter(converter));
+            Assert.Throws<ArgumentNullException>("converter", () => propertyMap.WithConverter(converter));
         }
 
         [Fact]
         public void WithValueFallback_Invoke_Success()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Same(mapping, mapping.WithValueFallback("abc"));
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+            Assert.Same(propertyMap, propertyMap.WithValueFallback("abc"));
 
-            FixedValueFallback emptyFallback = Assert.IsType<FixedValueFallback>(mapping.EmptyFallback);
-            FixedValueFallback invalidFallback = Assert.IsType<FixedValueFallback>(mapping.InvalidFallback);
+            FixedValueFallback emptyFallback = Assert.IsType<FixedValueFallback>(propertyMap.EmptyFallback);
+            FixedValueFallback invalidFallback = Assert.IsType<FixedValueFallback>(propertyMap.InvalidFallback);
 
             Assert.Equal("abc", emptyFallback.Value);
             Assert.Equal("abc", invalidFallback.Value);
@@ -386,17 +390,17 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithThrowingFallback_Invoke_Success()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Same(mapping, mapping.WithThrowingFallback());
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+            Assert.Same(propertyMap, propertyMap.WithThrowingFallback());
 
-            Assert.IsType<ThrowFallback>(mapping.EmptyFallback);
-            Assert.IsType<ThrowFallback>(mapping.InvalidFallback);
+            Assert.IsType<ThrowFallback>(propertyMap.EmptyFallback);
+            Assert.IsType<ThrowFallback>(propertyMap.InvalidFallback);
         }
 
         [Fact]
         public void WithEmptyFallback_Invoke_Success()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
+            SingleExcelPropertyMap<string> mapping = Map(t => t.Value);
             Assert.Same(mapping, mapping.WithEmptyFallback("abc"));
 
             FixedValueFallback fallback = Assert.IsType<FixedValueFallback>(mapping.EmptyFallback);
@@ -406,65 +410,65 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithThrowingEmptyFallback_Invoke_Success()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Same(mapping, mapping.WithThrowingEmptyFallback());
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+            Assert.Same(propertyMap, propertyMap.WithThrowingEmptyFallback());
 
-            Assert.IsType<ThrowFallback>(mapping.EmptyFallback);
+            Assert.IsType<ThrowFallback>(propertyMap.EmptyFallback);
         }
 
         [Fact]
         public void WithEmptyFallbackItem_ValidFallbackItem_Success()
         {
             IFallbackItem fallback = new FixedValueFallback(10);
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Same(mapping, mapping.WithEmptyFallbackItem(fallback));
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+            Assert.Same(propertyMap, propertyMap.WithEmptyFallbackItem(fallback));
 
-            Assert.Same(fallback, mapping.EmptyFallback);
+            Assert.Same(fallback, propertyMap.EmptyFallback);
         }
 
         [Fact]
         public void WithEmptyFallbackItem_NullFallbackItem_ThrowsArgumentNullException()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
 
-            Assert.Throws<ArgumentNullException>("fallbackItem", () => mapping.WithEmptyFallbackItem(null));
+            Assert.Throws<ArgumentNullException>("fallbackItem", () => propertyMap.WithEmptyFallbackItem(null));
         }
 
         [Fact]
         public void WithInvalidFallback_Invoke_Success()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Same(mapping, mapping.WithInvalidFallback("abc"));
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+            Assert.Same(propertyMap, propertyMap.WithInvalidFallback("abc"));
 
-            FixedValueFallback fallback = Assert.IsType<FixedValueFallback>(mapping.InvalidFallback);
+            FixedValueFallback fallback = Assert.IsType<FixedValueFallback>(propertyMap.InvalidFallback);
             Assert.Equal("abc", fallback.Value);
         }
 
         [Fact]
         public void WithThrowingInvalidFallback_Invoke_Success()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Same(mapping, mapping.WithThrowingInvalidFallback());
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+            Assert.Same(propertyMap, propertyMap.WithThrowingInvalidFallback());
 
-            Assert.IsType<ThrowFallback>(mapping.InvalidFallback);
+            Assert.IsType<ThrowFallback>(propertyMap.InvalidFallback);
         }
 
         [Fact]
         public void WithInvalidFallbackItem_ValidFallbackItem_Success()
         {
             IFallbackItem fallback = new FixedValueFallback(10);
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
-            Assert.Same(mapping, mapping.WithInvalidFallbackItem(fallback));
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+            Assert.Same(propertyMap, propertyMap.WithInvalidFallbackItem(fallback));
 
-            Assert.Same(fallback, mapping.InvalidFallback);
+            Assert.Same(fallback, propertyMap.InvalidFallback);
         }
 
         [Fact]
         public void WithInvalidFallbackItem_NullFallbackItem_ThrowsArgumentNullException()
         {
-            SinglePropertyMapping<string> mapping = Map(t => t.Value);
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
 
-            Assert.Throws<ArgumentNullException>("fallbackItem", () => mapping.WithInvalidFallbackItem(null));
+            Assert.Throws<ArgumentNullException>("fallbackItem", () => propertyMap.WithInvalidFallbackItem(null));
         }
     }
 }

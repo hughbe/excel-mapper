@@ -13,7 +13,7 @@ namespace ExcelMapper.Mappings.Mappers.Tests
             var item = new StringMapper();
 
             object value = 1;
-            PropertyMappingResultType result = item.GetProperty(new ReadResult(-1, stringValue), ref value);
+            PropertyMappingResultType result = item.GetProperty(new ReadCellValueResult(-1, stringValue), ref value);
             Assert.Equal(PropertyMappingResultType.SuccessIfNoOtherSuccess, result);
             Assert.Same(stringValue, value);
         }

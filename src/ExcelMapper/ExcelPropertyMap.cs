@@ -6,12 +6,12 @@ namespace ExcelMapper
 {
     public delegate void SetPropertyDelegate(object instance, object value);
 
-    public abstract class PropertyMapping
+    public abstract class ExcelPropertyMap
     {
         public MemberInfo Member { get; }
         public SetPropertyDelegate SetPropertyFactory { get; }
 
-        public PropertyMapping(MemberInfo member)
+        public ExcelPropertyMap(MemberInfo member)
         {
             if (member == null)
             {

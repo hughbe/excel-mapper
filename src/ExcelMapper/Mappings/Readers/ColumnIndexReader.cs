@@ -4,13 +4,20 @@ using ExcelDataReader;
 namespace ExcelMapper.Mappings.Readers
 {
     /// <summary>
-    /// Reads a single value of a column given the zero-based index of that column.
+    /// Reads the value of a single cell given the zero-based index of it's column.
     /// </summary>
-    public sealed class ColumnIndexReader : ISingleValueReader
+    public sealed class ColumnIndexValueReader : ICellValueReader
     {
+        /// <summary>
+        /// The zero-based index of the column to read.
+        /// </summary>
         public int ColumnIndex { get; }
 
-        public ColumnIndexReader(int columnIndex)
+        /// <summary>
+        /// Constructs a reader that reads the value of a single cell given the zero-based index of it's column.
+        /// </summary>
+        /// <param name="columnIndex">The zero-based index of the column to read.</param>
+        public ColumnIndexValueReader(int columnIndex)
         {
             if (columnIndex < 0)
             {
@@ -20,9 +27,9 @@ namespace ExcelMapper.Mappings.Readers
             ColumnIndex = columnIndex;
         }
 
-        public ReadResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public ReadCellValueResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            return new ReadResult(ColumnIndex, reader.GetString(ColumnIndex));
+            return new ReadCellValueResult(ColumnIndex, reader.GetString(ColumnIndex));
         }
     }
 }

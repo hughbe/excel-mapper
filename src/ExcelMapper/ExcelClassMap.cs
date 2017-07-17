@@ -12,7 +12,7 @@ namespace ExcelMapper
     {
         public Type Type { get; }
 
-        internal List<PropertyMapping> Mappings { get; } = new List<PropertyMapping>();
+        internal List<ExcelPropertyMap> Mappings { get; } = new List<ExcelPropertyMap>();
 
         internal ExcelClassMap(Type type) => Type = type;
 
@@ -20,7 +20,7 @@ namespace ExcelMapper
         {
             object instance = Activator.CreateInstance(Type);
 
-            foreach (PropertyMapping pipeline in Mappings)
+            foreach (ExcelPropertyMap pipeline in Mappings)
             {
                 object propertyValue = pipeline.GetPropertyValue(sheet, rowIndex, reader);
                 pipeline.SetPropertyFactory(instance, propertyValue);
@@ -29,7 +29,7 @@ namespace ExcelMapper
             return instance;
         }
 
-        protected PropertyMapping CreateObjectMap(PropertyMapping propertyMapping, Stack<MemberExpression> memberExpressions)
+        protected ExcelPropertyMap CreateObjectMap(ExcelPropertyMap propertyMapping, Stack<MemberExpression> memberExpressions)
         {
             MemberExpression memberExpression = memberExpressions.Pop();
             if (memberExpressions.Count == 0)
@@ -44,7 +44,7 @@ namespace ExcelMapper
             MethodInfo method = MapObjectMethod.MakeGenericMethod(memberType);
             try
             {
-                return (PropertyMapping)method.Invoke(this, new object[] { propertyMapping, memberExpression, memberExpressions });
+                return (ExcelPropertyMap)method.Invoke(this, new object[] { propertyMapping, memberExpression, memberExpressions });
             }
             catch (TargetInvocationException exception)
             {
@@ -52,17 +52,17 @@ namespace ExcelMapper
             }
         }
 
-        private PropertyMapping CreateObjectMapGeneric<TProperty>(PropertyMapping propertyMapping, MemberExpression memberExpression, Stack<MemberExpression> memberExpressions)
+        private ExcelPropertyMap CreateObjectMapGeneric<TProperty>(ExcelPropertyMap propertyMapping, MemberExpression memberExpression, Stack<MemberExpression> memberExpressions)
         {
-            PropertyMapping mapping = Mappings.FirstOrDefault(m => m.Member.Equals(memberExpression.Member));
+            ExcelPropertyMap mapping = Mappings.FirstOrDefault(m => m.Member.Equals(memberExpression.Member));
 
-            ObjectPropertyMapping<TProperty> objectPropertyMapping;
+            ObjectExcelPropertyMap<TProperty> objectPropertyMapping;
             if (mapping == null)
             {
-                objectPropertyMapping = new ObjectPropertyMapping<TProperty>(memberExpression.Member, new ExcelClassMap<TProperty>());
+                objectPropertyMapping = new ObjectExcelPropertyMap<TProperty>(memberExpression.Member, new ExcelClassMap<TProperty>());
                 Mappings.Add(objectPropertyMapping);
             }
-            else if (!(mapping is ObjectPropertyMapping<TProperty> existingMapping))
+            else if (!(mapping is ObjectExcelPropertyMap<TProperty> existingMapping))
             {
                 throw new InvalidOperationException($"Expression is already mapped differently.");
             }

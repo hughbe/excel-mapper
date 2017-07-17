@@ -1,8 +1,11 @@
 ﻿namespace ExcelMapper.Mappings.Mappers
 {
-    public class StringMapper : IStringValueMapper
+    /// <summary>
+    /// A mapper that returns the string value of a cell.
+    /// </summary>
+    public class StringMapper : ICellValueMapper
     {
-        public PropertyMappingResultType GetProperty(ReadResult result, ref object value)
+        public PropertyMappingResultType GetProperty(ReadCellValueResult result, ref object value)
         {
             value = result.StringValue;
             return PropertyMappingResultType.SuccessIfNoOtherSuccess;
