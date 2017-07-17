@@ -8,7 +8,7 @@ namespace ExcelMapper
     /// type T.
     /// </summary>
     /// <typeparam name="T">The type of the member to map the value of a single cell to.</typeparam>
-    public class SingleExcelPropertyMap<T> : SingleExcelPropertyMap, ISinglePropertyMapping<T>
+    public class SingleExcelPropertyMap<T> : SingleExcelPropertyMap, ISinglePropertyMap<T>
     {
         /// <summary>
         /// Constructs a map that reads the value of a single cell and maps the value of the cell

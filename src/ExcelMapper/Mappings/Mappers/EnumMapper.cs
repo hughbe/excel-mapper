@@ -32,16 +32,16 @@ namespace ExcelMapper.Mappings.Mappers
             EnumType = enumType;
         }
 
-        public PropertyMappingResultType GetProperty(ReadCellValueResult readResult, ref object value)
+        public PropertyMapperResultType GetProperty(ReadCellValueResult readResult, ref object value)
         {
             try
             {
                 value = Enum.Parse(EnumType, readResult.StringValue);
-                return PropertyMappingResultType.Success;
+                return PropertyMapperResultType.Success;
             }
             catch
             {
-                return PropertyMappingResultType.Invalid;
+                return PropertyMapperResultType.Invalid;
             }
         }
     }

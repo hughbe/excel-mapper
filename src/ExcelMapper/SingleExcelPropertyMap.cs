@@ -12,7 +12,7 @@ namespace ExcelMapper
     /// Reads a single cell of an excel sheet and maps the value of the cell to the
     /// type of the property or field.
     /// </summary>
-    public class SingleExcelPropertyMap : ExcelPropertyMap, ISinglePropertyMapping
+    public class SingleExcelPropertyMap : ExcelPropertyMap, ISinglePropertyMap
     {
         private readonly List<ICellValueTransformer> _cellValueTransformers = new List<ICellValueTransformer>();
         private readonly List<ICellValueMapper> _cellValueMappers = new List<ICellValueMapper>();
@@ -113,24 +113,24 @@ namespace ExcelMapper
                 return EmptyFallback.PerformFallback(sheet, rowIndex, readResult);
             }
 
-            PropertyMappingResultType resultType = PropertyMappingResultType.Success;
+            PropertyMapperResultType resultType = PropertyMapperResultType.Success;
             object value = null;
 
             foreach (ICellValueMapper mappingItem in _cellValueMappers)
             {
-                PropertyMappingResultType newResultType  = mappingItem.GetProperty(readResult, ref value);
-                if (newResultType == PropertyMappingResultType.Success)
+                PropertyMapperResultType newResultType  = mappingItem.GetProperty(readResult, ref value);
+                if (newResultType == PropertyMapperResultType.Success)
                 {
                     return value;
                 }
 
-                if (newResultType != PropertyMappingResultType.Continue)
+                if (newResultType != PropertyMapperResultType.Continue)
                 {
                     resultType = newResultType;
                 }
             }
 
-            if (resultType != PropertyMappingResultType.Success && resultType != PropertyMappingResultType.SuccessIfNoOtherSuccess && InvalidFallback != null)
+            if (resultType != PropertyMapperResultType.Success && resultType != PropertyMapperResultType.SuccessIfNoOtherSuccess && InvalidFallback != null)
             {
                 return InvalidFallback.PerformFallback(sheet, rowIndex, readResult);
             }

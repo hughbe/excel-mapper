@@ -10,104 +10,198 @@ using ExcelMapper.Mappings.Transformers;
 
 namespace ExcelMapper
 {
-    public delegate T ConvertUsingSimpleMappingDelegate<T>(string stringValue);
+    public delegate T ConvertUsingSimpleMapperDelegate<out T>(string stringValue);
 
+    /// <summary>
+    /// Extensions on SinglePropertyMapping to enable fluent "With" method chaining.
+    /// </summary>
     public static class SinglePropertyMappingExtensions
     {
-        public static T WithColumnName<T>(this T mapping, string columnName) where T : ISinglePropertyMapping
+        /// <summary>
+        /// Sets the reader of the property map to read the value of a single cell contained in the column with
+        /// the given name.
+        /// </summary>
+        /// <typeparam name="T">The type of the property map.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="columnName">The name of the column to read</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static T WithColumnName<T>(this T propertyMap, string columnName) where T : ISinglePropertyMap
         {
-            return mapping
+            return propertyMap
                 .WithReader(new ColumnNameValueReader(columnName));
         }
 
-        public static T WithColumnIndex<T>(this T mapping, int columnIndex) where T : ISinglePropertyMapping
+        /// <summary>
+        /// Sets the reader of the property map to read the value of a single cell contained in the column at
+        /// the given zero-based index.
+        /// </summary>
+        /// <typeparam name="T">The type of the property map.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="columnIndex">The zero-based index of the column to read</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static T WithColumnIndex<T>(this T propertyMap, int columnIndex) where T : ISinglePropertyMap
         {
-            return mapping
+            return propertyMap
                 .WithReader(new ColumnIndexValueReader(columnIndex));
         }
 
-        public static T WithReader<T>(this T mapping, ICellValueReader reader) where T : ISinglePropertyMapping
+        /// <summary>
+        /// Sets the reader of the property map to use a custom cell value reader.
+        /// </summary>
+        /// <typeparam name="T">The type of the property map.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="reader">The custom reader to use.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static T WithReader<T>(this T propertyMap, ICellValueReader reader) where T : ISinglePropertyMap
         {
             if (reader == null)
             {
                 throw new ArgumentNullException(nameof(reader));
             }
 
-            if (mapping.CellReader is OptionalCellValueReader optionalMapping)
+            if (propertyMap.CellReader is OptionalCellValueReader optionalCellValueReader)
             {
-                optionalMapping.InnerReader = reader;
+                optionalCellValueReader.InnerReader = reader;
             }
             else
             {
-                mapping.CellReader = reader;
+                propertyMap.CellReader = reader;
             }
 
-            return mapping;
+            return propertyMap;
         }
 
-        public static T MakeOptional<T>(this T mapping) where T : ISinglePropertyMapping
+        /// <summary>
+        /// Makes the reader of the property map optional. For example, if the column doesn't exist
+        /// or the index is invalid, an exception will not be thrown.
+        /// </summary>
+        /// <typeparam name="T">The type of the property map.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static T MakeOptional<T>(this T propertyMap) where T : ISinglePropertyMap
         {
-            if (mapping.CellReader is OptionalCellValueReader)
+            if (propertyMap.CellReader is OptionalCellValueReader)
             {
-                throw new ExcelMappingException("Mapping is already optional.");
+                throw new ExcelMappingException("The property map is already optional.");
             }
 
-            mapping.CellReader = new OptionalCellValueReader(mapping.CellReader);
-            return mapping;
+            propertyMap.CellReader = new OptionalCellValueReader(propertyMap.CellReader);
+            return propertyMap;
         }
 
-        public static T WithTrim<T>(this T mapping) where T : ISinglePropertyMapping
+        /// <summary>
+        /// Specifies that the string value of the cell should be trimmed before it is mapped to
+        /// a property or field.
+        /// </summary>
+        /// <typeparam name="T">The type of the property map.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static T WithTrim<T>(this T propertyMap) where T : ISinglePropertyMap
         {
             var transformer = new TrimCellValueTransformer();
-            mapping.AddCellValueTransformer(transformer);
-            return mapping;
+            propertyMap.AddCellValueTransformer(transformer);
+            return propertyMap;
         }
 
-        public static TMapping WithMappingItems<TMapping>(this TMapping mapping, params ICellValueMapper[] mappings) where TMapping : ISinglePropertyMapping
+        /// <summary>
+        /// Specifies additional custom mappers that will be used to map the value of a cell to
+        /// a property or field.
+        /// </summary>
+        /// <typeparam name="TPropertyMap">The type of the property map.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="mappers">A list of additional custom mappers that will be used to map the value of a cell to a property or field</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static TPropertyMap WithCellValueMappers<TPropertyMap>(this TPropertyMap propertyMap, params ICellValueMapper[] mappers) where TPropertyMap : ISinglePropertyMap
         {
-            if (mappings == null)
+            if (mappers == null)
             {
-                throw new ArgumentNullException(nameof(mappings));
+                throw new ArgumentNullException(nameof(mappers));
             }
 
-            foreach (ICellValueMapper mappingItem in mappings)
+            foreach (ICellValueMapper mapper in mappers)
             {
-                mapping.AddCellValueMapper(mappingItem);
+                if (mapper == null)
+                {
+                    throw new ArgumentNullException(nameof(mappers));
+                }
             }
 
-            return mapping;
+            foreach (ICellValueMapper mapper in mappers)
+            {
+                propertyMap.AddCellValueMapper(mapper);
+            }
+
+            return propertyMap;
         }
 
-        public static TMapping WithMapping<TMapping, T>(this TMapping mapping, IDictionary<string, T> mappingDictionary, IEqualityComparer<string> comparer = null) where TMapping : ISinglePropertyMapping<T>
+        /// <summary>
+        /// Specifies that the value of a cell should be mapped to a fixed value if it cannot be parsed. This
+        /// is useful for mapping columns where equivilent data was entered differently.
+        /// </summary>
+        /// <typeparam name="TPropertyMap">The type of the property map.</typeparam>
+        /// <typeparam name="T">The type of the property or field that the property map represents.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="mappingDictionary">A dictionary that maps a fixed string value to a fixed value of T.</param>
+        /// <param name="comparer">The comparer uses to map fixed string values. This allows for case-insensitive mappings, for example.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static TPropertyMap WithMapping<TPropertyMap, T>(this TPropertyMap propertyMap, IDictionary<string, T> mappingDictionary, IEqualityComparer<string> comparer = null) where TPropertyMap : ISinglePropertyMap<T>
         {
             var item = new DictionaryMapper<T>(mappingDictionary, comparer);
-            mapping.AddCellValueMapper(item);
-            return mapping;
+            propertyMap.AddCellValueMapper(item);
+            return propertyMap;
         }
 
-        public static SingleExcelPropertyMap<DateTime> WithDateFormats(this SingleExcelPropertyMap<DateTime> mapping, params string[] formats)
+        /// <summary>
+        /// Specifies data formats used when mapping the value of a cell to a DateTime. This is useful for
+        /// mapping columns where data formats differ. Existing date formats are overriden.
+        /// </summary>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="formats">A list of date formats to use when mapping the value of a cell to a DateTime.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static SingleExcelPropertyMap<DateTime> WithDateFormats(this SingleExcelPropertyMap<DateTime> propertyMap, params string[] formats)
         {
-            mapping.AddFormats(formats);
-            return mapping;
+            propertyMap.AddFormats(formats);
+            return propertyMap;
         }
 
-        public static SingleExcelPropertyMap<DateTime> WithDateFormats(this SingleExcelPropertyMap<DateTime> mapping, IEnumerable<string> formats) 
+        /// <summary>
+        /// Specifies data formats used when mapping the value of a cell to a DateTime. This is useful for
+        /// mapping columns where data formats differ. Existing date formats are overriden.
+        /// </summary>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="formats">A list of date formats to use when mapping the value of a cell to a DateTime.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static SingleExcelPropertyMap<DateTime> WithDateFormats(this SingleExcelPropertyMap<DateTime> propertyMap, IEnumerable<string> formats) 
         {
-            return mapping.WithDateFormats(formats?.ToArray());
+            return propertyMap.WithDateFormats(formats?.ToArray());
         }
 
-        public static SingleExcelPropertyMap<DateTime?> WithDateFormats(this SingleExcelPropertyMap<DateTime?> mapping, params string[] formats)
+        /// <summary>
+        /// Specifies data formats used when mapping the value of a cell to a DateTime. This is useful for
+        /// mapping columns where data formats differ. Existing date formats are overriden.
+        /// </summary>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="formats">A list of date formats to use when mapping the value of a cell to a DateTime.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static SingleExcelPropertyMap<DateTime?> WithDateFormats(this SingleExcelPropertyMap<DateTime?> propertyMap, params string[] formats)
         {
-            mapping.AddFormats(formats);
-            return mapping;
+            propertyMap.AddFormats(formats);
+            return propertyMap;
         }
 
-        public static SingleExcelPropertyMap<DateTime?> WithDateFormats(this SingleExcelPropertyMap<DateTime?> mapping, IEnumerable<string> formats)
+        /// <summary>
+        /// Specifies data formats used when mapping the value of a cell to a DateTime. This is useful for
+        /// mapping columns where data formats differ. Existing date formats are overriden.
+        /// </summary>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="formats">A list of date formats to use when mapping the value of a cell to a DateTime.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static SingleExcelPropertyMap<DateTime?> WithDateFormats(this SingleExcelPropertyMap<DateTime?> propertyMap, IEnumerable<string> formats)
         {
-            return mapping.WithDateFormats(formats?.ToArray());
+            return propertyMap.WithDateFormats(formats?.ToArray());
         }
 
-        private static void AddFormats(this ISinglePropertyMapping mapping, string[] formats)
+        private static void AddFormats(this ISinglePropertyMap propertyMap, string[] formats)
         {
             if (formats == null)
             {
@@ -119,89 +213,152 @@ namespace ExcelMapper
                 throw new ArgumentException("Formats cannot be empty.", nameof(formats));
             }
 
-            DateTimeMapper dateTimeItem = (DateTimeMapper)mapping.CellValueMappers.FirstOrDefault(item => item is DateTimeMapper);
+            DateTimeMapper dateTimeItem = (DateTimeMapper)propertyMap.CellValueMappers.FirstOrDefault(item => item is DateTimeMapper);
             if (dateTimeItem == null)
             {
                 dateTimeItem = new DateTimeMapper();
-                mapping.AddCellValueMapper(dateTimeItem);
+                propertyMap.AddCellValueMapper(dateTimeItem);
             }
 
             dateTimeItem.Formats = formats;
         }
 
-        public static TMapping WithConverter<TMapping, T>(this TMapping mapping, ConvertUsingSimpleMappingDelegate<T> converter) where TMapping : ISinglePropertyMapping<T>
+        /// <summary>
+        /// Specifies that the value of a cell should be mapped to a value using the given delegate. This is
+        /// useful for specifying custom mapping behaviour for a property or field without having to write
+        /// your own ICellValueMapper.
+        /// </summary>
+        /// <typeparam name="TPropertyMap">The type of the property map.</typeparam>
+        /// <typeparam name="T">The type of the property or field that the property map represents.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="converter">A delegate that is invoked to map the string value of a cell to the value of a property or field.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static TPropertyMap WithConverter<TPropertyMap, T>(this TPropertyMap propertyMap, ConvertUsingSimpleMapperDelegate<T> converter) where TPropertyMap : ISinglePropertyMap<T>
         {
             if (converter == null)
             {
                 throw new ArgumentNullException(nameof(converter));
             }
 
-            ConvertUsingMappingDelegate actualConverter = (ReadCellValueResult mapResult, ref object value) =>
+            ConvertUsingMapperDelegate actualConverter = (ReadCellValueResult mapResult, ref object value) =>
             {
                 try
                 {
                     value = converter(mapResult.StringValue);
-                    return PropertyMappingResultType.Success;
+                    return PropertyMapperResultType.Success;
                 }
                 catch
                 {
-                    return PropertyMappingResultType.Invalid;
+                    return PropertyMapperResultType.Invalid;
                 }
             };
 
             var item = new ConvertUsingMapper(actualConverter);
-            mapping.AddCellValueMapper(item);
-            return mapping;
+            propertyMap.AddCellValueMapper(item);
+            return propertyMap;
         }
 
-        public static TMapping WithValueFallback<TMapping>(this TMapping mapping, object defaultValue) where TMapping : ISinglePropertyMapping
+        /// <summary>
+        /// Specifies a fixed fallback to be used if the value of a cell is empty or cannot be mapped.
+        /// </summary>
+        /// <typeparam name="TPropertyMap">The type of the property map.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="defaultValue">The value that will be assigned to the property or field if the value of a cell is empty or cannot be mapped.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static TPropertyMap WithValueFallback<TPropertyMap>(this TPropertyMap propertyMap, object defaultValue) where TPropertyMap : ISinglePropertyMap
         {
-            return mapping
+            return propertyMap
                 .WithEmptyFallback(defaultValue)
                 .WithInvalidFallback(defaultValue);
         }
 
-        public static TMapping WithThrowingFallback<TMapping>(this TMapping mapping) where TMapping : ISinglePropertyMapping
+        /// <summary>
+        /// Specifies that the property map should throw an exception if the value of a cell if empty or cannot be mapped.
+        /// </summary>
+        /// <typeparam name="TPropertyMap">The type of the property map.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static TPropertyMap WithThrowingFallback<TPropertyMap>(this TPropertyMap propertyMap) where TPropertyMap : ISinglePropertyMap
         {
-            return mapping
+            return propertyMap
                 .WithThrowingEmptyFallback()
                 .WithThrowingInvalidFallback();
         }
 
-        public static TMapping WithEmptyFallback<TMapping>(this TMapping mapping, object fallbackValue) where TMapping : ISinglePropertyMapping
+        /// <summary>
+        /// Specifies a fixed fallback to be used if the value of a cell is empty.
+        /// </summary>
+        /// <typeparam name="TPropertyMap">The type of the property map.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell is empty.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static TPropertyMap WithEmptyFallback<TPropertyMap>(this TPropertyMap propertyMap, object fallbackValue) where TPropertyMap : ISinglePropertyMap
         {
-            return mapping
+            return propertyMap
                 .WithEmptyFallbackItem(new FixedValueFallback(fallbackValue));
         }
 
-        public static TMapping WithEmptyFallbackItem<TMapping>(this TMapping mapping, IFallbackItem fallbackItem) where TMapping : ISinglePropertyMapping
+        /// <summary>
+        /// Specifies a custom fallback to be used if the value of a cell is empty.
+        /// </summary>
+        /// <typeparam name="TPropertyMap">The type of the property map.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="fallbackItem">The fallback to be used if the value of a cell is empty.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static TPropertyMap WithEmptyFallbackItem<TPropertyMap>(this TPropertyMap propertyMap, IFallbackItem fallbackItem) where TPropertyMap : ISinglePropertyMap
         {
-            mapping.EmptyFallback = fallbackItem ?? throw new ArgumentNullException(nameof(fallbackItem));
-            return mapping;
+            propertyMap.EmptyFallback = fallbackItem ?? throw new ArgumentNullException(nameof(fallbackItem));
+            return propertyMap;
         }
 
-        public static TMapping WithThrowingEmptyFallback<TMapping>(this TMapping mapping) where TMapping : ISinglePropertyMapping
+        /// <summary>
+        /// Specifies that the property map should throw an exception if the value of a cell is empty.
+        /// </summary>
+        /// <typeparam name="TPropertyMap">The type of the property map.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static TPropertyMap WithThrowingEmptyFallback<TPropertyMap>(this TPropertyMap propertyMap) where TPropertyMap : ISinglePropertyMap
         {
-            return mapping
+            return propertyMap
                 .WithEmptyFallbackItem(new ThrowFallback());
         }
 
-        public static TMapping WithThrowingInvalidFallback<TMapping>(this TMapping mapping) where TMapping : ISinglePropertyMapping
+        /// <summary>
+        /// Specifies that the property map should throw an exception if the value of a cell cannot be mapped.
+        /// </summary>
+        /// <typeparam name="TPropertyMap">The type of the property map.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static TPropertyMap WithThrowingInvalidFallback<TPropertyMap>(this TPropertyMap propertyMap) where TPropertyMap : ISinglePropertyMap
         {
-            return mapping
+            return propertyMap
                 .WithInvalidFallbackItem(new ThrowFallback());
         }
 
-        public static TMapping WithInvalidFallback<TMapping>(this TMapping mapping, object fallbackValue) where TMapping : ISinglePropertyMapping
+        /// <summary>
+        /// Specifies a fixed fallback to be used if the value of a cell cannot be mapped.
+        /// </summary>
+        /// <typeparam name="TPropertyMap">The type of the property map.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell cannot be mapped.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static TPropertyMap WithInvalidFallback<TPropertyMap>(this TPropertyMap propertyMap, object fallbackValue) where TPropertyMap : ISinglePropertyMap
         {
-            return mapping
+            return propertyMap
                 .WithInvalidFallbackItem(new FixedValueFallback(fallbackValue));
         }
 
-        public static TMapping WithInvalidFallbackItem<TMapping>(this TMapping mapping, IFallbackItem fallbackItem) where TMapping : ISinglePropertyMapping
+        /// <summary>
+        /// Specifies a custom fallback to be used if the value of a cell cannot be mapped.
+        /// </summary>
+        /// <typeparam name="TPropertyMap">The type of the property map.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="fallbackItem">The fallback to be used if the value of a cell cannot be mapped.</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static TPropertyMap WithInvalidFallbackItem<TPropertyMap>(this TPropertyMap propertyMap, IFallbackItem fallbackItem) where TPropertyMap : ISinglePropertyMap
         {
-            mapping.InvalidFallback = fallbackItem ?? throw new ArgumentNullException(nameof(fallbackItem));
-            return mapping;
+            propertyMap.InvalidFallback = fallbackItem ?? throw new ArgumentNullException(nameof(fallbackItem));
+            return propertyMap;
         }
     }
 }

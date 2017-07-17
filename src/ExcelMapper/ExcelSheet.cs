@@ -4,6 +4,9 @@ using ExcelMapper.Utilities;
 
 namespace ExcelMapper
 {
+    /// <summary>
+    /// An object that represents a single sheet of an excel document.
+    /// </summary>
     public class ExcelSheet
     {
         internal ExcelSheet(IExcelDataReader reader, int index, ExcelImporterConfiguration configuration)
@@ -12,18 +15,39 @@ namespace ExcelMapper
             Name = reader.Name;
             Index = index;
             Configuration = configuration;
-            HasHeading = configuration.HasHeading == null ? true : configuration.HasHeading(this);
+            HasHeading = configuration.HasHeading?.Invoke(this) ?? true;
         }
 
+        /// <summary>
+        /// Gets the name of the sheet.
+        /// </summary>
         public string Name { get; }
+        
+        /// <summary>
+        /// Gets the zero-based index of the sheet where 0 is the first sheet in the document.
+        /// </summary>
         public int Index { get; }
+        
+        /// <summary>
+        /// Gets whether the sheet has a heading. This depends on the value of ExcelImporterConfiguration.HasHeading
+        /// and is true by default.
+        /// </summary>
         public bool HasHeading { get; }
+
+        /// <summary>
+        /// Gets the heading that was read from the sheet. This will return null if HasHeading is false
+        /// or the heading has not been read yet by calling ReadHeading or ReadRows.
+        /// </summary>
         public ExcelHeading Heading { get; private set; }
 
         private int CurrentIndex { get; set; } = -1;
         private ExcelImporterConfiguration Configuration { get; }
         private IExcelDataReader Reader { get; }
 
+        /// <summary>
+        /// Reads the heading of the sheet including column names and indices.
+        /// </summary>
+        /// <returns>An object that represents the heading of the sheet.</returns>
         public ExcelHeading ReadHeading()
         {
             if (!HasHeading)
@@ -36,6 +60,7 @@ namespace ExcelMapper
                 throw new ExcelMappingException($"Already read heading in sheet \"{Name}\".");
             }
 
+            // TODO: check for invalid.
             Reader.Read();
 
             var heading = new ExcelHeading(Reader);
@@ -43,6 +68,13 @@ namespace ExcelMapper
             return heading;
         }
 
+        /// <summary>
+        /// Maps each row of the sheet to an object using a registered mapping. If no map is registered for this
+        /// type then the type will be automapped. This method will read the sheet's heading if the sheet has
+        /// a heading and the heading has not yet been read.
+        /// </summary>
+        /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+        /// <returns>A list of objects of type T mapped from each row in the sheet.</returns>
         public IEnumerable<T> ReadRows<T>()
         {
             if (HasHeading && Heading == null)
@@ -56,6 +88,14 @@ namespace ExcelMapper
             }
         }
 
+        /// <summary>
+        /// Maps a single row of a sheet to an object using a registered mapping. If no map is registered for this
+        /// type then the type will be automapped. This method will not read the sheet's heading if the sheet has a
+        /// heading and the heading has not yet been read. This method will throw if mapping fails or there are
+        /// no more rows left.
+        /// </summary>
+        /// <typeparam name="T">The type of the object to map a single row to.</typeparam>
+        /// <returns>An object of type T mapped from a single row in the sheet.</returns>
         public T ReadRow<T>()
         {
             if (!TryReadRow(out T value))
@@ -66,6 +106,14 @@ namespace ExcelMapper
             return value;
         }
 
+        /// <summary>
+        /// Maps a single row of a sheet to an object using a registered mapping. If no map is registered for this
+        /// type then the type will be automapped. This method will not read the sheet's heading if the sheet has a
+        /// heading and the heading has not yet been read.
+        /// </summary>
+        /// <typeparam name="T">The type of the object to map a single row to.</typeparam>
+        /// <param name="value">An object of type T mapped from a single row in the sheet.</param>
+        /// <returns>False if there are no more rows in the sheet or the row cannot be mapped to an object, else false.</returns>
         public bool TryReadRow<T>(out T value)
         {
             value = default(T);

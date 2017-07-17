@@ -2,7 +2,7 @@
 
 namespace ExcelMapper.Mappings.Support
 {
-    public interface ISinglePropertyMapping
+    public interface ISinglePropertyMap
     {
         ICellValueReader CellReader { get; set; }
         IFallbackItem EmptyFallback { get; set; }

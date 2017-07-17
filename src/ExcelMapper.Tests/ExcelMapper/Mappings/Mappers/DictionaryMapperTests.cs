@@ -25,17 +25,17 @@ namespace ExcelMapper.Mappings.Mappers.Tests
         }
 
         [Theory]
-        [InlineData("key", PropertyMappingResultType.Success, "value")]
-        [InlineData("key2", PropertyMappingResultType.Success, 10)]
-        [InlineData("no_such_key", PropertyMappingResultType.Continue, null)]
-        public void GetProperty_ValidStringValue_ReturnsSuccess(string stringValue, PropertyMappingResultType expectedType, object expectedValue)
+        [InlineData("key", PropertyMapperResultType.Success, "value")]
+        [InlineData("key2", PropertyMapperResultType.Success, 10)]
+        [InlineData("no_such_key", PropertyMapperResultType.Continue, null)]
+        public void GetProperty_ValidStringValue_ReturnsSuccess(string stringValue, PropertyMapperResultType expectedType, object expectedValue)
         {
             var mapping = new Dictionary<string, object> { { "key", "value" }, { "KEY2", 10 } };
             var comparer = StringComparer.OrdinalIgnoreCase;
             var item = new DictionaryMapper<object>(mapping, comparer);
 
             object value = null;
-            PropertyMappingResultType result = item.GetProperty(new ReadCellValueResult(-1, stringValue), ref value);
+            PropertyMapperResultType result = item.GetProperty(new ReadCellValueResult(-1, stringValue), ref value);
             Assert.Equal(expectedType, result);
             Assert.Equal(expectedValue, value);
         }

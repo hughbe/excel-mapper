@@ -4,7 +4,7 @@
     /// An enumeration describing the result of an operation to map the value
     /// of a cell to a property or field.
     /// </summary>
-    public enum PropertyMappingResultType
+    public enum PropertyMapperResultType
     {
         /// <summary>
         /// The value could not be mapped, but is not invalid. This can be used

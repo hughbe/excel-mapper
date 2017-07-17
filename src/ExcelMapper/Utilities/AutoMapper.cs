@@ -58,7 +58,7 @@ namespace ExcelMapper.Utilities
             }
 
             mapping = new SingleExcelPropertyMap<T>(member)
-                .WithMappingItems(mapper)
+                .WithCellValueMappers(mapper)
                 .WithEmptyFallbackItem(emptyFallback)
                 .WithInvalidFallbackItem(invalidFallback);
             return true;

@@ -27,7 +27,7 @@ namespace ExcelMapper
         /// Constructs a map that reads one or more values from one or more cells and maps these values to each
         /// property and field of the type of the property or field. This is used to map nested objects.
         /// </summary>
-        /// <param name="member">The property or field to map the value of a one or more cells to</param>
+        /// <param name="member">The property or field to map the value of a one or more cells to.</param>
         /// <param name="classMap">The class map that maps multiple cells in a row to the properties and fields of an object.</param>
         public ObjectExcelPropertyMap(MemberInfo member, ExcelClassMap<T> classMap) : base(member)
         {

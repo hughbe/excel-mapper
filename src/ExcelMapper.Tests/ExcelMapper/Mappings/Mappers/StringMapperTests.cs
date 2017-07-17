@@ -13,8 +13,8 @@ namespace ExcelMapper.Mappings.Mappers.Tests
             var item = new StringMapper();
 
             object value = 1;
-            PropertyMappingResultType result = item.GetProperty(new ReadCellValueResult(-1, stringValue), ref value);
-            Assert.Equal(PropertyMappingResultType.SuccessIfNoOtherSuccess, result);
+            PropertyMapperResultType result = item.GetProperty(new ReadCellValueResult(-1, stringValue), ref value);
+            Assert.Equal(PropertyMapperResultType.SuccessIfNoOtherSuccess, result);
             Assert.Same(stringValue, value);
         }
     }

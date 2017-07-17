@@ -1,18 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using ExcelMapper.Utilities;
 
 namespace ExcelMapper
 {
+    /// <summary>
+    /// A map that maps a row of a sheet to an object of the given type.
+    /// </summary>
+    /// <typeparam name="T">The typ eof the object to create.</typeparam>
     public class ExcelClassMap<T> : ExcelClassMap
     {
+        /// <summary>
+        /// Gets the default strategy to use when the value of a cell is empty.
+        /// </summary>
         public FallbackStrategy EmptyValueStrategy { get; }
 
+        /// <summary>
+        /// Constructs the default class map for the given type.
+        /// </summary>
         public ExcelClassMap() : base(typeof(T)) { }
 
+        /// <summary>
+        /// Constructs a new class map for the given type using the given default strategy to use
+        /// when the value of a cell is empty.
+        /// </summary>
+        /// <param name="emptyValueStrategy">The default strategy to use when the value of a cell is empty.</param>
         public ExcelClassMap(FallbackStrategy emptyValueStrategy) : this()
         {
             if (!Enum.IsDefined(typeof(FallbackStrategy), emptyValueStrategy))
@@ -23,6 +37,13 @@ namespace ExcelMapper
             EmptyValueStrategy = emptyValueStrategy;
         }
 
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping primitives such as string, int etc.
+        /// </summary>
+        /// <typeparam name="TProperty">The type of the property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <returns>The map for the given property or field.</returns>
         public SingleExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
@@ -38,6 +59,13 @@ namespace ExcelMapper
             return mapping;
         }
 
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping enumerables.
+        /// </summary>
+        /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <returns>The map for the given property or field.</returns>
         public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, IEnumerable<TProperty>>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
@@ -47,6 +75,13 @@ namespace ExcelMapper
             return mapping;
         }
 
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping ICollections.
+        /// </summary>
+        /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <returns>The map for the given property or field.</returns>
         public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, ICollection<TProperty>>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
@@ -56,6 +91,13 @@ namespace ExcelMapper
             return mapping;
         }
 
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping ILists.
+        /// </summary>
+        /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <returns>The map for the given property or field.</returns>
         public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, IList<TProperty>>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
@@ -65,6 +107,13 @@ namespace ExcelMapper
             return mapping;
         }
 
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping lists.
+        /// </summary>
+        /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <returns>The map for the given property or field.</returns>
         public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, List<TProperty>>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
@@ -74,6 +123,13 @@ namespace ExcelMapper
             return mapping;
         }
 
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping arrays.
+        /// </summary>
+        /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <returns>The map for the given property or field.</returns>
         public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty[]>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
@@ -83,6 +139,13 @@ namespace ExcelMapper
             return mapping;
         }
 
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping objects that contain nested objects, primitives or enumerables.
+        /// </summary>
+        /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <returns>The map for the given property or field.</returns>
         public ObjectExcelPropertyMap<TProperty> MapObject<TProperty>(Expression<Func<T, TProperty>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
@@ -126,7 +189,7 @@ namespace ExcelMapper
                 if (!(expressionBody is MemberExpression memberExpressionBody))
                 {
                     // Each mapping is of the form (parameter => member).
-                    if (expressionBody is ParameterExpression parameterExpression)
+                    if (expressionBody is ParameterExpression _)
                     {
                         break;
                     }

@@ -123,7 +123,8 @@ namespace ExcelMapper
         }
 
         /// <summary>
-        /// Sets the reader to split the value of a single cell using the given separators.
+        /// Sets the reader of the property map to split the value of a single cell using the
+        /// given separators.
         /// </summary>
         /// <param name="separators">The separators used to split the value of a single cell.</param>
         /// <returns>The property map that invoked this method.</returns>
@@ -139,7 +140,8 @@ namespace ExcelMapper
         }
 
         /// <summary>
-        /// Sets the reader to split the value of a single cell using the given separators.
+        /// Sets the reader of the property map to split the value of a single cell using the
+        /// given separators.
         /// </summary>
         /// <param name="separators">The separators used to split the value of a single cell.</param>
         /// <returns>The property map that invoked this method.</returns>
@@ -149,8 +151,8 @@ namespace ExcelMapper
         }
 
         /// <summary>
-        /// Sets the reader to read the values of one or more cells contained in the columns with
-        /// the given names.
+        /// Sets the reader of the property map to read the values of one or more cells contained
+        /// in the columns with the given names.
         /// </summary>
         /// <param name="columnNames">The name of each column to read.</param>
         /// <returns>The property map that invoked this method.</returns>
@@ -161,8 +163,8 @@ namespace ExcelMapper
         }
 
         /// <summary>
-        /// Sets the reader to read the values of one or more cells contained in the columns with
-        /// the given names.
+        /// Sets the reader of the property map to read the values of one or more cells contained
+        /// in the columns with the given names.
         /// </summary>
         /// <param name="columnNames">The name of each column to read.</param>
         /// <returns>The property map that invoked this method.</returns>
@@ -172,8 +174,8 @@ namespace ExcelMapper
         }
 
         /// <summary>
-        /// Sets the reader to read the values of one or more cells contained in the columns with
-        /// the given zero-based indices.
+        /// Sets the reader of the property map to read the values of one or more cells contained
+        /// in the columns with the given zero-based indices.
         /// </summary>
         /// <param name="columnIndices">The zero-based index of each column to read.</param>
         /// <returns>The property map that invoked this method.</returns>
@@ -184,8 +186,8 @@ namespace ExcelMapper
         }
 
         /// <summary>
-        /// Sets the reader to read the values of one or more cells contained in the columns with
-        /// the given zero-based indices.
+        /// Sets the reader of the property map to read the values of one or more cells contained
+        /// in the columns with the given zero-based indices.
         /// </summary>
         /// <param name="columnIndices">The zero-based index of each column to read.</param>
         /// <returns>The property map that invoked this method.</returns>

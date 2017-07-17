@@ -1,12 +1,17 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using ExcelDataReader;
 
 namespace ExcelMapper
 {
+    /// <summary>
+    /// An object that represents the heading read from a sheet.
+    /// </summary>
     public class ExcelHeading
     {
-        internal ExcelHeading(IExcelDataReader reader)
+        private readonly string[] _columnNames;
+
+        internal ExcelHeading(IDataRecord reader)
         {
             var nameMapping = new Dictionary<string, int>(reader.FieldCount);
             var columnNames = new string[reader.FieldCount];
@@ -30,11 +35,21 @@ namespace ExcelMapper
             _columnNames = columnNames;
         }
 
-        private string[] _columnNames{ get; }
         private Dictionary<string, int> NameMapping { get; }
 
+        /// <summary>
+        /// Gets the name of the column at the given zero-based index.
+        /// </summary>
+        /// <param name="index">The zero-based index to get the name of.</param>
+        /// <returns>The name of the column at the given zero-based index.</returns>
         public string GetColumnName(int index) => _columnNames[index];
 
+        /// <summary>
+        /// Gets the zero-based index of the column with the given name. This method throws an ExcelMappingException
+        /// if the column does not exist.
+        /// </summary>
+        /// <param name="columnName">The name of the column to get the zero-based index of.</param>
+        /// <returns>The zero-based index of the column with the given name.</returns>
         public int GetColumnIndex(string columnName)
         {
             if (!NameMapping.TryGetValue(columnName, out int index))
@@ -46,6 +61,9 @@ namespace ExcelMapper
             return index;
         }
 
+        /// <summary>
+        /// Gets the list of all column names in the heading.
+        /// </summary>
         public IEnumerable<string> ColumnNames => _columnNames;
     }
 }

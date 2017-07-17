@@ -5,28 +5,28 @@
     /// </summary>
     public class BoolMapper : ICellValueMapper
     {
-        public PropertyMappingResultType GetProperty(ReadCellValueResult readResult, ref object value)
+        public PropertyMapperResultType GetProperty(ReadCellValueResult readResult, ref object value)
         {
             // Excel transforms bool values such as "true" or "false" to "1" or "0".
             if (readResult.StringValue == "1")
             {
                 value = true;
-                return PropertyMappingResultType.Success;
+                return PropertyMapperResultType.Success;
             }
 
             if (readResult.StringValue == "0")
             {
                 value = false;
-                return PropertyMappingResultType.Success;
+                return PropertyMapperResultType.Success;
             }
 
             if (!bool.TryParse(readResult.StringValue, out bool result))
             {
-                return PropertyMappingResultType.Invalid;
+                return PropertyMapperResultType.Invalid;
             }
 
             value = result;
-            return PropertyMappingResultType.Success;
+            return PropertyMapperResultType.Success;
         }
     }
 }

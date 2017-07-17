@@ -43,15 +43,15 @@ namespace ExcelMapper.Mappings.Mappers
         /// </summary>
         public DateTimeStyles Style { get; set; }
 
-        public PropertyMappingResultType GetProperty(ReadCellValueResult readResult, ref object value)
+        public PropertyMapperResultType GetProperty(ReadCellValueResult readResult, ref object value)
         {
             if (!DateTime.TryParseExact(readResult.StringValue, Formats, Provider, Style, out DateTime result))
             {
-                return PropertyMappingResultType.Invalid;
+                return PropertyMapperResultType.Invalid;
             }
 
             value = result;
-            return PropertyMappingResultType.Success;
+            return PropertyMapperResultType.Success;
         }
     }
 }

@@ -109,22 +109,30 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void WithMappingItems_ValidMappingItems_ThrowsArgumentNullException()
+        public void WithCellValueMappers_ValidMappers_ThrowsArgumentNullException()
         {
             SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
             ICellValueMapper mapper1 = Assert.Single(propertyMap.CellValueMappers);
             ICellValueMapper mapper2 = new BoolMapper(); ;
 
-            Assert.Same(propertyMap, propertyMap.WithMappingItems(mapper2));
+            Assert.Same(propertyMap, propertyMap.WithCellValueMappers(mapper2));
             Assert.Equal(new ICellValueMapper[] { mapper1, mapper2 }, propertyMap.CellValueMappers);
         }
 
         [Fact]
-        public void WithMappingItems_NullMappingItems_ThrowsArgumentNullException()
+        public void WithCellValueMappers_NullMappers_ThrowsArgumentNullException()
         {
             SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
 
-            Assert.Throws<ArgumentNullException>("mappings", () => propertyMap.WithMappingItems(null));
+            Assert.Throws<ArgumentNullException>("mappers", () => propertyMap.WithCellValueMappers(null));
+        }
+
+        [Fact]
+        public void WithCellValueMappers_NullMapperInMapperss_ThrowsArgumentNullException()
+        {
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
+
+            Assert.Throws<ArgumentNullException>("mappers", () => propertyMap.WithCellValueMappers(new ICellValueMapper[] { null }));
         }
 
         [Fact]
@@ -330,7 +338,7 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithConverter_SuccessConverter_ReturnsExpected()
         {
-            ConvertUsingSimpleMappingDelegate<string> converter = stringValue =>
+            ConvertUsingSimpleMapperDelegate<string> converter = stringValue =>
             {
                 Assert.Equal("stringValue", stringValue);
                 return "abc";
@@ -341,15 +349,15 @@ namespace ExcelMapper.Tests
             ConvertUsingMapper item = propertyMap.CellValueMappers.OfType<ConvertUsingMapper>().Single();
 
             object value = null;
-            PropertyMappingResultType result = item.Converter(new ReadCellValueResult(-1, "stringValue"), ref value);
-            Assert.Equal(PropertyMappingResultType.Success, result);
+            PropertyMapperResultType result = item.Converter(new ReadCellValueResult(-1, "stringValue"), ref value);
+            Assert.Equal(PropertyMapperResultType.Success, result);
             Assert.Equal("abc", value);
         }
 
         [Fact]
         public void WithConverter_InvalidConverter_ReturnsExpected()
         {
-            ConvertUsingSimpleMappingDelegate<string> converter = stringValue =>
+            ConvertUsingSimpleMapperDelegate<string> converter = stringValue =>
             {
                 Assert.Equal("stringValue", stringValue);
                 throw new NotSupportedException();
@@ -360,8 +368,8 @@ namespace ExcelMapper.Tests
             ConvertUsingMapper item = propertyMap.CellValueMappers.OfType<ConvertUsingMapper>().Single();
 
             object value = 1;
-            PropertyMappingResultType result = item.Converter(new ReadCellValueResult(-1, "stringValue"), ref value);
-            Assert.Equal(PropertyMappingResultType.Invalid, result);
+            PropertyMapperResultType result = item.Converter(new ReadCellValueResult(-1, "stringValue"), ref value);
+            Assert.Equal(PropertyMapperResultType.Invalid, result);
             Assert.Equal(1, value);
         }
 
@@ -370,7 +378,7 @@ namespace ExcelMapper.Tests
         {
             SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value);
 
-            ConvertUsingSimpleMappingDelegate<string> converter = null;
+            ConvertUsingSimpleMapperDelegate<string> converter = null;
             Assert.Throws<ArgumentNullException>("converter", () => propertyMap.WithConverter(converter));
         }
 

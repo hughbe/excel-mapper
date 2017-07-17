@@ -8,7 +8,7 @@ namespace ExcelMapper.Mappings.Mappers.Tests
         [Fact]
         public void Ctor_Converter()
         {
-            ConvertUsingMappingDelegate converter = (ReadCellValueResult readResult, ref object value) => PropertyMappingResultType.Success;
+            ConvertUsingMapperDelegate converter = (ReadCellValueResult readResult, ref object value) => PropertyMapperResultType.Success;
             var item = new ConvertUsingMapper(converter);
             Assert.Same(converter, item.Converter);
         }
@@ -22,19 +22,19 @@ namespace ExcelMapper.Mappings.Mappers.Tests
         [Fact]
         public void GetProperty_ValidStringValue_ReturnsSuccess()
         {
-            ConvertUsingMappingDelegate converter = (ReadCellValueResult readResult, ref object readValue) =>
+            ConvertUsingMapperDelegate converter = (ReadCellValueResult readResult, ref object readValue) =>
             {
                 Assert.Equal(-1, readResult.ColumnIndex);
                 Assert.Equal("string", readResult.StringValue);
 
                 readValue = 10;
-                return PropertyMappingResultType.Success;
+                return PropertyMapperResultType.Success;
             };
             var item = new ConvertUsingMapper(converter);
 
             object value = null;
-            PropertyMappingResultType result = item.GetProperty(new ReadCellValueResult(-1, "string"), ref value);
-            Assert.Equal(PropertyMappingResultType.Success, result);
+            PropertyMapperResultType result = item.GetProperty(new ReadCellValueResult(-1, "string"), ref value);
+            Assert.Equal(PropertyMapperResultType.Success, result);
             Assert.Equal(10, value);
         }
     }

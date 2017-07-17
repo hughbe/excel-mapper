@@ -73,8 +73,8 @@ namespace ExcelMapper.Mappings.Mappers.Tests
             };
 
             object value = null;
-            PropertyMappingResultType result = item.GetProperty(new ReadCellValueResult(-1, stringValue), ref value);
-            Assert.Equal(PropertyMappingResultType.Success, result);
+            PropertyMapperResultType result = item.GetProperty(new ReadCellValueResult(-1, stringValue), ref value);
+            Assert.Equal(PropertyMapperResultType.Success, result);
             Assert.Equal(expected, value);
         }
 
@@ -88,8 +88,8 @@ namespace ExcelMapper.Mappings.Mappers.Tests
             var item = new DateTimeMapper();
 
             object value = 1;
-            PropertyMappingResultType result = item.GetProperty(new ReadCellValueResult(-1, stringValue), ref value);
-            Assert.Equal(PropertyMappingResultType.Invalid, result);
+            PropertyMapperResultType result = item.GetProperty(new ReadCellValueResult(-1, stringValue), ref value);
+            Assert.Equal(PropertyMapperResultType.Invalid, result);
             Assert.Equal(1, value);
         }
     }
