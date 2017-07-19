@@ -59,7 +59,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ExcelMapper\ExcelMapper.csproj" />
+    <ProjectReference Include="..\src\ExcelMapper.csproj" />
   </ItemGroup>
 
   <ItemGroup>

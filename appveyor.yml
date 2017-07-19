@@ -6,13 +6,13 @@ build_script:
 - cmd: >-
     dotnet --version
 
-    dotnet restore ./src/ExcelMapper/ExcelMapper.csproj --verbosity m
+    dotnet restore ./src/ExcelMapper.csproj --verbosity m
 
-    dotnet publish ./src/ExcelMapper/ExcelMapper.csproj -f netstandard1.4
+    dotnet publish ./src/ExcelMapper.csproj -f netstandard1.4
 test_script:
 - cmd: >-
-    dotnet restore ./src/ExcelMapper.Tests/ExcelMapper.Tests.csproj --verbosity m
+    dotnet restore ./tests/ExcelMapper.Tests.csproj --verbosity m
 
-    cd ./src/ExcelMapper.Tests
+    cd ./tests
 
     dotnet xunit
