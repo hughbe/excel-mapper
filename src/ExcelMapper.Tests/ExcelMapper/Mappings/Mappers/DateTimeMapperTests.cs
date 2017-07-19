@@ -57,8 +57,8 @@ namespace ExcelMapper.Mappings.Mappers.Tests
 
         public static IEnumerable<object[]> GetProperty_Valid_TestData()
         {
-            yield return new object[] { "12/07/2017 07:57:46", new string[] { "G" }, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
-            yield return new object[] { "12/07/2017 07:57:46", new string[] { "G", "yyyy-MM-dd" }, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
+            yield return new object[] { new DateTime(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "G" }, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
+            yield return new object[] { new DateTime(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "G", "yyyy-MM-dd" }, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
             yield return new object[] { "   2017-07-12   ", new string[] { "G", "yyyy-MM-dd" }, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 7, 12) };
         }
 
