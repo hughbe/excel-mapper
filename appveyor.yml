@@ -19,7 +19,7 @@ build_script:
 after_build:
   # For once the build has completed
 artifacts:
- - path: '\src\bin\Debug\netstandard1.4\publish'
+ - path: '\src\ExcelMapper\bin\Debug\netstandard1.4\publish'
    name: ExcelMapper
    type: Auto
 clone_depth: 1
