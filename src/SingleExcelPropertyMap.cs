@@ -112,7 +112,7 @@ namespace ExcelMapper
                 readResult = new ReadCellValueResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult));
             }
 
-            if (readResult.StringValue == null && EmptyFallback != null)
+            if (string.IsNullOrEmpty(readResult.StringValue) && EmptyFallback != null)
             {
                 return EmptyFallback.PerformFallback(sheet, rowIndex, readResult, Member);
             }

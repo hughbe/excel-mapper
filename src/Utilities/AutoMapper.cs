@@ -70,11 +70,16 @@ namespace ExcelMapper.Utilities
 
             Type[] interfaces = type.GetTypeInfo().ImplementedInterfaces.ToArray();
 
-            IFallbackItem ReconcileFallback(FallbackStrategy strategyToPursue)
+            IFallbackItem ReconcileFallback(FallbackStrategy strategyToPursue, bool empty)
             {
-                if (strategyToPursue == FallbackStrategy.SetToDefaultValue || emptyValueStrategy == FallbackStrategy.SetToDefaultValue)
+                // Empty nullable values should be set to null.
+                if (empty && isNullable)
                 {
-                    return new FixedValueFallback(isNullable ? null : type.DefaultValue());
+                    return new FixedValueFallback(null);
+                }
+                else if (strategyToPursue == FallbackStrategy.SetToDefaultValue || emptyValueStrategy == FallbackStrategy.SetToDefaultValue)
+                {
+                    return new FixedValueFallback(type.DefaultValue());
                 }
                 else
                 {
@@ -88,38 +93,38 @@ namespace ExcelMapper.Utilities
             if (type == typeof(DateTime))
             {
                 mapper = new DateTimeMapper();
-                emptyFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive);
-                invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive);
+                emptyFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, empty: true);
+                invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, empty: false);
             }
             else if (type == typeof(bool))
             {
                 mapper = new BoolMapper();
-                emptyFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive);
-                invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive);
+                emptyFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, empty: true);
+                invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, empty: false);
             }
             else if (type.GetTypeInfo().IsEnum)
             {
                 mapper = new EnumMapper(type);
-                emptyFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive);
-                invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive);
+                emptyFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, empty: true);
+                invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, empty: false);
             }
             else if (type == typeof(string) || type == typeof(object) || type == typeof(IConvertible))
             {
                 mapper = new StringMapper();
-                emptyFallback = ReconcileFallback(FallbackStrategy.SetToDefaultValue);
-                invalidFallback = ReconcileFallback(FallbackStrategy.SetToDefaultValue);
+                emptyFallback = ReconcileFallback(FallbackStrategy.SetToDefaultValue, empty: true);
+                invalidFallback = ReconcileFallback(FallbackStrategy.SetToDefaultValue, empty: false);
             }
             else if (type == typeof(Uri))
             {
                 mapper = new UriMapper();
-                emptyFallback = ReconcileFallback(FallbackStrategy.SetToDefaultValue);
-                invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive);
+                emptyFallback = ReconcileFallback(FallbackStrategy.SetToDefaultValue, empty: true);
+                invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, empty: false);
             }
             else if (interfaces.Any(t => t == typeof(IConvertible)))
             {
                 mapper = new ChangeTypeMapper(type);
-                emptyFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive);
-                invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive);
+                emptyFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, empty: true);
+                invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, empty: false);
             }
             else
             {
