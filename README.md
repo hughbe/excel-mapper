@@ -33,7 +33,8 @@ public class Event
 
 // ...
 
-using (var importer = Helpers.GetImporter("Pub Events.xlsx"))
+using (var stream = File.OpenRead("Pub Events.xlsx"))
+using (var importer = new ExcelImporter(stream))
 {
     ExcelSheet sheet = importer.ReadSheet();
     Event[] events = sheet.ReadRows<Event>().ToArray();
@@ -114,7 +115,8 @@ public class PresidentClassMap : ExcelClassMap<President>
 
 // ...
 
-using (var importer = Helpers.GetImporter("Presidents.xlsx"))
+using (var stream = File.OpenRead("Presidents.xlsx"))
+using (var importer = new ExcelImporter(stream))
 {
     importer.Configuration.RegisterClassMap<PresidentClassMap>();
 
@@ -182,7 +184,9 @@ public class PresidentClassMap : ExcelClassMap<President>
 
 // ...
 
-using (var importer = Helpers.GetImporter("Presidents.xlsx"))
+
+using (var stream = File.OpenRead("Presidents.xlsx"))
+using (var importer = new ExcelImporter(stream))
 {
     importer.Configuration.RegisterClassMap<PresidentClassMap>();
 
@@ -237,7 +241,9 @@ public class PresidentClassMap : ExcelClassMap<President>
 
 // ...
 
-using (var importer = Helpers.GetImporter("Presidents.xlsx"))
+
+using (var stream = File.OpenRead("Presidents.xlsx"))
+using (var importer = new ExcelImporter(stream))
 {
     importer.Configuration.RegisterClassMap<PresidentClassMap>();
 
@@ -286,7 +292,8 @@ public class PresidentClassMap : ExcelClassMap<President>
 
 // ...
 
-using (var importer = Helpers.GetImporter("Presidents.xlsx"))
+using (var stream = File.OpenRead("Presidents.xlsx"))
+using (var importer = new ExcelImporter(stream))
 {
     importer.Configuration.RegisterClassMap<PresidentClassMap>();
 
