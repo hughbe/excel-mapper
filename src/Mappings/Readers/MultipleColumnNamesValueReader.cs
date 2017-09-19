@@ -48,8 +48,9 @@ namespace ExcelMapper.Mappings.Readers
         {
             return ColumnNames.Select(columnName =>
             {
-                int index = sheet.Heading.GetColumnIndex(columnName);
-                return new ReadCellValueResult(index, reader.GetString(index));
+                var index = sheet.Heading.GetColumnIndex(columnName);
+                var value = reader[index]?.ToString();
+                return new ReadCellValueResult(index, value);
             });
         }
     }
