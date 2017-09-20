@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
@@ -18,7 +19,7 @@ namespace ExcelMapper
 
             for (int columnIndex = 0; columnIndex < reader.FieldCount; columnIndex++)
             {
-                string columnName = reader.GetString(columnIndex);
+                string columnName = reader.GetValue(columnIndex)?.ToString();
                 if (columnName == null)
                 {
                     columnNames[columnIndex] = string.Empty;
@@ -26,6 +27,10 @@ namespace ExcelMapper
                 }
                 else
                 {
+                    if (nameMapping.ContainsKey(columnName))
+                    {
+                        columnName += "_" + Guid.NewGuid();
+                    }
                     nameMapping.Add(columnName, columnIndex);
                     columnNames[columnIndex] = columnName;
                 }

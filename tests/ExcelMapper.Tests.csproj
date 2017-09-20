@@ -15,6 +15,9 @@
     <Content Include="Resources\SplitWithCustomSeparators.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\DuplicatedColumns.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\WithMappings.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
