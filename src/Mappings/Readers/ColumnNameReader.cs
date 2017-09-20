@@ -34,8 +34,9 @@ namespace ExcelMapper.Mappings.Readers
 
         public ReadCellValueResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            int index = sheet.Heading.GetColumnIndex(ColumnName);
-            return new ReadCellValueResult(index, reader.GetString(index));
+            var index = sheet.Heading.GetColumnIndex(ColumnName);
+            var value = reader[index]?.ToString();
+            return new ReadCellValueResult(index, value);
         }
     }
 }

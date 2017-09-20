@@ -46,7 +46,11 @@ namespace ExcelMapper.Mappings.Readers
 
         public IEnumerable<ReadCellValueResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            return ColumnIndices.Select(i => new ReadCellValueResult(i, reader.GetString(i)));
+            return ColumnIndices.Select(columnIndex =>
+            {
+                var value = reader[columnIndex]?.ToString();
+                return new ReadCellValueResult(columnIndex, value);
+            });
         }
     }
 }

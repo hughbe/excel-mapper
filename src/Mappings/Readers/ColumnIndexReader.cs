@@ -29,7 +29,8 @@ namespace ExcelMapper.Mappings.Readers
 
         public ReadCellValueResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
-            return new ReadCellValueResult(ColumnIndex, reader.GetString(ColumnIndex));
+            var value = reader[ColumnIndex]?.ToString();
+            return new ReadCellValueResult(ColumnIndex, value);
         }
     }
 }
