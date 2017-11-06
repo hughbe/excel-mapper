@@ -7,7 +7,9 @@ namespace ExcelMapper.Utilities
 {
     public static class ExcelImporterUtils
     {
-        public static List<ExcelClassMap> RegisterMapperClassesByNamespace(this ExcelImporter importer, string namespacestr)
+#if NETSTANDARD2_0
+        public static List<ExcelClassMap> RegisterMapperClassesByNamespace(this ExcelImporter importer,
+            string namespacestr)
         {
             var classes = Assembly.GetExecutingAssembly()
                 .GetTypes().AsParallel()
@@ -21,5 +23,6 @@ namespace ExcelMapper.Utilities
 
             return objects;
         }
+#endif
     }
 }
