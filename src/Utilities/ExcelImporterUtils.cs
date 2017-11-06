@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace ExcelMapper.Utilities
+namespace ExcelMapper
 {
     public static class ExcelImporterUtils
     {
