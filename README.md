@@ -118,11 +118,11 @@ public class PresidentClassMap : ExcelClassMap<President>
 using (var stream = File.OpenRead("Presidents.xlsx"))
 using (var importer = new ExcelImporter(stream))
 {
-    //You can register class maps by type
+    // You can register class maps by type
     importer.Configuration.RegisterClassMap<PresidentClassMap>();
     
-    //Or by namespace
-    importer.RegisterMapperClassesByNamespace("NAMESPACE");
+    // Or by namespace
+    importer.RegisterMapperClassesByNamespace("My.Namespace");
 
 
     ExcelSheet sheet = importer.ReadSheet();
@@ -193,11 +193,11 @@ public class PresidentClassMap : ExcelClassMap<President>
 using (var stream = File.OpenRead("Presidents.xlsx"))
 using (var importer = new ExcelImporter(stream))
 {
-    //You can register class maps by type
+    // You can register class maps by type
     importer.Configuration.RegisterClassMap<PresidentClassMap>();
     
-    //Or by namespace
-    importer.RegisterMapperClassesByNamespace("NAMESPACE");
+    // Or by namespace
+    importer.RegisterMapperClassesByNamespace("My.Namespace");
 
     ExcelSheet sheet = importer.ReadSheet();
     President[] president = sheet.ReadRows<President>().ToArray();
@@ -254,11 +254,11 @@ public class PresidentClassMap : ExcelClassMap<President>
 using (var stream = File.OpenRead("Presidents.xlsx"))
 using (var importer = new ExcelImporter(stream))
 {
-    //You can register class maps by type
+    // You can register class maps by type
     importer.Configuration.RegisterClassMap<PresidentClassMap>();
     
-    //Or by namespace
-    importer.RegisterMapperClassesByNamespace("NAMESPACE");
+    // Or by namespace
+    importer.RegisterMapperClassesByNamespace("My.Namespace");
 
     ExcelSheet sheet = importer.ReadSheet();
     President[] president = sheet.ReadRows<President>().ToArray();
@@ -308,11 +308,11 @@ public class PresidentClassMap : ExcelClassMap<President>
 using (var stream = File.OpenRead("Presidents.xlsx"))
 using (var importer = new ExcelImporter(stream))
 {
-    //You can register class maps by type
+    // You can register class maps by type
     importer.Configuration.RegisterClassMap<PresidentClassMap>();
     
-    //Or by namespace
-    importer.RegisterMapperClassesByNamespace("NAMESPACE");
+    // Or by namespace
+    importer.RegisterMapperClassesByNamespace("My.Namespace");
 
     ExcelSheet sheet = importer.ReadSheet();
     President[] president = sheet.ReadRows<President>().ToArray();
