@@ -9,29 +9,29 @@ namespace ExcelMapper
     {
 #if NETSTANDARD2_0
         public static IEnumerable<ExcelClassMap> RegisterClassMapsInNamespace(this ExcelImporter importer,
-            string nameSpace)
+            string namespaceString)
         {
-            return RegisterClassMapsInNamespace(importer, Assembly.GetExecutingAssembly(), nameSpace);
+            return RegisterClassMapsInNamespace(importer, Assembly.GetExecutingAssembly(), namespaceString);
         }
 #endif
 
         public static IEnumerable<ExcelClassMap> RegisterClassMapsInNamespace(this ExcelImporter importer,
             Assembly assembly,
-            string nameSpace)
+            string namespaceString)
         {
-            if (nameSpace == null)
+            if (namespaceString == null)
             {
-                throw new ArgumentNullException(nameof(nameSpace));
+                throw new ArgumentNullException(nameof(namespaceString));
             }
 
-            if (nameSpace.Length == 0)
+            if (namespaceString.Length == 0)
             {
-                throw new ArgumentException("The namespace cannot be empty.", nameof(nameSpace));
+                throw new ArgumentException("The namespace cannot be empty.", nameof(namespaceString));
             }
 
             var classes = assembly
                 .GetTypes()
-                .Where(t => t.IsAssignableFrom(typeof(ExcelClassMap)) && t.Namespace == nameSpace);
+                .Where(t => t.IsAssignableFrom(typeof(ExcelClassMap)) && t.Namespace == namespaceString);
 
             var objects = classes.Select(Activator.CreateInstance).OfType<ExcelClassMap>().ToList();
 
