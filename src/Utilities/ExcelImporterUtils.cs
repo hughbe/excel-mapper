@@ -20,19 +20,13 @@ namespace ExcelMapper
             string namespaceString)
         {
             if (namespaceString == null)
-            {
                 throw new ArgumentNullException(nameof(namespaceString));
-            }
 
             if (namespaceString.Length == 0)
-            {
                 throw new ArgumentException("The namespace cannot be empty.", nameof(namespaceString));
-            }
 
             if (!assembly.GetTypes().Any())
-            {
                 throw new ArgumentException("The assembly doesn't have any types.", nameof(assembly));
-            }
 
             var classes = assembly
                 .GetTypes()
@@ -41,9 +35,7 @@ namespace ExcelMapper
             var objects = classes.Select(Activator.CreateInstance).OfType<ExcelClassMap>().ToList();
 
             if (!objects.Any())
-            {
                 throw new ArgumentException("No classmaps found in this namespace.", nameof(assembly));
-            }
 
             foreach (var o in objects)
                 importer.Configuration.RegisterClassMap(o);
