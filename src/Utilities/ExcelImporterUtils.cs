@@ -29,11 +29,21 @@ namespace ExcelMapper
                 throw new ArgumentException("The namespace cannot be empty.", nameof(namespaceString));
             }
 
+            if (!assembly.GetTypes().Any())
+            {
+                throw new ArgumentException("The assembly doesn't have any types.", nameof(assembly));
+            }
+
             var classes = assembly
                 .GetTypes()
                 .Where(t => t.IsAssignableFrom(typeof(ExcelClassMap)) && t.Namespace == namespaceString);
 
             var objects = classes.Select(Activator.CreateInstance).OfType<ExcelClassMap>().ToList();
+
+            if (!objects.Any())
+            {
+                throw new ArgumentException("No classmaps found in this namespace.", nameof(assembly));
+            }
 
             foreach (var o in objects)
                 importer.Configuration.RegisterClassMap(o);
