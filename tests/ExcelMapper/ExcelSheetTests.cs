@@ -34,6 +34,21 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadHeading_NonZeroHeadingIndex_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Non Zero Header Index.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.HeadingIndex = 3;
+
+                ExcelHeading heading = sheet.ReadHeading();
+                Assert.Same(heading, sheet.Heading);
+
+                Assert.Equal(new string[] { "Value" }, heading.ColumnNames);
+            }
+        }
+
+        [Fact]
         public void ReadHeading_AlreadyReadHeading_ThrowsExcelMappingException()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
@@ -119,6 +134,23 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRows_ReadHeadingNonZeroHeadingIndex_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Non Zero Header Index.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.HeadingIndex = 3;
+                sheet.ReadHeading();
+
+                IEnumerable<StringValue> rows = sheet.ReadRows<StringValue>();
+                Assert.Equal(new string[] { "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
+
+                Assert.NotNull(sheet.Heading);
+                Assert.True(sheet.HasHeading);
+            }
+        }
+
+        [Fact]
         public void ReadRow_HasHeadingFalse_ReturnsExpected()
         {
             using (var importer = Helpers.GetImporter("Strings.xlsx"))
@@ -137,7 +169,7 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_HasHeadingFalseAutomappedThrowsExcelMappingException()
+        public void ReadRow_HasHeadingFalseAutomapped_ThrowsExcelMappingException()
         {
             using (var importer = Helpers.GetImporter("Strings.xlsx"))
             {
@@ -173,6 +205,60 @@ namespace ExcelMapper.Tests
                 sheet.HasHeading = false;
 
                 Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValues>());
+            }
+        }
+
+        [Fact]
+        public void HasHeading_SetWhenAlreadyRead_InvalidOperationException()
+        {
+            using (var importer = Helpers.GetImporter("Strings.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                Assert.Throws<InvalidOperationException>(() => sheet.HasHeading = false);
+                Assert.Throws<InvalidOperationException>(() => sheet.HasHeading = true);
+            }
+        }
+
+        [Fact]
+        public void HeadingIndex_SetNegative_ThrowsArgumentOutOfRangeException()
+        {
+            using (var importer = Helpers.GetImporter("Strings.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+                Assert.Throws<ArgumentOutOfRangeException>("value", () => sheet.HeadingIndex = -1);
+
+                sheet.HasHeading = false;
+                Assert.Throws<ArgumentOutOfRangeException>("value", () => sheet.HeadingIndex = -1);
+
+                sheet.HasHeading = true;
+                sheet.ReadHeading();
+                Assert.Throws<ArgumentOutOfRangeException>("value", () => sheet.HeadingIndex = -1);
+            }
+        }
+
+        [Fact]
+        public void HeadingIndex_SetAfterHeadingSet_ThrowsInvalidOperationException()
+        {
+            using (var importer = Helpers.GetImporter("Strings.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                Assert.Throws<InvalidOperationException>(() => sheet.HeadingIndex = 0);
+            }
+        }
+
+        [Fact]
+        public void HeadingIndex_SetWhenHasHeadingFalse_ThrowsInvalidOperationException()
+        {
+            using (var importer = Helpers.GetImporter("Strings.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.HasHeading = false;
+
+                Assert.Throws<InvalidOperationException>(() => sheet.HeadingIndex = 0);
             }
         }
 
@@ -221,6 +307,18 @@ namespace ExcelMapper.Tests
                 ExcelSheet sheet = importer.ReadSheet();
                 Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<Helpers.IListInterface>());
                 Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IConvertible>());
+            }
+        }
+
+        [Fact]
+        public void ReadHeading_TooLargeHeadingIndex_ThrowsExcelMappingException()
+        {
+            using (var importer = Helpers.GetImporter("Non Zero Header Index.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.HeadingIndex = 8;
+
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadHeading());
             }
         }
 

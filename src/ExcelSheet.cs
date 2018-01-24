@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ExcelDataReader;
 using ExcelMapper.Utilities;
 
@@ -9,6 +10,9 @@ namespace ExcelMapper
     /// </summary>
     public class ExcelSheet
     {
+        private bool _hasHeading = true;
+        private int _headingIndex = 0;
+
         internal ExcelSheet(IExcelDataReader reader, int index, ExcelImporterConfiguration configuration)
         {
             Reader = reader;
@@ -30,7 +34,45 @@ namespace ExcelMapper
         /// <summary>
         /// Gets or sets whether the sheet has a heading. This is true by default.
         /// </summary>
-        public bool HasHeading { get; set; } = true;
+        public bool HasHeading
+        {
+            get => _hasHeading;
+            set
+            {
+                if (Heading != null)
+                {
+                    throw new InvalidOperationException("The heading has already been read. Set this property before reading any rows.");
+                }
+
+                _hasHeading = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the zero-based index of row containing the heading. This is 0 (the first row) by default.
+        /// If the value is non-zero, all rows preceding the heading are skipped and not mapped.
+        /// </summary>
+        public int HeadingIndex
+        {
+            get => _headingIndex;
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "The index of the heading must be positive or zero.");
+                }
+                if (!HasHeading)
+                {
+                    throw new InvalidOperationException("The sheet has no heading.");
+                }
+                if (Heading != null)
+                {
+                    throw new InvalidOperationException("The heading has already been read.");
+                }
+
+                _headingIndex = value;
+            }
+        }
 
         /// <summary>
         /// Gets the heading that was read from the sheet. This will return null if HasHeading is false
@@ -58,9 +100,12 @@ namespace ExcelMapper
                 throw new ExcelMappingException($"Already read heading in sheet \"{Name}\".");
             }
 
-            if (!Reader.Read())
+            for (int i = 0; i <= HeadingIndex; i++)
             {
-                throw new ExcelMappingException($"Sheet \"{Name}\" has no rows.");
+                if (!Reader.Read())
+                {
+                    throw new ExcelMappingException($"Sheet \"{Name}\" has no heading.");
+                }
             }
 
             var heading = new ExcelHeading(Reader);

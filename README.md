@@ -324,10 +324,11 @@ using (var importer = new ExcelImporter(stream))
 By default, ExcelMapper will read the first row of a sheet as a file header. This can be controlled by setting the boolean property `ExcelSheet.HasHeading`.
 ExcelMapper will go through each public property or field and attempt to map the value of the cell in the column with the name of the member. If the column cannot be found or mapped, an exception will be thrown.
 
-| Pub Quiz      | The Blue Anchor
-| Live Music    | The Raven
-| Live Football | The Rutland Arms
-
+|               |                  |
+|---------------|------------------|
+| Pub Quiz      | The Blue Anchor  |
+| Live Music    | The Raven        |
+| Live Football | The Rutland Arms |
 
 ```cs
 public class Event
@@ -354,11 +355,46 @@ public class EventClassMap : ExcelClassMap<Event>
 using (var stream = File.OpenRead("Pub Events.xlsx"))
 using (var importer = new ExcelImporter(stream))
 {
-    // You can register class maps by type.
     importer.Configuration.RegisterClassMap<EventClassMap>();
 
     ExcelSheet sheet = importer.ReadSheet();
     sheet.HasHeading = false;
+
+    Event[] events = sheet.ReadRows<Event>().ToArray();
+    Console.WriteLine(events[0].Name); // Pub Quiz
+    Console.WriteLine(events[1].Name); // Live Music
+    Console.WriteLine(events[2].Name); // Live Football
+}
+```
+
+# Mapping sheets where the header is not the first row
+
+ExcelMapper supports reading headers which are not in the first row. Set the property `ExcelSheet.HeadingIndex` to the zero-based index of the header. All data preceding the header will be skipped and will not be mapped.
+
+|               |                  |
+|---------------|------------------|
+|               |                  |
+|               |                  |
+|               |                  |
+| Name          | Location         |
+| Pub Quiz      | The Blue Anchor  |
+| Live Music    | The Raven        |
+| Live Football | The Rutland Arms |
+
+```cs
+public class Event
+{
+    public string Name { get; set; }
+    public string Location { get; set; }
+}
+
+// ...
+
+using (var stream = File.OpenRead("Pub Events.xlsx"))
+using (var importer = new ExcelImporter(stream))
+{
+    ExcelSheet sheet = importer.ReadSheet();
+    sheet.HeadingIndex = 3;
 
     Event[] events = sheet.ReadRows<Event>().ToArray();
     Console.WriteLine(events[0].Name); // Pub Quiz
