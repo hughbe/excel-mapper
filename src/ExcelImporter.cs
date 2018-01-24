@@ -115,23 +115,11 @@ namespace ExcelMapper
         /// <returns>The sheet in the document at the given zero-based index.</returns>
         public ExcelSheet ReadSheet(int sheetIndex)
         {
-            if (sheetIndex < 0)
+            if (!TryReadSheet(sheetIndex, out ExcelSheet sheet))
             {
-                throw new ArgumentOutOfRangeException(nameof(sheetIndex), sheetIndex, "The index cannot be negative.");
-            }
-            if (sheetIndex > NumberOfSheets - 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(sheetIndex), sheetIndex, "The index cannot be negative.");
+                throw new ArgumentOutOfRangeException(nameof(sheetIndex), sheetIndex, $"The sheet index {SheetIndex} must be between 0 and {NumberOfSheets}.");
             }
 
-            ResetReader();
-            for (int i = 0; i < sheetIndex; i++)
-            {
-                Reader.NextResult();
-            }
-
-            var sheet = new ExcelSheet(Reader, sheetIndex, Configuration);
-            ResetReader();
             return sheet;
         }
 
@@ -180,6 +168,32 @@ namespace ExcelMapper
 
             ResetReader();
             return false;
+        }
+
+        /// <summary>
+        /// Finds and reads a sheet at the given zero-based index in the document.
+        /// </summary>
+        /// <param name="sheetIndex">The zero-based index of the sheet to read.</param>
+        /// <param name="sheet">The sheet in the document at the given zero-based index.</param>
+        /// <returns>True if the sheet was found, else false.</returns>
+        public bool TryReadSheet(int sheetIndex, out ExcelSheet sheet)
+        {
+            sheet = null;
+
+            if (sheetIndex < 0 || sheetIndex > NumberOfSheets - 1)
+            {
+                return false;
+            }
+
+            ResetReader();
+            for (int i = 0; i < sheetIndex; i++)
+            {
+                Reader.NextResult();
+            }
+
+            sheet = new ExcelSheet(Reader, sheetIndex, Configuration);
+            ResetReader();
+            return true;
         }
 
         private void ResetReader()

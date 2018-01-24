@@ -238,6 +238,51 @@ namespace ExcelMapper.Tests
             }
         }
 
+        [Fact]
+        public void TryReadSheet_SheetNameExistsNotAlreadyRead_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                Assert.True(importer.TryReadSheet("Empty", out ExcelSheet sheet));
+                Assert.Equal("Empty", sheet.Name);
+                Assert.Equal(1, sheet.Index);
+                Assert.True(sheet.HasHeading);
+                Assert.Null(sheet.Heading);
+
+                // Reading a named sheet should reset the reader after finding the column.
+                ExcelSheet nextSheet = importer.ReadSheet();
+                Assert.Equal("Primitives", nextSheet.Name);
+                Assert.Equal(0, nextSheet.Index);
+                Assert.True(nextSheet.HasHeading);
+                Assert.Null(nextSheet.Heading);
+            }
+        }
+
+        [Fact]
+        public void TryReadSheet_SheetNameExistsAlreadyRead_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.ReadSheet();
+                importer.ReadSheet();
+                importer.ReadSheet();
+
+                // Reading a named sheet should reset the reader before finding the sheet.
+                Assert.True(importer.TryReadSheet("Empty", out ExcelSheet sheet));
+                Assert.Equal("Empty", sheet.Name);
+                Assert.Equal(1, sheet.Index);
+                Assert.True(sheet.HasHeading);
+                Assert.Null(sheet.Heading);
+
+                // Reading a named sheet should reset the reader after finding the column.
+                ExcelSheet nextSheet = importer.ReadSheet();
+                Assert.Equal("Primitives", nextSheet.Name);
+                Assert.Equal(0, nextSheet.Index);
+                Assert.True(nextSheet.HasHeading);
+                Assert.Null(nextSheet.Heading);
+            }
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("")]
@@ -307,6 +352,63 @@ namespace ExcelMapper.Tests
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
                 Assert.Throws<ArgumentOutOfRangeException>("sheetIndex", () => importer.ReadSheet(sheetIndex));
+            }
+        }
+
+        [Fact]
+        public void TryReadSheet_SheetIndexExistsNotAlreadyRead_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                Assert.True(importer.TryReadSheet(1, out ExcelSheet sheet));
+                Assert.Equal("Empty", sheet.Name);
+                Assert.Equal(1, sheet.Index);
+                Assert.True(sheet.HasHeading);
+                Assert.Null(sheet.Heading);
+
+                // Reading a named sheet should reset the reader after finding the column.
+                ExcelSheet nextSheet = importer.ReadSheet();
+                Assert.Equal("Primitives", nextSheet.Name);
+                Assert.Equal(0, nextSheet.Index);
+                Assert.True(nextSheet.HasHeading);
+                Assert.Null(nextSheet.Heading);
+            }
+        }
+
+        [Fact]
+        public void TryReadSheet_SheetIndexExistsAlreadyRead_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.ReadSheet();
+                importer.ReadSheet();
+                importer.ReadSheet();
+
+                // Reading a named sheet should reset the reader before finding the sheet.
+                Assert.True(importer.TryReadSheet(1, out ExcelSheet sheet));
+                Assert.Equal("Empty", sheet.Name);
+                Assert.Equal(1, sheet.Index);
+                Assert.True(sheet.HasHeading);
+                Assert.Null(sheet.Heading);
+
+                // Reading a named sheet should reset the reader after finding the column.
+                ExcelSheet nextSheet = importer.ReadSheet();
+                Assert.Equal("Primitives", nextSheet.Name);
+                Assert.Equal(0, nextSheet.Index);
+                Assert.True(nextSheet.HasHeading);
+                Assert.Null(nextSheet.Heading);
+            }
+        }
+
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(3)]
+        public void TryReadSheet_InvalidSheetIndex_ReturnsFalse(int sheetIndex)
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                Assert.False(importer.TryReadSheet(sheetIndex, out ExcelSheet sheet));
+                Assert.Null(sheet);
             }
         }
     }

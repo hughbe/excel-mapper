@@ -367,13 +367,79 @@ using (var importer = new ExcelImporter(stream))
 }
 ```
 
+# Reading Sheets
+
+ExcelMapper supports multiple sheets and provides APIs to read particular sheets.
+
+## Enumerating through all sheets
+
+Use the `ReadSheets` method to enumerate through all sheets in a document. Enumeration is reset at the end.
+
+```cs
+using (var stream = File.OpenRead("Sheet.xlsx"))
+using (var importer = new ExcelImporter(stream))
+{
+    foreach (ExcelSheet sheet in importer.ReadSheets())
+    {
+        // Do something with the sheet.
+    }
+}
+```
+
+## Getting the next sheet
+
+Use the `ReadSheet()` method to read the next sheet. This will throw if there are no more sheets. Use the `TryReadSheet(out ExcelSheet sheet)` method to avoid throwing behaviour.
+
+```cs
+using (var stream = File.OpenRead("Sheet.xlsx"))
+using (var importer = new ExcelImporter(stream))
+{
+    // Either:
+    ExcelSheet sheet = importer.ReadSheet();
+
+    // Or:
+    bool success = importer.TryReadSheet(out ExcelSheet sheet);
+}
+```
+
+## Getting a sheet by name
+
+Use the `ReadSheet(string sheetName)` method to read a particular sheet by name. This will throw if the sheet is not found. Use the `TryReadSheet(string sheetName, out ExcelSheet sheet)` method to avoid throwing behaviour.
+
+```cs
+using (var stream = File.OpenRead("Sheet.xlsx"))
+using (var importer = new ExcelImporter(stream))
+{
+    // Either:
+    ExcelSheet sheet = importer.ReadSheet("Sheet Name");
+
+    // Or:
+    bool success = importer.TryReadSheet("Sheet Name", out ExcelSheet sheet);
+}
+```
+
+## Getting a sheet by index
+
+Use the `ReadSheet(int sheetIndex)` method to read a particular sheet at the given zero-based index. This will throw if the sheet is not found. Use the `TryReadSheet(int sheetIndex, out ExcelSheet sheet)` method to avoid throwing behaviour.
+
+```cs
+using (var stream = File.OpenRead("Sheet.xlsx"))
+using (var importer = new ExcelImporter(stream))
+{
+    // Either:
+    ExcelSheet sheet = importer.ReadSheet(0);
+
+    // Or:
+    bool success = importer.TryReadSheet(0, out ExcelSheet sheet);
+}
+```
+
 # Mapping sheets where the header is not the first row
 
 ExcelMapper supports reading headers which are not in the first row. Set the property `ExcelSheet.HeadingIndex` to the zero-based index of the header. All data preceding the header will be skipped and will not be mapped.
 
 |               |                  |
 |---------------|------------------|
-|               |                  |
 |               |                  |
 |               |                  |
 | Name          | Location         |
