@@ -21,6 +21,11 @@ namespace ExcelMapper
         /// </summary>
         public ExcelImporterConfiguration Configuration { get; } = new ExcelImporterConfiguration();
 
+        /// <summary>
+        /// Gets the number of sheets in the document.
+        /// </summary>
+        public int NumberOfSheets => Reader.ResultsCount;
+
         private int SheetIndex { get; set; } = -1;
 
         /// <summary>
@@ -53,7 +58,7 @@ namespace ExcelMapper
         public void Dispose() => Reader.Dispose();
 
         /// <summary>
-        /// Reads each sheet in the document.
+        /// Reads each sheet in the document. Reading is reset at the end of enumeration.
         /// </summary>
         /// <returns>A lazily evaluated list of each sheet in the document.</returns>
         public IEnumerable<ExcelSheet> ReadSheets()
@@ -62,6 +67,8 @@ namespace ExcelMapper
             {
                 yield return sheet;
             }
+
+            ResetReader();
         }
 
         /// <summary>
@@ -80,13 +87,62 @@ namespace ExcelMapper
         }
 
         /// <summary>
+        /// Finds and reads a sheet with the given name in the document.
+        /// The method throws if the sheet does not exist.
+        /// </summary>
+        /// <param name="sheetName">The name of the sheet to read.</param>
+        /// <returns>The sheet in the document with the given name.</returns>
+        public ExcelSheet ReadSheet(string sheetName)
+        {
+            if (sheetName == null)
+            {
+                throw new ArgumentNullException(nameof(sheetName));
+            }
+
+            if (!TryReadSheet(sheetName, out ExcelSheet sheet))
+            {
+                throw new ExcelMappingException($"The sheet \"{sheetName}\" does not exist.");
+            }
+
+            return sheet;
+        }
+
+        /// <summary>
+        /// Finds and reads a sheet at the given zero-based index in the document.
+        /// The method throws if the index is invalid.
+        /// </summary>
+        /// <param name="name">The index of the sheet to read.</param>
+        /// <returns>The sheet in the document at the given zero-based index.</returns>
+        public ExcelSheet ReadSheet(int sheetIndex)
+        {
+            if (sheetIndex < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(sheetIndex), sheetIndex, "The index cannot be negative.");
+            }
+            if (sheetIndex > NumberOfSheets - 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(sheetIndex), sheetIndex, "The index cannot be negative.");
+            }
+
+            ResetReader();
+            for (int i = 0; i < sheetIndex; i++)
+            {
+                Reader.NextResult();
+            }
+
+            var sheet = new ExcelSheet(Reader, sheetIndex, Configuration);
+            ResetReader();
+            return sheet;
+        }
+
+        /// <summary>
         /// Reads the next sheet in the document. If no sheets have been read, then this reads the first sheet.
         /// </summary>
-        /// <param name="excelSheet">The next sheet in the document.</param>
+        /// <param name="sheet">The next sheet in the document.</param>
         /// <returns>False if there are no more sheets in the document, else true.</returns>
-        public bool TryReadSheet(out ExcelSheet excelSheet)
+        public bool TryReadSheet(out ExcelSheet sheet)
         {
-            excelSheet = null;
+            sheet = null;
 
             if (SheetIndex != -1)
             {
@@ -97,8 +153,39 @@ namespace ExcelMapper
             }
 
             SheetIndex++;
-            excelSheet = new ExcelSheet(Reader, SheetIndex, Configuration);
+            sheet = new ExcelSheet(Reader, SheetIndex, Configuration);
             return true;
+        }
+
+        /// <summary>
+        /// Finds and reads a sheet with the given name in the document.
+        /// </summary>
+        /// <param name="sheetName">The name of the sheet to read.</param>
+        /// <param name="sheet">The sheet in the document with the given name.</param>
+        /// <returns>True if the sheet was found, else false.</returns>
+        public bool TryReadSheet(string sheetName, out ExcelSheet sheet)
+        {
+            sheet = null;
+            ResetReader();
+
+            while (TryReadSheet(out ExcelSheet currentSheet))
+            {
+                if (currentSheet.Name == sheetName)
+                {
+                    ResetReader();
+                    sheet = currentSheet;
+                    return true;
+                }
+            }
+
+            ResetReader();
+            return false;
+        }
+
+        private void ResetReader()
+        {
+            Reader.Reset();
+            SheetIndex = -1;
         }
     }
 }
