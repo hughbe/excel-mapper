@@ -30,7 +30,7 @@ namespace ExcelMapper
         /// <summary>
         /// Gets or sets whether the sheet has a heading. This is true by default.
         /// </summary>
-        public bool HasHeading { get; set; }
+        public bool HasHeading { get; set; } = true;
 
         /// <summary>
         /// Gets the heading that was read from the sheet. This will return null if HasHeading is false
