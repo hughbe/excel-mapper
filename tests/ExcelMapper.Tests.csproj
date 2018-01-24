@@ -18,6 +18,9 @@
     <Content Include="Resources\DuplicatedColumns.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\Non Zero Header Index.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\WithMappings.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
