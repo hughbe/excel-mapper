@@ -89,7 +89,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Strings.xlsx"))
             {
-                importer.Configuration.RegisterClassMap<StringValueClassMap>();
+                importer.Configuration.RegisterClassMap<StringValueClassMapColumnIndex>();
 
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.HasHeading = false;
@@ -119,10 +119,12 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_ReadHasHeadingFalse_ReturnsExpected()
+        public void ReadRow_HasHeadingFalse_ReturnsExpected()
         {
             using (var importer = Helpers.GetImporter("Strings.xlsx"))
             {
+                importer.Configuration.RegisterClassMap<StringValueClassMapColumnIndex>();
+
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.HasHeading = false;
 
@@ -134,18 +136,81 @@ namespace ExcelMapper.Tests
             }
         }
 
-        private class StringValueClassMap : ExcelClassMap<StringValue>
+        [Fact]
+        public void ReadRow_HasHeadingFalseAutomappedThrowsExcelMappingException()
         {
-            public StringValueClassMap()
+            using (var importer = Helpers.GetImporter("Strings.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.HasHeading = false;
+
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValue>());
+            }
+        }
+
+        [Fact]
+        public void ReadRow_HasHeadingFalseColumnNameMapping_ThrowsExcelMappingException()
+        {
+            using (var importer = Helpers.GetImporter("Strings.xlsx"))
+            {
+                importer.Configuration.RegisterClassMap<StringValueClassMapColumnName>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.HasHeading = false;
+
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValue>());
+            }
+        }
+
+        [Fact]
+        public void ReadRow_HasHeadingFalseColumnNamesMapping_ThrowsExcelMappingException()
+        {
+            using (var importer = Helpers.GetImporter("Strings.xlsx"))
+            {
+                importer.Configuration.RegisterClassMap<StringValuesClassMapColumnNames>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.HasHeading = false;
+
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValues>());
+            }
+        }
+
+        private class StringValueClassMapColumnIndex : ExcelClassMap<StringValue>
+        {
+            public StringValueClassMapColumnIndex()
             {
                 Map(value => value.Value)
                     .WithColumnIndex(0);
             }
         }
 
+        private class StringValueClassMapColumnName : ExcelClassMap<StringValue>
+        {
+            public StringValueClassMapColumnName()
+            {
+                Map(value => value.Value)
+                    .WithColumnName("Value");
+            }
+        }
+
+        private class StringValuesClassMapColumnNames : ExcelClassMap<StringValues>
+        {
+            public StringValuesClassMapColumnNames()
+            {
+                Map(value => value.Value)
+                    .WithColumnNames("Value");
+            }
+        }
+
         private class StringValue
         {
             public string Value { get; set; }
+        }
+
+        private class StringValues
+        {
+            public string[] Value { get; set; }
         }
 
         [Fact]
