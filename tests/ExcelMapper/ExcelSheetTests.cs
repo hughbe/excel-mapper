@@ -50,8 +50,8 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                importer.Configuration.HasHeading = _ => false;
                 ExcelSheet sheet = importer.ReadSheet();
+                sheet.HasHeading = false;
 
                 Assert.Throws<ExcelMappingException>(() => sheet.ReadHeading());
             }
@@ -85,6 +85,24 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRows_NotReadHeadingHasHeadingFalse_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Strings.xlsx"))
+            {
+                importer.Configuration.RegisterClassMap<StringValueClassMap>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.HasHeading = false;
+
+                IEnumerable<StringValue> rows = sheet.ReadRows<StringValue>();
+                Assert.Equal(new string[] { "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
+
+                Assert.NotNull(sheet.Heading);
+                Assert.True(sheet.HasHeading);
+            }
+        }
+
+        [Fact]
         public void ReadRows_ReadHeading_ReturnsExpected()
         {
             using (var importer = Helpers.GetImporter("Strings.xlsx"))
@@ -97,6 +115,15 @@ namespace ExcelMapper.Tests
 
                 Assert.NotNull(sheet.Heading);
                 Assert.True(sheet.HasHeading);
+            }
+        }
+
+        private class StringValueClassMap : ExcelClassMap<StringValue>
+        {
+            public StringValueClassMap()
+            {
+                Map(value => value.Value)
+                    .WithColumnIndex(0);
             }
         }
 

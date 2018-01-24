@@ -15,24 +15,22 @@ namespace ExcelMapper
             Name = reader.Name;
             Index = index;
             Configuration = configuration;
-            HasHeading = configuration.HasHeading?.Invoke(this) ?? true;
         }
 
         /// <summary>
         /// Gets the name of the sheet.
         /// </summary>
         public string Name { get; }
-        
+
         /// <summary>
         /// Gets the zero-based index of the sheet where 0 is the first sheet in the document.
         /// </summary>
         public int Index { get; }
-        
+
         /// <summary>
-        /// Gets whether the sheet has a heading. This depends on the value of ExcelImporterConfiguration.HasHeading
-        /// and is true by default.
+        /// Gets or sets whether the sheet has a heading. This is true by default.
         /// </summary>
-        public bool HasHeading { get; }
+        public bool HasHeading { get; set; }
 
         /// <summary>
         /// Gets the heading that was read from the sheet. This will return null if HasHeading is false
