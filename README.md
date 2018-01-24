@@ -1,4 +1,3 @@
-
 # ExcelMapper
 
 A library that reads a row of an Excel sheet and maps it to an object. A flexible and extensible fluent mapping system allows you to customize the way the row is mapped to an object.
@@ -7,11 +6,11 @@ A library that reads a row of an Excel sheet and maps it to an object. A flexibl
 
 ExcelMapper will go through each public property or field and attempt to map the value of the cell in the column with the name of the member. If the column cannot be found or mapped, an exception will be thrown.
 
-| Name          | Location         | Attendance | Date       | Link                    | Revenue | Successful | Cause   | 
-|---------------|------------------|------------|------------|-------------------------|---------|------------|---------| 
-| Pub Quiz      | The Blue Anchor  | 20         | 18/07/2017 | http://eventbrite.com   | 100.2   | TRUE       | Charity | 
-| Live Music    | The Raven        | 15         | 17/07/2017 | http://ticketmaster.com | 105.6   | FALSE      | Profit  | 
-| Live Football | The Rutland Arms | 45         | 16/07/2017 | http://facebook.com     | 263.9   | TRUE       | Profit  | 
+| Name          | Location         | Attendance | Date       | Link                    | Revenue | Successful | Cause   |
+|---------------|------------------|------------|------------|-------------------------|---------|------------|---------|
+| Pub Quiz      | The Blue Anchor  | 20         | 18/07/2017 | http://eventbrite.com   | 100.2   | TRUE       | Charity |
+| Live Music    | The Raven        | 15         | 17/07/2017 | http://ticketmaster.com | 105.6   | FALSE      | Profit  |
+| Live Football | The Rutland Arms | 45         | 16/07/2017 | http://facebook.com     | 263.9   | TRUE       | Profit  |
 
 
 ```cs
@@ -50,13 +49,13 @@ ExcelMapper allows customizing the class map used when mapping a row in an Excel
 
 Custom class maps allow you to change the column used to map a cell or make that column optional. You can also change the default map of the class, adding custom conversions.
 
-| Name           | Marrital Status | Number of Children | Approval Rating (%) | Date of Birth | 
-|----------------|-----------------|--------------------|---------------------|---------------| 
-| Donald Trump   | Twice Married   | 5                  | 60%                 | 1946-06-14    | 
-| Barack Obama   | Married         | 2                  | 50                  | 04/08/1961    | 
-| Ronald Reagan  | Divorced        | 5                  | 75                  | 06/03/1911    | 
-| James Buchanan | Single          | 0                  | 100                 | 1791-04-23    | 
- 
+| Name           | Marrital Status | Number of Children | Approval Rating (%) | Date of Birth |
+|----------------|-----------------|--------------------|---------------------|---------------|
+| Donald Trump   | Twice Married   | 5                  | 60%                 | 1946-06-14    |
+| Barack Obama   | Married         | 2                  | 50                  | 04/08/1961    |
+| Ronald Reagan  | Divorced        | 5                  | 75                  | 06/03/1911    |
+| James Buchanan | Single          | 0                  | 100                 | 1791-04-23    |
+
 
 
 ```cs
@@ -90,7 +89,7 @@ public class PresidentClassMap : ExcelClassMap<President>
             .WithColumnName("Marrital Status")
             .WithMapping(new Dictionary<string, MaritalStatus>
             {
-                { "Twice Married", MaritalStatus.Married}
+                { "Twice Married", MaritalStatus.Married    }
             });
 
         // Read from a column index.
@@ -120,10 +119,9 @@ using (var importer = new ExcelImporter(stream))
 {
     // You can register class maps by type.
     importer.Configuration.RegisterClassMap<PresidentClassMap>();
-    
+
     // Or by namespace.
     importer.RegisterMapperClassesByNamespace("My.Namespace");
-
 
     ExcelSheet sheet = importer.ReadSheet();
     President[] president = sheet.ReadRows<President>().ToArray();
@@ -140,12 +138,12 @@ ExcelMapper will set nullable values to `null` if the value of the cell is empty
 
 You can customize the fallback to use a fixed value if the value of a cell is empty or the value of the cell cannot be mapped.
 
-| Name           | Marrital Status | Number of Children | Date of Birth | 
-|----------------|-----------------|--------------------|---------------| 
-| Donald Trump   | Twice Married   | invalid            | invalid       | 
-| Barack Obama   |                 |                    |               | 
-| Ronald Reagan  | Divorced        | 5                  | 06/03/1911    | 
-| James Buchanan | Single          | 0                  | 1791-04-23    | 
+| Name           | Marrital Status | Number of Children | Date of Birth |
+|----------------|-----------------|--------------------|---------------|
+| Donald Trump   | Twice Married   | invalid            | invalid       |
+| Barack Obama   |                 |                    |               |
+| Ronald Reagan  | Divorced        | 5                  | 06/03/1911    |
+| James Buchanan | Single          | 0                  | 1791-04-23    |
 
 
 ```cs
@@ -195,7 +193,7 @@ using (var importer = new ExcelImporter(stream))
 {
     // You can register class maps by type.
     importer.Configuration.RegisterClassMap<PresidentClassMap>();
-    
+
     // Or by namespace.
     importer.RegisterMapperClassesByNamespace("My.Namespace");
 
@@ -212,9 +210,9 @@ using (var importer = new ExcelImporter(stream))
 
 ExcelMapper supports mapping enumerables and lists. If no column names or column indices are supplied then the value of the cell will be split with the `','` separator.
 
-| Name         | Children Names | First Election | Second Election | First Inauguration | Second Inauguration | 
-|--------------|----------------|----------------|-----------------|--------------------|---------------------| 
-| Barack Obama | Malia,Sasha    | 04/11/2008     | 06/11/2012      | 2009-01-20         | 20/01/2013          | 
+| Name         | Children Names | First Election | Second Election | First Inauguration | Second Inauguration |
+|--------------|----------------|----------------|-----------------|--------------------|---------------------|
+| Barack Obama | Malia,Sasha    | 04/11/2008     | 06/11/2012      | 2009-01-20         | 20/01/2013          |
 
 ```cs
 public class President
@@ -256,7 +254,7 @@ using (var importer = new ExcelImporter(stream))
 {
     // You can register class maps by type.
     importer.Configuration.RegisterClassMap<PresidentClassMap>();
-    
+
     // Or by namespace.
     importer.RegisterMapperClassesByNamespace("My.Namespace");
 
@@ -274,9 +272,9 @@ using (var importer = new ExcelImporter(stream))
 ExcelMapper supports mapping nested objects. If no column names or class map is supplied, then the nested object is automatically mapped based on the names of it's public properties and fields.
 
 
-| Name         | First Elected | Electoral College Votes | 
-|--------------|---------------|-------------------------| 
-| Barack Obama | 04/11/2008    | 365                     | 
+| Name         | First Elected | Electoral College Votes |
+|--------------|---------------|-------------------------|
+| Barack Obama | 04/11/2008    | 365                     |
 
 ```cs
 public class Election
@@ -310,7 +308,7 @@ using (var importer = new ExcelImporter(stream))
 {
     // You can register class maps by type.
     importer.Configuration.RegisterClassMap<PresidentClassMap>();
-    
+
     // Or by namespace.
     importer.RegisterMapperClassesByNamespace("My.Namespace");
 
@@ -319,5 +317,52 @@ using (var importer = new ExcelImporter(stream))
     Console.WriteLine(president[0].Name); // Barack Obama
     Console.WriteLine(president[0].ElectionInformation.Date) // 2008-11-04
     Console.WriteLine(president[0].ElectionInformation.ElectoralCollegeVotes) // 365
+}
+```
+# Mapping sheets without headers
+
+By default, ExcelMapper will read the first row of a sheet as a file header. This can be controlled by setting the boolean property `ExcelSheet.HasHeading`.
+ExcelMapper will go through each public property or field and attempt to map the value of the cell in the column with the name of the member. If the column cannot be found or mapped, an exception will be thrown.
+
+| Pub Quiz      | The Blue Anchor
+| Live Music    | The Raven
+| Live Football | The Rutland Arms
+
+
+```cs
+public class Event
+{
+    public string Name { get; set; }
+    public string Location { get; set; }
+}
+
+public class EventClassMap : ExcelClassMap<Event>
+{
+    public EventClassMap()
+    {
+        // Read from a column index.
+        Map(event => event.Name)
+            .WithColumnIndex(0);
+
+        Map(event => event.Location)
+            .WithColumnIndex(1);
+    }
+}
+
+// ...
+
+using (var stream = File.OpenRead("Pub Events.xlsx"))
+using (var importer = new ExcelImporter(stream))
+{
+    // You can register class maps by type.
+    importer.Configuration.RegisterClassMap<EventClassMap>();
+
+    ExcelSheet sheet = importer.ReadSheet();
+    sheet.HasHeading = false;
+
+    Event[] events = sheet.ReadRows<Event>().ToArray();
+    Console.WriteLine(events[0].Name); // Pub Quiz
+    Console.WriteLine(events[1].Name); // Live Music
+    Console.WriteLine(events[2].Name); // Live Football
 }
 ```

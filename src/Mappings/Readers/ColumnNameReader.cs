@@ -34,6 +34,11 @@ namespace ExcelMapper.Mappings.Readers
 
         public ReadCellValueResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
+            if (sheet.Heading == null)
+            {
+                throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
+            }
+
             var index = sheet.Heading.GetColumnIndex(ColumnName);
             var value = reader[index]?.ToString();
             return new ReadCellValueResult(index, value);

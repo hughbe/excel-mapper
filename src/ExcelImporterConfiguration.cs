@@ -75,10 +75,5 @@ namespace ExcelMapper
 
             ClassMaps.Add(classMap);
         }
-
-        /// <summary>
-        /// Gets or sets a delegate that is called to check whether the given sheet has a heading.
-        /// </summary>
-        public Func<ExcelSheet, bool> HasHeading { get; set; }
     }
 }

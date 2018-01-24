@@ -32,7 +32,7 @@ namespace ExcelMapper.Mappings.Readers
             {
                 throw new ArgumentException("Column names cannot be empty.", nameof(columnNames));
             }
-            
+
             foreach (string columnName in columnNames)
             {
                 if (columnName == null)
@@ -46,6 +46,11 @@ namespace ExcelMapper.Mappings.Readers
 
         public IEnumerable<ReadCellValueResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
         {
+            if (sheet.Heading == null)
+            {
+                throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
+            }
+
             return ColumnNames.Select(columnName =>
             {
                 var index = sheet.Heading.GetColumnIndex(columnName);
