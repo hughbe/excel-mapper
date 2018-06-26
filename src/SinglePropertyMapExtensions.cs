@@ -23,7 +23,7 @@ namespace ExcelMapper
         /// </summary>
         /// <typeparam name="T">The type of the property map.</typeparam>
         /// <param name="propertyMap">The property map to use.</param>
-        /// <param name="predicate">A predicate which returns where a Column Name was matched or not</param>
+        /// <param name="predicate">A predicate which returns whether a Column Name was matched or not</param>
         /// <returns>The property map on which this method was invoked.</returns>
         public static T WithColumnNameMatching<T>(this T propertyMap, Func<string, bool> predicate)
             where T : ISinglePropertyMap

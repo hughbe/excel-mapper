@@ -23,6 +23,15 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void WithColumnNameMatching_ValidColumnName_Success()
+        {
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value).WithColumnNameMatching(e => e == "ColumnName");
+            Assert.Same(propertyMap, propertyMap.WithColumnNameMatching(e => e == "ColumnName"));
+
+            Assert.IsType<ColumnNameMatchingValueReader>(propertyMap.CellReader);
+        }
+
+        [Fact]
         public void WithColumnName_OptionalColumn_Success()
         {
             SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value).MakeOptional();

@@ -22,7 +22,24 @@ namespace ExcelMapper.Tests
                 }
             }
         }
-        
+
+        [Fact]
+        public void GetColumnName_GetFirstColumnMatchingIndex_Roundtrips()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+                ExcelHeading heading = sheet.ReadHeading();
+
+                string[] columnNames = heading.ColumnNames.ToArray();
+                for (int i = 0; i < columnNames.Length; i++)
+                {
+                    Assert.Equal(i, heading.GetFirstColumnMatchingIndex(e => e == columnNames[i]));
+                    Assert.Equal(columnNames[i], heading.GetColumnName(i));
+                }
+            }
+        }
+
         [Fact]
         public void GetColumnIndex_NullColumnName_ThrowsArgumentNullException()
         {
@@ -46,6 +63,20 @@ namespace ExcelMapper.Tests
                 ExcelHeading heading = sheet.ReadHeading();
 
                 Assert.Throws<ExcelMappingException>(() => heading.GetColumnIndex(columnName));
+            }
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("NoSuchColumn")]
+        public void GetFirstColumnMatchingIndex_NoSuchColumnName_ThrowsExcelMappingException(string columnName)
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+                ExcelHeading heading = sheet.ReadHeading();
+
+                Assert.Throws<ExcelMappingException>(() => heading.GetFirstColumnMatchingIndex(e => e == columnName));
             }
         }
     }

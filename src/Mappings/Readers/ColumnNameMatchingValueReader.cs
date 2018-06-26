@@ -4,10 +4,17 @@
 
     using ExcelDataReader;
 
+    /// <summary>
+    /// Reads the value of a single cell given the predicate matching the column name.
+    /// </summary>
     public sealed class ColumnNameMatchingValueReader : ICellValueReader
     {
         private readonly Func<string, bool> predicate;
 
+        /// <summary>
+        /// Constructs a reader that reads the value of a single cell given the predicate matching the column name.
+        /// </summary>
+        /// <param name="predicate">The predicate containing the column name to read.</param>
         public ColumnNameMatchingValueReader(Func<string, bool> predicate)
         {
             if (predicate == null)
