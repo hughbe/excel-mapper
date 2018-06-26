@@ -5,8 +5,6 @@ using System.Linq;
 
 namespace ExcelMapper
 {
-    using ExcelMapper.Utilities;
-
     /// <summary>
     /// An object that represents the heading read from a sheet.
     /// </summary>
@@ -68,23 +66,17 @@ namespace ExcelMapper
             return index;
         }
 
-        /// <summary>
-        /// Gets the zero-based index of the columns passed in. This method throws an ExcelMappingException
-        /// if the columns don't exist.
-        /// </summary>
-        /// <param name="columnNames">The name of the columns to get the zero-based index of.</param>
-        /// <returns>The zero-based index of the column with the given name.</returns>
-        public int GetFirstColumnIndex(string[] columnNames)
+        public int GetFirstColumnMatchingIndex(Func<string, bool> predicate)
         {
-            int index = 0;
-            string foundColumns = string.Join(", ", NameMapping.Keys.Select(c => $"\"{c}\""));
+            var key = NameMapping.Keys.FirstOrDefault(predicate);
 
-            if (columnNames.Any(columnName => this.NameMapping.TryGetValue(columnName, out index)))
+            if (key == null)
             {
-                return index;
+                string foundColumns = string.Join(", ", NameMapping.Keys.Select(c => $"\"{c}\""));
+                throw new ExcelMappingException($"No Columns found matching predicate from [{foundColumns}]");
             }
 
-            throw new ExcelMappingException($"Columns \"{columnNames.ArrayJoin()}\" do not exist in [{foundColumns}]");
+            return NameMapping[key];
         }
 
         /// <summary>
