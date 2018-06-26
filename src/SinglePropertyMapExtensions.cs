@@ -19,6 +19,20 @@ namespace ExcelMapper
     {
         /// <summary>
         /// Sets the reader of the property map to read the value of a single cell contained in the column with
+        /// the given names.
+        /// </summary>
+        /// <typeparam name="T">The type of the property map.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="columnNames">The name of the possible columns to read</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static T WithPossibleColumnNames<T>(this T propertyMap, string[] columnNames) where T : ISinglePropertyMap
+        {
+            return propertyMap
+                .WithReader(new OneOfColumnNameValueReader(columnNames));
+        }
+
+        /// <summary>
+        /// Sets the reader of the property map to read the value of a single cell contained in the column with
         /// the given name.
         /// </summary>
         /// <typeparam name="T">The type of the property map.</typeparam>
