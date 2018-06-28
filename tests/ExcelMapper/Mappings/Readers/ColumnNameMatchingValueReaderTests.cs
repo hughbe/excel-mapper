@@ -1,9 +1,8 @@
-﻿namespace ExcelMapper.Mappings.Readers.Tests
+﻿using System;
+using Xunit;
+
+namespace ExcelMapper.Mappings.Readers.Tests
 {
-    using System;
-
-    using Xunit;
-
     public class ColumnNameMatchingValueReaderTests
     {
         [Fact]
