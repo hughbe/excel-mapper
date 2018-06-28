@@ -19,6 +19,20 @@ namespace ExcelMapper
     {
         /// <summary>
         /// Sets the reader of the property map to read the value of a single cell contained in the column with
+        /// the given names.
+        /// </summary>
+        /// <typeparam name="T">The type of the property map.</typeparam>
+        /// <param name="propertyMap">The property map to use.</param>
+        /// <param name="predicate">A predicate which returns whether a Column Name was matched or not</param>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public static T WithColumnNameMatching<T>(this T propertyMap, Func<string, bool> predicate)
+            where T : ISinglePropertyMap
+        {
+            return propertyMap.WithReader(new ColumnNameMatchingValueReader(predicate));
+        }
+
+        /// <summary>
+        /// Sets the reader of the property map to read the value of a single cell contained in the column with
         /// the given name.
         /// </summary>
         /// <typeparam name="T">The type of the property map.</typeparam>
@@ -171,7 +185,7 @@ namespace ExcelMapper
         /// <param name="propertyMap">The property map to use.</param>
         /// <param name="formats">A list of date formats to use when mapping the value of a cell to a DateTime.</param>
         /// <returns>The property map on which this method was invoked.</returns>
-        public static SingleExcelPropertyMap<DateTime> WithDateFormats(this SingleExcelPropertyMap<DateTime> propertyMap, IEnumerable<string> formats) 
+        public static SingleExcelPropertyMap<DateTime> WithDateFormats(this SingleExcelPropertyMap<DateTime> propertyMap, IEnumerable<string> formats)
         {
             return propertyMap.WithDateFormats(formats?.ToArray());
         }

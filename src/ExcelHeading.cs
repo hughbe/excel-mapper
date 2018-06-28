@@ -67,6 +67,25 @@ namespace ExcelMapper
         }
 
         /// <summary>
+        /// Gets the zero-based index of the column with the given name if it matches the supplied predicate.
+        /// This method throws an ExcelMappingException if the column does not exist.
+        /// </summary>
+        /// <param name="predicate">The predicate containing the names of the column to get the zero-based index of.</param>
+        /// <returns>The zero-based index of the column with the given name.</returns>
+        public int GetFirstColumnMatchingIndex(Func<string, bool> predicate)
+        {
+            var key = NameMapping.Keys.FirstOrDefault(predicate);
+
+            if (key == null)
+            {
+                string foundColumns = string.Join(", ", NameMapping.Keys.Select(c => $"\"{c}\""));
+                throw new ExcelMappingException($"No Columns found matching predicate from [{foundColumns}]");
+            }
+
+            return NameMapping[key];
+        }
+
+        /// <summary>
         /// Gets the list of all column names in the heading.
         /// </summary>
         public IEnumerable<string> ColumnNames => _columnNames;
