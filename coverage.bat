@@ -4,7 +4,7 @@ set project_name=ExcelMapper
 set user_directory=C:\Users\hugh
 
 set open_cover_version=4.6.519
-set report_generator_version=2.5.7
+set report_generator_version=3.1.2
 set xunit_console_version=2.3.0-beta3-build3705
 
 set packages_directory=%user_directory%\.nuget\packages
