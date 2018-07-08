@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace ExcelMapper.Mappings.Mappers.Tests
@@ -27,7 +28,6 @@ namespace ExcelMapper.Mappings.Mappers.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData("invalid")]
-        [InlineData("/relative")]
         public void GetProperty_InvalidStringValue_ReturnsInvalid(string stringValue)
         {
             var item = new UriMapper();
@@ -36,6 +36,18 @@ namespace ExcelMapper.Mappings.Mappers.Tests
             PropertyMapperResultType result = item.GetProperty(new ReadCellValueResult(-1, stringValue), ref value);
             Assert.Equal(PropertyMapperResultType.Invalid, result);
             Assert.Equal(1, value);
+        }
+
+        [Theory]
+        [InlineData("/relative")]
+        public void GetProperty_InvalidStringValueWindows_ReturnsInvalid(string stringValue)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            GetProperty_InvalidStringValue_ReturnsInvalid(stringValue);
         }
     }
 }
