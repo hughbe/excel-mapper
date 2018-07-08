@@ -176,7 +176,7 @@ namespace ExcelMapper
                     throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\" as the sheet has no heading.");
                 }
 
-                if (!AutoMapper.AutoMapClass(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<T> autoClassMap))
+                if (!AutoMapper.GenerateObjectMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<T> autoClassMap))
                 {
                     throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\".");
                 }
