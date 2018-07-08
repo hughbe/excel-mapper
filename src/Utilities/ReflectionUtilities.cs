@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
@@ -13,7 +12,7 @@ namespace ExcelMapper.Utilities
             return type.GetTypeInfo().ImplementedInterfaces.Any(t => t == interfaceType);
         }
 
-        public static bool ImplementsGenericInterface(this Type type, Type genericInterfaceType, out Type elementType)
+        private static bool ImplementsGenericInterface(this Type type, Type genericInterfaceType, out Type elementType)
         {
             foreach (Type interfaceType in type.GetTypeInfo().ImplementedInterfaces)
             {
@@ -58,7 +57,7 @@ namespace ExcelMapper.Utilities
             return isNullable ? type.GenericTypeArguments[0] : type;
         }
 
-        public static bool IsNullable(this Type type)
+        private static bool IsNullable(this Type type)
         {
             return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
         }

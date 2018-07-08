@@ -39,8 +39,8 @@ namespace ExcelMapper.Mappings.Readers
                 throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
             }
 
-            var index = sheet.Heading.GetColumnIndex(ColumnName);
-            var value = reader[index]?.ToString();
+            int index = sheet.Heading.GetColumnIndex(ColumnName);
+            string value = reader[index]?.ToString();
             return new ReadCellValueResult(index, value);
         }
     }

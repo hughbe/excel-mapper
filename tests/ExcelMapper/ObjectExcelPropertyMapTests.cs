@@ -52,7 +52,7 @@ namespace ExcelMapper.Tests
                 ClassMap = classMap
             };
 
-            Assert.Same(classMap, propertyMap.ClassMap);
+            Assert.Throws<ArgumentNullException>("classMap", () => propertyMap.WithClassMap((ExcelClassMap<string>)null));
         }
 
         [Fact]

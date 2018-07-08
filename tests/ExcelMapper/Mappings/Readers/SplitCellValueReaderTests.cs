@@ -1,4 +1,5 @@
 ﻿using System;
+using ExcelDataReader;
 using Xunit;
 
 namespace ExcelMapper.Mappings.Readers.Tests
@@ -70,6 +71,21 @@ namespace ExcelMapper.Mappings.Readers.Tests
         {
             var reader = new SplitCellValueReader(new ColumnNameValueReader("ColumnName"));
             Assert.Throws<ArgumentNullException>("value", () => reader.CellReader = null);
+        }
+
+        [Fact]
+        public void GetValues_NullReaderValue_ReturnsEmpty()
+        {
+            var reader = new SplitCellValueReader(new NullValueReader());
+            Assert.Empty(reader.GetValues(null, 0, null));
+        }
+
+        private class NullValueReader : ICellValueReader
+        {
+            public ReadCellValueResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+            {
+                return new ReadCellValueResult();
+            }
         }
     }
 }

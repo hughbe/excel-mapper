@@ -8,14 +8,13 @@ namespace ExcelMapper.Utilities.Tests
 {
     public class ExcelImporterUtilsTests
     {
-#if NETSTANDARD2_0
+#if !NETCOREAPP1_1
         [Fact]
         public void RegisterClassMapsInNamespace_NoAssemblyAndValidNamespaceString_ReturnsExpected()
         {
             using (var importer = Helpers.GetImporter("Strings.xlsx"))
             {
-                Assembly assembly = typeof(ExcelImporterUtilsTests).GetTypeInfo().Assembly;
-                IEnumerable<ExcelClassMap> classMaps = ExcelImporterUtils.RegisterClassMapsInNamespace(importer, assembly, "ExcelMapper.Utilities.Tests");
+                IEnumerable<ExcelClassMap> classMaps = ExcelImporterUtils.RegisterClassMapsInNamespace(importer, "ExcelMapper.Utilities.Tests");
                 ExcelClassMap classMap = Assert.Single(classMaps);
                 Assert.IsType<TestClassMap>(classMap);
             }
@@ -76,7 +75,6 @@ namespace ExcelMapper.Utilities.Tests
 
     public class TestClassMap : ExcelClassMap<TestClass>
     {
-
     }
 
     public class TestClass

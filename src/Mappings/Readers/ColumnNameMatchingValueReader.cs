@@ -16,12 +16,7 @@ namespace ExcelMapper.Mappings.Readers
         /// <param name="predicate">The predicate containing the column name to read.</param>
         public ColumnNameMatchingValueReader(Func<string, bool> predicate)
         {
-            if (predicate == null)
-            {
-                throw new ArgumentNullException(nameof(predicate));
-            }
-
-            _predicate = predicate;
+            _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
         }
 
         public ReadCellValueResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
@@ -31,8 +26,8 @@ namespace ExcelMapper.Mappings.Readers
                 throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
             }
 
-            var index = sheet.Heading.GetFirstColumnMatchingIndex(_predicate);
-            var value = reader[index]?.ToString();
+            int index = sheet.Heading.GetFirstColumnMatchingIndex(_predicate);
+            string value = reader[index]?.ToString();
             return new ReadCellValueResult(index, value);
         }
     }

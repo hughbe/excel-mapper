@@ -151,6 +151,45 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRows_AllReadHasHeadingTrue_ReturnsEmpty()
+        {
+            using (var importer = Helpers.GetImporter("Strings.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+
+                IEnumerable<StringValue> rows1 = sheet.ReadRows<StringValue>();
+                Assert.Equal(new string[] { "value", "  value  ", null, "value" }, rows1.Select(p => p.Value).ToArray());
+
+                Assert.NotNull(sheet.Heading);
+                Assert.True(sheet.HasHeading);
+
+                StringValue[] rows2 = sheet.ReadRows<StringValue>().ToArray();
+                Assert.Empty(rows2.Select(p => p.Value).ToArray());
+            }
+        }
+
+        [Fact]
+        public void ReadRows_AllReadingHasHeadingFalse_ReturnsEmpty()
+        {
+            using (var importer = Helpers.GetImporter("Strings.xlsx"))
+            {
+                importer.Configuration.RegisterClassMap<StringValueClassMapColumnIndex>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.HasHeading = false;
+
+                IEnumerable<StringValue> rows1 = sheet.ReadRows<StringValue>();
+                Assert.Equal(new string[] { "Value", "value", "  value  ", null, "value" }, rows1.Select(p => p.Value).ToArray());
+
+                Assert.Null(sheet.Heading);
+                Assert.False(sheet.HasHeading);
+
+                StringValue[] rows2 = sheet.ReadRows<StringValue>().ToArray();
+                Assert.Empty(rows2.Select(p => p.Value).ToArray());
+            }
+        }
+
+        [Fact]
         public void ReadRow_HasHeadingFalse_ReturnsExpected()
         {
             using (var importer = Helpers.GetImporter("Strings.xlsx"))

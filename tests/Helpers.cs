@@ -44,11 +44,13 @@ namespace ExcelMapper.Tests
             public IListInterface ConcreteIEnumerable { get; set; }
         }
 
-        public interface IListInterface : IList<string>
+        public interface IEmptyInterface { }
+
+        public interface IListInterface : IEmptyInterface, IList<string>
         {
         }
 
-        public class ConcreteIEnumerable : IEnumerable<string>
+        public class ConcreteIEnumerable : IEmptyInterface, IEnumerable<string>
         {
             public IEnumerator<string> GetEnumerator() => throw new NotImplementedException();
             IEnumerator IEnumerable.GetEnumerator() => throw new NotImplementedException();

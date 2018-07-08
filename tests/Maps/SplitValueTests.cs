@@ -99,6 +99,12 @@ namespace ExcelMapper.Tests
             }
         }
 
+        [Fact]
+        public void ReadRow_NullableIntArray_ReturnsExpected()
+        {
+
+        }
+
         private class AutoSplitWithSeparatorClass
         {
             public string[] Value { get; set; }

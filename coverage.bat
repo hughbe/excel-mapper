@@ -1,6 +1,6 @@
 @echo off
 
-dotnet test tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+dotnet test tests -f netcoreapp2.1 /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
 
 set report_generator_version=3.1.2
 set user_directory=C:\Users\hughb
