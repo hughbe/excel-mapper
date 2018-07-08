@@ -35,6 +35,12 @@ bld/
 *.VisualState.xml
 TestResult.xml
 
+# Visual Studio code coverage results
+*.coverage
+*.coveragexml
+coverage.opencover.xml
+lcov.info
+
 # Build Results of an ATL Project
 [Dd]ebugPS/
 [Rr]eleasePS/
