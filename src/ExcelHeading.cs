@@ -14,7 +14,7 @@ namespace ExcelMapper
 
         internal ExcelHeading(IDataRecord reader)
         {
-            var nameMapping = new Dictionary<string, int>(reader.FieldCount);
+            var nameMapping = new Dictionary<string, int>(reader.FieldCount, StringComparer.OrdinalIgnoreCase);
             var columnNames = new string[reader.FieldCount];
 
             for (int columnIndex = 0; columnIndex < reader.FieldCount; columnIndex++)
