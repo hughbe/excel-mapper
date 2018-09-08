@@ -68,7 +68,7 @@ namespace ExcelMapper
         /// <returns>The map for the given property or field.</returns>
         public SingleExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression, bool ignoreCase) where TProperty : struct
         {
-            if (!typeof(TProperty).IsEnum)
+            if (!typeof(TProperty).GetTypeInfo().IsEnum)
             {
                 throw new ArgumentException($"The type ${typeof(TProperty)} must be an Enum.");
             }
@@ -94,7 +94,7 @@ namespace ExcelMapper
         /// <returns>The map for the given property or field.</returns>
         public SingleExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty?>> expression, bool ignoreCase) where TProperty : struct
         {
-            if (!typeof(TProperty).IsEnum)
+            if (!typeof(TProperty).GetTypeInfo().IsEnum)
             {
                 throw new ArgumentException($"The type ${typeof(TProperty)} must be an Enum.");
             }

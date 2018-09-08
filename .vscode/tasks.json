@@ -12,6 +12,16 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "label": "pack",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "${workspaceFolder}/src/ExcelMapper.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
             "label": "test",
             "command": "dotnet",
             "type": "process",
