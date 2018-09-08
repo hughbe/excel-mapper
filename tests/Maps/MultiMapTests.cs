@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Xunit;
 
 namespace ExcelMapper.Tests
@@ -24,6 +25,10 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new string[] { "a", "b" }, row1.IListString);
                 Assert.Equal(new string[] { "1", "2" }, row1.ListString);
                 Assert.Equal(new string[] { "1", "2" }, row1._concreteICollection);
+                Assert.Equal(new string[] { "1", "2" }, row1.CollectionString);
+                Assert.Equal(new string[] { "1", "2" }, row1.ObservableCollectionString);
+                Assert.Equal(new string[] { "1", "2" }, row1.CustomObservableCollectionString);
+                Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.a, ObservableCollectionEnum.b }, row1.CustomObservableCollectionEnum);
 
                 MultiMapRow row2 = sheet.ReadRow<MultiMapRow>();
                 Assert.Equal(new int[] { 1, -1, 3 }, row2.MultiMapName);
@@ -33,6 +38,10 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new string[] { "c", "d" }, row2.IListString);
                 Assert.Equal(new string[] { "3", "4" }, row2.ListString);
                 Assert.Equal(new string[] { "3", "4" }, row2._concreteICollection);
+                Assert.Equal(new string[] { "3", "4" }, row2.CollectionString);
+                Assert.Equal(new string[] { "3", "4" }, row2.ObservableCollectionString);
+                Assert.Equal(new string[] { "3", "4" }, row2.CustomObservableCollectionString);
+                Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.custom, ObservableCollectionEnum.custom }, row2.CustomObservableCollectionEnum);
 
                 MultiMapRow row3 = sheet.ReadRow<MultiMapRow>();
                 Assert.Equal(new int[] { -1, -1, -1 }, row3.MultiMapName);
@@ -42,6 +51,10 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new string[] { "e", "f" }, row3.IListString);
                 Assert.Equal(new string[] { "5", "6" }, row3.ListString);
                 Assert.Equal(new string[] { "5", "6" }, row3._concreteICollection);
+                Assert.Equal(new string[] { "5", "6" }, row3.CollectionString);
+                Assert.Equal(new string[] { "5", "6" }, row3.ObservableCollectionString);
+                Assert.Equal(new string[] { "5", "6" }, row3.CustomObservableCollectionString);
+                Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.custom, ObservableCollectionEnum.custom }, row3.CustomObservableCollectionEnum);
 
                 MultiMapRow row4 = sheet.ReadRow<MultiMapRow>();
                 Assert.Equal(new int[] { -2, -2, 3 }, row4.MultiMapName);
@@ -51,6 +64,10 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new string[] { "g", "h" }, row4.IListString);
                 Assert.Equal(new string[] { "7", "8" }, row4.ListString);
                 Assert.Equal(new string[] { "7", "8" }, row4._concreteICollection);
+                Assert.Equal(new string[] { "7", "8" }, row4.CollectionString);
+                Assert.Equal(new string[] { "7", "8" }, row4.ObservableCollectionString);
+                Assert.Equal(new string[] { "7", "8" }, row4.CustomObservableCollectionString);
+                Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.custom, ObservableCollectionEnum.custom }, row4.CustomObservableCollectionEnum);
             }
         }
 
@@ -65,6 +82,10 @@ namespace ExcelMapper.Tests
 #pragma warning disable 0649
             public SortedSet<string> _concreteICollection;
 #pragma warning restore 0649
+            public Collection<string> CollectionString { get; set; }
+            public ObservableCollection<string> ObservableCollectionString { get; set; }
+            public CustomObservableCollection CustomObservableCollectionString { get; set; }
+            public CustomEnumObservableCollection CustomObservableCollectionEnum { get; set; }
         }
 
         private class MultiMapRowMap : ExcelClassMap<MultiMapRow>
@@ -101,6 +122,21 @@ namespace ExcelMapper.Tests
 
                 Map<string>(p => p._concreteICollection)
                     .WithColumnNames("ListString1", "ListString2");
+
+                Map<string>(p => p.CollectionString)
+                    .WithColumnNames("ListString1", "ListString2");
+
+                Map<string>(p => p.ObservableCollectionString)
+                    .WithColumnNames("ListString1", "ListString2");
+
+                Map<string>(p => p.CustomObservableCollectionString)
+                    .WithColumnNames("ListString1", "ListString2");
+
+                Map<ObservableCollectionEnum>(p => p.CustomObservableCollectionEnum)
+                    .WithColumnNames("MultiMapIndex1", "MultiMapIndex2")
+                    .WithElementMap(e => e
+                        .WithValueFallback(ObservableCollectionEnum.custom)
+                    );;
             }
         }
 
@@ -141,6 +177,21 @@ namespace ExcelMapper.Tests
             public void RemoveAt(int index) => Inner.RemoveAt(index);
 
             IEnumerator IEnumerable.GetEnumerator() => Inner.GetEnumerator();
+        }
+
+        public class CustomObservableCollection : ObservableCollection<string>
+        {
+        }
+
+        public class CustomEnumObservableCollection : ObservableCollection<ObservableCollectionEnum>
+        {
+        }
+
+        public enum ObservableCollectionEnum
+        {
+            a,
+            b,
+            custom
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Xunit;
 
 namespace ExcelMapper.Tests
@@ -15,9 +16,16 @@ namespace ExcelMapper.Tests
 
                 AutoSplitWithSeparatorClass row1 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
                 Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+                Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.Value1, ObservableCollectionEnum.Value2, ObservableCollectionEnum.Value3 }, row1.EnumValue);
 
-                AutoSplitWithSeparatorClass row2 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
-                Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+                // Empty value.
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<AutoSplitWithSeparatorClass>());
+
+                // Invalid value.
+                AutoSplitWithSeparatorClass row3 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
+                Assert.Equal(new string[] { "1" }, row3.Value);
+
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<AutoSplitWithSeparatorClass>());
             }
         }
 
@@ -31,11 +39,25 @@ namespace ExcelMapper.Tests
                 ExcelSheet sheet = importer.ReadSheet();
                 sheet.ReadHeading();
 
-                AutoSplitWithSeparatorClass row1 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
+                MappedAutoSplitWithSeparatorClass row1 = sheet.ReadRow<MappedAutoSplitWithSeparatorClass>();
                 Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+                Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.Value1, ObservableCollectionEnum.Value2, ObservableCollectionEnum.Value3 }, row1.EnumCollectionValue);
+                Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.Value1, ObservableCollectionEnum.Value2, ObservableCollectionEnum.Value3 }, row1.EnumValue);
 
-                AutoSplitWithSeparatorClass row2 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
+                MappedAutoSplitWithSeparatorClass row2 = sheet.ReadRow<MappedAutoSplitWithSeparatorClass>();
                 Assert.Equal(new string[] { "1", "empty", "2" }, row2.Value);
+                Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.Value1, ObservableCollectionEnum.Empty, ObservableCollectionEnum.Value3 }, row2.EnumCollectionValue);
+                Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.Value1, ObservableCollectionEnum.Empty, ObservableCollectionEnum.Value3 }, row2.EnumValue);
+
+                MappedAutoSplitWithSeparatorClass row3 = sheet.ReadRow<MappedAutoSplitWithSeparatorClass>();
+                Assert.Equal(new string[] { "1" }, row3.Value);
+                Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.Value1 }, row3.EnumCollectionValue);
+                Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.Value1 }, row3.EnumValue);
+
+                MappedAutoSplitWithSeparatorClass row4 = sheet.ReadRow<MappedAutoSplitWithSeparatorClass>();
+                Assert.Equal(new string[0], row4.Value);
+                Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.Invalid }, row4.EnumCollectionValue);
+                Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.Invalid }, row4.EnumValue);
             }
         }
 
@@ -99,15 +121,17 @@ namespace ExcelMapper.Tests
             }
         }
 
-        [Fact]
-        public void ReadRow_NullableIntArray_ReturnsExpected()
-        {
-
-        }
-
         private class AutoSplitWithSeparatorClass
         {
             public string[] Value { get; set; }
+            public ObservableCollection<ObservableCollectionEnum> EnumValue { get; set; }
+        }
+
+        private class MappedAutoSplitWithSeparatorClass
+        {
+            public string[] Value { get; set; }
+            public Collection<ObservableCollectionEnum> EnumCollectionValue { get; set; }
+            public ObservableCollection<ObservableCollectionEnum> EnumValue { get; set; }
         }
 
         private class CustomSplitWithSeparatorClass
@@ -123,7 +147,7 @@ namespace ExcelMapper.Tests
             public string[] ValueWithColumnIndexAcrossMultiColumnIndices { get; set; }
         }
 
-        private class SplitWithElementMapMap : ExcelClassMap<AutoSplitWithSeparatorClass>
+        private class SplitWithElementMapMap : ExcelClassMap<MappedAutoSplitWithSeparatorClass>
         {
             public SplitWithElementMapMap()
             {
@@ -131,6 +155,19 @@ namespace ExcelMapper.Tests
                     .WithElementMap(e => e
                         .WithEmptyFallback("empty")
                     );
+
+                Map(p => p.EnumCollectionValue)
+                    .WithColumnName("EnumValue")
+                    .WithElementMap(e => e
+                        .WithEmptyFallback(ObservableCollectionEnum.Empty)
+                        .WithInvalidFallback(ObservableCollectionEnum.Invalid)
+                    );
+
+                Map(p => p.EnumValue)
+                    .WithElementMap(e => e
+                        .WithEmptyFallback(ObservableCollectionEnum.Empty)
+                        .WithInvalidFallback(ObservableCollectionEnum.Invalid)
+                    );;
             }
         }
 
@@ -180,6 +217,15 @@ namespace ExcelMapper.Tests
                     .WithColumnIndices(9, 10)
                     .WithColumnIndex(0);
             }
+        }
+
+        public enum ObservableCollectionEnum
+        {
+            Value1,
+            Value2,
+            Value3,
+            Empty,
+            Invalid
         }
     }
 }

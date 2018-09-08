@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Reflection;
 using ExcelMapper.Utilities;
@@ -80,6 +81,38 @@ namespace ExcelMapper
         /// <param name="expression">A MemberExpression reading the property or field.</param>
         /// <returns>The map for the given property or field.</returns>
         public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, ICollection<TProperty>>> expression)
+        {
+            MemberExpression memberExpression = GetMemberExpression(expression);
+            EnumerableExcelPropertyMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+
+            AddMap(map, expression);
+            return map;
+        }
+
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping Collection.
+        /// </summary>
+        /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <returns>The map for the given property or field.</returns>
+        public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, Collection<TProperty>>> expression)
+        {
+            MemberExpression memberExpression = GetMemberExpression(expression);
+            EnumerableExcelPropertyMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+
+            AddMap(map, expression);
+            return map;
+        }
+
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping ObservableCollection.
+        /// </summary>
+        /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <returns>The map for the given property or field.</returns>
+        public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, ObservableCollection<TProperty>>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
             EnumerableExcelPropertyMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
