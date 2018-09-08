@@ -103,18 +103,21 @@ namespace ExcelMapper.Tests
                 Assert.Equal(0, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
 
                 sheet = importer.ReadSheet();
                 Assert.Equal("Empty", sheet.Name);
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
 
                 sheet = importer.ReadSheet();
                 Assert.Equal("Third Sheet", sheet.Name);
                 Assert.Equal(2, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
             }
         }
 
@@ -141,18 +144,21 @@ namespace ExcelMapper.Tests
                 Assert.Equal(0, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
 
                 Assert.True(importer.TryReadSheet(out sheet));
                 Assert.Equal("Empty", sheet.Name);
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
 
                 Assert.True(importer.TryReadSheet(out sheet));
                 Assert.Equal("Third Sheet", sheet.Name);
                 Assert.Equal(2, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
             }
         }
 
@@ -180,6 +186,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
 
                 // Reading a named sheet should reset the reader after finding the column.
                 ExcelSheet nextSheet = importer.ReadSheet();
@@ -187,6 +194,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(0, nextSheet.Index);
                 Assert.True(nextSheet.HasHeading);
                 Assert.Null(nextSheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
             }
         }
 
@@ -205,6 +213,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
 
                 // Reading a named sheet should reset the reader after finding the column.
                 ExcelSheet nextSheet = importer.ReadSheet();
@@ -212,6 +221,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(0, nextSheet.Index);
                 Assert.True(nextSheet.HasHeading);
                 Assert.Null(nextSheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
             }
         }
 
@@ -248,6 +258,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
 
                 // Reading a named sheet should reset the reader after finding the column.
                 ExcelSheet nextSheet = importer.ReadSheet();
@@ -255,6 +266,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(0, nextSheet.Index);
                 Assert.True(nextSheet.HasHeading);
                 Assert.Null(nextSheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
             }
         }
 
@@ -273,6 +285,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
 
                 // Reading a named sheet should reset the reader after finding the column.
                 ExcelSheet nextSheet = importer.ReadSheet();
@@ -280,6 +293,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(0, nextSheet.Index);
                 Assert.True(nextSheet.HasHeading);
                 Assert.Null(nextSheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
             }
         }
 
@@ -309,6 +323,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
 
                 // Reading a named sheet should reset the reader after finding the column.
                 ExcelSheet nextSheet = importer.ReadSheet();
@@ -316,6 +331,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(0, nextSheet.Index);
                 Assert.True(nextSheet.HasHeading);
                 Assert.Null(nextSheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
             }
         }
 
@@ -334,6 +350,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
 
                 // Reading a named sheet should reset the reader after finding the column.
                 ExcelSheet nextSheet = importer.ReadSheet();
@@ -341,6 +358,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(0, nextSheet.Index);
                 Assert.True(nextSheet.HasHeading);
                 Assert.Null(nextSheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
             }
         }
 
@@ -365,6 +383,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
 
                 // Reading a named sheet should reset the reader after finding the column.
                 ExcelSheet nextSheet = importer.ReadSheet();
@@ -372,6 +391,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(0, nextSheet.Index);
                 Assert.True(nextSheet.HasHeading);
                 Assert.Null(nextSheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
             }
         }
 
@@ -390,6 +410,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
 
                 // Reading a named sheet should reset the reader after finding the column.
                 ExcelSheet nextSheet = importer.ReadSheet();
@@ -397,6 +418,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(0, nextSheet.Index);
                 Assert.True(nextSheet.HasHeading);
                 Assert.Null(nextSheet.Heading);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
             }
         }
 

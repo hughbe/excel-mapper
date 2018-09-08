@@ -15,8 +15,8 @@ namespace ExcelMapper.Tests
                 ExcelSheet sheet = importer.ReadSheet();
                 ExcelHeading heading = sheet.ReadHeading();
                 Assert.Same(heading, sheet.Heading);
-
                 Assert.Equal(new string[] { "Int Value", "StringValue", "Bool Value", "Enum Value", "DateValue", "ArrayValue", "MappedValue", "TrimmedValue" }, heading.ColumnNames);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
             }
         }
 
@@ -28,8 +28,8 @@ namespace ExcelMapper.Tests
                 ExcelSheet sheet = importer.ReadSheet();
                 ExcelHeading heading = sheet.ReadHeading();
                 Assert.Same(heading, sheet.Heading);
-
                 Assert.Equal(new string[] { "", "Column2", "", " Column4 " }, heading.ColumnNames);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
             }
         }
 
@@ -43,8 +43,8 @@ namespace ExcelMapper.Tests
 
                 ExcelHeading heading = sheet.ReadHeading();
                 Assert.Same(heading, sheet.Heading);
-
                 Assert.Equal(new string[] { "Value" }, heading.ColumnNames);
+                Assert.Equal(-1, sheet.CurrentRowIndex);
             }
         }
 
@@ -93,6 +93,7 @@ namespace ExcelMapper.Tests
 
                 IEnumerable<StringValue> rows = sheet.ReadRows<StringValue>();
                 Assert.Equal(new string[] { "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
+                Assert.Equal(3, sheet.CurrentRowIndex);
 
                 Assert.NotNull(sheet.Heading);
                 Assert.True(sheet.HasHeading);
@@ -111,6 +112,7 @@ namespace ExcelMapper.Tests
 
                 IEnumerable<StringValue> rows = sheet.ReadRows<StringValue>();
                 Assert.Equal(new string[] { "Value", "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
+                Assert.Equal(4, sheet.CurrentRowIndex);
 
                 Assert.Null(sheet.Heading);
                 Assert.False(sheet.HasHeading);
@@ -127,6 +129,7 @@ namespace ExcelMapper.Tests
 
                 IEnumerable<StringValue> rows = sheet.ReadRows<StringValue>();
                 Assert.Equal(new string[] { "value", "  value  ", null, "value"  }, rows.Select(p => p.Value).ToArray());
+                Assert.Equal(3, sheet.CurrentRowIndex);
 
                 Assert.NotNull(sheet.Heading);
                 Assert.True(sheet.HasHeading);
@@ -144,6 +147,7 @@ namespace ExcelMapper.Tests
 
                 IEnumerable<StringValue> rows = sheet.ReadRows<StringValue>();
                 Assert.Equal(new string[] { "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
+                Assert.Equal(3, sheet.CurrentRowIndex);
 
                 Assert.NotNull(sheet.Heading);
                 Assert.True(sheet.HasHeading);
@@ -159,6 +163,7 @@ namespace ExcelMapper.Tests
 
                 IEnumerable<StringValue> rows1 = sheet.ReadRows<StringValue>();
                 Assert.Equal(new string[] { "value", "  value  ", null, "value" }, rows1.Select(p => p.Value).ToArray());
+                Assert.Equal(3, sheet.CurrentRowIndex);
 
                 Assert.NotNull(sheet.Heading);
                 Assert.True(sheet.HasHeading);
@@ -180,6 +185,7 @@ namespace ExcelMapper.Tests
 
                 IEnumerable<StringValue> rows1 = sheet.ReadRows<StringValue>();
                 Assert.Equal(new string[] { "Value", "value", "  value  ", null, "value" }, rows1.Select(p => p.Value).ToArray());
+                Assert.Equal(4, sheet.CurrentRowIndex);
 
                 Assert.Null(sheet.Heading);
                 Assert.False(sheet.HasHeading);
@@ -201,6 +207,7 @@ namespace ExcelMapper.Tests
 
                 StringValue value = sheet.ReadRow<StringValue>();
                 Assert.Equal("Value", value.Value);
+                Assert.Equal(0, sheet.CurrentRowIndex);
 
                 Assert.Null(sheet.Heading);
                 Assert.False(sheet.HasHeading);

@@ -80,7 +80,11 @@ namespace ExcelMapper
         /// </summary>
         public ExcelHeading Heading { get; private set; }
 
-        private int CurrentIndex { get; set; } = -1;
+        /// <summary>
+        /// Gets the index of the row currently being mapped.
+        /// </summary>
+        public int CurrentRowIndex { get; private set; } = -1;
+
         private ExcelImporterConfiguration Configuration { get; }
         private IExcelDataReader Reader { get; }
 
@@ -167,7 +171,7 @@ namespace ExcelMapper
                 return false;
             }
 
-            CurrentIndex++;
+            CurrentRowIndex++;
 
             if (!Configuration.TryGetClassMap<T>(out ExcelClassMap classMap))
             {
@@ -185,7 +189,7 @@ namespace ExcelMapper
                 Configuration.RegisterClassMap(autoClassMap);
             }
 
-            value = (T)classMap.Execute(this, CurrentIndex, Reader);
+            value = (T)classMap.Execute(this, CurrentRowIndex, Reader);
             return true;
         }
     }
