@@ -117,6 +117,12 @@ namespace ExcelMapper.Utilities
                 emptyFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, isEmpty: true);
                 invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, isEmpty: false);
             }
+            else if (type == typeof(Guid))
+            {
+                mapper = new GuidMapper();
+                emptyFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, isEmpty: true);
+                invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, isEmpty: false);
+            }
             else if (type == typeof(bool))
             {
                 mapper = new BoolMapper();
