@@ -13,12 +13,12 @@ namespace ExcelMapper
         private bool _hasHeading = true;
         private int _headingIndex = 0;
 
-        internal ExcelSheet(IExcelDataReader reader, int index, ExcelImporterConfiguration configuration)
+        internal ExcelSheet(IExcelDataReader reader, int index, ExcelImporter importer)
         {
             Reader = reader;
             Name = reader.Name;
             Index = index;
-            Configuration = configuration;
+            Importer = importer;
         }
 
         /// <summary>
@@ -85,7 +85,8 @@ namespace ExcelMapper
         /// </summary>
         public int CurrentRowIndex { get; private set; } = -1;
 
-        private ExcelImporterConfiguration Configuration { get; }
+        private ExcelImporter Importer { get; }
+
         private IExcelDataReader Reader { get; }
 
         /// <summary>
@@ -104,13 +105,8 @@ namespace ExcelMapper
                 throw new ExcelMappingException($"Already read heading in sheet \"{Name}\".");
             }
 
-            for (int i = 0; i <= HeadingIndex; i++)
-            {
-                if (!Reader.Read())
-                {
-                    throw new ExcelMappingException($"Sheet \"{Name}\" has no heading.");
-                }
-            }
+            Importer.MoveToSheet(this);
+            ReadPastHeading();
 
             var heading = new ExcelHeading(Reader);
             Heading = heading;
@@ -165,6 +161,8 @@ namespace ExcelMapper
         /// <returns>False if there are no more rows in the sheet or the row cannot be mapped to an object, else false.</returns>
         public bool TryReadRow<T>(out T value)
         {
+            Importer.MoveToSheet(this);
+
             value = default(T);
             if (!Reader.Read())
             {
@@ -173,7 +171,7 @@ namespace ExcelMapper
 
             CurrentRowIndex++;
 
-            if (!Configuration.TryGetClassMap<T>(out ExcelClassMap classMap))
+            if (!Importer.Configuration.TryGetClassMap<T>(out ExcelClassMap classMap))
             {
                 if (!HasHeading)
                 {
@@ -186,11 +184,22 @@ namespace ExcelMapper
                 }
 
                 classMap = autoClassMap;
-                Configuration.RegisterClassMap(autoClassMap);
+                Importer.Configuration.RegisterClassMap(autoClassMap);
             }
 
             value = (T)classMap.Execute(this, CurrentRowIndex, Reader);
             return true;
+        }
+
+        internal void ReadPastHeading()
+        {
+            for (int i = 0; i <= HeadingIndex; i++)
+            {
+                if (!Reader.Read())
+                {
+                    throw new ExcelMappingException($"Sheet \"{Name}\" has no heading.");
+                }
+            }
         }
     }
 }

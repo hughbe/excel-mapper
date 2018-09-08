@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using ExcelDataReader;
 
@@ -141,7 +142,7 @@ namespace ExcelMapper
             }
 
             SheetIndex++;
-            sheet = new ExcelSheet(Reader, SheetIndex, Configuration);
+            sheet = new ExcelSheet(Reader, SheetIndex, this);
             return true;
         }
 
@@ -191,7 +192,7 @@ namespace ExcelMapper
                 Reader.NextResult();
             }
 
-            sheet = new ExcelSheet(Reader, sheetIndex, Configuration);
+            sheet = new ExcelSheet(Reader, sheetIndex, this);
             ResetReader();
             return true;
         }
@@ -200,6 +201,37 @@ namespace ExcelMapper
         {
             Reader.Reset();
             SheetIndex = -1;
+        }
+
+        internal void MoveToSheet(ExcelSheet sheet)
+        {
+            Debug.Assert(sheet.Index >= 0 && sheet.Index < NumberOfSheets);
+            // Already on the sheet.
+            if (SheetIndex == sheet.Index)
+            {
+                return;
+            }
+
+            // Read up to the current sheet.
+            Reader.Reset();
+            for (int i = 0; i < sheet.Index; i++)
+            {
+                Reader.NextResult();
+            }
+
+            // If the header has already been read, skip past it.
+            if (sheet.HasHeading && sheet.Heading != null)
+            {
+                sheet.ReadPastHeading();
+            }
+
+            // Read up to the current row.
+            for (int i = 0; i <= sheet.CurrentRowIndex; i++)
+            {
+                Reader.Read();
+            }
+
+            SheetIndex = sheet.Index;
         }
     }
 }
