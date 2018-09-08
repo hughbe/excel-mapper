@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Reflection;
 using ExcelMapper.Utilities;
+using ExcelMapper.Mappings.Mappers;
 
 namespace ExcelMapper
 {
@@ -52,6 +53,58 @@ namespace ExcelMapper
             {
                 throw new ExcelMappingException($"Don't know how to map type {typeof(TProperty)}.");
             }
+
+            AddMap(map, expression);
+            return map;
+        }
+
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping enums.
+        /// </summary>
+        /// <typeparam name="TProperty">The enum type of the property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <param name="ignoreCase">A flag indicating whether enum parsing is case insensitive.</param>
+        /// <returns>The map for the given property or field.</returns>
+        public SingleExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression, bool ignoreCase) where TProperty : struct
+        {
+            if (!typeof(TProperty).IsEnum)
+            {
+                throw new ArgumentException($"The type ${typeof(TProperty)} must be an Enum.");
+            }
+
+            MemberExpression memberExpression = GetMemberExpression(expression);
+            var mapper = new EnumMapper(typeof(TProperty), ignoreCase);
+            var map = new SingleExcelPropertyMap<TProperty>(memberExpression.Member)
+                .WithCellValueMappers(mapper)
+                .WithThrowingEmptyFallback()
+                .WithThrowingInvalidFallback();
+
+            AddMap(map, expression);
+            return map;
+        }
+
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping nullable enums.
+        /// </summary>
+        /// <typeparam name="TProperty">The enum type of the property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <param name="ignoreCase">A flag indicating whether enum parsing is case insensitive.</param>
+        /// <returns>The map for the given property or field.</returns>
+        public SingleExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty?>> expression, bool ignoreCase) where TProperty : struct
+        {
+            if (!typeof(TProperty).IsEnum)
+            {
+                throw new ArgumentException($"The type ${typeof(TProperty)} must be an Enum.");
+            }
+
+            MemberExpression memberExpression = GetMemberExpression(expression);
+            var mapper = new EnumMapper(typeof(TProperty), ignoreCase);
+            var map = new SingleExcelPropertyMap<TProperty>(memberExpression.Member)
+                .WithCellValueMappers(mapper)
+                .WithEmptyFallback(null)
+                .WithThrowingInvalidFallback();
 
             AddMap(map, expression);
             return map;

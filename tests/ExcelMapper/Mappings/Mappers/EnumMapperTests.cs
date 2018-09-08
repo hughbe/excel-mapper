@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace ExcelMapper.Mappings.Mappers.Tests
@@ -11,6 +12,17 @@ namespace ExcelMapper.Mappings.Mappers.Tests
         {
             var item = new EnumMapper(enumType);
             Assert.Same(enumType, item.EnumType);
+            Assert.False(item.IgnoreCase);
+        }
+
+        [Theory]
+        [InlineData(typeof(ConsoleColor), true)]
+        [InlineData(typeof(ConsoleColor), false)]
+        public void Ctor_Type_Bool(Type enumType, bool ignoreCase)
+        {
+            var item = new EnumMapper(enumType, ignoreCase);
+            Assert.Same(enumType, item.EnumType);
+            Assert.Equal(ignoreCase, item.IgnoreCase);
         }
 
         [Fact]
@@ -27,26 +39,35 @@ namespace ExcelMapper.Mappings.Mappers.Tests
             Assert.Throws<ArgumentException>("enumType", () => new EnumMapper(enumType));
         }
 
-        [Theory]
-        [InlineData(typeof(ConsoleColor), "Black", ConsoleColor.Black)]
-        public void GetProperty_ValidStringValue_ReturnsSuccess(Type enumType, string stringValue, Enum expected)
+        public static IEnumerable<object[]> GetProperty_ValidStringValue_TestData()
         {
-            var item = new EnumMapper(enumType);
+            yield return new object[] { new EnumMapper(typeof(ConsoleColor)), "Black", ConsoleColor.Black };
+            yield return new object[] { new EnumMapper(typeof(ConsoleColor), ignoreCase: true), "Black", ConsoleColor.Black };
+            yield return new object[] { new EnumMapper(typeof(ConsoleColor), ignoreCase: true), "bLaCk", ConsoleColor.Black };
+        }
 
+        [Theory]
+        [MemberData(nameof(GetProperty_ValidStringValue_TestData))]
+        public void GetProperty_ValidStringValue_ReturnsSuccess(EnumMapper item, string stringValue, Enum expected)
+        {
             object value = null;
             PropertyMapperResultType result = item.GetProperty(new ReadCellValueResult(-1, stringValue), ref value);
             Assert.Equal(PropertyMapperResultType.Success, result);
             Assert.Equal(expected, value);
         }
 
-        [Theory]
-        [InlineData(typeof(ConsoleColor), null)]
-        [InlineData(typeof(ConsoleColor), "")]
-        [InlineData(typeof(ConsoleColor), "Invalid")]
-        public void GetProperty_InvalidStringValue_ReturnsInvalid(Type enumType, string stringValue)
+        public static IEnumerable<object[]> GetProperty_InvalidStringValue_TestData()
         {
-            var item = new EnumMapper(enumType);
+            yield return new object[] { new EnumMapper(typeof(ConsoleColor)), null };
+            yield return new object[] { new EnumMapper(typeof(ConsoleColor)), "" };
+            yield return new object[] { new EnumMapper(typeof(ConsoleColor)), "Invalid" };
+            yield return new object[] { new EnumMapper(typeof(ConsoleColor)), "black" };
+        }
 
+        [Theory]
+        [MemberData(nameof(GetProperty_InvalidStringValue_TestData))]
+        public void GetProperty_InvalidStringValue_ReturnsInvalid(EnumMapper item, string stringValue)
+        {
             object value = 1;
             PropertyMapperResultType result = item.GetProperty(new ReadCellValueResult(-1, stringValue), ref value);
             Assert.Equal(PropertyMapperResultType.Invalid, result);

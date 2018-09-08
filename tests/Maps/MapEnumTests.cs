@@ -16,6 +16,9 @@ namespace ExcelMapper.Tests
                 EnumValue row1 = sheet.ReadRow<EnumValue>();
                 Assert.Equal(TestEnum.Member, row1.Value);
 
+                // Different case cell value.
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableEnumValue>());
+
                 // Empty cell value.
                 Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumValue>());
 
@@ -36,9 +39,12 @@ namespace ExcelMapper.Tests
                 NullableEnumValue row1 = sheet.ReadRow<NullableEnumValue>();
                 Assert.Equal(TestEnum.Member, row1.Value);
 
+                // Different case cell value.
+                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableEnumValue>());
+
                 // Empty cell value.
-                NullableEnumValue row2 = sheet.ReadRow<NullableEnumValue>();
-                Assert.Null(row2.Value);
+                NullableEnumValue row3 = sheet.ReadRow<NullableEnumValue>();
+                Assert.Null(row3.Value);
 
                 // Invalid cell value.
                 Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableEnumValue>());
@@ -59,13 +65,45 @@ namespace ExcelMapper.Tests
                 EnumValue row1 = sheet.ReadRow<EnumValue>();
                 Assert.Equal(TestEnum.Member, row1.Value);
 
-                // Empty cell value.
+                // Different case cell value.
                 EnumValue row2 = sheet.ReadRow<EnumValue>();
-                Assert.Equal(TestEnum.Empty, row2.Value);
+                Assert.Equal(TestEnum.Invalid, row2.Value);
+
+                // Empty cell value.
+                EnumValue row3 = sheet.ReadRow<EnumValue>();
+                Assert.Equal(TestEnum.Empty, row3.Value);
 
                 // Invalid cell value.
+                EnumValue row4 = sheet.ReadRow<EnumValue>();
+                Assert.Equal(TestEnum.Invalid, row4.Value);
+            }
+        }
+
+        [Fact]
+        public void ReadRow_IgnoreCasseEnum_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Enums.xlsx"))
+            {
+                importer.Configuration.RegisterClassMap<IgnoreCaseEnumValueFallbackMap>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                // Valid cell value.
+                EnumValue row1 = sheet.ReadRow<EnumValue>();
+                Assert.Equal(TestEnum.Member, row1.Value);
+
+                // Different case cell value.
+                EnumValue row2 = sheet.ReadRow<EnumValue>();
+                Assert.Equal(TestEnum.Member, row2.Value);
+
+                // Empty cell value.
                 EnumValue row3 = sheet.ReadRow<EnumValue>();
-                Assert.Equal(TestEnum.Invalid, row3.Value);
+                Assert.Equal(TestEnum.Empty, row3.Value);
+
+                // Invalid cell value.
+                EnumValue row4 = sheet.ReadRow<EnumValue>();
+                Assert.Equal(TestEnum.Invalid, row4.Value);
             }
         }
 
@@ -83,13 +121,45 @@ namespace ExcelMapper.Tests
                 NullableEnumValue row1 = sheet.ReadRow<NullableEnumValue>();
                 Assert.Equal(TestEnum.Member, row1.Value);
 
-                // Empty cell value.
+                // Different case cell value.
                 NullableEnumValue row2 = sheet.ReadRow<NullableEnumValue>();
-                Assert.Equal(TestEnum.Empty, row2.Value);
+                Assert.Equal(TestEnum.Invalid, row2.Value);
+
+                // Empty cell value.
+                NullableEnumValue row3 = sheet.ReadRow<NullableEnumValue>();
+                Assert.Equal(TestEnum.Empty, row3.Value);
 
                 // Invalid cell value.
+                NullableEnumValue row4 = sheet.ReadRow<NullableEnumValue>();
+                Assert.Equal(TestEnum.Invalid, row4.Value);
+            }
+        }
+
+        [Fact]
+        public void ReadRow_NullableIgnoreCaseEnum_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("Enums.xlsx"))
+            {
+                importer.Configuration.RegisterClassMap<IgnoreCaseNullableEnumValueFallbackMap>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                // Valid cell value.
+                NullableEnumValue row1 = sheet.ReadRow<NullableEnumValue>();
+                Assert.Equal(TestEnum.Member, row1.Value);
+
+                // Different case cell value.
+                NullableEnumValue row2 = sheet.ReadRow<NullableEnumValue>();
+                Assert.Equal(TestEnum.Member, row2.Value);
+
+                // Empty cell value.
                 NullableEnumValue row3 = sheet.ReadRow<NullableEnumValue>();
-                Assert.Equal(TestEnum.Invalid, row3.Value);
+                Assert.Equal(TestEnum.Empty, row3.Value);
+
+                // Invalid cell value.
+                NullableEnumValue row4 = sheet.ReadRow<NullableEnumValue>();
+                Assert.Equal(TestEnum.Invalid, row4.Value);
             }
         }
 
@@ -120,11 +190,31 @@ namespace ExcelMapper.Tests
             }
         }
 
+        private class IgnoreCaseEnumValueFallbackMap : ExcelClassMap<EnumValue>
+        {
+            public IgnoreCaseEnumValueFallbackMap()
+            {
+                Map(u => u.Value, ignoreCase: true)
+                    .WithEmptyFallback(TestEnum.Empty)
+                    .WithInvalidFallback(TestEnum.Invalid);
+            }
+        }
+
         private class NullableEnumValueFallbackMap : ExcelClassMap<NullableEnumValue>
         {
             public NullableEnumValueFallbackMap()
             {
                 Map(u => u.Value)
+                    .WithEmptyFallback(TestEnum.Empty)
+                    .WithInvalidFallback(TestEnum.Invalid);
+            }
+        }
+
+        private class IgnoreCaseNullableEnumValueFallbackMap : ExcelClassMap<NullableEnumValue>
+        {
+            public IgnoreCaseNullableEnumValueFallbackMap()
+            {
+                Map(u => u.Value, ignoreCase: true)
                     .WithEmptyFallback(TestEnum.Empty)
                     .WithInvalidFallback(TestEnum.Invalid);
             }

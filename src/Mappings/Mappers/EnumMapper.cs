@@ -14,10 +14,20 @@ namespace ExcelMapper.Mappings.Mappers
         public Type EnumType { get; }
 
         /// <summary>
+        /// Gets whether enum parsing is case insensitive.
+        /// </summary>
+        public bool IgnoreCase { get; }
+
+        /// <summary>
         /// Constructs a mapper that tries to map the value of a cell to an enum of a given type.
         /// </summary>
         /// <param name="enumType">The type of the enum to convert the value of a cell to.</param>
-        public EnumMapper(Type enumType)
+        /// <param name="ignoreCase">A flag indicating whether enum parsing is case insensitive.</param>
+        public EnumMapper(Type enumType) : this(enumType, ignoreCase: false)
+        {
+        }
+
+        public EnumMapper(Type enumType, bool ignoreCase)
         {
             if (enumType == null)
             {
@@ -30,13 +40,14 @@ namespace ExcelMapper.Mappings.Mappers
             }
 
             EnumType = enumType;
+            IgnoreCase = ignoreCase;
         }
 
         public PropertyMapperResultType GetProperty(ReadCellValueResult readResult, ref object value)
         {
             try
             {
-                value = Enum.Parse(EnumType, readResult.StringValue);
+                value = Enum.Parse(EnumType, readResult.StringValue, ignoreCase: IgnoreCase);
                 return PropertyMapperResultType.Success;
             }
             catch

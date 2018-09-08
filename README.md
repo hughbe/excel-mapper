@@ -206,6 +206,67 @@ using (var importer = new ExcelImporter(stream))
 }
 ```
 
+## Mapping enums
+
+ExcelMapper supports mapping string values to an enum. By default this is case sensitive matching the behaviour of the .NET Framework, but this case be overriden in a custom map.
+
+| Name           | Marrital Status | Number of Children | Date of Birth |
+|----------------|-----------------|--------------------|---------------|
+| Donald Trump   | Married         | invalid            | invalid       |
+| Barack Obama   |                 |                    |               |
+| Ronald Reagan  | diVorCED        | 5                  | 06/03/1911    |
+| James Buchanan | Single          | 0                  | 1791-04-23    |
+
+
+```cs
+public enum MaritalStatus
+{
+    Married,
+    Single,
+    Invalid,
+    Unknown
+}
+
+public class President
+{
+    public string Name { get; set; }
+    public MaritalStatus MarritalStatus { get; set; }
+}
+
+public class PresidentClassMap : ExcelClassMap<President>
+{
+    public PresidentClassMap()
+    {
+        Map(president => president.Name);
+
+        Map(president => president.MarritalStatus, ignoreCase: true)
+            .WithColumnName("Marrital Status")
+            .WithEmptyFallback(MaritalStatus.Unknown)
+            .WithInvalidFallback(MaritalStatus.Invalid);
+    }
+}
+
+// ...
+
+
+using (var stream = File.OpenRead("Presidents.xlsx"))
+using (var importer = new ExcelImporter(stream))
+{
+    // You can register class maps by type.
+    importer.Configuration.RegisterClassMap<PresidentClassMap>();
+
+    // Or by namespace.
+    importer.RegisterMapperClassesByNamespace("My.Namespace");
+
+    ExcelSheet sheet = importer.ReadSheet();
+    President[] president = sheet.ReadRows<President>().ToArray();
+    Console.WriteLine(president[0].Name); // Donald Trump
+    Console.WriteLine(president[1].Name); // Barack Obama
+    Console.WriteLine(president[2].Name); // Ronald Reagan
+    Console.WriteLine(president[2].Name); // James Buchanan
+}
+```
+
 ## Mapping enumerables
 
 ExcelMapper supports mapping enumerables and lists. If no column names or column indices are supplied then the value of the cell will be split with the `','` separator.
