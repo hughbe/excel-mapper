@@ -13,6 +13,13 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void Map_NotEnum_ThrowsArgumentException()
+        {
+            Assert.Throws<ArgumentException>("TProperty", () => Map(p => p.DateValue, ignoreCase: true));
+            Assert.Throws<ArgumentException>("TProperty", () => Map(p => p.NullableDateValue, ignoreCase: true));
+        }
+
+        [Fact]
         public void Map_IEnumerable_ThrowsExcelMappingException()
         {
             Assert.Throws<ExcelMappingException>(() => Map(p => p.ConcreteIEnumerable));
@@ -173,6 +180,7 @@ namespace ExcelMapper.Tests
             var map = new TestClassMap(emptyValueStrategy);
             Assert.Equal(emptyValueStrategy, map.EmptyValueStrategy);
             Assert.Equal(typeof(Helpers.TestClass), map.Type);
+            Assert.Empty(map.Mappings);
         }
 
         [Theory]

@@ -13,10 +13,16 @@ namespace ExcelMapper.Tests
                 importer.Configuration.RegisterClassMap<TestMap>();
 
                 Assert.True(importer.Configuration.TryGetClassMap<int>(out ExcelClassMap classMap));
-                Assert.IsType<TestMap>(classMap);
+                TestMap map = Assert.IsType<TestMap>(classMap);
+                Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
+                Assert.Equal(typeof(int), map.Type);
+                Assert.Empty(map.Mappings);
 
                 Assert.True(importer.Configuration.TryGetClassMap(typeof(int), out classMap));
-                Assert.IsType<TestMap>(classMap);
+                map = Assert.IsType<TestMap>(classMap);
+                Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
+                Assert.Equal(typeof(int), map.Type);
+                Assert.Empty(map.Mappings);
             }
         }
 

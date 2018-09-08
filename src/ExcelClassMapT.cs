@@ -70,7 +70,7 @@ namespace ExcelMapper
         {
             if (!typeof(TProperty).GetTypeInfo().IsEnum)
             {
-                throw new ArgumentException($"The type ${typeof(TProperty)} must be an Enum.");
+                throw new ArgumentException($"The type ${typeof(TProperty)} must be an Enum.", nameof(TProperty));
             }
 
             MemberExpression memberExpression = GetMemberExpression(expression);
@@ -96,7 +96,7 @@ namespace ExcelMapper
         {
             if (!typeof(TProperty).GetTypeInfo().IsEnum)
             {
-                throw new ArgumentException($"The type ${typeof(TProperty)} must be an Enum.");
+                throw new ArgumentException($"The type ${typeof(TProperty)} must be an Enum.", nameof(TProperty));
             }
 
             MemberExpression memberExpression = GetMemberExpression(expression);

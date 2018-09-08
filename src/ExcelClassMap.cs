@@ -18,8 +18,8 @@ namespace ExcelMapper
         /// </summary>
         public Type Type { get; }
 
-        internal List<ExcelPropertyMap> Mappings { get; } = new List<ExcelPropertyMap>();
-
+        public ExcelPropertyMapCollection Mappings { get; } = new ExcelPropertyMapCollection();
+    
         /// <summary>
         /// Creates an ExcelClassMap for the given type.
         /// </summary>
