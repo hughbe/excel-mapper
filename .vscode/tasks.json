@@ -10,6 +10,20 @@
                 "${workspaceFolder}/tests/ExcelMapper.Tests.csproj"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "test",
+            "command": "dotnet",
+            "type": "process",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "args": [
+                "test",
+                "${workspaceFolder}/tests/ExcelMapper.Tests.csproj"
+            ],
+            "problemMatcher": "$msCompile"
         }
     ]
 }
