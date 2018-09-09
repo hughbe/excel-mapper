@@ -205,7 +205,6 @@ namespace ExcelMapper
 
         internal void MoveToSheet(ExcelSheet sheet)
         {
-            Debug.Assert(sheet.Index >= 0 && sheet.Index < NumberOfSheets);
             // Already on the sheet.
             if (SheetIndex == sheet.Index)
             {

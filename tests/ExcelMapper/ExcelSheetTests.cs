@@ -196,6 +196,22 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRows_EmptySheetNoHeading_ReturnsEmpty()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.Configuration.RegisterClassMap<StringValueClassMapColumnIndex>();
+
+                importer.ReadSheet();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.HasHeading = false;
+
+                Assert.Empty(sheet.ReadRows<StringValue>());
+            }
+        }
+
+        [Fact]
         public void ReadRow_HasHeadingFalse_ReturnsExpected()
         {
             using (var importer = Helpers.GetImporter("Strings.xlsx"))

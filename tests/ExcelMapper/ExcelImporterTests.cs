@@ -628,6 +628,347 @@ namespace ExcelMapper.Tests
             }
         }
 
+        [Fact]
+        public void MultipleSheets_ReadFirstRowThenLastRowThenFirstRowThenLastRow_Success()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+
+                sheet1.ReadHeading();
+                sheet3.ReadHeading();
+
+                TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("a", sheet1Row1.StringValue);
+    
+                TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("b", sheet1Row2.StringValue);
+
+                TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s1", sheet3Row1.StringValue);
+
+                TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s2", sheet3Row2.StringValue);
+
+                TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+                Assert.Null(sheet1Row3.StringValue);
+
+                TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s3", sheet3Row3.StringValue);
+            }
+        }
+
+        [Fact]
+        public void MultipleSheets_ReadFirstRowThenLastRowThenLastRowThenFirstRow_Success()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+
+                sheet1.ReadHeading();
+                sheet3.ReadHeading();
+
+                TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("a", sheet1Row1.StringValue);
+
+                TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s1", sheet3Row1.StringValue);
+    
+                TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("b", sheet1Row2.StringValue);
+
+                TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s2", sheet3Row2.StringValue);
+
+                TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+                Assert.Null(sheet1Row3.StringValue);
+
+                TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s3", sheet3Row3.StringValue);
+            }
+        }
+
+        [Fact]
+        public void MultipleSheets_ReadLastRowThenFirstRowThenLastRowThenFirstRow_Success()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+
+                sheet1.ReadHeading();
+                sheet3.ReadHeading();
+
+                TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s1", sheet3Row1.StringValue);
+
+                TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("a", sheet1Row1.StringValue);
+    
+                TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("b", sheet1Row2.StringValue);
+
+                TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s2", sheet3Row2.StringValue);
+
+                TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s3", sheet3Row3.StringValue);
+
+                TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+                Assert.Null(sheet1Row3.StringValue);
+            }
+        }
+
+        [Fact]
+        public void MultipleSheets_ReadLastRowThenFirstRowThenLastRowThenLastRowThenFirstRow_Success()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+
+                sheet1.ReadHeading();
+                sheet3.ReadHeading();
+
+                TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s1", sheet3Row1.StringValue);
+
+                TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("a", sheet1Row1.StringValue);
+
+                TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s2", sheet3Row2.StringValue);
+    
+                TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("b", sheet1Row2.StringValue);
+
+                TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s3", sheet3Row3.StringValue);
+
+                TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+                Assert.Null(sheet1Row3.StringValue);
+            }
+        }
+
+        [Fact]
+        public void MultipleSheets_NoHeadingReadFirstRowsThenLastRows_Success()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.Configuration.RegisterClassMap<TestClassMapColumnIndex>();
+
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+
+                sheet1.HasHeading = false;
+                sheet3.HasHeading = false;
+
+                TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("StringValue", sheet1Row1.StringValue);
+    
+                TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("a", sheet1Row2.StringValue);
+
+                TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("b", sheet1Row3.StringValue);
+
+                TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("StringValue", sheet3Row1.StringValue);
+
+                TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s1", sheet3Row2.StringValue);
+
+                TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s2", sheet3Row3.StringValue);
+            }
+        }
+
+        [Fact]
+        public void MultipleSheets_NoHeadingReadLastRowsThenFirstRows_Success()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.Configuration.RegisterClassMap<TestClassMapColumnIndex>();
+
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+
+                sheet1.HasHeading = false;
+                sheet3.HasHeading = false;
+
+                TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("StringValue", sheet3Row1.StringValue);
+
+                TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s1", sheet3Row2.StringValue);
+
+                TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s2", sheet3Row3.StringValue);
+
+                TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("StringValue", sheet1Row1.StringValue);
+    
+                TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("a", sheet1Row2.StringValue);
+
+                TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("b", sheet1Row3.StringValue);
+            }
+        }
+
+        [Fact]
+        public void MultipleSheets_NoHeadingReadFirstRowsThenLastRowsThenFirstRowsThenLastRows_Success()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.Configuration.RegisterClassMap<TestClassMapColumnIndex>();
+
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+
+                sheet1.HasHeading = false;
+                sheet3.HasHeading = false;
+
+                TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("StringValue", sheet1Row1.StringValue);
+
+                TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("StringValue", sheet3Row1.StringValue);
+    
+                TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("a", sheet1Row2.StringValue);
+
+                TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s1", sheet3Row2.StringValue);
+
+                TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("b", sheet1Row3.StringValue);
+
+                TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s2", sheet3Row3.StringValue);
+            }
+        }
+
+        [Fact]
+        public void MultipleSheets_NoHeadingReadFirstRowsThenLastRowsThenLastRowsThenFirstRows_Success()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.Configuration.RegisterClassMap<TestClassMapColumnIndex>();
+
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+
+                sheet1.HasHeading = false;
+                sheet3.HasHeading = false;
+
+                TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("StringValue", sheet1Row1.StringValue);
+
+                TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("StringValue", sheet3Row1.StringValue);
+
+                TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s1", sheet3Row2.StringValue);
+    
+                TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("a", sheet1Row2.StringValue);
+
+                TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("b", sheet1Row3.StringValue);
+
+                TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s2", sheet3Row3.StringValue);
+            }
+        }
+
+        [Fact]
+        public void MultipleSheets_NoHeadingReadLastRowsThenFirstRowsThenFirstRowsThenLastRows_Success()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.Configuration.RegisterClassMap<TestClassMapColumnIndex>();
+
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+
+                sheet1.HasHeading = false;
+                sheet3.HasHeading = false;
+
+                TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("StringValue", sheet3Row1.StringValue);
+
+                TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("StringValue", sheet1Row1.StringValue);
+    
+                TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("a", sheet1Row2.StringValue);
+
+                TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s1", sheet3Row2.StringValue);
+
+                TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s2", sheet3Row3.StringValue);
+
+                TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("b", sheet1Row3.StringValue);
+            }
+        }
+
+        [Fact]
+        public void MultipleSheets_NoHeadingReadLastRowsThenFirstRowsThenLastRowsThenFirstRows_Success()
+        {
+            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
+            {
+                importer.Configuration.RegisterClassMap<TestClassMapColumnIndex>();
+
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
+                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+
+                sheet1.HasHeading = false;
+                sheet3.HasHeading = false;
+
+                TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("StringValue", sheet3Row1.StringValue);
+
+                TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("StringValue", sheet1Row1.StringValue);
+
+                TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s1", sheet3Row2.StringValue);
+    
+                TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("a", sheet1Row2.StringValue);
+
+                TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+                Assert.Equal("s2", sheet3Row3.StringValue);
+
+                TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+                Assert.Equal("b", sheet1Row3.StringValue);
+            }
+        }
+
+        private class TestClassMapColumnIndex : ExcelClassMap<TestClass>
+        {
+            public TestClassMapColumnIndex()
+            {
+                Map(value => value.StringValue)
+                    .WithColumnIndex(1);
+            }
+        }
+
         private class TestClass
         {
             public string StringValue { get; set; }
