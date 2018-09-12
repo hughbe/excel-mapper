@@ -7,7 +7,7 @@
 
   <PropertyGroup>
     <PackageId>ExcelDataReader.Mapping</PackageId>
-    <PackageVersion>1.1.1</PackageVersion>
+    <PackageVersion>1.1.2</PackageVersion>
     <Authors>Hugh Bellamy</Authors>
     <Title>Excel Mapping Helper</Title>
     <Description>An extension of ExcelDataReader that supports fluent mapping of rows to C# objects.</Description>
@@ -15,7 +15,7 @@
     <RepositoryUrl>https://github.com/hughbe/excel-mapper</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseUrl>https://github.com/hughbe/excel-mapper/blob/master/LICENSE</PackageLicenseUrl>
-    <Copyright>Copyright 2017 (c) Hugh Bellamy. All rights reserved.</Copyright>
+    <Copyright>Copyright 2018 (c) Hugh Bellamy. All rights reserved.</Copyright>
     <PackageTags>excel mapping mapper</PackageTags>
     <PackageReleaseNotes>Add license and upgrade ExcelDataReader.</PackageReleaseNotes>
   </PropertyGroup>
