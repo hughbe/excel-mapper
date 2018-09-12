@@ -100,6 +100,7 @@ namespace ExcelMapper.Tests
             {
                 ExcelSheet sheet = importer.ReadSheet();
                 Assert.Equal("Primitives", sheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
                 Assert.Equal(0, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
@@ -107,6 +108,7 @@ namespace ExcelMapper.Tests
 
                 sheet = importer.ReadSheet();
                 Assert.Equal("Empty", sheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
@@ -114,6 +116,7 @@ namespace ExcelMapper.Tests
 
                 sheet = importer.ReadSheet();
                 Assert.Equal("Third Sheet", sheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
                 Assert.Equal(2, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
@@ -141,6 +144,7 @@ namespace ExcelMapper.Tests
             {
                 Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
                 Assert.Equal("Primitives", sheet1.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, sheet1.Visibility);
                 Assert.Equal(0, sheet1.Index);
                 Assert.True(sheet1.HasHeading);
                 Assert.Null(sheet1.Heading);
@@ -148,6 +152,7 @@ namespace ExcelMapper.Tests
 
                 Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
                 Assert.Equal("Empty", sheet2.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, sheet2.Visibility);
                 Assert.Equal(1, sheet2.Index);
                 Assert.True(sheet2.HasHeading);
                 Assert.Null(sheet2.Heading);
@@ -155,6 +160,7 @@ namespace ExcelMapper.Tests
 
                 Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
                 Assert.Equal("Third Sheet", sheet3.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, sheet3.Visibility);
                 Assert.Equal(2, sheet3.Index);
                 Assert.True(sheet3.HasHeading);
                 Assert.Null(sheet3.Heading);
@@ -183,6 +189,7 @@ namespace ExcelMapper.Tests
             {
                 ExcelSheet sheet = importer.ReadSheet("Empty");
                 Assert.Equal("Empty", sheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
@@ -191,6 +198,7 @@ namespace ExcelMapper.Tests
                 // Reading a named sheet should reset the reader after finding the column.
                 ExcelSheet nextSheet = importer.ReadSheet();
                 Assert.Equal("Primitives", nextSheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, nextSheet.Visibility);
                 Assert.Equal(0, nextSheet.Index);
                 Assert.True(nextSheet.HasHeading);
                 Assert.Null(nextSheet.Heading);
@@ -210,6 +218,7 @@ namespace ExcelMapper.Tests
                 // Reading a named sheet should reset the reader before finding the sheet.
                 ExcelSheet sheet = importer.ReadSheet("Empty");
                 Assert.Equal("Empty", sheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
@@ -218,6 +227,7 @@ namespace ExcelMapper.Tests
                 // Reading a named sheet should reset the reader after finding the column.
                 ExcelSheet nextSheet = importer.ReadSheet();
                 Assert.Equal("Primitives", nextSheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, nextSheet.Visibility);
                 Assert.Equal(0, nextSheet.Index);
                 Assert.True(nextSheet.HasHeading);
                 Assert.Null(nextSheet.Heading);
@@ -255,6 +265,7 @@ namespace ExcelMapper.Tests
             {
                 Assert.True(importer.TryReadSheet("Empty", out ExcelSheet sheet));
                 Assert.Equal("Empty", sheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
@@ -263,6 +274,7 @@ namespace ExcelMapper.Tests
                 // Reading a named sheet should reset the reader after finding the column.
                 ExcelSheet nextSheet = importer.ReadSheet();
                 Assert.Equal("Primitives", nextSheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, nextSheet.Visibility);
                 Assert.Equal(0, nextSheet.Index);
                 Assert.True(nextSheet.HasHeading);
                 Assert.Null(nextSheet.Heading);
@@ -282,6 +294,7 @@ namespace ExcelMapper.Tests
                 // Reading a named sheet should reset the reader before finding the sheet.
                 Assert.True(importer.TryReadSheet("Empty", out ExcelSheet sheet));
                 Assert.Equal("Empty", sheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
@@ -290,6 +303,7 @@ namespace ExcelMapper.Tests
                 // Reading a named sheet should reset the reader after finding the column.
                 ExcelSheet nextSheet = importer.ReadSheet();
                 Assert.Equal("Primitives", nextSheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, nextSheet.Visibility);
                 Assert.Equal(0, nextSheet.Index);
                 Assert.True(nextSheet.HasHeading);
                 Assert.Null(nextSheet.Heading);
@@ -320,6 +334,7 @@ namespace ExcelMapper.Tests
             {
                 ExcelSheet sheet = importer.ReadSheet(1);
                 Assert.Equal("Empty", sheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
@@ -328,6 +343,7 @@ namespace ExcelMapper.Tests
                 // Reading a named sheet should reset the reader after finding the column.
                 ExcelSheet nextSheet = importer.ReadSheet();
                 Assert.Equal("Primitives", nextSheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, nextSheet.Visibility);
                 Assert.Equal(0, nextSheet.Index);
                 Assert.True(nextSheet.HasHeading);
                 Assert.Null(nextSheet.Heading);
@@ -347,6 +363,7 @@ namespace ExcelMapper.Tests
                 // Reading a named sheet should reset the reader before finding the sheet.
                 ExcelSheet sheet = importer.ReadSheet(1);
                 Assert.Equal("Empty", sheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
@@ -355,6 +372,7 @@ namespace ExcelMapper.Tests
                 // Reading a named sheet should reset the reader after finding the column.
                 ExcelSheet nextSheet = importer.ReadSheet();
                 Assert.Equal("Primitives", nextSheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, nextSheet.Visibility);
                 Assert.Equal(0, nextSheet.Index);
                 Assert.True(nextSheet.HasHeading);
                 Assert.Null(nextSheet.Heading);
@@ -380,6 +398,7 @@ namespace ExcelMapper.Tests
             {
                 Assert.True(importer.TryReadSheet(1, out ExcelSheet sheet));
                 Assert.Equal("Empty", sheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
@@ -388,6 +407,7 @@ namespace ExcelMapper.Tests
                 // Reading a named sheet should reset the reader after finding the column.
                 ExcelSheet nextSheet = importer.ReadSheet();
                 Assert.Equal("Primitives", nextSheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, nextSheet.Visibility);
                 Assert.Equal(0, nextSheet.Index);
                 Assert.True(nextSheet.HasHeading);
                 Assert.Null(nextSheet.Heading);
@@ -407,6 +427,7 @@ namespace ExcelMapper.Tests
                 // Reading a named sheet should reset the reader before finding the sheet.
                 Assert.True(importer.TryReadSheet(1, out ExcelSheet sheet));
                 Assert.Equal("Empty", sheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
                 Assert.Null(sheet.Heading);
@@ -415,6 +436,7 @@ namespace ExcelMapper.Tests
                 // Reading a named sheet should reset the reader after finding the column.
                 ExcelSheet nextSheet = importer.ReadSheet();
                 Assert.Equal("Primitives", nextSheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, nextSheet.Visibility);
                 Assert.Equal(0, nextSheet.Index);
                 Assert.True(nextSheet.HasHeading);
                 Assert.Null(nextSheet.Heading);

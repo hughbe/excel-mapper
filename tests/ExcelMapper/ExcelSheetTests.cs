@@ -8,6 +8,25 @@ namespace ExcelMapper.Tests
     public class ExcelSheetTests
     {
         [Fact]
+        public void Visibility_Get_ReturnsExpected()
+        {
+            using (var importer = Helpers.GetImporter("HiddenSheets.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+                Assert.Equal("VisibleSheet", sheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
+                
+                sheet = importer.ReadSheet();
+                Assert.Equal("VeryHiddenSheet", sheet.Name);
+                Assert.Equal(ExcelSheetVisibility.VeryHidden, sheet.Visibility);
+
+                sheet = importer.ReadSheet();
+                Assert.Equal("HiddenSheet", sheet.Name);
+                Assert.Equal(ExcelSheetVisibility.Hidden, sheet.Visibility);
+            }
+        }
+
+        [Fact]
         public void ReadHeading_HasHeading_ReturnsExpected()
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))

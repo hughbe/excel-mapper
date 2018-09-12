@@ -17,6 +17,18 @@ namespace ExcelMapper
         {
             Reader = reader;
             Name = reader.Name;
+            if (reader.VisibleState == "visible")
+            {
+                Visibility = ExcelSheetVisibility.Visible;
+            }
+            else if (reader.VisibleState == "hidden")
+            {
+                Visibility = ExcelSheetVisibility.Hidden;
+            }
+            else
+            {
+                Visibility = ExcelSheetVisibility.VeryHidden;
+            }
             Index = index;
             Importer = importer;
         }
@@ -25,6 +37,11 @@ namespace ExcelMapper
         /// Gets the name of the sheet.
         /// </summary>
         public string Name { get; }
+        
+        /// <summary>
+        /// Gets the visibility of the sheet.
+        /// </summary>
+        public ExcelSheetVisibility Visibility { get; }
 
         /// <summary>
         /// Gets the zero-based index of the sheet where 0 is the first sheet in the document.
