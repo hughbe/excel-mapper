@@ -38,7 +38,7 @@ namespace ExcelMapper
             ElementMap = elementMap ?? throw new ArgumentNullException(nameof(elementMap));
 
             var columnReader = new ColumnNameValueReader(member.Name);
-            ColumnsReader = new SplitCellValueReader(columnReader); 
+            ColumnsReader = new CharSplitCellValueReader(columnReader); 
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace ExcelMapper
             }
             else
             {
-                ColumnsReader = new SplitCellValueReader(columnReader);
+                ColumnsReader = new CharSplitCellValueReader(columnReader);
             }
 
             return this;
@@ -116,7 +116,7 @@ namespace ExcelMapper
             }
             else
             {
-                ColumnsReader = new SplitCellValueReader(reader);
+                ColumnsReader = new CharSplitCellValueReader(reader);
             }
 
             return this;
@@ -135,7 +135,11 @@ namespace ExcelMapper
                 throw new ExcelMappingException("The mapping comes from multiple columns, so cannot be split.");
             }
 
-            splitColumnReader.Separators = separators;
+            ColumnsReader = new CharSplitCellValueReader(splitColumnReader.CellReader)
+            {
+                Separators = separators,
+                Options = splitColumnReader.Options
+            };
             return this;
         }
 
@@ -146,6 +150,38 @@ namespace ExcelMapper
         /// <param name="separators">The separators used to split the value of a single cell.</param>
         /// <returns>The property map that invoked this method.</returns>
         public EnumerableExcelPropertyMap<T> WithSeparators(IEnumerable<char> separators)
+        {
+            return WithSeparators(separators?.ToArray());
+        }
+
+        /// <summary>
+        /// Sets the reader of the property map to split the value of a single cell using the
+        /// given separators.
+        /// </summary>
+        /// <param name="separators">The separators used to split the value of a single cell.</param>
+        /// <returns>The property map that invoked this method.</returns>
+        public EnumerableExcelPropertyMap<T> WithSeparators(params string[] separators)
+        {
+            if (!(ColumnsReader is SplitCellValueReader splitColumnReader))
+            {
+                throw new ExcelMappingException("The mapping comes from multiple columns, so cannot be split.");
+            }
+
+            ColumnsReader = new StringSplitCellValueReader(splitColumnReader.CellReader)
+            {
+                Separators = separators,
+                Options = splitColumnReader.Options
+            };
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the reader of the property map to split the value of a single cell using the
+        /// given separators.
+        /// </summary>
+        /// <param name="separators">The separators used to split the value of a single cell.</param>
+        /// <returns>The property map that invoked this method.</returns>
+        public EnumerableExcelPropertyMap<T> WithSeparators(IEnumerable<string> separators)
         {
             return WithSeparators(separators?.ToArray());
         }

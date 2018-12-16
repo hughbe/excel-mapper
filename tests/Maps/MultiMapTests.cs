@@ -136,7 +136,7 @@ namespace ExcelMapper.Tests
                     .WithColumnNames("MultiMapIndex1", "MultiMapIndex2")
                     .WithElementMap(e => e
                         .WithValueFallback(ObservableCollectionEnum.custom)
-                    );;
+                    );
             }
         }
 

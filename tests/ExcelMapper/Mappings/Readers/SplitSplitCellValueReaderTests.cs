@@ -10,40 +10,16 @@ namespace ExcelMapper.Mappings.Readers.Tests
         public void Ctor_CellReader()
         {
             var innerReader = new ColumnNameValueReader("ColumnName");
-            var reader = new SplitCellValueReader(innerReader);
+            var reader = new SubSplitCellValueReader(innerReader);
             Assert.Same(innerReader, reader.CellReader);
 
             Assert.Equal(StringSplitOptions.None, reader.Options);
-            Assert.Equal(new char[] { ',' }, reader.Separators);
         }
 
         [Fact]
         public void Ctor_NullCellReader_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("cellReader", () => new SplitCellValueReader(null));
-        }
-
-        [Theory]
-        [InlineData(new char[] { ',' })]
-        [InlineData(new char[] { ',', ';' })]
-        public void Separators_SetValid_GetReturnsExpected(char[] separators)
-        {
-            var reader = new SplitCellValueReader(new ColumnNameValueReader("ColumnName")) { Separators = separators };
-            Assert.Same(separators, reader.Separators);
-        }
-
-        [Fact]
-        public void Separators_SetNull_ThrowsArgumentNullException()
-        {
-            var reader = new SplitCellValueReader(new ColumnNameValueReader("ColumnName"));
-            Assert.Throws<ArgumentNullException>("value", () => reader.Separators = null);
-        }
-
-        [Fact]
-        public void Separators_SetEmpty_ThrowsArgumentException()
-        {
-            var reader = new SplitCellValueReader(new ColumnNameValueReader("ColumnName"));
-            Assert.Throws<ArgumentException>("value", () => reader.Separators = new char[0]);
+            Assert.Throws<ArgumentNullException>("cellReader", () => new SubSplitCellValueReader(null));
         }
 
         [Theory]
@@ -53,7 +29,7 @@ namespace ExcelMapper.Mappings.Readers.Tests
         [InlineData(StringSplitOptions.RemoveEmptyEntries + 1)]
         public void Options_Set_GetReturnsExpected(StringSplitOptions options)
         {
-            var reader = new SplitCellValueReader(new ColumnNameValueReader("ColumnName")) { Options = options };
+            var reader = new SubSplitCellValueReader(new ColumnNameValueReader("ColumnName")) { Options = options };
             Assert.Equal(options, reader.Options);
         }
 
@@ -61,7 +37,7 @@ namespace ExcelMapper.Mappings.Readers.Tests
         public void CellReader_SetValid_GetReturnsExpected()
         {
             var innerReader = new ColumnNameValueReader("ColumnName1");
-            var reader = new SplitCellValueReader(new ColumnNameValueReader("ColumnName2")) { CellReader = innerReader };
+            var reader = new SubSplitCellValueReader(new ColumnNameValueReader("ColumnName2")) { CellReader = innerReader };
 
             Assert.Same(innerReader, reader.CellReader);
         }
@@ -69,15 +45,24 @@ namespace ExcelMapper.Mappings.Readers.Tests
         [Fact]
         public void CellReader_SetNull_ThrowsArgumentNullException()
         {
-            var reader = new SplitCellValueReader(new ColumnNameValueReader("ColumnName"));
+            var reader = new SubSplitCellValueReader(new ColumnNameValueReader("ColumnName"));
             Assert.Throws<ArgumentNullException>("value", () => reader.CellReader = null);
         }
 
         [Fact]
         public void GetValues_NullReaderValue_ReturnsEmpty()
         {
-            var reader = new SplitCellValueReader(new NullValueReader());
+            var reader = new SubSplitCellValueReader(new NullValueReader());
             Assert.Empty(reader.GetValues(null, 0, null));
+        }
+
+        private class SubSplitCellValueReader : SplitCellValueReader
+        {
+            public SubSplitCellValueReader(ICellValueReader cellReader) : base(cellReader)
+            {
+            }
+
+            protected override string[] GetValues(string value) => new string[0];
         }
 
         private class NullValueReader : ICellValueReader

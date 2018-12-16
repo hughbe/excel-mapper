@@ -66,7 +66,7 @@ namespace ExcelMapper.Tests
             var propertyMap = new SubPropertyMap(propertyInfo);
             Assert.Same(propertyMap, propertyMap.WithColumnName("ColumnName"));
 
-            SplitCellValueReader valueReader = Assert.IsType<SplitCellValueReader>(propertyMap.ColumnsReader);
+            CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.ColumnsReader);
             ColumnNameValueReader innerReader = Assert.IsType<ColumnNameValueReader>(valueReader.CellReader);
             Assert.Equal("ColumnName", innerReader.ColumnName);
         }
@@ -78,7 +78,7 @@ namespace ExcelMapper.Tests
             var propertyMap = new SubPropertyMap(propertyInfo).WithColumnNames("ColumnName");
             Assert.Same(propertyMap, propertyMap.WithColumnName("ColumnName"));
 
-            SplitCellValueReader valueReader = Assert.IsType<SplitCellValueReader>(propertyMap.ColumnsReader);
+            CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.ColumnsReader);
             ColumnNameValueReader innerReader = Assert.IsType<ColumnNameValueReader>(valueReader.CellReader);
             Assert.Equal("ColumnName", innerReader.ColumnName);
         }
@@ -110,7 +110,7 @@ namespace ExcelMapper.Tests
             var propertyMap = new SubPropertyMap(propertyInfo);
             Assert.Same(propertyMap, propertyMap.WithColumnIndex(columnIndex));
 
-            SplitCellValueReader valueReader = Assert.IsType<SplitCellValueReader>(propertyMap.ColumnsReader);
+            CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.ColumnsReader);
             ColumnIndexValueReader innerReader = Assert.IsType<ColumnIndexValueReader>(valueReader.CellReader);
             Assert.Equal(columnIndex, innerReader.ColumnIndex);
         }
@@ -124,7 +124,7 @@ namespace ExcelMapper.Tests
             var propertyMap = new SubPropertyMap(propertyInfo).WithColumnNames("ColumnName");
             Assert.Same(propertyMap, propertyMap.WithColumnIndex(columnIndex));
 
-            SplitCellValueReader valueReader = Assert.IsType<SplitCellValueReader>(propertyMap.ColumnsReader);
+            CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.ColumnsReader);
             ColumnIndexValueReader innerReader = Assert.IsType<ColumnIndexValueReader>(valueReader.CellReader);
             Assert.Equal(columnIndex, innerReader.ColumnIndex);
         }
@@ -138,7 +138,7 @@ namespace ExcelMapper.Tests
             Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => propertyMap.WithColumnIndex(-1));
         }
 
-        public static IEnumerable<object[]> Separators_TestData()
+        public static IEnumerable<object[]> Separators_Char_TestData()
         {
             yield return new object[] { new char[] { ',' } };
             yield return new object[] { new char[] { ';', '-' } };
@@ -146,8 +146,8 @@ namespace ExcelMapper.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Separators_TestData))]
-        public void WithSeparators_ParamsString_Success(IEnumerable<char> separators)
+        [MemberData(nameof(Separators_Char_TestData))]
+        public void WithSeparators_ParamsChar_Success(IEnumerable<char> separators)
         {
             char[] separatorsArray = separators.ToArray();
 
@@ -155,19 +155,52 @@ namespace ExcelMapper.Tests
             var propertyMap = new SubPropertyMap(propertyInfo);
             Assert.Same(propertyMap, propertyMap.WithSeparators(separatorsArray));
 
-            SplitCellValueReader valueReader = Assert.IsType<SplitCellValueReader>(propertyMap.ColumnsReader);
+            CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.ColumnsReader);
             Assert.Same(separatorsArray, valueReader.Separators);
         }
 
         [Theory]
-        [MemberData(nameof(Separators_TestData))]
-        public void WithSeparators_IEnumerableString_Success(IEnumerable<char> separators)
+        [MemberData(nameof(Separators_Char_TestData))]
+        public void WithSeparators_IEnumerableChar_Success(IEnumerable<char> separators)
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var propertyMap = new SubPropertyMap(propertyInfo);
             Assert.Same(propertyMap, propertyMap.WithSeparators(separators));
 
-            SplitCellValueReader valueReader = Assert.IsType<SplitCellValueReader>(propertyMap.ColumnsReader);
+            CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.ColumnsReader);
+            Assert.Equal(separators, valueReader.Separators);
+        }
+
+        public static IEnumerable<object[]> Separators_String_TestData()
+        {
+            yield return new object[] { new string[] { "," } };
+            yield return new object[] { new string[] { ";", "-" } };
+            yield return new object[] { new List<string> { ";", "-" } };
+        }
+
+        [Theory]
+        [MemberData(nameof(Separators_String_TestData))]
+        public void WithSeparators_ParamsString_Success(IEnumerable<string> separators)
+        {
+            string[] separatorsArray = separators.ToArray();
+
+            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
+            var propertyMap = new SubPropertyMap(propertyInfo);
+            Assert.Same(propertyMap, propertyMap.WithSeparators(separatorsArray));
+
+            StringSplitCellValueReader valueReader = Assert.IsType<StringSplitCellValueReader>(propertyMap.ColumnsReader);
+            Assert.Same(separatorsArray, valueReader.Separators);
+        }
+
+        [Theory]
+        [MemberData(nameof(Separators_String_TestData))]
+        public void WithSeparators_IEnumerableString_Success(IEnumerable<string> separators)
+        {
+            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
+            var propertyMap = new SubPropertyMap(propertyInfo);
+            Assert.Same(propertyMap, propertyMap.WithSeparators(separators));
+
+            StringSplitCellValueReader valueReader = Assert.IsType<StringSplitCellValueReader>(propertyMap.ColumnsReader);
             Assert.Equal(separators, valueReader.Separators);
         }
 
@@ -177,8 +210,10 @@ namespace ExcelMapper.Tests
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var propertyMap = new SubPropertyMap(propertyInfo);
 
-            Assert.Throws<ArgumentNullException>("value", () => propertyMap.WithSeparators(null));
+            Assert.Throws<ArgumentNullException>("value", () => propertyMap.WithSeparators((char[])null));
             Assert.Throws<ArgumentNullException>("value", () => propertyMap.WithSeparators((IEnumerable<char>)null));
+            Assert.Throws<ArgumentNullException>("value", () => propertyMap.WithSeparators((string[])null));
+            Assert.Throws<ArgumentNullException>("value", () => propertyMap.WithSeparators((IEnumerable<string>)null));
         }
 
         [Fact]
@@ -189,6 +224,8 @@ namespace ExcelMapper.Tests
 
             Assert.Throws<ArgumentException>("value", () => propertyMap.WithSeparators(new char[0]));
             Assert.Throws<ArgumentException>("value", () => propertyMap.WithSeparators(new List<char>()));
+            Assert.Throws<ArgumentException>("value", () => propertyMap.WithSeparators(new string[0]));
+            Assert.Throws<ArgumentException>("value", () => propertyMap.WithSeparators(new List<string>()));
         }
 
         [Fact]
@@ -199,6 +236,8 @@ namespace ExcelMapper.Tests
 
             Assert.Throws<ExcelMappingException>(() => propertyMap.WithSeparators(new char[0]));
             Assert.Throws<ExcelMappingException>(() => propertyMap.WithSeparators(new List<char>()));
+            Assert.Throws<ExcelMappingException>(() => propertyMap.WithSeparators(new string[0]));
+            Assert.Throws<ExcelMappingException>(() => propertyMap.WithSeparators(new List<string>()));
         }
 
         [Fact]

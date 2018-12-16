@@ -9,32 +9,8 @@ namespace ExcelMapper.Mappings.Readers
     /// Reads the value of a cell and produces multiple values by splitting the string value
     /// using the given separators.
     /// </summary>
-    public class SplitCellValueReader : IMultipleCellValuesReader
+    public abstract class SplitCellValueReader : IMultipleCellValuesReader
     {
-        private char[] _separators = new char[] { ',' };
-
-        /// <summary>
-        /// Gets or sets the separators used to split the string value of the cell.
-        /// </summary>
-        public char[] Separators
-        {
-            get => _separators;
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                if (value.Length == 0)
-                {
-                    throw new ArgumentException("Separators cannot be empty.", nameof(value));
-                }
-
-                _separators = value;
-            }
-        }
-
         /// <summary>
         /// Gets or sets the options used to split the string value of the cell.
         /// </summary>
@@ -70,8 +46,10 @@ namespace ExcelMapper.Mappings.Readers
                 return Enumerable.Empty<ReadCellValueResult>();
             }
 
-            string[] splitStringValues = readResult.StringValue.Split(Separators, Options);
+            string[] splitStringValues = GetValues(readResult.StringValue);
             return splitStringValues.Select(s => new ReadCellValueResult(readResult.ColumnIndex, s));
         }
+
+        protected abstract string[] GetValues(string value);
     }
 }
