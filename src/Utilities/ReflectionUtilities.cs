@@ -62,6 +62,12 @@ namespace ExcelMapper.Utilities
             return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
 
+        /// <summary>
+        /// Gets the element type or the IEnumerable<T> type of the given type.
+        /// </summary>
+        /// <param name="type">The type to get the element type of.</param>
+        /// <param name="elementType">The element type or IEnumerable<T> of the given type.</param>
+        /// <returns>True if the type has an element type, else false.
         public static bool GetElementTypeOrEnumerableType(this Type type, out Type elementType)
         {
             if (type.IsArray)

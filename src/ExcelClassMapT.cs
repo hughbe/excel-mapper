@@ -49,7 +49,7 @@ namespace ExcelMapper
         public SingleExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
-            if (!AutoMapper.TryMapPrimitive(memberExpression.Member, EmptyValueStrategy, out SingleExcelPropertyMap<TProperty> map))
+            if (!AutoMapper.TryCreatePrimitiveMap(memberExpression.Member, EmptyValueStrategy, out SingleExcelPropertyMap<TProperty> map))
             {
                 throw new ExcelMappingException($"Don't know how to map type {typeof(TProperty)}.");
             }
@@ -232,7 +232,7 @@ namespace ExcelMapper
         public ObjectExcelPropertyMap<TProperty> MapObject<TProperty>(Expression<Func<T, TProperty>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
-            if (!AutoMapper.TryMapObject(memberExpression.Member, EmptyValueStrategy, out ObjectExcelPropertyMap<TProperty> map))
+            if (!AutoMapper.TryCreateObjectMap(memberExpression.Member, EmptyValueStrategy, out ObjectExcelPropertyMap<TProperty> map))
             {
                 throw new ExcelMappingException($"Could not map object of type \"{typeof(TProperty)}\".");
             }
@@ -243,7 +243,7 @@ namespace ExcelMapper
 
         private EnumerableExcelPropertyMap<TProperty> GetMultiMap<TProperty>(MemberInfo member)
         {
-            if (!AutoMapper.TryMapGenericEnumerable(member, EmptyValueStrategy, out EnumerableExcelPropertyMap<TProperty> map))
+            if (!AutoMapper.TryCreateGenericEnumerableMap(member, EmptyValueStrategy, out EnumerableExcelPropertyMap<TProperty> map))
             {
                 throw new ExcelMappingException($"No known way to instantiate type \"{typeof(TProperty)}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
             }

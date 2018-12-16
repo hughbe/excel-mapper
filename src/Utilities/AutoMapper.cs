@@ -10,19 +10,19 @@ using ExcelMapper.Mappings.MultiItems;
 
 namespace ExcelMapper.Utilities
 {
-    internal static class AutoMapper
+    public static class AutoMapper
     {
-        private static MethodInfo s_mappingMethod;
-        private static MethodInfo MappingMethod => s_mappingMethod ?? (s_mappingMethod = typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(InferMapping)));
+        private static MethodInfo s_tryCreateMemberMapMethod;
+        private static MethodInfo TryCreateMemberMapMethod => s_tryCreateMemberMapMethod ?? (s_tryCreateMemberMapMethod = typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateMemberMap)));
 
-        private static MethodInfo s_tryMapEnumerableMethod;
-        private static MethodInfo TryMapEnumerableMethod => s_tryMapEnumerableMethod ?? (s_tryMapEnumerableMethod = typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryMapGenericEnumerable)));
+        private static MethodInfo s_tryCreateGenericEnumerableMapMethod;
+        private static MethodInfo TryCreateGenericEnumerableMapMethod => s_tryCreateGenericEnumerableMapMethod ?? (s_tryCreateGenericEnumerableMapMethod = typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateGenericEnumerableMap)));
 
-        private static bool InferMapping<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out ExcelPropertyMap map)
+        private static bool TryCreateMemberMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out ExcelPropertyMap map)
         {
             // First, check if this is a well-known type (e.g. string/int).
             // This is a simple conversion from the cell's value to the type.
-            if (TryMapPrimitive(member, emptyValueStrategy, out SingleExcelPropertyMap<T> singleMap))
+            if (TryCreatePrimitiveMap(member, emptyValueStrategy, out SingleExcelPropertyMap<T> singleMap))
             {
                 map = singleMap;
                 return true;
@@ -30,7 +30,7 @@ namespace ExcelMapper.Utilities
 
             // Secondly, check if this is a collection (e.g. array, list).
             // This requires converting each value to the element type of the collection.
-            if (TryMapEnumerable(member, emptyValueStrategy, out ExcelPropertyMap multiMap))
+            if (TryCreateEnumerableMap(member, emptyValueStrategy, out ExcelPropertyMap multiMap))
             {
                 map = multiMap;
                 return true;
@@ -38,7 +38,7 @@ namespace ExcelMapper.Utilities
 
             // Thirdly, check if this is an object.
             // This requires converting each member and setting it on the object.
-            if (TryMapObject(member, emptyValueStrategy, out ObjectExcelPropertyMap<T> objectMap))
+            if (TryCreateObjectMap(member, emptyValueStrategy, out ObjectExcelPropertyMap<T> objectMap))
             {
                 map = objectMap;
                 return true;
@@ -48,9 +48,9 @@ namespace ExcelMapper.Utilities
             return false;
         }
 
-        public static bool TryMapPrimitive<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out SingleExcelPropertyMap<T> map)
+        internal static bool TryCreatePrimitiveMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out SingleExcelPropertyMap<T> map)
         {
-            if (!GetWellKnownMapper(typeof(T), emptyValueStrategy, out ICellValueMapper mapper, out IFallbackItem emptyFallback, out IFallbackItem invalidFallback))
+            if (!TryGetWellKnownMap(typeof(T), emptyValueStrategy, out ICellValueMapper mapper, out IFallbackItem emptyFallback, out IFallbackItem invalidFallback))
             {
                 map = null;
                 return false;
@@ -63,7 +63,7 @@ namespace ExcelMapper.Utilities
             return true;
         }
 
-        private static bool TryMapEnumerable(MemberInfo member, FallbackStrategy emptyValueStrategy, out ExcelPropertyMap map)
+        private static bool TryCreateEnumerableMap(MemberInfo member, FallbackStrategy emptyValueStrategy, out ExcelPropertyMap map)
         {
             if (!member.MemberType().GetElementTypeOrEnumerableType(out Type elementType))
             {
@@ -71,7 +71,7 @@ namespace ExcelMapper.Utilities
                 return false;
             }
 
-            MethodInfo method = TryMapEnumerableMethod.MakeGenericMethod(elementType);
+            MethodInfo method = TryCreateGenericEnumerableMapMethod.MakeGenericMethod(elementType);
 
             var parameters = new object[] { member, emptyValueStrategy, null };
             bool result = (bool)method.Invoke(null, parameters);
@@ -85,7 +85,7 @@ namespace ExcelMapper.Utilities
             return false;
         }
 
-        private static bool GetWellKnownMapper(Type memberType, FallbackStrategy emptyValueStrategy, out ICellValueMapper mapper, out IFallbackItem emptyFallback, out IFallbackItem invalidFallback)
+        private static bool TryGetWellKnownMap(Type memberType, FallbackStrategy emptyValueStrategy, out ICellValueMapper mapper, out IFallbackItem emptyFallback, out IFallbackItem invalidFallback)
         {
             Type type = memberType.GetNullableTypeOrThis(out bool isNullable);
             Type[] interfaces = type.GetTypeInfo().ImplementedInterfaces.ToArray();
@@ -164,14 +164,14 @@ namespace ExcelMapper.Utilities
             return true;
         }
 
-        public static bool TryMapGenericEnumerable<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out EnumerableExcelPropertyMap<T> map)
+        internal static bool TryCreateGenericEnumerableMap<TElement>(MemberInfo member, FallbackStrategy emptyValueStrategy, out EnumerableExcelPropertyMap<TElement> map)
         {
             Type rawType = member.MemberType();
             TypeInfo rawTypeInfo = rawType.GetTypeInfo();
 
             // First, get the mapper for the element. This is used to convert individual values
             // to be added to/included in the collection.
-            if (!TryMapPrimitive(member, emptyValueStrategy, out SingleExcelPropertyMap<T> elementMapping))
+            if (!TryCreatePrimitiveMap(member, emptyValueStrategy, out SingleExcelPropertyMap<TElement> elementMapping))
             {
                 map = null;
                 return false;
@@ -181,22 +181,22 @@ namespace ExcelMapper.Utilities
             if (rawType.IsArray)
             {
                 // Add values using the arrray indexer.
-                map = new ArrayPropertyMap<T>(member, elementMapping);
+                map = new ArrayPropertyMap<TElement>(member, elementMapping);
                 return true;
             }
             else if (rawTypeInfo.IsInterface)
             {
                 // Add values by creating a list and assigning to the property.
-                if (rawTypeInfo.IsAssignableFrom(typeof(List<T>).GetTypeInfo()))
+                if (rawTypeInfo.IsAssignableFrom(typeof(List<TElement>).GetTypeInfo()))
                 {
-                    map = new InterfaceAssignableFromListPropertyMap<T>(member, elementMapping);
+                    map = new InterfaceAssignableFromListPropertyMap<TElement>(member, elementMapping);
                     return true;
                 }
             }
-            else if (rawType.ImplementsInterface(typeof(ICollection<T>)))
+            else if (rawType.ImplementsInterface(typeof(ICollection<TElement>)))
             {
                 // Add values using the ICollection<T>.Add method.
-                map = new ConcreteICollectionPropertyMap<T>(rawType, member, elementMapping);
+                map = new ConcreteICollectionPropertyMap<TElement>(rawType, member, elementMapping);
                 return true;
             }
 
@@ -204,9 +204,9 @@ namespace ExcelMapper.Utilities
             return false;
         }
 
-        public static bool TryMapObject<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out ObjectExcelPropertyMap<T> mapping)
+        internal static bool TryCreateObjectMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out ObjectExcelPropertyMap<T> mapping)
         {
-            if (!GenerateObjectMap(emptyValueStrategy, out ExcelClassMap<T> excelClassMap))
+            if (!TryCreateClassMap(emptyValueStrategy, out ExcelClassMap<T> excelClassMap))
             {
                 mapping = null;
                 return false;
@@ -216,8 +216,19 @@ namespace ExcelMapper.Utilities
             return true;
         }
 
-        public static bool GenerateObjectMap<T>(FallbackStrategy emptyValueStrategy, out ExcelClassMap<T> classMap)
+        /// <summary>
+        /// Creates a class map for the given type using the given strategy.
+        /// </summary>
+        /// <param name="emptyValueStrategy">The default strategy to use when the value of a cell is empty.</param>
+        /// <param name="classMap">The class map for the given type.</param>
+        /// <returns>True if the class map could be created, else false.</returns>
+        public static bool TryCreateClassMap<T>(FallbackStrategy emptyValueStrategy, out ExcelClassMap<T> classMap)
         {
+            if (!Enum.IsDefined(typeof(FallbackStrategy), emptyValueStrategy))
+            {
+                throw new ArgumentException($"Invalid value \"{emptyValueStrategy}\".", nameof(emptyValueStrategy));
+            }
+
             Type type = typeof(T);
 
             if (type.GetTypeInfo().IsInterface)
@@ -226,7 +237,7 @@ namespace ExcelMapper.Utilities
                 return false;
             }
 
-            var map = new ExcelClassMap<T>();
+            var map = new ExcelClassMap<T>(emptyValueStrategy);
             IEnumerable<MemberInfo> properties = type.GetRuntimeProperties().Where(p => p.CanWrite);
             IEnumerable<MemberInfo> fields = type.GetRuntimeFields().Where(f => f.IsPublic);
 
@@ -234,7 +245,7 @@ namespace ExcelMapper.Utilities
             {
                 // Infer the mapping for each member (property/field) belonging to the type.
                 Type memberType = member.MemberType();
-                MethodInfo method = MappingMethod.MakeGenericMethod(memberType);
+                MethodInfo method = TryCreateMemberMapMethod.MakeGenericMethod(memberType);
 
                 var parameters = new object[] { member, emptyValueStrategy, null };
                 bool result = (bool)method.Invoke(null, parameters);
