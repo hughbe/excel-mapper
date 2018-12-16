@@ -238,8 +238,8 @@ namespace ExcelMapper.Utilities
             }
 
             var map = new ExcelClassMap<T>(emptyValueStrategy);
-            IEnumerable<MemberInfo> properties = type.GetRuntimeProperties().Where(p => p.CanWrite);
-            IEnumerable<MemberInfo> fields = type.GetRuntimeFields().Where(f => f.IsPublic);
+            IEnumerable<MemberInfo> properties = type.GetRuntimeProperties().Where(p => p.CanWrite && p.SetMethod.IsPublic && !p.SetMethod.IsStatic);
+            IEnumerable<MemberInfo> fields = type.GetRuntimeFields().Where(f => f.IsPublic && !f.IsStatic);
 
             foreach (MemberInfo member in properties.Concat(fields))
             {

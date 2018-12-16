@@ -15,6 +15,7 @@ namespace ExcelMapper.Utilities.Tests
             Assert.True(AutoMapper.TryCreateClassMap<TestClass>(emptyValueStrategy, out ExcelClassMap<TestClass> classMap));
             Assert.Equal(emptyValueStrategy, classMap.EmptyValueStrategy);
             Assert.Equal(typeof(TestClass), classMap.Type);
+            Assert.Equal(5, classMap.Mappings.Count);
 
             IEnumerable<string> members = classMap.Mappings.Select(m => m.Member.Name);
             Console.WriteLine(string.Join(", ", members));
@@ -22,6 +23,7 @@ namespace ExcelMapper.Utilities.Tests
             Assert.Contains("_field", members);
             Assert.Contains("InheritedProperty", members);
             Assert.Contains("Property", members);
+            Assert.Contains("PrivateGetProperty", members);
         }
 
         [Fact]
@@ -59,6 +61,9 @@ namespace ExcelMapper.Utilities.Tests
             internal string InternalProperty { get; set; }
             private string PrivateProperty { get; set; }
             public static string StaticProperty { get; set; }
+
+            public string PrivateSetProperty { get; private set; }
+            public string PrivateGetProperty { private get; set; }
 
         }
 #pragma warning restore 0649
