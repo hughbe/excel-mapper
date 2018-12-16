@@ -32,10 +32,10 @@ namespace ExcelMapper
         /// contained by the property or field.
         /// </summary>
         /// <param name="member">The property or field to map the values of one or more cell to.</param>
-        /// <param name="elementMapping">The map that maps the value of a single cell to an object of the element type of the property or field.</param>
-        protected EnumerableExcelPropertyMap(MemberInfo member, SingleExcelPropertyMap<T> elementMapping) : base(member)
+        /// <param name="elementMap">The map that maps the value of a single cell to an object of the element type of the property or field.</param>
+        protected EnumerableExcelPropertyMap(MemberInfo member, SingleExcelPropertyMap<T> elementMap) : base(member)
         {
-            ElementMap = elementMapping ?? throw new ArgumentNullException(nameof(elementMapping));
+            ElementMap = elementMap ?? throw new ArgumentNullException(nameof(elementMap));
 
             var columnReader = new ColumnNameValueReader(member.Name);
             ColumnsReader = new SplitCellValueReader(columnReader); 

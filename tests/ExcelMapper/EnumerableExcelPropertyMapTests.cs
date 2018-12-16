@@ -20,6 +20,13 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void Ctor_NullElementMap_ThrowsArgumentNullException()
+        {
+            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
+            Assert.Throws<ArgumentNullException>("elementMap", () => new SubPropertyMap(propertyInfo, null));
+        }
+
+        [Fact]
         public void WithElementMap_ValidMap_Success()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
@@ -307,6 +314,11 @@ namespace ExcelMapper.Tests
             public SubPropertyMap(MemberInfo member) : base(member, new SingleExcelPropertyMap<string>(member))
             {
             }
+
+            public SubPropertyMap(MemberInfo member, SingleExcelPropertyMap<string> elementMapping) : base(member, elementMapping)
+            {
+            }
+
 
             protected override object CreateFromElements(IEnumerable<string> elements)
             {

@@ -7,6 +7,23 @@ namespace ExcelMapper.Tests
     public class ObjectExcelPropertyMapTests
     {
         [Fact]
+        public void Ctor_MemberInfo_ExcelClassMap()
+        {
+            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
+            var classMap = new ExcelClassMap<string>();
+            var propertyMap = new ObjectExcelPropertyMap<string>(propertyInfo, classMap);
+            Assert.Equal(propertyInfo, propertyMap.Member);
+            Assert.Equal(classMap, propertyMap.ClassMap);
+        }
+
+        [Fact]
+        public void Ctor_NullClassMap_ThrowsArgumentNullException()
+        {
+            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
+            Assert.Throws<ArgumentNullException>("classMap", () => new ObjectExcelPropertyMap<string>(propertyInfo, null));
+        }
+
+        [Fact]
         public void WithClassMap_ClassMapFactory_ReturnsExpected()
         {
             bool calledClassMapFactory = false;
