@@ -14,7 +14,7 @@
     <PackageProjectUrl>https://github.com/hughbe/excel-mapper</PackageProjectUrl>
     <RepositoryUrl>https://github.com/hughbe/excel-mapper</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageLicenseUrl>https://github.com/hughbe/excel-mapper/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>Copyright 2018 (c) Hugh Bellamy. All rights reserved.</Copyright>
     <PackageTags>excel mapping mapper</PackageTags>
     <PackageReleaseNotes>Add license and upgrade ExcelDataReader.</PackageReleaseNotes>
