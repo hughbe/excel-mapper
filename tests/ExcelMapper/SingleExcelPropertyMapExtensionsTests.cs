@@ -180,11 +180,15 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void MakeOptional_AlreadyOptional_ThrowsExcelMappingException()
+        public void MakeOptional_AlreadyOptional_ReturnsExpected()
         {
-            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value).WithColumnIndex(1).MakeOptional();
+            var innerReader = new ColumnIndexValueReader(1);
+            SingleExcelPropertyMap<string> propertyMap = Map(t => t.Value).WithReader(innerReader);
+            Assert.Same(propertyMap, propertyMap.MakeOptional());
+            Assert.Same(propertyMap, propertyMap.MakeOptional());
 
-            Assert.Throws<ExcelMappingException>(() => propertyMap.MakeOptional());
+            OptionalCellValueReader reader = Assert.IsType<OptionalCellValueReader>(propertyMap.CellReader);
+            Assert.Same(innerReader, reader.InnerReader);
         }
 
         [Fact]

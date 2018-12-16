@@ -96,7 +96,7 @@ namespace ExcelMapper
         {
             if (propertyMap.CellReader is OptionalCellValueReader)
             {
-                throw new ExcelMappingException("The property map is already optional.");
+                return propertyMap;
             }
 
             propertyMap.CellReader = new OptionalCellValueReader(propertyMap.CellReader);
