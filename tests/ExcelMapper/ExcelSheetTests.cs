@@ -230,6 +230,51 @@ namespace ExcelMapper.Tests
             }
         }
 
+        public static IEnumerable<object[]> ReadRows_Area_TestData()
+        {
+            yield return new object[] { 1, 2, new string[] { "value", "  value  " } };
+            yield return new object[] { 0, 4, new string[] { "value", "  value  ", null, "value" } };
+            yield return new object[] { 1, 0, new string[0] };
+        }
+
+        [Theory]
+        [MemberData(nameof(ReadRows_Area_TestData))]
+        public void ReadRows_IndexCount_ReturnsExpected(int startIndex, int count, string[] expectedValues)
+        {
+            using (var importer = Helpers.GetImporter("Strings.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                IEnumerable<StringValue> rows = sheet.ReadRows<StringValue>(startIndex, count);
+                Assert.Equal(expectedValues, rows.Select(p => p.Value).ToArray());
+                Assert.Equal(startIndex + count, sheet.CurrentRowIndex);
+
+                Assert.NotNull(sheet.Heading);
+                Assert.True(sheet.HasHeading);
+            }
+        }
+
+        [Fact]
+        public void ReadRows_NegativeStartIndex_ThrowsArgumentOutOfRangeException()
+        {
+            using (var importer = Helpers.GetImporter("Strings.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+                Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => sheet.ReadRows<StringValue>(-1, 0).ToArray());
+            }
+        }
+
+        [Fact]
+        public void ReadRows_NegativeCount_ThrowsArgumentOutOfRangeException()
+        {
+            using (var importer = Helpers.GetImporter("Strings.xlsx"))
+            {
+                ExcelSheet sheet = importer.ReadSheet();
+                Assert.Throws<ArgumentOutOfRangeException>("count", () => sheet.ReadRows<StringValue>(0, -1).ToArray());
+            }
+        }
+
         [Fact]
         public void ReadRow_HasHeadingFalse_ReturnsExpected()
         {
