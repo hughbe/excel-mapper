@@ -23,5 +23,11 @@ jobs:
       run: dotnet build --configuration Release --no-restore
     - name: Test
       run: dotnet test --no-restore --verbosity normal
+    - name: Generate coverage report
+      run: dotnet test /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=opencover
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+        with:
+          file: tests/TestResults/coverage.net5.opencover.xml
     - name: Pack
       run: dotnet pack --configuration Release
