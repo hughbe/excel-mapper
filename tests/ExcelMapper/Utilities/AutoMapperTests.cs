@@ -18,7 +18,6 @@ namespace ExcelMapper.Utilities.Tests
             Assert.Equal(5, classMap.Mappings.Count);
 
             IEnumerable<string> members = classMap.Mappings.Select(m => m.Member.Name);
-            Console.WriteLine(string.Join(", ", members));
             Assert.Contains("_inheritedField", members);
             Assert.Contains("_field", members);
             Assert.Contains("InheritedProperty", members);

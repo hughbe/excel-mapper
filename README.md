@@ -2,6 +2,8 @@
 
 A library that reads a row of an Excel sheet and maps it to an object. A flexible and extensible fluent mapping system allows you to customize the way the row is mapped to an object.
 
+![.NET Core](https://github.com/hughbe/excel-mapper/workflows/.NET%20Core/badge.svg)
+
 ## Basic Mapping
 
 ExcelMapper will go through each public property or field and attempt to map the value of the cell in the column with the name of the member. If the column cannot be found or mapped, an exception will be thrown.
