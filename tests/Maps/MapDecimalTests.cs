@@ -93,6 +93,30 @@ namespace ExcelMapper.Tests
             }
         }
 
+        [Fact]
+        public void ReadRow_CustomNullMappedNullableDecimal_Success()
+        {
+            using (var importer = Helpers.GetImporter("Doubles.xlsx"))
+            {
+                importer.Configuration.RegisterClassMap<NullableDecimalNullValueFallbackMap>();
+
+                ExcelSheet sheet = importer.ReadSheet();
+                sheet.ReadHeading();
+
+                // Valid cell value.
+                NullableDecimalValue row1 = sheet.ReadRow<NullableDecimalValue>();
+                Assert.Equal(2.2345m, row1.Value);
+
+                // Empty cell value.
+                NullableDecimalValue row2 = sheet.ReadRow<NullableDecimalValue>();
+                Assert.Equal((decimal?)null, row2.Value);
+
+                // Invalid cell value.
+                NullableDecimalValue row3 = sheet.ReadRow<NullableDecimalValue>();
+                Assert.Equal((decimal?)null, row3.Value);
+            }
+        }
+
         private class DecimalValue
         {
             public decimal Value { get; set; }
@@ -120,6 +144,16 @@ namespace ExcelMapper.Tests
                 Map(o => o.Value)
                     .WithEmptyFallback(-10m)
                     .WithInvalidFallback(10m);
+            }
+        }
+
+        private class NullableDecimalNullValueFallbackMap : ExcelClassMap<NullableDecimalValue>
+        {
+            public NullableDecimalNullValueFallbackMap()
+            {
+                Map(o => o.Value)
+                    .WithEmptyFallback((decimal?)null)
+                    .WithInvalidFallback((decimal?)null);
             }
         }
     }
