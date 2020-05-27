@@ -74,5 +74,31 @@ namespace ExcelMapper.Tests
             Empty,
             Invalid
         }
+
+        [Fact]
+        public void ReadRow_MultiMapMissingRow_ThrowsExcelMappingException()
+        {
+            using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
+            importer.Configuration.RegisterClassMap<MissingColumnRowMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<MissingColumnRow>());
+        }
+
+        private class MissingColumnRow
+        {
+            public int[] MissingValue { get; set; }
+        }
+
+        private class MissingColumnRowMap : ExcelClassMap<MissingColumnRow>
+        {
+            public MissingColumnRowMap()
+            {
+                Map(p => p.MissingValue)
+                    .WithSeparators(';', ',');
+            }
+        }
     }
 }

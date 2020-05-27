@@ -56,7 +56,7 @@ namespace ExcelMapper.Tests
         private class ClassWithEvent
         {
             public event EventHandler Event { add { } remove { } }
-        
+
             public int Property { get; set; }
 #pragma warning disable 0649
             public int _field;
@@ -69,9 +69,8 @@ namespace ExcelMapper.Tests
         {
             public SubPropertyMap(MemberInfo member) : base(member) { }
 
-            public override object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+            public override void SetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, object instance)
             {
-                return 10;
             }
         }
     }

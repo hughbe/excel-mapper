@@ -33,7 +33,7 @@ namespace ExcelMapper.Mappings.Mappers.Tests
             var item = new ConvertUsingMapper(converter);
 
             object value = null;
-            PropertyMapperResultType result = item.GetProperty(new ReadCellValueResult(-1, "string"), ref value);
+            PropertyMapperResultType result = item.MapCellValue(new ReadCellValueResult(-1, "string"), ref value);
             Assert.Equal(PropertyMapperResultType.Success, result);
             Assert.Equal(10, value);
         }

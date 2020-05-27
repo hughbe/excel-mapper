@@ -40,7 +40,7 @@ namespace ExcelMapper.Mappings.Readers
         /// by splitting it.
         /// </summary>
         /// <param name="cellReader">The ICellValueReader that reads the string value of the cell before it is split.</param>
-        public StringSplitCellValueReader(ICellValueReader cellReader) : base(cellReader)
+        public StringSplitCellValueReader(ISingleCellValueReader cellReader) : base(cellReader)
         {
         }
 

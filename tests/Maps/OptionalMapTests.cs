@@ -15,11 +15,11 @@ namespace ExcelMapper.Tests
                 sheet.ReadHeading();
 
                 OptionalValue row1 = sheet.ReadRow<OptionalValue>();
-                Assert.Equal(-1, row1.NoSuchColumnNoName);
-                Assert.Equal(-2, row1.NoSuchColumnWithNameBefore);
-                Assert.Equal(-3, row1.NoSuchColumnWithNameAfter);
-                Assert.Equal(-4, row1.NoSuchColumnWithIndexBefore);
-                Assert.Equal(-5, row1.NoSuchColumnWithIndexAfter);
+                Assert.Equal(0, row1.NoSuchColumnNoName);
+                Assert.Equal(0, row1.NoSuchColumnWithNameBefore);
+                Assert.Equal(0, row1.NoSuchColumnWithNameAfter);
+                Assert.Equal(0, row1.NoSuchColumnWithIndexBefore);
+                Assert.Equal(0, row1.NoSuchColumnWithIndexAfter);
             }
         }
 

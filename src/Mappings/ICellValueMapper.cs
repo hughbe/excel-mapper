@@ -2,6 +2,6 @@
 {
     public interface ICellValueMapper
     {
-        PropertyMapperResultType GetProperty(ReadCellValueResult mapResult, ref object value);
+        PropertyMapperResultType MapCellValue(ReadCellValueResult mapResult, ref object value);
     }
 }

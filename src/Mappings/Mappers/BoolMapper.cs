@@ -5,7 +5,7 @@
     /// </summary>
     public class BoolMapper : ICellValueMapper
     {
-        public PropertyMapperResultType GetProperty(ReadCellValueResult readResult, ref object value)
+        public PropertyMapperResultType MapCellValue(ReadCellValueResult readResult, ref object value)
         {
             // Excel transforms bool values such as "true" or "false" to "1" or "0".
             if (readResult.StringValue == "1")

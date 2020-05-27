@@ -6,7 +6,7 @@ namespace ExcelMapper.Mappings.Readers
     /// <summary>
     /// Reads the value of a single cell given the zero-based index of it's column.
     /// </summary>
-    public sealed class ColumnIndexValueReader : ICellValueReader
+    public sealed class ColumnIndexValueReader : ISingleCellValueReader
     {
         /// <summary>
         /// The zero-based index of the column to read.
@@ -27,10 +27,17 @@ namespace ExcelMapper.Mappings.Readers
             ColumnIndex = columnIndex;
         }
 
-        public ReadCellValueResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out ReadCellValueResult result)
         {
+            if (ColumnIndex > reader.ResultsCount)
+            {
+                result = default;
+                return false;
+            }
+
             var value = reader[ColumnIndex]?.ToString();
-            return new ReadCellValueResult(ColumnIndex, value);
+            result = new ReadCellValueResult(ColumnIndex, value);
+            return true;
         }
     }
 }

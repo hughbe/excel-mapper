@@ -44,13 +44,14 @@ namespace ExcelMapper.Mappings.Readers
             ColumnIndices = columnIndices;
         }
 
-        public IEnumerable<ReadCellValueResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out IEnumerable<ReadCellValueResult> result)
         {
-            return ColumnIndices.Select(columnIndex =>
+            result = ColumnIndices.Select(columnIndex =>
             {
                 var value = reader[columnIndex]?.ToString();
                 return new ReadCellValueResult(columnIndex, value);
             });
+            return true;
         }
     }
 }

@@ -2,9 +2,10 @@
 
 namespace ExcelMapper.Mappings.Support
 {
-    public interface ISinglePropertyMap
+    public interface IOneToOnePropertyMap
     {
-        ICellValueReader CellReader { get; set; }
+        ISingleCellValueReader CellReader { get; set; }
+        bool Optional { get; set; }
         IFallbackItem EmptyFallback { get; set; }
         IFallbackItem InvalidFallback { get; set; }
 

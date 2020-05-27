@@ -7,7 +7,7 @@ namespace ExcelMapper.Mappings.Mappers
     /// </summary>
     public class GuidMapper : ICellValueMapper
     {
-        public PropertyMapperResultType GetProperty(ReadCellValueResult readResult, ref object value)
+        public PropertyMapperResultType MapCellValue(ReadCellValueResult readResult, ref object value)
         {
             if (!Guid.TryParse(readResult.StringValue, out Guid result))
             {

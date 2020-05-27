@@ -44,19 +44,20 @@ namespace ExcelMapper.Mappings.Readers
             ColumnNames = columnNames;
         }
 
-        public IEnumerable<ReadCellValueResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out IEnumerable<ReadCellValueResult> result)
         {
             if (sheet.Heading == null)
             {
                 throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
             }
 
-            return ColumnNames.Select(columnName =>
+            result = ColumnNames.Select(columnName =>
             {
                 var index = sheet.Heading.GetColumnIndex(columnName);
                 var value = reader[index]?.ToString();
                 return new ReadCellValueResult(index, value);
             });
+            return true;
         }
     }
 }

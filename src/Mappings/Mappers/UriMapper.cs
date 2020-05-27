@@ -7,7 +7,7 @@ namespace ExcelMapper.Mappings.Mappers
     /// </summary>
     public class UriMapper : ICellValueMapper
     {
-        public PropertyMapperResultType GetProperty(ReadCellValueResult readResult, ref object value)
+        public PropertyMapperResultType MapCellValue(ReadCellValueResult readResult, ref object value)
         {
             if (!Uri.TryCreate(readResult.StringValue, UriKind.Absolute, out Uri result))
             {

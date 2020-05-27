@@ -6,7 +6,7 @@ namespace ExcelMapper.Mappings.Readers
     /// <summary>
     /// Reads the value of a single cell given the name of it's column.
     /// </summary>
-    public sealed class ColumnNameValueReader : ICellValueReader
+    public sealed class ColumnNameValueReader : ISingleCellValueReader
     {
         /// <summary>
         /// The name of the column to read.
@@ -32,16 +32,22 @@ namespace ExcelMapper.Mappings.Readers
             ColumnName = columnName;
         }
 
-        public ReadCellValueResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out ReadCellValueResult result)
         {
             if (sheet.Heading == null)
             {
                 throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
             }
 
-            int index = sheet.Heading.GetColumnIndex(ColumnName);
+            if (!sheet.Heading.TryGetColumnIndex(ColumnName, out int index))
+            {
+                result = default;
+                return false;
+            }
+
             string value = reader[index]?.ToString();
-            return new ReadCellValueResult(index, value);
+            result = new ReadCellValueResult(index, value);
+            return true;
         }
     }
 }

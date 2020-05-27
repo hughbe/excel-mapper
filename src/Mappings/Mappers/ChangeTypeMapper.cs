@@ -33,7 +33,7 @@ namespace ExcelMapper.Mappings.Mappers
             Type = type;
         }
 
-        public PropertyMapperResultType GetProperty(ReadCellValueResult readResult, ref object value)
+        public PropertyMapperResultType MapCellValue(ReadCellValueResult readResult, ref object value)
         {
             try
             {

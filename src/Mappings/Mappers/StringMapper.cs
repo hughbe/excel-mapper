@@ -5,7 +5,7 @@
     /// </summary>
     public class StringMapper : ICellValueMapper
     {
-        public PropertyMapperResultType GetProperty(ReadCellValueResult result, ref object value)
+        public PropertyMapperResultType MapCellValue(ReadCellValueResult result, ref object value)
         {
             value = result.StringValue;
             return PropertyMapperResultType.SuccessIfNoOtherSuccess;

@@ -10,7 +10,7 @@ namespace ExcelMapper.Mappings.MultiItems
     /// <typeparam name="T">The element type of the array to create.</typeparam>
     internal class ArrayPropertyMap<T> : EnumerableExcelPropertyMap<T>
     {
-        public ArrayPropertyMap(MemberInfo member, SingleExcelPropertyMap<T> elementMapping) : base(member, elementMapping)
+        public ArrayPropertyMap(MemberInfo member, OneToOnePropertyMap<T> elementMapping) : base(member, elementMapping)
         {
         }
 

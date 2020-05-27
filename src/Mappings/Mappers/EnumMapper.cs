@@ -43,7 +43,7 @@ namespace ExcelMapper.Mappings.Mappers
             IgnoreCase = ignoreCase;
         }
 
-        public PropertyMapperResultType GetProperty(ReadCellValueResult readResult, ref object value)
+        public PropertyMapperResultType MapCellValue(ReadCellValueResult readResult, ref object value)
         {
             try
             {

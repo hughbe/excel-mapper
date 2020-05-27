@@ -28,7 +28,7 @@ namespace ExcelMapper.Mappings.Mappers
             MappingDictionary = new Dictionary<string, T>(mappingDictionary, comparer);
         }
 
-        public PropertyMapperResultType GetProperty(ReadCellValueResult readResult, ref object value)
+        public PropertyMapperResultType MapCellValue(ReadCellValueResult readResult, ref object value)
         {
             // If we didn't find anything, keep going. This is not necessarily a fatal error.
             if (!MappingDictionary.TryGetValue(readResult.StringValue, out T result))

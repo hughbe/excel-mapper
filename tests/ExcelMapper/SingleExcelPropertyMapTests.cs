@@ -9,14 +9,14 @@ using Xunit;
 
 namespace ExcelMapper.Tests
 {
-    public class SingleExcelPropertyMapTests
+    public class OneToOnePropertyMapTests
     {
         [Fact]
         public void Ctor_Member_Type_EmptyValueStrategy()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
 
-            var propertyMap = new SingleExcelPropertyMap(propertyInfo);
+            var propertyMap = new OneToOnePropertyMap(propertyInfo);
             Assert.Same(propertyInfo, propertyMap.Member);
 
             Assert.Empty(propertyMap.CellValueMappers);
@@ -27,7 +27,7 @@ namespace ExcelMapper.Tests
         public void EmptyFallback_Set_GetReturnsExpected()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SingleExcelPropertyMap(propertyInfo);
+            var propertyMap = new OneToOnePropertyMap(propertyInfo);
 
             var fallback = new FixedValueFallback(10);
             propertyMap.EmptyFallback = fallback;
@@ -41,7 +41,7 @@ namespace ExcelMapper.Tests
         public void InvalidFallback_Set_GetReturnsExpected()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SingleExcelPropertyMap(propertyInfo);
+            var propertyMap = new OneToOnePropertyMap(propertyInfo);
 
             var fallback = new FixedValueFallback(10);
             propertyMap.InvalidFallback = fallback;
@@ -55,7 +55,7 @@ namespace ExcelMapper.Tests
         public void AddCellValueMapper_ValidItem_Success()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SingleExcelPropertyMap(propertyInfo);
+            var propertyMap = new OneToOnePropertyMap(propertyInfo);
             var item1 = new BoolMapper();
             var item2 = new BoolMapper();
 
@@ -68,7 +68,7 @@ namespace ExcelMapper.Tests
         public void AddCellValueMapper_NullItem_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SingleExcelPropertyMap(propertyInfo);
+            var propertyMap = new OneToOnePropertyMap(propertyInfo);
 
             Assert.Throws<ArgumentNullException>("mapper", () => propertyMap.AddCellValueMapper(null));
         }
@@ -77,7 +77,7 @@ namespace ExcelMapper.Tests
         public void RemoveCellValueMapper_Index_Success()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SingleExcelPropertyMap(propertyInfo);
+            var propertyMap = new OneToOnePropertyMap(propertyInfo);
             propertyMap.AddCellValueMapper(new BoolMapper());
 
             propertyMap.RemoveCellValueMapper(0);
@@ -88,7 +88,7 @@ namespace ExcelMapper.Tests
         public void AddCellValueTransformer_ValidTransformer_Success()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SingleExcelPropertyMap(propertyInfo);
+            var propertyMap = new OneToOnePropertyMap(propertyInfo);
             var transformer1 = new TrimCellValueTransformer();
             var transformer2 = new TrimCellValueTransformer();
 
@@ -101,7 +101,7 @@ namespace ExcelMapper.Tests
         public void AddCellValueTransformer_NullTransformer_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SingleExcelPropertyMap(propertyInfo);
+            var propertyMap = new OneToOnePropertyMap(propertyInfo);
 
             Assert.Throws<ArgumentNullException>("transformer", () => propertyMap.AddCellValueTransformer(null));
         }
@@ -111,7 +111,7 @@ namespace ExcelMapper.Tests
         {
             var cellReader = new ColumnNameValueReader("ColumnName");
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SingleExcelPropertyMap(propertyInfo)
+            var propertyMap = new OneToOnePropertyMap(propertyInfo)
             {
                 CellReader = cellReader
             };
@@ -123,7 +123,7 @@ namespace ExcelMapper.Tests
         public void CellReader_SetNull_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SingleExcelPropertyMap(propertyInfo);
+            var propertyMap = new OneToOnePropertyMap(propertyInfo);
 
             Assert.Throws<ArgumentNullException>("value", () => propertyMap.CellReader = null);
         }

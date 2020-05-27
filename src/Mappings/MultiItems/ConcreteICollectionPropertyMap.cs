@@ -12,7 +12,7 @@ namespace ExcelMapper.Mappings.MultiItems
     {
         private Type CollectionType { get; }
 
-        public ConcreteICollectionPropertyMap(Type type, MemberInfo member, SingleExcelPropertyMap<T> elementMapping) : base(member, elementMapping)
+        public ConcreteICollectionPropertyMap(Type type, MemberInfo member, OneToOnePropertyMap<T> elementMapping) : base(member, elementMapping)
         {
             CollectionType = type;
         }

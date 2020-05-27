@@ -9,6 +9,6 @@ namespace ExcelMapper.Mappings
     /// </summary>
     public interface IMultipleCellValuesReader
     {
-        IEnumerable<ReadCellValueResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader);
+        bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out IEnumerable<ReadCellValueResult> result);
     }
 }

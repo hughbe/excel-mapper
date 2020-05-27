@@ -19,7 +19,7 @@ namespace ExcelMapper
         public Type Type { get; }
 
         public ExcelPropertyMapCollection Mappings { get; } = new ExcelPropertyMapCollection();
-    
+
         /// <summary>
         /// Creates an ExcelClassMap for the given type.
         /// </summary>
@@ -41,8 +41,7 @@ namespace ExcelMapper
 
             foreach (ExcelPropertyMap pipeline in Mappings)
             {
-                object propertyValue = pipeline.GetPropertyValue(sheet, rowIndex, reader);
-                pipeline.SetPropertyFactory(instance, propertyValue);
+                pipeline.SetPropertyValue(sheet, rowIndex, reader, instance);
             }
 
             return instance;
