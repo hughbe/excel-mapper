@@ -16,10 +16,10 @@ namespace ExcelMapper
     public abstract class EnumerableExcelPropertyMap<T> : ExcelPropertyMap
     {
         /// <summary>
-        /// Gets the map that maps the value of a single cell to an object of the element type of the property
+        /// Gets the pipeline that maps the value of a single cell to an object of the element type of the property
         /// or field.
         /// </summary>
-        public OneToOnePropertyMap<T> ElementMap { get; private set; }
+        public ValuePipeline ElementPipeline { get; private set; }
 
         /// <summary>
         /// Gets the reader that reads one or more values from one or more cells used to map each
@@ -32,10 +32,10 @@ namespace ExcelMapper
         /// contained by the property or field.
         /// </summary>
         /// <param name="member">The property or field to map the values of one or more cell to.</param>
-        /// <param name="elementMap">The map that maps the value of a single cell to an object of the element type of the property or field.</param>
-        protected EnumerableExcelPropertyMap(MemberInfo member, OneToOnePropertyMap<T> elementMap) : base(member)
+        /// <param name="elementPipeline">The pipeline that maps the value of a single cell to an object of the element type of the property or field.</param>
+        protected EnumerableExcelPropertyMap(MemberInfo member, ValuePipeline elementPipeline) : base(member)
         {
-            ElementMap = elementMap ?? throw new ArgumentNullException(nameof(elementMap));
+            ElementPipeline = elementPipeline ?? throw new ArgumentNullException(nameof(elementPipeline));
 
             var columnReader = new ColumnNameValueReader(member.Name);
             ColumnsReader = new CharSplitCellValueReader(columnReader);
@@ -45,7 +45,7 @@ namespace ExcelMapper
         /// Sets the map that maps the value of a single cell to an object of the element type of the property
         /// or field.
         /// </summary>
-        /// <param name="elementMap">The map that maps the value of a single cell to an object of the element type of the property
+        /// <param name="elementMap">The pipeline that maps the value of a single cell to an object of the element type of the property
         /// or field.</param>
         /// <returns>The property map that invoked this method.</returns>
         public EnumerableExcelPropertyMap<T> WithElementMap(Func<OneToOnePropertyMap<T>, OneToOnePropertyMap<T>> elementMap)
@@ -55,7 +55,10 @@ namespace ExcelMapper
                 throw new ArgumentNullException(nameof(elementMap));
             }
 
-            ElementMap = elementMap(ElementMap) ?? throw new ArgumentNullException(nameof(elementMap));
+            // Bit of a hack right now.
+            var map = new OneToOnePropertyMap<T>(Member, ElementPipeline);
+            OneToOnePropertyMap<T> result = elementMap(map) ?? throw new ArgumentNullException(nameof(elementMap));
+            ElementPipeline = result.Pipeline;
             return this;
         }
 
@@ -69,7 +72,7 @@ namespace ExcelMapper
             var elements = new List<T>();
             foreach (ReadCellValueResult value in values)
             {
-                T elementValue = (T)ElementMap.GetPropertyValue(sheet, rowIndex, reader, value);
+                T elementValue = (T)ElementPipeline.GetPropertyValue(sheet, rowIndex, reader, value, Member);
                 elements.Add(elementValue);
             }
 

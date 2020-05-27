@@ -110,7 +110,7 @@ namespace ExcelMapper.Tests
             public string[] ValueWithColumnIndexAcrossMultiColumnNames { get; set; }
             public string[] ValueWithColumnIndexAcrossMultiColumnIndices { get; set; }
         }
-        
+
         private class SplitWithElementMapMap : ExcelClassMap<MappedAutoSplitWithSeparatorClass>
         {
             public SplitWithElementMapMap()

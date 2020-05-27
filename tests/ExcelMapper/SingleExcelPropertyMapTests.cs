@@ -19,8 +19,8 @@ namespace ExcelMapper.Tests
             var propertyMap = new OneToOnePropertyMap(propertyInfo);
             Assert.Same(propertyInfo, propertyMap.Member);
 
-            Assert.Empty(propertyMap.CellValueMappers);
-            Assert.Empty(propertyMap.CellValueTransformers);
+            Assert.Empty(propertyMap.Pipeline.CellValueMappers);
+            Assert.Empty(propertyMap.Pipeline.CellValueTransformers);
         }
 
         [Fact]
@@ -30,11 +30,11 @@ namespace ExcelMapper.Tests
             var propertyMap = new OneToOnePropertyMap(propertyInfo);
 
             var fallback = new FixedValueFallback(10);
-            propertyMap.EmptyFallback = fallback;
-            Assert.Same(fallback, propertyMap.EmptyFallback);
+            propertyMap.Pipeline.EmptyFallback = fallback;
+            Assert.Same(fallback, propertyMap.Pipeline.EmptyFallback);
 
-            propertyMap.EmptyFallback = null;
-            Assert.Null(propertyMap.EmptyFallback);
+            propertyMap.Pipeline.EmptyFallback = null;
+            Assert.Null(propertyMap.Pipeline.EmptyFallback);
         }
 
         [Fact]
@@ -44,11 +44,11 @@ namespace ExcelMapper.Tests
             var propertyMap = new OneToOnePropertyMap(propertyInfo);
 
             var fallback = new FixedValueFallback(10);
-            propertyMap.InvalidFallback = fallback;
-            Assert.Same(fallback, propertyMap.InvalidFallback);
+            propertyMap.Pipeline.InvalidFallback = fallback;
+            Assert.Same(fallback, propertyMap.Pipeline.InvalidFallback);
 
-            propertyMap.InvalidFallback = null;
-            Assert.Null(propertyMap.InvalidFallback);
+            propertyMap.Pipeline.InvalidFallback = null;
+            Assert.Null(propertyMap.Pipeline.InvalidFallback);
         }
 
         [Fact]
@@ -59,9 +59,9 @@ namespace ExcelMapper.Tests
             var item1 = new BoolMapper();
             var item2 = new BoolMapper();
 
-            propertyMap.AddCellValueMapper(item1);
-            propertyMap.AddCellValueMapper(item2);
-            Assert.Equal(new ICellValueMapper[] { item1, item2 }, propertyMap.CellValueMappers);
+            propertyMap.Pipeline.AddCellValueMapper(item1);
+            propertyMap.Pipeline.AddCellValueMapper(item2);
+            Assert.Equal(new ICellValueMapper[] { item1, item2 }, propertyMap.Pipeline.CellValueMappers);
         }
 
         [Fact]
@@ -70,7 +70,7 @@ namespace ExcelMapper.Tests
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var propertyMap = new OneToOnePropertyMap(propertyInfo);
 
-            Assert.Throws<ArgumentNullException>("mapper", () => propertyMap.AddCellValueMapper(null));
+            Assert.Throws<ArgumentNullException>("mapper", () => propertyMap.Pipeline.AddCellValueMapper(null));
         }
 
         [Fact]
@@ -78,10 +78,10 @@ namespace ExcelMapper.Tests
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var propertyMap = new OneToOnePropertyMap(propertyInfo);
-            propertyMap.AddCellValueMapper(new BoolMapper());
+            propertyMap.Pipeline.AddCellValueMapper(new BoolMapper());
 
-            propertyMap.RemoveCellValueMapper(0);
-            Assert.Empty(propertyMap.CellValueMappers);
+            propertyMap.Pipeline.RemoveCellValueMapper(0);
+            Assert.Empty(propertyMap.Pipeline.CellValueMappers);
         }
 
         [Fact]
@@ -92,9 +92,9 @@ namespace ExcelMapper.Tests
             var transformer1 = new TrimCellValueTransformer();
             var transformer2 = new TrimCellValueTransformer();
 
-            propertyMap.AddCellValueTransformer(transformer1);
-            propertyMap.AddCellValueTransformer(transformer2);
-            Assert.Equal(new ICellValueTransformer[] { transformer1, transformer2 }, propertyMap.CellValueTransformers);
+            propertyMap.Pipeline.AddCellValueTransformer(transformer1);
+            propertyMap.Pipeline.AddCellValueTransformer(transformer2);
+            Assert.Equal(new ICellValueTransformer[] { transformer1, transformer2 }, propertyMap.Pipeline.CellValueTransformers);
         }
 
         [Fact]
@@ -103,7 +103,7 @@ namespace ExcelMapper.Tests
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var propertyMap = new OneToOnePropertyMap(propertyInfo);
 
-            Assert.Throws<ArgumentNullException>("transformer", () => propertyMap.AddCellValueTransformer(null));
+            Assert.Throws<ArgumentNullException>("transformer", () => propertyMap.Pipeline.AddCellValueTransformer(null));
         }
 
         [Fact]

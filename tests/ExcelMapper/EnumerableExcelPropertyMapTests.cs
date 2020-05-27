@@ -13,17 +13,17 @@ namespace ExcelMapper.Tests
         public void Ctor_MemberInfo_EmptyValueStategy()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo);
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo);
             Assert.Same(propertyInfo, propertyMap.Member);
 
-            Assert.NotNull(propertyMap.ElementMap);
+            Assert.NotNull(propertyMap.ElementPipeline);
         }
 
         [Fact]
-        public void Ctor_NullElementMap_ThrowsArgumentNullException()
+        public void Ctor_NullPipeline_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            Assert.Throws<ArgumentNullException>("elementMap", () => new SubPropertyMap(propertyInfo, null));
+            Assert.Throws<ArgumentNullException>("elementPipeline", () => new SubEnumerableExcelPropertyMap(propertyInfo, null));
         }
 
         [Fact]
@@ -32,20 +32,20 @@ namespace ExcelMapper.Tests
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var elementMap = new OneToOnePropertyMap<string>(propertyInfo);
 
-            var propertyMap = new SubPropertyMap(propertyInfo);
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo);
             Assert.Same(propertyMap, propertyMap.WithElementMap(e =>
             {
-                Assert.Same(e, propertyMap.ElementMap);
+                Assert.Same(e.Pipeline, propertyMap.ElementPipeline);
                 return elementMap;
             }));
-            Assert.Same(elementMap, propertyMap.ElementMap);
+            Assert.Same(elementMap.Pipeline, propertyMap.ElementPipeline);
         }
 
         [Fact]
         public void WithElementMap_NullMap_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo);
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo);
 
             Assert.Throws<ArgumentNullException>("elementMap", () => propertyMap.WithElementMap(null));
         }
@@ -54,7 +54,7 @@ namespace ExcelMapper.Tests
         public void WithElementMap_MapReturnsNull_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo);
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo);
 
             Assert.Throws<ArgumentNullException>("elementMap", () => propertyMap.WithElementMap(e => null));
         }
@@ -63,7 +63,7 @@ namespace ExcelMapper.Tests
         public void WithColumnName_SplitValidColumnName_Success()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo);
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo);
             Assert.Same(propertyMap, propertyMap.WithColumnName("ColumnName"));
 
             CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.ColumnsReader);
@@ -75,7 +75,7 @@ namespace ExcelMapper.Tests
         public void WithColumnName_MultiValidColumnName_Success()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo).WithColumnNames("ColumnName");
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo).WithColumnNames("ColumnName");
             Assert.Same(propertyMap, propertyMap.WithColumnName("ColumnName"));
 
             CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.ColumnsReader);
@@ -87,7 +87,7 @@ namespace ExcelMapper.Tests
         public void WithColumnName_NullColumnName_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo);
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo);
 
             Assert.Throws<ArgumentNullException>("columnName", () => propertyMap.WithColumnName(null));
         }
@@ -96,7 +96,7 @@ namespace ExcelMapper.Tests
         public void WithColumnName_EmptyColumnName_ThrowsArgumentException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo);
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo);
 
             Assert.Throws<ArgumentException>("columnName", () => propertyMap.WithColumnName(string.Empty));
         }
@@ -107,7 +107,7 @@ namespace ExcelMapper.Tests
         public void WithColumnIndex_SplitColumnIndex_Success(int columnIndex)
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo);
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo);
             Assert.Same(propertyMap, propertyMap.WithColumnIndex(columnIndex));
 
             CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.ColumnsReader);
@@ -121,7 +121,7 @@ namespace ExcelMapper.Tests
         public void WithColumnIndex_MultiColumnIndex_Success(int columnIndex)
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo).WithColumnNames("ColumnName");
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo).WithColumnNames("ColumnName");
             Assert.Same(propertyMap, propertyMap.WithColumnIndex(columnIndex));
 
             CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.ColumnsReader);
@@ -133,7 +133,7 @@ namespace ExcelMapper.Tests
         public void WithColumnIndex_NegativeColumnIndex_ThrowsArgumentOutOfRangeException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo);
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo);
 
             Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => propertyMap.WithColumnIndex(-1));
         }
@@ -152,7 +152,7 @@ namespace ExcelMapper.Tests
             char[] separatorsArray = separators.ToArray();
 
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo);
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo);
             Assert.Same(propertyMap, propertyMap.WithSeparators(separatorsArray));
 
             CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.ColumnsReader);
@@ -164,7 +164,7 @@ namespace ExcelMapper.Tests
         public void WithSeparators_IEnumerableChar_Success(IEnumerable<char> separators)
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo);
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo);
             Assert.Same(propertyMap, propertyMap.WithSeparators(separators));
 
             CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.ColumnsReader);
@@ -185,7 +185,7 @@ namespace ExcelMapper.Tests
             string[] separatorsArray = separators.ToArray();
 
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo);
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo);
             Assert.Same(propertyMap, propertyMap.WithSeparators(separatorsArray));
 
             StringSplitCellValueReader valueReader = Assert.IsType<StringSplitCellValueReader>(propertyMap.ColumnsReader);
@@ -197,7 +197,7 @@ namespace ExcelMapper.Tests
         public void WithSeparators_IEnumerableString_Success(IEnumerable<string> separators)
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo);
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo);
             Assert.Same(propertyMap, propertyMap.WithSeparators(separators));
 
             StringSplitCellValueReader valueReader = Assert.IsType<StringSplitCellValueReader>(propertyMap.ColumnsReader);
@@ -208,7 +208,7 @@ namespace ExcelMapper.Tests
         public void WithSeparators_NullSeparators_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo);
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo);
 
             Assert.Throws<ArgumentNullException>("value", () => propertyMap.WithSeparators((char[])null));
             Assert.Throws<ArgumentNullException>("value", () => propertyMap.WithSeparators((IEnumerable<char>)null));
@@ -220,7 +220,7 @@ namespace ExcelMapper.Tests
         public void WithSeparators_EmptySeparators_ThrowsArgumentException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo);
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo);
 
             Assert.Throws<ArgumentException>("value", () => propertyMap.WithSeparators(new char[0]));
             Assert.Throws<ArgumentException>("value", () => propertyMap.WithSeparators(new List<char>()));
@@ -232,7 +232,7 @@ namespace ExcelMapper.Tests
         public void WithSeperators_MultiMap_ThrowsExcelMappingException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
 
             Assert.Throws<ExcelMappingException>(() => propertyMap.WithSeparators(new char[0]));
             Assert.Throws<ExcelMappingException>(() => propertyMap.WithSeparators(new List<char>()));
@@ -245,7 +245,7 @@ namespace ExcelMapper.Tests
         {
             var columnNames = new string[] { "ColumnName1", "ColumnName2" };
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
             Assert.Same(propertyMap, propertyMap.WithColumnNames(columnNames));
 
             MultipleColumnNamesValueReader valueReader = Assert.IsType<MultipleColumnNamesValueReader>(propertyMap.ColumnsReader);
@@ -257,7 +257,7 @@ namespace ExcelMapper.Tests
         {
             var columnNames = new List<string> { "ColumnName1", "ColumnName2" };
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
             Assert.Same(propertyMap, propertyMap.WithColumnNames(columnNames));
 
             MultipleColumnNamesValueReader valueReader = Assert.IsType<MultipleColumnNamesValueReader>(propertyMap.ColumnsReader);
@@ -268,7 +268,7 @@ namespace ExcelMapper.Tests
         public void WithColumnNames_NullColumnNames_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
 
             Assert.Throws<ArgumentNullException>("columnNames", () => propertyMap.WithColumnNames(null));
             Assert.Throws<ArgumentNullException>("columnNames", () => propertyMap.WithColumnNames((IEnumerable<string>)null));
@@ -278,7 +278,7 @@ namespace ExcelMapper.Tests
         public void WithColumnNames_EmptyColumnNames_ThrowsArgumentException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
 
             Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new string[0]));
             Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new List<string>()));
@@ -288,7 +288,7 @@ namespace ExcelMapper.Tests
         public void WithColumnNames_NullValueInColumnNames_ThrowsArgumentException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
 
             Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new string[] { null }));
             Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new List<string> { null }));
@@ -299,7 +299,7 @@ namespace ExcelMapper.Tests
         {
             var columnIndices = new int[] { 0, 1 };
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
             Assert.Same(propertyMap, propertyMap.WithColumnIndices(columnIndices));
 
             MultipleColumnIndicesValueReader reader = Assert.IsType<MultipleColumnIndicesValueReader>(propertyMap.ColumnsReader);
@@ -311,7 +311,7 @@ namespace ExcelMapper.Tests
         {
             var columnIndices = new List<int> { 0, 1 };
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
             Assert.Same(propertyMap, propertyMap.WithColumnIndices(columnIndices));
 
             MultipleColumnIndicesValueReader reader = Assert.IsType<MultipleColumnIndicesValueReader>(propertyMap.ColumnsReader);
@@ -322,7 +322,7 @@ namespace ExcelMapper.Tests
         public void WithColumnIndices_NullColumnIndices_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
 
             Assert.Throws<ArgumentNullException>("columnIndices", () => propertyMap.WithColumnIndices(null));
             Assert.Throws<ArgumentNullException>("columnIndices", () => propertyMap.WithColumnIndices((IEnumerable<int>)null));
@@ -332,7 +332,7 @@ namespace ExcelMapper.Tests
         public void WithColumnIndices_EmptyColumnIndices_ThrowsArgumentException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
 
             Assert.Throws<ArgumentException>("columnIndices", () => propertyMap.WithColumnIndices(new int[0]));
             Assert.Throws<ArgumentException>("columnIndices", () => propertyMap.WithColumnIndices(new List<int>()));
@@ -342,19 +342,19 @@ namespace ExcelMapper.Tests
         public void WithColumnIndices_NegativeValueInColumnIndices_ThrowsArgumentOutOfRangeException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var propertyMap = new SubPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
+            var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo).WithColumnNames("ColumnNames");
 
             Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => propertyMap.WithColumnIndices(new int[] { -1 }));
             Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => propertyMap.WithColumnIndices(new List<int> { -1 }));
         }
 
-        private class SubPropertyMap : EnumerableExcelPropertyMap<string>
+        private class SubEnumerableExcelPropertyMap : EnumerableExcelPropertyMap<string>
         {
-            public SubPropertyMap(MemberInfo member) : base(member, new OneToOnePropertyMap<string>(member))
+            public SubEnumerableExcelPropertyMap(MemberInfo member) : base(member, new ValuePipeline())
             {
             }
 
-            public SubPropertyMap(MemberInfo member, OneToOnePropertyMap<string> elementMapping) : base(member, elementMapping)
+            public SubEnumerableExcelPropertyMap(MemberInfo member, ValuePipeline elementPipeline) : base(member, elementPipeline)
             {
             }
 

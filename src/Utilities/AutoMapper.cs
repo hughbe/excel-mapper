@@ -48,6 +48,21 @@ namespace ExcelMapper.Utilities
             return false;
         }
 
+        internal static bool TryCreatePrimitivePipeline<T>(FallbackStrategy emptyValueStrategy, out ValuePipeline pipeline)
+        {
+            if (!TryGetWellKnownMap(typeof(T), emptyValueStrategy, out ICellValueMapper mapper, out IFallbackItem emptyFallback, out IFallbackItem invalidFallback))
+            {
+                pipeline = null;
+                return false;
+            }
+
+            pipeline = new ValuePipeline();
+            pipeline.AddCellValueMapper(mapper);
+            pipeline.EmptyFallback = emptyFallback;
+            pipeline.InvalidFallback = invalidFallback;
+            return true;
+        }
+
         internal static bool TryCreatePrimitiveMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out OneToOnePropertyMap<T> map)
         {
             if (!TryGetWellKnownMap(typeof(T), emptyValueStrategy, out ICellValueMapper mapper, out IFallbackItem emptyFallback, out IFallbackItem invalidFallback))
@@ -169,9 +184,9 @@ namespace ExcelMapper.Utilities
             Type rawType = member.MemberType();
             TypeInfo rawTypeInfo = rawType.GetTypeInfo();
 
-            // First, get the mapper for the element. This is used to convert individual values
+            // First, get the pipeline for the element. This is used to convert individual values
             // to be added to/included in the collection.
-            if (!TryCreatePrimitiveMap(member, emptyValueStrategy, out OneToOnePropertyMap<TElement> elementMapping))
+            if (!TryCreatePrimitivePipeline<TElement>(emptyValueStrategy, out ValuePipeline elementMapping))
             {
                 map = null;
                 return false;
