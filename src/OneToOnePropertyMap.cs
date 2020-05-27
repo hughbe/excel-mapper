@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Reflection;
 using ExcelDataReader;
-using ExcelMapper.Mappings;
-using ExcelMapper.Mappings.Readers;
-using ExcelMapper.Mappings.Support;
+using ExcelMapper.Abstractions;
+using ExcelMapper.Readers;
 
 namespace ExcelMapper
 {
@@ -12,11 +11,11 @@ namespace ExcelMapper
     /// Reads a single cell of an excel sheet and maps the value of the cell to the
     /// type of the property or field.
     /// </summary>
-    public class OneToOnePropertyMap : ExcelPropertyMap, IOneToOnePropertyMap
+    public class OneToOnePropertyMap : ExcelPropertyMap, IValuePipeline
     {
-        private readonly List<ICellValueTransformer> _cellValueTransformers = new List<ICellValueTransformer>();
-        private readonly List<ICellValueMapper> _cellValueMappers = new List<ICellValueMapper>();
         private ISingleCellValueReader _reader;
+
+        public ValuePipeline Pipeline { get; } = new ValuePipeline();
 
         /// <summary>
         /// Gets or sets the object that takes a sheet and row index and produces the value of a cell.
@@ -32,68 +31,6 @@ namespace ExcelMapper
         /// found.
         /// </summary>
         public bool Optional { get; set; }
-
-        /// <summary>
-        /// Gets the list of objects that take the initial string value read from a cell and
-        /// modifies the string value. This is useful for things like trimming the string value
-        /// before mapping it.
-        /// </summary>
-        public IEnumerable<ICellValueTransformer> CellValueTransformers => _cellValueTransformers;
-
-        /// <summary>
-        /// Gets the pipeline of items that take the initial string value read from a cell and
-        /// converts the string value into the type of the property or field. The items form
-        /// a pipeline: if a mapper fails to parse or map the cell value, the next item is used.
-        /// </summary>
-        public IEnumerable<ICellValueMapper> CellValueMappers => _cellValueMappers;
-
-        /// <summary>
-        /// Adds the given mapper to the pipeline of cell value mappers.
-        /// </summary>
-        /// <param name="mapper">The mapper to add.</param>
-        public void AddCellValueMapper(ICellValueMapper mapper)
-        {
-            if (mapper == null)
-            {
-                throw new ArgumentNullException(nameof(mapper));
-            }
-
-            _cellValueMappers.Add(mapper);
-        }
-
-        /// <summary>
-        /// Removes the mapper at the given index from the pipeline of cell value mappers.
-        /// </summary>
-        /// <param name="index">The index of the mapper to remove.</param>
-        public void RemoveCellValueMapper(int index) => _cellValueMappers.RemoveAt(index);
-
-        /// <summary>
-        /// Adds the given transformer to the pipeline of cell value transformers.
-        /// </summary>
-        /// <param name="transformer">The tranformer to add.</param>
-        public void AddCellValueTransformer(ICellValueTransformer transformer)
-        {
-            if (transformer == null)
-            {
-                throw new ArgumentNullException(nameof(transformer));
-            }
-
-            _cellValueTransformers.Add(transformer);
-        }
-
-        /// <summary>
-        /// Gets or sets an object that handles mapping a cell value to a property or field if the value of the
-        /// cell is empty. For example, you can provide a fixed value to return if the value of the cell
-        /// is empty.
-        /// </summary>
-        public IFallbackItem EmptyFallback { get; set; }
-
-        /// <summary>
-        /// Gets or sets an object that handles mapping a cell value to a property or field if all items
-        /// in the mapper pipeline failed to map the value to the property or field. For example, you can
-        /// provide a fixed value to return if the value of the cell is invalid.
-        /// </summary>
-        public IFallbackItem InvalidFallback { get; set; }
 
         /// <summary>
         /// Constructs a map that reads the value of a single cell and maps the value of the cell
@@ -113,51 +50,35 @@ namespace ExcelMapper
                 {
                     return;
                 }
-                else
-                {
-                    throw new ExcelMappingException($"Could not find read value for mapper");
-                }
+
+                throw new ExcelMappingException($"Could not read value for {Member.Name}", sheet, rowIndex);
             }
 
-            object result = GetPropertyValue(sheet, rowIndex, reader, readResult);
+            object result = ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, reader, readResult, Member);
             SetPropertyFactory(instance, result);
         }
 
-        internal object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadCellValueResult readResult)
+
+        public IEnumerable<ICellValueTransformer> CellValueTransformers => Pipeline.CellValueTransformers;
+
+        public IEnumerable<ICellValueMapper> CellValueMappers => Pipeline.CellValueMappers;
+
+        public IFallbackItem EmptyFallback
         {
-            foreach (ICellValueTransformer transformer in _cellValueTransformers)
-            {
-                readResult = new ReadCellValueResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult));
-            }
-
-            if (string.IsNullOrEmpty(readResult.StringValue) && EmptyFallback != null)
-            {
-                return EmptyFallback.PerformFallback(sheet, rowIndex, readResult, Member);
-            }
-
-            PropertyMapperResultType resultType = PropertyMapperResultType.Success;
-            object value = null;
-
-            foreach (ICellValueMapper mappingItem in _cellValueMappers)
-            {
-                PropertyMapperResultType newResultType  = mappingItem.MapCellValue(readResult, ref value);
-                if (newResultType == PropertyMapperResultType.Success)
-                {
-                    return value;
-                }
-
-                if (newResultType != PropertyMapperResultType.Continue)
-                {
-                    resultType = newResultType;
-                }
-            }
-
-            if (resultType != PropertyMapperResultType.Success && resultType != PropertyMapperResultType.SuccessIfNoOtherSuccess && InvalidFallback != null)
-            {
-                return InvalidFallback.PerformFallback(sheet, rowIndex, readResult, Member);
-            }
-
-            return value;
+            get => Pipeline.EmptyFallback;
+            set => Pipeline.EmptyFallback = value;
         }
+
+        public IFallbackItem InvalidFallback
+        {
+            get => Pipeline.InvalidFallback;
+            set => Pipeline.InvalidFallback = value;
+        }
+
+        public void AddCellValueMapper(ICellValueMapper mapper) => Pipeline.AddCellValueMapper(mapper);
+
+        public void RemoveCellValueMapper(int index) => Pipeline.RemoveCellValueMapper(index);
+
+        public void AddCellValueTransformer(ICellValueTransformer transformer) => Pipeline.AddCellValueTransformer(transformer);
     }
 }

@@ -101,6 +101,19 @@ namespace ExcelMapper.Tests
             Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<MissingColumnRow>());
         }
 
+        [Fact]
+        public void ReadRow_MultiMapOptionalMissingRow_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
+            importer.Configuration.RegisterClassMap<OptionalMissingColumnRowMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            MissingColumnRow row = sheet.ReadRow<MissingColumnRow>();
+            Assert.Null(row.MissingValue);
+        }
+
         private class MissingColumnRow
         {
             public int[] MissingValue { get; set; }
@@ -112,6 +125,16 @@ namespace ExcelMapper.Tests
             {
                 Map(p => p.MissingValue)
                     .WithSeparators(";", ",");
+            }
+        }
+
+        private class OptionalMissingColumnRowMap : ExcelClassMap<MissingColumnRow>
+        {
+            public OptionalMissingColumnRowMap()
+            {
+                Map(p => p.MissingValue)
+                    .WithSeparators(";", ",")
+                    .MakeOptional();
             }
         }
     }

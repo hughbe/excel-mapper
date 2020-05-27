@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Reflection;
 using ExcelMapper.Utilities;
-using ExcelMapper.Mappings.Mappers;
+using ExcelMapper.Mappers;
 
 namespace ExcelMapper
 {
@@ -117,10 +117,10 @@ namespace ExcelMapper
         /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
         /// <param name="expression">A MemberExpression reading the property or field.</param>
         /// <returns>The map for the given property or field.</returns>
-        public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, IEnumerable<TProperty>>> expression)
+        public ManyToOneEnumerablePropertyMap<TProperty> Map<TProperty>(Expression<Func<T, IEnumerable<TProperty>>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
-            EnumerableExcelPropertyMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+            ManyToOneEnumerablePropertyMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
 
             AddMap(map, expression);
             return map;
@@ -133,10 +133,10 @@ namespace ExcelMapper
         /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
         /// <param name="expression">A MemberExpression reading the property or field.</param>
         /// <returns>The map for the given property or field.</returns>
-        public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, ICollection<TProperty>>> expression)
+        public ManyToOneEnumerablePropertyMap<TProperty> Map<TProperty>(Expression<Func<T, ICollection<TProperty>>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
-            EnumerableExcelPropertyMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+            ManyToOneEnumerablePropertyMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
 
             AddMap(map, expression);
             return map;
@@ -149,10 +149,10 @@ namespace ExcelMapper
         /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
         /// <param name="expression">A MemberExpression reading the property or field.</param>
         /// <returns>The map for the given property or field.</returns>
-        public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, Collection<TProperty>>> expression)
+        public ManyToOneEnumerablePropertyMap<TProperty> Map<TProperty>(Expression<Func<T, Collection<TProperty>>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
-            EnumerableExcelPropertyMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+            ManyToOneEnumerablePropertyMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
 
             AddMap(map, expression);
             return map;
@@ -165,10 +165,10 @@ namespace ExcelMapper
         /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
         /// <param name="expression">A MemberExpression reading the property or field.</param>
         /// <returns>The map for the given property or field.</returns>
-        public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, ObservableCollection<TProperty>>> expression)
+        public ManyToOneEnumerablePropertyMap<TProperty> Map<TProperty>(Expression<Func<T, ObservableCollection<TProperty>>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
-            EnumerableExcelPropertyMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+            ManyToOneEnumerablePropertyMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
 
             AddMap(map, expression);
             return map;
@@ -181,10 +181,10 @@ namespace ExcelMapper
         /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
         /// <param name="expression">A MemberExpression reading the property or field.</param>
         /// <returns>The map for the given property or field.</returns>
-        public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, IList<TProperty>>> expression)
+        public ManyToOneEnumerablePropertyMap<TProperty> Map<TProperty>(Expression<Func<T, IList<TProperty>>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
-            EnumerableExcelPropertyMap<TProperty> mapping = GetMultiMap<TProperty>(memberExpression.Member);
+            ManyToOneEnumerablePropertyMap<TProperty> mapping = GetMultiMap<TProperty>(memberExpression.Member);
 
             AddMap(mapping, expression);
             return mapping;
@@ -197,10 +197,10 @@ namespace ExcelMapper
         /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
         /// <param name="expression">A MemberExpression reading the property or field.</param>
         /// <returns>The map for the given property or field.</returns>
-        public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, List<TProperty>>> expression)
+        public ManyToOneEnumerablePropertyMap<TProperty> Map<TProperty>(Expression<Func<T, List<TProperty>>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
-            EnumerableExcelPropertyMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+            ManyToOneEnumerablePropertyMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
 
             AddMap(map, expression);
             return map;
@@ -213,10 +213,10 @@ namespace ExcelMapper
         /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
         /// <param name="expression">A MemberExpression reading the property or field.</param>
         /// <returns>The map for the given property or field.</returns>
-        public EnumerableExcelPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty[]>> expression)
+        public ManyToOneEnumerablePropertyMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty[]>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
-            EnumerableExcelPropertyMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+            ManyToOneEnumerablePropertyMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
 
             AddMap(map, expression);
             return map;
@@ -229,10 +229,10 @@ namespace ExcelMapper
         /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
         /// <param name="expression">A MemberExpression reading the property or field.</param>
         /// <returns>The map for the given property or field.</returns>
-        public ObjectExcelPropertyMap<TProperty> MapObject<TProperty>(Expression<Func<T, TProperty>> expression)
+        public ManyToOneObjectPropertyMap<TProperty> MapObject<TProperty>(Expression<Func<T, TProperty>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
-            if (!AutoMapper.TryCreateObjectMap(memberExpression.Member, EmptyValueStrategy, out ObjectExcelPropertyMap<TProperty> map))
+            if (!AutoMapper.TryCreateObjectMap(memberExpression.Member, EmptyValueStrategy, out ManyToOneObjectPropertyMap<TProperty> map))
             {
                 throw new ExcelMappingException($"Could not map object of type \"{typeof(TProperty)}\".");
             }
@@ -241,9 +241,9 @@ namespace ExcelMapper
             return map;
         }
 
-        private EnumerableExcelPropertyMap<TProperty> GetMultiMap<TProperty>(MemberInfo member)
+        private ManyToOneEnumerablePropertyMap<TProperty> GetMultiMap<TProperty>(MemberInfo member)
         {
-            if (!AutoMapper.TryCreateGenericEnumerableMap(member, EmptyValueStrategy, out EnumerableExcelPropertyMap<TProperty> map))
+            if (!AutoMapper.TryCreateGenericEnumerableMap(member, EmptyValueStrategy, out ManyToOneEnumerablePropertyMap<TProperty> map))
             {
                 throw new ExcelMappingException($"No known way to instantiate type \"{typeof(TProperty)}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
             }

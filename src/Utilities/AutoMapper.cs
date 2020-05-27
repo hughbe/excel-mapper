@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using ExcelMapper.Mappings;
-using ExcelMapper.Mappings.Fallbacks;
-using ExcelMapper.Mappings.Mappers;
-using ExcelMapper.Mappings.MultiItems;
+using ExcelMapper.Abstractions;
+using ExcelMapper.Fallbacks;
+using ExcelMapper.Mappers;
+using ExcelMapper.Readers;
 
 namespace ExcelMapper.Utilities
 {
@@ -38,7 +38,7 @@ namespace ExcelMapper.Utilities
 
             // Thirdly, check if this is an object.
             // This requires converting each member and setting it on the object.
-            if (TryCreateObjectMap(member, emptyValueStrategy, out ObjectExcelPropertyMap<T> objectMap))
+            if (TryCreateObjectMap(member, emptyValueStrategy, out ManyToOneObjectPropertyMap<T> objectMap))
             {
                 map = objectMap;
                 return true;
@@ -46,6 +46,21 @@ namespace ExcelMapper.Utilities
 
             map = null;
             return false;
+        }
+
+        internal static bool TryCreatePrimitivePipeline<T>(FallbackStrategy emptyValueStrategy, out ValuePipeline<T> pipeline)
+        {
+            if (!TryGetWellKnownMap(typeof(T), emptyValueStrategy, out ICellValueMapper mapper, out IFallbackItem emptyFallback, out IFallbackItem invalidFallback))
+            {
+                pipeline = null;
+                return false;
+            }
+
+            pipeline = new ValuePipeline<T>();
+            pipeline.AddCellValueMapper(mapper);
+            pipeline.EmptyFallback = emptyFallback;
+            pipeline.InvalidFallback = invalidFallback;
+            return true;
         }
 
         internal static bool TryCreatePrimitiveMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out OneToOnePropertyMap<T> map)
@@ -164,47 +179,68 @@ namespace ExcelMapper.Utilities
             return true;
         }
 
-        internal static bool TryCreateGenericEnumerableMap<TElement>(MemberInfo member, FallbackStrategy emptyValueStrategy, out EnumerableExcelPropertyMap<TElement> map)
+        internal static bool TryCreateGenericEnumerableMap<TElement>(MemberInfo member, FallbackStrategy emptyValueStrategy, out ManyToOneEnumerablePropertyMap<TElement> map)
         {
             Type rawType = member.MemberType();
-            TypeInfo rawTypeInfo = rawType.GetTypeInfo();
 
-            // First, get the mapper for the element. This is used to convert individual values
+            // First, get the pipeline for the element. This is used to convert individual values
             // to be added to/included in the collection.
-            if (!TryCreatePrimitiveMap(member, emptyValueStrategy, out OneToOnePropertyMap<TElement> elementMapping))
+            if (!TryCreatePrimitivePipeline<TElement>(emptyValueStrategy, out ValuePipeline<TElement> elementMapping))
             {
                 map = null;
                 return false;
             }
 
             // Secondly, find the right way of adding the converted value to the collection.
-            if (rawType.IsArray)
+            if (!TryGetCreateElementsFactory<TElement>(rawType, out CreateElementsFactory<TElement> factory))
             {
-                // Add values using the arrray indexer.
-                map = new ArrayPropertyMap<TElement>(member, elementMapping);
+                map = null;
+                return false;
+            }
+
+            // Default to splitting.
+            var defaultNameReader = new ColumnNameValueReader(member.Name);
+            var defaultReader = new CharSplitCellValueReader(defaultNameReader);
+            map = new ManyToOneEnumerablePropertyMap<TElement>(member, defaultReader, elementMapping, factory);
+            return true;
+        }
+
+        private static bool TryGetCreateElementsFactory<T>(Type memberType, out CreateElementsFactory<T> result)
+        {
+            if (memberType.IsArray)
+            {
+                result = elements => elements.ToArray();
                 return true;
             }
-            else if (rawTypeInfo.IsInterface)
+            else if (memberType.GetTypeInfo().IsInterface)
             {
                 // Add values by creating a list and assigning to the property.
-                if (rawTypeInfo.IsAssignableFrom(typeof(List<TElement>).GetTypeInfo()))
+                if (memberType.GetTypeInfo().IsAssignableFrom(typeof(List<T>).GetTypeInfo()))
                 {
-                    map = new InterfaceAssignableFromListPropertyMap<TElement>(member, elementMapping);
+                    result = elements => elements;
                     return true;
                 }
             }
-            else if (rawType.ImplementsInterface(typeof(ICollection<TElement>)))
+            else if (memberType.ImplementsInterface(typeof(ICollection<T>)))
             {
-                // Add values using the ICollection<T>.Add method.
-                map = new ConcreteICollectionPropertyMap<TElement>(rawType, member, elementMapping);
+                result = elements =>
+                {
+                    ICollection<T> value = (ICollection<T>)Activator.CreateInstance(memberType);
+                    foreach (T element in elements)
+                    {
+                        value.Add(element);
+                    }
+
+                    return value;
+                };
                 return true;
             }
 
-            map = null;
+            result = default;
             return false;
         }
 
-        internal static bool TryCreateObjectMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out ObjectExcelPropertyMap<T> mapping)
+        internal static bool TryCreateObjectMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out ManyToOneObjectPropertyMap<T> mapping)
         {
             if (!TryCreateClassMap(emptyValueStrategy, out ExcelClassMap<T> excelClassMap))
             {
@@ -212,7 +248,7 @@ namespace ExcelMapper.Utilities
                 return false;
             }
 
-            mapping = new ObjectExcelPropertyMap<T>(member, excelClassMap);
+            mapping = new ManyToOneObjectPropertyMap<T>(member, excelClassMap);
             return true;
         }
 

@@ -195,7 +195,7 @@ namespace ExcelMapper.Tests
         public void MapObject_ClassMapFactory_ReturnsExpected()
         {
             var map = new TestClassMap(FallbackStrategy.ThrowIfPrimitive);
-            ObjectExcelPropertyMap<string> mapping = map.MapObject(t => t.Value);
+            ManyToOneObjectPropertyMap<string> mapping = map.MapObject(t => t.Value);
             Assert.NotNull(mapping.ClassMap);
         }
 
