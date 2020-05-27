@@ -9,37 +9,33 @@ namespace ExcelMapper.Tests
         [Fact]
         public void ReadRow_SeparatorsArrayMap_ReturnsExpected()
         {
-            using (var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx"))
-            {
-                importer.Configuration.RegisterClassMap<SplitWithSeparatorsArrayMap>();
+            using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
+            importer.Configuration.RegisterClassMap<SplitWithSeparatorsArrayMap>();
 
-                ExcelSheet sheet = importer.ReadSheet();
-                sheet.ReadHeading();
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
 
-                AutoSplitWithSeparatorClass row1 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
-                Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, row1.Value);
+            AutoSplitWithSeparatorClass row1 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
+            Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, row1.Value);
 
-                AutoSplitWithSeparatorClass row2 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
-                Assert.Equal(new string[] { "1", "2", "3" }, row2.Value);
-            }
+            AutoSplitWithSeparatorClass row2 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
+            Assert.Equal(new string[] { "1", "2", "3" }, row2.Value);
         }
 
         [Fact]
         public void ReadRow_IEnumerableSeparatorsMap_ReturnsExpected()
         {
-            using (var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx"))
-            {
-                importer.Configuration.RegisterClassMap<SplitWithEnumerableSeparatorsMap>();
+            using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
+            importer.Configuration.RegisterClassMap<SplitWithEnumerableSeparatorsMap>();
 
-                ExcelSheet sheet = importer.ReadSheet();
-                sheet.ReadHeading();
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
 
-                AutoSplitWithSeparatorClass row1 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
-                Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, row1.Value);
+            AutoSplitWithSeparatorClass row1 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
+            Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, row1.Value);
 
-                AutoSplitWithSeparatorClass row2 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
-                Assert.Equal(new string[] { "1", "2", "3" }, row2.Value);
-            }
+            AutoSplitWithSeparatorClass row2 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
+            Assert.Equal(new string[] { "1", "2", "3" }, row2.Value);
         }
 
         private class AutoSplitWithSeparatorClass

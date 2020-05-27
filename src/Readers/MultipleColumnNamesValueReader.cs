@@ -52,12 +52,20 @@ namespace ExcelMapper.Readers
                 throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
             }
 
-            result = ColumnNames.Select(columnName =>
+            var values = new ReadCellValueResult[ColumnNames.Length];
+            for (int i = 0; i < ColumnNames.Length; i++)
             {
-                var index = sheet.Heading.GetColumnIndex(columnName);
+                if (!sheet.Heading.TryGetColumnIndex(ColumnNames[i], out int index))
+                {
+                    result = default;
+                    return false;
+                }
+
                 var value = reader[index]?.ToString();
-                return new ReadCellValueResult(index, value);
-            });
+                values[i] = new ReadCellValueResult(index, value);
+            }
+
+            result = values;
             return true;
         }
     }

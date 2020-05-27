@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Reflection;
-using ExcelMapper.Abstractions;
 
 namespace ExcelMapper
 {
-    public delegate IEnumerable<T> CreateElementsFactory<T>(IEnumerable<T> elements);
-
     /// <summary>
     /// Reads multiple cells of an excel sheet and maps the value of the cell to the
     /// type of the property or field.

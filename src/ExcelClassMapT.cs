@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Dynamic;
 using System.Linq.Expressions;
 using System.Reflection;
 using ExcelMapper.Utilities;
@@ -241,6 +242,54 @@ namespace ExcelMapper
             return map;
         }
 
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping IDictionarys.
+        /// </summary>
+        /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <returns>The map for the given property or field.</returns>
+        public ManyToOneDictionaryPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, IDictionary<string, TProperty>>> expression)
+        {
+            MemberExpression memberExpression = GetMemberExpression(expression);
+            var map = GetDictionaryMap<string, TProperty>(memberExpression.Member);
+
+            AddMap(map, expression);
+            return map;
+        }
+
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping IDictionarys.
+        /// </summary>
+        /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <returns>The map for the given property or field.</returns>
+        public ManyToOneDictionaryPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, Dictionary<string, TProperty>>> expression)
+        {
+            MemberExpression memberExpression = GetMemberExpression(expression);
+            var map = GetDictionaryMap<string, TProperty>(memberExpression.Member);
+
+            AddMap(map, expression);
+            return map;
+        }
+
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping ExpandoObjects.
+        /// </summary>
+        /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <returns>The map for the given property or field.</returns>
+        public ManyToOneDictionaryPropertyMap<object> Map(Expression<Func<T, ExpandoObject>> expression)
+        {
+            MemberExpression memberExpression = GetMemberExpression(expression);
+            var map = GetDictionaryMap<string, object>(memberExpression.Member);
+
+            AddMap(map, expression);
+            return map;
+        }
+
         private ManyToOneEnumerablePropertyMap<TProperty> GetMultiMap<TProperty>(MemberInfo member)
         {
             if (!AutoMapper.TryCreateGenericEnumerableMap(member, EmptyValueStrategy, out ManyToOneEnumerablePropertyMap<TProperty> map))
@@ -249,6 +298,16 @@ namespace ExcelMapper
             }
 
             return map;
+        }
+
+        private ManyToOneDictionaryPropertyMap<TValue> GetDictionaryMap<TKey, TValue>(MemberInfo member)
+        {
+            if (!AutoMapper.TryCreateGenericDictionaryMap<TKey, TValue>(member, EmptyValueStrategy, out ManyToOneDictionaryPropertyMap<TValue> mapping))
+            {
+                throw new ExcelMappingException($"No known way to instantiate type \"IDictionary<{typeof(TKey)}, {typeof(TValue)}>\".");
+            }
+
+            return mapping;
         }
 
         protected internal MemberExpression GetMemberExpression<TProperty>(Expression<Func<T, TProperty>> expression)

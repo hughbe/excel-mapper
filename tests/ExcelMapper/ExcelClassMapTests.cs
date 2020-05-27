@@ -26,6 +26,12 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void Map_IDictionary_ThrowsExcelMappingException()
+        {
+            Assert.Throws<ExcelMappingException>(() => Map(p => p.ConcreteIDictionary));
+        }
+
+        [Fact]
         public void MultiMap_UnknownInterface_ThrowsExcelMappingException()
         {
             Assert.Throws<ExcelMappingException>(() => Map<string>(p => p.UnknownInterfaceValue));
@@ -44,15 +50,27 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void MultiMap_CantMapIDictionaryValueType_ThrowsExcelMappingException()
+        {
+            Assert.Throws<ExcelMappingException>(() => Map(p => p.CantMapDictionaryValueType));
+        }
+
+        [Fact]
         public void MapObject_Interface_ThrowsExcelMappingException()
         {
             Assert.Throws<ExcelMappingException>(() => MapObject(p => p.UnknownInterfaceValue));
         }
 
         [Fact]
-        public void MapObject_InvalidMemberType_ThrowsExcelMappingException()
+        public void MapObject_InvalidIListMemberType_ThrowsExcelMappingException()
         {
-            Assert.Throws<ExcelMappingException>(() => MapObject(p => p.InvalidMemberType));
+            Assert.Throws<ExcelMappingException>(() => MapObject(p => p.InvalidIListMemberType));
+        }
+
+        [Fact]
+        public void MapObject_InvalidIDictionaryMemberType_ThrowsExcelMappingException()
+        {
+            Assert.Throws<ExcelMappingException>(() => MapObject(p => p.InvalidIDictionaryMemberType));
         }
 
         [Fact]
