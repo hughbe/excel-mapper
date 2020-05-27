@@ -19,7 +19,7 @@ namespace ExcelMapper.Tests
             CreateElementsFactory<string> createElementsFactory = elements => elements;
             var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
             Assert.Same(propertyInfo, propertyMap.Member);
-
+            Assert.False(propertyMap.Optional);
             Assert.NotNull(propertyMap.ElementPipeline);
         }
 
@@ -48,6 +48,94 @@ namespace ExcelMapper.Tests
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             Assert.Throws<ArgumentNullException>("createElementsFactory", () => new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, null));
+        }
+
+        public static IEnumerable<object[]> CellValuesReader_Set_TestData()
+        {
+            yield return new object[] { new MultipleColumnNamesValueReader("Column") };
+        }
+
+        [Theory]
+        [MemberData(nameof(CellValuesReader_Set_TestData))]
+        public void CellValuesReader_SetValid_GetReturnsExpected(IMultipleCellValuesReader value)
+        {
+            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
+            var cellValuesReader = new MultipleColumnNamesValueReader("Column");
+            var elementPipeline = new ValuePipeline<string>();
+            CreateElementsFactory<string> createElementsFactory = elements => elements;
+            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory)
+            {
+                CellValuesReader = value
+            };
+            Assert.Same(value, propertyMap.CellValuesReader);
+
+            // Set same.
+            propertyMap.CellValuesReader = value;
+            Assert.Same(value, propertyMap.CellValuesReader);
+        }
+
+        [Fact]
+        public void CellValuesReader_SetNull_ThrowsArgumentNullException()
+        {
+            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
+            var cellValuesReader = new MultipleColumnNamesValueReader("Column");
+            var elementPipeline = new ValuePipeline<string>();
+            CreateElementsFactory<string> createElementsFactory = elements => elements;
+            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            Assert.Throws<ArgumentNullException>("value", () => propertyMap.CellValuesReader = null);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Optional_Set_GetReturnsExpected(bool value)
+        {
+            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
+            var cellValuesReader = new MultipleColumnNamesValueReader("Column");
+            var elementPipeline = new ValuePipeline<string>();
+            CreateElementsFactory<string> createElementsFactory = elements => elements;
+            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory)
+            {
+                Optional = value
+            };
+            Assert.Equal(value, propertyMap.Optional);
+
+            // Set same.
+            propertyMap.Optional = value;
+            Assert.Equal(value, propertyMap.Optional);
+
+            // Set different.
+            propertyMap.Optional = !value;
+            Assert.Equal(!value, propertyMap.Optional);
+        }
+
+        [Fact]
+        public void MakeOptional_HasMapper_ReturnsExpected()
+        {
+            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
+            var cellValuesReader = new MultipleColumnNamesValueReader("Column");
+            var elementPipeline = new ValuePipeline<string>();
+            CreateElementsFactory<string> createElementsFactory = elements => elements;
+            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            Assert.False(propertyMap.Optional);
+            Assert.Same(propertyMap, propertyMap.MakeOptional());
+            Assert.True(propertyMap.Optional);
+            Assert.Same(cellValuesReader, propertyMap.CellValuesReader);
+        }
+
+        [Fact]
+        public void MakeOptional_AlreadyOptional_ReturnsExpected()
+        {
+            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
+            var cellValuesReader = new MultipleColumnNamesValueReader("Column");
+            var elementPipeline = new ValuePipeline<string>();
+            CreateElementsFactory<string> createElementsFactory = elements => elements;
+            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            Assert.Same(propertyMap, propertyMap.MakeOptional());
+            Assert.True(propertyMap.Optional);
+            Assert.Same(propertyMap, propertyMap.MakeOptional());
+            Assert.True(propertyMap.Optional);
+            Assert.Same(cellValuesReader, propertyMap.CellValuesReader);
         }
 
         [Fact]

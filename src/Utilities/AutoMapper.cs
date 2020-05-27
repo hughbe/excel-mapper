@@ -38,7 +38,7 @@ namespace ExcelMapper.Utilities
 
             // Thirdly, check if this is an object.
             // This requires converting each member and setting it on the object.
-            if (TryCreateObjectMap(member, emptyValueStrategy, out ObjectExcelPropertyMap<T> objectMap))
+            if (TryCreateObjectMap(member, emptyValueStrategy, out ManyToOneObjectPropertyMap<T> objectMap))
             {
                 map = objectMap;
                 return true;
@@ -212,10 +212,10 @@ namespace ExcelMapper.Utilities
                 result = elements => elements.ToArray();
                 return true;
             }
-            else if (memberType.IsInterface)
+            else if (memberType.GetTypeInfo().IsInterface)
             {
                 // Add values by creating a list and assigning to the property.
-                if (memberType.IsAssignableFrom(typeof(List<T>).GetTypeInfo()))
+                if (memberType.GetTypeInfo().IsAssignableFrom(typeof(List<T>).GetTypeInfo()))
                 {
                     result = elements => elements;
                     return true;
@@ -240,7 +240,7 @@ namespace ExcelMapper.Utilities
             return false;
         }
 
-        internal static bool TryCreateObjectMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out ObjectExcelPropertyMap<T> mapping)
+        internal static bool TryCreateObjectMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out ManyToOneObjectPropertyMap<T> mapping)
         {
             if (!TryCreateClassMap(emptyValueStrategy, out ExcelClassMap<T> excelClassMap))
             {
@@ -248,7 +248,7 @@ namespace ExcelMapper.Utilities
                 return false;
             }
 
-            mapping = new ObjectExcelPropertyMap<T>(member, excelClassMap);
+            mapping = new ManyToOneObjectPropertyMap<T>(member, excelClassMap);
             return true;
         }
 

@@ -229,10 +229,10 @@ namespace ExcelMapper
         /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
         /// <param name="expression">A MemberExpression reading the property or field.</param>
         /// <returns>The map for the given property or field.</returns>
-        public ObjectExcelPropertyMap<TProperty> MapObject<TProperty>(Expression<Func<T, TProperty>> expression)
+        public ManyToOneObjectPropertyMap<TProperty> MapObject<TProperty>(Expression<Func<T, TProperty>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
-            if (!AutoMapper.TryCreateObjectMap(memberExpression.Member, EmptyValueStrategy, out ObjectExcelPropertyMap<TProperty> map))
+            if (!AutoMapper.TryCreateObjectMap(memberExpression.Member, EmptyValueStrategy, out ManyToOneObjectPropertyMap<TProperty> map))
             {
                 throw new ExcelMappingException($"Could not map object of type \"{typeof(TProperty)}\".");
             }

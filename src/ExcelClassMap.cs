@@ -81,13 +81,13 @@ namespace ExcelMapper
         {
             ExcelPropertyMap mapping = Mappings.FirstOrDefault(m => m.Member.Equals(memberExpression.Member));
 
-            ObjectExcelPropertyMap<TProperty> objectPropertyMapping;
+            ManyToOneObjectPropertyMap<TProperty> objectPropertyMapping;
             if (mapping == null)
             {
-                objectPropertyMapping = new ObjectExcelPropertyMap<TProperty>(memberExpression.Member, new ExcelClassMap<TProperty>());
+                objectPropertyMapping = new ManyToOneObjectPropertyMap<TProperty>(memberExpression.Member, new ExcelClassMap<TProperty>());
                 Mappings.Add(objectPropertyMapping);
             }
-            else if (!(mapping is ObjectExcelPropertyMap<TProperty> existingMapping))
+            else if (!(mapping is ManyToOneObjectPropertyMap<TProperty> existingMapping))
             {
                 throw new InvalidOperationException($"Expression is already mapped differently.");
             }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using ExcelDataReader;
 
@@ -9,7 +9,7 @@ namespace ExcelMapper
     /// property and field of the type of the property or field. This is used to map properties
     /// and fields that are objects.
     /// </summary>
-    public class ObjectExcelPropertyMap<T> : OneToOnePropertyMap<T>
+    public class ManyToOneObjectPropertyMap<T> : ManyToOnePropertyMap<T>
     {
         private ExcelClassMap<T> _classMap;
 
@@ -29,7 +29,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="member">The property or field to map the value of a one or more cells to.</param>
         /// <param name="classMap">The class map that maps multiple cells in a row to the properties and fields of an object.</param>
-        public ObjectExcelPropertyMap(MemberInfo member, ExcelClassMap<T> classMap) : base(member)
+        public ManyToOneObjectPropertyMap(MemberInfo member, ExcelClassMap<T> classMap) : base(member)
         {
             ClassMap = classMap ?? throw new ArgumentNullException(nameof(classMap));
         }
@@ -40,7 +40,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="classMapFactory">A delegate that allows configuring the default class map used.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public ObjectExcelPropertyMap<T> WithClassMap(Action<ExcelClassMap<T>> classMapFactory)
+        public ManyToOneObjectPropertyMap<T> WithClassMap(Action<ExcelClassMap<T>> classMapFactory)
         {
             if (classMapFactory == null)
             {
@@ -57,7 +57,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="classMap">The new class map used.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public ObjectExcelPropertyMap<T> WithClassMap(ExcelClassMap<T> classMap)
+        public ManyToOneObjectPropertyMap<T> WithClassMap(ExcelClassMap<T> classMap)
         {
             ClassMap = classMap ?? throw new ArgumentNullException(nameof(classMap));
             return this;

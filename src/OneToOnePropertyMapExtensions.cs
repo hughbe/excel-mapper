@@ -18,11 +18,6 @@ namespace ExcelMapper
         /// <returns>The property map on which this method was invoked.</returns>
         public static T MakeOptional<T>(this T propertyMap) where T : OneToOnePropertyMap
         {
-            if (propertyMap.Optional)
-            {
-                return propertyMap;
-            }
-
             propertyMap.Optional = true;
             return propertyMap;
         }

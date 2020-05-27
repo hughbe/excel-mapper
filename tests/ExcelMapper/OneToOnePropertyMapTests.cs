@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Fallbacks;
@@ -53,6 +54,27 @@ namespace ExcelMapper.Tests
 
             propertyMap.InvalidFallback = null;
             Assert.Null(propertyMap.InvalidFallback);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Optional_Set_GetReturnsExpected(bool value)
+        {
+            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
+            var propertyMap = new OneToOnePropertyMap(propertyInfo)
+            {
+                Optional = value
+            };
+            Assert.Equal(value, propertyMap.Optional);
+
+            // Set same.
+            propertyMap.Optional = value;
+            Assert.Equal(value, propertyMap.Optional);
+
+            // Set different.
+            propertyMap.Optional = !value;
+            Assert.Equal(!value, propertyMap.Optional);
         }
 
         [Fact]
@@ -110,17 +132,25 @@ namespace ExcelMapper.Tests
             Assert.Throws<ArgumentNullException>("transformer", () => propertyMap.AddCellValueTransformer(null));
         }
 
-        [Fact]
-        public void CellReader_SetValid_GetReturnsExpected()
+        public static IEnumerable<object[]> CellReader_Set_TestData()
         {
-            var cellReader = new ColumnNameValueReader("ColumnName");
+            yield return new object[] { new ColumnNameValueReader("Column") };
+        }
+
+        [Theory]
+        [MemberData(nameof(CellReader_Set_TestData))]
+        public void CellReader_SetValid_GetReturnsExpected(ISingleCellValueReader value)
+        {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var propertyMap = new OneToOnePropertyMap(propertyInfo)
             {
-                CellReader = cellReader
+                CellReader = value
             };
+            Assert.Same(value, propertyMap.CellReader);
 
-            Assert.Same(cellReader, propertyMap.CellReader);
+            // Set same.
+            propertyMap.CellReader = value;
+            Assert.Same(value, propertyMap.CellReader);
         }
 
         [Fact]

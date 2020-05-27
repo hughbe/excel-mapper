@@ -15,6 +15,16 @@ namespace ExcelMapper
     /// </summary>
     public class ManyToOneEnumerablePropertyMap<T> : ManyToOnePropertyMap<T>
     {
+        public IMultipleCellValuesReader _cellValuesReader;
+
+        public IMultipleCellValuesReader CellValuesReader
+        {
+            get => _cellValuesReader;
+            set => _cellValuesReader = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        public bool Optional { get; set; }
+
         public IValuePipeline<T> ElementPipeline { get; private set; }
 
         public CreateElementsFactory<T> CreateElementsFactory { get; }
@@ -25,9 +35,10 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="member">The property or field to map the value of a one or more cells to.</param>
         /// <param name="cellValuesReader">The reader.</param>
-        public ManyToOneEnumerablePropertyMap(MemberInfo member, IMultipleCellValuesReader cellValuesReader, IValuePipeline<T> elementPipeline, CreateElementsFactory<T> createElementsFactory) : base(member, cellValuesReader)
+        public ManyToOneEnumerablePropertyMap(MemberInfo member, IMultipleCellValuesReader cellValuesReader, IValuePipeline<T> elementPipeline, CreateElementsFactory<T> createElementsFactory) : base(member)
         {
             Type memberType = member.MemberType();
+            CellValuesReader = cellValuesReader ?? throw new ArgumentNullException(nameof(cellValuesReader));
             ElementPipeline = elementPipeline ?? throw new ArgumentNullException(nameof(elementPipeline));
             CreateElementsFactory = createElementsFactory ?? throw new ArgumentNullException(nameof(createElementsFactory));
         }
@@ -53,6 +64,17 @@ namespace ExcelMapper
 
             object result = CreateElementsFactory(elements);
             SetPropertyFactory(instance, result);
+        }
+
+        /// <summary>
+        /// Makes the reader of the property map optional. For example, if the column doesn't exist
+        /// or the index is invalid, an exception will not be thrown.
+        /// </summary>
+        /// <returns>The property map on which this method was invoked.</returns>
+        public ManyToOneEnumerablePropertyMap<T> MakeOptional()
+        {
+            Optional = true;
+            return this;
         }
 
         /// <summary>
