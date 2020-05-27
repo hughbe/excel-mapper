@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ExcelDataReader;
 using Xunit;
 
@@ -53,23 +54,25 @@ namespace ExcelMapper.Mappings.Readers.Tests
         public void GetValues_NullReaderValue_ReturnsEmpty()
         {
             var reader = new SubSplitCellValueReader(new NullValueReader());
-            Assert.Empty(reader.GetValues(null, 0, null));
+            Assert.True(reader.TryGetValues(null, 0, null, out IEnumerable<ReadCellValueResult> result));
+            Assert.Empty(result);
         }
 
         private class SubSplitCellValueReader : SplitCellValueReader
         {
-            public SubSplitCellValueReader(ICellValueReader cellReader) : base(cellReader)
+            public SubSplitCellValueReader(ISingleCellValueReader cellReader) : base(cellReader)
             {
             }
 
             protected override string[] GetValues(string value) => new string[0];
         }
 
-        private class NullValueReader : ICellValueReader
+        private class NullValueReader : ISingleCellValueReader
         {
-            public ReadCellValueResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+            public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out ReadCellValueResult result)
             {
-                return new ReadCellValueResult();
+                result = new ReadCellValueResult();
+                return true;
             }
         }
     }

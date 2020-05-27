@@ -23,7 +23,7 @@ namespace ExcelMapper.Mappings.Mappers
             Converter = converter ?? throw new ArgumentNullException(nameof(converter));
         }
 
-        public PropertyMapperResultType GetProperty(ReadCellValueResult readResult, ref object value)
+        public PropertyMapperResultType MapCellValue(ReadCellValueResult readResult, ref object value)
         {
             return Converter(readResult, ref value);
         }

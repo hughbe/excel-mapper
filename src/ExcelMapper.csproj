@@ -7,7 +7,7 @@
 
   <PropertyGroup>
     <PackageId>ExcelDataReader.Mapping</PackageId>
-    <PackageVersion>1.2.1</PackageVersion>
+    <PackageVersion>2.0.0</PackageVersion>
     <Authors>Hugh Bellamy</Authors>
     <Title>Excel Mapping Helper</Title>
     <Description>An extension of ExcelDataReader that supports fluent mapping of rows to C# objects.</Description>
@@ -33,5 +33,5 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
   </PropertyGroup>
-  
+
 </Project>

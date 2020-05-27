@@ -19,7 +19,7 @@ namespace ExcelMapper
         /// Gets the map that maps the value of a single cell to an object of the element type of the property
         /// or field.
         /// </summary>
-        public SingleExcelPropertyMap<T> ElementMap { get; private set; }
+        public OneToOnePropertyMap<T> ElementMap { get; private set; }
 
         /// <summary>
         /// Gets the reader that reads one or more values from one or more cells used to map each
@@ -33,12 +33,12 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="member">The property or field to map the values of one or more cell to.</param>
         /// <param name="elementMap">The map that maps the value of a single cell to an object of the element type of the property or field.</param>
-        protected EnumerableExcelPropertyMap(MemberInfo member, SingleExcelPropertyMap<T> elementMap) : base(member)
+        protected EnumerableExcelPropertyMap(MemberInfo member, OneToOnePropertyMap<T> elementMap) : base(member)
         {
             ElementMap = elementMap ?? throw new ArgumentNullException(nameof(elementMap));
 
             var columnReader = new ColumnNameValueReader(member.Name);
-            ColumnsReader = new CharSplitCellValueReader(columnReader); 
+            ColumnsReader = new CharSplitCellValueReader(columnReader);
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace ExcelMapper
         /// <param name="elementMap">The map that maps the value of a single cell to an object of the element type of the property
         /// or field.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public EnumerableExcelPropertyMap<T> WithElementMap(Func<SingleExcelPropertyMap<T>, SingleExcelPropertyMap<T>> elementMap)
+        public EnumerableExcelPropertyMap<T> WithElementMap(Func<OneToOnePropertyMap<T>, OneToOnePropertyMap<T>> elementMap)
         {
             if (elementMap == null)
             {
@@ -59,18 +59,22 @@ namespace ExcelMapper
             return this;
         }
 
-        public override object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public override void SetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, object instance)
         {
-            ReadCellValueResult[] values = ColumnsReader.GetValues(sheet, rowIndex, reader).ToArray();
-            var elements = new List<T>(values.Length);
+            if (!ColumnsReader.TryGetValues(sheet, rowIndex, reader, out IEnumerable<ReadCellValueResult> values))
+            {
+                throw new ExcelMappingException($"Could not read value for \"{Member.Name}\" on row {rowIndex}. Check your mapping - does this column exist? Consider using MakeOptional");
+            }
 
+            var elements = new List<T>();
             foreach (ReadCellValueResult value in values)
             {
                 T elementValue = (T)ElementMap.GetPropertyValue(sheet, rowIndex, reader, value);
                 elements.Add(elementValue);
             }
 
-            return CreateFromElements(elements);
+            object result = CreateFromElements(elements);
+            SetPropertyFactory(instance, result);
         }
 
         /// <summary>

@@ -56,12 +56,12 @@ namespace ExcelMapper
         }
 
         /// <summary>
-        /// Maps a row of a sheet to an object. The return value will be assigned to the property or field.
+        /// Maps a row of a sheet to an object.
         /// </summary>
         /// <param name="sheet">The sheet containing the row that is being read.</param>
         /// <param name="rowIndex">The index of the row that is being read.</param>
         /// <param name="reader">The reader that allows access to the data of the document.</param>
         /// <returns>An object created from one or more cells in the row.</returns>
-        public abstract object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader);
+        public abstract void SetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, object instance);
     }
 }

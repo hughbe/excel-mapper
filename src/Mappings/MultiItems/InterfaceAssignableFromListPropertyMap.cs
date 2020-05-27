@@ -10,7 +10,7 @@ namespace ExcelMapper.Mappings.MultiItems
     /// <typeparam name="T">The element type of the List to create.</typeparam>
     internal class InterfaceAssignableFromListPropertyMap<T> : EnumerableExcelPropertyMap<T>
     {
-        public InterfaceAssignableFromListPropertyMap(MemberInfo member, SingleExcelPropertyMap<T> elementMapping) : base(member, elementMapping)
+        public InterfaceAssignableFromListPropertyMap(MemberInfo member, OneToOnePropertyMap<T> elementMapping) : base(member, elementMapping)
         {
         }
 

@@ -16,13 +16,13 @@ namespace ExcelMapper.Mappings.Readers
         /// </summary>
         public StringSplitOptions Options { get; set; }
 
-        private ICellValueReader _cellReader;
+        private ISingleCellValueReader _cellReader;
 
         /// <summary>
         /// Gets or sets the ICellValueReader that reads the string value of the cell
         /// before it is split.
         /// </summary>
-        public ICellValueReader CellReader
+        public ISingleCellValueReader CellReader
         {
             get => _cellReader;
             set => _cellReader = value ?? throw new ArgumentNullException(nameof(value));
@@ -33,21 +33,28 @@ namespace ExcelMapper.Mappings.Readers
         /// by splitting it.
         /// </summary>
         /// <param name="cellReader">The ICellValueReader that reads the string value of the cell before it is split.</param>
-        public SplitCellValueReader(ICellValueReader cellReader)
+        public SplitCellValueReader(ISingleCellValueReader cellReader)
         {
             CellReader = cellReader ?? throw new ArgumentNullException(nameof(cellReader));
         }
 
-        public IEnumerable<ReadCellValueResult> GetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out IEnumerable<ReadCellValueResult> result)
         {
-            ReadCellValueResult readResult = CellReader.GetValue(sheet, rowIndex, reader);
+            if (!CellReader.TryGetValue(sheet, rowIndex, reader, out ReadCellValueResult readResult))
+            {
+                result = default;
+                return false;
+            }
+
             if (readResult.StringValue == null)
             {
-                return Enumerable.Empty<ReadCellValueResult>();
+                result = Enumerable.Empty<ReadCellValueResult>();
+                return true;
             }
 
             string[] splitStringValues = GetValues(readResult.StringValue);
-            return splitStringValues.Select(s => new ReadCellValueResult(readResult.ColumnIndex, s));
+            result = splitStringValues.Select(s => new ReadCellValueResult(readResult.ColumnIndex, s));
+            return true;
         }
 
         protected abstract string[] GetValues(string value);

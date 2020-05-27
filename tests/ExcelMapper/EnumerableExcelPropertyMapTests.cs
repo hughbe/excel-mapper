@@ -30,7 +30,7 @@ namespace ExcelMapper.Tests
         public void WithElementMap_ValidMap_Success()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var elementMap = new SingleExcelPropertyMap<string>(propertyInfo);
+            var elementMap = new OneToOnePropertyMap<string>(propertyInfo);
 
             var propertyMap = new SubPropertyMap(propertyInfo);
             Assert.Same(propertyMap, propertyMap.WithElementMap(e =>
@@ -350,11 +350,11 @@ namespace ExcelMapper.Tests
 
         private class SubPropertyMap : EnumerableExcelPropertyMap<string>
         {
-            public SubPropertyMap(MemberInfo member) : base(member, new SingleExcelPropertyMap<string>(member))
+            public SubPropertyMap(MemberInfo member) : base(member, new OneToOnePropertyMap<string>(member))
             {
             }
 
-            public SubPropertyMap(MemberInfo member, SingleExcelPropertyMap<string> elementMapping) : base(member, elementMapping)
+            public SubPropertyMap(MemberInfo member, OneToOnePropertyMap<string> elementMapping) : base(member, elementMapping)
             {
             }
 

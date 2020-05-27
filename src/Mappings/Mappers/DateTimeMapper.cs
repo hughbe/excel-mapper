@@ -43,7 +43,7 @@ namespace ExcelMapper.Mappings.Mappers
         /// </summary>
         public DateTimeStyles Style { get; set; }
 
-        public PropertyMapperResultType GetProperty(ReadCellValueResult readResult, ref object value)
+        public PropertyMapperResultType MapCellValue(ReadCellValueResult readResult, ref object value)
         {
             if (!DateTime.TryParseExact(readResult.StringValue, Formats, Provider, Style, out DateTime result))
             {

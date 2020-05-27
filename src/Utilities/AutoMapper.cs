@@ -22,7 +22,7 @@ namespace ExcelMapper.Utilities
         {
             // First, check if this is a well-known type (e.g. string/int).
             // This is a simple conversion from the cell's value to the type.
-            if (TryCreatePrimitiveMap(member, emptyValueStrategy, out SingleExcelPropertyMap<T> singleMap))
+            if (TryCreatePrimitiveMap(member, emptyValueStrategy, out OneToOnePropertyMap<T> singleMap))
             {
                 map = singleMap;
                 return true;
@@ -48,7 +48,7 @@ namespace ExcelMapper.Utilities
             return false;
         }
 
-        internal static bool TryCreatePrimitiveMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out SingleExcelPropertyMap<T> map)
+        internal static bool TryCreatePrimitiveMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out OneToOnePropertyMap<T> map)
         {
             if (!TryGetWellKnownMap(typeof(T), emptyValueStrategy, out ICellValueMapper mapper, out IFallbackItem emptyFallback, out IFallbackItem invalidFallback))
             {
@@ -56,7 +56,7 @@ namespace ExcelMapper.Utilities
                 return false;
             }
 
-            map = new SingleExcelPropertyMap<T>(member)
+            map = new OneToOnePropertyMap<T>(member)
                 .WithCellValueMappers(mapper)
                 .WithEmptyFallbackItem(emptyFallback)
                 .WithInvalidFallbackItem(invalidFallback);
@@ -171,7 +171,7 @@ namespace ExcelMapper.Utilities
 
             // First, get the mapper for the element. This is used to convert individual values
             // to be added to/included in the collection.
-            if (!TryCreatePrimitiveMap(member, emptyValueStrategy, out SingleExcelPropertyMap<TElement> elementMapping))
+            if (!TryCreatePrimitiveMap(member, emptyValueStrategy, out OneToOnePropertyMap<TElement> elementMapping))
             {
                 map = null;
                 return false;

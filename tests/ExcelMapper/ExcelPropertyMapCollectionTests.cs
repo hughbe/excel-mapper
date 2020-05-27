@@ -14,7 +14,7 @@ namespace ExcelMapper.Tests
             var map1 = new SubPropertyMap(propertyInfo);
             var map2 = new SubPropertyMap(propertyInfo);
             ExcelPropertyMapCollection mappings = new TestClassMap().Mappings;
-            
+
             mappings.Add(map1);
             Assert.Same(map1, Assert.Single(mappings));
             Assert.Same(map1, mappings[0]);
@@ -42,7 +42,7 @@ namespace ExcelMapper.Tests
             var map1 = new SubPropertyMap(propertyInfo);
             var map2 = new SubPropertyMap(propertyInfo);
             ExcelPropertyMapCollection mappings = new TestClassMap().Mappings;
-            
+
             mappings.Insert(0, map1);
             Assert.Same(map1, Assert.Single(mappings));
             Assert.Same(map1, mappings[0]);
@@ -101,9 +101,8 @@ namespace ExcelMapper.Tests
         {
             public SubPropertyMap(MemberInfo member) : base(member) { }
 
-            public override object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+            public override void SetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, object instance)
             {
-                return 10;
             }
         }
     }

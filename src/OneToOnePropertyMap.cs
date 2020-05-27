@@ -12,20 +12,26 @@ namespace ExcelMapper
     /// Reads a single cell of an excel sheet and maps the value of the cell to the
     /// type of the property or field.
     /// </summary>
-    public class SingleExcelPropertyMap : ExcelPropertyMap, ISinglePropertyMap
+    public class OneToOnePropertyMap : ExcelPropertyMap, IOneToOnePropertyMap
     {
         private readonly List<ICellValueTransformer> _cellValueTransformers = new List<ICellValueTransformer>();
         private readonly List<ICellValueMapper> _cellValueMappers = new List<ICellValueMapper>();
-        private ICellValueReader _reader;
+        private ISingleCellValueReader _reader;
 
         /// <summary>
         /// Gets or sets the object that takes a sheet and row index and produces the value of a cell.
         /// </summary>
-        public ICellValueReader CellReader
+        public ISingleCellValueReader CellReader
         {
             get => _reader;
             set => _reader = value ?? throw new ArgumentNullException(nameof(value));
         }
+
+        /// <summary>
+        /// Gets or sets whether mapping should fail silently and continue if the cell value cannot be
+        /// found.
+        /// </summary>
+        public bool Optional { get; set; }
 
         /// <summary>
         /// Gets the list of objects that take the initial string value read from a cell and
@@ -42,7 +48,7 @@ namespace ExcelMapper
         public IEnumerable<ICellValueMapper> CellValueMappers => _cellValueMappers;
 
         /// <summary>
-        /// Adds the given mapper to the pipeline of cell value mappers.        
+        /// Adds the given mapper to the pipeline of cell value mappers.
         /// </summary>
         /// <param name="mapper">The mapper to add.</param>
         public void AddCellValueMapper(ICellValueMapper mapper)
@@ -94,15 +100,27 @@ namespace ExcelMapper
         /// to the type of the property or field.
         /// </summary>
         /// <param name="member">The property or field to map the value of a single cell to.</param>
-        public SingleExcelPropertyMap(MemberInfo member) : base(member)
+        public OneToOnePropertyMap(MemberInfo member) : base(member)
         {
             CellReader = new ColumnNameValueReader(member.Name);
         }
 
-        public override object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public override void SetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, object instance)
         {
-            ReadCellValueResult readResult = CellReader.GetValue(sheet, rowIndex, reader);
-            return GetPropertyValue(sheet, rowIndex, reader, readResult);
+            if (!CellReader.TryGetValue(sheet, rowIndex, reader, out ReadCellValueResult readResult))
+            {
+                if (Optional)
+                {
+                    return;
+                }
+                else
+                {
+                    throw new ExcelMappingException($"Could not find read value for mapper");
+                }
+            }
+
+            object result = GetPropertyValue(sheet, rowIndex, reader, readResult);
+            SetPropertyFactory(instance, result);
         }
 
         internal object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadCellValueResult readResult)
@@ -122,7 +140,7 @@ namespace ExcelMapper
 
             foreach (ICellValueMapper mappingItem in _cellValueMappers)
             {
-                PropertyMapperResultType newResultType  = mappingItem.GetProperty(readResult, ref value);
+                PropertyMapperResultType newResultType  = mappingItem.MapCellValue(readResult, ref value);
                 if (newResultType == PropertyMapperResultType.Success)
                 {
                     return value;

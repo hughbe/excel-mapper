@@ -6,7 +6,7 @@ namespace ExcelMapper.Mappings.Readers
     /// <summary>
     /// Reads the value of a single cell given the predicate matching the column name.
     /// </summary>
-    public sealed class ColumnNameMatchingValueReader : ICellValueReader
+    public sealed class ColumnNameMatchingValueReader : ISingleCellValueReader
     {
         private readonly Func<string, bool> _predicate;
 
@@ -19,16 +19,22 @@ namespace ExcelMapper.Mappings.Readers
             _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
         }
 
-        public ReadCellValueResult GetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out ReadCellValueResult result)
         {
             if (sheet.Heading == null)
             {
                 throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
             }
 
-            int index = sheet.Heading.GetFirstColumnMatchingIndex(_predicate);
+            if (!sheet.Heading.TryGetFirstColumnMatchingIndex(_predicate, out int index))
+            {
+                result = default;
+                return false;
+            }
+
             string value = reader[index]?.ToString();
-            return new ReadCellValueResult(index, value);
+            result = new ReadCellValueResult(index, value);
+            return true;
         }
     }
 }

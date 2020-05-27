@@ -22,7 +22,7 @@ namespace ExcelMapper.Mappings.Mappers.Tests
             var item = new GuidMapper();
 
             object value = null;
-            PropertyMapperResultType result = item.GetProperty(new ReadCellValueResult(-1, stringValue), ref value);
+            PropertyMapperResultType result = item.MapCellValue(new ReadCellValueResult(-1, stringValue), ref value);
             Assert.Equal(PropertyMapperResultType.Success, result);
             Assert.Equal(expected, value);
         }
@@ -36,7 +36,7 @@ namespace ExcelMapper.Mappings.Mappers.Tests
             var item = new GuidMapper();
 
             object value = 1;
-            PropertyMapperResultType result = item.GetProperty(new ReadCellValueResult(-1, stringValue), ref value);
+            PropertyMapperResultType result = item.MapCellValue(new ReadCellValueResult(-1, stringValue), ref value);
             Assert.Equal(PropertyMapperResultType.Invalid, result);
             Assert.Equal(1, value);
         }

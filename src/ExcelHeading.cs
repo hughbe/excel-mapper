@@ -67,6 +67,14 @@ namespace ExcelMapper
         }
 
         /// <summary>
+        /// Tries to get the zero-based index of the column with the given name.
+        /// </summary>
+        /// <param name="columnName">The name of the column to get the zero-based index of.</param>
+        /// <param name="index">The zero-based index of the column with the given name.</param>
+        /// <returns>Whether or not the column exists.</returns>
+        public bool TryGetColumnIndex(string columnName, out int index) => NameMapping.TryGetValue(columnName, out index);
+
+        /// <summary>
         /// Gets the zero-based index of the column with the given name if it matches the supplied predicate.
         /// This method throws an ExcelMappingException if the column does not exist.
         /// </summary>
@@ -83,6 +91,25 @@ namespace ExcelMapper
             }
 
             return NameMapping[key];
+        }
+
+        /// <summary>
+        /// Tries to get the zero-based index of the column with the given name if it matches the supplied predicate.
+        /// </summary>
+        /// <param name="predicate">The predicate containing the names of the column to get the zero-based index of.</param>
+        /// <param name="index">The zero-based index of the column with the given name.</param>
+        /// <returns>Whether or not the column exists.</returns>
+        public bool TryGetFirstColumnMatchingIndex(Func<string, bool> predicate, out int index)
+        {
+            string key = NameMapping.Keys.FirstOrDefault(predicate);
+            if (key == null)
+            {
+                index = -1;
+                return false;
+            }
+
+            index = NameMapping[key];
+            return true;
         }
 
         /// <summary>

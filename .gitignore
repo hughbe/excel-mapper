@@ -310,3 +310,5 @@ $RECYCLE.BIN/
 
 resources/coverage
 coverage.xml
+*.opencover.xml
+BenchmarkDotNet.Artifacts

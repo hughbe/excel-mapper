@@ -9,7 +9,7 @@ namespace ExcelMapper
     /// property and field of the type of the property or field. This is used to map properties
     /// and fields that are objects.
     /// </summary>
-    public class ObjectExcelPropertyMap<T> : SingleExcelPropertyMap<T>
+    public class ObjectExcelPropertyMap<T> : OneToOnePropertyMap<T>
     {
         private ExcelClassMap<T> _classMap;
 
@@ -63,9 +63,10 @@ namespace ExcelMapper
             return this;
         }
 
-        public override object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+        public override void SetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, object instance)
         {
-            return _classMap.Execute(sheet, rowIndex, reader);
+            object result = _classMap.Execute(sheet, rowIndex, reader);
+            SetPropertyFactory(instance, result);
         }
     }
 }
