@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using ExcelMapper.Mappings.Readers;
+using ExcelMapper.Abstractions;
+using ExcelMapper.Readers;
 using Xunit;
 
 namespace ExcelMapper.Tests
@@ -30,15 +31,15 @@ namespace ExcelMapper.Tests
         public void WithElementMap_ValidMap_Success()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var elementMap = new OneToOnePropertyMap<string>(propertyInfo);
+            var elementPipeline = new ValuePipeline<string>();
 
             var propertyMap = new SubEnumerableExcelPropertyMap(propertyInfo);
             Assert.Same(propertyMap, propertyMap.WithElementMap(e =>
             {
-                Assert.Same(e.Pipeline, propertyMap.ElementPipeline);
-                return elementMap;
+                Assert.Same(e, propertyMap.ElementPipeline);
+                return elementPipeline;
             }));
-            Assert.Same(elementMap.Pipeline, propertyMap.ElementPipeline);
+            Assert.Same(elementPipeline, propertyMap.ElementPipeline);
         }
 
         [Fact]
@@ -350,11 +351,11 @@ namespace ExcelMapper.Tests
 
         private class SubEnumerableExcelPropertyMap : EnumerableExcelPropertyMap<string>
         {
-            public SubEnumerableExcelPropertyMap(MemberInfo member) : base(member, new ValuePipeline())
+            public SubEnumerableExcelPropertyMap(MemberInfo member) : base(member, new ValuePipeline<string>())
             {
             }
 
-            public SubEnumerableExcelPropertyMap(MemberInfo member, ValuePipeline elementPipeline) : base(member, elementPipeline)
+            public SubEnumerableExcelPropertyMap(MemberInfo member, IValuePipeline<string> elementPipeline) : base(member, elementPipeline)
             {
             }
 

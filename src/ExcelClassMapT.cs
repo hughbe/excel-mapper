@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Reflection;
 using ExcelMapper.Utilities;
-using ExcelMapper.Mappings.Mappers;
+using ExcelMapper.Mappers;
 
 namespace ExcelMapper
 {

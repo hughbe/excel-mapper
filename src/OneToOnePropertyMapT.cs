@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using ExcelMapper.Mappings;
+using ExcelMapper.Abstractions;
 
 namespace ExcelMapper
 {
@@ -8,7 +8,7 @@ namespace ExcelMapper
     /// type T.
     /// </summary>
     /// <typeparam name="T">The type of the member to map the value of a single cell to.</typeparam>
-    public class OneToOnePropertyMap<T> : OneToOnePropertyMap
+    public class OneToOnePropertyMap<T> : OneToOnePropertyMap, IValuePipeline<T>
     {
         /// <summary>
         /// Constructs a map that reads the value of a single cell and maps the value of the cell
@@ -16,7 +16,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="member">The property or field to map the value of a single cell to.</param>
         /// <param name="pipeline">The pipeline to convert the string to an objet.</param>
-        public OneToOnePropertyMap(MemberInfo member, ValuePipeline pipeline = null) : base(member, pipeline)
+        public OneToOnePropertyMap(MemberInfo member) : base(member)
         {
         }
     }

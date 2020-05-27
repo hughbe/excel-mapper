@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Reflection;
 using ExcelDataReader;
-using ExcelMapper.Mappings;
-using ExcelMapper.Mappings.Readers;
+using ExcelMapper.Abstractions;
+using ExcelMapper.Readers;
 
 namespace ExcelMapper
 {
@@ -11,7 +11,7 @@ namespace ExcelMapper
     /// Reads a single cell of an excel sheet and maps the value of the cell to the
     /// type of the property or field.
     /// </summary>
-    public class OneToOnePropertyMap : ExcelPropertyMap
+    public class OneToOnePropertyMap : ExcelPropertyMap, IValuePipeline
     {
         private ISingleCellValueReader _reader;
 
@@ -37,10 +37,9 @@ namespace ExcelMapper
         /// to the type of the property or field.
         /// </summary>
         /// <param name="member">The property or field to map the value of a single cell to.</param>
-        public OneToOnePropertyMap(MemberInfo member, ValuePipeline pipeline = null) : base(member)
+        public OneToOnePropertyMap(MemberInfo member) : base(member)
         {
             CellReader = new ColumnNameValueReader(member.Name);
-            Pipeline = pipeline ?? new ValuePipeline();
         }
 
         public override void SetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, object instance)
@@ -55,8 +54,31 @@ namespace ExcelMapper
                 throw new ExcelMappingException($"Could not read value for {Member.Name}", sheet, rowIndex);
             }
 
-            object result = Pipeline.GetPropertyValue(sheet, rowIndex, reader, readResult, Member);
+            object result = ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, reader, readResult, Member);
             SetPropertyFactory(instance, result);
         }
+
+
+        public IEnumerable<ICellValueTransformer> CellValueTransformers => Pipeline.CellValueTransformers;
+
+        public IEnumerable<ICellValueMapper> CellValueMappers => Pipeline.CellValueMappers;
+
+        public IFallbackItem EmptyFallback
+        {
+            get => Pipeline.EmptyFallback;
+            set => Pipeline.EmptyFallback = value;
+        }
+
+        public IFallbackItem InvalidFallback
+        {
+            get => Pipeline.InvalidFallback;
+            set => Pipeline.InvalidFallback = value;
+        }
+
+        public void AddCellValueMapper(ICellValueMapper mapper) => Pipeline.AddCellValueMapper(mapper);
+
+        public void RemoveCellValueMapper(int index) => Pipeline.RemoveCellValueMapper(index);
+
+        public void AddCellValueTransformer(ICellValueTransformer transformer) => Pipeline.AddCellValueTransformer(transformer);
     }
 }

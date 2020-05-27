@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using ExcelDataReader;
-using ExcelMapper.Mappings;
+using ExcelMapper.Abstractions;
 
 namespace ExcelMapper
 {
@@ -10,7 +10,7 @@ namespace ExcelMapper
     /// Reads a single cell of an excel sheet and maps the value of the cell to the
     /// type of the property or field.
     /// </summary>
-    public class ValuePipeline
+    public class ValuePipeline : IValuePipeline
     {
         private readonly List<ICellValueTransformer> _cellValueTransformers = new List<ICellValueTransformer>();
         private readonly List<ICellValueMapper> _cellValueMappers = new List<ICellValueMapper>();
@@ -77,22 +77,22 @@ namespace ExcelMapper
         /// </summary>
         public IFallbackItem InvalidFallback { get; set; }
 
-        internal object GetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadCellValueResult readResult, MemberInfo member)
+        internal static object GetPropertyValue(IValuePipeline pipeline, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadCellValueResult readResult, MemberInfo member)
         {
-            foreach (ICellValueTransformer transformer in _cellValueTransformers)
+            foreach (ICellValueTransformer transformer in pipeline.CellValueTransformers)
             {
                 readResult = new ReadCellValueResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult));
             }
 
-            if (string.IsNullOrEmpty(readResult.StringValue) && EmptyFallback != null)
+            if (string.IsNullOrEmpty(readResult.StringValue) && pipeline.EmptyFallback != null)
             {
-                return EmptyFallback.PerformFallback(sheet, rowIndex, readResult, member);
+                return pipeline.EmptyFallback.PerformFallback(sheet, rowIndex, readResult, member);
             }
 
             PropertyMapperResultType resultType = PropertyMapperResultType.Success;
             object value = null;
 
-            foreach (ICellValueMapper mappingItem in _cellValueMappers)
+            foreach (ICellValueMapper mappingItem in pipeline.CellValueMappers)
             {
                 PropertyMapperResultType newResultType  = mappingItem.MapCellValue(readResult, ref value);
                 if (newResultType == PropertyMapperResultType.Success)
@@ -106,9 +106,9 @@ namespace ExcelMapper
                 }
             }
 
-            if (resultType != PropertyMapperResultType.Success && resultType != PropertyMapperResultType.SuccessIfNoOtherSuccess && InvalidFallback != null)
+            if (resultType != PropertyMapperResultType.Success && resultType != PropertyMapperResultType.SuccessIfNoOtherSuccess && pipeline.InvalidFallback != null)
             {
-                return InvalidFallback.PerformFallback(sheet, rowIndex, readResult, member);
+                return pipeline.InvalidFallback.PerformFallback(sheet, rowIndex, readResult, member);
             }
 
             return value;

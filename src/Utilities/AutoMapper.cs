@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using ExcelMapper.Mappings;
-using ExcelMapper.Mappings.Fallbacks;
-using ExcelMapper.Mappings.Mappers;
-using ExcelMapper.Mappings.MultiItems;
+using ExcelMapper.Abstractions;
+using ExcelMapper.Fallbacks;
+using ExcelMapper.Mappers;
+using ExcelMapper.Mappers.MultiItems;
 
 namespace ExcelMapper.Utilities
 {
@@ -48,7 +48,7 @@ namespace ExcelMapper.Utilities
             return false;
         }
 
-        internal static bool TryCreatePrimitivePipeline<T>(FallbackStrategy emptyValueStrategy, out ValuePipeline pipeline)
+        internal static bool TryCreatePrimitivePipeline<T>(FallbackStrategy emptyValueStrategy, out ValuePipeline<T> pipeline)
         {
             if (!TryGetWellKnownMap(typeof(T), emptyValueStrategy, out ICellValueMapper mapper, out IFallbackItem emptyFallback, out IFallbackItem invalidFallback))
             {
@@ -56,7 +56,7 @@ namespace ExcelMapper.Utilities
                 return false;
             }
 
-            pipeline = new ValuePipeline();
+            pipeline = new ValuePipeline<T>();
             pipeline.AddCellValueMapper(mapper);
             pipeline.EmptyFallback = emptyFallback;
             pipeline.InvalidFallback = invalidFallback;
@@ -186,7 +186,7 @@ namespace ExcelMapper.Utilities
 
             // First, get the pipeline for the element. This is used to convert individual values
             // to be added to/included in the collection.
-            if (!TryCreatePrimitivePipeline<TElement>(emptyValueStrategy, out ValuePipeline elementMapping))
+            if (!TryCreatePrimitivePipeline<TElement>(emptyValueStrategy, out ValuePipeline<TElement> elementMapping))
             {
                 map = null;
                 return false;

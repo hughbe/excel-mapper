@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
-using ExcelMapper.Mappings;
-using ExcelMapper.Mappings.Readers;
+using ExcelMapper.Abstractions;
+using ExcelMapper.Readers;
 
 namespace ExcelMapper
 {
@@ -19,7 +19,7 @@ namespace ExcelMapper
         /// Gets the pipeline that maps the value of a single cell to an object of the element type of the property
         /// or field.
         /// </summary>
-        public ValuePipeline ElementPipeline { get; private set; }
+        public IValuePipeline<T> ElementPipeline { get; private set; }
 
         /// <summary>
         /// Gets the reader that reads one or more values from one or more cells used to map each
@@ -33,7 +33,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="member">The property or field to map the values of one or more cell to.</param>
         /// <param name="elementPipeline">The pipeline that maps the value of a single cell to an object of the element type of the property or field.</param>
-        protected EnumerableExcelPropertyMap(MemberInfo member, ValuePipeline elementPipeline) : base(member)
+        protected EnumerableExcelPropertyMap(MemberInfo member, IValuePipeline<T> elementPipeline) : base(member)
         {
             ElementPipeline = elementPipeline ?? throw new ArgumentNullException(nameof(elementPipeline));
 
@@ -48,17 +48,14 @@ namespace ExcelMapper
         /// <param name="elementMap">The pipeline that maps the value of a single cell to an object of the element type of the property
         /// or field.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public EnumerableExcelPropertyMap<T> WithElementMap(Func<OneToOnePropertyMap<T>, OneToOnePropertyMap<T>> elementMap)
+        public EnumerableExcelPropertyMap<T> WithElementMap(Func<IValuePipeline<T>, IValuePipeline<T>> elementMap)
         {
             if (elementMap == null)
             {
                 throw new ArgumentNullException(nameof(elementMap));
             }
 
-            // Bit of a hack right now.
-            var map = new OneToOnePropertyMap<T>(Member, ElementPipeline);
-            OneToOnePropertyMap<T> result = elementMap(map) ?? throw new ArgumentNullException(nameof(elementMap));
-            ElementPipeline = result.Pipeline;
+            ElementPipeline = elementMap(ElementPipeline) ?? throw new ArgumentNullException(nameof(elementMap));
             return this;
         }
 
@@ -72,7 +69,7 @@ namespace ExcelMapper
             var elements = new List<T>();
             foreach (ReadCellValueResult value in values)
             {
-                T elementValue = (T)ElementPipeline.GetPropertyValue(sheet, rowIndex, reader, value, Member);
+                T elementValue = (T)ValuePipeline.GetPropertyValue(ElementPipeline, sheet, rowIndex, reader, value, Member);
                 elements.Add(elementValue);
             }
 

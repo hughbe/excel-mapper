@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Reflection;
-using ExcelMapper.Mappings;
-using ExcelMapper.Mappings.Fallbacks;
-using ExcelMapper.Mappings.Mappers;
-using ExcelMapper.Mappings.Readers;
-using ExcelMapper.Mappings.Transformers;
+using ExcelMapper.Abstractions;
+using ExcelMapper.Fallbacks;
+using ExcelMapper.Mappers;
+using ExcelMapper.Readers;
+using ExcelMapper.Transformers;
 using Xunit;
 
 namespace ExcelMapper.Tests
