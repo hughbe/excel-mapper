@@ -6,7 +6,7 @@ using System.Reflection;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
-using ExcelMapper.Mappers.MultiItems;
+using ExcelMapper.Readers;
 
 namespace ExcelMapper.Utilities
 {
@@ -179,10 +179,9 @@ namespace ExcelMapper.Utilities
             return true;
         }
 
-        internal static bool TryCreateGenericEnumerableMap<TElement>(MemberInfo member, FallbackStrategy emptyValueStrategy, out EnumerableExcelPropertyMap<TElement> map)
+        internal static bool TryCreateGenericEnumerableMap<TElement>(MemberInfo member, FallbackStrategy emptyValueStrategy, out ManyToOneEnumerablePropertyMap<TElement> map)
         {
             Type rawType = member.MemberType();
-            TypeInfo rawTypeInfo = rawType.GetTypeInfo();
 
             // First, get the pipeline for the element. This is used to convert individual values
             // to be added to/included in the collection.
@@ -193,29 +192,51 @@ namespace ExcelMapper.Utilities
             }
 
             // Secondly, find the right way of adding the converted value to the collection.
-            if (rawType.IsArray)
+            if (!TryGetCreateElementsFactory<TElement>(rawType, out CreateElementsFactory<TElement> factory))
             {
-                // Add values using the arrray indexer.
-                map = new ArrayPropertyMap<TElement>(member, elementMapping);
+                map = null;
+                return false;
+            }
+
+            // Default to splitting.
+            var defaultNameReader = new ColumnNameValueReader(member.Name);
+            var defaultReader = new CharSplitCellValueReader(defaultNameReader);
+            map = new ManyToOneEnumerablePropertyMap<TElement>(member, defaultReader, elementMapping, factory);
+            return true;
+        }
+
+        private static bool TryGetCreateElementsFactory<T>(Type memberType, out CreateElementsFactory<T> result)
+        {
+            if (memberType.IsArray)
+            {
+                result = elements => elements.ToArray();
                 return true;
             }
-            else if (rawTypeInfo.IsInterface)
+            else if (memberType.IsInterface)
             {
                 // Add values by creating a list and assigning to the property.
-                if (rawTypeInfo.IsAssignableFrom(typeof(List<TElement>).GetTypeInfo()))
+                if (memberType.IsAssignableFrom(typeof(List<T>).GetTypeInfo()))
                 {
-                    map = new InterfaceAssignableFromListPropertyMap<TElement>(member, elementMapping);
+                    result = elements => elements;
                     return true;
                 }
             }
-            else if (rawType.ImplementsInterface(typeof(ICollection<TElement>)))
+            else if (memberType.ImplementsInterface(typeof(ICollection<T>)))
             {
-                // Add values using the ICollection<T>.Add method.
-                map = new ConcreteICollectionPropertyMap<TElement>(rawType, member, elementMapping);
+                result = elements =>
+                {
+                    ICollection<T> value = (ICollection<T>)Activator.CreateInstance(memberType);
+                    foreach (T element in elements)
+                    {
+                        value.Add(element);
+                    }
+
+                    return value;
+                };
                 return true;
             }
 
-            map = null;
+            result = default;
             return false;
         }
 

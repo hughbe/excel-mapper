@@ -22,7 +22,7 @@ namespace ExcelMapper.Readers
         /// and returns the string value of for each column.
         /// </summary>
         /// <param name="columnNames">The names of each column to read.</param>
-        public MultipleColumnNamesValueReader(string[] columnNames)
+        public MultipleColumnNamesValueReader(params string[] columnNames)
         {
             if (columnNames == null)
             {
