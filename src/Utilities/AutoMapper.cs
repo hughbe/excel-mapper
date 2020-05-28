@@ -372,9 +372,19 @@ namespace ExcelMapper.Utilities
 
             foreach (MemberInfo member in properties.Concat(fields))
             {
+                // Ignore this property/field.
+                if (Attribute.IsDefined(member, typeof(ExcelIgnoreAttribute)))
+                {
+                    continue;
+                }
+
                 // Infer the mapping for each member (property/field) belonging to the type.
                 Type memberType = member.MemberType();
                 MethodInfo method = TryCreateMemberMapMethod.MakeGenericMethod(memberType);
+                if (memberType == type)
+                {
+                    throw new ExcelMappingException($"Cannot map recursive property \"{member.Name}\" of type {memberType}. Consider applying the ExcelIgnore attribute.");
+                }
 
                 var parameters = new object[] { member, emptyValueStrategy, null };
                 bool result = (bool)method.Invoke(null, parameters);

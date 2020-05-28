@@ -45,6 +45,53 @@ using (var importer = new ExcelImporter(stream))
 }
 ```
 
+## Attribute Mapping
+
+### Ignoring Properties
+ExcelMapper supports ignoring properties when deserializing with the `ExcelIgnoreAttribute` attribute. This is useful for cases where the the data structure is recursive, or the property is missing data and you don't want to create a custom mapper and call `MakeOptional`.
+
+| Name           | Age |
+|----------------|-----|
+| Donald Trump   | 73  |
+| Barack Obama   | 58  |
+
+```cs
+public class President
+{
+    public string Name { get; set; }
+
+    // If you want to ignore a property that exists for any reason.
+    [ExcelIgnore]
+    public int Age { get; set; }
+
+    // If you want to ignore a property that doesn't exist for any reason.
+    [ExcelIgnore]
+    public object NoSuchColumn { get; set; }
+
+    // If the data structure is recursive
+    [ExcelIgnore]
+    public President PreviousPresident { get; set; }
+}
+
+
+// ...
+
+using var stream = File.OpenRead("Presidents.xlsx");
+using var importer = new ExcelImporter(stream);
+
+ExcelSheet sheet = importer.ReadSheet();
+President[] president = sheet.ReadRows<President>().ToArray();
+Console.WriteLine(president[0].Name); // Donald Trump
+Console.WriteLine(president[0].Age); // 0
+Console.WriteLine(president[0].NoSuchColumn); // null
+Console.WriteLine(president[0].PreviousPresident); // null
+Console.WriteLine(president[1].Name); // Barack Obama
+Console.WriteLine(president[1].Age); // 0
+Console.WriteLine(president[1].NoSuchColumn); // null
+Console.WriteLine(president[1].PreviousPresident); // null
+}
+```
+
 ## Defining a custom mapping
 
 ExcelMapper allows customizing the class map used when mapping a row in an Excel sheet to an object.
