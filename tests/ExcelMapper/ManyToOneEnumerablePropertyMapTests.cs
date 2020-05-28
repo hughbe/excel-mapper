@@ -184,7 +184,7 @@ namespace ExcelMapper.Tests
         public void WithColumnName_SplitValidColumnName_Success()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var cellValuesReader = new MultipleColumnNamesValueReader("Column");
+            var cellValuesReader = new CharSplitCellValueReader(new ColumnNameValueReader("Column"));
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
             var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
@@ -240,7 +240,7 @@ namespace ExcelMapper.Tests
         public void WithColumnIndex_SplitColumnIndex_Success(int columnIndex)
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
-            var cellValuesReader = new MultipleColumnNamesValueReader("Column");
+            var cellValuesReader = new CharSplitCellValueReader(new ColumnNameValueReader("Column"));
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
             var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
@@ -427,7 +427,7 @@ namespace ExcelMapper.Tests
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
             var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
-            Assert.Same(propertyMap, propertyMap.WithColumnNames(columnNames));
+            Assert.Same(propertyMap, propertyMap.WithColumnNames((IEnumerable<string>)columnNames));
 
             MultipleColumnNamesValueReader valueReader = Assert.IsType<MultipleColumnNamesValueReader>(propertyMap.CellValuesReader);
             Assert.Equal(columnNames, valueReader.ColumnNames);

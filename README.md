@@ -382,6 +382,70 @@ using (var importer = new ExcelImporter(stream))
     Console.WriteLine(president[0].ElectionInformation.ElectoralCollegeVotes) // 365
 }
 ```
+
+## Mapping Dictionaries and ExpandObject
+
+ExcelMapper supports mapping dictionaries and Expando Object. If no column names are supplied, then the dictionary will contain all columns.
+
+| Name           | Age
+|----------------|----|
+| Barack Obama   | 58 |
+| Michelle Obama | 56 |
+
+### Dictionaries [Not Currently Supported.]
+
+Note that
+```cs
+using var stream = File.OpenRead("Presidents.xlsx");
+using var importer = new ExcelImporter(stream);
+
+ExcelSheet sheet = importer.ReadSheet();
+Dictionary<string, string>[] results = sheet.ReadRows<Dictionary<string, string>>().ToArray();
+Console.WriteLine(results[0].Count); // 2: { { name: "Barack Obama" }, { age: "58" } }
+Console.WriteLine(results[1].Count); // 2: { { name: "Michelle Obama" }, { age: "56" } }
+```
+
+### Field Dictionaries
+
+Note that
+```cs
+public class DataClass
+{
+    public Dictionary<string, string> Values { get; set; }
+    // Or
+    public ExpandoObject Values { get; set; }
+}
+
+public class DataClassMap : ExcelClassMap<DataClass>
+{
+    public DataClass()
+    {
+        // Default: reads all column names.
+        Map(d => d.Values);
+
+        // Read custom column names.
+        Map(d => d.Values)
+            .WithColumnNames("Name", "Age");
+    }
+}
+
+// ...
+
+using var stream = File.OpenRead("Presidents.xlsx");
+using var importer = new ExcelImporter(stream);
+
+// You can register class maps by type.
+importer.Configuration.RegisterClassMap<DataClassMap>();
+
+// Or by namespace.
+importer.RegisterMapperClassesByNamespace("My.Namespace");
+
+ExcelSheet sheet = importer.ReadSheet();
+DataClass[] results = sheet.ReadRows<DataClass>().ToArray();
+Console.WriteLine(results[0].Values.Count); // 2: { { name: "Barack Obama" }, { age: "58" } }
+Console.WriteLine(results[1].Values.Count); // 2: { { name: "Michelle Obama" }, { age: "56" } }
+```
+
 # Mapping sheets without headers
 
 By default, ExcelMapper will read the first row of a sheet as a file header. This can be controlled by setting the boolean property `ExcelSheet.HasHeading`.
