@@ -31,3 +31,9 @@ jobs:
         file: tests/TestResults/coverage.netcoreapp3.1.opencover.xml
     - name: Pack
       run: dotnet pack --configuration Release
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: "Nuget Package"
+        path: "*.nupkg"
+
