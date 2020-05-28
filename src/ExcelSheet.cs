@@ -37,7 +37,7 @@ namespace ExcelMapper
         /// Gets the name of the sheet.
         /// </summary>
         public string Name { get; }
-        
+
         /// <summary>
         /// Gets the visibility of the sheet.
         /// </summary>
@@ -154,7 +154,7 @@ namespace ExcelMapper
         /// Maps each row within the range specified to an object using a registered mapping. If no map is registered for this
         /// type then the type will be automapped. This method will not read the sheet's heading.
         /// </summary>
-        /// <param name="startIndex">The zero-based index from the first row of the document (including the header) of the range of rows to map from.</param> 
+        /// <param name="startIndex">The zero-based index from the first row of the document (including the header) of the range of rows to map from.</param>
         /// <param name="count">The number of rows to read and map.</param>
         /// <typeparam name="T">The type of the object to map each row to.</typeparam>
         /// <returns>A list of objects of type T mapped from each row within the range specified.</returns>
@@ -213,6 +213,32 @@ namespace ExcelMapper
             }
 
             CurrentRowIndex++;
+
+            if (Importer.Configuration.SkipBlankLines)
+            {
+                bool RowEmpty()
+                {
+                    for (int i = 0; i < Reader.FieldCount; i++)
+                    {
+                        if (!(Reader.GetValue(i) is null))
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+
+                while (RowEmpty())
+                {
+                    if (!Reader.Read())
+                    {
+                        return false;
+                    }
+
+                    CurrentRowIndex++;
+                }
+            }
 
             if (!Importer.Configuration.TryGetClassMap<T>(out ExcelClassMap classMap))
             {

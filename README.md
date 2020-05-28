@@ -34,16 +34,17 @@ public class Event
 
 // ...
 
-using (var stream = File.OpenRead("Pub Events.xlsx"))
-using (var importer = new ExcelImporter(stream))
-{
-    ExcelSheet sheet = importer.ReadSheet();
-    Event[] events = sheet.ReadRows<Event>().ToArray();
-    Console.WriteLine(events[0].Name); // Pub Quiz
-    Console.WriteLine(events[1].Name); // Live Music
-    Console.WriteLine(events[2].Name); // Live Football
-}
+using var stream = File.OpenRead("Pub Events.xlsx");
+using var importer = new ExcelImporter(stream);
+
+ExcelSheet sheet = importer.ReadSheet();
+Event[] events = sheet.ReadRows<Event>().ToArray();
+Console.WriteLine(events[0].Name); // Pub Quiz
+Console.WriteLine(events[1].Name); // Live Music
+Console.WriteLine(events[2].Name); // Live Football
 ```
+
+You can skip blank lines by setting `importer.Configuration.SkipBlankLines = true`. This is off by default for performance reasons.
 
 ## Attribute Mapping
 
