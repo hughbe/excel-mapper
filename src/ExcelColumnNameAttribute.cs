@@ -32,7 +32,7 @@ namespace ExcelMapper
         }
 
         /// <summary>
-        /// The name of the property.
+        /// The name of the column.
         /// </summary>
         public string Name { get; }
     }
