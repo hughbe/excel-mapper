@@ -7,6 +7,7 @@ using System.Reflection;
 using ExcelMapper.Utilities;
 using ExcelMapper.Mappers;
 using ExcelMapper.Readers;
+using ExcelMapper.Abstractions;
 
 namespace ExcelMapper
 {
@@ -77,7 +78,7 @@ namespace ExcelMapper
 
             MemberExpression memberExpression = GetMemberExpression(expression);
             var mapper = new EnumMapper(typeof(TProperty), ignoreCase);
-            var defaultReader = new ColumnNameValueReader(memberExpression.Member.Name);
+            ISingleCellValueReader defaultReader = AutoMapper.GetDefaultSingleCellValueReader(memberExpression.Member);
             var map = new OneToOnePropertyMap<TProperty>(memberExpression.Member, defaultReader)
                 .WithCellValueMappers(mapper)
                 .WithThrowingEmptyFallback()
@@ -104,7 +105,7 @@ namespace ExcelMapper
 
             MemberExpression memberExpression = GetMemberExpression(expression);
             var mapper = new EnumMapper(typeof(TProperty), ignoreCase);
-            var defaultReader = new ColumnNameValueReader(memberExpression.Member.Name);
+            ISingleCellValueReader defaultReader = AutoMapper.GetDefaultSingleCellValueReader(memberExpression.Member);
             var map = new OneToOnePropertyMap<TProperty>(memberExpression.Member, defaultReader)
                 .WithCellValueMappers(mapper)
                 .WithEmptyFallback(null)

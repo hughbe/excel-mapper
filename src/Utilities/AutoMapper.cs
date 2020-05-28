@@ -82,12 +82,23 @@ namespace ExcelMapper.Utilities
                 return false;
             }
 
-            var defaultReader = new ColumnNameValueReader(member.Name);
+            ISingleCellValueReader defaultReader = GetDefaultSingleCellValueReader(member);
             map = new OneToOnePropertyMap<T>(member, defaultReader)
                 .WithCellValueMappers(mapper)
                 .WithEmptyFallbackItem(emptyFallback)
                 .WithInvalidFallbackItem(invalidFallback);
             return true;
+        }
+
+        internal static ISingleCellValueReader GetDefaultSingleCellValueReader(MemberInfo member)
+        {
+            var colummnNameAttribute = member.GetCustomAttribute<ExcelColumnNameAttribute>();
+            if (colummnNameAttribute != null)
+            {
+                return new ColumnNameValueReader(colummnNameAttribute.Name);
+            }
+
+            return new ColumnNameValueReader(member.Name);
         }
 
         private static bool TryGetWellKnownMap(Type memberType, FallbackStrategy emptyValueStrategy, out ICellValueMapper mapper, out IFallbackItem emptyFallback, out IFallbackItem invalidFallback)
@@ -209,7 +220,7 @@ namespace ExcelMapper.Utilities
             }
 
             // Default to splitting.
-            var defaultNameReader = new ColumnNameValueReader(member.Name);
+            var defaultNameReader = GetDefaultSingleCellValueReader(member);
             var defaultReader = new CharSplitCellValueReader(defaultNameReader);
             map = new ManyToOneEnumerablePropertyMap<TElement>(member, defaultReader, elementMapping, factory);
             return true;
