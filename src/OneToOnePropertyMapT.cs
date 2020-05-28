@@ -16,7 +16,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="member">The property or field to map the value of a single cell to.</param>
         /// <param name="pipeline">The pipeline to convert the string to an objet.</param>
-        public OneToOnePropertyMap(MemberInfo member) : base(member)
+        public OneToOnePropertyMap(MemberInfo member, ISingleCellValueReader reader) : base(member, reader)
         {
         }
     }

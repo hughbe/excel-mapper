@@ -82,7 +82,8 @@ namespace ExcelMapper.Utilities
                 return false;
             }
 
-            map = new OneToOnePropertyMap<T>(member)
+            var defaultReader = new ColumnNameValueReader(member.Name);
+            map = new OneToOnePropertyMap<T>(member, defaultReader)
                 .WithCellValueMappers(mapper)
                 .WithEmptyFallbackItem(emptyFallback)
                 .WithInvalidFallbackItem(invalidFallback);

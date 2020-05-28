@@ -37,9 +37,9 @@ namespace ExcelMapper
         /// to the type of the property or field.
         /// </summary>
         /// <param name="member">The property or field to map the value of a single cell to.</param>
-        public OneToOnePropertyMap(MemberInfo member) : base(member)
+        public OneToOnePropertyMap(MemberInfo member, ISingleCellValueReader reader) : base(member)
         {
-            CellReader = new ColumnNameValueReader(member.Name);
+            CellReader = reader ?? throw new ArgumentNullException(nameof(reader));
         }
 
         public override void SetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, object instance)
