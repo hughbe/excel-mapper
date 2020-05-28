@@ -7,105 +7,142 @@ namespace ExcelMapper.Tests
         [Fact]
         public void ReadRow_AutoMappedFloat_Success()
         {
-            using (var importer = Helpers.GetImporter("Doubles.xlsx"))
-            {
-                ExcelSheet sheet = importer.ReadSheet();
-                sheet.ReadHeading();
+            using var importer = Helpers.GetImporter("Doubles.xlsx");
 
-                // Valid cell value.
-                FloatValue row1 = sheet.ReadRow<FloatValue>();
-                Assert.Equal(2.2345f, row1.Value);
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
 
-                // Empty cell value.
-                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FloatValue>());
+            // Valid cell value.
+            FloatClass row1 = sheet.ReadRow<FloatClass>();
+            Assert.Equal(2.2345f, row1.Value);
 
-                // Invalid cell value.
-                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FloatValue>());
-            }
+            // Empty cell value.
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FloatClass>());
+
+            // Invalid cell value.
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FloatClass>());
         }
 
         [Fact]
         public void ReadRow_AutoMappedNullableFloat_Success()
         {
-            using (var importer = Helpers.GetImporter("Doubles.xlsx"))
-            {
-                ExcelSheet sheet = importer.ReadSheet();
-                sheet.ReadHeading();
+            using var importer = Helpers.GetImporter("Doubles.xlsx");
 
-                // Valid cell value.
-                NullableFloatValue row1 = sheet.ReadRow<NullableFloatValue>();
-                Assert.Equal(2.2345f, row1.Value);
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
 
-                // Empty cell value.
-                NullableFloatValue row2 = sheet.ReadRow<NullableFloatValue>();
-                Assert.Null(row2.Value);
+            // Valid cell value.
+            NullableFloatClass row1 = sheet.ReadRow<NullableFloatClass>();
+            Assert.Equal(2.2345f, row1.Value);
 
-                // Invalid cell value.
-                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableFloatValue>());
-            }
+            // Empty cell value.
+            NullableFloatClass row2 = sheet.ReadRow<NullableFloatClass>();
+            Assert.Null(row2.Value);
+
+            // Invalid cell value.
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableFloatClass>());
+        }
+        [Fact]
+        public void ReadRow_DefaultMappedFloat_Success()
+        {
+            using var importer = Helpers.GetImporter("Doubles.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultFloatClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            // Valid cell value.
+            FloatClass row1 = sheet.ReadRow<FloatClass>();
+            Assert.Equal(2.2345f, row1.Value);
+
+            // Empty cell value.
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FloatClass>());
+
+            // Invalid cell value.
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FloatClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedNullableFloat_Success()
+        {
+            using var importer = Helpers.GetImporter("Doubles.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultNullableFloatClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            // Valid cell value.
+            NullableFloatClass row1 = sheet.ReadRow<NullableFloatClass>();
+            Assert.Equal(2.2345f, row1.Value);
+
+            // Empty cell value.
+            NullableFloatClass row2 = sheet.ReadRow<NullableFloatClass>();
+            Assert.Null(row2.Value);
+
+            // Invalid cell value.
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableFloatClass>());
         }
 
         [Fact]
         public void ReadRow_CustomMappedFloat_Success()
         {
-            using (var importer = Helpers.GetImporter("Doubles.xlsx"))
-            {
-                importer.Configuration.RegisterClassMap<FloatValueFallbackMap>();
+            using var importer = Helpers.GetImporter("Doubles.xlsx");
+            importer.Configuration.RegisterClassMap<CustomFloatClassMap>();
 
-                ExcelSheet sheet = importer.ReadSheet();
-                sheet.ReadHeading();
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
 
-                // Valid cell value.
-                FloatValue row1 = sheet.ReadRow<FloatValue>();
-                Assert.Equal(2.2345f, row1.Value);
+            // Valid cell value.
+            FloatClass row1 = sheet.ReadRow<FloatClass>();
+            Assert.Equal(2.2345f, row1.Value);
 
-                // Empty cell value.
-                FloatValue row2 = sheet.ReadRow<FloatValue>();
-                Assert.Equal(-10, row2.Value);
+            // Empty cell value.
+            FloatClass row2 = sheet.ReadRow<FloatClass>();
+            Assert.Equal(-10, row2.Value);
 
-                // Invalid cell value.
-                FloatValue row3 = sheet.ReadRow<FloatValue>();
-                Assert.Equal(10, row3.Value);
-            }
+            // Invalid cell value.
+            FloatClass row3 = sheet.ReadRow<FloatClass>();
+            Assert.Equal(10, row3.Value);
         }
 
         [Fact]
         public void ReadRow_CustomMappedNullableFloat_Success()
         {
-            using (var importer = Helpers.GetImporter("Doubles.xlsx"))
-            {
-                importer.Configuration.RegisterClassMap<NullableFloatValueFallbackMap>();
+            using var importer = Helpers.GetImporter("Doubles.xlsx");
+            importer.Configuration.RegisterClassMap<CustomNullableFlatClassMap>();
 
-                ExcelSheet sheet = importer.ReadSheet();
-                sheet.ReadHeading();
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
 
-                // Valid cell value.
-                NullableFloatValue row1 = sheet.ReadRow<NullableFloatValue>();
-                Assert.Equal(2.2345f, row1.Value);
+            // Valid cell value.
+            NullableFloatClass row1 = sheet.ReadRow<NullableFloatClass>();
+            Assert.Equal(2.2345f, row1.Value);
 
-                // Empty cell value.
-                NullableFloatValue row2 = sheet.ReadRow<NullableFloatValue>();
-                Assert.Equal(-10, row2.Value);
+            // Empty cell value.
+            NullableFloatClass row2 = sheet.ReadRow<NullableFloatClass>();
+            Assert.Equal(-10, row2.Value);
 
-                // Invalid cell value.
-                NullableFloatValue row3 = sheet.ReadRow<NullableFloatValue>();
-                Assert.Equal(10, row3.Value);
-            }
+            // Invalid cell value.
+            NullableFloatClass row3 = sheet.ReadRow<NullableFloatClass>();
+            Assert.Equal(10, row3.Value);
         }
 
-        private class FloatValue
+        private class FloatClass
         {
             public float Value { get; set; }
         }
 
-        private class NullableFloatValue
+        private class DefaultFloatClassMap : ExcelClassMap<FloatClass>
         {
-            public float? Value { get; set; }
+            public DefaultFloatClassMap()
+            {
+                Map(o => o.Value);
+            }
         }
 
-        private class FloatValueFallbackMap : ExcelClassMap<FloatValue>
+        private class CustomFloatClassMap : ExcelClassMap<FloatClass>
         {
-            public FloatValueFallbackMap()
+            public CustomFloatClassMap()
             {
                 Map(o => o.Value)
                     .WithEmptyFallback(-10.0f)
@@ -113,9 +150,22 @@ namespace ExcelMapper.Tests
             }
         }
 
-        private class NullableFloatValueFallbackMap : ExcelClassMap<NullableFloatValue>
+        private class NullableFloatClass
         {
-            public NullableFloatValueFallbackMap()
+            public float? Value { get; set; }
+        }
+
+        private class DefaultNullableFloatClassMap : ExcelClassMap<NullableFloatClass>
+        {
+            public DefaultNullableFloatClassMap()
+            {
+                Map(o => o.Value);
+            }
+        }
+
+        private class CustomNullableFlatClassMap : ExcelClassMap<NullableFloatClass>
+        {
+            public CustomNullableFlatClassMap()
             {
                 Map(o => o.Value)
                     .WithEmptyFallback(-10.0f)

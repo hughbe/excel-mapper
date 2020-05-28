@@ -39,7 +39,7 @@ namespace ExcelMapper.Tests
                 sheet.ReadHeading();
 
                 var exception = new ExcelMappingException("Message", sheet, 10, 1);
-                Assert.Equal("Message \"StringValue\" on row 10 in sheet \"Primitives\".", exception.Message);
+                Assert.Equal("Message in column \"StringValue\" on row 10 in sheet \"Primitives\".", exception.Message);
                 Assert.Null(exception.InnerException);
             }
         }
@@ -51,7 +51,7 @@ namespace ExcelMapper.Tests
             {
                 ExcelSheet sheet = importer.ReadSheet();
                 var exception = new ExcelMappingException("Message", sheet, 10, 1);
-                Assert.Equal("Message \"StringValue\" on row 10 in sheet \"Primitives\".", exception.Message);
+                Assert.Equal("Message in column \"StringValue\" on row 10 in sheet \"Primitives\".", exception.Message);
                 Assert.Null(exception.InnerException);
             }
         }

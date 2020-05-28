@@ -50,7 +50,7 @@ namespace ExcelMapper
                         sheet.ReadHeading();
                     }
 
-                    position = $" \"{sheet.Heading.GetColumnName(columnIndex)}\"";
+                    position = $" in column \"{sheet.Heading.GetColumnName(columnIndex)}\"";
                 }
                 else
                 {
