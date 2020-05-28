@@ -11,6 +11,12 @@ namespace ExcelMapper
     {
         private List<ExcelClassMap> ClassMaps { get; } = new List<ExcelClassMap>();
 
+        /// <summary>
+        ///  Gets or sets whether blank lines should be skipped during reading.
+        ///  This may have performance implications so is off by default.
+        /// </summary>
+        public bool SkipBlankLines { get; set; }
+
         internal ExcelImporterConfiguration() { }
 
         /// <summary>

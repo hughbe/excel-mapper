@@ -22,6 +22,20 @@ namespace ExcelMapper.Benchmarks
         }
 
         [Benchmark]
+        public void SkipBlankLinesMap()
+        {
+            using var original = Helpers.GetResource("VeryLargeSheet.xlsx");
+            var importer = new ExcelImporter(original);
+            importer.Configuration.SkipBlankLines = true;
+            importer.Configuration.RegisterClassMap<DataClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            foreach (object value in sheet.ReadRows<DataClass>())
+            {
+            }
+        }
+
+        [Benchmark]
         public void OptionalMap()
         {
             using var original = Helpers.GetResource("VeryLargeSheet.xlsx");
