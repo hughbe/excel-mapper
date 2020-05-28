@@ -7,12 +7,10 @@ namespace ExcelMapper
 {
     public static class ExcelImporterUtils
     {
-#if !NETSTANDARD1_4
         public static IEnumerable<ExcelClassMap> RegisterClassMapsInNamespace(this ExcelImporter importer, string namespaceString)
         {
             return RegisterClassMapsInNamespace(importer, Assembly.GetCallingAssembly(), namespaceString);
         }
-#endif
 
         public static IEnumerable<ExcelClassMap> RegisterClassMapsInNamespace(this ExcelImporter importer, Assembly assembly, string namespaceString)
         {
