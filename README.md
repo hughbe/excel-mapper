@@ -47,6 +47,38 @@ using (var importer = new ExcelImporter(stream))
 
 ## Attribute Mapping
 
+### Custom Column Names
+ExcelMapper supports specifying a custom column name with the `ExcelColumnName` attribute. This is useful for cases where we want to map a column name that is different from the property name in the data structure, for example the column name contains whitespace or the column name contains characters that can't be represented in C#.
+
+| Full Name      | #Age |
+|----------------|------|
+| Donald Trump   | 73   |
+| Barack Obama   | 58   |
+
+```cs
+public class President
+{
+    [ExcelColumnName("Full Name")]
+    public string Name { get; set; }
+
+    [ExcelColumnName("#Age")]
+    public int Age { get; set; }
+}
+
+
+// ...
+
+using var stream = File.OpenRead("Presidents.xlsx");
+using var importer = new ExcelImporter(stream);
+
+ExcelSheet sheet = importer.ReadSheet();
+President[] president = sheet.ReadRows<President>().ToArray();
+Console.WriteLine(president[0].Name); // Donald Trump
+Console.WriteLine(president[0].Age); // 73
+Console.WriteLine(president[1].Name); // Barack Obama
+Console.WriteLine(president[1].Age); // 58
+```
+
 ### Ignoring Properties
 ExcelMapper supports ignoring properties when deserializing with the `ExcelIgnoreAttribute` attribute. This is useful for cases where the the data structure is recursive, or the property is missing data and you don't want to create a custom mapper and call `MakeOptional`.
 
@@ -89,7 +121,6 @@ Console.WriteLine(president[1].Name); // Barack Obama
 Console.WriteLine(president[1].Age); // 0
 Console.WriteLine(president[1].NoSuchColumn); // null
 Console.WriteLine(president[1].PreviousPresident); // null
-}
 ```
 
 ## Defining a custom mapping
