@@ -92,10 +92,16 @@ namespace ExcelMapper.Utilities
 
         internal static ISingleCellValueReader GetDefaultSingleCellValueReader(MemberInfo member)
         {
-            var colummnNameAttribute = member.GetCustomAttribute<ExcelColumnNameAttribute>();
+            ExcelColumnNameAttribute colummnNameAttribute = member.GetCustomAttribute<ExcelColumnNameAttribute>();
             if (colummnNameAttribute != null)
             {
                 return new ColumnNameValueReader(colummnNameAttribute.Name);
+            }
+
+            ExcelColumnIndexAttribute colummnIndexAttribute = member.GetCustomAttribute<ExcelColumnIndexAttribute>();
+            if (colummnIndexAttribute != null)
+            {
+                return new ColumnIndexValueReader(colummnIndexAttribute.Index);
             }
 
             return new ColumnNameValueReader(member.Name);

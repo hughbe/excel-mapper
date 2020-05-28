@@ -2,7 +2,7 @@ using Xunit;
 
 namespace ExcelMapper.Tests
 {
-    public class MapCustomColumnNameTests
+    public class MapCustomColumnIndexTests
     {
         [Fact]
         public void ReadRows_AutoMappedCustomNameProperty_ReturnsExpected()
