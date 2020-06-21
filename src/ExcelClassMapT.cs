@@ -314,11 +314,23 @@ namespace ExcelMapper
             return mapping;
         }
 
+        private Expression GetExpressionBody(Expression body)
+        {
+            // Allow casts e.g. (p => (ICollection<int>)p.Value)
+            if (body is UnaryExpression unaryExpression && unaryExpression.NodeType == ExpressionType.Convert)
+            {
+                return unaryExpression.Operand;
+            }
+
+            return body;
+        }
+
         protected internal MemberExpression GetMemberExpression<TProperty>(Expression<Func<T, TProperty>> expression)
         {
-            if (!(expression.Body is MemberExpression rootMemberExpression))
+            Expression body = GetExpressionBody(expression.Body);
+            if (!(body is MemberExpression rootMemberExpression))
             {
-                throw new ArgumentException("Not a member expression.", nameof(expression));
+                throw new ArgumentException($"Not a member expression. Received {expression.Body}", nameof(expression));
             }
 
             return rootMemberExpression;
@@ -326,7 +338,7 @@ namespace ExcelMapper
 
         protected internal void AddMap<TProperty>(ExcelPropertyMap map, Expression<Func<T, TProperty>> expression)
         {
-            Expression expressionBody = expression.Body;
+            Expression expressionBody = GetExpressionBody(expression.Body);
             var expressions = new Stack<MemberExpression>();
             while (true)
             {
@@ -338,7 +350,7 @@ namespace ExcelMapper
                         break;
                     }
 
-                    throw new ArgumentException($"Expression can only contain member accesses, but found {expressionBody}.", nameof(expression));
+                    throw new ArgumentException($"Expression can only contain member accesses, but found {expressionBody}. Found {expressions.Count} expressions.", nameof(expression));
                 }
 
                 expressions.Push(memberExpressionBody);
