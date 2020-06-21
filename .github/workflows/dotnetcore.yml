@@ -36,4 +36,3 @@ jobs:
       with:
         name: "Nuget Package"
         path: "*.nupkg"
-

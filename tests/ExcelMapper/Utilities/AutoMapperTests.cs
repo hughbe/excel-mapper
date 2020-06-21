@@ -15,9 +15,9 @@ namespace ExcelMapper.Utilities.Tests
             Assert.True(AutoMapper.TryCreateClassMap<TestClass>(emptyValueStrategy, out ExcelClassMap<TestClass> classMap));
             Assert.Equal(emptyValueStrategy, classMap.EmptyValueStrategy);
             Assert.Equal(typeof(TestClass), classMap.Type);
-            Assert.Equal(5, classMap.Mappings.Count);
+            Assert.Equal(5, classMap.Properties.Count);
 
-            IEnumerable<string> members = classMap.Mappings.Select(m => m.Member.Name);
+            IEnumerable<string> members = classMap.Properties.Select(m => m.Member.Name);
             Assert.Contains("_inheritedField", members);
             Assert.Contains("_field", members);
             Assert.Contains("InheritedProperty", members);

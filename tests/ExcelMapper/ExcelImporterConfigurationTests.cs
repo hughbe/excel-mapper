@@ -33,13 +33,13 @@ namespace ExcelMapper.Tests
             TestMap map = Assert.IsType<TestMap>(classMap);
             Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
             Assert.Equal(typeof(int), map.Type);
-            Assert.Empty(map.Mappings);
+            Assert.Empty(map.Properties);
 
             Assert.True(importer.Configuration.TryGetClassMap(typeof(int), out classMap));
             map = Assert.IsType<TestMap>(classMap);
             Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
             Assert.Equal(typeof(int), map.Type);
-            Assert.Empty(map.Mappings);
+            Assert.Empty(map.Properties);
         }
 
         [Fact]

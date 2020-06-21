@@ -5,7 +5,6 @@ using System.Reflection;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Readers;
-using ExcelMapper.Utilities;
 
 namespace ExcelMapper
 {
@@ -15,7 +14,7 @@ namespace ExcelMapper
     /// Reads multiple cells of an excel sheet and maps the value of the cell to the
     /// type of the property or field.
     /// </summary>
-    public class ManyToOneEnumerablePropertyMap<T> : ManyToOnePropertyMap<T>
+    public class ManyToOneEnumerableMap<T> : Map
     {
         public IMultipleCellValuesReader _cellValuesReader;
 
@@ -35,37 +34,35 @@ namespace ExcelMapper
         /// Constructs a map that reads one or more values from one or more cells and maps these values to one
         /// property and field of the type of the property or field.
         /// </summary>
-        /// <param name="member">The property or field to map the value of a one or more cells to.</param>
-        /// <param name="cellValuesReader">The reader.</param>
-        public ManyToOneEnumerablePropertyMap(MemberInfo member, IMultipleCellValuesReader cellValuesReader, IValuePipeline<T> elementPipeline, CreateElementsFactory<T> createElementsFactory) : base(member)
+        public ManyToOneEnumerableMap(IMultipleCellValuesReader cellValuesReader, IValuePipeline<T> elementPipeline, CreateElementsFactory<T> createElementsFactory)
         {
-            Type memberType = member.MemberType();
             CellValuesReader = cellValuesReader ?? throw new ArgumentNullException(nameof(cellValuesReader));
             ElementPipeline = elementPipeline ?? throw new ArgumentNullException(nameof(elementPipeline));
             CreateElementsFactory = createElementsFactory ?? throw new ArgumentNullException(nameof(createElementsFactory));
         }
 
-        public override void SetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, object instance)
+        public override bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object value)
         {
             if (!CellValuesReader.TryGetValues(sheet, rowIndex, reader, out IEnumerable<ReadCellValueResult> results))
             {
                 if (Optional)
                 {
-                    return;
+                    value = default;
+                    return false;
                 }
 
-                throw new ExcelMappingException($"Could not read value for {Member.Name}", sheet, rowIndex);
+                throw new ExcelMappingException($"Could not read value for {member.Name}", sheet, rowIndex);
             }
 
             var elements = new List<T>();
-            foreach (ReadCellValueResult value in results)
+            foreach (ReadCellValueResult result in results)
             {
-                T elementValue = (T)ValuePipeline.GetPropertyValue(ElementPipeline, sheet, rowIndex, reader, value, Member);
+                T elementValue = (T)ValuePipeline.GetPropertyValue(ElementPipeline, sheet, rowIndex, reader, result, member);
                 elements.Add(elementValue);
             }
 
-            object result = CreateElementsFactory(elements);
-            SetPropertyFactory(instance, result);
+            value = CreateElementsFactory(elements);
+            return true;
         }
 
         /// <summary>
@@ -73,7 +70,7 @@ namespace ExcelMapper
         /// or the index is invalid, an exception will not be thrown.
         /// </summary>
         /// <returns>The property map on which this method was invoked.</returns>
-        public ManyToOneEnumerablePropertyMap<T> MakeOptional()
+        public ManyToOneEnumerableMap<T> MakeOptional()
         {
             Optional = true;
             return this;
@@ -86,7 +83,7 @@ namespace ExcelMapper
         /// <param name="elementMap">The pipeline that maps the value of a single cell to an object of the element type of the property
         /// or field.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public ManyToOneEnumerablePropertyMap<T> WithElementMap(Func<IValuePipeline<T>, IValuePipeline<T>> elementMap)
+        public ManyToOneEnumerableMap<T> WithElementMap(Func<IValuePipeline<T>, IValuePipeline<T>> elementMap)
         {
             if (elementMap == null)
             {
@@ -103,7 +100,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="columnName">The name of the column containing the cell to split.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public ManyToOneEnumerablePropertyMap<T> WithColumnName(string columnName)
+        public ManyToOneEnumerableMap<T> WithColumnName(string columnName)
         {
             var columnReader = new ColumnNameValueReader(columnName);
             if (CellValuesReader is SplitCellValueReader splitColumnReader)
@@ -124,7 +121,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="columnIndex">The zero-bassed index of the column containing the cell to split.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public ManyToOneEnumerablePropertyMap<T> WithColumnIndex(int columnIndex)
+        public ManyToOneEnumerableMap<T> WithColumnIndex(int columnIndex)
         {
             var reader = new ColumnIndexValueReader(columnIndex);
             if (CellValuesReader is SplitCellValueReader splitColumnReader)
@@ -145,7 +142,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="separators">The separators used to split the value of a single cell.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public ManyToOneEnumerablePropertyMap<T> WithSeparators(params char[] separators)
+        public ManyToOneEnumerableMap<T> WithSeparators(params char[] separators)
         {
             if (!(CellValuesReader is SplitCellValueReader splitColumnReader))
             {
@@ -166,7 +163,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="separators">The separators used to split the value of a single cell.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public ManyToOneEnumerablePropertyMap<T> WithSeparators(IEnumerable<char> separators)
+        public ManyToOneEnumerableMap<T> WithSeparators(IEnumerable<char> separators)
         {
             return WithSeparators(separators?.ToArray());
         }
@@ -177,7 +174,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="separators">The separators used to split the value of a single cell.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public ManyToOneEnumerablePropertyMap<T> WithSeparators(params string[] separators)
+        public ManyToOneEnumerableMap<T> WithSeparators(params string[] separators)
         {
             if (!(CellValuesReader is SplitCellValueReader splitColumnReader))
             {
@@ -198,7 +195,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="separators">The separators used to split the value of a single cell.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public ManyToOneEnumerablePropertyMap<T> WithSeparators(IEnumerable<string> separators)
+        public ManyToOneEnumerableMap<T> WithSeparators(IEnumerable<string> separators)
         {
             return WithSeparators(separators?.ToArray());
         }
@@ -209,7 +206,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="columnNames">The name of each column to read.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public ManyToOneEnumerablePropertyMap<T> WithColumnNames(params string[] columnNames)
+        public ManyToOneEnumerableMap<T> WithColumnNames(params string[] columnNames)
         {
             CellValuesReader = new MultipleColumnNamesValueReader(columnNames);
             return this;
@@ -221,7 +218,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="columnNames">The name of each column to read.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public ManyToOneEnumerablePropertyMap<T> WithColumnNames(IEnumerable<string> columnNames)
+        public ManyToOneEnumerableMap<T> WithColumnNames(IEnumerable<string> columnNames)
         {
             return WithColumnNames(columnNames?.ToArray());
         }
@@ -232,7 +229,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="columnIndices">The zero-based index of each column to read.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public ManyToOneEnumerablePropertyMap<T> WithColumnIndices(params int[] columnIndices)
+        public ManyToOneEnumerableMap<T> WithColumnIndices(params int[] columnIndices)
         {
             CellValuesReader = new MultipleColumnIndicesValueReader(columnIndices);
             return this;
@@ -244,7 +241,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="columnIndices">The zero-based index of each column to read.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public ManyToOneEnumerablePropertyMap<T> WithColumnIndices(IEnumerable<int> columnIndices)
+        public ManyToOneEnumerableMap<T> WithColumnIndices(IEnumerable<int> columnIndices)
         {
             return WithColumnIndices(columnIndices?.ToArray());
         }

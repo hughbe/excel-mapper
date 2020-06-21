@@ -10,12 +10,12 @@ using Xunit;
 
 namespace ExcelMapper.Tests
 {
-    public class OneToOnePropertyMapExtensionsTests : ExcelClassMap<Helpers.TestClass>
+    public class OneToOneMapExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         [Fact]
         public void WithColumnName_ValidColumnName_Success()
         {
-            OneToOnePropertyMap<string> propertyMap = Map(t => t.Value);
+            OneToOneMap<string> propertyMap = Map(t => t.Value);
             Assert.Same(propertyMap, propertyMap.WithColumnName("ColumnName"));
 
             ColumnNameValueReader reader = Assert.IsType<ColumnNameValueReader>(propertyMap.CellReader);
@@ -25,7 +25,7 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnNameMatching_ValidColumnName_Success()
         {
-            OneToOnePropertyMap<string> propertyMap = Map(t => t.Value).WithColumnNameMatching(e => e == "ColumnName");
+            OneToOneMap<string> propertyMap = Map(t => t.Value).WithColumnNameMatching(e => e == "ColumnName");
             Assert.Same(propertyMap, propertyMap.WithColumnNameMatching(e => e == "ColumnName"));
 
             Assert.IsType<ColumnNameMatchingValueReader>(propertyMap.CellReader);
@@ -34,7 +34,7 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnName_OptionalColumn_Success()
         {
-            OneToOnePropertyMap<string> propertyMap = Map(t => t.Value).MakeOptional();
+            OneToOneMap<string> propertyMap = Map(t => t.Value).MakeOptional();
             Assert.True(propertyMap.Optional);
             Assert.Same(propertyMap, propertyMap.WithColumnName("ColumnName"));
             Assert.True(propertyMap.Optional);
@@ -46,14 +46,14 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnName_NullColumnName_ThrowsArgumentNullException()
         {
-            OneToOnePropertyMap<string> propertyMap = Map(t => t.Value);
+            OneToOneMap<string> propertyMap = Map(t => t.Value);
             Assert.Throws<ArgumentNullException>("columnName", () => propertyMap.WithColumnName(null));
         }
 
         [Fact]
         public void WithColumnName_EmptyColumnName_ThrowsArgumentException()
         {
-            OneToOnePropertyMap<string> propertyMap = Map(t => t.Value);
+            OneToOneMap<string> propertyMap = Map(t => t.Value);
             Assert.Throws<ArgumentException>("columnName", () => propertyMap.WithColumnName(string.Empty));
         }
 
@@ -62,7 +62,7 @@ namespace ExcelMapper.Tests
         [InlineData(1)]
         public void WithColumnIndex_ValidColumnIndex_Success(int columnIndex)
         {
-            OneToOnePropertyMap<string> propertyMap = Map(t => t.Value);
+            OneToOneMap<string> propertyMap = Map(t => t.Value);
             Assert.Same(propertyMap, propertyMap.WithColumnIndex(columnIndex));
 
             ColumnIndexValueReader reader = Assert.IsType<ColumnIndexValueReader>(propertyMap.CellReader);
@@ -72,7 +72,7 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnIndex_OptionalColumn_Success()
         {
-            OneToOnePropertyMap<string> propertyMap = Map(t => t.Value).MakeOptional();
+            OneToOneMap<string> propertyMap = Map(t => t.Value).MakeOptional();
             Assert.True(propertyMap.Optional);
             Assert.Same(propertyMap, propertyMap.WithColumnIndex(1));
             Assert.True(propertyMap.Optional);
@@ -84,7 +84,7 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnIndex_NegativeColumnIndex_ThrowsArgumentOutOfRangeException()
         {
-            OneToOnePropertyMap<string> propertyMap = Map(t => t.Value);
+            OneToOneMap<string> propertyMap = Map(t => t.Value);
 
             Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => propertyMap.WithColumnIndex(-1));
         }

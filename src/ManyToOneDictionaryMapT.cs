@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -15,8 +15,20 @@ namespace ExcelMapper
     /// property or field. This is used to map IDictionary properties and fields.
     /// </summary>
     /// <typeparam name="T">The element type of the IDictionary property or field.</typeparam>
-    public class ManyToOneDictionaryPropertyMap<T> : ManyToOnePropertyMap<T>
+    public class ManyToOneDictionaryMap<T> : Map
     {
+        /// <summary>
+        /// Constructs a map reads one or more values from one or more cells and maps these values as element
+        /// contained by the property or field.
+        /// </summary>
+        /// <param name="valuePipeline">The map that maps the value of a single cell to an object of the element type of the property or field.</param>
+        public ManyToOneDictionaryMap(IMultipleCellValuesReader cellValuesReader, IValuePipeline<T> valuePipeline, CreateDictionaryFactory<T> createDictionaryFactory)
+        {
+            CellValuesReader = cellValuesReader ?? throw new ArgumentNullException(nameof(cellValuesReader));
+            ValuePipeline = valuePipeline ?? throw new ArgumentNullException(nameof(valuePipeline));
+            CreateDictionaryFactory = createDictionaryFactory ?? throw new ArgumentNullException(nameof(createDictionaryFactory));
+        }
+
         /// <summary>
         /// Gets the map that maps the value of a single cell to an object of the element type of the property
         /// or field.
@@ -37,37 +49,24 @@ namespace ExcelMapper
 
         public CreateDictionaryFactory<T> CreateDictionaryFactory { get; }
 
-        /// <summary>
-        /// Constructs a map reads one or more values from one or more cells and maps these values as element
-        /// contained by the property or field.
-        /// </summary>
-        /// <param name="member">The property or field to map the values of one or more cell to.</param>
-        /// <param name="valuePipeline">The map that maps the value of a single cell to an object of the element type of the property or field.</param>
-        public ManyToOneDictionaryPropertyMap(MemberInfo member, IMultipleCellValuesReader cellValuesReader, IValuePipeline<T> valuePipeline, CreateDictionaryFactory<T> createDictionaryFactory) : base(member)
-        {
-            CellValuesReader = cellValuesReader ?? throw new ArgumentNullException(nameof(cellValuesReader));
-            ValuePipeline = valuePipeline ?? throw new ArgumentNullException(nameof(valuePipeline));
-            CreateDictionaryFactory = createDictionaryFactory ?? throw new ArgumentNullException(nameof(createDictionaryFactory));
-        }
-
-        public override void SetPropertyValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, object instance)
+        public override bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object value)
         {
             if (!CellValuesReader.TryGetValues(sheet, rowIndex, reader, out IEnumerable<ReadCellValueResult> valueResults))
             {
-                throw new ExcelMappingException($"Could not read value for \"{Member.Name}\"", sheet, rowIndex);
+                throw new ExcelMappingException($"Could not read value for \"{member.Name}\"", sheet, rowIndex);
             }
 
             var values = new List<T>();
             foreach (ReadCellValueResult valueResult in valueResults)
             {
-                T value = (T)ExcelMapper.ValuePipeline.GetPropertyValue(ValuePipeline, sheet, rowIndex, reader, valueResult, Member);
-                values.Add(value);
+                T keyValue = (T)ExcelMapper.ValuePipeline.GetPropertyValue(ValuePipeline, sheet, rowIndex, reader, valueResult, member);
+                values.Add(keyValue);
             }
 
             IEnumerable<string> keys = valueResults.Select(r => sheet.Heading.GetColumnName(r.ColumnIndex));
-            IEnumerable<KeyValuePair<string, T>> elements = keys.Zip(values, (key, value) => new KeyValuePair<string, T>(key, value));
-            object result = CreateDictionaryFactory(elements);
-            SetPropertyFactory(instance, result);
+            IEnumerable<KeyValuePair<string, T>> elements = keys.Zip(values, (key, keyValue) => new KeyValuePair<string, T>(key, keyValue));
+            value = CreateDictionaryFactory(elements);
+            return true;
         }
 
         /// <summary>
@@ -76,7 +75,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="columnNames">The name of each column to read.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public ManyToOneDictionaryPropertyMap<T> WithColumnNames(params string[] columnNames)
+        public ManyToOneDictionaryMap<T> WithColumnNames(params string[] columnNames)
         {
             CellValuesReader = new MultipleColumnNamesValueReader(columnNames);
             return this;
@@ -88,7 +87,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="columnNames">The name of each column to read.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public ManyToOneDictionaryPropertyMap<T> WithColumnNames(IEnumerable<string> columnNames)
+        public ManyToOneDictionaryMap<T> WithColumnNames(IEnumerable<string> columnNames)
         {
             return WithColumnNames(columnNames?.ToArray());
         }
@@ -100,7 +99,7 @@ namespace ExcelMapper
         /// <param name="valueMap">The pipeline that maps the value of a single cell to an object of the element type of the property
         /// or field.</param>
         /// <returns>The property map that invoked this method.</returns>
-        public ManyToOneDictionaryPropertyMap<T> WithValueMap(Func<IValuePipeline<T>, IValuePipeline<T>> valueMap)
+        public ManyToOneDictionaryMap<T> WithValueMap(Func<IValuePipeline<T>, IValuePipeline<T>> valueMap)
         {
             if (valueMap == null)
             {

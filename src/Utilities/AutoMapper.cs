@@ -21,11 +21,11 @@ namespace ExcelMapper.Utilities
         private static MethodInfo s_tryCreateGenericDictionaryMapMethod;
         private static MethodInfo TryCreateGenericDictionaryMapMethod => s_tryCreateGenericDictionaryMapMethod ?? (s_tryCreateGenericDictionaryMapMethod = typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateGenericDictionaryMap)));
 
-        private static bool TryCreateMemberMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out ExcelPropertyMap map)
+        private static bool TryCreateMemberMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out Map map)
         {
             // First, check if this is a well-known type (e.g. string/int).
             // This is a simple conversion from the cell's value to the type.
-            if (TryCreatePrimitiveMap(member, emptyValueStrategy, out OneToOnePropertyMap<T> singleMap))
+            if (TryCreatePrimitiveMap(member, emptyValueStrategy, out OneToOneMap<T> singleMap))
             {
                 map = singleMap;
                 return true;
@@ -33,7 +33,7 @@ namespace ExcelMapper.Utilities
 
             // Secondly, check if this is a dictionary.
             // This requires converting each value to the value type of the collection.
-            if (TryCreateDictionaryMap(member, emptyValueStrategy, out ExcelPropertyMap dictionaryMap))
+            if (TryCreateDictionaryMap(member.MemberType(), emptyValueStrategy, out Map dictionaryMap))
             {
                 map = dictionaryMap;
                 return true;
@@ -41,7 +41,7 @@ namespace ExcelMapper.Utilities
 
             // Thirdly, check if this is a collection (e.g. array, list).
             // This requires converting each value to the element type of the collection.
-            if (TryCreateEnumerableMap(member, emptyValueStrategy, out ExcelPropertyMap multiMap))
+            if (TryCreateEnumerableMap(member, emptyValueStrategy, out Map multiMap))
             {
                 map = multiMap;
                 return true;
@@ -49,7 +49,7 @@ namespace ExcelMapper.Utilities
 
             // Fourthly, check if this is an object.
             // This requires converting each member and setting it on the object.
-            if (TryCreateObjectMap(member, emptyValueStrategy, out ManyToOneObjectPropertyMap<T> objectMap))
+            if (TryCreateObjectMap(emptyValueStrategy, out ExcelClassMap<T> objectMap))
             {
                 map = objectMap;
                 return true;
@@ -74,7 +74,7 @@ namespace ExcelMapper.Utilities
             return true;
         }
 
-        internal static bool TryCreatePrimitiveMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out OneToOnePropertyMap<T> map)
+        internal static bool TryCreatePrimitiveMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out OneToOneMap<T> map)
         {
             if (!TryGetWellKnownMap(typeof(T), emptyValueStrategy, out ICellValueMapper mapper, out IFallbackItem emptyFallback, out IFallbackItem invalidFallback))
             {
@@ -83,7 +83,7 @@ namespace ExcelMapper.Utilities
             }
 
             ISingleCellValueReader defaultReader = GetDefaultSingleCellValueReader(member);
-            map = new OneToOnePropertyMap<T>(member, defaultReader)
+            map = new OneToOneMap<T>(defaultReader)
                 .WithCellValueMappers(mapper)
                 .WithEmptyFallbackItem(emptyFallback)
                 .WithInvalidFallbackItem(invalidFallback);
@@ -186,7 +186,7 @@ namespace ExcelMapper.Utilities
             return true;
         }
 
-        private static bool TryCreateEnumerableMap(MemberInfo member, FallbackStrategy emptyValueStrategy, out ExcelPropertyMap map)
+        private static bool TryCreateEnumerableMap(MemberInfo member, FallbackStrategy emptyValueStrategy, out Map map)
         {
             if (!member.MemberType().GetElementTypeOrEnumerableType(out Type elementType))
             {
@@ -200,7 +200,7 @@ namespace ExcelMapper.Utilities
             bool result = (bool)method.Invoke(null, parameters);
             if (result)
             {
-                map = (ExcelPropertyMap)parameters[2];
+                map = (Map)parameters[2];
                 return true;
             }
 
@@ -208,7 +208,7 @@ namespace ExcelMapper.Utilities
             return false;
         }
 
-        internal static bool TryCreateGenericEnumerableMap<TElement>(MemberInfo member, FallbackStrategy emptyValueStrategy, out ManyToOneEnumerablePropertyMap<TElement> map)
+        internal static bool TryCreateGenericEnumerableMap<TElement>(MemberInfo member, FallbackStrategy emptyValueStrategy, out ManyToOneEnumerableMap<TElement> map)
         {
             // First, get the pipeline for the element. This is used to convert individual values
             // to be added to/included in the collection.
@@ -228,7 +228,7 @@ namespace ExcelMapper.Utilities
             // Default to splitting.
             var defaultNameReader = GetDefaultSingleCellValueReader(member);
             var defaultReader = new CharSplitCellValueReader(defaultNameReader);
-            map = new ManyToOneEnumerablePropertyMap<TElement>(member, defaultReader, elementMapping, factory);
+            map = new ManyToOneEnumerableMap<TElement>(defaultReader, elementMapping, factory);
             return true;
         }
 
@@ -267,10 +267,10 @@ namespace ExcelMapper.Utilities
             return false;
         }
 
-        public static bool TryCreateDictionaryMap(MemberInfo member, FallbackStrategy emptyValueStrategy, out ExcelPropertyMap map)
+        public static bool TryCreateDictionaryMap(Type memberType, FallbackStrategy emptyValueStrategy, out Map map)
         {
             // We should be able to parse anything that implements IEnumerable<KeyValuePair<TKey, TValue>>
-            if (!member.MemberType().ImplementsGenericInterface(typeof(IEnumerable<>), out Type keyValuePairType))
+            if (!memberType.ImplementsGenericInterface(typeof(IEnumerable<>), out Type keyValuePairType))
             {
                 map = null;
                 return false;
@@ -286,11 +286,11 @@ namespace ExcelMapper.Utilities
             Type valueType = arguments[1];
             MethodInfo method = TryCreateGenericDictionaryMapMethod.MakeGenericMethod(keyType, valueType);
 
-            var parameters = new object[] { member, emptyValueStrategy, null };
+            var parameters = new object[] { memberType, emptyValueStrategy, null };
             bool result = (bool)method.Invoke(null, parameters);
             if (result)
             {
-                map = (ExcelPropertyMap)parameters[2];
+                map = (Map)parameters[2];
                 return true;
             }
 
@@ -298,18 +298,15 @@ namespace ExcelMapper.Utilities
             return false;
         }
 
-        internal static bool TryCreateGenericDictionaryMap<TKey, TValue>(MemberInfo member, FallbackStrategy emptyValueStrategy, out ManyToOneDictionaryPropertyMap<TValue> map)
+        internal static bool TryCreateGenericDictionaryMap<TKey, TValue>(Type memberType, FallbackStrategy emptyValueStrategy, out ManyToOneDictionaryMap<TValue> map)
         {
-            Type rawType = member.MemberType();
-            TypeInfo rawTypeInfo = rawType.GetTypeInfo();
-
             if (!TryCreatePrimitivePipeline<TValue>(emptyValueStrategy, out ValuePipeline<TValue> valuePipeline))
             {
                 map = null;
                 return false;
             }
 
-            if (!TryGetCreateDictionaryFactory<TKey, TValue>(member.MemberType(), out CreateDictionaryFactory<TValue> factory))
+            if (!TryGetCreateDictionaryFactory<TKey, TValue>(memberType, out CreateDictionaryFactory<TValue> factory))
             {
                 map = null;
                 return false;
@@ -317,7 +314,7 @@ namespace ExcelMapper.Utilities
 
             // Default to all columns.
             var defaultReader = new AllColumnNamesValueReader();
-            map = new ManyToOneDictionaryPropertyMap<TValue>(member, defaultReader, valuePipeline, factory);
+            map = new ManyToOneDictionaryMap<TValue>(defaultReader, valuePipeline, factory);
             return true;
         }
 
@@ -359,7 +356,7 @@ namespace ExcelMapper.Utilities
             return false;
         }
 
-        internal static bool TryCreateObjectMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out ManyToOneObjectPropertyMap<T> mapping)
+        internal static bool TryCreateObjectMap<T>(FallbackStrategy emptyValueStrategy, out ExcelClassMap<T> mapping)
         {
             if (!TryCreateClassMap(emptyValueStrategy, out ExcelClassMap<T> excelClassMap))
             {
@@ -367,7 +364,7 @@ namespace ExcelMapper.Utilities
                 return false;
             }
 
-            mapping = new ManyToOneObjectPropertyMap<T>(member, excelClassMap);
+            mapping = excelClassMap;
             return true;
         }
 
@@ -420,7 +417,7 @@ namespace ExcelMapper.Utilities
                 }
 
                 // Get the out parameter representing the property map for the member.
-                map.Mappings.Add((ExcelPropertyMap)parameters[2]);
+                map.Properties.Add(new ExcelPropertyMap(member, (Map)parameters[2]));
             }
 
             classMap = map;

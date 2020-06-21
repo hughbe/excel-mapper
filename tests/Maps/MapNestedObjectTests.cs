@@ -7,18 +7,17 @@ namespace ExcelMapper.Tests
         [Fact]
         public void ReadRow_AutoMappedObject_ReturnsExpected()
         {
-            using (var importer = Helpers.GetImporter("NestedObjects.xlsx"))
-            {
-                ExcelSheet sheet = importer.ReadSheet();
-                sheet.ReadHeading();
+            using var importer = Helpers.GetImporter("NestedObjects.xlsx");
 
-                NestedObjectValue row1 = sheet.ReadRow<NestedObjectValue>();
-                Assert.Equal("a", row1.SubValue1.StringValue);
-                Assert.Equal(new string[] { "a", "b" }, row1.SubValue1.SplitStringValue);
-                Assert.Equal(1, row1.SubValue2.IntValue);
-                Assert.Equal(10, row1.SubValue2.SubValue.SubInt);
-                Assert.Equal("c", row1.SubValue2.SubValue.SubString);
-            }
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            NestedObjectValue row1 = sheet.ReadRow<NestedObjectValue>();
+            Assert.Equal("a", row1.SubValue1.StringValue);
+            Assert.Equal(new string[] { "a", "b" }, row1.SubValue1.SplitStringValue);
+            Assert.Equal(1, row1.SubValue2.IntValue);
+            Assert.Equal(10, row1.SubValue2.SubValue.SubInt);
+            Assert.Equal("c", row1.SubValue2.SubValue.SubString);
         }
 
         private class NestedObjectValue
@@ -48,20 +47,18 @@ namespace ExcelMapper.Tests
         [Fact]
         public void ReadRow_CustomMappedObject_ReturnsExpected()
         {
-            using (var importer = Helpers.GetImporter("NestedObjects.xlsx"))
-            {
-                importer.Configuration.RegisterClassMap<ObjectValueCustomClassMapMap>();
+            using var importer = Helpers.GetImporter("NestedObjects.xlsx");
+            importer.Configuration.RegisterClassMap<ObjectValueCustomClassMapMap>();
 
-                ExcelSheet sheet = importer.ReadSheet();
-                sheet.ReadHeading();
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
 
-                NestedObjectValue row1 = sheet.ReadRow<NestedObjectValue>();
-                Assert.Equal("a", row1.SubValue1.StringValue);
-                Assert.Equal(new string[] { "a", "b" }, row1.SubValue1.SplitStringValue);
-                Assert.Equal(1, row1.SubValue2.IntValue);
-                Assert.Equal(10, row1.SubValue2.SubValue.SubInt);
-                Assert.Equal("c", row1.SubValue2.SubValue.SubString);
-            }
+            NestedObjectValue row1 = sheet.ReadRow<NestedObjectValue>();
+            Assert.Equal("a", row1.SubValue1.StringValue);
+            Assert.Equal(new string[] { "a", "b" }, row1.SubValue1.SplitStringValue);
+            Assert.Equal(1, row1.SubValue2.IntValue);
+            Assert.Equal(10, row1.SubValue2.SubValue.SubInt);
+            Assert.Equal("c", row1.SubValue2.SubValue.SubString);
         }
 
         private class ObjectValueCustomClassMapMap : ExcelClassMap<NestedObjectValue>
@@ -91,20 +88,18 @@ namespace ExcelMapper.Tests
         [Fact]
         public void ReadRow_CustomInnerObjectMap_ReturnsExpected()
         {
-            using (var importer = Helpers.GetImporter("NestedObjects.xlsx"))
-            {
-                importer.Configuration.RegisterClassMap<ObjectValueInnerMap>();
+            using var importer = Helpers.GetImporter("NestedObjects.xlsx");
+            importer.Configuration.RegisterClassMap<ObjectValueInnerMap>();
 
-                ExcelSheet sheet = importer.ReadSheet();
-                sheet.ReadHeading();
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
 
-                NestedObjectValue row1 = sheet.ReadRow<NestedObjectValue>();
-                Assert.Equal("a", row1.SubValue1.StringValue);
-                Assert.Equal(new string[] { "a", "b" }, row1.SubValue1.SplitStringValue);
-                Assert.Equal(1, row1.SubValue2.IntValue);
-                Assert.Equal(10, row1.SubValue2.SubValue.SubInt);
-                Assert.Equal("c", row1.SubValue2.SubValue.SubString);
-            }
+            NestedObjectValue row1 = sheet.ReadRow<NestedObjectValue>();
+            Assert.Equal("a", row1.SubValue1.StringValue);
+            Assert.Equal(new string[] { "a", "b" }, row1.SubValue1.SplitStringValue);
+            Assert.Equal(1, row1.SubValue2.IntValue);
+            Assert.Equal(10, row1.SubValue2.SubValue.SubInt);
+            Assert.Equal("c", row1.SubValue2.SubValue.SubString);
         }
 
         private class ObjectValueInnerMap : ExcelClassMap<NestedObjectValue>
