@@ -120,7 +120,7 @@ namespace ExcelMapper.Tests
                 Map(p => p.ListString)
                     .WithColumnNames("ListString1", "ListString2");
 
-                Map<string>(p => p._concreteICollection)
+                Map(p => (ICollection<string>)p._concreteICollection)
                     .WithColumnNames("ListString1", "ListString2");
 
                 Map<string>(p => p.CollectionString)

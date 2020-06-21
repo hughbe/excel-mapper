@@ -197,6 +197,38 @@ namespace ExcelMapper
 
         /// <summary>
         /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping IReadOnlyCollections.
+        /// </summary>
+        /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <returns>The map for the given property or field.</returns>
+        public ManyToOneEnumerablePropertyMap<TProperty> Map<TProperty>(Expression<Func<T, IReadOnlyCollection<TProperty>>> expression)
+        {
+            MemberExpression memberExpression = GetMemberExpression(expression);
+            ManyToOneEnumerablePropertyMap<TProperty> mapping = GetMultiMap<TProperty>(memberExpression.Member);
+
+            AddMap(mapping, expression);
+            return mapping;
+        }
+
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping IReadOnlyLists.
+        /// </summary>
+        /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <returns>The map for the given property or field.</returns>
+        public ManyToOneEnumerablePropertyMap<TProperty> Map<TProperty>(Expression<Func<T, IReadOnlyList<TProperty>>> expression)
+        {
+            MemberExpression memberExpression = GetMemberExpression(expression);
+            ManyToOneEnumerablePropertyMap<TProperty> mapping = GetMultiMap<TProperty>(memberExpression.Member);
+
+            AddMap(mapping, expression);
+            return mapping;
+        }
+
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
         /// This is used for mapping lists.
         /// </summary>
         /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
@@ -254,6 +286,22 @@ namespace ExcelMapper
         /// <param name="expression">A MemberExpression reading the property or field.</param>
         /// <returns>The map for the given property or field.</returns>
         public ManyToOneDictionaryPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, IDictionary<string, TProperty>>> expression)
+        {
+            MemberExpression memberExpression = GetMemberExpression(expression);
+            var map = GetDictionaryMap<string, TProperty>(memberExpression.Member);
+
+            AddMap(map, expression);
+            return map;
+        }
+
+        /// <summary>
+        /// Creates a map for a property or field given a MemberExpression reading the property or field.
+        /// This is used for mapping IReadOnlyDictionarys.
+        /// </summary>
+        /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+        /// <param name="expression">A MemberExpression reading the property or field.</param>
+        /// <returns>The map for the given property or field.</returns>
+        public ManyToOneDictionaryPropertyMap<TProperty> Map<TProperty>(Expression<Func<T, IReadOnlyDictionary<string, TProperty>>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
             var map = GetDictionaryMap<string, TProperty>(memberExpression.Member);

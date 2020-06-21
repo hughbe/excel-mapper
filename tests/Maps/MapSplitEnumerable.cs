@@ -123,6 +123,52 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRow_AutoMappedICollectionObject_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ICollectionObjectClass row1 = sheet.ReadRow<ICollectionObjectClass>();
+            Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+
+            ICollectionObjectClass row2 = sheet.ReadRow<ICollectionObjectClass>();
+            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+
+            ICollectionObjectClass row3 = sheet.ReadRow<ICollectionObjectClass>();
+            Assert.Equal(new string[] { "1" }, row3.Value);
+
+            ICollectionObjectClass row4 = sheet.ReadRow<ICollectionObjectClass>();
+            Assert.Empty(row4.Value);
+
+            ICollectionObjectClass row5 = sheet.ReadRow<ICollectionObjectClass>();
+            Assert.Equal(new string[] { "Invalid" }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedICollectionInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ICollectionIntClass row1 = sheet.ReadRow<ICollectionIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ICollectionIntClass>());
+
+            ICollectionIntClass row3 = sheet.ReadRow<ICollectionIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ICollectionIntClass row4 = sheet.ReadRow<ICollectionIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ICollectionIntClass>());
+        }
+
+        [Fact]
         public void ReadRow_AutoMappedIListObject_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
@@ -166,6 +212,98 @@ namespace ExcelMapper.Tests
             Assert.Empty(row4.Value);
 
             Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IListIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedIReadOnlyCollectionObject_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IReadOnlyCollectionObjectClass row1 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+            Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+
+            IReadOnlyCollectionObjectClass row2 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+
+            IReadOnlyCollectionObjectClass row3 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+            Assert.Equal(new string[] { "1" }, row3.Value);
+
+            IReadOnlyCollectionObjectClass row4 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+            Assert.Empty(row4.Value);
+
+            IReadOnlyCollectionObjectClass row5 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+            Assert.Equal(new string[] { "Invalid" }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedIReadOnlyCollectionInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IReadOnlyCollectionIntClass row1 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyCollectionIntClass>());
+
+            IReadOnlyCollectionIntClass row3 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IReadOnlyCollectionIntClass row4 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyCollectionIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedIReadOnlyListObject_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IReadOnlyListObjectClass row1 = sheet.ReadRow<IReadOnlyListObjectClass>();
+            Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+
+            IReadOnlyListObjectClass row2 = sheet.ReadRow<IReadOnlyListObjectClass>();
+            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+
+            IReadOnlyListObjectClass row3 = sheet.ReadRow<IReadOnlyListObjectClass>();
+            Assert.Equal(new string[] { "1" }, row3.Value);
+
+            IReadOnlyListObjectClass row4 = sheet.ReadRow<IReadOnlyListObjectClass>();
+            Assert.Empty(row4.Value);
+
+            IReadOnlyListObjectClass row5 = sheet.ReadRow<IReadOnlyListObjectClass>();
+            Assert.Equal(new string[] { "Invalid" }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedIReadOnlyListInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IReadOnlyListIntClass row1 = sheet.ReadRow<IReadOnlyListIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyListIntClass>());
+
+            IReadOnlyListIntClass row3 = sheet.ReadRow<IReadOnlyListIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IReadOnlyListIntClass row4 = sheet.ReadRow<IReadOnlyListIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyListIntClass>());
         }
 
         [Fact]
@@ -358,6 +496,54 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRow_DefaultMappedICollectionObject_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultICollectionObjectClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ICollectionObjectClass row1 = sheet.ReadRow<ICollectionObjectClass>();
+            Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+
+            ICollectionObjectClass row2 = sheet.ReadRow<ICollectionObjectClass>();
+            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+
+            ICollectionObjectClass row3 = sheet.ReadRow<ICollectionObjectClass>();
+            Assert.Equal(new string[] { "1" }, row3.Value);
+
+            ICollectionObjectClass row4 = sheet.ReadRow<ICollectionObjectClass>();
+            Assert.Empty(row4.Value);
+
+            ICollectionObjectClass row5 = sheet.ReadRow<ICollectionObjectClass>();
+            Assert.Equal(new string[] { "Invalid" }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedICollectionInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultICollectionIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ICollectionIntClass row1 = sheet.ReadRow<ICollectionIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ICollectionIntClass>());
+
+            ICollectionIntClass row3 = sheet.ReadRow<ICollectionIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ICollectionIntClass row4 = sheet.ReadRow<ICollectionIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ICollectionIntClass>());
+        }
+
+        [Fact]
         public void ReadRow_DefaultMappedIListObject_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
@@ -403,6 +589,102 @@ namespace ExcelMapper.Tests
             Assert.Empty(row4.Value);
 
             Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IListIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedIReadOnlyCollectionObject_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultIReadOnlyCollectionObjectClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IReadOnlyCollectionObjectClass row1 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+            Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+
+            IReadOnlyCollectionObjectClass row2 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+
+            IReadOnlyCollectionObjectClass row3 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+            Assert.Equal(new string[] { "1" }, row3.Value);
+
+            IReadOnlyCollectionObjectClass row4 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+            Assert.Empty(row4.Value);
+
+            IReadOnlyCollectionObjectClass row5 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+            Assert.Equal(new string[] { "Invalid" }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedIReadOnlyCollectionInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultIReadOnlyCollectionIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IReadOnlyCollectionIntClass row1 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyCollectionIntClass>());
+
+            IReadOnlyCollectionIntClass row3 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IReadOnlyCollectionIntClass row4 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyCollectionIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedIReadOnlyListObject_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultIReadOnlyListObjectClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IReadOnlyListObjectClass row1 = sheet.ReadRow<IReadOnlyListObjectClass>();
+            Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+
+            IReadOnlyListObjectClass row2 = sheet.ReadRow<IReadOnlyListObjectClass>();
+            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+
+            IReadOnlyListObjectClass row3 = sheet.ReadRow<IReadOnlyListObjectClass>();
+            Assert.Equal(new string[] { "1" }, row3.Value);
+
+            IReadOnlyListObjectClass row4 = sheet.ReadRow<IReadOnlyListObjectClass>();
+            Assert.Empty(row4.Value);
+
+            IReadOnlyListObjectClass row5 = sheet.ReadRow<IReadOnlyListObjectClass>();
+            Assert.Equal(new string[] { "Invalid" }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedIReadOnlyListInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultIReadOnlyListIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IReadOnlyListIntClass row1 = sheet.ReadRow<IReadOnlyListIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyListIntClass>());
+
+            IReadOnlyListIntClass row3 = sheet.ReadRow<IReadOnlyListIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IReadOnlyListIntClass row4 = sheet.ReadRow<IReadOnlyListIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyListIntClass>());
         }
 
         [Fact]
@@ -502,6 +784,31 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRow_CustomMappedICollectionInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomICollectionIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ICollectionIntClass row1 = sheet.ReadRow<ICollectionIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            ICollectionIntClass row2 = sheet.ReadRow<ICollectionIntClass>();
+            Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
+
+            ICollectionIntClass row3 = sheet.ReadRow<ICollectionIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ICollectionIntClass row4 = sheet.ReadRow<ICollectionIntClass>();
+            Assert.Empty(row4.Value);
+
+            ICollectionIntClass row5 = sheet.ReadRow<ICollectionIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
         public void ReadRow_CustomMappedIListInt_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
@@ -523,6 +830,56 @@ namespace ExcelMapper.Tests
             Assert.Empty(row4.Value);
 
             IListIntClass row5 = sheet.ReadRow<IListIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedIReadOnlyCollectionInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomIReadOnlyCollectionIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IReadOnlyCollectionIntClass row1 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            IReadOnlyCollectionIntClass row2 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+            Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
+
+            IReadOnlyCollectionIntClass row3 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IReadOnlyCollectionIntClass row4 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+            Assert.Empty(row4.Value);
+
+            IReadOnlyCollectionIntClass row5 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedIReadOnlyListInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomIReadOnlyListIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IReadOnlyListIntClass row1 = sheet.ReadRow<IReadOnlyListIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            IReadOnlyListIntClass row2 = sheet.ReadRow<IReadOnlyListIntClass>();
+            Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
+
+            IReadOnlyListIntClass row3 = sheet.ReadRow<IReadOnlyListIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IReadOnlyListIntClass row4 = sheet.ReadRow<IReadOnlyListIntClass>();
+            Assert.Empty(row4.Value);
+
+            IReadOnlyListIntClass row5 = sheet.ReadRow<IReadOnlyListIntClass>();
             Assert.Equal(new int[] { -2 }, row5.Value);
         }
 
@@ -665,6 +1022,44 @@ namespace ExcelMapper.Tests
             }
         }
 
+        public class ICollectionObjectClass
+        {
+            public ICollection<object> Value { get; set; }
+        }
+
+        public class DefaultICollectionObjectClassMap : ExcelClassMap<ICollectionObjectClass>
+        {
+            public DefaultICollectionObjectClassMap()
+            {
+                Map(p => p.Value);
+            }
+        }
+
+        public class ICollectionIntClass
+        {
+            public ICollection<int> Value { get; set; }
+        }
+
+        public class DefaultICollectionIntClassMap : ExcelClassMap<ICollectionIntClass>
+        {
+            public DefaultICollectionIntClassMap()
+            {
+                Map(p => p.Value);
+            }
+        }
+
+        public class CustomICollectionIntClassMap : ExcelClassMap<ICollectionIntClass>
+        {
+            public CustomICollectionIntClassMap()
+            {
+                Map(p => p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
         public class IListObjectClass
         {
             public IList<object> Value { get; set; }
@@ -683,6 +1078,14 @@ namespace ExcelMapper.Tests
             public IList<int> Value { get; set; }
         }
 
+        public class DefaultIListIntClassMap : ExcelClassMap<IListIntClass>
+        {
+            public DefaultIListIntClassMap()
+            {
+                Map(p => p.Value);
+            }
+        }
+
         public class CustomIListIntClassMap : ExcelClassMap<IListIntClass>
         {
             public CustomIListIntClassMap()
@@ -695,11 +1098,79 @@ namespace ExcelMapper.Tests
             }
         }
 
-        public class DefaultIListIntClassMap : ExcelClassMap<IListIntClass>
+        public class IReadOnlyCollectionObjectClass
         {
-            public DefaultIListIntClassMap()
+            public IReadOnlyCollection<object> Value { get; set; }
+        }
+
+        public class DefaultIReadOnlyCollectionObjectClassMap : ExcelClassMap<IReadOnlyCollectionObjectClass>
+        {
+            public DefaultIReadOnlyCollectionObjectClassMap()
             {
                 Map(p => p.Value);
+            }
+        }
+
+        public class IReadOnlyCollectionIntClass
+        {
+            public IReadOnlyCollection<int> Value { get; set; }
+        }
+
+        public class DefaultIReadOnlyCollectionIntClassMap : ExcelClassMap<IReadOnlyCollectionIntClass>
+        {
+            public DefaultIReadOnlyCollectionIntClassMap()
+            {
+                Map(p => p.Value);
+            }
+        }
+
+        public class CustomIReadOnlyCollectionIntClassMap : ExcelClassMap<IReadOnlyCollectionIntClass>
+        {
+            public CustomIReadOnlyCollectionIntClassMap()
+            {
+                Map(p => p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class IReadOnlyListObjectClass
+        {
+            public IReadOnlyList<object> Value { get; set; }
+        }
+
+        public class DefaultIReadOnlyListObjectClassMap : ExcelClassMap<IReadOnlyListObjectClass>
+        {
+            public DefaultIReadOnlyListObjectClassMap()
+            {
+                Map(p => p.Value);
+            }
+        }
+
+        public class IReadOnlyListIntClass
+        {
+            public IReadOnlyList<int> Value { get; set; }
+        }
+
+        public class DefaultIReadOnlyListIntClassMap : ExcelClassMap<IReadOnlyListIntClass>
+        {
+            public DefaultIReadOnlyListIntClassMap()
+            {
+                Map(p => p.Value);
+            }
+        }
+
+        public class CustomIReadOnlyListIntClassMap : ExcelClassMap<IReadOnlyListIntClass>
+        {
+            public CustomIReadOnlyListIntClassMap()
+            {
+                Map(p => p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
             }
         }
 
