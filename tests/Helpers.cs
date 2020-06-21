@@ -27,6 +27,8 @@ namespace ExcelMapper.Tests
         public class TestClass
         {
             public string Value { get; set; }
+            public object ObjectValue { get; set; }
+            public NestedClass NestedValue { get; set; }
             public DateTime DateValue { get; set; }
             public DateTime? NullableDateValue { get; set; }
             public IListInterface UnknownInterfaceValue { get; set; }
@@ -40,6 +42,11 @@ namespace ExcelMapper.Tests
             public InvalidIDictionaryMemberType InvalidIDictionaryMemberType { get; set; }
 
             public event EventHandler Event { add { } remove { } }
+
+            public class NestedClass
+            {
+                public int IntValue { get; set; }
+            }
         }
 
         public class InvalidIListMemberType

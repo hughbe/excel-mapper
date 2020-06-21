@@ -7,6 +7,30 @@ namespace ExcelMapper.Tests
     public class ExcelClassMapTests : ExcelClassMap<Helpers.TestClass>
     {
         [Fact]
+        public void Map_SingleExpression_Success()
+        {
+            Assert.Equal("Value", Map(p => p.Value).Member.Name);
+        }
+
+        [Fact]
+        public void Map_NestedExpression_Success()
+        {
+            Assert.Equal("IntValue", Map(p => p.NestedValue.IntValue).Member.Name);
+        }
+
+        [Fact]
+        public void Map_CastExpression_Success()
+        {
+            Assert.Equal("Value", Map(p => (string)p.Value).Member.Name);
+        }
+
+        [Fact]
+        public void Map_NestedCastExpression_Success()
+        {
+            Assert.Equal("IntValue", Map(p => (int)p.NestedValue.IntValue).Member.Name);
+        }
+
+        [Fact]
         public void Map_ExpressionNotMemberExpression_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>("expression", () => Map(p => new List<string>()));
@@ -81,6 +105,33 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void Map_InvalidUnaryExpression_ThrowsArgumentException()
+        {
+            var otherType = new OtherType();
+            Assert.Throws<ArgumentException>("expression", () => Map(p => -otherType.Value));
+        }
+
+        [Fact]
+        public void Map_InvalidBinaryExpression_ThrowsArgumentException()
+        {
+            var otherType = new OtherType();
+            Assert.Throws<ArgumentException>("expression", () => Map(p => otherType.Value + 1));
+        }
+
+        [Fact]
+        public void Map_InvalidMethodExpression_ThrowsArgumentException()
+        {
+            var otherType = new OtherType();
+            Assert.Throws<ArgumentException>("expression", () => Map(p => otherType.Value.ToString()));
+        }
+
+        [Fact]
+        public void Map_InvalidCastExpression_ThrowsExcelMappingException()
+        {
+            Assert.Throws<ExcelMappingException>(() => Map(p => (CollectionAttribute)p.ObjectValue));
+        }
+
+        [Fact]
         public void Map_MultipleMemberAccessTypeAlreadyMapped_ThrowsInvalidOperationException()
         {
             var iconvertibleType = new IConvertibleType();
@@ -99,95 +150,44 @@ namespace ExcelMapper.Tests
         {
             public string Value { get; set; }
 
-            public TypeCode GetTypeCode()
-            {
-                throw new NotImplementedException();
-            }
+            public TypeCode GetTypeCode() => throw new NotImplementedException();
 
-            public bool ToBoolean(IFormatProvider provider)
-            {
-                throw new NotImplementedException();
-            }
+            public bool ToBoolean(IFormatProvider provider) => throw new NotImplementedException();
 
-            public byte ToByte(IFormatProvider provider)
-            {
-                throw new NotImplementedException();
-            }
+            public byte ToByte(IFormatProvider provider) => throw new NotImplementedException();
 
-            public char ToChar(IFormatProvider provider)
-            {
-                throw new NotImplementedException();
-            }
+            public char ToChar(IFormatProvider provider) => throw new NotImplementedException();
 
-            public DateTime ToDateTime(IFormatProvider provider)
-            {
-                throw new NotImplementedException();
-            }
+            public DateTime ToDateTime(IFormatProvider provider) => throw new NotImplementedException();
 
-            public decimal ToDecimal(IFormatProvider provider)
-            {
-                throw new NotImplementedException();
-            }
+            public decimal ToDecimal(IFormatProvider provider) => throw new NotImplementedException();
 
-            public double ToDouble(IFormatProvider provider)
-            {
-                throw new NotImplementedException();
-            }
+            public double ToDouble(IFormatProvider provider) => throw new NotImplementedException();
 
-            public short ToInt16(IFormatProvider provider)
-            {
-                throw new NotImplementedException();
-            }
+            public short ToInt16(IFormatProvider provider) => throw new NotImplementedException();
 
-            public int ToInt32(IFormatProvider provider)
-            {
-                throw new NotImplementedException();
-            }
+            public int ToInt32(IFormatProvider provider) => throw new NotImplementedException();
 
-            public long ToInt64(IFormatProvider provider)
-            {
-                throw new NotImplementedException();
-            }
+            public long ToInt64(IFormatProvider provider) => throw new NotImplementedException();
 
-            public sbyte ToSByte(IFormatProvider provider)
-            {
-                throw new NotImplementedException();
-            }
+            public sbyte ToSByte(IFormatProvider provider) => throw new NotImplementedException();
 
-            public float ToSingle(IFormatProvider provider)
-            {
-                throw new NotImplementedException();
-            }
+            public float ToSingle(IFormatProvider provider) => throw new NotImplementedException();
 
-            public string ToString(IFormatProvider provider)
-            {
-                throw new NotImplementedException();
-            }
+            public string ToString(IFormatProvider provider) => throw new NotImplementedException();
 
-            public object ToType(Type conversionType, IFormatProvider provider)
-            {
-                throw new NotImplementedException();
-            }
+            public object ToType(Type conversionType, IFormatProvider provider) => throw new NotImplementedException();
 
-            public ushort ToUInt16(IFormatProvider provider)
-            {
-                throw new NotImplementedException();
-            }
+            public ushort ToUInt16(IFormatProvider provider) => throw new NotImplementedException();
 
-            public uint ToUInt32(IFormatProvider provider)
-            {
-                throw new NotImplementedException();
-            }
+            public uint ToUInt32(IFormatProvider provider) => throw new NotImplementedException();
 
-            public ulong ToUInt64(IFormatProvider provider)
-            {
-                throw new NotImplementedException();
-            }
+            public ulong ToUInt64(IFormatProvider provider) => throw new NotImplementedException();
         }
 
         public class OtherType
         {
-            public string Value { get; set; }
+            public int Value { get; set; }
         }
 
         [Theory]
