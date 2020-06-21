@@ -256,8 +256,9 @@ namespace ExcelMapper
                 Importer.Configuration.RegisterClassMap(autoClassMap);
             }
 
-            value = (T)classMap.Execute(this, CurrentRowIndex, Reader);
-            return true;
+            bool result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out object valueObject);
+            value = (T)valueObject;
+            return result;
         }
 
         internal void ReadPastHeading()

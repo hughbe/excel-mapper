@@ -1,52 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Readers;
 using Xunit;
 
 namespace ExcelMapper.Tests
 {
-    public class ManyToOneDictionaryPropertyMapTests
+    public class ManyToOneDictionaryMapTests
     {
         [Fact]
         public void Ctor_MemberInfo_IMultipleCellValuesReader_IValuePipeline_CreateDictionaryFactory()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var valuePipeline = new ValuePipeline<string>();
             CreateDictionaryFactory<string> createDictionaryFactory = elements => new Dictionary<string, string>();
-            var propertyMap = new ManyToOneDictionaryPropertyMap<string>(propertyInfo, cellValuesReader, valuePipeline, createDictionaryFactory);
-            Assert.Same(propertyInfo, propertyMap.Member);
+            var propertyMap = new ManyToOneDictionaryMap<string>(cellValuesReader, valuePipeline, createDictionaryFactory);
             Assert.NotNull(propertyMap.ValuePipeline);
         }
 
         [Fact]
         public void Ctor_NullCellValuesReader_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var valuePipeline = new ValuePipeline<string>();
             CreateDictionaryFactory<string> createDictionaryFactory = elements => new Dictionary<string, string>();
-            Assert.Throws<ArgumentNullException>("cellValuesReader", () => new ManyToOneDictionaryPropertyMap<string>(propertyInfo, null, valuePipeline, createDictionaryFactory));
+            Assert.Throws<ArgumentNullException>("cellValuesReader", () => new ManyToOneDictionaryMap<string>(null, valuePipeline, createDictionaryFactory));
         }
 
         [Fact]
         public void Ctor_NullPipeline_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             CreateDictionaryFactory<string> createDictionaryFactory = elements => new Dictionary<string, string>();
-            Assert.Throws<ArgumentNullException>("valuePipeline", () => new ManyToOneDictionaryPropertyMap<string>(propertyInfo, cellValuesReader, null, createDictionaryFactory));
+            Assert.Throws<ArgumentNullException>("valuePipeline", () => new ManyToOneDictionaryMap<string>(cellValuesReader, null, createDictionaryFactory));
         }
 
         [Fact]
         public void Ctor_NullCreateDictionaryFactory_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var valuePipeline = new ValuePipeline<string>();
-            Assert.Throws<ArgumentNullException>("createDictionaryFactory", () => new ManyToOneDictionaryPropertyMap<string>(propertyInfo, cellValuesReader, valuePipeline, null));
+            Assert.Throws<ArgumentNullException>("createDictionaryFactory", () => new ManyToOneDictionaryMap<string>(cellValuesReader, valuePipeline, null));
         }
 
         public static IEnumerable<object[]> CellValuesReader_Set_TestData()
@@ -58,11 +51,10 @@ namespace ExcelMapper.Tests
         [MemberData(nameof(CellValuesReader_Set_TestData))]
         public void CellValuesReader_SetValid_GetReturnsExpected(IMultipleCellValuesReader value)
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var valuePipeline = new ValuePipeline<string>();
             CreateDictionaryFactory<string> createDictionaryFactory = elements => new Dictionary<string, string>();
-            var propertyMap = new ManyToOneDictionaryPropertyMap<string>(propertyInfo, cellValuesReader, valuePipeline, createDictionaryFactory)
+            var propertyMap = new ManyToOneDictionaryMap<string>(cellValuesReader, valuePipeline, createDictionaryFactory)
             {
                 CellValuesReader = value
             };
@@ -76,22 +68,20 @@ namespace ExcelMapper.Tests
         [Fact]
         public void CellValuesReader_SetNull_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var valuePipeline = new ValuePipeline<string>();
             CreateDictionaryFactory<string> createDictionaryFactory = elements => new Dictionary<string, string>();
-            var propertyMap = new ManyToOneDictionaryPropertyMap<string>(propertyInfo, cellValuesReader, valuePipeline, createDictionaryFactory);
+            var propertyMap = new ManyToOneDictionaryMap<string>(cellValuesReader, valuePipeline, createDictionaryFactory);
             Assert.Throws<ArgumentNullException>("value", () => propertyMap.CellValuesReader = null);
         }
 
         [Fact]
         public void WithValueMap_ValidMap_Success()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var valuePipeline = new ValuePipeline<string>();
             CreateDictionaryFactory<string> createDictionaryFactory = elements => new Dictionary<string, string>();
-            var propertyMap = new ManyToOneDictionaryPropertyMap<string>(propertyInfo, cellValuesReader, valuePipeline, createDictionaryFactory);
+            var propertyMap = new ManyToOneDictionaryMap<string>(cellValuesReader, valuePipeline, createDictionaryFactory);
 
             var newValuePipeline = new ValuePipeline<string>();
             Assert.Same(propertyMap, propertyMap.WithValueMap(e =>
@@ -105,11 +95,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithValueMap_NullMap_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var valuePipeline = new ValuePipeline<string>();
             CreateDictionaryFactory<string> createDictionaryFactory = elements => new Dictionary<string, string>();
-            var propertyMap = new ManyToOneDictionaryPropertyMap<string>(propertyInfo, cellValuesReader, valuePipeline, createDictionaryFactory);
+            var propertyMap = new ManyToOneDictionaryMap<string>(cellValuesReader, valuePipeline, createDictionaryFactory);
 
             Assert.Throws<ArgumentNullException>("valueMap", () => propertyMap.WithValueMap(null));
         }
@@ -117,11 +106,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithValueMap_MapReturnsNull_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var valuePipeline = new ValuePipeline<string>();
             CreateDictionaryFactory<string> createDictionaryFactory = elements => new Dictionary<string, string>();
-            var propertyMap = new ManyToOneDictionaryPropertyMap<string>(propertyInfo, cellValuesReader, valuePipeline, createDictionaryFactory);
+            var propertyMap = new ManyToOneDictionaryMap<string>(cellValuesReader, valuePipeline, createDictionaryFactory);
 
             Assert.Throws<ArgumentNullException>("valueMap", () => propertyMap.WithValueMap(e => null));
         }
@@ -130,11 +118,10 @@ namespace ExcelMapper.Tests
         public void WithColumnNames_ParamsString_Success()
         {
             var columnNames = new string[] { "ColumnName1", "ColumnName2" };
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var valuePipeline = new ValuePipeline<string>();
             CreateDictionaryFactory<string> createDictionaryFactory = elements => new Dictionary<string, string>();
-            var propertyMap = new ManyToOneDictionaryPropertyMap<string>(propertyInfo, cellValuesReader, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
+            var propertyMap = new ManyToOneDictionaryMap<string>(cellValuesReader, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
             Assert.Same(propertyMap, propertyMap.WithColumnNames(columnNames));
 
             MultipleColumnNamesValueReader valueReader = Assert.IsType<MultipleColumnNamesValueReader>(propertyMap.CellValuesReader);
@@ -145,11 +132,10 @@ namespace ExcelMapper.Tests
         public void WithColumnNames_IEnumerableString_Success()
         {
             var columnNames = new List<string> { "ColumnName1", "ColumnName2" };
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var valuePipeline = new ValuePipeline<string>();
             CreateDictionaryFactory<string> createDictionaryFactory = elements => new Dictionary<string, string>();
-            var propertyMap = new ManyToOneDictionaryPropertyMap<string>(propertyInfo, cellValuesReader, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
+            var propertyMap = new ManyToOneDictionaryMap<string>(cellValuesReader, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
             Assert.Same(propertyMap, propertyMap.WithColumnNames((IEnumerable<string>)columnNames));
 
             MultipleColumnNamesValueReader valueReader = Assert.IsType<MultipleColumnNamesValueReader>(propertyMap.CellValuesReader);
@@ -159,11 +145,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnNames_NullColumnNames_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var valuePipeline = new ValuePipeline<string>();
             CreateDictionaryFactory<string> createDictionaryFactory = elements => new Dictionary<string, string>();
-            var propertyMap = new ManyToOneDictionaryPropertyMap<string>(propertyInfo, cellValuesReader, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
+            var propertyMap = new ManyToOneDictionaryMap<string>(cellValuesReader, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
 
             Assert.Throws<ArgumentNullException>("columnNames", () => propertyMap.WithColumnNames(null));
             Assert.Throws<ArgumentNullException>("columnNames", () => propertyMap.WithColumnNames((IEnumerable<string>)null));
@@ -172,11 +157,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnNames_EmptyColumnNames_ThrowsArgumentException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var valuePipeline = new ValuePipeline<string>();
             CreateDictionaryFactory<string> createDictionaryFactory = elements => new Dictionary<string, string>();
-            var propertyMap = new ManyToOneDictionaryPropertyMap<string>(propertyInfo, cellValuesReader, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
+            var propertyMap = new ManyToOneDictionaryMap<string>(cellValuesReader, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
 
             Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new string[0]));
             Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new List<string>()));
@@ -185,11 +169,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnNames_NullValueInColumnNames_ThrowsArgumentException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var valuePipeline = new ValuePipeline<string>();
             CreateDictionaryFactory<string> createDictionaryFactory = elements => new Dictionary<string, string>();
-            var propertyMap = new ManyToOneDictionaryPropertyMap<string>(propertyInfo, cellValuesReader, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
+            var propertyMap = new ManyToOneDictionaryMap<string>(cellValuesReader, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
 
             Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new string[] { null }));
             Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new List<string> { null }));

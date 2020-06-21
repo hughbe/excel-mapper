@@ -8,17 +8,15 @@ using Xunit;
 
 namespace ExcelMapper.Tests
 {
-    public class ManyToOneEnumerablePropertyMapTests
+    public class ManyToOneEnumerableMapTests
     {
         [Fact]
-        public void Ctor_MemberInfo_IMultipleCellValuesReader_IValuePipeline_CreateElementsFactory()
+        public void Ctor_IMultipleCellValuesReader_IValuePipeline_CreateElementsFactory()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
-            Assert.Same(propertyInfo, propertyMap.Member);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
             Assert.False(propertyMap.Optional);
             Assert.NotNull(propertyMap.ElementPipeline);
         }
@@ -26,28 +24,25 @@ namespace ExcelMapper.Tests
         [Fact]
         public void Ctor_NullCellValuesReader_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            Assert.Throws<ArgumentNullException>("cellValuesReader", () => new ManyToOneEnumerablePropertyMap<string>(propertyInfo, null, elementPipeline, createElementsFactory));
+            Assert.Throws<ArgumentNullException>("cellValuesReader", () => new ManyToOneEnumerableMap<string>(null, elementPipeline, createElementsFactory));
         }
 
         [Fact]
         public void Ctor_NullPipeline_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            Assert.Throws<ArgumentNullException>("elementPipeline", () => new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, null, createElementsFactory));
+            Assert.Throws<ArgumentNullException>("elementPipeline", () => new ManyToOneEnumerableMap<string>(cellValuesReader, null, createElementsFactory));
         }
 
         [Fact]
         public void Ctor_NullCreateElementsFactory_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
-            Assert.Throws<ArgumentNullException>("createElementsFactory", () => new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, null));
+            Assert.Throws<ArgumentNullException>("createElementsFactory", () => new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, null));
         }
 
         public static IEnumerable<object[]> CellValuesReader_Set_TestData()
@@ -59,11 +54,10 @@ namespace ExcelMapper.Tests
         [MemberData(nameof(CellValuesReader_Set_TestData))]
         public void CellValuesReader_SetValid_GetReturnsExpected(IMultipleCellValuesReader value)
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory)
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory)
             {
                 CellValuesReader = value
             };
@@ -77,11 +71,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void CellValuesReader_SetNull_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
             Assert.Throws<ArgumentNullException>("value", () => propertyMap.CellValuesReader = null);
         }
 
@@ -90,11 +83,10 @@ namespace ExcelMapper.Tests
         [InlineData(false)]
         public void Optional_Set_GetReturnsExpected(bool value)
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory)
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory)
             {
                 Optional = value
             };
@@ -112,11 +104,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void MakeOptional_HasMapper_ReturnsExpected()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
             Assert.False(propertyMap.Optional);
             Assert.Same(propertyMap, propertyMap.MakeOptional());
             Assert.True(propertyMap.Optional);
@@ -126,11 +117,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void MakeOptional_AlreadyOptional_ReturnsExpected()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
             Assert.Same(propertyMap, propertyMap.MakeOptional());
             Assert.True(propertyMap.Optional);
             Assert.Same(propertyMap, propertyMap.MakeOptional());
@@ -141,11 +131,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithElementMap_ValidMap_Success()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
 
             var newElementPipeline = new ValuePipeline<string>();
             Assert.Same(propertyMap, propertyMap.WithElementMap(e =>
@@ -159,11 +148,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithElementMap_NullMap_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
 
             Assert.Throws<ArgumentNullException>("elementMap", () => propertyMap.WithElementMap(null));
         }
@@ -171,11 +159,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithElementMap_MapReturnsNull_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
 
             Assert.Throws<ArgumentNullException>("elementMap", () => propertyMap.WithElementMap(e => null));
         }
@@ -183,11 +170,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnName_SplitValidColumnName_Success()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new CharSplitCellValueReader(new ColumnNameValueReader("Column"));
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
             Assert.Same(propertyMap, propertyMap.WithColumnName("ColumnName"));
 
             CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.CellValuesReader);
@@ -198,11 +184,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnName_MultiValidColumnName_Success()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnName");
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnName");
             Assert.Same(propertyMap, propertyMap.WithColumnName("ColumnName"));
 
             CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.CellValuesReader);
@@ -213,11 +198,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnName_NullColumnName_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
 
             Assert.Throws<ArgumentNullException>("columnName", () => propertyMap.WithColumnName(null));
         }
@@ -225,11 +209,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnName_EmptyColumnName_ThrowsArgumentException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
 
             Assert.Throws<ArgumentException>("columnName", () => propertyMap.WithColumnName(string.Empty));
         }
@@ -239,11 +222,10 @@ namespace ExcelMapper.Tests
         [InlineData(1)]
         public void WithColumnIndex_SplitColumnIndex_Success(int columnIndex)
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new CharSplitCellValueReader(new ColumnNameValueReader("Column"));
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
             Assert.Same(propertyMap, propertyMap.WithColumnIndex(columnIndex));
 
             CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.CellValuesReader);
@@ -256,11 +238,10 @@ namespace ExcelMapper.Tests
         [InlineData(1)]
         public void WithColumnIndex_MultiColumnIndex_Success(int columnIndex)
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnName");
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnName");
             Assert.Same(propertyMap, propertyMap.WithColumnIndex(columnIndex));
 
             CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.CellValuesReader);
@@ -271,11 +252,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnIndex_NegativeColumnIndex_ThrowsArgumentOutOfRangeException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
 
             Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => propertyMap.WithColumnIndex(-1));
         }
@@ -293,11 +273,10 @@ namespace ExcelMapper.Tests
         {
             char[] separatorsArray = separators.ToArray();
 
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new StringSplitCellValueReader(new ColumnNameValueReader("Column"));
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
             Assert.Same(propertyMap, propertyMap.WithSeparators(separatorsArray));
 
             CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.CellValuesReader);
@@ -308,11 +287,10 @@ namespace ExcelMapper.Tests
         [MemberData(nameof(Separators_Char_TestData))]
         public void WithSeparators_IEnumerableChar_Success(IEnumerable<char> separators)
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new StringSplitCellValueReader(new ColumnNameValueReader("Column"));
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
             Assert.Same(propertyMap, propertyMap.WithSeparators(separators));
 
             CharSplitCellValueReader valueReader = Assert.IsType<CharSplitCellValueReader>(propertyMap.CellValuesReader);
@@ -332,11 +310,10 @@ namespace ExcelMapper.Tests
         {
             string[] separatorsArray = separators.ToArray();
 
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new StringSplitCellValueReader(new ColumnNameValueReader("Column"));
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
             Assert.Same(propertyMap, propertyMap.WithSeparators(separatorsArray));
 
             StringSplitCellValueReader valueReader = Assert.IsType<StringSplitCellValueReader>(propertyMap.CellValuesReader);
@@ -347,11 +324,10 @@ namespace ExcelMapper.Tests
         [MemberData(nameof(Separators_String_TestData))]
         public void WithSeparators_IEnumerableString_Success(IEnumerable<string> separators)
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new StringSplitCellValueReader(new ColumnNameValueReader("Column"));
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
             Assert.Same(propertyMap, propertyMap.WithSeparators(separators));
 
             StringSplitCellValueReader valueReader = Assert.IsType<StringSplitCellValueReader>(propertyMap.CellValuesReader);
@@ -361,11 +337,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithSeparators_NullSeparators_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new StringSplitCellValueReader(new ColumnNameValueReader("Column"));
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
 
             Assert.Throws<ArgumentNullException>("value", () => propertyMap.WithSeparators((char[])null));
             Assert.Throws<ArgumentNullException>("value", () => propertyMap.WithSeparators((IEnumerable<char>)null));
@@ -376,11 +351,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithSeparators_EmptySeparators_ThrowsArgumentException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new StringSplitCellValueReader(new ColumnNameValueReader("Column"));
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory);
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
 
             Assert.Throws<ArgumentException>("value", () => propertyMap.WithSeparators(new char[0]));
             Assert.Throws<ArgumentException>("value", () => propertyMap.WithSeparators(new List<char>()));
@@ -391,11 +365,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithSeperators_MultiMap_ThrowsExcelMappingException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
             Assert.Throws<ExcelMappingException>(() => propertyMap.WithSeparators(new char[0]));
             Assert.Throws<ExcelMappingException>(() => propertyMap.WithSeparators(new List<char>()));
@@ -407,11 +380,10 @@ namespace ExcelMapper.Tests
         public void WithColumnNames_ParamsString_Success()
         {
             var columnNames = new string[] { "ColumnName1", "ColumnName2" };
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
             Assert.Same(propertyMap, propertyMap.WithColumnNames(columnNames));
 
             MultipleColumnNamesValueReader valueReader = Assert.IsType<MultipleColumnNamesValueReader>(propertyMap.CellValuesReader);
@@ -422,11 +394,10 @@ namespace ExcelMapper.Tests
         public void WithColumnNames_IEnumerableString_Success()
         {
             var columnNames = new List<string> { "ColumnName1", "ColumnName2" };
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
             Assert.Same(propertyMap, propertyMap.WithColumnNames((IEnumerable<string>)columnNames));
 
             MultipleColumnNamesValueReader valueReader = Assert.IsType<MultipleColumnNamesValueReader>(propertyMap.CellValuesReader);
@@ -436,11 +407,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnNames_NullColumnNames_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
             Assert.Throws<ArgumentNullException>("columnNames", () => propertyMap.WithColumnNames(null));
             Assert.Throws<ArgumentNullException>("columnNames", () => propertyMap.WithColumnNames((IEnumerable<string>)null));
@@ -449,11 +419,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnNames_EmptyColumnNames_ThrowsArgumentException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
             Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new string[0]));
             Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new List<string>()));
@@ -462,11 +431,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnNames_NullValueInColumnNames_ThrowsArgumentException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
             Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new string[] { null }));
             Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new List<string> { null }));
@@ -476,11 +444,10 @@ namespace ExcelMapper.Tests
         public void WithColumnIndices_ParamsInt_Success()
         {
             var columnIndices = new int[] { 0, 1 };
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
             Assert.Same(propertyMap, propertyMap.WithColumnIndices(columnIndices));
 
             MultipleColumnIndicesValueReader reader = Assert.IsType<MultipleColumnIndicesValueReader>(propertyMap.CellValuesReader);
@@ -491,11 +458,10 @@ namespace ExcelMapper.Tests
         public void WithColumnIndices_IEnumerableInt_Success()
         {
             var columnIndices = new List<int> { 0, 1 };
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
             Assert.Same(propertyMap, propertyMap.WithColumnIndices(columnIndices));
 
             MultipleColumnIndicesValueReader reader = Assert.IsType<MultipleColumnIndicesValueReader>(propertyMap.CellValuesReader);
@@ -505,11 +471,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnIndices_NullColumnIndices_ThrowsArgumentNullException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
             Assert.Throws<ArgumentNullException>("columnIndices", () => propertyMap.WithColumnIndices(null));
             Assert.Throws<ArgumentNullException>("columnIndices", () => propertyMap.WithColumnIndices((IEnumerable<int>)null));
@@ -518,11 +483,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnIndices_EmptyColumnIndices_ThrowsArgumentException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
             Assert.Throws<ArgumentException>("columnIndices", () => propertyMap.WithColumnIndices(new int[0]));
             Assert.Throws<ArgumentException>("columnIndices", () => propertyMap.WithColumnIndices(new List<int>()));
@@ -531,11 +495,10 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithColumnIndices_NegativeValueInColumnIndices_ThrowsArgumentOutOfRangeException()
         {
-            MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value));
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            var propertyMap = new ManyToOneEnumerablePropertyMap<string>(propertyInfo, cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+            var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
             Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => propertyMap.WithColumnIndices(new int[] { -1 }));
             Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => propertyMap.WithColumnIndices(new List<int> { -1 }));
