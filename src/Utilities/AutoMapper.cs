@@ -269,12 +269,21 @@ namespace ExcelMapper.Utilities
 
         public static bool TryCreateDictionaryMap(MemberInfo member, FallbackStrategy emptyValueStrategy, out ExcelPropertyMap map)
         {
-            if (!member.MemberType().ImplementsGenericInterface(typeof(IDictionary<,>), out Type keyType, out Type valueType))
+            // We should be able to parse anything that implements IEnumerable<KeyValuePair<TKey, TValue>>
+            if (!member.MemberType().ImplementsGenericInterface(typeof(IEnumerable<>), out Type keyValuePairType))
+            {
+                map = null;
+                return false;
+            }
+            if (!keyValuePairType.IsGenericType || keyValuePairType.GetGenericTypeDefinition() != typeof(KeyValuePair<,>))
             {
                 map = null;
                 return false;
             }
 
+            Type[] arguments = keyValuePairType.GenericTypeArguments;
+            Type keyType = arguments[0];
+            Type valueType = arguments[1];
             MethodInfo method = TryCreateGenericDictionaryMapMethod.MakeGenericMethod(keyType, valueType);
 
             var parameters = new object[] { member, emptyValueStrategy, null };
@@ -311,7 +320,6 @@ namespace ExcelMapper.Utilities
             map = new ManyToOneDictionaryPropertyMap<TValue>(member, defaultReader, valuePipeline, factory);
             return true;
         }
-
 
         private static bool TryGetCreateDictionaryFactory<TKey, TValue>(Type memberType, out CreateDictionaryFactory<TValue> result)
         {

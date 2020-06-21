@@ -12,7 +12,7 @@ namespace ExcelMapper.Utilities
             return type.GetTypeInfo().ImplementedInterfaces.Any(t => t == interfaceType);
         }
 
-        private static bool ImplementsGenericInterface(this Type type, Type genericInterfaceType, out Type elementType)
+        public static bool ImplementsGenericInterface(this Type type, Type genericInterfaceType, out Type elementType)
         {
             bool CheckInterface(Type interfaceType, out Type elementTypeResult)
             {
@@ -42,42 +42,6 @@ namespace ExcelMapper.Utilities
             }
 
             elementType = null;
-            return false;
-        }
-
-        public static bool ImplementsGenericInterface(this Type type, Type genericInterfaceType, out Type keyType, out Type valueType)
-        {
-            bool CheckInterface(Type interfaceType, out Type keyTypeResult, out Type valueTypeResult)
-            {
-                if (interfaceType.GetTypeInfo().IsGenericType && interfaceType.GetGenericTypeDefinition() == genericInterfaceType)
-                {
-                    keyTypeResult = interfaceType.GenericTypeArguments[0];
-                    valueTypeResult = interfaceType.GenericTypeArguments[1];
-                    return true;
-                }
-
-                keyTypeResult = null;
-                valueTypeResult = null;
-                return false;
-            }
-
-            // This type may actually be the interface in question.
-            // So return true if this is the case.
-            if (type.GetTypeInfo().IsInterface && CheckInterface(type, out keyType, out valueType))
-            {
-                return true;
-            }
-
-            foreach (Type interfaceType in type.GetTypeInfo().ImplementedInterfaces)
-            {
-                if (CheckInterface(interfaceType, out keyType, out valueType))
-                {
-                    return true;
-                }
-            }
-
-            keyType = null;
-            valueType = null;
             return false;
         }
 
