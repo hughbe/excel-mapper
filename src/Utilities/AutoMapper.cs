@@ -263,6 +263,34 @@ namespace ExcelMapper.Utilities
                 return true;
             }
 
+            // Check if the type has .ctor(IEnumerable<T>) such as Queue or Stack.
+            ConstructorInfo ctor = memberType.GetConstructor(new Type[] { typeof(IEnumerable<T>) });
+            if (ctor != null)
+            {
+                result = element =>
+                {
+                    return (IEnumerable<T>)Activator.CreateInstance(memberType, new object[] { element });
+                };
+                return true;
+            }
+
+            // Check if the type has Add(T) such as BlockingCollection.
+            MethodInfo addMethod = memberType.GetMethod("Add", new Type[] { typeof(T) });
+            if (addMethod != null)
+            {
+                result = elements =>
+                {
+                    IEnumerable<T> value = (IEnumerable<T>)Activator.CreateInstance(memberType);
+                    foreach (T element in elements)
+                    {
+                        addMethod.Invoke(value, new object[] { element });
+                    }
+
+                    return value;
+                };
+                return true;
+            }
+
             result = default;
             return false;
         }

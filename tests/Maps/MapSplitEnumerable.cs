@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Xunit;
@@ -372,6 +374,182 @@ namespace ExcelMapper.Tests
             Assert.Empty(row4.Value);
 
             Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ObservableCollectionIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedQueueInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            QueueIntClass row1 = sheet.ReadRow<QueueIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<QueueIntClass>());
+
+            QueueIntClass row3 = sheet.ReadRow<QueueIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            QueueIntClass row4 = sheet.ReadRow<QueueIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<QueueIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedStackInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            StackIntClass row1 = sheet.ReadRow<StackIntClass>();
+            Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StackIntClass>());
+
+            StackIntClass row3 = sheet.ReadRow<StackIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            StackIntClass row4 = sheet.ReadRow<StackIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StackIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedConcurrentQueueInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ConcurrentQueueIntClass row1 = sheet.ReadRow<ConcurrentQueueIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentQueueIntClass>());
+
+            ConcurrentQueueIntClass row3 = sheet.ReadRow<ConcurrentQueueIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ConcurrentQueueIntClass row4 = sheet.ReadRow<ConcurrentQueueIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentQueueIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedConcurrentStackInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ConcurrentStackIntClass row1 = sheet.ReadRow<ConcurrentStackIntClass>();
+            Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentStackIntClass>());
+
+            ConcurrentStackIntClass row3 = sheet.ReadRow<ConcurrentStackIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ConcurrentStackIntClass row4 = sheet.ReadRow<ConcurrentStackIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentStackIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedConcurrentBagInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ConcurrentBagIntClass row1 = sheet.ReadRow<ConcurrentBagIntClass>();
+            Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentBagIntClass>());
+
+            ConcurrentBagIntClass row3 = sheet.ReadRow<ConcurrentBagIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ConcurrentBagIntClass row4 = sheet.ReadRow<ConcurrentBagIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentBagIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedBlockingCollectionInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            BlockingCollectionIntClass row1 = sheet.ReadRow<BlockingCollectionIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlockingCollectionIntClass>());
+
+            BlockingCollectionIntClass row3 = sheet.ReadRow<BlockingCollectionIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            BlockingCollectionIntClass row4 = sheet.ReadRow<BlockingCollectionIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlockingCollectionIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedCustomConstructorIEnumerableInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            CustomConstructorIEnumerableIntClass row1 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomConstructorIEnumerableIntClass>());
+
+            CustomConstructorIEnumerableIntClass row3 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            CustomConstructorIEnumerableIntClass row4 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomConstructorIEnumerableIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedCustomAddIEnumerableInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            CustomAddIEnumerableIntClass row1 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomAddIEnumerableIntClass>());
+
+            CustomAddIEnumerableIntClass row3 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            CustomAddIEnumerableIntClass row4 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomAddIEnumerableIntClass>());
         }
 
         [Fact]
@@ -759,6 +937,190 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRow_DefaultMappedQueueInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultQueueIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            QueueIntClass row1 = sheet.ReadRow<QueueIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<QueueIntClass>());
+
+            QueueIntClass row3 = sheet.ReadRow<QueueIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            QueueIntClass row4 = sheet.ReadRow<QueueIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<QueueIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedStackInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultStackIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            StackIntClass row1 = sheet.ReadRow<StackIntClass>();
+            Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StackIntClass>());
+
+            StackIntClass row3 = sheet.ReadRow<StackIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            StackIntClass row4 = sheet.ReadRow<StackIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StackIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedConcurrentQueueInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultConcurrentQueueIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ConcurrentQueueIntClass row1 = sheet.ReadRow<ConcurrentQueueIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentQueueIntClass>());
+
+            ConcurrentQueueIntClass row3 = sheet.ReadRow<ConcurrentQueueIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ConcurrentQueueIntClass row4 = sheet.ReadRow<ConcurrentQueueIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentQueueIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedConcurrentStackInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultConcurrentStackIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ConcurrentStackIntClass row1 = sheet.ReadRow<ConcurrentStackIntClass>();
+            Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentStackIntClass>());
+
+            ConcurrentStackIntClass row3 = sheet.ReadRow<ConcurrentStackIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ConcurrentStackIntClass row4 = sheet.ReadRow<ConcurrentStackIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentStackIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedConcurrentBagInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultConcurrentBagIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ConcurrentBagIntClass row1 = sheet.ReadRow<ConcurrentBagIntClass>();
+            Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentBagIntClass>());
+
+            ConcurrentBagIntClass row3 = sheet.ReadRow<ConcurrentBagIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ConcurrentBagIntClass row4 = sheet.ReadRow<ConcurrentBagIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentBagIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedBlockingCollectionInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultBlockingCollectionIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            BlockingCollectionIntClass row1 = sheet.ReadRow<BlockingCollectionIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlockingCollectionIntClass>());
+
+            BlockingCollectionIntClass row3 = sheet.ReadRow<BlockingCollectionIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            BlockingCollectionIntClass row4 = sheet.ReadRow<BlockingCollectionIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlockingCollectionIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedCustomConstructorIEnumerableInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultCustomConstructorIEnumerableIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            CustomConstructorIEnumerableIntClass row1 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomConstructorIEnumerableIntClass>());
+
+            CustomConstructorIEnumerableIntClass row3 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            CustomConstructorIEnumerableIntClass row4 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomConstructorIEnumerableIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedCustomAddIEnumerableInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultCustomAddIEnumerableIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            CustomAddIEnumerableIntClass row1 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomAddIEnumerableIntClass>());
+
+            CustomAddIEnumerableIntClass row3 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            CustomAddIEnumerableIntClass row4 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomAddIEnumerableIntClass>());
+        }
+
+        [Fact]
         public void ReadRow_CustomMappedIntArray_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
@@ -933,6 +1295,206 @@ namespace ExcelMapper.Tests
             Assert.Equal(new int[] { -2 }, row5.Value);
         }
 
+        [Fact]
+        public void ReadRow_CustomMappedQueueInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomQueueIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            QueueIntClass row1 = sheet.ReadRow<QueueIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            QueueIntClass row2 = sheet.ReadRow<QueueIntClass>();
+            Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
+
+            QueueIntClass row3 = sheet.ReadRow<QueueIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            QueueIntClass row4 = sheet.ReadRow<QueueIntClass>();
+            Assert.Empty(row4.Value);
+
+            QueueIntClass row5 = sheet.ReadRow<QueueIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedStackInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomStackIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            StackIntClass row1 = sheet.ReadRow<StackIntClass>();
+            Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
+
+            StackIntClass row2 = sheet.ReadRow<StackIntClass>();
+            Assert.Equal(new int[] { 2, -1, 1 }, row2.Value);
+
+            StackIntClass row3 = sheet.ReadRow<StackIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            StackIntClass row4 = sheet.ReadRow<StackIntClass>();
+            Assert.Empty(row4.Value);
+
+            StackIntClass row5 = sheet.ReadRow<StackIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedConcurrentQueueInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomConcurrentQueueIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ConcurrentQueueIntClass row1 = sheet.ReadRow<ConcurrentQueueIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            ConcurrentQueueIntClass row2 = sheet.ReadRow<ConcurrentQueueIntClass>();
+            Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
+
+            ConcurrentQueueIntClass row3 = sheet.ReadRow<ConcurrentQueueIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ConcurrentQueueIntClass row4 = sheet.ReadRow<ConcurrentQueueIntClass>();
+            Assert.Empty(row4.Value);
+
+            ConcurrentQueueIntClass row5 = sheet.ReadRow<ConcurrentQueueIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedConcurrentStackInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomConcurrentStackIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ConcurrentStackIntClass row1 = sheet.ReadRow<ConcurrentStackIntClass>();
+            Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
+
+            ConcurrentStackIntClass row2 = sheet.ReadRow<ConcurrentStackIntClass>();
+            Assert.Equal(new int[] { 2, -1, 1 }, row2.Value);
+
+            ConcurrentStackIntClass row3 = sheet.ReadRow<ConcurrentStackIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ConcurrentStackIntClass row4 = sheet.ReadRow<ConcurrentStackIntClass>();
+            Assert.Empty(row4.Value);
+
+            ConcurrentStackIntClass row5 = sheet.ReadRow<ConcurrentStackIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedConcurrentBagInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomConcurrentBagIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ConcurrentBagIntClass row1 = sheet.ReadRow<ConcurrentBagIntClass>();
+            Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
+
+            ConcurrentBagIntClass row2 = sheet.ReadRow<ConcurrentBagIntClass>();
+            Assert.Equal(new int[] { 2, -1, 1 }, row2.Value);
+
+            ConcurrentBagIntClass row3 = sheet.ReadRow<ConcurrentBagIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ConcurrentBagIntClass row4 = sheet.ReadRow<ConcurrentBagIntClass>();
+            Assert.Empty(row4.Value);
+
+            ConcurrentBagIntClass row5 = sheet.ReadRow<ConcurrentBagIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedBlockingCollectionInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomBlockingCollectionIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            BlockingCollectionIntClass row1 = sheet.ReadRow<BlockingCollectionIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            BlockingCollectionIntClass row2 = sheet.ReadRow<BlockingCollectionIntClass>();
+            Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
+
+            BlockingCollectionIntClass row3 = sheet.ReadRow<BlockingCollectionIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            BlockingCollectionIntClass row4 = sheet.ReadRow<BlockingCollectionIntClass>();
+            Assert.Empty(row4.Value);
+
+            BlockingCollectionIntClass row5 = sheet.ReadRow<BlockingCollectionIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedCustomConstructorIEnumerableInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomCustomConstructorIEnumerableIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            CustomConstructorIEnumerableIntClass row1 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            CustomConstructorIEnumerableIntClass row2 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+            Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
+
+            CustomConstructorIEnumerableIntClass row3 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            CustomConstructorIEnumerableIntClass row4 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+            Assert.Empty(row4.Value);
+
+            CustomConstructorIEnumerableIntClass row5 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedCustomAddIEnumerableInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomCustomAddIEnumerableIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            CustomAddIEnumerableIntClass row1 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            CustomAddIEnumerableIntClass row2 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+            Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
+
+            CustomAddIEnumerableIntClass row3 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            CustomAddIEnumerableIntClass row4 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+            Assert.Empty(row4.Value);
+
+            CustomAddIEnumerableIntClass row5 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
         public class ObjectArrayClass
         {
             public object[] Value { get; set; }
@@ -1002,9 +1564,9 @@ namespace ExcelMapper.Tests
             public IEnumerable<int> Value { get; set; }
         }
 
-        public class CustomIEnumerableIntClassMap : ExcelClassMap<IEnumerableIntClass>
+        public class CustomConstructorIEnumerableIntClassMap : ExcelClassMap<IEnumerableIntClass>
         {
-            public CustomIEnumerableIntClassMap()
+            public CustomConstructorIEnumerableIntClassMap()
             {
                 Map(p => p.Value)
                     .WithElementMap(p => p
@@ -1230,6 +1792,231 @@ namespace ExcelMapper.Tests
             public CustomObservableCollectionIntClassMap()
             {
                 Map(p => p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class QueueIntClass
+        {
+            public Queue<int> Value { get; set; }
+        }
+
+        public class DefaultQueueIntClassMap : ExcelClassMap<QueueIntClass>
+        {
+            public DefaultQueueIntClassMap()
+            {
+                Map<int>(p => p.Value);
+            }
+        }
+
+        public class CustomQueueIntClassMap : ExcelClassMap<QueueIntClass>
+        {
+            public CustomQueueIntClassMap()
+            {
+                Map<int>(p => p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class StackIntClass
+        {
+            public Stack<int> Value { get; set; }
+        }
+
+        public class DefaultStackIntClassMap : ExcelClassMap<StackIntClass>
+        {
+            public DefaultStackIntClassMap()
+            {
+                Map<int>(p => p.Value);
+            }
+        }
+
+        public class CustomStackIntClassMap : ExcelClassMap<StackIntClass>
+        {
+            public CustomStackIntClassMap()
+            {
+                Map<int>(p => p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class ConcurrentQueueIntClass
+        {
+            public ConcurrentQueue<int> Value { get; set; }
+        }
+
+        public class DefaultConcurrentQueueIntClassMap : ExcelClassMap<ConcurrentQueueIntClass>
+        {
+            public DefaultConcurrentQueueIntClassMap()
+            {
+                Map<int>(p => p.Value);
+            }
+        }
+
+        public class CustomConcurrentQueueIntClassMap : ExcelClassMap<ConcurrentQueueIntClass>
+        {
+            public CustomConcurrentQueueIntClassMap()
+            {
+                Map<int>(p => p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class ConcurrentStackIntClass
+        {
+            public ConcurrentStack<int> Value { get; set; }
+        }
+
+        public class DefaultConcurrentStackIntClassMap : ExcelClassMap<ConcurrentStackIntClass>
+        {
+            public DefaultConcurrentStackIntClassMap()
+            {
+                Map<int>(p => p.Value);
+            }
+        }
+
+        public class CustomConcurrentStackIntClassMap : ExcelClassMap<ConcurrentStackIntClass>
+        {
+            public CustomConcurrentStackIntClassMap()
+            {
+                Map<int>(p => p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class ConcurrentBagIntClass
+        {
+            public ConcurrentBag<int> Value { get; set; }
+        }
+
+        public class DefaultConcurrentBagIntClassMap : ExcelClassMap<ConcurrentBagIntClass>
+        {
+            public DefaultConcurrentBagIntClassMap()
+            {
+                Map<int>(p => p.Value);
+            }
+        }
+
+        public class CustomConcurrentBagIntClassMap : ExcelClassMap<ConcurrentBagIntClass>
+        {
+            public CustomConcurrentBagIntClassMap()
+            {
+                Map<int>(p => p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class BlockingCollectionIntClass
+        {
+            public BlockingCollection<int> Value { get; set; }
+        }
+
+        public class DefaultBlockingCollectionIntClassMap : ExcelClassMap<BlockingCollectionIntClass>
+        {
+            public DefaultBlockingCollectionIntClassMap()
+            {
+                Map<int>(p => p.Value);
+            }
+        }
+
+        public class CustomBlockingCollectionIntClassMap : ExcelClassMap<BlockingCollectionIntClass>
+        {
+            public CustomBlockingCollectionIntClassMap()
+            {
+                Map<int>(p => p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class CustomConstructorIEnumerable<T> : IEnumerable<T>
+        {
+            private IEnumerable<T> _inner;
+
+            public CustomConstructorIEnumerable(IEnumerable<T> inner)
+            {
+                _inner = inner;
+            }
+
+            public IEnumerator<T> GetEnumerator() => _inner.GetEnumerator();
+
+            IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_inner).GetEnumerator();
+        }
+
+        public class CustomConstructorIEnumerableIntClass
+        {
+            public CustomConstructorIEnumerable<int> Value { get; set; }
+        }
+
+        public class DefaultCustomConstructorIEnumerableIntClassMap : ExcelClassMap<CustomConstructorIEnumerableIntClass>
+        {
+            public DefaultCustomConstructorIEnumerableIntClassMap()
+            {
+                Map<int>(p => p.Value);
+            }
+        }
+
+        public class CustomCustomConstructorIEnumerableIntClassMap : ExcelClassMap<CustomConstructorIEnumerableIntClass>
+        {
+            public CustomCustomConstructorIEnumerableIntClassMap()
+            {
+                Map<int>(p => p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class CustomAddIEnumerable<T> : IEnumerable<T>
+        {
+            private List<T> _inner = new List<T>();
+
+            public IEnumerator<T> GetEnumerator() => _inner.GetEnumerator();
+
+            IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_inner).GetEnumerator();
+
+            public void Add(T value) => _inner.Add(value);
+        }
+
+        public class CustomAddIEnumerableIntClass
+        {
+            public CustomAddIEnumerable<int> Value { get; set; }
+        }
+
+        public class DefaultCustomAddIEnumerableIntClassMap : ExcelClassMap<CustomAddIEnumerableIntClass>
+        {
+            public DefaultCustomAddIEnumerableIntClassMap()
+            {
+                Map<int>(p => p.Value);
+            }
+        }
+
+        public class CustomCustomAddIEnumerableIntClassMap : ExcelClassMap<CustomAddIEnumerableIntClass>
+        {
+            public CustomCustomAddIEnumerableIntClassMap()
+            {
+                Map<int>(p => p.Value)
                     .WithElementMap(p => p
                         .WithEmptyFallback(-1)
                         .WithInvalidFallback(-2)
