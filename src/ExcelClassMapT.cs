@@ -345,7 +345,7 @@ namespace ExcelMapper
         {
             if (!AutoMapper.TryCreateGenericEnumerableMap(member, EmptyValueStrategy, out ManyToOneEnumerableMap<TProperty> map))
             {
-                throw new ExcelMappingException($"No known way to instantiate type \"{typeof(TProperty)}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
+                throw new ExcelMappingException($"No known way to instantiate type \"{member.MemberType()}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
             }
 
             return map;
@@ -355,7 +355,7 @@ namespace ExcelMapper
         {
             if (!AutoMapper.TryCreateGenericDictionaryMap<TKey, TValue>(member.MemberType(), EmptyValueStrategy, out ManyToOneDictionaryMap<TValue> map))
             {
-                throw new ExcelMappingException($"No known way to instantiate type \"IDictionary<{typeof(TKey)}, {typeof(TValue)}>\".");
+                throw new ExcelMappingException($"No known way to instantiate type \"{member.MemberType()}\".");
             }
 
             return map;

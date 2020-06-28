@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Xunit;
 
@@ -37,7 +38,7 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_AutoMappedIEnumerableKeyValuePairStringIntClass_ReturnsExpected()
+        public void ReadRow_AutoMappedIEnumerableKeyValuePairStringInt_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
@@ -91,7 +92,7 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_AutoMappedICollectionKeyValuePairStringIntClass_ReturnsExpected()
+        public void ReadRow_AutoMappedICollectionKeyValuePairStringInt_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
@@ -145,7 +146,7 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_AutoMappedIReadOnlyCollectionKeyValuePairStringIntClass_ReturnsExpected()
+        public void ReadRow_AutoMappedIReadOnlyCollectionKeyValuePairStringInt_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
@@ -199,7 +200,7 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_AutoMappedIDictionaryStringIntClass_ReturnsExpected()
+        public void ReadRow_AutoMappedIDictionaryStringInt_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
@@ -253,7 +254,7 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_AutoMappedIReadOnlyDictionaryStringIntClass_ReturnsExpected()
+        public void ReadRow_AutoMappedIReadOnlyDictionaryStringInt_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
@@ -307,7 +308,7 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_AutoMappedDictionaryStringIntClass_ReturnsExpected()
+        public void ReadRow_AutoMappedDictionaryStringInt_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
@@ -342,6 +343,54 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRow_AutoMappedSortedDictionaryStringInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            SortedDictionaryStringIntClass row1 = sheet.ReadRow<SortedDictionaryStringIntClass>();
+            Assert.Equal(2, row1.Value.Count);
+            Assert.Equal(1, row1.Value["Column1"]);
+            Assert.Equal(2, row1.Value["Column2"]);
+
+            SortedDictionaryStringIntClass row2 = sheet.ReadRow<SortedDictionaryStringIntClass>();
+            Assert.Equal(2, row2.Value.Count);
+            Assert.Equal(0, row2.Value["Column1"]);
+            Assert.Equal(0, row2.Value["Column2"]);
+
+            SortedDictionaryStringIntClass row3 = sheet.ReadRow<SortedDictionaryStringIntClass>();
+            Assert.Equal(2, row3.Value.Count);
+            Assert.Equal(-2, row3.Value["Column1"]);
+            Assert.Equal(-1, row3.Value["Column2"]);
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedConcurrentDictionaryStringInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ConcurrentDictionaryStringIntClass row1 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
+            Assert.Equal(2, row1.Value.Count);
+            Assert.Equal(1, row1.Value["Column1"]);
+            Assert.Equal(2, row1.Value["Column2"]);
+
+            ConcurrentDictionaryStringIntClass row2 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
+            Assert.Equal(2, row2.Value.Count);
+            Assert.Equal(0, row2.Value["Column1"]);
+            Assert.Equal(0, row2.Value["Column2"]);
+
+            ConcurrentDictionaryStringIntClass row3 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
+            Assert.Equal(2, row3.Value.Count);
+            Assert.Equal(-2, row3.Value["Column1"]);
+            Assert.Equal(-1, row3.Value["Column2"]);
+        }
+
+        [Fact]
         public void ReadRow_DefaultMappedIDictionaryStringObjectClass_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
@@ -373,7 +422,7 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_DefaultMappedIDictionaryStringIntClass_ReturnsExpected()
+        public void ReadRow_DefaultMappedIDictionaryStringInt_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
             importer.Configuration.RegisterClassMap<DefaultIDictionaryStringIntClassMap>();
@@ -429,7 +478,7 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_DefaultMappedIReadOnlyDictionaryStringIntClass_ReturnsExpected()
+        public void ReadRow_DefaultMappedIReadOnlyDictionaryStringInt_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
             importer.Configuration.RegisterClassMap<DefaultIReadOnlyDictionaryStringIntClassMap>();
@@ -485,7 +534,7 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_DefaultMappedDictionaryStringIntClass_ReturnsExpected()
+        public void ReadRow_DefaultMappedDictionaryStringInt_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
             importer.Configuration.RegisterClassMap<DefaultDictionaryStringIntClassMap>();
@@ -504,6 +553,56 @@ namespace ExcelMapper.Tests
             Assert.Equal(0, row2.Value["Column2"]);
 
             DictionaryStringIntClass row3 = sheet.ReadRow<DictionaryStringIntClass>();
+            Assert.Equal(2, row3.Value.Count);
+            Assert.Equal(-2, row3.Value["Column1"]);
+            Assert.Equal(-1, row3.Value["Column2"]);
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedSortedDictionaryStringInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultSortedDictionaryStringIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            SortedDictionaryStringIntClass row1 = sheet.ReadRow<SortedDictionaryStringIntClass>();
+            Assert.Equal(2, row1.Value.Count);
+            Assert.Equal(1, row1.Value["Column1"]);
+            Assert.Equal(2, row1.Value["Column2"]);
+
+            SortedDictionaryStringIntClass row2 = sheet.ReadRow<SortedDictionaryStringIntClass>();
+            Assert.Equal(2, row2.Value.Count);
+            Assert.Equal(0, row2.Value["Column1"]);
+            Assert.Equal(0, row2.Value["Column2"]);
+
+            SortedDictionaryStringIntClass row3 = sheet.ReadRow<SortedDictionaryStringIntClass>();
+            Assert.Equal(2, row3.Value.Count);
+            Assert.Equal(-2, row3.Value["Column1"]);
+            Assert.Equal(-1, row3.Value["Column2"]);
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedConcurrentDictionaryStringInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultConcurrentDictionaryStringIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ConcurrentDictionaryStringIntClass row1 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
+            Assert.Equal(2, row1.Value.Count);
+            Assert.Equal(1, row1.Value["Column1"]);
+            Assert.Equal(2, row1.Value["Column2"]);
+
+            ConcurrentDictionaryStringIntClass row2 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
+            Assert.Equal(2, row2.Value.Count);
+            Assert.Equal(0, row2.Value["Column1"]);
+            Assert.Equal(0, row2.Value["Column2"]);
+
+            ConcurrentDictionaryStringIntClass row3 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
             Assert.Equal(2, row3.Value.Count);
             Assert.Equal(-2, row3.Value["Column1"]);
             Assert.Equal(-1, row3.Value["Column2"]);
@@ -660,7 +759,7 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void ReadRow_CustomMapSortedDictionaryStringInt_ReturnsExpected()
+        public void ReadRow_CustomMappedSortedDictionaryStringInt_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
             importer.Configuration.RegisterClassMap(new CustomSortedDictionaryStringIntClassMap());
@@ -679,6 +778,31 @@ namespace ExcelMapper.Tests
             Assert.Equal(0, row2.Value["Column3"]);
 
             SortedDictionaryStringIntClass row3 = sheet.ReadRow<SortedDictionaryStringIntClass>();
+            Assert.Equal(2, row3.Value.Count);
+            Assert.Equal(-2, row3.Value["Column2"]);
+            Assert.Equal(-1, row3.Value["Column3"]);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedConcurrentDictionaryStringInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+            importer.Configuration.RegisterClassMap(new CustomConcurrentDictionaryStringIntClassMap());
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ConcurrentDictionaryStringIntClass row1 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
+            Assert.Equal(2, row1.Value.Count);
+            Assert.Equal(1, row1.Value["Column2"]);
+            Assert.Equal(2, row1.Value["Column3"]);
+
+            ConcurrentDictionaryStringIntClass row2 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
+            Assert.Equal(2, row2.Value.Count);
+            Assert.Equal(0, row2.Value["Column2"]);
+            Assert.Equal(0, row2.Value["Column3"]);
+
+            ConcurrentDictionaryStringIntClass row3 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
             Assert.Equal(2, row3.Value.Count);
             Assert.Equal(-2, row3.Value["Column2"]);
             Assert.Equal(-1, row3.Value["Column3"]);
@@ -1046,14 +1170,35 @@ namespace ExcelMapper.Tests
         {
             public DefaultSortedDictionaryStringIntClassMap()
             {
-                Map(p => (IDictionary<string, int>)p.Value)
-                    .WithColumnNames("Column2", "Column3");
+                Map(p => (IDictionary<string, int>)p.Value);
             }
         }
 
         private class CustomSortedDictionaryStringIntClassMap : ExcelClassMap<SortedDictionaryStringIntClass>
         {
             public CustomSortedDictionaryStringIntClassMap()
+            {
+                Map(p => (IDictionary<string, int>)p.Value)
+                    .WithColumnNames("Column2", "Column3");
+            }
+        }
+
+        private class ConcurrentDictionaryStringIntClass
+        {
+            public ConcurrentDictionary<string, int> Value { get; set; }
+        }
+
+        private class DefaultConcurrentDictionaryStringIntClassMap : ExcelClassMap<ConcurrentDictionaryStringIntClass>
+        {
+            public DefaultConcurrentDictionaryStringIntClassMap()
+            {
+                Map(p => (IDictionary<string, int>)p.Value);
+            }
+        }
+
+        private class CustomConcurrentDictionaryStringIntClassMap : ExcelClassMap<ConcurrentDictionaryStringIntClass>
+        {
+            public CustomConcurrentDictionaryStringIntClassMap()
             {
                 Map(p => (IDictionary<string, int>)p.Value)
                     .WithColumnNames("Column2", "Column3");
