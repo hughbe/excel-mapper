@@ -240,20 +240,20 @@ namespace ExcelMapper
                 }
             }
 
-            if (!Importer.Configuration.TryGetClassMap<T>(out ExcelClassMap classMap))
+            if (!Importer.Configuration.TryGetClassMap<T>(out IMap classMap))
             {
                 if (!HasHeading)
                 {
                     throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\" as the sheet has no heading.");
                 }
 
-                if (!AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<T> autoClassMap))
+                if (!AutoMapper.TryAutoMap<T>(FallbackStrategy.ThrowIfPrimitive, out IMap map))
                 {
                     throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\".");
                 }
 
-                classMap = autoClassMap;
-                Importer.Configuration.RegisterClassMap(autoClassMap);
+                classMap = map;
+                Importer.Configuration.RegisterClassMap(typeof(T), classMap);
             }
 
             bool result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out object valueObject);

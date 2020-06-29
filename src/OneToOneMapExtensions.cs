@@ -16,7 +16,7 @@ namespace ExcelMapper
         /// <typeparam name="T">The type of the property map.</typeparam>
         /// <param name="propertyMap">The property map to use.</param>
         /// <returns>The property map on which this method was invoked.</returns>
-        public static T MakeOptional<T>(this T propertyMap) where T : OneToOneMap
+        public static OneToOneMap<T> MakeOptional<T>(this OneToOneMap<T> propertyMap)
         {
             propertyMap.Optional = true;
             return propertyMap;
@@ -30,8 +30,7 @@ namespace ExcelMapper
         /// <param name="propertyMap">The property map to use.</param>
         /// <param name="predicate">A predicate which returns whether a Column Name was matched or not</param>
         /// <returns>The property map on which this method was invoked.</returns>
-        public static T WithColumnNameMatching<T>(this T propertyMap, Func<string, bool> predicate)
-            where T : OneToOneMap
+        public static OneToOneMap<T> WithColumnNameMatching<T>(this OneToOneMap<T> propertyMap, Func<string, bool> predicate)
         {
             return propertyMap.WithReader(new ColumnNameMatchingValueReader(predicate));
         }
@@ -44,7 +43,7 @@ namespace ExcelMapper
         /// <param name="propertyMap">The property map to use.</param>
         /// <param name="columnName">The name of the column to read</param>
         /// <returns>The property map on which this method was invoked.</returns>
-        public static T WithColumnName<T>(this T propertyMap, string columnName) where T : OneToOneMap
+        public static OneToOneMap<T> WithColumnName<T>(this OneToOneMap<T> propertyMap, string columnName)
         {
             return propertyMap
                 .WithReader(new ColumnNameValueReader(columnName));
@@ -58,7 +57,7 @@ namespace ExcelMapper
         /// <param name="propertyMap">The property map to use.</param>
         /// <param name="columnIndex">The zero-based index of the column to read</param>
         /// <returns>The property map on which this method was invoked.</returns>
-        public static T WithColumnIndex<T>(this T propertyMap, int columnIndex) where T : OneToOneMap
+        public static OneToOneMap<T> WithColumnIndex<T>(this OneToOneMap<T> propertyMap, int columnIndex)
         {
             return propertyMap
                 .WithReader(new ColumnIndexValueReader(columnIndex));
@@ -71,7 +70,7 @@ namespace ExcelMapper
         /// <param name="propertyMap">The property map to use.</param>
         /// <param name="reader">The custom reader to use.</param>
         /// <returns>The property map on which this method was invoked.</returns>
-        public static T WithReader<T>(this T propertyMap, ISingleCellValueReader reader) where T : OneToOneMap
+        public static OneToOneMap<T> WithReader<T>(this OneToOneMap<T> propertyMap, ISingleCellValueReader reader)
         {
             if (reader == null)
             {

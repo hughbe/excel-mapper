@@ -21,7 +21,7 @@ namespace ExcelMapper.Utilities
         private static MethodInfo s_tryCreateGenericDictionaryMapMethod;
         private static MethodInfo TryCreateGenericDictionaryMapMethod => s_tryCreateGenericDictionaryMapMethod ?? (s_tryCreateGenericDictionaryMapMethod = typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateGenericDictionaryMap)));
 
-        private static bool TryCreateMemberMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out Map map)
+        private static bool TryCreateMemberMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out IMap map)
         {
             // First, check if this is a well-known type (e.g. string/int).
             // This is a simple conversion from the cell's value to the type.
@@ -33,7 +33,7 @@ namespace ExcelMapper.Utilities
 
             // Secondly, check if this is a dictionary.
             // This requires converting each value to the value type of the collection.
-            if (TryCreateDictionaryMap(member.MemberType(), emptyValueStrategy, out Map dictionaryMap))
+            if (TryCreateDictionaryMap<T>(emptyValueStrategy, out IMap dictionaryMap))
             {
                 map = dictionaryMap;
                 return true;
@@ -41,7 +41,7 @@ namespace ExcelMapper.Utilities
 
             // Thirdly, check if this is a collection (e.g. array, list).
             // This requires converting each value to the element type of the collection.
-            if (TryCreateEnumerableMap(member, emptyValueStrategy, out Map multiMap))
+            if (TryCreateEnumerableMap(member, emptyValueStrategy, out IMap multiMap))
             {
                 map = multiMap;
                 return true;
@@ -186,7 +186,7 @@ namespace ExcelMapper.Utilities
             return true;
         }
 
-        private static bool TryCreateEnumerableMap(MemberInfo member, FallbackStrategy emptyValueStrategy, out Map map)
+        private static bool TryCreateEnumerableMap(MemberInfo member, FallbackStrategy emptyValueStrategy, out IMap map)
         {
             if (!member.MemberType().GetElementTypeOrEnumerableType(out Type elementType))
             {
@@ -200,7 +200,7 @@ namespace ExcelMapper.Utilities
             bool result = (bool)method.Invoke(null, parameters);
             if (result)
             {
-                map = (Map)parameters[2];
+                map = (IMap)parameters[2];
                 return true;
             }
 
@@ -304,10 +304,10 @@ namespace ExcelMapper.Utilities
             return false;
         }
 
-        public static bool TryCreateDictionaryMap(Type memberType, FallbackStrategy emptyValueStrategy, out Map map)
+        private static bool TryCreateDictionaryMap<T>(FallbackStrategy emptyValueStrategy, out IMap map)
         {
             // We should be able to parse anything that implements IEnumerable<KeyValuePair<TKey, TValue>>
-            if (!memberType.ImplementsGenericInterface(typeof(IEnumerable<>), out Type keyValuePairType))
+            if (!typeof(T).ImplementsGenericInterface(typeof(IEnumerable<>), out Type keyValuePairType))
             {
                 map = null;
                 return false;
@@ -323,11 +323,11 @@ namespace ExcelMapper.Utilities
             Type valueType = arguments[1];
             MethodInfo method = TryCreateGenericDictionaryMapMethod.MakeGenericMethod(keyType, valueType);
 
-            var parameters = new object[] { memberType, emptyValueStrategy, null };
+            var parameters = new object[] { typeof(T), emptyValueStrategy, null };
             bool result = (bool)method.Invoke(null, parameters);
             if (result)
             {
-                map = (Map)parameters[2];
+                map = (IMap)parameters[2];
                 return true;
             }
 
@@ -463,11 +463,29 @@ namespace ExcelMapper.Utilities
                 }
 
                 // Get the out parameter representing the property map for the member.
-                map.Properties.Add(new ExcelPropertyMap(member, (Map)parameters[2]));
+                map.Properties.Add(new ExcelPropertyMap(member, (IMap)parameters[2]));
             }
 
             classMap = map;
             return true;
+        }
+
+        internal static bool TryAutoMap<T>(FallbackStrategy emptyValueStrategy, out IMap result)
+        {
+            // First see if we can create a dictionary map of this type.
+            if (TryCreateDictionaryMap<T>(emptyValueStrategy, out IMap dictionaryMap))
+            {
+                result = dictionaryMap;
+                return true;
+            }
+            else if (TryCreateClassMap(emptyValueStrategy, out ExcelClassMap<T> classMap))
+            {
+                result = classMap;
+                return true;
+            }
+
+            result = null;
+            return false;
         }
     }
 }

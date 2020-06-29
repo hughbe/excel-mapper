@@ -9,7 +9,7 @@ namespace ExcelMapper
     /// </summary>
     public class ExcelImporterConfiguration
     {
-        private List<ExcelClassMap> ClassMaps { get; } = new List<ExcelClassMap>();
+        private Dictionary<Type, IMap> ClassMaps { get; } = new Dictionary<Type, IMap>();
 
         /// <summary>
         ///  Gets or sets whether blank lines should be skipped during reading.
@@ -25,24 +25,14 @@ namespace ExcelMapper
         /// <param name="classType">The type of the object to get the class map for.</param>
         /// <param name="classMap">The class map for the given type if it exists, else null.</param>
         /// <returns>True if a class map exists for the given type, else false.</returns>
-        public bool TryGetClassMap(Type classType, out ExcelClassMap classMap)
+        public bool TryGetClassMap(Type classType, out IMap classMap)
         {
             if (classType == null)
             {
                 throw new ArgumentNullException(nameof(classType));
             }
 
-            foreach (ExcelClassMap registeredMap in ClassMaps)
-            {
-                if (registeredMap.Type == classType)
-                {
-                    classMap = registeredMap;
-                    return true;
-                }
-            }
-
-            classMap = null;
-            return false;
+            return ClassMaps.TryGetValue(classType, out classMap);
         }
 
         /// <summary>
@@ -51,7 +41,7 @@ namespace ExcelMapper
         /// <typeparam name="T">The type of the object to get the class map for.</typeparam>
         /// <param name="classMap">The class map for the given type if it exists, else null.</param>
         /// <returns>True if a class map exists for the given type, else false.</returns>
-        public bool TryGetClassMap<T>(out ExcelClassMap classMap) => TryGetClassMap(typeof(T), out classMap);
+        public bool TryGetClassMap<T>(out IMap classMap) => TryGetClassMap(typeof(T), out classMap);
 
         /// <summary>
         /// Registers a class map of the given type to be used when mapping a row to an object.
@@ -74,12 +64,30 @@ namespace ExcelMapper
                 throw new ArgumentNullException(nameof(classMap));
             }
 
-            if (TryGetClassMap(classMap.Type, out ExcelClassMap _))
+            RegisterClassMap(classMap.Type, classMap);
+        }
+
+        /// <summary>
+        /// Registers the given class map to be used when mapping a row to an object.
+        /// </summary>
+        /// <param name="classType">The type of the class.</param>
+        /// <param name="classMap">The class map to use.</param>
+        public void RegisterClassMap(Type classType, IMap classMap)
+        {
+            if (classType == null)
             {
-                throw new ExcelMappingException($"Class map already type \"{classMap.Type.FullName}\"");
+                throw new ArgumentNullException(nameof(classType));
+            }
+            if (classMap == null)
+            {
+                throw new ArgumentNullException(nameof(classMap));
+            }
+            if (ClassMaps.ContainsKey(classType))
+            {
+                throw new ExcelMappingException($"Class map already exists for type \"{classType.FullName}\"");
             }
 
-            ClassMaps.Add(classMap);
+            ClassMaps.Add(classType, classMap);
         }
     }
 }

@@ -18,14 +18,11 @@ namespace ExcelMapper
     public class ExcelClassMap<T> : ExcelClassMap
     {
         /// <summary>
-        /// Gets the default strategy to use when the value of a cell is empty.
-        /// </summary>
-        public FallbackStrategy EmptyValueStrategy { get; }
-
-        /// <summary>
         /// Constructs the default class map for the given type.
         /// </summary>
-        public ExcelClassMap() : base(typeof(T)) { }
+        public ExcelClassMap() : base(typeof(T))
+        {
+        }
 
         /// <summary>
         /// Constructs a new class map for the given type using the given default strategy to use
@@ -41,6 +38,11 @@ namespace ExcelMapper
 
             EmptyValueStrategy = emptyValueStrategy;
         }
+
+        /// <summary>
+        /// Gets the default strategy to use when the value of a cell is empty.
+        /// </summary>
+        public FallbackStrategy EmptyValueStrategy { get; }
 
         /// <summary>
         /// Creates a map for a property or field given a MemberExpression reading the property or field.

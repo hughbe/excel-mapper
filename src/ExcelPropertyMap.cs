@@ -7,7 +7,7 @@ namespace ExcelMapper
 
     public class ExcelPropertyMap
     {
-        public ExcelPropertyMap(MemberInfo member, Map map)
+        public ExcelPropertyMap(MemberInfo member, IMap map)
         {
             Member = member ?? throw new ArgumentNullException(nameof(member));
             Map = map ?? throw new ArgumentNullException(nameof(map));
@@ -35,6 +35,6 @@ namespace ExcelMapper
 
         public MemberSetValueDelegate SetValueFactory { get; }
 
-        public Map Map { get; }
+        public IMap Map { get; }
     }
 }
