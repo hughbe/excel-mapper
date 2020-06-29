@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Reflection;
 using ExcelDataReader;
 
 namespace ExcelMapper
 {
-    public class ExcelClassMap : Map
+    public class ExcelClassMap : IMap
     {
         public ExcelClassMap(Type type)
         {
@@ -15,7 +15,7 @@ namespace ExcelMapper
 
         public ExcelPropertyMapCollection Properties { get; } = new ExcelPropertyMapCollection();
 
-        public override bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object result)
+        public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object result)
         {
             object instance = Activator.CreateInstance(Type);
             foreach (ExcelPropertyMap property in Properties)

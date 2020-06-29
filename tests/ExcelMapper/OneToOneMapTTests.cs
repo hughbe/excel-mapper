@@ -34,6 +34,36 @@ namespace ExcelMapper.Tests
             Assert.Throws<ArgumentNullException>("reader", () => new SubOneToOneMap<int>(null));
         }
 
+        public static IEnumerable<object[]> CellReader_Set_TestData()
+        {
+            yield return new object[] { new ColumnNameValueReader("Column") };
+        }
+
+        [Theory]
+        [MemberData(nameof(CellReader_Set_TestData))]
+        public void CellReader_SetValid_GetReturnsExpected(ISingleCellValueReader value)
+        {
+            var reader = new ColumnNameValueReader("Column");
+            var map = new SubOneToOneMap<int>(reader)
+            {
+                CellReader = value
+            };
+            Assert.Same(value, map.CellReader);
+
+            // Set same.
+            map.CellReader = value;
+            Assert.Same(value, map.CellReader);
+        }
+
+        [Fact]
+        public void CellReader_SetNull_ThrowsArgumentNullException()
+        {
+            var reader = new ColumnNameValueReader("Column");
+            var map = new SubOneToOneMap<int>(reader);
+
+            Assert.Throws<ArgumentNullException>("value", () => map.CellReader = null);
+        }
+
         [Fact]
         public void EmptyFallback_Set_GetReturnsExpected()
         {
@@ -60,6 +90,27 @@ namespace ExcelMapper.Tests
 
             map.InvalidFallback = null;
             Assert.Null(map.InvalidFallback);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Optional_Set_GetReturnsExpected(bool value)
+        {
+            var reader = new ColumnNameValueReader("Column");
+            var map = new SubOneToOneMap<int>(reader)
+            {
+                Optional = value
+            };
+            Assert.Equal(value, map.Optional);
+
+            // Set same.
+            map.Optional = value;
+            Assert.Equal(value, map.Optional);
+
+            // Set different.
+            map.Optional = !value;
+            Assert.Equal(!value, map.Optional);
         }
 
         [Fact]
@@ -125,11 +176,6 @@ namespace ExcelMapper.Tests
         {
             public SubOneToOneMap(ISingleCellValueReader reader) : base(reader)
             {
-            }
-
-            public override bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object value)
-            {
-                throw new NotImplementedException();
             }
         }
     }

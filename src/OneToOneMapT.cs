@@ -6,15 +6,26 @@ using ExcelMapper.Abstractions;
 
 namespace ExcelMapper
 {
-    public class OneToOneMap<T> : OneToOneMap, IValuePipeline<T>
+    public class OneToOneMap<T> : IValuePipeline<T>, IMap
     {
-        public OneToOneMap(ISingleCellValueReader reader) : base(reader)
+        public OneToOneMap(ISingleCellValueReader reader)
         {
+            CellReader = reader ?? throw new ArgumentNullException(nameof(reader));
         }
+
+        private ISingleCellValueReader _reader;
+
+        public ISingleCellValueReader CellReader
+        {
+            get => _reader;
+            set => _reader = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        public bool Optional { get; set; }
 
         public ValuePipeline<T> Pipeline { get; } = new ValuePipeline<T>();
 
-        public override bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object result)
+        public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object result)
         {
             if (!CellReader.TryGetValue(sheet, rowIndex, reader, out ReadCellValueResult readResult))
             {

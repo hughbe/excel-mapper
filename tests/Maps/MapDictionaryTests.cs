@@ -1031,11 +1031,71 @@ namespace ExcelMapper.Tests
             Assert.Equal(-1, row3.Value["Column3"]);
         }
 
-#if false
+        [Fact]
+        public void ReadRow_IDictionaryObject_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IDictionary<string, object> row1 = sheet.ReadRow<IDictionary<string, object>>();
+            Assert.Equal(4, row1.Count);
+            Assert.Equal("a", row1["Column1"]);
+            Assert.Equal("1", row1["Column2"]);
+            Assert.Equal("2", row1["Column3"]);
+            Assert.Null(row1["Column4"]);
+
+            IDictionary<string, object> row2 = sheet.ReadRow<IDictionary<string, object>>();
+            Assert.Equal(4, row2.Count);
+            Assert.Equal("b", row2["Column1"]);
+            Assert.Equal("0", row2["Column2"]);
+            Assert.Equal("0", row2["Column3"]);
+            Assert.Null(row2["Column4"]);
+
+            IDictionary<string, object> row3 = sheet.ReadRow<IDictionary<string, object>>();
+            Assert.Equal(4, row3.Count);
+            Assert.Equal("c", row3["Column1"]);
+            Assert.Equal("-2", row3["Column2"]);
+            Assert.Equal("-1", row3["Column3"]);
+            Assert.Null(row3["Column4"]);
+        }
+
+        [Fact]
+        public void ReadRow_IReadOnlyDictionaryObject_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IReadOnlyDictionary<string, object> row1 = sheet.ReadRow<IReadOnlyDictionary<string, object>>();
+            Assert.Equal(4, row1.Count);
+            Assert.Equal("a", row1["Column1"]);
+            Assert.Equal("1", row1["Column2"]);
+            Assert.Equal("2", row1["Column3"]);
+            Assert.Null(row1["Column4"]);
+
+            IReadOnlyDictionary<string, object> row2 = sheet.ReadRow<IReadOnlyDictionary<string, object>>();
+            Assert.Equal(4, row2.Count);
+            Assert.Equal("b", row2["Column1"]);
+            Assert.Equal("0", row2["Column2"]);
+            Assert.Equal("0", row2["Column3"]);
+            Assert.Null(row2["Column4"]);
+
+            IReadOnlyDictionary<string, object> row3 = sheet.ReadRow<IReadOnlyDictionary<string, object>>();
+            Assert.Equal(4, row3.Count);
+            Assert.Equal("c", row3["Column1"]);
+            Assert.Equal("-2", row3["Column2"]);
+            Assert.Equal("-1", row3["Column3"]);
+            Assert.Null(row3["Column4"]);
+        }
+
         [Fact]
         public void ReadRow_DictionaryObject_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
             ExcelSheet sheet = importer.ReadSheet();
             sheet.ReadHeading();
 
@@ -1046,50 +1106,19 @@ namespace ExcelMapper.Tests
             Assert.Equal("2", row1["Column3"]);
             Assert.Null(row1["Column4"]);
 
-            IDictionary<string, string> row2 = sheet.ReadRow<IDictionary<string, string>>();
+            Dictionary<string, object> row2 = sheet.ReadRow<Dictionary<string, object>>();
             Assert.Equal(4, row2.Count);
             Assert.Equal("b", row2["Column1"]);
             Assert.Equal("0", row2["Column2"]);
             Assert.Equal("0", row2["Column3"]);
             Assert.Null(row2["Column4"]);
 
-            IDictionaryStringObjectClass row3 = sheet.ReadRow<IDictionaryStringObjectClass>();
-            Assert.Equal(4, row3.Value.Count);
-            Assert.Equal("c", row3.Value["Column1"]);
-            Assert.Equal("-2", row3.Value["Column2"]);
-            Assert.Equal("-1", row3.Value["Column3"]);
-            Assert.Null(row3.Value["Column4"]);
-        }
-#endif
-
-        [Fact]
-        public void ReadRow_IDictionaryStringObject_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IDictionary<string, object>>());
-        }
-
-        [Fact]
-        public void ReadRow_IReadOnlyDictionaryStringObject_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyDictionary<string, object>>());
-        }
-
-        [Fact]
-        public void ReadRow_DictionaryStringObject_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<Dictionary<string, object>>());
+            Dictionary<string, object> row3 = sheet.ReadRow<Dictionary<string, object>>();
+            Assert.Equal(4, row3.Count);
+            Assert.Equal("c", row3["Column1"]);
+            Assert.Equal("-2", row3["Column2"]);
+            Assert.Equal("-1", row3["Column3"]);
+            Assert.Null(row3["Column4"]);
         }
 
         [Fact]

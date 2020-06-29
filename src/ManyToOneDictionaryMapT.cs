@@ -15,7 +15,7 @@ namespace ExcelMapper
     /// property or field. This is used to map IDictionary properties and fields.
     /// </summary>
     /// <typeparam name="T">The element type of the IDictionary property or field.</typeparam>
-    public class ManyToOneDictionaryMap<T> : Map
+    public class ManyToOneDictionaryMap<T> : IMap
     {
         /// <summary>
         /// Constructs a map reads one or more values from one or more cells and maps these values as element
@@ -49,7 +49,7 @@ namespace ExcelMapper
 
         public CreateDictionaryFactory<T> CreateDictionaryFactory { get; }
 
-        public override bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object value)
+        public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object value)
         {
             if (!CellValuesReader.TryGetValues(sheet, rowIndex, reader, out IEnumerable<ReadCellValueResult> valueResults))
             {
