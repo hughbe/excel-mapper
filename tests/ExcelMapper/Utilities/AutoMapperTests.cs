@@ -63,7 +63,6 @@ namespace ExcelMapper.Utilities.Tests
 
             public string PrivateSetProperty { get; private set; }
             public string PrivateGetProperty { private get; set; }
-
         }
 #pragma warning restore 0649
     }

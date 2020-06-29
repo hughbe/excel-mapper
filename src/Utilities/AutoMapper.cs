@@ -239,6 +239,15 @@ namespace ExcelMapper.Utilities
                 result = elements => elements.ToArray();
                 return true;
             }
+            else if (memberType.IsImmutableEnumerableType())
+            {
+                MethodInfo createRangeMethod = memberType.GetImmutableEnumerableCreateRangeMethod(typeof(T));
+                result = elements =>
+                {
+                    return (IEnumerable<T>)createRangeMethod.Invoke(null, new object[] { elements });
+                };
+                return true;
+            }
             else if (memberType.GetTypeInfo().IsInterface)
             {
                 // Add values by creating a list and assigning to the property.
@@ -348,6 +357,15 @@ namespace ExcelMapper.Utilities
 
         private static bool TryGetCreateDictionaryFactory<TKey, TValue>(Type memberType, out CreateDictionaryFactory<TValue> result)
         {
+            if (memberType.IsImmutableDictionaryType())
+            {
+                MethodInfo createRangeMethod = memberType.GetImmutableDictionaryCreateRangeMethod(typeof(TValue));
+                result = elements =>
+                {
+                    return (IDictionary<string, TValue>)createRangeMethod.Invoke(null, new object[] { elements });
+                };
+                return true;
+            }
             if (memberType.GetTypeInfo().IsInterface)
             {
                 if (memberType.GetTypeInfo().IsAssignableFrom(typeof(Dictionary<TKey, TValue>).GetTypeInfo()))

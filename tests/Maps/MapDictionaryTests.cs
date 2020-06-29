@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Xunit;
 
 namespace ExcelMapper.Tests
@@ -367,6 +368,78 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRow_AutoMappedIImmutableDictionaryStringInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IImmutableDictionaryStringIntClass row1 = sheet.ReadRow<IImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row1.Value.Count);
+            Assert.Equal(1, row1.Value["Column1"]);
+            Assert.Equal(2, row1.Value["Column2"]);
+
+            IImmutableDictionaryStringIntClass row2 = sheet.ReadRow<IImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row2.Value.Count);
+            Assert.Equal(0, row2.Value["Column1"]);
+            Assert.Equal(0, row2.Value["Column2"]);
+
+            IImmutableDictionaryStringIntClass row3 = sheet.ReadRow<IImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row3.Value.Count);
+            Assert.Equal(-2, row3.Value["Column1"]);
+            Assert.Equal(-1, row3.Value["Column2"]);
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedImmutableDictionaryStringInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableDictionaryStringIntClass row1 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row1.Value.Count);
+            Assert.Equal(1, row1.Value["Column1"]);
+            Assert.Equal(2, row1.Value["Column2"]);
+
+            ImmutableDictionaryStringIntClass row2 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row2.Value.Count);
+            Assert.Equal(0, row2.Value["Column1"]);
+            Assert.Equal(0, row2.Value["Column2"]);
+
+            ImmutableDictionaryStringIntClass row3 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row3.Value.Count);
+            Assert.Equal(-2, row3.Value["Column1"]);
+            Assert.Equal(-1, row3.Value["Column2"]);
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedImmutableSortedDictionaryStringInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableSortedDictionaryStringIntClass row1 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
+            Assert.Equal(2, row1.Value.Count);
+            Assert.Equal(1, row1.Value["Column1"]);
+            Assert.Equal(2, row1.Value["Column2"]);
+
+            ImmutableSortedDictionaryStringIntClass row2 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
+            Assert.Equal(2, row2.Value.Count);
+            Assert.Equal(0, row2.Value["Column1"]);
+            Assert.Equal(0, row2.Value["Column2"]);
+
+            ImmutableSortedDictionaryStringIntClass row3 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
+            Assert.Equal(2, row3.Value.Count);
+            Assert.Equal(-2, row3.Value["Column1"]);
+            Assert.Equal(-1, row3.Value["Column2"]);
+        }
+
+        [Fact]
         public void ReadRow_AutoMappedConcurrentDictionaryStringInt_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
@@ -584,6 +657,81 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRow_DefaultMappedIImmutableDictionaryStringInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultIImmutableDictionaryStringIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IImmutableDictionaryStringIntClass row1 = sheet.ReadRow<IImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row1.Value.Count);
+            Assert.Equal(1, row1.Value["Column1"]);
+            Assert.Equal(2, row1.Value["Column2"]);
+
+            IImmutableDictionaryStringIntClass row2 = sheet.ReadRow<IImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row2.Value.Count);
+            Assert.Equal(0, row2.Value["Column1"]);
+            Assert.Equal(0, row2.Value["Column2"]);
+
+            IImmutableDictionaryStringIntClass row3 = sheet.ReadRow<IImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row3.Value.Count);
+            Assert.Equal(-2, row3.Value["Column1"]);
+            Assert.Equal(-1, row3.Value["Column2"]);
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedImmutableDictionaryStringInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultImmutableDictionaryStringIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableDictionaryStringIntClass row1 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row1.Value.Count);
+            Assert.Equal(1, row1.Value["Column1"]);
+            Assert.Equal(2, row1.Value["Column2"]);
+
+            ImmutableDictionaryStringIntClass row2 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row2.Value.Count);
+            Assert.Equal(0, row2.Value["Column1"]);
+            Assert.Equal(0, row2.Value["Column2"]);
+
+            ImmutableDictionaryStringIntClass row3 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row3.Value.Count);
+            Assert.Equal(-2, row3.Value["Column1"]);
+            Assert.Equal(-1, row3.Value["Column2"]);
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedImmutableSortedDictionaryStringInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultImmutableSortedDictionaryStringIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableSortedDictionaryStringIntClass row1 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
+            Assert.Equal(2, row1.Value.Count);
+            Assert.Equal(1, row1.Value["Column1"]);
+            Assert.Equal(2, row1.Value["Column2"]);
+
+            ImmutableSortedDictionaryStringIntClass row2 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
+            Assert.Equal(2, row2.Value.Count);
+            Assert.Equal(0, row2.Value["Column1"]);
+            Assert.Equal(0, row2.Value["Column2"]);
+
+            ImmutableSortedDictionaryStringIntClass row3 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
+            Assert.Equal(2, row3.Value.Count);
+            Assert.Equal(-2, row3.Value["Column1"]);
+            Assert.Equal(-1, row3.Value["Column2"]);
+        }
+
+        [Fact]
         public void ReadRow_DefaultMappedConcurrentDictionaryStringInt_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
@@ -778,6 +926,81 @@ namespace ExcelMapper.Tests
             Assert.Equal(0, row2.Value["Column3"]);
 
             SortedDictionaryStringIntClass row3 = sheet.ReadRow<SortedDictionaryStringIntClass>();
+            Assert.Equal(2, row3.Value.Count);
+            Assert.Equal(-2, row3.Value["Column2"]);
+            Assert.Equal(-1, row3.Value["Column3"]);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedIImmutableDictionaryStringInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+            importer.Configuration.RegisterClassMap(new CustomIImmutableDictionaryStringIntClassMap());
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IImmutableDictionaryStringIntClass row1 = sheet.ReadRow<IImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row1.Value.Count);
+            Assert.Equal(1, row1.Value["Column2"]);
+            Assert.Equal(2, row1.Value["Column3"]);
+
+            IImmutableDictionaryStringIntClass row2 = sheet.ReadRow<IImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row2.Value.Count);
+            Assert.Equal(0, row2.Value["Column2"]);
+            Assert.Equal(0, row2.Value["Column3"]);
+
+            IImmutableDictionaryStringIntClass row3 = sheet.ReadRow<IImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row3.Value.Count);
+            Assert.Equal(-2, row3.Value["Column2"]);
+            Assert.Equal(-1, row3.Value["Column3"]);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedImmutableDictionaryStringInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+            importer.Configuration.RegisterClassMap(new CustomImmutableDictionaryStringIntClassMap());
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableDictionaryStringIntClass row1 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row1.Value.Count);
+            Assert.Equal(1, row1.Value["Column2"]);
+            Assert.Equal(2, row1.Value["Column3"]);
+
+            ImmutableDictionaryStringIntClass row2 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row2.Value.Count);
+            Assert.Equal(0, row2.Value["Column2"]);
+            Assert.Equal(0, row2.Value["Column3"]);
+
+            ImmutableDictionaryStringIntClass row3 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
+            Assert.Equal(2, row3.Value.Count);
+            Assert.Equal(-2, row3.Value["Column2"]);
+            Assert.Equal(-1, row3.Value["Column3"]);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedImmutableSortedDictionaryStringInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+            importer.Configuration.RegisterClassMap(new CustomImmutableSortedDictionaryStringIntClassMap());
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableSortedDictionaryStringIntClass row1 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
+            Assert.Equal(2, row1.Value.Count);
+            Assert.Equal(1, row1.Value["Column2"]);
+            Assert.Equal(2, row1.Value["Column3"]);
+
+            ImmutableSortedDictionaryStringIntClass row2 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
+            Assert.Equal(2, row2.Value.Count);
+            Assert.Equal(0, row2.Value["Column2"]);
+            Assert.Equal(0, row2.Value["Column3"]);
+
+            ImmutableSortedDictionaryStringIntClass row3 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
             Assert.Equal(2, row3.Value.Count);
             Assert.Equal(-2, row3.Value["Column2"]);
             Assert.Equal(-1, row3.Value["Column3"]);
@@ -1177,6 +1400,72 @@ namespace ExcelMapper.Tests
         private class CustomSortedDictionaryStringIntClassMap : ExcelClassMap<SortedDictionaryStringIntClass>
         {
             public CustomSortedDictionaryStringIntClassMap()
+            {
+                Map(p => (IDictionary<string, int>)p.Value)
+                    .WithColumnNames("Column2", "Column3");
+            }
+        }
+
+        private class IImmutableDictionaryStringIntClass
+        {
+            public IImmutableDictionary<string, int> Value { get; set; }
+        }
+
+        private class DefaultIImmutableDictionaryStringIntClassMap : ExcelClassMap<IImmutableDictionaryStringIntClass>
+        {
+            public DefaultIImmutableDictionaryStringIntClassMap()
+            {
+                Map(p => (IDictionary<string, int>)p.Value);
+            }
+        }
+
+        private class CustomIImmutableDictionaryStringIntClassMap : ExcelClassMap<IImmutableDictionaryStringIntClass>
+        {
+            public CustomIImmutableDictionaryStringIntClassMap()
+            {
+                Map(p => (IDictionary<string, int>)p.Value)
+                    .WithColumnNames("Column2", "Column3");
+            }
+        }
+
+        private class ImmutableDictionaryStringIntClass
+        {
+            public ImmutableDictionary<string, int> Value { get; set; }
+        }
+
+        private class DefaultImmutableDictionaryStringIntClassMap : ExcelClassMap<ImmutableDictionaryStringIntClass>
+        {
+            public DefaultImmutableDictionaryStringIntClassMap()
+            {
+                Map(p => (IDictionary<string, int>)p.Value);
+            }
+        }
+
+        private class CustomImmutableDictionaryStringIntClassMap : ExcelClassMap<ImmutableDictionaryStringIntClass>
+        {
+            public CustomImmutableDictionaryStringIntClassMap()
+            {
+                Map(p => (IDictionary<string, int>)p.Value)
+                    .WithColumnNames("Column2", "Column3");
+            }
+        }
+
+        private class ImmutableSortedDictionaryStringIntClass
+        {
+            public ImmutableSortedDictionary<string, int> Value { get; set; }
+        }
+
+        private class DefaultImmutableSortedDictionaryStringIntClassMap : ExcelClassMap<ImmutableSortedDictionaryStringIntClass>
+        {
+            public DefaultImmutableSortedDictionaryStringIntClassMap()
+            {
+                Map(p => (IDictionary<string, int>)p.Value);
+            }
+        }
+
+        private class CustomImmutableSortedDictionaryStringIntClassMap : ExcelClassMap<ImmutableSortedDictionaryStringIntClass>
+        {
+            public CustomImmutableSortedDictionaryStringIntClassMap()
             {
                 Map(p => (IDictionary<string, int>)p.Value)
                     .WithColumnNames("Column2", "Column3");

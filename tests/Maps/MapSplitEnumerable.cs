@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using Xunit;
 
@@ -418,6 +420,270 @@ namespace ExcelMapper.Tests
             Assert.Empty(row4.Value);
 
             Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StackIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedSortedSetInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            SortedSetIntClass row1 = sheet.ReadRow<SortedSetIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SortedSetIntClass>());
+
+            SortedSetIntClass row3 = sheet.ReadRow<SortedSetIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            SortedSetIntClass row4 = sheet.ReadRow<SortedSetIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SortedSetIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedHashSetInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            HashSetIntClass row1 = sheet.ReadRow<HashSetIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<HashSetIntClass>());
+
+            HashSetIntClass row3 = sheet.ReadRow<HashSetIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            HashSetIntClass row4 = sheet.ReadRow<HashSetIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<HashSetIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedIImmutableListInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IImmutableListIntClass row1 = sheet.ReadRow<IImmutableListIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableListIntClass>());
+
+            IImmutableListIntClass row3 = sheet.ReadRow<IImmutableListIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IImmutableListIntClass row4 = sheet.ReadRow<IImmutableListIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableListIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedIImmutableStackInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IImmutableStackIntClass row1 = sheet.ReadRow<IImmutableStackIntClass>();
+            Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableStackIntClass>());
+
+            IImmutableStackIntClass row3 = sheet.ReadRow<IImmutableStackIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IImmutableStackIntClass row4 = sheet.ReadRow<IImmutableStackIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableStackIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedIImmutableQueueInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IImmutableQueueIntClass row1 = sheet.ReadRow<IImmutableQueueIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableQueueIntClass>());
+
+            IImmutableQueueIntClass row3 = sheet.ReadRow<IImmutableQueueIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IImmutableQueueIntClass row4 = sheet.ReadRow<IImmutableQueueIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableQueueIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedIImmutableSetInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IImmutableSetIntClass row1 = sheet.ReadRow<IImmutableSetIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableSetIntClass>());
+
+            IImmutableSetIntClass row3 = sheet.ReadRow<IImmutableSetIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IImmutableSetIntClass row4 = sheet.ReadRow<IImmutableSetIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableSetIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedImmutableArrayInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableArrayIntClass row1 = sheet.ReadRow<ImmutableArrayIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableArrayIntClass>());
+
+            ImmutableArrayIntClass row3 = sheet.ReadRow<ImmutableArrayIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableArrayIntClass row4 = sheet.ReadRow<ImmutableArrayIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableArrayIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedImmutableListInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableListIntClass row1 = sheet.ReadRow<ImmutableListIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableListIntClass>());
+
+            ImmutableListIntClass row3 = sheet.ReadRow<ImmutableListIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableListIntClass row4 = sheet.ReadRow<ImmutableListIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableListIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedImmutableStackInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableStackIntClass row1 = sheet.ReadRow<ImmutableStackIntClass>();
+            Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableStackIntClass>());
+
+            ImmutableStackIntClass row3 = sheet.ReadRow<ImmutableStackIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableStackIntClass row4 = sheet.ReadRow<ImmutableStackIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableStackIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedImmutableQueueInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableQueueIntClass row1 = sheet.ReadRow<ImmutableQueueIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableQueueIntClass>());
+
+            ImmutableQueueIntClass row3 = sheet.ReadRow<ImmutableQueueIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableQueueIntClass row4 = sheet.ReadRow<ImmutableQueueIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableQueueIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedImmutableSortedSetInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableSortedSetIntClass row1 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableSortedSetIntClass>());
+
+            ImmutableSortedSetIntClass row3 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableSortedSetIntClass row4 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableSortedSetIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedImmutableHashSetInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableHashSetIntClass row1 = sheet.ReadRow<ImmutableHashSetIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableHashSetIntClass>());
+
+            ImmutableHashSetIntClass row3 = sheet.ReadRow<ImmutableHashSetIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableHashSetIntClass row4 = sheet.ReadRow<ImmutableHashSetIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableHashSetIntClass>());
         }
 
         [Fact]
@@ -960,6 +1226,52 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRow_DefaultMappedSortedSetInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultSortedSetIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            SortedSetIntClass row1 = sheet.ReadRow<SortedSetIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SortedSetIntClass>());
+
+            SortedSetIntClass row3 = sheet.ReadRow<SortedSetIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            SortedSetIntClass row4 = sheet.ReadRow<SortedSetIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SortedSetIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedHashSetInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultHashSetIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            HashSetIntClass row1 = sheet.ReadRow<HashSetIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<HashSetIntClass>());
+
+            HashSetIntClass row3 = sheet.ReadRow<HashSetIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            HashSetIntClass row4 = sheet.ReadRow<HashSetIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<HashSetIntClass>());
+        }
+
+        [Fact]
         public void ReadRow_DefaultMappedStackInt_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
@@ -980,6 +1292,236 @@ namespace ExcelMapper.Tests
             Assert.Empty(row4.Value);
 
             Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StackIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedIImmutableListInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultIImmutableListIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IImmutableListIntClass row1 = sheet.ReadRow<IImmutableListIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableListIntClass>());
+
+            IImmutableListIntClass row3 = sheet.ReadRow<IImmutableListIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IImmutableListIntClass row4 = sheet.ReadRow<IImmutableListIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableListIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedIImmutableStackInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultIImmutableStackIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IImmutableStackIntClass row1 = sheet.ReadRow<IImmutableStackIntClass>();
+            Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableStackIntClass>());
+
+            IImmutableStackIntClass row3 = sheet.ReadRow<IImmutableStackIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IImmutableStackIntClass row4 = sheet.ReadRow<IImmutableStackIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableStackIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedIImmutableQueueInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultIImmutableQueueIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IImmutableQueueIntClass row1 = sheet.ReadRow<IImmutableQueueIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableQueueIntClass>());
+
+            IImmutableQueueIntClass row3 = sheet.ReadRow<IImmutableQueueIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IImmutableQueueIntClass row4 = sheet.ReadRow<IImmutableQueueIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableQueueIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedIImmutableSetInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultIImmutableSetIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IImmutableSetIntClass row1 = sheet.ReadRow<IImmutableSetIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableSetIntClass>());
+
+            IImmutableSetIntClass row3 = sheet.ReadRow<IImmutableSetIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IImmutableSetIntClass row4 = sheet.ReadRow<IImmutableSetIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableSetIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedImmutableArrayInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultImmutableArrayIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableArrayIntClass row1 = sheet.ReadRow<ImmutableArrayIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableArrayIntClass>());
+
+            ImmutableArrayIntClass row3 = sheet.ReadRow<ImmutableArrayIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableArrayIntClass row4 = sheet.ReadRow<ImmutableArrayIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableArrayIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedImmutableListInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultImmutableListIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableListIntClass row1 = sheet.ReadRow<ImmutableListIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableListIntClass>());
+
+            ImmutableListIntClass row3 = sheet.ReadRow<ImmutableListIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableListIntClass row4 = sheet.ReadRow<ImmutableListIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableListIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedImmutableStackInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultImmutableStackIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableStackIntClass row1 = sheet.ReadRow<ImmutableStackIntClass>();
+            Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableStackIntClass>());
+
+            ImmutableStackIntClass row3 = sheet.ReadRow<ImmutableStackIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableStackIntClass row4 = sheet.ReadRow<ImmutableStackIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableStackIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedImmutableQueueInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultImmutableQueueIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableQueueIntClass row1 = sheet.ReadRow<ImmutableQueueIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableQueueIntClass>());
+
+            ImmutableQueueIntClass row3 = sheet.ReadRow<ImmutableQueueIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableQueueIntClass row4 = sheet.ReadRow<ImmutableQueueIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableQueueIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedImmutableSortedSetInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultImmutableSortedSetIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableSortedSetIntClass row1 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableSortedSetIntClass>());
+
+            ImmutableSortedSetIntClass row3 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableSortedSetIntClass row4 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableSortedSetIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedImmutableHashSetInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultImmutableHashSetIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableHashSetIntClass row1 = sheet.ReadRow<ImmutableHashSetIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableHashSetIntClass>());
+
+            ImmutableHashSetIntClass row3 = sheet.ReadRow<ImmutableHashSetIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableHashSetIntClass row4 = sheet.ReadRow<ImmutableHashSetIntClass>();
+            Assert.Empty(row4.Value);
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableHashSetIntClass>());
         }
 
         [Fact]
@@ -1321,6 +1863,56 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void ReadRow_CustomMappedSortedSetInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomSortedSetIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            SortedSetIntClass row1 = sheet.ReadRow<SortedSetIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            SortedSetIntClass row2 = sheet.ReadRow<SortedSetIntClass>();
+            Assert.Equal(new int[] { -1, 1, 2 }, row2.Value);
+
+            SortedSetIntClass row3 = sheet.ReadRow<SortedSetIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            SortedSetIntClass row4 = sheet.ReadRow<SortedSetIntClass>();
+            Assert.Empty(row4.Value);
+
+            SortedSetIntClass row5 = sheet.ReadRow<SortedSetIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedHashSetInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomHashSetIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            HashSetIntClass row1 = sheet.ReadRow<HashSetIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            HashSetIntClass row2 = sheet.ReadRow<HashSetIntClass>();
+            Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
+
+            HashSetIntClass row3 = sheet.ReadRow<HashSetIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            HashSetIntClass row4 = sheet.ReadRow<HashSetIntClass>();
+            Assert.Empty(row4.Value);
+
+            HashSetIntClass row5 = sheet.ReadRow<HashSetIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
         public void ReadRow_CustomMappedStackInt_ReturnsExpected()
         {
             using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
@@ -1342,6 +1934,256 @@ namespace ExcelMapper.Tests
             Assert.Empty(row4.Value);
 
             StackIntClass row5 = sheet.ReadRow<StackIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedIImmutableListInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomIImmutableListIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IImmutableListIntClass row1 = sheet.ReadRow<IImmutableListIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            IImmutableListIntClass row2 = sheet.ReadRow<IImmutableListIntClass>();
+            Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
+
+            IImmutableListIntClass row3 = sheet.ReadRow<IImmutableListIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IImmutableListIntClass row4 = sheet.ReadRow<IImmutableListIntClass>();
+            Assert.Empty(row4.Value);
+
+            IImmutableListIntClass row5 = sheet.ReadRow<IImmutableListIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedIImmutableStackInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomIImmutableStackIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IImmutableStackIntClass row1 = sheet.ReadRow<IImmutableStackIntClass>();
+            Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
+
+            IImmutableStackIntClass row2 = sheet.ReadRow<IImmutableStackIntClass>();
+            Assert.Equal(new int[] { 2, -1, 1 }, row2.Value);
+
+            IImmutableStackIntClass row3 = sheet.ReadRow<IImmutableStackIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IImmutableStackIntClass row4 = sheet.ReadRow<IImmutableStackIntClass>();
+            Assert.Empty(row4.Value);
+
+            IImmutableStackIntClass row5 = sheet.ReadRow<IImmutableStackIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedIImmutableQueueInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomIImmutableQueueIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IImmutableQueueIntClass row1 = sheet.ReadRow<IImmutableQueueIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            IImmutableQueueIntClass row2 = sheet.ReadRow<IImmutableQueueIntClass>();
+            Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
+
+            IImmutableQueueIntClass row3 = sheet.ReadRow<IImmutableQueueIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IImmutableQueueIntClass row4 = sheet.ReadRow<IImmutableQueueIntClass>();
+            Assert.Empty(row4.Value);
+
+            IImmutableQueueIntClass row5 = sheet.ReadRow<IImmutableQueueIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedIImmutableSetInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomIImmutableSetIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            IImmutableSetIntClass row1 = sheet.ReadRow<IImmutableSetIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            IImmutableSetIntClass row2 = sheet.ReadRow<IImmutableSetIntClass>();
+            Assert.Equal(new int[] { -1, 1, 2 }, row2.Value);
+
+            IImmutableSetIntClass row3 = sheet.ReadRow<IImmutableSetIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            IImmutableSetIntClass row4 = sheet.ReadRow<IImmutableSetIntClass>();
+            Assert.Empty(row4.Value);
+
+            IImmutableSetIntClass row5 = sheet.ReadRow<IImmutableSetIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedImmutableArrayInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomImmutableArrayIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableArrayIntClass row1 = sheet.ReadRow<ImmutableArrayIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            ImmutableArrayIntClass row2 = sheet.ReadRow<ImmutableArrayIntClass>();
+            Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
+
+            ImmutableArrayIntClass row3 = sheet.ReadRow<ImmutableArrayIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableArrayIntClass row4 = sheet.ReadRow<ImmutableArrayIntClass>();
+            Assert.Empty(row4.Value);
+
+            ImmutableArrayIntClass row5 = sheet.ReadRow<ImmutableArrayIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedImmutableListInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomImmutableListIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableListIntClass row1 = sheet.ReadRow<ImmutableListIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            ImmutableListIntClass row2 = sheet.ReadRow<ImmutableListIntClass>();
+            Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
+
+            ImmutableListIntClass row3 = sheet.ReadRow<ImmutableListIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableListIntClass row4 = sheet.ReadRow<ImmutableListIntClass>();
+            Assert.Empty(row4.Value);
+
+            ImmutableListIntClass row5 = sheet.ReadRow<ImmutableListIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedImmutableStackInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomImmutableStackIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableStackIntClass row1 = sheet.ReadRow<ImmutableStackIntClass>();
+            Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
+
+            ImmutableStackIntClass row2 = sheet.ReadRow<ImmutableStackIntClass>();
+            Assert.Equal(new int[] { 2, -1, 1 }, row2.Value);
+
+            ImmutableStackIntClass row3 = sheet.ReadRow<ImmutableStackIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableStackIntClass row4 = sheet.ReadRow<ImmutableStackIntClass>();
+            Assert.Empty(row4.Value);
+
+            ImmutableStackIntClass row5 = sheet.ReadRow<ImmutableStackIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedImmutableQueueInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomImmutableQueueIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableQueueIntClass row1 = sheet.ReadRow<ImmutableQueueIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            ImmutableQueueIntClass row2 = sheet.ReadRow<ImmutableQueueIntClass>();
+            Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
+
+            ImmutableQueueIntClass row3 = sheet.ReadRow<ImmutableQueueIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableQueueIntClass row4 = sheet.ReadRow<ImmutableQueueIntClass>();
+            Assert.Empty(row4.Value);
+
+            ImmutableQueueIntClass row5 = sheet.ReadRow<ImmutableQueueIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedImmutableSortedSetInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomImmutableSortedSetIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableSortedSetIntClass row1 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            ImmutableSortedSetIntClass row2 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+            Assert.Equal(new int[] { -1, 1, 2 }, row2.Value);
+
+            ImmutableSortedSetIntClass row3 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableSortedSetIntClass row4 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+            Assert.Empty(row4.Value);
+
+            ImmutableSortedSetIntClass row5 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+            Assert.Equal(new int[] { -2 }, row5.Value);
+        }
+
+        [Fact]
+        public void ReadRow_CustomMappedImmutableHashSetInt_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<CustomImmutableHashSetIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            ImmutableHashSetIntClass row1 = sheet.ReadRow<ImmutableHashSetIntClass>();
+            Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+            ImmutableHashSetIntClass row2 = sheet.ReadRow<ImmutableHashSetIntClass>();
+            Assert.Equal(new int[] { -1, 1, 2 }, row2.Value);
+
+            ImmutableHashSetIntClass row3 = sheet.ReadRow<ImmutableHashSetIntClass>();
+            Assert.Equal(new int[] { 1 }, row3.Value);
+
+            ImmutableHashSetIntClass row4 = sheet.ReadRow<ImmutableHashSetIntClass>();
+            Assert.Empty(row4.Value);
+
+            ImmutableHashSetIntClass row5 = sheet.ReadRow<ImmutableHashSetIntClass>();
             Assert.Equal(new int[] { -2 }, row5.Value);
         }
 
@@ -1849,6 +2691,306 @@ namespace ExcelMapper.Tests
             }
         }
 
+        public class SortedSetIntClass
+        {
+            public SortedSet<int> Value { get; set; }
+        }
+
+        public class DefaultSortedSetIntClassMap : ExcelClassMap<SortedSetIntClass>
+        {
+            public DefaultSortedSetIntClassMap()
+            {
+                Map(p => (ICollection<int>)p.Value);
+            }
+        }
+
+        public class CustomSortedSetIntClassMap : ExcelClassMap<SortedSetIntClass>
+        {
+            public CustomSortedSetIntClassMap()
+            {
+                Map(p => (ICollection<int>)p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class HashSetIntClass
+        {
+            public HashSet<int> Value { get; set; }
+        }
+
+        public class DefaultHashSetIntClassMap : ExcelClassMap<HashSetIntClass>
+        {
+            public DefaultHashSetIntClassMap()
+            {
+                Map(p => (ICollection<int>)p.Value);
+            }
+        }
+
+        public class CustomHashSetIntClassMap : ExcelClassMap<HashSetIntClass>
+        {
+            public CustomHashSetIntClassMap()
+            {
+                Map(p => (ICollection<int>)p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class IImmutableListIntClass
+        {
+            public IImmutableList<int> Value { get; set; }
+        }
+
+        public class DefaultIImmutableListIntClassMap : ExcelClassMap<IImmutableListIntClass>
+        {
+            public DefaultIImmutableListIntClassMap()
+            {
+                Map(p => (IList<int>)p.Value);
+            }
+        }
+
+        public class CustomIImmutableListIntClassMap : ExcelClassMap<IImmutableListIntClass>
+        {
+            public CustomIImmutableListIntClassMap()
+            {
+                Map(p => (IList<int>)p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class IImmutableStackIntClass
+        {
+            public IImmutableStack<int> Value { get; set; }
+        }
+
+        public class DefaultIImmutableStackIntClassMap : ExcelClassMap<IImmutableStackIntClass>
+        {
+            public DefaultIImmutableStackIntClassMap()
+            {
+                Map<int>(p => p.Value);
+            }
+        }
+
+        public class CustomIImmutableStackIntClassMap : ExcelClassMap<IImmutableStackIntClass>
+        {
+            public CustomIImmutableStackIntClassMap()
+            {
+                Map<int>(p => p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class IImmutableQueueIntClass
+        {
+            public IImmutableQueue<int> Value { get; set; }
+        }
+
+        public class DefaultIImmutableQueueIntClassMap : ExcelClassMap<IImmutableQueueIntClass>
+        {
+            public DefaultIImmutableQueueIntClassMap()
+            {
+                Map<int>(p => p.Value);
+            }
+        }
+
+        public class CustomIImmutableQueueIntClassMap : ExcelClassMap<IImmutableQueueIntClass>
+        {
+            public CustomIImmutableQueueIntClassMap()
+            {
+                Map<int>(p => p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class IImmutableSetIntClass
+        {
+            public IImmutableSet<int> Value { get; set; }
+        }
+
+        public class DefaultIImmutableSetIntClassMap : ExcelClassMap<IImmutableSetIntClass>
+        {
+            public DefaultIImmutableSetIntClassMap()
+            {
+                Map(p => (IList<int>)p.Value);
+            }
+        }
+
+        public class CustomIImmutableSetIntClassMap : ExcelClassMap<IImmutableSetIntClass>
+        {
+            public CustomIImmutableSetIntClassMap()
+            {
+                Map(p => (IList<int>)p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class ImmutableArrayIntClass
+        {
+            public ImmutableArray<int> Value { get; set; }
+        }
+
+        public class DefaultImmutableArrayIntClassMap : ExcelClassMap<ImmutableArrayIntClass>
+        {
+            public DefaultImmutableArrayIntClassMap()
+            {
+                Map(p => (IList<int>)p.Value);
+            }
+        }
+
+        public class CustomImmutableArrayIntClassMap : ExcelClassMap<ImmutableArrayIntClass>
+        {
+            public CustomImmutableArrayIntClassMap()
+            {
+                Map(p => (IList<int>)p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class ImmutableListIntClass
+        {
+            public ImmutableList<int> Value { get; set; }
+        }
+
+        public class DefaultImmutableListIntClassMap : ExcelClassMap<ImmutableListIntClass>
+        {
+            public DefaultImmutableListIntClassMap()
+            {
+                Map(p => (IList<int>)p.Value);
+            }
+        }
+
+        public class CustomImmutableListIntClassMap : ExcelClassMap<ImmutableListIntClass>
+        {
+            public CustomImmutableListIntClassMap()
+            {
+                Map(p => (IList<int>)p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class ImmutableStackIntClass
+        {
+            public ImmutableStack<int> Value { get; set; }
+        }
+
+        public class DefaultImmutableStackIntClassMap : ExcelClassMap<ImmutableStackIntClass>
+        {
+            public DefaultImmutableStackIntClassMap()
+            {
+                Map<int>(p => p.Value);
+            }
+        }
+
+        public class CustomImmutableStackIntClassMap : ExcelClassMap<ImmutableStackIntClass>
+        {
+            public CustomImmutableStackIntClassMap()
+            {
+                Map<int>(p => p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class ImmutableQueueIntClass
+        {
+            public ImmutableQueue<int> Value { get; set; }
+        }
+
+        public class DefaultImmutableQueueIntClassMap : ExcelClassMap<ImmutableQueueIntClass>
+        {
+            public DefaultImmutableQueueIntClassMap()
+            {
+                Map<int>(p => p.Value);
+            }
+        }
+
+        public class CustomImmutableQueueIntClassMap : ExcelClassMap<ImmutableQueueIntClass>
+        {
+            public CustomImmutableQueueIntClassMap()
+            {
+                Map<int>(p => p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class ImmutableSortedSetIntClass
+        {
+            public ImmutableSortedSet<int> Value { get; set; }
+        }
+
+        public class DefaultImmutableSortedSetIntClassMap : ExcelClassMap<ImmutableSortedSetIntClass>
+        {
+            public DefaultImmutableSortedSetIntClassMap()
+            {
+                Map(p => (IList<int>)p.Value);
+            }
+        }
+
+        public class CustomImmutableSortedSetIntClassMap : ExcelClassMap<ImmutableSortedSetIntClass>
+        {
+            public CustomImmutableSortedSetIntClassMap()
+            {
+                Map(p => (IList<int>)p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
+        public class ImmutableHashSetIntClass
+        {
+            public ImmutableHashSet<int> Value { get; set; }
+        }
+
+        public class DefaultImmutableHashSetIntClassMap : ExcelClassMap<ImmutableHashSetIntClass>
+        {
+            public DefaultImmutableHashSetIntClassMap()
+            {
+                Map(p => (ICollection<int>)p.Value);
+            }
+        }
+
+        public class CustomImmutableHashSetIntClassMap : ExcelClassMap<ImmutableHashSetIntClass>
+        {
+            public CustomImmutableHashSetIntClassMap()
+            {
+                Map(p => (ICollection<int>)p.Value)
+                    .WithElementMap(p => p
+                        .WithEmptyFallback(-1)
+                        .WithInvalidFallback(-2)
+                    );
+            }
+        }
+
         public class ConcurrentQueueIntClass
         {
             public ConcurrentQueue<int> Value { get; set; }
@@ -2068,6 +3210,78 @@ namespace ExcelMapper.Tests
             {
                 Map(p => p.MissingColumn)
                     .MakeOptional();
+            }
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedMultiImmutableArrayBuilder_ThrowsMissingMethodException()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            Assert.Throws<MissingMethodException>(() => sheet.ReadRow<ImmutableArrayBuilderIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedMultiImmutableArrayBuilder_ThrowsMissingMethodException()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultImmutableArrayBuilderIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            Assert.Throws<MissingMethodException>(() => sheet.ReadRow<ImmutableArrayBuilderIntClass>());
+        }
+
+        public class ImmutableArrayBuilderIntClass
+        {
+            public ImmutableArray<int>.Builder Value { get; set; }
+        }
+
+        public class DefaultImmutableArrayBuilderIntClassMap : ExcelClassMap<ImmutableArrayBuilderIntClass>
+        {
+            public DefaultImmutableArrayBuilderIntClassMap()
+            {
+                Map(p => (IList<int>)p.Value);
+            }
+        }
+
+        [Fact]
+        public void ReadRow_AutoMappedMultiImmutableDictionaryBuilder_ThrowsExcelMappingException()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableDictionaryBuilderIntClass>());
+        }
+
+        [Fact]
+        public void ReadRow_DefaultMappedMultiImmutableDictionaryBuilder_ThrowsExcelMappingException()
+        {
+            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+            importer.Configuration.RegisterClassMap<DefaultImmutableDictionaryBuilderIntClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableDictionaryBuilderIntClass>());
+        }
+
+        public class ImmutableDictionaryBuilderIntClass
+        {
+            public ImmutableDictionary<string, int>.Builder Value { get; set; }
+        }
+
+        public class DefaultImmutableDictionaryBuilderIntClassMap : ExcelClassMap<ImmutableDictionaryBuilderIntClass>
+        {
+            public DefaultImmutableDictionaryBuilderIntClassMap()
+            {
+                Map<int>(p => (IDictionary<string, int>)p.Value);
             }
         }
     }

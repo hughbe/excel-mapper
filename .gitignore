@@ -308,7 +308,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-resources/coverage
+coverage/
 coverage.xml
 *.opencover.xml
 BenchmarkDotNet.Artifacts
