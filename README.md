@@ -471,7 +471,7 @@ ExcelMapper supports mapping dictionaries and Expando Object. If no column names
 | Barack Obama   | 58 |
 | Michelle Obama | 56 |
 
-### Dictionaries [Not Currently Supported.]
+### Dictionaries
 
 Note that
 ```cs
