@@ -4,4 +4,4 @@ set -e
 
 cd tests
 dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
-dotnet reportgenerator -reports:coverage.net5.opencover.xml -targetdir:../coverage
+dotnet reportgenerator -reports:coverage.netcoreapp3.1.opencover.xml -targetdir:../coverage
