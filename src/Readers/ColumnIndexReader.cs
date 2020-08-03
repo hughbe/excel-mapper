@@ -30,7 +30,7 @@ namespace ExcelMapper.Readers
 
         public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out ReadCellValueResult result)
         {
-            if (ColumnIndex > reader.ResultsCount)
+            if (ColumnIndex >= reader.FieldCount)
             {
                 result = default;
                 return false;
