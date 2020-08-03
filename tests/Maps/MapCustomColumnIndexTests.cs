@@ -533,5 +533,153 @@ namespace ExcelMapper.Tests
                 Map(p => p.CustomValue);
             }
         }
+
+        [Fact]
+        public void ReadRows_CustomColumnIndexClassMap_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("CustomColumnIndex.xlsx");
+            importer.Configuration.RegisterClassMap<CustomColumnIndexClassMap>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.HasHeading = false;
+
+            CustomColumnIndexDataClass row1 = sheet.ReadRow<CustomColumnIndexDataClass>();
+            Assert.Equal("Column3_A", row1.Value1);
+            Assert.Equal("Column2_A", row1.Value2);
+            Assert.Equal("Column1_A", row1.Value3);
+
+            CustomColumnIndexDataClass row2 = sheet.ReadRow<CustomColumnIndexDataClass>();
+            Assert.Equal("Column3_B", row2.Value1);
+            Assert.Equal("Column2_B", row2.Value2);
+            Assert.Equal("Column1_B", row2.Value3);
+        }
+
+        [Fact]
+        public void ReadRows_InvalidColumnIndexClassMap1_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("CustomColumnIndex.xlsx");
+            importer.Configuration.RegisterClassMap<InvalidColumnIndexClassMap1>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.HasHeading = false;
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomColumnIndexDataClass>());
+        }
+
+        [Fact]
+        public void ReadRows_InvalidColumnIndexClassMap2_ThrowsExcelMappingException()
+        {
+            using var importer = Helpers.GetImporter("CustomColumnIndex.xlsx");
+            importer.Configuration.RegisterClassMap<InvalidColumnIndexClassMap2>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.HasHeading = false;
+
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomColumnIndexDataClass>());
+        }
+
+        [Fact]
+        public void ReadRows_InvalidColumnIndexOptionalClassMap1_ReturnsExpected()
+        {
+            using var importer = Helpers.GetImporter("CustomColumnIndex.xlsx");
+            importer.Configuration.RegisterClassMap<InvalidColumnIndexOptionalClassMap1>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.HasHeading = false;
+
+            CustomColumnIndexDataClass row1 = sheet.ReadRow<CustomColumnIndexDataClass>();
+            Assert.Null(row1.Value1);
+            Assert.Null(row1.Value2);
+            Assert.Null(row1.Value3);
+
+            CustomColumnIndexDataClass row2 = sheet.ReadRow<CustomColumnIndexDataClass>();
+            Assert.Null(row2.Value1);
+            Assert.Null(row2.Value2);
+            Assert.Null(row2.Value3);
+        }
+
+        [Fact]
+        public void ReadRows_InvalidColumnIndexOptionalClassMap2_ThrowsExcelMappingException()
+        {
+            using var importer = Helpers.GetImporter("CustomColumnIndex.xlsx");
+            importer.Configuration.RegisterClassMap<InvalidColumnIndexOptionalClassMap2>();
+
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.HasHeading = false;
+
+            CustomColumnIndexDataClass row1 = sheet.ReadRow<CustomColumnIndexDataClass>();
+            Assert.Null(row1.Value1);
+            Assert.Null(row1.Value2);
+            Assert.Null(row1.Value3);
+
+            CustomColumnIndexDataClass row2 = sheet.ReadRow<CustomColumnIndexDataClass>();
+            Assert.Null(row2.Value1);
+            Assert.Null(row2.Value2);
+            Assert.Null(row2.Value3);
+        }
+
+        private class CustomColumnIndexDataClass
+        {
+            public string Value1 { get; set; }
+            public string Value2 { get; set; }
+            public string Value3 { get; set; }
+        }
+
+        private class CustomColumnIndexClassMap : ExcelClassMap<CustomColumnIndexDataClass>
+        {
+            public CustomColumnIndexClassMap()
+            {
+                Map(c => c.Value1)
+                    .WithColumnIndex(2);
+
+                Map(c => c.Value2)
+                    .WithColumnIndex(1);
+
+                Map(c => c.Value3)
+                    .WithColumnIndex(0);
+            }
+        }
+
+        private class InvalidColumnIndexClassMap1 : ExcelClassMap<CustomColumnIndexDataClass>
+        {
+            public InvalidColumnIndexClassMap1()
+            {
+                // ColumnIndex == FieldCount
+                Map(c => c.Value1)
+                    .WithColumnIndex(3);
+            }
+        }
+
+        private class InvalidColumnIndexClassMap2 : ExcelClassMap<CustomColumnIndexDataClass>
+        {
+            public InvalidColumnIndexClassMap2()
+            {
+                // ColumnIndex > FieldCount
+                Map(c => c.Value1)
+                    .WithColumnIndex(4);
+            }
+        }
+
+        private class InvalidColumnIndexOptionalClassMap1 : ExcelClassMap<CustomColumnIndexDataClass>
+        {
+            public InvalidColumnIndexOptionalClassMap1()
+            {
+                // ColumnIndex == FieldCount
+                Map(c => c.Value1)
+                    .WithColumnIndex(3)
+                    .MakeOptional();
+            }
+        }
+
+        private class InvalidColumnIndexOptionalClassMap2 : ExcelClassMap<CustomColumnIndexDataClass>
+        {
+            public InvalidColumnIndexOptionalClassMap2()
+            {
+                // ColumnIndex > FieldCount
+                Map(c => c.Value1)
+                    .WithColumnIndex(4)
+                    .MakeOptional();
+            }
+        }
     }
 }
