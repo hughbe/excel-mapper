@@ -34,10 +34,10 @@ namespace ExcelMapper.Mappers.Tests
         {
             var item = new ChangeTypeMapper(type);
 
-            object value = 0;
-            PropertyMapperResultType result = item.MapCellValue(new ReadCellValueResult(-1, stringValue), ref value);
-            Assert.Equal(PropertyMapperResultType.Success, result);
-            Assert.Equal(expected, value);
+            CellValueMapperResult result = item.MapCellValue(new ReadCellValueResult(-1, stringValue));
+            Assert.True(result.Succeeded);
+            Assert.Equal(expected, result.Value);
+            Assert.Null(result.Exception);
         }
 
         [Theory]
@@ -49,10 +49,10 @@ namespace ExcelMapper.Mappers.Tests
         {
             var item = new ChangeTypeMapper(type);
 
-            object value = 1;
-            PropertyMapperResultType result = item.MapCellValue(new ReadCellValueResult(-1, stringValue), ref value);
-            Assert.Equal(PropertyMapperResultType.Invalid, result);
-            Assert.Equal(1, value);
+            CellValueMapperResult result = item.MapCellValue(new ReadCellValueResult(-1, stringValue));
+            Assert.False(result.Succeeded);
+            Assert.Null(result.Value);
+            Assert.NotNull(result.Exception);
         }
     }
 }

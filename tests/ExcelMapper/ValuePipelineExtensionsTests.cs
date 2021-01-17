@@ -285,10 +285,10 @@ namespace ExcelMapper.Tests
             Assert.Same(propertyMap, propertyMap.WithConverter(converter));
             ConvertUsingMapper item = propertyMap.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
 
-            object value = null;
-            PropertyMapperResultType result = item.Converter(new ReadCellValueResult(-1, "stringValue"), ref value);
-            Assert.Equal(PropertyMapperResultType.Success, result);
-            Assert.Equal("abc", value);
+            CellValueMapperResult result = item.Converter(new ReadCellValueResult(-1, "stringValue"));
+            Assert.True(result.Succeeded);
+            Assert.Equal("abc", result.Value);
+            Assert.Null(result.Exception);
         }
 
         [Fact]
@@ -304,10 +304,10 @@ namespace ExcelMapper.Tests
             Assert.Same(propertyMap, propertyMap.WithConverter(converter));
             ConvertUsingMapper item = propertyMap.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
 
-            object value = 1;
-            PropertyMapperResultType result = item.Converter(new ReadCellValueResult(-1, "stringValue"), ref value);
-            Assert.Equal(PropertyMapperResultType.Invalid, result);
-            Assert.Equal(1, value);
+            CellValueMapperResult result = item.Converter(new ReadCellValueResult(-1, "stringValue"));
+            Assert.False(result.Succeeded);
+            Assert.Null(result.Value);
+            Assert.IsType<NotSupportedException>(result.Exception);
         }
 
         [Fact]

@@ -77,6 +77,8 @@ namespace ExcelMapper
         /// </summary>
         public IFallbackItem InvalidFallback { get; set; }
 
+        private static Exception s_couldNotMapException = new ExcelMappingException("Could not map successfully.");
+
         internal static object GetPropertyValue(IValuePipeline pipeline, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadCellValueResult readResult, MemberInfo member)
         {
             foreach (ICellValueTransformer transformer in pipeline.CellValueTransformers)
@@ -86,32 +88,30 @@ namespace ExcelMapper
 
             if (string.IsNullOrEmpty(readResult.StringValue) && pipeline.EmptyFallback != null)
             {
-                return pipeline.EmptyFallback.PerformFallback(sheet, rowIndex, readResult, member);
+                return pipeline.EmptyFallback.PerformFallback(sheet, rowIndex, readResult, null, member);
             }
 
-            PropertyMapperResultType resultType = PropertyMapperResultType.Success;
-            object value = null;
-
-            foreach (ICellValueMapper mappingItem in pipeline.CellValueMappers)
+            CellValueMapperResult finalResult = CellValueMapperResult.Invalid(s_couldNotMapException);
+            foreach (ICellValueMapper mapper in pipeline.CellValueMappers)
             {
-                PropertyMapperResultType newResultType  = mappingItem.MapCellValue(readResult, ref value);
-                if (newResultType == PropertyMapperResultType.Success)
+                CellValueMapperResult result = mapper.MapCellValue(readResult);
+                if (result.Action != CellValueMapperResult.HandleAction.IgnoreResultAndContinueMapping)
                 {
-                    return value;
+                    finalResult = result;
                 }
 
-                if (newResultType != PropertyMapperResultType.Continue)
+                if (result.Action == CellValueMapperResult.HandleAction.UseResultAndStopMapping)
                 {
-                    resultType = newResultType;
+                    break;
                 }
             }
 
-            if (resultType != PropertyMapperResultType.Success && resultType != PropertyMapperResultType.SuccessIfNoOtherSuccess && pipeline.InvalidFallback != null)
+            if (!finalResult.Succeeded && pipeline.InvalidFallback != null)
             {
-                return pipeline.InvalidFallback.PerformFallback(sheet, rowIndex, readResult, member);
+                return pipeline.InvalidFallback.PerformFallback(sheet, rowIndex, readResult, finalResult.Exception, member);
             }
 
-            return value;
+            return finalResult.Value;
         }
     }
 }

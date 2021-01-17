@@ -8,15 +8,17 @@ namespace ExcelMapper.Mappers
     /// </summary>
     public class UriMapper : ICellValueMapper
     {
-        public PropertyMapperResultType MapCellValue(ReadCellValueResult readResult, ref object value)
+        public CellValueMapperResult MapCellValue(ReadCellValueResult readResult)
         {
-            if (!Uri.TryCreate(readResult.StringValue, UriKind.Absolute, out Uri result))
+            try
             {
-                return PropertyMapperResultType.Invalid;
+                var uri = new Uri(readResult.StringValue, UriKind.Absolute);
+                return CellValueMapperResult.Success(uri);
             }
-
-            value = result;
-            return PropertyMapperResultType.Success;
+            catch (Exception exception)
+            {
+                return CellValueMapperResult.Invalid(exception);
+            }
         }
     }
 }

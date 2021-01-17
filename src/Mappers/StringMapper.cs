@@ -7,10 +7,9 @@ namespace ExcelMapper.Mappers
     /// </summary>
     public class StringMapper : ICellValueMapper
     {
-        public PropertyMapperResultType MapCellValue(ReadCellValueResult result, ref object value)
+        public CellValueMapperResult MapCellValue(ReadCellValueResult result)
         {
-            value = result.StringValue;
-            return PropertyMapperResultType.SuccessIfNoOtherSuccess;
+            return CellValueMapperResult.SuccessIfNoOtherSuccess(result.StringValue);
         }
     }
 }

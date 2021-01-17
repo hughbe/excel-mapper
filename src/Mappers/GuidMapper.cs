@@ -8,15 +8,17 @@ namespace ExcelMapper.Mappers
     /// </summary>
     public class GuidMapper : ICellValueMapper
     {
-        public PropertyMapperResultType MapCellValue(ReadCellValueResult readResult, ref object value)
+        public CellValueMapperResult MapCellValue(ReadCellValueResult readResult)
         {
-            if (!Guid.TryParse(readResult.StringValue, out Guid result))
+            try
             {
-                return PropertyMapperResultType.Invalid;
+                Guid result = Guid.Parse(readResult.StringValue);
+                return CellValueMapperResult.Success(result);
             }
-
-            value = result;
-            return PropertyMapperResultType.Success;
+            catch (Exception exception)
+            {
+                return CellValueMapperResult.Invalid(exception);
+            }
         }
     }
 }

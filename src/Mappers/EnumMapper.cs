@@ -44,16 +44,16 @@ namespace ExcelMapper.Mappers
             IgnoreCase = ignoreCase;
         }
 
-        public PropertyMapperResultType MapCellValue(ReadCellValueResult readResult, ref object value)
+        public CellValueMapperResult MapCellValue(ReadCellValueResult readResult)
         {
             try
             {
-                value = Enum.Parse(EnumType, readResult.StringValue, ignoreCase: IgnoreCase);
-                return PropertyMapperResultType.Success;
+                object result = Enum.Parse(EnumType, readResult.StringValue, IgnoreCase);
+                return CellValueMapperResult.Success(result);
             }
-            catch
+            catch (Exception exception)
             {
-                return PropertyMapperResultType.Invalid;
+                return CellValueMapperResult.Invalid(exception);
             }
         }
     }

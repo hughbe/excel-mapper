@@ -26,19 +26,20 @@ namespace ExcelMapper.Mappers.Tests
         }
 
         [Theory]
-        [InlineData("key", PropertyMapperResultType.Success, "value")]
-        [InlineData("key2", PropertyMapperResultType.Success, 10)]
-        [InlineData("no_such_key", PropertyMapperResultType.Continue, null)]
-        public void GetProperty_ValidStringValue_ReturnsSuccess(string stringValue, PropertyMapperResultType expectedType, object expectedValue)
+        [InlineData("key", true, CellValueMapperResult.HandleAction.UseResultAndStopMapping, "value")]
+        [InlineData("key2", true, CellValueMapperResult.HandleAction.UseResultAndStopMapping, 10)]
+        [InlineData("no_such_key", false, CellValueMapperResult.HandleAction.IgnoreResultAndContinueMapping, null)]
+        public void GetProperty_ValidStringValue_ReturnsSuccess(string stringValue, bool expectedSucceeded, CellValueMapperResult.HandleAction expectedAction, object expectedValue)
         {
             var mapping = new Dictionary<string, object> { { "key", "value" }, { "KEY2", 10 } };
             var comparer = StringComparer.OrdinalIgnoreCase;
             var item = new DictionaryMapper<object>(mapping, comparer);
 
-            object value = null;
-            PropertyMapperResultType result = item.MapCellValue(new ReadCellValueResult(-1, stringValue), ref value);
-            Assert.Equal(expectedType, result);
-            Assert.Equal(expectedValue, value);
+            CellValueMapperResult result = item.MapCellValue(new ReadCellValueResult(-1, stringValue));
+            Assert.Equal(expectedSucceeded, result.Succeeded);
+            Assert.Equal(expectedAction, result.Action);
+            Assert.Equal(expectedValue, result.Value);
+            Assert.Null(result.Exception);
         }
     }
 }

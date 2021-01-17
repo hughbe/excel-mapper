@@ -13,10 +13,10 @@ namespace ExcelMapper.Mappers.Tests
         {
             var item = new StringMapper();
 
-            object value = 1;
-            PropertyMapperResultType result = item.MapCellValue(new ReadCellValueResult(-1, stringValue), ref value);
-            Assert.Equal(PropertyMapperResultType.SuccessIfNoOtherSuccess, result);
-            Assert.Same(stringValue, value);
+            CellValueMapperResult result = item.MapCellValue(new ReadCellValueResult(-1, stringValue));
+            Assert.True(result.Succeeded);
+            Assert.Equal(stringValue, result.Value);
+            Assert.Null(result.Exception);
         }
     }
 }

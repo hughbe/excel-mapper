@@ -165,16 +165,16 @@ namespace ExcelMapper
                 throw new ArgumentNullException(nameof(converter));
             }
 
-            ConvertUsingMapperDelegate actualConverter = (ReadCellValueResult mapResult, ref object value) =>
+            ConvertUsingMapperDelegate actualConverter = (ReadCellValueResult readResult) =>
             {
                 try
                 {
-                    value = converter(mapResult.StringValue);
-                    return PropertyMapperResultType.Success;
+                    object result = converter(readResult.StringValue);
+                    return CellValueMapperResult.Success(result);
                 }
-                catch
+                catch (Exception exception)
                 {
-                    return PropertyMapperResultType.Invalid;
+                    return CellValueMapperResult.Invalid(exception);
                 }
             };
 

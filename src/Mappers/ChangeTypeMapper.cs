@@ -34,16 +34,16 @@ namespace ExcelMapper.Mappers
             Type = type;
         }
 
-        public PropertyMapperResultType MapCellValue(ReadCellValueResult readResult, ref object value)
+        public CellValueMapperResult MapCellValue(ReadCellValueResult readResult)
         {
             try
             {
-                value = Convert.ChangeType(readResult.StringValue, Type);
-                return PropertyMapperResultType.Success;
+                object result = Convert.ChangeType(readResult.StringValue, Type);
+                return CellValueMapperResult.Success(result);
             }
-            catch
+            catch (Exception exception)
             {
-                return PropertyMapperResultType.Invalid;
+                return CellValueMapperResult.Invalid(exception);
             }
         }
     }

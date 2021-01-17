@@ -35,7 +35,7 @@ namespace ExcelMapper
                     return false;
                 }
 
-                throw new ExcelMappingException($"Could not read value for {member.Name}", sheet, rowIndex);
+                throw new ExcelMappingException($"Could not read value for {member.Name}", sheet, rowIndex, -1);
             }
 
             result = (T)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, reader, readResult, member);

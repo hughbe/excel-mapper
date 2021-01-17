@@ -18,11 +18,11 @@ namespace ExcelMapper.Mappers.Tests
         public void GetProperty_ValidStringValue_ReturnsSuccess(string stringValue, Uri expected)
         {
             var item = new UriMapper();
-
-            object value = null;
-            PropertyMapperResultType result = item.MapCellValue(new ReadCellValueResult(-1, stringValue), ref value);
-            Assert.Equal(PropertyMapperResultType.Success, result);
-            Assert.Equal(expected, value);
+            
+            CellValueMapperResult result = item.MapCellValue(new ReadCellValueResult(-1, stringValue));
+            Assert.True(result.Succeeded);
+            Assert.Equal(expected, result.Value);
+            Assert.Null(result.Exception);
         }
 
         [Theory]
@@ -32,11 +32,10 @@ namespace ExcelMapper.Mappers.Tests
         public void GetProperty_InvalidStringValue_ReturnsInvalid(string stringValue)
         {
             var item = new UriMapper();
-
-            object value = 1;
-            PropertyMapperResultType result = item.MapCellValue(new ReadCellValueResult(-1, stringValue), ref value);
-            Assert.Equal(PropertyMapperResultType.Invalid, result);
-            Assert.Equal(1, value);
+            CellValueMapperResult result = item.MapCellValue(new ReadCellValueResult(-1, stringValue));
+            Assert.False(result.Succeeded);
+            Assert.Null(result.Value);
+            Assert.NotNull(result.Exception);
         }
 
         [Theory]

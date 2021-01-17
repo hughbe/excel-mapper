@@ -1,4 +1,5 @@
-﻿using ExcelMapper.Abstractions;
+﻿using System;
+using ExcelMapper.Abstractions;
 
 namespace ExcelMapper.Mappers
 {
@@ -7,28 +8,30 @@ namespace ExcelMapper.Mappers
     /// </summary>
     public class BoolMapper : ICellValueMapper
     {
-        public PropertyMapperResultType MapCellValue(ReadCellValueResult readResult, ref object value)
+        private static object s_boxedTrue = true;
+        private static object s_boxedFalse = false;
+
+        public CellValueMapperResult MapCellValue(ReadCellValueResult readResult)
         {
             // Excel transforms bool values such as "true" or "false" to "1" or "0".
             if (readResult.StringValue == "1")
             {
-                value = true;
-                return PropertyMapperResultType.Success;
+                return CellValueMapperResult.Success(s_boxedTrue);
             }
-
-            if (readResult.StringValue == "0")
+            else if (readResult.StringValue == "0")
             {
-                value = false;
-                return PropertyMapperResultType.Success;
+                return CellValueMapperResult.Success(s_boxedFalse);
             }
 
-            if (!bool.TryParse(readResult.StringValue, out bool result))
+            try
             {
-                return PropertyMapperResultType.Invalid;
+                bool result = bool.Parse(readResult.StringValue);
+                return CellValueMapperResult.Success(result);
             }
-
-            value = result;
-            return PropertyMapperResultType.Success;
+            catch (Exception exception)
+            {
+                return CellValueMapperResult.Invalid(exception);
+            }
         }
     }
 }
