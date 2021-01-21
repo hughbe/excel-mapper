@@ -15,7 +15,7 @@ namespace ExcelMapper.Mappers.Tests
             var item = new BoolMapper();
 
             object value = null;
-            PropertyMapperResultType result = item.MapCellValue(new ReadCellValueResult(-1, stringValue), ref value);
+            PropertyMapperResultType result = item.MapCellValue(new ReadCellValueResult(-1, -1, stringValue), ref value);
             Assert.Equal(PropertyMapperResultType.Success, result);
             Assert.Equal(expected, value);
         }
@@ -29,7 +29,7 @@ namespace ExcelMapper.Mappers.Tests
             var item = new BoolMapper();
 
             object value = 1;
-            PropertyMapperResultType result = item.MapCellValue(new ReadCellValueResult(-1, stringValue), ref value);
+            PropertyMapperResultType result = item.MapCellValue(new ReadCellValueResult(-1, -1, stringValue), ref value);
             Assert.Equal(PropertyMapperResultType.Invalid, result);
             Assert.Equal(1, value);
         }

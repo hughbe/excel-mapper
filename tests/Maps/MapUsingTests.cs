@@ -29,7 +29,7 @@ namespace ExcelMapper.Tests
             public ConvertUsingValueMap()
             {
                 Map(c => c.StringValue)
-                    .WithConverter(s => s + "extra");
+                    .WithConverter(s => s.StringValue + "extra");
             }
         }
     }

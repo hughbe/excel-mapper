@@ -36,7 +36,7 @@ namespace ExcelMapper.Mappers.Tests
             var item = new DictionaryMapper<object>(mapping, comparer);
 
             object value = null;
-            PropertyMapperResultType result = item.MapCellValue(new ReadCellValueResult(-1, stringValue), ref value);
+            PropertyMapperResultType result = item.MapCellValue(new ReadCellValueResult(-1, -1, stringValue), ref value);
             Assert.Equal(expectedType, result);
             Assert.Equal(expectedValue, value);
         }

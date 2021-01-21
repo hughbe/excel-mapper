@@ -50,7 +50,7 @@ namespace ExcelMapper.Readers
             result = ColumnIndices.Select(columnIndex =>
             {
                 var value = reader[columnIndex]?.ToString();
-                return new ReadCellValueResult(columnIndex, value);
+                return new ReadCellValueResult(columnIndex, rowIndex, value);
             });
             return true;
         }

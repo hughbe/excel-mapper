@@ -21,7 +21,7 @@ namespace ExcelMapper.Readers
             {
                 var index = sheet.Heading.GetColumnIndex(columnName);
                 var value = reader[index]?.ToString();
-                return new ReadCellValueResult(index, value);
+                return new ReadCellValueResult(index, rowIndex, value);
             });
             return true;
         }

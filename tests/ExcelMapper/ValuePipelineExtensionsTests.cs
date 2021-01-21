@@ -275,9 +275,11 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithConverter_SuccessConverter_ReturnsExpected()
         {
-            ConvertUsingSimpleMapperDelegate<string> converter = stringValue =>
+            ConvertUsingSimpleMapperDelegate<string> converter = cell =>
             {
-                Assert.Equal("stringValue", stringValue);
+                Assert.Equal("stringValue", cell.StringValue);
+                Assert.Equal(-1, cell.ColumnIndex);
+                Assert.Equal(-1, cell.RowIndex);
                 return "abc";
             };
 
@@ -286,7 +288,7 @@ namespace ExcelMapper.Tests
             ConvertUsingMapper item = propertyMap.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
 
             object value = null;
-            PropertyMapperResultType result = item.Converter(new ReadCellValueResult(-1, "stringValue"), ref value);
+            PropertyMapperResultType result = item.Converter(new ReadCellValueResult(-1, -1, "stringValue"), ref value);
             Assert.Equal(PropertyMapperResultType.Success, result);
             Assert.Equal("abc", value);
         }
@@ -294,9 +296,11 @@ namespace ExcelMapper.Tests
         [Fact]
         public void WithConverter_InvalidConverter_ReturnsExpected()
         {
-            ConvertUsingSimpleMapperDelegate<string> converter = stringValue =>
+            ConvertUsingSimpleMapperDelegate<string> converter = cell =>
             {
-                Assert.Equal("stringValue", stringValue);
+                Assert.Equal("stringValue", cell.StringValue);
+                Assert.Equal(-1, cell.ColumnIndex);
+                Assert.Equal(-1, cell.RowIndex);
                 throw new NotSupportedException();
             };
 
@@ -305,7 +309,7 @@ namespace ExcelMapper.Tests
             ConvertUsingMapper item = propertyMap.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
 
             object value = 1;
-            PropertyMapperResultType result = item.Converter(new ReadCellValueResult(-1, "stringValue"), ref value);
+            PropertyMapperResultType result = item.Converter(new ReadCellValueResult(-1, -1, "stringValue"), ref value);
             Assert.Equal(PropertyMapperResultType.Invalid, result);
             Assert.Equal(1, value);
         }

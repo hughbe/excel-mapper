@@ -54,7 +54,7 @@ namespace ExcelMapper.Readers
             }
 
             string[] splitStringValues = GetValues(readResult.StringValue);
-            result = splitStringValues.Select(s => new ReadCellValueResult(readResult.ColumnIndex, s));
+            result = splitStringValues.Select(s => new ReadCellValueResult(readResult.ColumnIndex, readResult.RowIndex, s));
             return true;
         }
 

@@ -37,7 +37,7 @@ namespace ExcelMapper.Readers
             }
 
             var value = reader[ColumnIndex]?.ToString();
-            result = new ReadCellValueResult(ColumnIndex, value);
+            result = new ReadCellValueResult(ColumnIndex, rowIndex, value);
             return true;
         }
     }

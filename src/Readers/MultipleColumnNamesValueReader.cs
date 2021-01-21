@@ -62,7 +62,7 @@ namespace ExcelMapper.Readers
                 }
 
                 var value = reader[index]?.ToString();
-                values[i] = new ReadCellValueResult(index, value);
+                values[i] = new ReadCellValueResult(index, rowIndex, value);
             }
 
             result = values;

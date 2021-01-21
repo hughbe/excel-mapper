@@ -81,7 +81,7 @@ namespace ExcelMapper
         {
             foreach (ICellValueTransformer transformer in pipeline.CellValueTransformers)
             {
-                readResult = new ReadCellValueResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult));
+                readResult = new ReadCellValueResult(readResult.ColumnIndex, readResult.RowIndex, transformer.TransformStringValue(sheet, rowIndex, readResult));
             }
 
             if (string.IsNullOrEmpty(readResult.StringValue) && pipeline.EmptyFallback != null)

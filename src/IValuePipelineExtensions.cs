@@ -8,7 +8,7 @@ using ExcelMapper.Transformers;
 
 namespace ExcelMapper
 {
-    public delegate T ConvertUsingSimpleMapperDelegate<out T>(string stringValue);
+    public delegate T ConvertUsingSimpleMapperDelegate<out T>(ReadCellValueResult cell);
 
     /// <summary>
     /// Extensions on IValuePipeline to enable fluent "With" method chaining.
@@ -156,7 +156,7 @@ namespace ExcelMapper
         /// <typeparam name="TPropertyMap">The type of the property map.</typeparam>
         /// <typeparam name="T">The type of the property or field that the property map represents.</typeparam>
         /// <param name="propertyMap">The property map to use.</param>
-        /// <param name="converter">A delegate that is invoked to map the string value of a cell to the value of a property or field.</param>
+        /// <param name="converter">A delegate that is invoked to map the cell value to the value of a property or field.</param>
         /// <returns>The property map on which this method was invoked.</returns>
         public static TPropertyMap WithConverter<TPropertyMap, T>(this TPropertyMap propertyMap, ConvertUsingSimpleMapperDelegate<T> converter) where TPropertyMap : IValuePipeline<T>
         {
@@ -169,7 +169,7 @@ namespace ExcelMapper
             {
                 try
                 {
-                    value = converter(mapResult.StringValue);
+                    value = converter(mapResult);
                     return PropertyMapperResultType.Success;
                 }
                 catch
