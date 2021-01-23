@@ -3,7 +3,7 @@ using ExcelMapper.Abstractions;
 
 namespace ExcelMapper.Mappers
 {
-    public delegate PropertyMapperResultType ConvertUsingMapperDelegate(ReadCellValueResult readResult, ref object value);
+    public delegate CellValueMapperResult ConvertUsingMapperDelegate(ReadCellValueResult readResult);
 
     /// <summary>
     /// A mapper that tries to map the value of a cell to an object using a given conversion delegate.
@@ -24,9 +24,16 @@ namespace ExcelMapper.Mappers
             Converter = converter ?? throw new ArgumentNullException(nameof(converter));
         }
 
-        public PropertyMapperResultType MapCellValue(ReadCellValueResult readResult, ref object value)
+        public CellValueMapperResult MapCellValue(ReadCellValueResult readResult)
         {
-            return Converter(readResult, ref value);
+            try
+            {
+                return Converter(readResult);
+            }
+            catch (Exception exception)
+            {
+                return CellValueMapperResult.Invalid(exception);
+            }
         }
     }
 }

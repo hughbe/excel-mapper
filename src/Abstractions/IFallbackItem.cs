@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 
 namespace ExcelMapper.Abstractions
 {
@@ -9,6 +10,6 @@ namespace ExcelMapper.Abstractions
     /// </summary>
     public interface IFallbackItem
     {
-        object PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellValueResult readResult, MemberInfo member);
+        object PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellValueResult readResult, Exception exception, MemberInfo member);
     }
 }

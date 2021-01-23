@@ -165,20 +165,30 @@ namespace ExcelMapper
                 throw new ArgumentNullException(nameof(converter));
             }
 
-            ConvertUsingMapperDelegate actualConverter = (ReadCellValueResult mapResult, ref object value) =>
+            ConvertUsingMapperDelegate actualConverter = (ReadCellValueResult readResult) =>
             {
                 try
                 {
-                    value = converter(mapResult.StringValue);
-                    return PropertyMapperResultType.Success;
+                    object result = converter(readResult.StringValue);
+                    return CellValueMapperResult.Success(result);
                 }
-                catch
+                catch (Exception exception)
                 {
-                    return PropertyMapperResultType.Invalid;
+                    return CellValueMapperResult.Invalid(exception);
                 }
             };
 
-            var item = new ConvertUsingMapper(actualConverter);
+            return propertyMap.WithConverter(actualConverter);
+        }
+
+        public static TPropertyMap WithConverter<TPropertyMap>(this TPropertyMap propertyMap, ConvertUsingMapperDelegate converter) where TPropertyMap: IValuePipeline
+        {
+            if (converter == null)
+            {
+                throw new ArgumentNullException(nameof(converter));
+            }
+
+            var item = new ConvertUsingMapper(converter);
             propertyMap.AddCellValueMapper(item);
             return propertyMap;
         }

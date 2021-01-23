@@ -1,4 +1,5 @@
 ﻿using System;
+using ExcelMapper.Abstractions;
 
 namespace ExcelMapper
 {
@@ -34,7 +35,18 @@ namespace ExcelMapper
         /// <param name="message">The base error message of the exception.</param>
         /// <param name="sheet">The sheet that is currently being read.</param>
         /// <param name="rowIndex">The zero-based index of the row in the sheet that is currently being read.</param>
-        public ExcelMappingException(string message, ExcelSheet sheet, int rowIndex, int columnIndex = -1) : base(GetMessage(message, sheet, rowIndex, columnIndex))
+        public ExcelMappingException(string message, ExcelSheet sheet, int rowIndex, int columnIndex) : base(GetMessage(message, sheet, rowIndex, columnIndex))
+        {
+        }
+
+        /// <summary>
+        /// Creates an ExcelMappingException throw trying to map a cell value to a property or field.
+        /// </summary>
+        /// <param name="message">The base error message of the exception.</param>
+        /// <param name="sheet">The sheet that is currently being read.</param>
+        /// <param name="rowIndex">The zero-based index of the row in the sheet that is currently being read.</param>
+        /// <param name="innerException">The inner exception of the exception.</param>
+        public ExcelMappingException(string message, ExcelSheet sheet, int rowIndex, int columnIndex, Exception innerException) : base(GetMessage(message, sheet, rowIndex, columnIndex), innerException)
         {
         }
 

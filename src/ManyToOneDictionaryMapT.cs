@@ -53,7 +53,7 @@ namespace ExcelMapper
         {
             if (!CellValuesReader.TryGetValues(sheet, rowIndex, reader, out IEnumerable<ReadCellValueResult> valueResults))
             {
-                throw new ExcelMappingException($"Could not read value for \"{member.Name}\"", sheet, rowIndex);
+                throw new ExcelMappingException($"Could not read value for \"{member.Name}\"", sheet, rowIndex, -1);
             }
 
             var values = new List<T>();

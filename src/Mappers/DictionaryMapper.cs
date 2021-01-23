@@ -29,16 +29,15 @@ namespace ExcelMapper.Mappers
             MappingDictionary = new Dictionary<string, T>(mappingDictionary, comparer);
         }
 
-        public PropertyMapperResultType MapCellValue(ReadCellValueResult readResult, ref object value)
+        public CellValueMapperResult MapCellValue(ReadCellValueResult readResult)
         {
             // If we didn't find anything, keep going. This is not necessarily a fatal error.
             if (!MappingDictionary.TryGetValue(readResult.StringValue, out T result))
             {
-                return PropertyMapperResultType.Continue;
+                return CellValueMapperResult.Ignore();
             }
 
-            value = result;
-            return PropertyMapperResultType.Success;
+            return CellValueMapperResult.Success(result);
         }
     }
 }

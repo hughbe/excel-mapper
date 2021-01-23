@@ -12,9 +12,9 @@ namespace ExcelMapper.Fallbacks.Tests
         public void Ctor_Default(object value)
         {
             var fallback = new FixedValueFallback(value);
-            Assert.Same(value, value);
+            Assert.Same(value, fallback.Value);
 
-            object result = fallback.PerformFallback(null, 0, new ReadCellValueResult(), null);
+            object result = fallback.PerformFallback(null, 0, new ReadCellValueResult(), null, null);
             Assert.Same(value, result);
         }
     }
