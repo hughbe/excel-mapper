@@ -178,7 +178,17 @@ namespace ExcelMapper
                 }
             };
 
-            var item = new ConvertUsingMapper(actualConverter);
+            return propertyMap.WithConverter(actualConverter);
+        }
+
+        public static TPropertyMap WithConverter<TPropertyMap>(this TPropertyMap propertyMap, ConvertUsingMapperDelegate converter) where TPropertyMap: IValuePipeline
+        {
+            if (converter == null)
+            {
+                throw new ArgumentNullException(nameof(converter));
+            }
+
+            var item = new ConvertUsingMapper(converter);
             propertyMap.AddCellValueMapper(item);
             return propertyMap;
         }

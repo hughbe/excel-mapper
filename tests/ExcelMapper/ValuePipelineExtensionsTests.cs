@@ -273,16 +273,14 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void WithConverter_SuccessConverter_ReturnsExpected()
+        public void WithConverter_SuccessConverterSimple_ReturnsExpected()
         {
-            ConvertUsingSimpleMapperDelegate<string> converter = stringValue =>
+            OneToOneMap<string> propertyMap = Map(t => t.Value);
+            Assert.Same(propertyMap, propertyMap.WithConverter(stringValue =>
             {
                 Assert.Equal("stringValue", stringValue);
                 return "abc";
-            };
-
-            OneToOneMap<string> propertyMap = Map(t => t.Value);
-            Assert.Same(propertyMap, propertyMap.WithConverter(converter));
+            }));
             ConvertUsingMapper item = propertyMap.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
 
             CellValueMapperResult result = item.Converter(new ReadCellValueResult(-1, "stringValue"));
@@ -311,12 +309,45 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
+        public void WithConverter_SuccessConverterAdvanced_ReturnsExpected()
+        {
+            OneToOneMap<string> propertyMap = Map(t => t.Value);
+            Assert.Same(propertyMap, propertyMap.WithConverter(readResult =>
+            {
+                Assert.Equal("stringValue", readResult.StringValue);
+                return CellValueMapperResult.Success("abc");
+            }));
+            ConvertUsingMapper item = propertyMap.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
+
+            CellValueMapperResult result = item.Converter(new ReadCellValueResult(-1, "stringValue"));
+            Assert.True(result.Succeeded);
+            Assert.Equal("abc", result.Value);
+            Assert.Null(result.Exception);
+        }
+
+        [Fact]
+        public void WithConverter_InvalidConverterAdvanced_ReturnsExpected()
+        {
+            ConvertUsingMapperDelegate converter = readResult =>
+            {
+                Assert.Equal("stringValue", readResult.StringValue);
+                throw new NotSupportedException();
+            };
+
+            OneToOneMap<string> propertyMap = Map(t => t.Value);
+            Assert.Same(propertyMap, propertyMap.WithConverter(converter));
+            ConvertUsingMapper item = propertyMap.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
+
+            Assert.Throws<NotSupportedException>(() => item.Converter(new ReadCellValueResult(-1, "stringValue")));
+        }
+
+        [Fact]
         public void WithConverter_NullConverter_ThrowsArgumentNullException()
         {
             OneToOneMap<string> propertyMap = Map(t => t.Value);
 
-            ConvertUsingSimpleMapperDelegate<string> converter = null;
-            Assert.Throws<ArgumentNullException>("converter", () => propertyMap.WithConverter(converter));
+            Assert.Throws<ArgumentNullException>("converter", () => propertyMap.WithConverter((ConvertUsingSimpleMapperDelegate<string>)null));
+            Assert.Throws<ArgumentNullException>("converter", () => propertyMap.WithConverter((ConvertUsingMapperDelegate)null));
         }
 
         [Fact]
