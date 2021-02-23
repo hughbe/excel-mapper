@@ -3,6 +3,7 @@
 A library that reads a row of an Excel sheet and maps it to an object. A flexible and extensible fluent mapping system allows you to customize the way the row is mapped to an object.
 
 ![.NET Core](https://github.com/hughbe/excel-mapper/workflows/.NET%20Core/badge.svg)
+![Nuget](https://img.shields.io/nuget/v/ExcelDataReader.Mapping)
 
 ## Basic Mapping
 
