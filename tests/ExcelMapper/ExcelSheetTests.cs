@@ -519,5 +519,31 @@ namespace ExcelMapper.Tests
             public string StringValue { get; set; }
             public int IntValue { get; set; }
         }
+        class Dictionary
+        {
+            public Dictionary<string, string> RawRow { get; set; }
+        }
+
+        [Fact]
+        public void ReadDictionary_FormattedCellOutsideRange()
+        {
+            // One of the cells header row outside of the data range has a bold formatting applied to it
+            // causing the ManyToOne Cell reader to add a header with an empty value
+            try
+            {
+                using var importer = Helpers.GetImporter("ManyToOneMappingIssue.xlsx");
+                var mapping = new ExcelClassMap<Dictionary>();
+
+                mapping.Map(t => t.RawRow);
+                importer.Configuration.RegisterClassMap(mapping);
+                ExcelSheet sheet = importer.ReadSheet();
+
+                sheet.ReadRows<Dictionary>().ToArray();
+            }
+            catch (Exception e)
+            {
+                Assert.False(true, e.Message);
+            }
+        }
     }
 }
