@@ -17,12 +17,14 @@ namespace ExcelMapper.Readers
                 throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
             }
 
-            result = sheet.Heading.ColumnNames.Select(columnName =>
-            {
-                var index = sheet.Heading.GetColumnIndex(columnName);
-                var value = reader[index]?.ToString();
-                return new ReadCellValueResult(index, value);
-            });
+            result = sheet.Heading.ColumnNames
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(columnName =>
+                {
+                    var index = sheet.Heading.GetColumnIndex(columnName);
+                    var value = reader[index]?.ToString();
+                    return new ReadCellValueResult(index, value);
+                });
             return true;
         }
     }
