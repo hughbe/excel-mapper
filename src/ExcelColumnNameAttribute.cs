@@ -10,7 +10,7 @@ namespace ExcelMapper
     /// Specifies the column name that is used when deserializing a property
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-    public sealed class ExcelColumnNameAttribute : Attribute
+    public class ExcelColumnNameAttribute : Attribute
     {
         /// <summary>
         /// Initializes a new instance of <see cref="ExcelColumnNameAttribute"/> with the specified column name.
@@ -34,6 +34,6 @@ namespace ExcelMapper
         /// <summary>
         /// The name of the column.
         /// </summary>
-        public string Name { get; }
+        public string Name { get; set; }
     }
 }
