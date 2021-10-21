@@ -12,28 +12,37 @@ namespace ExcelMapper
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
     public class ExcelColumnNameAttribute : Attribute
     {
+        private string _name;
+
         /// <summary>
         /// Initializes a new instance of <see cref="ExcelColumnNameAttribute"/> with the specified column name.
         /// </summary>
         /// <param name="name">The name of the column.</param>
         public ExcelColumnNameAttribute(string name)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (name.Length == 0)
-            {
-                throw new ArgumentException("Column name cannot be empty.", nameof(name));
-            }
-
             Name = name;
         }
 
         /// <summary>
         /// The name of the column.
         /// </summary>
-        public string Name { get; set; }
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                if (value.Length == 0)
+                {
+                    throw new ArgumentException("Column name cannot be empty.", nameof(value));
+                }
+                
+                _name = value;
+            }
+        }
     }
 }
