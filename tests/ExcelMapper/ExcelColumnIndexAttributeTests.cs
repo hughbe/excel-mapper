@@ -17,7 +17,7 @@ namespace ExcelMapper.Tests
         [Fact]
         public void Ctor_InvalidIndex_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => new ExcelColumnIndexAttribute(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => new ExcelColumnIndexAttribute(-1));
         }
         
         [Theory]

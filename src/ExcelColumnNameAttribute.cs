@@ -20,6 +20,7 @@ namespace ExcelMapper
         /// <param name="name">The name of the column.</param>
         public ExcelColumnNameAttribute(string name)
         {
+            CheckNameNullOrEmpty(name , nameof(name));
             Name = name;
         }
 
@@ -31,17 +32,21 @@ namespace ExcelMapper
             get => _name;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                if (value.Length == 0)
-                {
-                    throw new ArgumentException("Column name cannot be empty.", nameof(value));
-                }
-                
+                CheckNameNullOrEmpty(value , nameof(value));
                 _name = value;
+            }
+        }
+        
+        private void CheckNameNullOrEmpty(string name, string paramName)
+        {
+            if (name == null)
+            {
+                throw new ArgumentNullException(paramName);
+            }
+
+            if (name.Length == 0)
+            {
+                throw new ArgumentException("Column name cannot be empty.", paramName);
             }
         }
     }

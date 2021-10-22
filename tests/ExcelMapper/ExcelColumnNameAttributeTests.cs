@@ -17,13 +17,13 @@ namespace ExcelMapper.Tests
         [Fact]
         public void Ctor_NullName_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => new ExcelColumnNameAttribute(null));
+            Assert.Throws<ArgumentNullException>("name", () => new ExcelColumnNameAttribute(null));
         }
 
         [Fact]
         public void Ctor_EmptyName_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentException>("value", () => new ExcelColumnNameAttribute(string.Empty));
+            Assert.Throws<ArgumentException>("name", () => new ExcelColumnNameAttribute(string.Empty));
         }
         
         [Theory]

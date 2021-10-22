@@ -20,6 +20,7 @@ namespace ExcelMapper
         /// <param name="index">The index of the column.</param>
         public ExcelColumnIndexAttribute(int index)
         {
+            CheckIndexGreaterOrEqualToZero(index, nameof(index));
             Index = index;
         }
 
@@ -31,12 +32,16 @@ namespace ExcelMapper
             get => _index;
             set
             {
-                if (value < 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, $"Column index {value} must be greater or equal to zero.");
-                }
-                
+                CheckIndexGreaterOrEqualToZero(value, nameof(value));
                 _index = value;
+            }
+        }
+
+        private void CheckIndexGreaterOrEqualToZero(int index, string paramName)
+        {
+            if (index < 0)
+            {
+                throw new ArgumentOutOfRangeException(paramName, index, $"Column index {index} must be greater or equal to zero.");
             }
         }
     }
