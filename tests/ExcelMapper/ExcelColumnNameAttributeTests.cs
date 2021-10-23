@@ -25,5 +25,31 @@ namespace ExcelMapper.Tests
         {
             Assert.Throws<ArgumentException>("name", () => new ExcelColumnNameAttribute(string.Empty));
         }
+        
+        [Theory]
+        [InlineData("columnname")]
+        [InlineData("ColumnName")]
+        public void Name_Set_GetReturnsExpected(string value)
+        {
+            var attribute = new ExcelColumnNameAttribute("Name")
+            {
+                Name = value
+            };
+            Assert.Equal(value, attribute.Name);
+        }
+
+        [Fact]
+        public void Name_SetNull_ThrowsArgumentNullException()
+        {
+            var attribute = new ExcelColumnNameAttribute("Name");
+            Assert.Throws<ArgumentNullException>("value", () => attribute.Name = null);
+        }
+
+        [Fact]
+        public void Name_SetEmpty_ThrowsArgumentNullException()
+        {
+            var attribute = new ExcelColumnNameAttribute("Name");
+            Assert.Throws<ArgumentException>("value", () => attribute.Name = string.Empty);
+        }
     }
 }
