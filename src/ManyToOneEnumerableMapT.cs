@@ -1,5 +1,3 @@
-#if MULTIPLE
-using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
@@ -13,11 +11,11 @@ public delegate IEnumerable<T> CreateElementsFactory<T>(IEnumerable<T> elements)
 /// Reads multiple cells of an excel sheet and maps the value of the cell to the
 /// type of the property or field.
 /// </summary>
-public class ManyToOneEnumerableMap<TElement> : IMap
+public class ManyToOneEnumerableMap<TElement> : IManyToOneMap<T>, IMap
 {
     public bool Optional { get; set; }
 
-    public IEnumerable<IMapper<TElement>> Mappers { get; }
+    public IEnumerable<IMap<TElement>> Mappers { get; }
 
     public CreateElementsFactory<TElement> CreateElementsFactory { get; }
 
@@ -25,18 +23,18 @@ public class ManyToOneEnumerableMap<TElement> : IMap
     /// Constructs a map that reads one or more values from one or more cells and maps these values to one
     /// property and field of the type of the property or field.
     /// </summary>
-    public ManyToOneEnumerableMap(IEnumerable<IMapper<TElement>> mappers, CreateElementsFactory<TElement> createElementsFactory)
+    public ManyToOneEnumerableMap(IEnumerable<IMap<TElement>> mappers, CreateElementsFactory<TElement> createElementsFactory)
     {
         Mappers = mappers ?? throw new ArgumentNullException(nameof(mappers));
         CreateElementsFactory = createElementsFactory ?? throw new ArgumentNullException(nameof(createElementsFactory));
     }
 
-    public bool TryGetValue(ExcelRow row, IExcelDataReader reader, MemberInfo member, out object value)
+    public bool TryMap(ExcelRow row, IExcelDataReader reader, MemberInfo member, out object value)
     {
         var elements = new List<TElement>();
-        foreach (IMapper<TElement> mapper in Mappers)
+        foreach (IMap<TElement> mapper in Mappers)
         {
-            if (mapper.TryGetValue(row, reader, member, out object element))
+            if (mapper.TryMap(row, reader, member, out object element))
             {
                 elements.Add((TElement)element);
             }
@@ -59,24 +57,6 @@ public class ManyToOneEnumerableMap<TElement> : IMap
     public ManyToOneEnumerableMap<TElement> MakeOptional()
     {
         Optional = true;
-        return this;
-    }
-
-    /// <summary>
-    /// Sets the map that maps the value of a single cell to an object of the element type of the property
-    /// or field.
-    /// </summary>
-    /// <param name="elementMap">The pipeline that maps the value of a single cell to an object of the element type of the property
-    /// or field.</param>
-    /// <returns>The property map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithElementMap(Func<IValuePipeline<TElement>, IValuePipeline<TElement>> elementMap)
-    {
-        if (elementMap == null)
-        {
-            throw new ArgumentNullException(nameof(elementMap));
-        }
-
-        elementMapper = elementMap(elementMapper) ?? throw new ArgumentNullException(nameof(elementMap));
         return this;
     }
 
@@ -232,4 +212,3 @@ public class ManyToOneEnumerableMap<TElement> : IMap
         return WithColumnIndices(columnIndices?.ToArray());
     }
 }
-#endif

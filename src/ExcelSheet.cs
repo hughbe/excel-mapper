@@ -256,7 +256,7 @@ public class ExcelSheet
         }
 
         var row = new ExcelRow(this, CurrentRowIndex, Reader.FieldCount);
-        bool result = classMap.TryGetValue(row, Reader, null, out object valueObject);
+        bool result = classMap.TryMap(row, Reader, null, out object valueObject);
         value = (T)valueObject;
         return result;
     }

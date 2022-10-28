@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using ExcelMapper.Abstractions;
 
-public delegate CellValueMapperResult ConvertUsingMapperDelegate(ExcelCell cell, object value);
+public delegate CellValueMapperResult ConvertUsingMapperDelegate(ExcelCell cell, CellValueMapperResult previous);
 
 /// <summary>
 /// A mapper that tries to map the value of a cell to an object using a given conversion delegate.
@@ -22,15 +22,15 @@ public class ConvertUsingMapper : ICellValueMapper
         Converter = converter ?? throw new ArgumentNullException(nameof(converter));
     }
 
-    public CellValueMapperResult MapCell(ExcelCell cell, CellValueMapperResult result, MemberInfo member)
+    public CellValueMapperResult MapCell(ExcelCell cell, CellValueMapperResult previous, MemberInfo member)
     {
         try
         {
-            return Converter(cell, result.Value);
+            return Converter(cell, previous);
         }
         catch (Exception exception)
         {
-            return CellValueMapperResult.Invalid(exception);
+            return previous.Invalid(exception);
         }
     }
 }

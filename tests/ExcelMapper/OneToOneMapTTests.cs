@@ -7,11 +7,11 @@ namespace ExcelMapper.Tests;
 public class OneToOneMapTTests
 {
     [Fact]
-    public void Ctor_ICellReader()
+    public void Ctor_IReader()
     {
         var reader = new ColumnNameValueReader("Column");
         var map = new SubOneToOneMap<int>(reader);
-        Assert.Same(reader, map.CellReader);
+        Assert.Same(reader, map.Reader);
         Assert.Empty(map.Mappers);
         Assert.False(map.Optional);
     }
@@ -22,34 +22,34 @@ public class OneToOneMapTTests
         Assert.Throws<ArgumentNullException>("reader", () => new SubOneToOneMap<int>(null));
     }
 
-    public static IEnumerable<object[]> CellReader_Set_TestData()
+    public static IEnumerable<object[]> Reader_Set_TestData()
     {
         yield return new object[] { new ColumnNameValueReader("Column") };
     }
 
     [Theory]
-    [MemberData(nameof(CellReader_Set_TestData))]
-    public void CellReader_SetValid_GetReturnsExpected(ICellReader value)
+    [MemberData(nameof(Reader_Set_TestData))]
+    public void Reader_SetValid_GetReturnsExpected(ICellReader value)
     {
         var reader = new ColumnNameValueReader("Column");
         var map = new SubOneToOneMap<int>(reader)
         {
-            CellReader = value
+            Reader = value
         };
-        Assert.Same(value, map.CellReader);
+        Assert.Same(value, map.Reader);
 
         // Set same.
-        map.CellReader = value;
-        Assert.Same(value, map.CellReader);
+        map.Reader = value;
+        Assert.Same(value, map.Reader);
     }
 
     [Fact]
-    public void CellReader_SetNull_ThrowsArgumentNullException()
+    public void Reader_SetNull_ThrowsArgumentNullException()
     {
         var reader = new ColumnNameValueReader("Column");
         var map = new SubOneToOneMap<int>(reader);
 
-        Assert.Throws<ArgumentNullException>("value", () => map.CellReader = null);
+        Assert.Throws<ArgumentNullException>("value", () => map.Reader = null);
     }
 
     [Theory]

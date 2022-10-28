@@ -29,12 +29,12 @@ public class DictionaryMapper<T> : ICellValueMapper
     public CellValueMapperResult MapCell(ExcelCell cell, CellValueMapperResult previous, MemberInfo member)
     {
         // If we didn't find anything, keep going. This is not necessarily a fatal error.
-        string stringValue = previous.Value?.ToString();
+        string stringValue = previous.StringValue;
         if (stringValue == null || !MappingDictionary.TryGetValue(stringValue, out T result))
         {
-            return CellValueMapperResult.Ignore();
+            return previous.Ignore();
         }
 
-        return CellValueMapperResult.Success(result);
+        return previous.Success(result);
     }
 }

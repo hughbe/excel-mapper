@@ -26,14 +26,14 @@ namespace ExcelMapper.Mappers.Tests
         [Theory]
         [InlineData("key", true, CellValueMapperResult.HandleAction.UseResultAndStopMapping, "value")]
         [InlineData("key2", true, CellValueMapperResult.HandleAction.UseResultAndStopMapping, 10)]
-        [InlineData("no_such_key", false, CellValueMapperResult.HandleAction.IgnoreResultAndContinueMapping, null)]
+        [InlineData("no_such_key", false, CellValueMapperResult.HandleAction.IgnoreResultAndContinueMapping, "no_such_key")]
         public void GetProperty_ValidStringValue_ReturnsSuccess(string stringValue, bool expectedSucceeded, CellValueMapperResult.HandleAction expectedAction, object expectedValue)
         {
             var mapping = new Dictionary<string, object> { { "key", "value" }, { "KEY2", 10 } };
             var comparer = StringComparer.OrdinalIgnoreCase;
             var item = new DictionaryMapper<object>(mapping, comparer);
 
-            CellValueMapperResult result = item.MapCell(new ExcelCell(null, -1, -1), CellValueMapperResult.Success(stringValue), null);
+            CellValueMapperResult result = item.MapCell(new ExcelCell(null, -1, -1), new CellValueMapperResult(stringValue, null, CellValueMapperResult.HandleAction.UseResultAndStopMapping), null);
             Assert.Equal(expectedSucceeded, result.Succeeded);
             Assert.Equal(expectedAction, result.Action);
             Assert.Equal(expectedValue, result.Value);

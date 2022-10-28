@@ -15,28 +15,28 @@ public class BoolMapper : ICellValueMapper
     {
         if (previous.Value is bool boolValue)
         {
-            return CellValueMapperResult.Success(boolValue);
+            return previous.Success(boolValue);
         }
 
         // Excel transforms bool values such as "true" or "false" to "1" or "0".
-        string stringValue = previous.Value?.ToString();
+        string stringValue = previous.StringValue;
         if (stringValue == "1")
         {
-            return CellValueMapperResult.Success(s_boxedTrue);
+            return previous.Success(s_boxedTrue);
         }
         else if (stringValue == "0")
         {
-            return CellValueMapperResult.Success(s_boxedFalse);
+            return previous.Success(s_boxedFalse);
         }
 
         try
         {
             bool result = bool.Parse(stringValue);
-            return CellValueMapperResult.Success(result);
+            return previous.Success(result);
         }
         catch (Exception exception)
         {
-            return CellValueMapperResult.Invalid(exception);
+            return previous.Invalid(exception);
         }
     }
 }

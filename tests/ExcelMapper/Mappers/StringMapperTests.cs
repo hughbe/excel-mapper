@@ -13,7 +13,7 @@ namespace ExcelMapper.Mappers.Tests
         {
             var item = new StringMapper();
 
-            CellValueMapperResult result = item.MapCell(new ExcelCell(null, -1, -1), CellValueMapperResult.Success(stringValue), null);
+            CellValueMapperResult result = item.MapCell(new ExcelCell(null, -1, -1), new CellValueMapperResult(stringValue, null, CellValueMapperResult.HandleAction.UseResultAndStopMapping), null);
             Assert.True(result.Succeeded);
             Assert.Equal(stringValue, result.Value);
             Assert.Null(result.Exception);

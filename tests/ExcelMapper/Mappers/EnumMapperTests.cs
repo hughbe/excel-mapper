@@ -50,7 +50,7 @@ namespace ExcelMapper.Mappers.Tests
         public void GetProperty_ValidStringValue_ReturnsSuccess(EnumMapper item, string stringValue, Enum expected)
         {
             
-            CellValueMapperResult result = item.MapCell(new ExcelCell(null, -1, -1), CellValueMapperResult.Success(stringValue), null);
+            CellValueMapperResult result = item.MapCell(new ExcelCell(null, -1, -1), new CellValueMapperResult(stringValue, null, CellValueMapperResult.HandleAction.UseResultAndStopMapping), null);
             Assert.True(result.Succeeded);
             Assert.Equal(expected, result.Value);
             Assert.Null(result.Exception);
@@ -68,9 +68,9 @@ namespace ExcelMapper.Mappers.Tests
         [MemberData(nameof(GetProperty_InvalidStringValue_TestData))]
         public void GetProperty_InvalidStringValue_ReturnsInvalid(EnumMapper item, string stringValue)
         {
-            CellValueMapperResult result = item.MapCell(new ExcelCell(null, -1, -1), CellValueMapperResult.Success(stringValue), null);
+            CellValueMapperResult result = item.MapCell(new ExcelCell(null, -1, -1), new CellValueMapperResult(stringValue, null, CellValueMapperResult.HandleAction.UseResultAndStopMapping), null);
             Assert.False(result.Succeeded);
-            Assert.Null(result.Value);
+            Assert.Same(stringValue, result.Value);
             Assert.NotNull(result.Exception);
         }
     }

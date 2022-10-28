@@ -16,7 +16,7 @@ public class EmptyCellMapper : ICellValueMapper
     {
         if (previous.Value == null || (previous.Value is string stringValue && string.IsNullOrEmpty(stringValue)))
         {
-            return CellValueMapperResult.Success(Fallback.PerformFallback(cell, member));
+            return previous.Success(Fallback.PerformFallback(cell, member));
         }
 
         return previous;

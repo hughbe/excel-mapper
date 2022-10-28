@@ -46,18 +46,17 @@ public class DateTimeMapper : ICellValueMapper
     {
         if (previous.Value is DateTime dateTimeValue)
         {
-            return CellValueMapperResult.Success(dateTimeValue);
+            return previous.Success(dateTimeValue);
         }
 
-        string stringValue = previous.Value?.ToString();
         try
         {
-            DateTime result = DateTime.ParseExact(stringValue, Formats, Provider, Style);
-            return CellValueMapperResult.Success(result);
+            DateTime result = DateTime.ParseExact(previous.StringValue, Formats, Provider, Style);
+            return previous.Success(result);
         }
         catch (Exception exception)
         {
-            return CellValueMapperResult.Invalid(exception);
+            return previous.Invalid(exception);
         }
     }
 }

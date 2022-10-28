@@ -13,7 +13,7 @@ namespace ExcelMapper
     /// A map that maps a row of a sheet to an object of the given type.
     /// </summary>
     /// <typeparam name="T">The typ eof the object to create.</typeparam>
-    public class ExcelClassMap<T> : ExcelClassMap
+    public class ExcelClassMap<T> : ExcelClassMap, IMap<T>
     {
         /// <summary>
         /// Constructs the default class map for the given type.
@@ -49,10 +49,10 @@ namespace ExcelMapper
         /// <typeparam name="TProperty">The type of the property or field to map.</typeparam>
         /// <param name="expression">A MemberExpression reading the property or field.</param>
         /// <returns>The map for the given property or field.</returns>
-        public OneToOneMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
+        public IOneToOneMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
-            if (!AutoMapper.TryCreatePrimitiveMap(memberExpression.Member, EmptyValueStrategy, out OneToOneMap<TProperty> map))
+            if (!AutoMapper.TryCreatePrimitiveMap(memberExpression.Member, EmptyValueStrategy, out IOneToOneMap<TProperty> map))
             {
                 throw new ExcelMappingException($"Don't know how to map type {typeof(TProperty)}.");
             }
@@ -69,7 +69,7 @@ namespace ExcelMapper
         /// <param name="expression">A MemberExpression reading the property or field.</param>
         /// <param name="ignoreCase">A flag indicating whether enum parsing is case insensitive.</param>
         /// <returns>The map for the given property or field.</returns>
-        public OneToOneMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression, bool ignoreCase) where TProperty : struct
+        public IOneToOneMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression, bool ignoreCase) where TProperty : struct
         {
             if (!typeof(TProperty).GetTypeInfo().IsEnum)
             {
@@ -96,7 +96,7 @@ namespace ExcelMapper
         /// <param name="expression">A MemberExpression reading the property or field.</param>
         /// <param name="ignoreCase">A flag indicating whether enum parsing is case insensitive.</param>
         /// <returns>The map for the given property or field.</returns>
-        public OneToOneMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty?>> expression, bool ignoreCase) where TProperty : struct
+        public IOneToOneMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty?>> expression, bool ignoreCase) where TProperty : struct
         {
             if (!typeof(TProperty).GetTypeInfo().IsEnum)
             {

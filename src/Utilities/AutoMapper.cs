@@ -24,7 +24,7 @@ public static class AutoMapper
     {
         // First, check if this is a well-known type (e.g. string/int).
         // This is a simple conversion from the cell's value to the type.
-        if (TryCreatePrimitiveMap(member, emptyValueStrategy, out OneToOneMap<T> singleMap))
+        if (TryCreatePrimitiveMap(member, emptyValueStrategy, out IOneToOneMap<T> singleMap))
         {
             map = singleMap;
             return true;
@@ -38,6 +38,7 @@ public static class AutoMapper
             map = dictionaryMap;
             return true;
         }
+#endif
 
         // Thirdly, check if this is a collection (e.g. array, list).
         // This requires converting each value to the element type of the collection.
@@ -46,7 +47,6 @@ public static class AutoMapper
             map = multiMap;
             return true;
         }
-#endif
 
         // Fourthly, check if this is an object.
         // This requires converting each member and setting it on the object.
@@ -60,7 +60,7 @@ public static class AutoMapper
         return false;
     }
 
-    internal static bool TryCreatePrimitiveMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out OneToOneMap<T> map)
+    internal static bool TryCreatePrimitiveMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, out IOneToOneMap<T> map)
     {
         if (!TryGetWellKnownMapper(typeof(T), emptyValueStrategy, out ICellValueMapper mapper, out IEmptyCellFallback emptyFallback, out IInvalidCellFallback invalidFallback))
         {
@@ -70,9 +70,16 @@ public static class AutoMapper
 
         ICellReader defaultReader = GetDefaultSingleCellValueReader(member);
         map = new OneToOneMap<T>(defaultReader)
-            .WithCellValueMappers(mapper)
-            .WithEmptyFallbackItem(emptyFallback)
-            .WithInvalidFallbackItem(invalidFallback);
+            .WithCellValueMappers(mapper);
+        if (emptyFallback != null)
+        {
+            map = map.WithEmptyFallbackItem(emptyFallback);
+        }
+        if (invalidFallback)
+        {
+            map = map.WithInvalidFallbackItem(invalidFallback);
+        }
+
         return true;
     }
 
@@ -152,8 +159,8 @@ public static class AutoMapper
         else if (type == typeof(string) || type == typeof(object) || type == typeof(IConvertible))
         {
             mapper = new StringMapper();
-            emptyFallback = GetEmptyFallback(FallbackStrategy.SetToDefaultValue);
-            invalidFallback = GetInvalidFallback(FallbackStrategy.SetToDefaultValue);
+            emptyFallback = null;
+            invalidFallback = null;
         }
         else if (type == typeof(Uri))
         {
@@ -178,7 +185,6 @@ public static class AutoMapper
         return true;
     }
 
-#if MULTI
     private static bool TryCreateEnumerableMap(MemberInfo member, FallbackStrategy emptyValueStrategy, out IMap map)
     {
         if (!member.MemberType().GetElementTypeOrEnumerableType(out Type elementType))
@@ -297,6 +303,7 @@ public static class AutoMapper
         return false;
     }
 
+#if MULTI
     private static bool TryCreateDictionaryMap<T>(FallbackStrategy emptyValueStrategy, out IMap map)
     {
         // We should be able to parse anything that implements IEnumerable<KeyValuePair<TKey, TValue>>

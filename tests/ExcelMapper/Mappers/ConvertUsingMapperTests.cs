@@ -27,7 +27,7 @@ namespace ExcelMapper.Mappers.Tests
             {
                 Assert.Equal(-1, readResult.ColumnIndex);
                 Assert.Equal("string", readResult.StringValue);
-                return CellValueMapperResult.Success(10);
+                return previous.Success(10);
             };
             var item = new ConvertUsingMapper(converter);
             

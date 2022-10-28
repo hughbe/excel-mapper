@@ -171,7 +171,7 @@ namespace ExcelMapper.Tests
             private int _previousRowIndex = -1;
             private int _currentIndex = 0;
 
-            public bool TryGetValue(ExcelRow row, IExcelDataReader reader, MemberInfo member, out object value)
+            public bool TryMap(ExcelRow row, IExcelDataReader reader, MemberInfo member, out object value)
             {
                 // Note: only works for 2 days (Monday, Tuesday) as written, but easy to extend.
                 var result = new List<BusinessHours>();

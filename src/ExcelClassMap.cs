@@ -15,12 +15,12 @@ public class ExcelClassMap : IMap
 
     public ExcelPropertyMapCollection Properties { get; } = new ExcelPropertyMapCollection();
 
-    public bool TryGetValue(ExcelRow row, IExcelDataReader reader, MemberInfo member, out object value)
+    public bool TryMap(ExcelRow row, IExcelDataReader reader, MemberInfo member, out object value)
     {
         object instance = Activator.CreateInstance(Type);
         foreach (ExcelPropertyMap property in Properties)
         {
-            if (property.Map.TryGetValue(row, reader, property.Member, out object propertyValue))
+            if (property.Map.TryMap(row, reader, property.Member, out object propertyValue))
             {
                 property.SetValueFactory(instance, propertyValue);
             }

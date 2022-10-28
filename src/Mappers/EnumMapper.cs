@@ -43,16 +43,14 @@ public class EnumMapper : ICellValueMapper
 
     public CellValueMapperResult MapCell(ExcelCell cell, CellValueMapperResult previous, MemberInfo member)
     {
-        string stringValue = previous.Value?.ToString();
-
         try
         {
-            object result = Enum.Parse(EnumType, stringValue, IgnoreCase);
-            return CellValueMapperResult.Success(result);
+            object result = Enum.Parse(EnumType, previous.StringValue, IgnoreCase);
+            return previous.Success(result);
         }
         catch (Exception exception)
         {
-            return CellValueMapperResult.Invalid(exception);
+            return previous.Invalid(exception);
         }
     }
 }

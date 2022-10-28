@@ -37,11 +37,11 @@ public class ChangeTypeMapper : ICellValueMapper
         try
         {
             object result = Convert.ChangeType(previous.Value, Type);
-            return CellValueMapperResult.Success(result);
+            return previous.Success(result);
         }
         catch (Exception exception)
         {
-            return CellValueMapperResult.Invalid(exception);
+            return previous.Invalid(exception);
         }
     }
 }

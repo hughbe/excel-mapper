@@ -6,5 +6,5 @@ namespace ExcelMapper.Mappers;
 public class TrimCellValueTransformer : ICellValueMapper
 {
     public CellValueMapperResult MapCell(ExcelCell cell, CellValueMapperResult previous, MemberInfo member)
-        => CellValueMapperResult.Success(previous.Value?.ToString().Trim());
+        => previous.Success(previous.StringValue?.Trim());
 }

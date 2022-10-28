@@ -8,15 +8,14 @@ public class UriMapper : ICellValueMapper
 {
     public CellValueMapperResult MapCell(ExcelCell cell, CellValueMapperResult previous, MemberInfo member)
     {
-        string stringValue = previous.Value?.ToString();
         try
         {
-            var uri = new Uri(stringValue, UriKind.Absolute);
-            return CellValueMapperResult.Success(uri);
+            var uri = new Uri(previous.StringValue, UriKind.Absolute);
+            return previous.Success(uri);
         }
         catch (Exception exception)
         {
-            return CellValueMapperResult.Invalid(exception);
+            return previous.Invalid(exception);
         }
     }
 }

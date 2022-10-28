@@ -133,7 +133,7 @@ namespace ExcelMapper.Tests
 
         private class CustomIMap : IMap
         {
-            public bool TryGetValue(ExcelRow row, IExcelDataReader reader, MemberInfo member, out object value)
+            public bool TryMap(ExcelRow row, IExcelDataReader reader, MemberInfo member, out object value)
             {
                 throw new NotImplementedException();
             }

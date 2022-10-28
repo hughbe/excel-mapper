@@ -5,28 +5,37 @@ using ExcelMapper.Utilities;
 
 namespace ExcelMapper;
  
-public class OneToOneMap<T> : IMapper<T>, IMap
+public class OneToOneMap<T> : IOneToOneMap<T>, IMap<T>, IMap
 {
     public OneToOneMap(ICellReader reader)
     {
-        CellReader = reader ?? throw new ArgumentNullException(nameof(reader));
+        Reader = reader ?? throw new ArgumentNullException(nameof(reader));
     }
 
     private ICellReader _reader;
 
-    public ICellReader CellReader
+    /// <summary>
+    /// Gets or sets the <see cref="ICellReader"/> used to read the cell value.
+    /// </summary>
+    public ICellReader Reader
     {
         get => _reader;
         set => _reader = value ?? throw new ArgumentNullException(nameof(value));
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the cell value is optional.
+    /// </summary>
     public bool Optional { get; set; }
 
+    /// <summary>
+    /// Gets the list of <see cref="ICellMapper"/>s used to convert the cell value.
+    /// </summary>
     public CellValueMapperCollection Mappers { get; } = new CellValueMapperCollection();
 
-    public bool TryGetValue(ExcelRow row, IExcelDataReader reader, MemberInfo member, out object result)
+    public bool TryMap(ExcelRow row, IExcelDataReader reader, MemberInfo member, out object result)
     {
-        if (!CellReader.TryGetCell(row, out ExcelCell cell))
+        if (!Reader.TryGetCell(row, out ExcelCell cell))
         {
             if (Optional)
             {

@@ -16,7 +16,7 @@ public class InvalidCellMapper : ICellValueMapper
     {
         if (!previous.Succeeded)
         {
-            return CellValueMapperResult.Success(Fallback.PerformFallback(cell, previous.Value, previous.Exception, member));
+            return previous.Success(Fallback.PerformFallback(cell, previous.Value, previous.Exception, member));
         }
 
         return previous;

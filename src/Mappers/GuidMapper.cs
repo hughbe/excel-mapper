@@ -10,18 +10,17 @@ public class GuidMapper : ICellValueMapper
     {
         if (previous.Value is Guid guidValue)
         {
-            return CellValueMapperResult.Success(guidValue);
+            return previous.Success(guidValue);
         }
 
-        string stringValue = previous.Value?.ToString();
         try
         {
-            Guid result = Guid.Parse(stringValue);
-            return CellValueMapperResult.Success(result);
+            Guid result = Guid.Parse(previous.StringValue);
+            return previous.Success(result);
         }
         catch (Exception exception)
         {
-            return CellValueMapperResult.Invalid(exception);
+            return previous.Invalid(exception);
         }
     }
 }
