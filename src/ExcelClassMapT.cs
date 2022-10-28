@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Dynamic;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -80,7 +78,7 @@ namespace ExcelMapper
 
             MemberExpression memberExpression = GetMemberExpression(expression);
             var mapper = new EnumMapper(typeof(TProperty), ignoreCase);
-            ISingleCellValueReader defaultReader = AutoMapper.GetDefaultSingleCellValueReader(memberExpression.Member);
+            ICellReader defaultReader = AutoMapper.GetDefaultSingleCellValueReader(memberExpression.Member);
             var map = new OneToOneMap<TProperty>(defaultReader)
                 .WithCellValueMappers(mapper)
                 .WithThrowingEmptyFallback()
@@ -107,7 +105,7 @@ namespace ExcelMapper
 
             MemberExpression memberExpression = GetMemberExpression(expression);
             var mapper = new EnumMapper(typeof(TProperty), ignoreCase);
-            ISingleCellValueReader defaultReader = AutoMapper.GetDefaultSingleCellValueReader(memberExpression.Member);
+            ICellReader defaultReader = AutoMapper.GetDefaultSingleCellValueReader(memberExpression.Member);
             var map = new OneToOneMap<TProperty>(defaultReader)
                 .WithCellValueMappers(mapper)
                 .WithEmptyFallback(null)
@@ -116,6 +114,7 @@ namespace ExcelMapper
             return map;
         }
 
+#if MUTIPLE
         /// <summary>
         /// Creates a map for a property or field given a MemberExpression reading the property or field.
         /// This is used for map enumerables.
@@ -259,6 +258,7 @@ namespace ExcelMapper
             AddMap(new ExcelPropertyMap<TProperty>(memberExpression.Member, map), expression);
             return map;
         }
+#endif
 
         /// <summary>
         /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -279,6 +279,7 @@ namespace ExcelMapper
             return map;
         }
 
+#if MULTIPLE
         /// <summary>
         /// Creates a map for a property or field given a MemberExpression reading the property or field.
         /// This is used for map IDictionarys.
@@ -362,6 +363,7 @@ namespace ExcelMapper
 
             return map;
         }
+#endif
 
         private Expression GetExpressionBody(Expression body)
         {

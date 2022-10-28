@@ -1,5 +1,4 @@
-using System;
-using System.Collections.Generic;
+#if MULTIPLE
 using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
@@ -111,3 +110,4 @@ namespace ExcelMapper
         }
     }
 }
+#endif

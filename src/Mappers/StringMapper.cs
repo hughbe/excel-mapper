@@ -1,15 +1,13 @@
-﻿using ExcelMapper.Abstractions;
+﻿using System.Reflection;
+using ExcelMapper.Abstractions;
 
-namespace ExcelMapper.Mappers
+/// <summary>
+/// A mapper that returns the string value of a cell.
+/// </summary>
+public class StringMapper : ICellValueMapper
 {
-    /// <summary>
-    /// A mapper that returns the string value of a cell.
-    /// </summary>
-    public class StringMapper : ICellValueMapper
+    public CellValueMapperResult MapCell(ExcelCell cell, CellValueMapperResult previous, MemberInfo member)
     {
-        public CellValueMapperResult MapCellValue(ReadCellValueResult result)
-        {
-            return CellValueMapperResult.SuccessIfNoOtherSuccess(result.StringValue);
-        }
+        return CellValueMapperResult.SuccessIfNoOtherSuccess(previous.Value?.ToString());
     }
 }

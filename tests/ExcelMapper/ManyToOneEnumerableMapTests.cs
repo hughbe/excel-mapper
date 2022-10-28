@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#if false
 using System.Linq;
 using System.Reflection;
 using ExcelMapper.Abstractions;
@@ -510,3 +509,4 @@ namespace ExcelMapper.Tests
         }
     }
 }
+#endif

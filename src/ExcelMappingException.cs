@@ -1,5 +1,4 @@
-﻿using System;
-using ExcelMapper.Abstractions;
+﻿using ExcelMapper.Abstractions;
 
 namespace ExcelMapper
 {

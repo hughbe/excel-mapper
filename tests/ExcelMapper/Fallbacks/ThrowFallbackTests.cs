@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#if FALSE
 using System.Reflection;
 using ExcelMapper.Abstractions;
 using Xunit;
@@ -55,3 +54,4 @@ namespace ExcelMapper.Fallbacks.Tests
         }
     }
 }
+#endif

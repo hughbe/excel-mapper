@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Linq.Expressions;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
@@ -173,15 +171,15 @@ namespace ExcelMapper.Tests
             private int _previousRowIndex = -1;
             private int _currentIndex = 0;
 
-            public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object value)
+            public bool TryGetValue(ExcelRow row, IExcelDataReader reader, MemberInfo member, out object value)
             {
                 // Note: only works for 2 days (Monday, Tuesday) as written, but easy to extend.
                 var result = new List<BusinessHours>();
                 for (int i = 0; i < 2; i++)
                 {
-                    if (_previousRowIndex != rowIndex)
+                    if (_previousRowIndex != row.RowIndex)
                     {
-                        _previousRowIndex = rowIndex;
+                        _previousRowIndex = row.RowIndex;
                         _currentIndex = 0;
                     }
 
@@ -205,18 +203,18 @@ namespace ExcelMapper.Tests
                     var labelReader = new ColumnNameValueReader(prefix + "Label");
                     var startTimeReader = new ColumnNameValueReader(prefix + "Open");
                     var endTimeReader = new ColumnNameValueReader(prefix + "Close");
-                    if (!labelReader.TryGetValue(sheet, rowIndex, reader, out ReadCellValueResult labelResult) ||
-                        !startTimeReader.TryGetValue(sheet, rowIndex, reader, out ReadCellValueResult startTimeResult) ||
-                        !endTimeReader.TryGetValue(sheet, rowIndex, reader, out ReadCellValueResult endTimeResult))
+                    if (!labelReader.TryGetCell(row, out var labelResult) ||
+                        !startTimeReader.TryGetCell(row, out var startTimeResult) ||
+                        !endTimeReader.TryGetCell(row, out var endTimeResult))
                     {
                         throw new InvalidOperationException("No such column");
                     }
 
                     result.Add(new BusinessHours
                     {
-                        DayLabel = labelResult.StringValue,
-                        StartTime = startTimeResult.StringValue,
-                        EndTime = endTimeResult.StringValue
+                        DayLabel = reader.GetString(labelResult.ColumnIndex),
+                        StartTime = reader.GetString(startTimeResult.ColumnIndex),
+                        EndTime = reader.GetString(endTimeResult.ColumnIndex)
                     });            
                 }
 

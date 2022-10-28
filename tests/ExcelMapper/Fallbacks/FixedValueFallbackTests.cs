@@ -1,4 +1,5 @@
-﻿using ExcelMapper.Abstractions;
+﻿#if FALSE
+using ExcelMapper.Abstractions;
 using Xunit;
 
 namespace ExcelMapper.Fallbacks.Tests
@@ -19,3 +20,4 @@ namespace ExcelMapper.Fallbacks.Tests
         }
     }
 }
+#endif

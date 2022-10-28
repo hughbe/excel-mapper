@@ -1,13 +1,12 @@
-﻿using System;
-using ExcelDataReader;
+﻿using ExcelDataReader;
 using ExcelMapper.Abstractions;
 
 namespace ExcelMapper.Readers
 {
     /// <summary>
-    /// Reads the value of a single cell given the zero-based index of it's column.
+    /// Finds a cell from a zero-based column index.
     /// </summary>
-    public sealed class ColumnIndexValueReader : ISingleCellValueReader
+    public sealed class ColumnIndexValueReader : ICellReader
     {
         /// <summary>
         /// The zero-based index of the column to read.
@@ -15,7 +14,7 @@ namespace ExcelMapper.Readers
         public int ColumnIndex { get; }
 
         /// <summary>
-        /// Constructs a reader that reads the value of a single cell given the zero-based index of it's column.
+        /// Constructs a reader that reads the value of a single cell given a zero-based column index.
         /// </summary>
         /// <param name="columnIndex">The zero-based index of the column to read.</param>
         public ColumnIndexValueReader(int columnIndex)
@@ -28,16 +27,15 @@ namespace ExcelMapper.Readers
             ColumnIndex = columnIndex;
         }
 
-        public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out ReadCellValueResult result)
+        public bool TryGetCell(ExcelRow row, out ExcelCell cell)
         {
-            if (ColumnIndex >= reader.FieldCount)
+            if (ColumnIndex >= row.ColumnCount)
             {
-                result = default;
+                cell = default;
                 return false;
             }
 
-            var value = reader[ColumnIndex]?.ToString();
-            result = new ReadCellValueResult(ColumnIndex, value);
+            cell = new ExcelCell(row.Sheet, row.RowIndex, ColumnIndex);
             return true;
         }
     }

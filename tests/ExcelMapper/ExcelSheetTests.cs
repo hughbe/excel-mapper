@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Xunit;
 
 namespace ExcelMapper.Tests
@@ -388,6 +386,7 @@ namespace ExcelMapper.Tests
             Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValue>());
         }
 
+#if false
         [Fact]
         public void ReadRow_HasHeadingFalseColumnNamesMapping_ThrowsExcelMappingException()
         {
@@ -399,6 +398,7 @@ namespace ExcelMapper.Tests
 
             Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValues>());
         }
+#endif
 
         [Fact]
         public void HasHeading_SetWhenAlreadyRead_InvalidOperationException()
@@ -464,6 +464,7 @@ namespace ExcelMapper.Tests
             }
         }
 
+#if false
         private class StringValuesClassMapColumnNames : ExcelClassMap<StringValues>
         {
             public StringValuesClassMapColumnNames()
@@ -472,6 +473,7 @@ namespace ExcelMapper.Tests
                     .WithColumnNames("Value");
             }
         }
+        #endif
 
         private class StringValue
         {

@@ -1,4 +1,5 @@
-﻿using ExcelMapper.Abstractions;
+﻿#if false
+using ExcelMapper.Abstractions;
 using Xunit;
 
 namespace ExcelMapper.Transformers.Tests
@@ -16,3 +17,4 @@ namespace ExcelMapper.Transformers.Tests
         }
     }
 }
+#endif

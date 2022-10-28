@@ -1,6 +1,6 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using ExcelDataReader;
+using ExcelMapper.Abstractions;
 using Xunit;
 
 namespace ExcelMapper.Tests
@@ -133,7 +133,7 @@ namespace ExcelMapper.Tests
 
         private class CustomIMap : IMap
         {
-            public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object value)
+            public bool TryGetValue(ExcelRow row, IExcelDataReader reader, MemberInfo member, out object value)
             {
                 throw new NotImplementedException();
             }

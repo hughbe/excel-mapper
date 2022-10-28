@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using ExcelMapper.Abstractions;
+﻿using ExcelMapper.Abstractions;
 using Xunit;
 
 namespace ExcelMapper.Mappers.Tests
@@ -22,7 +20,7 @@ namespace ExcelMapper.Mappers.Tests
         {
             var item = new GuidMapper();
 
-            CellValueMapperResult result = item.MapCellValue(new ReadCellValueResult(-1, stringValue));
+            CellValueMapperResult result = item.MapCell(new ExcelCell(null, -1, -1), CellValueMapperResult.Success(stringValue), null);
             Assert.True(result.Succeeded);
             Assert.Equal(expected, result.Value);
             Assert.Null(result.Exception);
@@ -36,7 +34,7 @@ namespace ExcelMapper.Mappers.Tests
         {
             var item = new GuidMapper();
 
-            CellValueMapperResult result = item.MapCellValue(new ReadCellValueResult(-1, stringValue));
+            CellValueMapperResult result = item.MapCell(new ExcelCell(null, -1, -1), CellValueMapperResult.Success(stringValue), null);
             Assert.False(result.Succeeded);
             Assert.Null(result.Value);
             Assert.NotNull(result.Exception);

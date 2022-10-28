@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#if false
 using System.Dynamic;
 using Xunit;
 
@@ -144,3 +143,4 @@ namespace ExcelMapper.Tests
         }
     }
 }
+#endif

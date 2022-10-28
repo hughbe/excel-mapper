@@ -1,4 +1,4 @@
-﻿using System;
+﻿#if false
 using ExcelDataReader;
 using Xunit;
 
@@ -52,3 +52,4 @@ namespace ExcelMapper.Readers.Tests
         }
     }
 }
+#endif

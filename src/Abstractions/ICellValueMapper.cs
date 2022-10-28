@@ -1,7 +1,11 @@
-﻿namespace ExcelMapper.Abstractions
+﻿using System.Reflection;
+
+namespace ExcelMapper.Abstractions;
+
+/// <summary>
+/// Converts a cell to a value.
+/// </summary> 
+public interface ICellValueMapper
 {
-    public interface ICellValueMapper
-    {
-        CellValueMapperResult MapCellValue(ReadCellValueResult readResult);
-    }
+    CellValueMapperResult MapCell(ExcelCell cell, CellValueMapperResult previous, MemberInfo member);
 }

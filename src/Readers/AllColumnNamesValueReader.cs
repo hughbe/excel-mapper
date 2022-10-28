@@ -1,31 +1,27 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using ExcelDataReader;
+﻿using ExcelDataReader;
 using ExcelMapper.Abstractions;
 
-namespace ExcelMapper.Readers
+namespace ExcelMapper.Readers;
+ 
+/// <summary>
+/// Reads a multiple values of all columns in a sheet.
+/// </summary>
+public sealed class AllColumnNamesValueReader : IMultipleCellReader
 {
-    /// <summary>
-    /// Reads a multiple values of all columns in a sheet.
-    /// </summary>
-    public sealed class AllColumnNamesValueReader : IMultipleCellValuesReader
+    public bool TryGetCells(ExcelRow row, IExcelDataReader reader, out IEnumerable<ExcelCell> cells)
     {
-        public bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out IEnumerable<ReadCellValueResult> result)
+        if (row.Sheet.Heading == null)
         {
-            if (sheet.Heading == null)
-            {
-                throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
-            }
-
-            result = sheet.Heading.ColumnNames
-                .Where(s => !string.IsNullOrWhiteSpace(s))
-                .Select(columnName =>
-                {
-                    var index = sheet.Heading.GetColumnIndex(columnName);
-                    var value = reader[index]?.ToString();
-                    return new ReadCellValueResult(index, value);
-                });
-            return true;
+            throw new ExcelMappingException($"The sheet \"{row.Sheet.Name}\" does not have a heading. Use a column index mapping instead.");
         }
+
+        cells = row.Sheet.Heading.ColumnNames
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Select(columnName =>
+            {
+                var columnIndex = row.Sheet.Heading.GetColumnIndex(columnName);
+                return new ExcelCell(row.Sheet, row.RowIndex, columnIndex);
+            });
+        return true;
     }
 }

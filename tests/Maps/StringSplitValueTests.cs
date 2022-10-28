@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿#if FALSE
 using System.Collections.ObjectModel;
 using Xunit;
 
@@ -135,3 +135,4 @@ namespace ExcelMapper.Tests
         }
     }
 }
+#endif

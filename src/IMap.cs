@@ -1,10 +1,10 @@
 using System.Reflection;
 using ExcelDataReader;
+using ExcelMapper.Abstractions;
 
-namespace ExcelMapper
+namespace ExcelMapper;
+ 
+public interface IMap
 {
-    public interface IMap
-    {
-        bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object value);
-    }
+    bool TryGetValue(ExcelRow row, IExcelDataReader reader, MemberInfo member, out object value);
 }

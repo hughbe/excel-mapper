@@ -1,4 +1,4 @@
-﻿using System;
+﻿#if FALSE
 using ExcelMapper.Abstractions;
 using Xunit;
 
@@ -9,7 +9,7 @@ namespace ExcelMapper.Mappers.Tests
         [Fact]
         public void Ctor_Converter()
         {
-            ConvertUsingMapperDelegate converter = (ReadCellValueResult readResult) => CellValueMapperResult.Success(1);
+            ConvertUsingMapperDelegate converter = (ExcelCell cell, object value) => CellValueMapperResult.Success(1);
             var item = new ConvertUsingMapper(converter);
             Assert.Same(converter, item.Converter);
         }
@@ -23,7 +23,7 @@ namespace ExcelMapper.Mappers.Tests
         [Fact]
         public void GetProperty_ValidStringValue_ReturnsSuccess()
         {
-            ConvertUsingMapperDelegate converter = (ReadCellValueResult readResult) =>
+            ConvertUsingMapperDelegate converter = (ExcelCell cell, object value) =>
             {
                 Assert.Equal(-1, readResult.ColumnIndex);
                 Assert.Equal("string", readResult.StringValue);
@@ -31,7 +31,7 @@ namespace ExcelMapper.Mappers.Tests
             };
             var item = new ConvertUsingMapper(converter);
             
-            CellValueMapperResult result = item.MapCellValue(new ReadCellValueResult(-1, "string"));
+            CellValueMapperResult result = item.MapCell(new ReadCellValueResult(-1, "string"));
             Assert.True(result.Succeeded);
             Assert.Equal(10, result.Value);
             Assert.Null(result.Exception);
@@ -48,10 +48,11 @@ namespace ExcelMapper.Mappers.Tests
             };
             var item = new ConvertUsingMapper(converter);
             
-            CellValueMapperResult result = item.MapCellValue(new ReadCellValueResult(-1, "string"));
+            CellValueMapperResult result = item.MapCell(new ReadCellValueResult(-1, "string"));
             Assert.False(result.Succeeded);
             Assert.Null(result.Value);
             Assert.IsType<DivideByZeroException>(result.Exception);
         }
     }
 }
+#endif

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#if FALSE
 using ExcelDataReader;
 using Xunit;
 
@@ -47,3 +46,4 @@ namespace ExcelMapper.Readers.Tests
         }
     }
 }
+#endif

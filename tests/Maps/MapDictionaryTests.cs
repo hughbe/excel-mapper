@@ -1,6 +1,5 @@
-﻿using System;
+﻿#if FALSE
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using Xunit;
 
@@ -1545,3 +1544,4 @@ namespace ExcelMapper.Tests
         }
     }
 }
+#endif

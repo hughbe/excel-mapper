@@ -1,4 +1,4 @@
-﻿using System;
+﻿#if false
 using Xunit;
 
 namespace ExcelMapper.Tests
@@ -55,3 +55,4 @@ namespace ExcelMapper.Tests
         }
     }
 }
+#endif
