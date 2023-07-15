@@ -151,7 +151,7 @@ public enum MaritalStatus
 public class President
 {
     public string Name { get; set; }
-    public MaritalStatus MarritalStatus { get; set; }
+    public MaritalStatus MaritalStatus { get; set; }
     public int NumberOfChildren { get; set; }
     public float ApprovalRating { get; set; }
     public DateTime DateOfBirth { get; set; }
@@ -167,7 +167,7 @@ public class PresidentClassMap : ExcelClassMap<President>
         Map(president => president.Name);
 
         // Map invalid unknown value to a known value.
-        Map(president => president.MarritalStatus)
+        Map(president => president.MaritalStatus)
             .WithColumnName("Marrital Status")
             .WithMapping(new Dictionary<string, MaritalStatus>
             {
@@ -240,7 +240,7 @@ public enum MaritalStatus
 public class President
 {
     public string Name { get; set; }
-    public MaritalStatus MarritalStatus { get; set; }
+    public MaritalStatus MaritalStatus { get; set; }
     public int? NumberOfChildren { get; set; }
     public DateTime? DateOfBirth { get; set; }
 }
@@ -251,7 +251,7 @@ public class PresidentClassMap : ExcelClassMap<President>
     {
         Map(president => president.Name);
 
-        Map(president => president.MarritalStatus)
+        Map(president => president.MaritalStatus)
             .WithColumnName("Marrital Status")
             .WithEmptyFallback(MaritalStatus.Unknown)
             .WithInvalidFallback(MaritalStatus.Invalid);
@@ -312,7 +312,7 @@ public enum MaritalStatus
 public class President
 {
     public string Name { get; set; }
-    public MaritalStatus MarritalStatus { get; set; }
+    public MaritalStatus MaritalStatus { get; set; }
 }
 
 public class PresidentClassMap : ExcelClassMap<President>
@@ -321,7 +321,7 @@ public class PresidentClassMap : ExcelClassMap<President>
     {
         Map(president => president.Name);
 
-        Map(president => president.MarritalStatus, ignoreCase: true)
+        Map(president => president.MaritalStatus, ignoreCase: true)
             .WithColumnName("Marrital Status")
             .WithEmptyFallback(MaritalStatus.Unknown)
             .WithInvalidFallback(MaritalStatus.Invalid);
