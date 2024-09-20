@@ -96,7 +96,7 @@ namespace ExcelMapper.Tests
             ExcelSheet sheet = importer.ReadSheet();
 
             IEnumerable<StringValue> rows = sheet.ReadRows<StringValue>();
-            Assert.Equal(new string[] { "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
+            Assert.Equal(new string?[] { "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
             Assert.Equal(3, sheet.CurrentRowIndex);
 
             Assert.NotNull(sheet.Heading);
@@ -113,7 +113,7 @@ namespace ExcelMapper.Tests
             sheet.HasHeading = false;
 
             IEnumerable<StringValue> rows = sheet.ReadRows<StringValue>();
-            Assert.Equal(new string[] { "Value", "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
+            Assert.Equal(new string?[] { "Value", "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
             Assert.Equal(4, sheet.CurrentRowIndex);
 
             Assert.Null(sheet.Heading);
@@ -128,7 +128,7 @@ namespace ExcelMapper.Tests
             sheet.ReadHeading();
 
             IEnumerable<StringValue> rows = sheet.ReadRows<StringValue>();
-            Assert.Equal(new string[] { "value", "  value  ", null, "value"  }, rows.Select(p => p.Value).ToArray());
+            Assert.Equal(new string?[] { "value", "  value  ", null, "value"  }, rows.Select(p => p.Value).ToArray());
             Assert.Equal(3, sheet.CurrentRowIndex);
 
             Assert.NotNull(sheet.Heading);
@@ -144,7 +144,7 @@ namespace ExcelMapper.Tests
             sheet.ReadHeading();
 
             IEnumerable<StringValue> rows = sheet.ReadRows<StringValue>();
-            Assert.Equal(new string[] { "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
+            Assert.Equal(new string?[] { "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
             Assert.Equal(3, sheet.CurrentRowIndex);
 
             Assert.NotNull(sheet.Heading);
@@ -158,7 +158,7 @@ namespace ExcelMapper.Tests
             ExcelSheet sheet = importer.ReadSheet();
 
             IEnumerable<StringValue> rows1 = sheet.ReadRows<StringValue>();
-            Assert.Equal(new string[] { "value", "  value  ", null, "value" }, rows1.Select(p => p.Value).ToArray());
+            Assert.Equal(new string?[] { "value", "  value  ", null, "value" }, rows1.Select(p => p.Value).ToArray());
             Assert.Equal(3, sheet.CurrentRowIndex);
 
             Assert.NotNull(sheet.Heading);
@@ -178,7 +178,7 @@ namespace ExcelMapper.Tests
             sheet.HasHeading = false;
 
             IEnumerable<StringValue> rows1 = sheet.ReadRows<StringValue>();
-            Assert.Equal(new string[] { "Value", "value", "  value  ", null, "value" }, rows1.Select(p => p.Value).ToArray());
+            Assert.Equal(new string?[] { "Value", "value", "  value  ", null, "value" }, rows1.Select(p => p.Value).ToArray());
             Assert.Equal(4, sheet.CurrentRowIndex);
 
             Assert.Null(sheet.Heading);
@@ -204,14 +204,14 @@ namespace ExcelMapper.Tests
 
         public static IEnumerable<object[]> ReadRows_Area_TestData()
         {
-            yield return new object[] { 1, 2, new string[] { "value", "  value  " } };
-            yield return new object[] { 0, 4, new string[] { "value", "  value  ", null, "value" } };
-            yield return new object[] { 1, 0, new string[0] };
+            yield return new object[] { 1, 2, new string?[] { "value", "  value  " } };
+            yield return new object[] { 0, 4, new string?[] { "value", "  value  ", null, "value" } };
+            yield return new object[] { 1, 0, new string?[0] };
         }
 
         [Theory]
         [MemberData(nameof(ReadRows_Area_TestData))]
-        public void ReadRows_IndexCount_ReturnsExpected(int startIndex, int count, string[] expectedValues)
+        public void ReadRows_IndexCount_ReturnsExpected(int startIndex, int count, string?[] expectedValues)
         {
             using var importer = Helpers.GetImporter("Strings.xlsx");
             ExcelSheet sheet = importer.ReadSheet();
@@ -475,12 +475,12 @@ namespace ExcelMapper.Tests
 
         private class StringValue
         {
-            public string Value { get; set; }
+            public string? Value { get; set; }
         }
 
         private class StringValues
         {
-            public string[] Value { get; set; }
+            public string[] Value { get; set; } = default!;
         }
 
         [Fact]
@@ -510,18 +510,18 @@ namespace ExcelMapper.Tests
             Assert.NotEmpty(sheet.ReadRows<object>().ToArray());
 
             Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<object>());
-            Assert.False(sheet.TryReadRow(out object row));
+            Assert.False(sheet.TryReadRow(out object? row));
             Assert.Null(row);
         }
 
         private class BlankLinesClass
         {
-            public string StringValue { get; set; }
+            public string? StringValue { get; set; }
             public int IntValue { get; set; }
         }
         class Dictionary
         {
-            public Dictionary<string, string> RawRow { get; set; }
+            public Dictionary<string, string> RawRow { get; set; } = default!;
         }
 
         [Fact]

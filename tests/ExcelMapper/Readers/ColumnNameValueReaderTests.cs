@@ -15,7 +15,7 @@ namespace ExcelMapper.Readers.Tests
         [Fact]
         public void Ctor_NullColumnName_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("columnName", () => new ColumnNameValueReader(null));
+            Assert.Throws<ArgumentNullException>("columnName", () => new ColumnNameValueReader(null!));
         }
 
         [Fact]

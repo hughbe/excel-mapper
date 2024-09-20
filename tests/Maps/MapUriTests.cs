@@ -65,7 +65,7 @@ namespace ExcelMapper.Tests
 
         private class UriClass
         {
-            public Uri Uri { get; set; }
+            public Uri Uri { get; set; } = default!;
         }
 
         private class DefaultUriClassMap : ExcelClassMap<UriClass>

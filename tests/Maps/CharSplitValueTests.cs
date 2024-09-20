@@ -44,8 +44,8 @@ namespace ExcelMapper.Tests
 
         private class AutoSplitWithSeparatorClass
         {
-            public string[] Value { get; set; }
-            public ObservableCollection<ObservableCollectionEnum> EnumValue { get; set; }
+            public string[] Value { get; set; } = default!;
+            public ObservableCollection<ObservableCollectionEnum> EnumValue { get; set; } = default!;
         }
 
         private class SplitWithSeparatorsArrayMap : ExcelClassMap<AutoSplitWithSeparatorClass>
@@ -102,7 +102,7 @@ namespace ExcelMapper.Tests
 
         private class MissingColumnRow
         {
-            public int[] MissingValue { get; set; }
+            public int[] MissingValue { get; set; } = default!;
         }
 
         private class MissingColumnRowMap : ExcelClassMap<MissingColumnRow>

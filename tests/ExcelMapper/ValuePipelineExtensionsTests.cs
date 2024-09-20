@@ -38,7 +38,7 @@ namespace ExcelMapper.Tests
         {
             OneToOneMap<string> propertyMap = Map(t => t.Value);
 
-            Assert.Throws<ArgumentNullException>("reader", () => propertyMap.WithReader(null));
+            Assert.Throws<ArgumentNullException>("reader", () => propertyMap.WithReader(null!));
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace ExcelMapper.Tests
         {
             OneToOneMap<string> propertyMap = Map(t => t.Value);
             ICellValueMapper mapper1 = Assert.Single(propertyMap.Pipeline.CellValueMappers);
-            ICellValueMapper mapper2 = new BoolMapper(); ;
+            ICellValueMapper mapper2 = new BoolMapper();
 
             Assert.Same(propertyMap, propertyMap.WithCellValueMappers(mapper2));
             Assert.Equal(new ICellValueMapper[] { mapper1, mapper2 }, propertyMap.Pipeline.CellValueMappers);
@@ -57,7 +57,7 @@ namespace ExcelMapper.Tests
         {
             OneToOneMap<string> propertyMap = Map(t => t.Value);
 
-            Assert.Throws<ArgumentNullException>("mappers", () => propertyMap.WithCellValueMappers(null));
+            Assert.Throws<ArgumentNullException>("mappers", () => propertyMap.WithCellValueMappers(null!));
         }
 
         [Fact]
@@ -65,7 +65,7 @@ namespace ExcelMapper.Tests
         {
             OneToOneMap<string> propertyMap = Map(t => t.Value);
 
-            Assert.Throws<ArgumentNullException>("mappers", () => propertyMap.WithCellValueMappers(new ICellValueMapper[] { null }));
+            Assert.Throws<ArgumentNullException>("mappers", () => propertyMap.WithCellValueMappers(new ICellValueMapper[] { null! }));
         }
 
         [Fact]
@@ -89,7 +89,7 @@ namespace ExcelMapper.Tests
         {
             OneToOneMap<string> propertyMap = Map(t => t.Value);
 
-            Assert.Throws<ArgumentNullException>("mappingDictionary", () => propertyMap.WithMapping((Dictionary<string, string>)null));
+            Assert.Throws<ArgumentNullException>("mappingDictionary", () => propertyMap.WithMapping((Dictionary<string, string>)null!));
         }
 
         [Fact]
@@ -162,7 +162,7 @@ namespace ExcelMapper.Tests
 
         [Theory]
         [MemberData(nameof(Formats_TestData))]
-        public void WithDateFormats_AutoMappedIEnumerableString_Success(IEnumerable<string> formats)
+        public void WithDateFormats_AutoMappedIEnumerableString_Success(ICollection<string> formats)
         {
             OneToOneMap<DateTime> propertyMap = Map(t => t.DateValue);
             Assert.Same(propertyMap, propertyMap.WithDateFormats(formats));
@@ -173,7 +173,7 @@ namespace ExcelMapper.Tests
 
         [Theory]
         [MemberData(nameof(Formats_TestData))]
-        public void WithDateFormats_NotMappedIEnumerableString_Success(IEnumerable<string> formats)
+        public void WithDateFormats_NotMappedIEnumerableString_Success(ICollection<string> formats)
         {
             OneToOneMap<DateTime> propertyMap = Map(t => t.DateValue);
             propertyMap.Pipeline.RemoveCellValueMapper(0);
@@ -189,8 +189,8 @@ namespace ExcelMapper.Tests
         {
             OneToOneMap<DateTime> propertyMap = Map(t => t.DateValue);
 
-            Assert.Throws<ArgumentNullException>("formats", () => propertyMap.WithDateFormats(null));
-            Assert.Throws<ArgumentNullException>("formats", () => propertyMap.WithDateFormats((IEnumerable<string>)null));
+            Assert.Throws<ArgumentNullException>("formats", () => propertyMap.WithDateFormats(null!));
+            Assert.Throws<ArgumentNullException>("formats", () => propertyMap.WithDateFormats((IEnumerable<string>)null!));
         }
 
         [Fact]
@@ -232,7 +232,7 @@ namespace ExcelMapper.Tests
 
         [Theory]
         [MemberData(nameof(Formats_TestData))]
-        public void WithDateFormats_NullableAutoMappedIEnumerableString_Success(IEnumerable<string> formats)
+        public void WithDateFormats_NullableAutoMappedIEnumerableString_Success(ICollection<string> formats)
         {
             OneToOneMap<DateTime?> propertyMap = Map(t => t.NullableDateValue);
             Assert.Same(propertyMap, propertyMap.WithDateFormats(formats));
@@ -243,7 +243,7 @@ namespace ExcelMapper.Tests
 
         [Theory]
         [MemberData(nameof(Formats_TestData))]
-        public void WithDateFormats_NullableNotMappedIEnumerableString_Success(IEnumerable<string> formats)
+        public void WithDateFormats_NullableNotMappedIEnumerableString_Success(ICollection<string> formats)
         {
             OneToOneMap<DateTime?> propertyMap = Map(t => t.NullableDateValue);
             propertyMap.Pipeline.RemoveCellValueMapper(0);
@@ -259,8 +259,8 @@ namespace ExcelMapper.Tests
         {
             OneToOneMap<DateTime?> mapping = Map(t => t.NullableDateValue);
 
-            Assert.Throws<ArgumentNullException>("formats", () => mapping.WithDateFormats(null));
-            Assert.Throws<ArgumentNullException>("formats", () => mapping.WithDateFormats((IEnumerable<string>)null));
+            Assert.Throws<ArgumentNullException>("formats", () => mapping.WithDateFormats(null!));
+            Assert.Throws<ArgumentNullException>("formats", () => mapping.WithDateFormats((IEnumerable<string>)null!));
         }
 
         [Fact]
@@ -346,8 +346,8 @@ namespace ExcelMapper.Tests
         {
             OneToOneMap<string> propertyMap = Map(t => t.Value);
 
-            Assert.Throws<ArgumentNullException>("converter", () => propertyMap.WithConverter((ConvertUsingSimpleMapperDelegate<string>)null));
-            Assert.Throws<ArgumentNullException>("converter", () => propertyMap.WithConverter((ConvertUsingMapperDelegate)null));
+            Assert.Throws<ArgumentNullException>("converter", () => propertyMap.WithConverter((ConvertUsingSimpleMapperDelegate<string>)null!));
+            Assert.Throws<ArgumentNullException>("converter", () => propertyMap.WithConverter((ConvertUsingMapperDelegate)null!));
         }
 
         [Fact]
@@ -407,7 +407,7 @@ namespace ExcelMapper.Tests
         {
             OneToOneMap<string> propertyMap = Map(t => t.Value);
 
-            Assert.Throws<ArgumentNullException>("fallbackItem", () => propertyMap.WithEmptyFallbackItem(null));
+            Assert.Throws<ArgumentNullException>("fallbackItem", () => propertyMap.WithEmptyFallbackItem(null!));
         }
 
         [Fact]
@@ -443,7 +443,7 @@ namespace ExcelMapper.Tests
         public void WithInvalidFallbackItem_NullFallbackItem_ThrowsArgumentNullException()
         {
             OneToOneMap<string> propertyMap = Map(t => t.Value);
-            Assert.Throws<ArgumentNullException>("fallbackItem", () => propertyMap.WithInvalidFallbackItem(null));
+            Assert.Throws<ArgumentNullException>("fallbackItem", () => propertyMap.WithInvalidFallbackItem(null!));
         }
     }
 }

@@ -28,11 +28,11 @@ namespace ExcelMapper.Tests
         public class EmptyValues
         {
             public int IntValue { get; set; }
-            public string StringValue { get; set; }
+            public string StringValue { get; set; } = default!;
             public bool BoolValue { get; set; }
             public EmptyValuesEnum EnumValue { get; set; }
             public DateTime DateValue { get; set; }
-            public int[] ArrayValue { get; set; }
+            public int[] ArrayValue { get; set; } = default!;
         }
 
         public enum EmptyValuesEnum

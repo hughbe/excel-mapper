@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using ExcelDataReader;
 
@@ -64,7 +64,7 @@ namespace ExcelMapper
         /// <returns>A lazily evaluated list of each sheet in the document.</returns>
         public IEnumerable<ExcelSheet> ReadSheets()
         {
-            while (TryReadSheet(out ExcelSheet sheet))
+            while (TryReadSheet(out ExcelSheet? sheet))
             {
                 yield return sheet;
             }
@@ -79,7 +79,7 @@ namespace ExcelMapper
         /// <returns>The next sheet in the document.</returns>
         public ExcelSheet ReadSheet()
         {
-            if (!TryReadSheet(out ExcelSheet sheet))
+            if (!TryReadSheet(out ExcelSheet? sheet))
             {
                 throw new ExcelMappingException("No more sheets.");
             }
@@ -100,7 +100,7 @@ namespace ExcelMapper
                 throw new ArgumentNullException(nameof(sheetName));
             }
 
-            if (!TryReadSheet(sheetName, out ExcelSheet sheet))
+            if (!TryReadSheet(sheetName, out ExcelSheet? sheet))
             {
                 throw new ExcelMappingException($"The sheet \"{sheetName}\" does not exist.");
             }
@@ -112,11 +112,11 @@ namespace ExcelMapper
         /// Finds and reads a sheet at the given zero-based index in the document.
         /// The method throws if the index is invalid.
         /// </summary>
-        /// <param name="name">The index of the sheet to read.</param>
+        /// <param name="sheetIndex">The index of the sheet to read.</param>
         /// <returns>The sheet in the document at the given zero-based index.</returns>
         public ExcelSheet ReadSheet(int sheetIndex)
         {
-            if (!TryReadSheet(sheetIndex, out ExcelSheet sheet))
+            if (!TryReadSheet(sheetIndex, out ExcelSheet? sheet))
             {
                 throw new ArgumentOutOfRangeException(nameof(sheetIndex), sheetIndex, $"The sheet index {SheetIndex} must be between 0 and {NumberOfSheets}.");
             }
@@ -129,7 +129,7 @@ namespace ExcelMapper
         /// </summary>
         /// <param name="sheet">The next sheet in the document.</param>
         /// <returns>False if there are no more sheets in the document, else true.</returns>
-        public bool TryReadSheet(out ExcelSheet sheet)
+        public bool TryReadSheet([NotNullWhen(true)] out ExcelSheet? sheet)
         {
             sheet = null;
 
@@ -152,12 +152,12 @@ namespace ExcelMapper
         /// <param name="sheetName">The name of the sheet to read.</param>
         /// <param name="sheet">The sheet in the document with the given name.</param>
         /// <returns>True if the sheet was found, else false.</returns>
-        public bool TryReadSheet(string sheetName, out ExcelSheet sheet)
+        public bool TryReadSheet(string sheetName, [NotNullWhen(true)] out ExcelSheet? sheet)
         {
             sheet = null;
             ResetReader();
 
-            while (TryReadSheet(out ExcelSheet currentSheet))
+            while (TryReadSheet(out ExcelSheet? currentSheet))
             {
                 if (currentSheet.Name == sheetName)
                 {
@@ -177,7 +177,7 @@ namespace ExcelMapper
         /// <param name="sheetIndex">The zero-based index of the sheet to read.</param>
         /// <param name="sheet">The sheet in the document at the given zero-based index.</param>
         /// <returns>True if the sheet was found, else false.</returns>
-        public bool TryReadSheet(int sheetIndex, out ExcelSheet sheet)
+        public bool TryReadSheet(int sheetIndex, [NotNullWhen(true)] out ExcelSheet? sheet)
         {
             sheet = null;
 

@@ -32,7 +32,7 @@ namespace ExcelMapper.Tests
 
                 MultiMapRow row2 = sheet.ReadRow<MultiMapRow>();
                 Assert.Equal(new int[] { 1, -1, 3 }, row2.MultiMapName);
-                Assert.Equal(new string[] { null, null }, row2.MultiMapIndex);
+                Assert.Equal(new string?[] { null, null }, row2.MultiMapIndex);
                 Assert.Equal(new int[] { 0, 0 }, row2.IEnumerableInt);
                 Assert.Equal(new bool[] { false, true }, row2.ICollectionBool);
                 Assert.Equal(new string[] { "c", "d" }, row2.IListString);
@@ -45,7 +45,7 @@ namespace ExcelMapper.Tests
 
                 MultiMapRow row3 = sheet.ReadRow<MultiMapRow>();
                 Assert.Equal(new int[] { -1, -1, -1 }, row3.MultiMapName);
-                Assert.Equal(new string[] { null, "d" }, row3.MultiMapIndex);
+                Assert.Equal(new string?[] { null, "d" }, row3.MultiMapIndex);
                 Assert.Equal(new int[] { 5, 6 }, row3.IEnumerableInt);
                 Assert.Equal(new bool[] { false, false }, row3.ICollectionBool);
                 Assert.Equal(new string[] { "e", "f" }, row3.IListString);
@@ -58,7 +58,7 @@ namespace ExcelMapper.Tests
 
                 MultiMapRow row4 = sheet.ReadRow<MultiMapRow>();
                 Assert.Equal(new int[] { -2, -2, 3 }, row4.MultiMapName);
-                Assert.Equal(new string[] { "d", null }, row4.MultiMapIndex);
+                Assert.Equal(new string?[] { "d", null }, row4.MultiMapIndex);
                 Assert.Equal(new int[] { 7, 8 }, row4.IEnumerableInt);
                 Assert.Equal(new bool[] { false, true }, row4.ICollectionBool);
                 Assert.Equal(new string[] { "g", "h" }, row4.IListString);
@@ -73,19 +73,17 @@ namespace ExcelMapper.Tests
 
         private class MultiMapRow
         {
-            public int[] MultiMapName { get; set; }
-            public CustomList MultiMapIndex { get; set; }
-            public IEnumerable<int> IEnumerableInt { get; set; }
-            public ICollection<bool> ICollectionBool { get; set; }
-            public IList<string> IListString { get; set; }
-            public List<string> ListString { get; set; }
-#pragma warning disable 0649
-            public SortedSet<string> _concreteICollection;
-#pragma warning restore 0649
-            public Collection<string> CollectionString { get; set; }
-            public ObservableCollection<string> ObservableCollectionString { get; set; }
-            public CustomObservableCollection CustomObservableCollectionString { get; set; }
-            public CustomEnumObservableCollection CustomObservableCollectionEnum { get; set; }
+            public int[] MultiMapName { get; set; } = default!;
+            public CustomList MultiMapIndex { get; set; } = default!;
+            public IEnumerable<int> IEnumerableInt { get; set; } = default!;
+            public ICollection<bool> ICollectionBool { get; set; } = default!;
+            public IList<string> IListString { get; set; } = default!;
+            public List<string> ListString { get; set; } = default!;
+            public SortedSet<string> _concreteICollection = default!;
+            public Collection<string> CollectionString { get; set; } = default!;
+            public ObservableCollection<string> ObservableCollectionString { get; set; } = default!;
+            public CustomObservableCollection CustomObservableCollectionString { get; set; } = default!;
+            public CustomEnumObservableCollection CustomObservableCollectionEnum { get; set; } = default!;
         }
 
         private class MultiMapRowMap : ExcelClassMap<MultiMapRow>
@@ -179,15 +177,15 @@ namespace ExcelMapper.Tests
             IEnumerator IEnumerable.GetEnumerator() => Inner.GetEnumerator();
         }
 
-        public class CustomObservableCollection : ObservableCollection<string>
+        private class CustomObservableCollection : ObservableCollection<string>
         {
         }
 
-        public class CustomEnumObservableCollection : ObservableCollection<ObservableCollectionEnum>
+        private class CustomEnumObservableCollection : ObservableCollection<ObservableCollectionEnum>
         {
         }
 
-        public enum ObservableCollectionEnum
+        private enum ObservableCollectionEnum
         {
             a,
             b,

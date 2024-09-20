@@ -21,7 +21,7 @@ namespace ExcelMapper.Tests
 
         private class ConvertUsingValue
         {
-            public string StringValue { get; set; }
+            public string StringValue { get; set; } = default!;
         }
 
         private class ConvertUsingValueMap : ExcelClassMap<ConvertUsingValue>

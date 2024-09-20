@@ -12,7 +12,9 @@ namespace ExcelMapper.Mappers
         {
             try
             {
-                var uri = new Uri(readResult.StringValue, UriKind.Absolute);
+                // Discarding readResult.StringValue nullability warning.
+                // If null - CellValueMapperResult.Invalid with ArgumentNullException will be returned
+                var uri = new Uri(readResult.StringValue!, UriKind.Absolute);
                 return CellValueMapperResult.Success(uri);
             }
             catch (Exception exception)

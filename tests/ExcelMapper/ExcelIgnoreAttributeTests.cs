@@ -7,7 +7,8 @@ namespace ExcelMapper.Tests
         [Fact]
         public void Ctor_Default()
         {
-            new ExcelIgnoreAttribute();
+            var exception = Record.Exception(() => new ExcelIgnoreAttribute());
+            Assert.Null(exception);
         }
     }
 }

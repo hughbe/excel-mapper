@@ -23,11 +23,15 @@ namespace ExcelMapper.Mappers
         /// Constructs a mapper that tries to map the value of a cell to an enum of a given type.
         /// </summary>
         /// <param name="enumType">The type of the enum to convert the value of a cell to.</param>
-        /// <param name="ignoreCase">A flag indicating whether enum parsing is case insensitive.</param>
         public EnumMapper(Type enumType) : this(enumType, ignoreCase: false)
         {
         }
 
+        /// <summary>
+        /// Constructs a mapper that tries to map the value of a cell to an enum of a given type.
+        /// </summary>
+        /// <param name="enumType">The type of the enum to convert the value of a cell to.</param>
+        /// <param name="ignoreCase">A flag indicating whether enum parsing is case insensitive.</param>
         public EnumMapper(Type enumType, bool ignoreCase)
         {
             if (enumType == null)
@@ -48,7 +52,9 @@ namespace ExcelMapper.Mappers
         {
             try
             {
-                object result = Enum.Parse(EnumType, readResult.StringValue, IgnoreCase);
+                // Discarding readResult.StringValue nullability warning.
+                // If null - CellValueMapperResult.Invalid with ArgumentNullException will be returned
+                object result = Enum.Parse(EnumType, readResult.StringValue!, IgnoreCase);
                 return CellValueMapperResult.Success(result);
             }
             catch (Exception exception)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
@@ -24,7 +25,7 @@ namespace ExcelMapper
         /// <param name="valuePipeline">The map that maps the value of a single cell to an object of the element type of the property or field.</param>
         public ManyToOneDictionaryMap(IMultipleCellValuesReader cellValuesReader, IValuePipeline<T> valuePipeline, CreateDictionaryFactory<T> createDictionaryFactory)
         {
-            CellValuesReader = cellValuesReader ?? throw new ArgumentNullException(nameof(cellValuesReader));
+            _cellValuesReader = cellValuesReader ?? throw new ArgumentNullException(nameof(cellValuesReader));
             ValuePipeline = valuePipeline ?? throw new ArgumentNullException(nameof(valuePipeline));
             CreateDictionaryFactory = createDictionaryFactory ?? throw new ArgumentNullException(nameof(createDictionaryFactory));
         }
@@ -39,7 +40,7 @@ namespace ExcelMapper
         /// Gets the reader that reads one or more values from one or more cells used to map each
         /// element of the property or field.
         /// </summary>
-        public IMultipleCellValuesReader _cellValuesReader;
+        private IMultipleCellValuesReader _cellValuesReader;
 
         public IMultipleCellValuesReader CellValuesReader
         {
@@ -49,21 +50,26 @@ namespace ExcelMapper
 
         public CreateDictionaryFactory<T> CreateDictionaryFactory { get; }
 
-        public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object value)
+        public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
         {
-            if (!CellValuesReader.TryGetValues(sheet, rowIndex, reader, out IEnumerable<ReadCellValueResult> valueResults))
+            if (!CellValuesReader.TryGetValues(sheet, rowIndex, reader, out IEnumerable<ReadCellValueResult>? valueResults))
             {
-                throw new ExcelMappingException($"Could not read value for \"{member.Name}\"", sheet, rowIndex, -1);
+                throw new ExcelMappingException($"Could not read value for \"{member?.Name}\"", sheet, rowIndex, -1);
             }
 
+            var valueResultsList = valueResults.ToList();
+
             var values = new List<T>();
-            foreach (ReadCellValueResult valueResult in valueResults)
+            foreach (ReadCellValueResult valueResult in valueResultsList)
             {
-                T keyValue = (T)ExcelMapper.ValuePipeline.GetPropertyValue(ValuePipeline, sheet, rowIndex, reader, valueResult, member);
+                // Discarding nullability check because it may be indended to be this way (T may be nullable)
+                T keyValue = (T)ExcelMapper.ValuePipeline.GetPropertyValue(ValuePipeline, sheet, rowIndex, valueResult, member)!;
                 values.Add(keyValue);
             }
 
-            IEnumerable<string> keys = valueResults.Select(r => sheet.Heading.GetColumnName(r.ColumnIndex));
+            var heading = sheet.Heading ?? sheet.ReadHeading();
+
+            IEnumerable<string> keys = valueResultsList.Select(r => heading.GetColumnName(r.ColumnIndex));
             IEnumerable<KeyValuePair<string, T>> elements = keys.Zip(values, (key, keyValue) => new KeyValuePair<string, T>(key, keyValue));
             value = CreateDictionaryFactory(elements);
             return true;
@@ -89,7 +95,12 @@ namespace ExcelMapper
         /// <returns>The property map that invoked this method.</returns>
         public ManyToOneDictionaryMap<T> WithColumnNames(IEnumerable<string> columnNames)
         {
-            return WithColumnNames(columnNames?.ToArray());
+            if (columnNames == null)
+            {
+                throw new ArgumentNullException(nameof(columnNames));
+            }
+
+            return WithColumnNames(columnNames.ToArray());
         }
 
         /// <summary>

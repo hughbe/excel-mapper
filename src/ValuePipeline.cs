@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using ExcelDataReader;
 using ExcelMapper.Abstractions;
 
 namespace ExcelMapper
@@ -68,18 +67,23 @@ namespace ExcelMapper
         /// cell is empty. For example, you can provide a fixed value to return if the value of the cell
         /// is empty.
         /// </summary>
-        public IFallbackItem EmptyFallback { get; set; }
+        public IFallbackItem? EmptyFallback { get; set; }
 
         /// <summary>
         /// Gets or sets an object that handles mapping a cell value to a property or field if all items
         /// in the mapper pipeline failed to map the value to the property or field. For example, you can
         /// provide a fixed value to return if the value of the cell is invalid.
         /// </summary>
-        public IFallbackItem InvalidFallback { get; set; }
+        public IFallbackItem? InvalidFallback { get; set; }
 
         private static Exception s_couldNotMapException = new ExcelMappingException("Could not map successfully.");
 
-        internal static object GetPropertyValue(IValuePipeline pipeline, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, ReadCellValueResult readResult, MemberInfo member)
+        internal static object? GetPropertyValue(
+            IValuePipeline pipeline,
+            ExcelSheet sheet,
+            int rowIndex,
+            ReadCellValueResult readResult,
+            MemberInfo? member)
         {
             foreach (ICellValueTransformer transformer in pipeline.CellValueTransformers)
             {

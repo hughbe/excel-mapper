@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelDataReader;
 
@@ -15,12 +16,12 @@ namespace ExcelMapper
 
         public ExcelPropertyMapCollection Properties { get; } = new ExcelPropertyMapCollection();
 
-        public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object result)
+        public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
         {
             object instance = Activator.CreateInstance(Type);
             foreach (ExcelPropertyMap property in Properties)
             {
-                if (property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out object value))
+                if (property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out object? value))
                 {
                     property.SetValueFactory(instance, value);
                 }

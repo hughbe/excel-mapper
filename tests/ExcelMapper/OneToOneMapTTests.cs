@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
-using ExcelDataReader;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
@@ -31,7 +29,7 @@ namespace ExcelMapper.Tests
         [Fact]
         public void Ctor_NullReader_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("reader", () => new SubOneToOneMap<int>(null));
+            Assert.Throws<ArgumentNullException>("reader", () => new SubOneToOneMap<int>(null!));
         }
 
         public static IEnumerable<object[]> CellReader_Set_TestData()
@@ -61,7 +59,7 @@ namespace ExcelMapper.Tests
             var reader = new ColumnNameValueReader("Column");
             var map = new SubOneToOneMap<int>(reader);
 
-            Assert.Throws<ArgumentNullException>("value", () => map.CellReader = null);
+            Assert.Throws<ArgumentNullException>("value", () => map.CellReader = null!);
         }
 
         [Fact]
@@ -132,7 +130,7 @@ namespace ExcelMapper.Tests
             var reader = new ColumnNameValueReader("Column");
             var map = new SubOneToOneMap<int>(reader);
 
-            Assert.Throws<ArgumentNullException>("mapper", () => map.AddCellValueMapper(null));
+            Assert.Throws<ArgumentNullException>("mapper", () => map.AddCellValueMapper(null!));
         }
 
         [Fact]
@@ -164,12 +162,7 @@ namespace ExcelMapper.Tests
         {
             var reader = new ColumnNameValueReader("Column");
             var map = new SubOneToOneMap<int>(reader);
-            Assert.Throws<ArgumentNullException>("transformer", () => map.AddCellValueTransformer(null));
-        }
-
-        private class TestClass
-        {
-            public string Value { get; set; }
+            Assert.Throws<ArgumentNullException>("transformer", () => map.AddCellValueTransformer(null!));
         }
 
         private class SubOneToOneMap<T> : OneToOneMap<T>

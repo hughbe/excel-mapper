@@ -8,7 +8,7 @@ using ExcelMapper.Transformers;
 
 namespace ExcelMapper
 {
-    public delegate T ConvertUsingSimpleMapperDelegate<out T>(string stringValue);
+    public delegate T ConvertUsingSimpleMapperDelegate<out T>(string? stringValue);
 
     /// <summary>
     /// Extensions on IValuePipeline to enable fluent "With" method chaining.
@@ -69,7 +69,7 @@ namespace ExcelMapper
         /// <param name="mappingDictionary">A dictionary that maps a fixed string value to a fixed value of T.</param>
         /// <param name="comparer">The comparer uses to map fixed string values. This allows for case-insensitive mappings, for example.</param>
         /// <returns>The property map on which this method was invoked.</returns>
-        public static TPropertyMap WithMapping<TPropertyMap, T>(this TPropertyMap propertyMap, IDictionary<string, T> mappingDictionary, IEqualityComparer<string> comparer = null) where TPropertyMap : IValuePipeline<T>
+        public static TPropertyMap WithMapping<TPropertyMap, T>(this TPropertyMap propertyMap, IDictionary<string, T> mappingDictionary, IEqualityComparer<string>? comparer = null) where TPropertyMap : IValuePipeline<T>
         {
             var item = new DictionaryMapper<T>(mappingDictionary, comparer);
             propertyMap.AddCellValueMapper(item);
@@ -98,7 +98,12 @@ namespace ExcelMapper
         /// <returns>The property map on which this method was invoked.</returns>
         public static IValuePipeline<DateTime> WithDateFormats(this IValuePipeline<DateTime> propertyMap, IEnumerable<string> formats)
         {
-            return propertyMap.WithDateFormats(formats?.ToArray());
+            if (formats == null)
+            {
+                throw new ArgumentNullException(nameof(formats));
+            }
+            
+            return propertyMap.WithDateFormats(formats.ToArray());
         }
 
         /// <summary>
@@ -123,7 +128,12 @@ namespace ExcelMapper
         /// <returns>The property map on which this method was invoked.</returns>
         public static IValuePipeline<DateTime?> WithDateFormats(this IValuePipeline<DateTime?> propertyMap, IEnumerable<string> formats)
         {
-            return propertyMap.WithDateFormats(formats?.ToArray());
+            if (formats == null)
+            {
+                throw new ArgumentNullException(nameof(formats));
+            }
+            
+            return propertyMap.WithDateFormats(formats.ToArray());
         }
 
         private static void AddFormats(this IValuePipeline propertyMap, string[] formats)
@@ -138,7 +148,9 @@ namespace ExcelMapper
                 throw new ArgumentException("Formats cannot be empty.", nameof(formats));
             }
 
-            DateTimeMapper dateTimeItem = (DateTimeMapper)propertyMap.CellValueMappers.FirstOrDefault(item => item is DateTimeMapper);
+            var dateTimeItem = propertyMap.CellValueMappers
+                .OfType<DateTimeMapper>()
+                .FirstOrDefault();
             if (dateTimeItem == null)
             {
                 dateTimeItem = new DateTimeMapper();
@@ -158,7 +170,10 @@ namespace ExcelMapper
         /// <param name="propertyMap">The property map to use.</param>
         /// <param name="converter">A delegate that is invoked to map the string value of a cell to the value of a property or field.</param>
         /// <returns>The property map on which this method was invoked.</returns>
-        public static TPropertyMap WithConverter<TPropertyMap, T>(this TPropertyMap propertyMap, ConvertUsingSimpleMapperDelegate<T> converter) where TPropertyMap : IValuePipeline<T>
+        public static TPropertyMap WithConverter<TPropertyMap, T>(
+            this TPropertyMap propertyMap,
+            ConvertUsingSimpleMapperDelegate<T> converter)
+            where TPropertyMap : IValuePipeline<T>
         {
             if (converter == null)
             {
@@ -169,7 +184,7 @@ namespace ExcelMapper
             {
                 try
                 {
-                    object result = converter(readResult.StringValue);
+                    object? result = converter(readResult.StringValue);
                     return CellValueMapperResult.Success(result);
                 }
                 catch (Exception exception)
@@ -227,7 +242,7 @@ namespace ExcelMapper
         /// <param name="propertyMap">The property map to use.</param>
         /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell is empty.</param>
         /// <returns>The property map on which this method was invoked.</returns>
-        public static TPropertyMap WithEmptyFallback<TPropertyMap>(this TPropertyMap propertyMap, object fallbackValue) where TPropertyMap : IValuePipeline
+        public static TPropertyMap WithEmptyFallback<TPropertyMap>(this TPropertyMap propertyMap, object? fallbackValue) where TPropertyMap : IValuePipeline
         {
             return propertyMap
                 .WithEmptyFallbackItem(new FixedValueFallback(fallbackValue));
@@ -277,7 +292,7 @@ namespace ExcelMapper
         /// <param name="propertyMap">The property map to use.</param>
         /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell cannot be mapped.</param>
         /// <returns>The property map on which this method was invoked.</returns>
-        public static TPropertyMap WithInvalidFallback<TPropertyMap>(this TPropertyMap propertyMap, object fallbackValue) where TPropertyMap : IValuePipeline
+        public static TPropertyMap WithInvalidFallback<TPropertyMap>(this TPropertyMap propertyMap, object? fallbackValue) where TPropertyMap : IValuePipeline
         {
             return propertyMap
                 .WithInvalidFallbackItem(new FixedValueFallback(fallbackValue));

@@ -12,7 +12,9 @@ namespace ExcelMapper.Mappers
         {
             try
             {
-                Guid result = Guid.Parse(readResult.StringValue);
+                // Discarding readResult.StringValue nullability warning.
+                // If null - CellValueMapperResult.Invalid with ArgumentNullException will be returned
+                Guid result = Guid.Parse(readResult.StringValue!);
                 return CellValueMapperResult.Success(result);
             }
             catch (Exception exception)

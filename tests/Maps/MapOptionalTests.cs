@@ -179,7 +179,7 @@ namespace ExcelMapper.Tests
             [ExcelIgnore]
             public string StringValue { get; set; } = "CustomValue";
 
-            public string MappedValue { get; set; }
+            public string MappedValue { get; set; } = default!;
         }
 
         private class MissingColumnIgnoredPropertyClass
@@ -187,7 +187,7 @@ namespace ExcelMapper.Tests
             [ExcelIgnore]
             public int NoSuchColumn { get; set; } = 10;
 
-            public string MappedValue { get; set; }
+            public string MappedValue { get; set; } = default!;
         }
 
 #pragma warning disable CS0649
@@ -196,7 +196,7 @@ namespace ExcelMapper.Tests
             [ExcelIgnore]
             public string StringValue = "CustomValue";
 
-            public string MappedValue;
+            public string MappedValue = default!;
         }
 
         private class MissingColumnIgnoredFieldClass
@@ -204,7 +204,7 @@ namespace ExcelMapper.Tests
             [ExcelIgnore]
             public int NoSuchColumn = 10;
 
-            public string MappedValue;
+            public string MappedValue = default!;
         }
 #pragma warning restore CS0649
 
@@ -258,33 +258,33 @@ namespace ExcelMapper.Tests
 
         private class NotIgnoredRecursivePropertyClass
         {
-            public NotIgnoredRecursivePropertyClass StringValue { get; set; }
+            public NotIgnoredRecursivePropertyClass StringValue { get; set; } = default!;
 
-            public string MappedValue { get; set; }
+            public string MappedValue { get; set; } = default!;
         }
 
         private class IgnoredRecursivePropertyClass
         {
             [ExcelIgnore]
-            public IgnoredRecursivePropertyClass StringValue { get; set; }
+            public IgnoredRecursivePropertyClass StringValue { get; set; } = default!;
 
-            public string MappedValue { get; set; }
+            public string MappedValue { get; set; } = default!;
         }
 
 #pragma warning disable CS0649
         private class NotIgnoredRecursiveFieldClass
         {
-            public NotIgnoredRecursiveFieldClass StringValue;
+            public NotIgnoredRecursiveFieldClass StringValue = default!;
 
-            public string MappedValue;
+            public string MappedValue = default!;
         }
 
         private class IgnoredRecursiveFieldClass
         {
             [ExcelIgnore]
-            public IgnoredRecursiveFieldClass StringValue;
+            public IgnoredRecursiveFieldClass StringValue = default!;
 
-            public string MappedValue;
+            public string MappedValue = default!;
         }
 #pragma warning restore CS0649
     }

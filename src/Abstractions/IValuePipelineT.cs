@@ -9,7 +9,7 @@ namespace ExcelMapper.Abstractions
         void AddCellValueMapper(ICellValueMapper mapper);
         void RemoveCellValueMapper(int index);
         void AddCellValueTransformer(ICellValueTransformer transformer);
-        IFallbackItem EmptyFallback { get; set; }
-        IFallbackItem InvalidFallback { get; set; }
+        IFallbackItem? EmptyFallback { get; set; }
+        IFallbackItem? InvalidFallback { get; set; }
     }
 }

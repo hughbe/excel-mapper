@@ -33,7 +33,7 @@ namespace ExcelMapper.Readers
                 return false;
             }
 
-            string value = reader[index]?.ToString();
+            string? value = reader[index]?.ToString();
             result = new ReadCellValueResult(index, value);
             return true;
         }

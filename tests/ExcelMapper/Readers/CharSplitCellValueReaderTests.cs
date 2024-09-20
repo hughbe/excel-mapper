@@ -1,5 +1,4 @@
 ﻿using System;
-using ExcelDataReader;
 using Xunit;
 
 namespace ExcelMapper.Readers.Tests
@@ -30,7 +29,7 @@ namespace ExcelMapper.Readers.Tests
         public void Separators_SetNull_ThrowsArgumentNullException()
         {
             var reader = new CharSplitCellValueReader(new ColumnNameValueReader("ColumnName"));
-            Assert.Throws<ArgumentNullException>("value", () => reader.Separators = null);
+            Assert.Throws<ArgumentNullException>("value", () => reader.Separators = null!);
         }
 
         [Fact]

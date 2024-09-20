@@ -43,7 +43,7 @@ namespace ExcelMapper.Tests
 
         private class WithMappingValue
         {
-            public string StringValue { get; set; }
+            public string StringValue { get; set; } = default!;
             public MapUsingValueEnum EnumValue { get; set; }
         }
 

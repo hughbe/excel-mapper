@@ -8,13 +8,13 @@ namespace ExcelMapper.Abstractions
     /// </summary>
     public struct CellValueMapperResult
     {
-        public object Value { get; }
-        public Exception Exception { get; }
+        public object? Value { get; }
+        public Exception? Exception { get; }
         public HandleAction Action { get; }
 
         public bool Succeeded => Exception == null && Action != HandleAction.IgnoreResultAndContinueMapping;
 
-        internal CellValueMapperResult(object value, Exception exception, HandleAction action)
+        internal CellValueMapperResult(object? value, Exception? exception, HandleAction action)
         {
             Value = value;
             Exception = exception;
@@ -25,13 +25,13 @@ namespace ExcelMapper.Abstractions
         /// The value could be mapped. This mapped value will be used to set the value of the property or
         /// field.
         /// </summary>
-        public static CellValueMapperResult Success(object value) => new CellValueMapperResult(value, null, HandleAction.UseResultAndStopMapping);
+        public static CellValueMapperResult Success(object? value) => new CellValueMapperResult(value, null, HandleAction.UseResultAndStopMapping);
 
         /// <summary>
         /// The value could be mapped, but prefer the result of mapping items further on in
         /// the mapping pipeline. This can be used for specifiying value mappers that are lower priority.
         /// </summary>
-        public static CellValueMapperResult SuccessIfNoOtherSuccess(object result) => new CellValueMapperResult(result, null, HandleAction.UseResultAndContinueMapping);
+        public static CellValueMapperResult SuccessIfNoOtherSuccess(object? result) => new CellValueMapperResult(result, null, HandleAction.UseResultAndContinueMapping);
 
         /// <summary>
         /// The value could not be mapped, but is not invalid. This can be used

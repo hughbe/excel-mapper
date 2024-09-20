@@ -50,13 +50,13 @@ namespace ExcelMapper.Tests
 
         private class MyValuesWithOneColumn
         {
-            public string MyColumn { get; set; }
+            public string MyColumn { get; set; } = default!;
         }
 
         private class MyValues
         {
-            public string MyColumn { get; set; }
-            public string AnotherColumn { get; set; }
+            public string MyColumn { get; set; } = default!;
+            public string AnotherColumn { get; set; } = default!;
         }
 
         private class MyValuesMap : ExcelClassMap<MyValues>

@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using ExcelMapper.Abstractions;
-using ExcelMapper.Fallbacks;
-using ExcelMapper.Mappers;
 using ExcelMapper.Readers;
-using ExcelMapper.Transformers;
 using Xunit;
 
 namespace ExcelMapper.Tests
@@ -47,7 +41,7 @@ namespace ExcelMapper.Tests
         public void WithColumnName_NullColumnName_ThrowsArgumentNullException()
         {
             OneToOneMap<string> propertyMap = Map(t => t.Value);
-            Assert.Throws<ArgumentNullException>("columnName", () => propertyMap.WithColumnName(null));
+            Assert.Throws<ArgumentNullException>("columnName", () => propertyMap.WithColumnName(null!));
         }
 
         [Fact]

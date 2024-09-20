@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
@@ -12,9 +13,12 @@ namespace ExcelMapper.Utilities
             return type.GetTypeInfo().ImplementedInterfaces.Any(t => t == interfaceType);
         }
 
-        public static bool ImplementsGenericInterface(this Type type, Type genericInterfaceType, out Type elementType)
+        public static bool ImplementsGenericInterface(
+            this Type type,
+            Type genericInterfaceType,
+            [NotNullWhen(true)] out Type? elementType)
         {
-            bool CheckInterface(Type interfaceType, out Type elementTypeResult)
+            bool CheckInterface(Type interfaceType, [NotNullWhen(true)] out Type? elementTypeResult)
             {
                 if (interfaceType.GetTypeInfo().IsGenericType && interfaceType.GetGenericTypeDefinition() == genericInterfaceType)
                 {
@@ -45,7 +49,7 @@ namespace ExcelMapper.Utilities
             return false;
         }
 
-        public static object DefaultValue(this Type type)
+        public static object? DefaultValue(this Type type)
         {
             if (type.GetTypeInfo().IsValueType)
             {
@@ -81,12 +85,12 @@ namespace ExcelMapper.Utilities
         }
 
         /// <summary>
-        /// Gets the element type or the IEnumerable<T> type of the given type.
+        /// Gets the element type or the IEnumerable&lt;T&gt; type of the given type.
         /// </summary>
         /// <param name="type">The type to get the element type of.</param>
-        /// <param name="elementType">The element type or IEnumerable<T> of the given type.</param>
-        /// <returns>True if the type has an element type, else false.
-        public static bool GetElementTypeOrEnumerableType(this Type type, out Type elementType)
+        /// <param name="elementType">The element type or IEnumerable&lt;T&gt; of the given type.</param>
+        /// <returns>True if the type has an element type, else false.</returns>
+        public static bool GetElementTypeOrEnumerableType(this Type type, [NotNullWhen(true)] out Type? elementType)
         {
             if (type.IsArray)
             {

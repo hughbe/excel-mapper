@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
@@ -36,10 +37,10 @@ namespace ExcelMapper.Readers
         /// <param name="cellReader">The ICellValueReader that reads the string value of the cell before it is split.</param>
         public SplitCellValueReader(ISingleCellValueReader cellReader)
         {
-            CellReader = cellReader ?? throw new ArgumentNullException(nameof(cellReader));
+            _cellReader = cellReader ?? throw new ArgumentNullException(nameof(cellReader));
         }
 
-        public bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out IEnumerable<ReadCellValueResult> result)
+        public bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, [NotNullWhen(true)] out IEnumerable<ReadCellValueResult>? result)
         {
             if (!CellReader.TryGetValue(sheet, rowIndex, reader, out ReadCellValueResult readResult))
             {

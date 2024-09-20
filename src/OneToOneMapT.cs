@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
@@ -10,7 +11,7 @@ namespace ExcelMapper
     {
         public OneToOneMap(ISingleCellValueReader reader)
         {
-            CellReader = reader ?? throw new ArgumentNullException(nameof(reader));
+            _reader = reader ?? throw new ArgumentNullException(nameof(reader));
         }
 
         private ISingleCellValueReader _reader;
@@ -25,7 +26,7 @@ namespace ExcelMapper
 
         public ValuePipeline<T> Pipeline { get; } = new ValuePipeline<T>();
 
-        public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object result)
+        public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
         {
             if (!CellReader.TryGetValue(sheet, rowIndex, reader, out ReadCellValueResult readResult))
             {
@@ -35,24 +36,24 @@ namespace ExcelMapper
                     return false;
                 }
 
-                throw new ExcelMappingException($"Could not read value for {member.Name}", sheet, rowIndex, -1);
+                throw new ExcelMappingException($"Could not read value for {member?.Name}", sheet, rowIndex, -1);
             }
 
-            result = (T)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, reader, readResult, member);
-            return true;
+            result = (T?)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, readResult, member);
+            return result != null;
         }
 
         public IEnumerable<ICellValueTransformer> CellValueTransformers => Pipeline.CellValueTransformers;
 
         public IEnumerable<ICellValueMapper> CellValueMappers => Pipeline.CellValueMappers;
 
-        public IFallbackItem EmptyFallback
+        public IFallbackItem? EmptyFallback
         {
             get => Pipeline.EmptyFallback;
             set => Pipeline.EmptyFallback = value;
         }
 
-        public IFallbackItem InvalidFallback
+        public IFallbackItem? InvalidFallback
         {
             get => Pipeline.InvalidFallback;
             set => Pipeline.InvalidFallback = value;

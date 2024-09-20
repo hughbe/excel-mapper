@@ -21,7 +21,7 @@ namespace ExcelMapper
         public ExcelColumnNameAttribute(string name)
         {
             CheckNameNullOrEmpty(name , nameof(name));
-            Name = name;
+            _name = name;
         }
 
         /// <summary>

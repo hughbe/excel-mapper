@@ -19,7 +19,7 @@ namespace ExcelMapper.Mappers.Tests
         [Fact]
         public void Ctor_NullType_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("type", () => new ChangeTypeMapper(null));
+            Assert.Throws<ArgumentNullException>("type", () => new ChangeTypeMapper(null!));
         }
 
         [Fact]
