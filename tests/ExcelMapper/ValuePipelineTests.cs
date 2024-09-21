@@ -1,9 +1,7 @@
 using System;
-using System.Reflection;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
-using ExcelMapper.Readers;
 using ExcelMapper.Transformers;
 using Xunit;
 
@@ -61,7 +59,7 @@ namespace ExcelMapper.Tests
         public void AddCellValueMapper_NullItem_ThrowsArgumentNullException()
         {
             var pipeline = new ValuePipeline();
-            Assert.Throws<ArgumentNullException>("mapper", () => pipeline.AddCellValueMapper(null));
+            Assert.Throws<ArgumentNullException>("mapper", () => pipeline.AddCellValueMapper(null!));
         }
 
         [Fact]
@@ -90,7 +88,7 @@ namespace ExcelMapper.Tests
         public void AddCellValueTransformer_NullTransformer_ThrowsArgumentNullException()
         {
             var pipeline = new ValuePipeline();
-            Assert.Throws<ArgumentNullException>("transformer", () => pipeline.AddCellValueTransformer(null));
+            Assert.Throws<ArgumentNullException>("transformer", () => pipeline.AddCellValueTransformer(null!));
         }
     }
 }

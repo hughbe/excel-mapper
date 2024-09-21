@@ -19,7 +19,7 @@ namespace ExcelMapper
 
             for (int columnIndex = 0; columnIndex < reader.FieldCount; columnIndex++)
             {
-                string columnName = reader.GetValue(columnIndex)?.ToString();
+                string? columnName = reader.GetValue(columnIndex)?.ToString();
                 if (columnName == null)
                 {
                     columnNames[columnIndex] = string.Empty;
@@ -101,7 +101,7 @@ namespace ExcelMapper
         /// <returns>Whether or not the column exists.</returns>
         public bool TryGetFirstColumnMatchingIndex(Func<string, bool> predicate, out int index)
         {
-            string key = NameMapping.Keys.FirstOrDefault(predicate);
+            string? key = NameMapping.Keys.FirstOrDefault(predicate);
             if (key == null)
             {
                 index = -1;

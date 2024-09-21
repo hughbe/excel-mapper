@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 
@@ -26,20 +27,20 @@ namespace ExcelMapper.Tests
 
         public class TestClass
         {
-            public string Value { get; set; }
-            public object ObjectValue { get; set; }
-            public NestedClass NestedValue { get; set; }
+            public string Value { get; set; } = default!;
+            public object ObjectValue { get; set; } = default!;
+            public NestedClass NestedValue { get; set; } = default!;
             public DateTime DateValue { get; set; }
             public DateTime? NullableDateValue { get; set; }
-            public IListInterface UnknownInterfaceValue { get; set; }
-            public ConcreteIEnumerable ConcreteIEnumerable { get; set; }
-            public ConcreteIDictionary ConcreteIDictionary { get; set; }
-            public IList<IList<string>> CantMapElementType { get; set; }
-            public IDictionary<string, IList<string>> CantMapDictionaryValueType { get; set; }
-            public string[,] MultiDimensionalArray { get; set; }
+            public IListInterface UnknownInterfaceValue { get; set; } = default!;
+            public ConcreteIEnumerable ConcreteIEnumerable { get; set; } = default!;
+            public ConcreteIDictionary ConcreteIDictionary { get; set; } = default!;
+            public IList<IList<string>> CantMapElementType { get; set; } = default!;
+            public IDictionary<string, IList<string>> CantMapDictionaryValueType { get; set; } = default!;
+            public string[,] MultiDimensionalArray { get; set; } = default!;
 
-            public InvalidIListMemberType InvalidIListMemberType { get; set; }
-            public InvalidIDictionaryMemberType InvalidIDictionaryMemberType { get; set; }
+            public InvalidIListMemberType InvalidIListMemberType { get; set; } = default!;
+            public InvalidIDictionaryMemberType InvalidIDictionaryMemberType { get; set; } = default!;
 
             public event EventHandler Event { add { } remove { } }
 
@@ -51,12 +52,12 @@ namespace ExcelMapper.Tests
 
         public class InvalidIListMemberType
         {
-            public IListInterface ConcreteIEnumerable { get; set; }
+            public IListInterface ConcreteIEnumerable { get; set; } = default!;
         }
 
         public class InvalidIDictionaryMemberType
         {
-            public IDictionaryInterface ConcreteIEnumerable { get; set; }
+            public IDictionaryInterface ConcreteIEnumerable { get; set; } = default!;
         }
 
         public interface IEmptyInterface { }
@@ -105,7 +106,7 @@ namespace ExcelMapper.Tests
 
             public bool Remove(KeyValuePair<string, string> item) => throw new NotImplementedException();
 
-            public bool TryGetValue(string key, out string value) => throw new NotImplementedException();
+            public bool TryGetValue(string key, [NotNullWhen(true)] out string? value) => throw new NotImplementedException();
 
             IEnumerator IEnumerable.GetEnumerator() => throw new NotImplementedException();
         }

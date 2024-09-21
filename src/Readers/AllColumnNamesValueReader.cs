@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
@@ -10,7 +11,7 @@ namespace ExcelMapper.Readers
     /// </summary>
     public sealed class AllColumnNamesValueReader : IMultipleCellValuesReader
     {
-        public bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out IEnumerable<ReadCellValueResult> result)
+        public bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, [NotNullWhen(true)] out IEnumerable<ReadCellValueResult>? result)
         {
             if (sheet.Heading == null)
             {

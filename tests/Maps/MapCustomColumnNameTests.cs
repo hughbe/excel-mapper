@@ -83,7 +83,7 @@ namespace ExcelMapper.Tests
         private class CustomNamePropertyClass
         {
             [ExcelColumnName("StringValue")]
-            public string CustomName { get; set; }
+            public string CustomName { get; set; } = default!;
         }
 
         private class DefaultCustomNamePropertyClassMap : ExcelClassMap<CustomNamePropertyClass>
@@ -102,14 +102,12 @@ namespace ExcelMapper.Tests
                     .WithColumnName("Int Value");
             }
         }
-
-#pragma warning disable CS0649
+        
         private class CustomNameFieldClass
         {
             [ExcelColumnName("StringValue")]
-            public string CustomName { get; set; }
+            public string CustomName { get; set; } = default!;
         }
-#pragma warning restore CS0649
 
         private class DefaultCustomNameFieldClassMap : ExcelClassMap<CustomNameFieldClass>
         {
@@ -352,13 +350,12 @@ namespace ExcelMapper.Tests
                 Map(p => p.CustomName, ignoreCase: true);
             }
         }
-#pragma warning disable CS0649
+        
         private class CustomNameEnumFieldClass
         {
             [ExcelColumnName("StringValue")]
             public CustomEnum CustomName { get; set; }
         }
-#pragma warning restore CS0649
 
         private class DefaultCustomNameEnumFieldClassMap : ExcelClassMap<CustomNameEnumFieldClass>
         {
@@ -375,14 +372,12 @@ namespace ExcelMapper.Tests
                 Map(p => p.CustomName, ignoreCase: true);
             }
         }
-
-#pragma warning disable CS0649
+        
         private class CustomNameNullableEnumFieldClass
         {
             [ExcelColumnName("StringValue")]
             public CustomEnum? CustomName { get; set; }
         }
-#pragma warning restore CS0649
 
         private class DefaultCustomNameNullableEnumFieldClassMap : ExcelClassMap<CustomNameNullableEnumFieldClass>
         {
@@ -415,19 +410,19 @@ namespace ExcelMapper.Tests
             sheet.ReadHeading();
 
             CustomNameEnumerablePropertyClass row1 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Equal(new string[] { "1", "2", "3" }, row1.CustomValue);
+            Assert.Equal(new object[] { "1", "2", "3" }, row1.CustomValue);
 
             CustomNameEnumerablePropertyClass row2 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.CustomValue);
+            Assert.Equal(new object?[] { "1", null, "2" }, row2.CustomValue);
 
             CustomNameEnumerablePropertyClass row3 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Equal(new string[] { "1" }, row3.CustomValue);
+            Assert.Equal(new object[] { "1" }, row3.CustomValue);
 
             CustomNameEnumerablePropertyClass row4 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
             Assert.Empty(row4.CustomValue);
 
             CustomNameEnumerablePropertyClass row5 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Equal(new string[] { "Invalid" }, row5.CustomValue);
+            Assert.Equal(new object[] { "Invalid" }, row5.CustomValue);
         }
 
         [Fact]
@@ -439,19 +434,19 @@ namespace ExcelMapper.Tests
             sheet.ReadHeading();
 
             CustomNameEnumerableFieldClass row1 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Equal(new string[] { "1", "2", "3" }, row1.CustomValue);
+            Assert.Equal(new object[] { "1", "2", "3" }, row1.CustomValue);
 
             CustomNameEnumerableFieldClass row2 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.CustomValue);
+            Assert.Equal(new object?[] { "1", null, "2" }, row2.CustomValue);
 
             CustomNameEnumerableFieldClass row3 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Equal(new string[] { "1" }, row3.CustomValue);
+            Assert.Equal(new object[] { "1" }, row3.CustomValue);
 
             CustomNameEnumerableFieldClass row4 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
             Assert.Empty(row4.CustomValue);
 
             CustomNameEnumerableFieldClass row5 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Equal(new string[] { "Invalid" }, row5.CustomValue);
+            Assert.Equal(new object[] { "Invalid" }, row5.CustomValue);
         }
 
         [Fact]
@@ -464,19 +459,19 @@ namespace ExcelMapper.Tests
             sheet.ReadHeading();
 
             CustomNameEnumerablePropertyClass row1 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Equal(new string[] { "1", "2", "3" }, row1.CustomValue);
+            Assert.Equal(new object[] { "1", "2", "3" }, row1.CustomValue);
 
             CustomNameEnumerablePropertyClass row2 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.CustomValue);
+            Assert.Equal(new object?[] { "1", null, "2" }, row2.CustomValue);
 
             CustomNameEnumerablePropertyClass row3 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Equal(new string[] { "1" }, row3.CustomValue);
+            Assert.Equal(new object[] { "1" }, row3.CustomValue);
 
             CustomNameEnumerablePropertyClass row4 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
             Assert.Empty(row4.CustomValue);
 
             CustomNameEnumerablePropertyClass row5 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Equal(new string[] { "Invalid" }, row5.CustomValue);
+            Assert.Equal(new object[] { "Invalid" }, row5.CustomValue);
         }
 
         [Fact]
@@ -489,25 +484,25 @@ namespace ExcelMapper.Tests
             sheet.ReadHeading();
 
             CustomNameEnumerableFieldClass row1 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Equal(new string[] { "1", "2", "3" }, row1.CustomValue);
+            Assert.Equal(new object[] { "1", "2", "3" }, row1.CustomValue);
 
             CustomNameEnumerableFieldClass row2 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.CustomValue);
+            Assert.Equal(new object?[] { "1", null, "2" }, row2.CustomValue);
 
             CustomNameEnumerableFieldClass row3 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Equal(new string[] { "1" }, row3.CustomValue);
+            Assert.Equal(new object[] { "1" }, row3.CustomValue);
 
             CustomNameEnumerableFieldClass row4 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
             Assert.Empty(row4.CustomValue);
 
             CustomNameEnumerableFieldClass row5 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Equal(new string[] { "Invalid" }, row5.CustomValue);
+            Assert.Equal(new object[] { "Invalid" }, row5.CustomValue);
         }
 
         private class CustomNameEnumerablePropertyClass
         {
             [ExcelColumnName("Value")]
-            public object[] CustomValue { get; set; }
+            public object?[] CustomValue { get; set; } = default!;
         }
 
         private class DefaultCustomNameEnumerablePropertyClassMap : ExcelClassMap<CustomNameEnumerablePropertyClass>
@@ -517,14 +512,12 @@ namespace ExcelMapper.Tests
                 Map(p => p.CustomValue);
             }
         }
-
-#pragma warning disable CS0649
+        
         private class CustomNameEnumerableFieldClass
         {
             [ExcelColumnName("Value")]
-            public object[] CustomValue { get; set; }
+            public object?[] CustomValue { get; set; } = default!;
         }
-#pragma warning restore CS0649
 
         private class DefaultCustomNameEnumerableFieldClassMap : ExcelClassMap<CustomNameEnumerableFieldClass>
         {

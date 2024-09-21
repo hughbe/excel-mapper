@@ -10,6 +10,11 @@ namespace ExcelMapper.Abstractions
     /// </summary>
     public interface IFallbackItem
     {
-        object PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellValueResult readResult, Exception exception, MemberInfo member);
+        object? PerformFallback(
+            ExcelSheet sheet,
+            int rowIndex,
+            ReadCellValueResult readResult,
+            Exception? exception,
+            MemberInfo? member);
     }
 }

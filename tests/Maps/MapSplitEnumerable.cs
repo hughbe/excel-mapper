@@ -19,19 +19,19 @@ namespace ExcelMapper.Tests
             sheet.ReadHeading();
 
             ObjectArrayClass row1 = sheet.ReadRow<ObjectArrayClass>();
-            Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+            Assert.Equal(new object[] { "1", "2", "3" }, row1.Value);
 
             ObjectArrayClass row2 = sheet.ReadRow<ObjectArrayClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+            Assert.Equal(new object?[] { "1", null, "2" }, row2.Value);
 
             ObjectArrayClass row3 = sheet.ReadRow<ObjectArrayClass>();
-            Assert.Equal(new string[] { "1" }, row3.Value);
+            Assert.Equal(new object[] { "1" }, row3.Value);
 
             ObjectArrayClass row4 = sheet.ReadRow<ObjectArrayClass>();
             Assert.Empty(row4.Value);
 
             ObjectArrayClass row5 = sheet.ReadRow<ObjectArrayClass>();
-            Assert.Equal(new string[] { "Invalid" }, row5.Value);
+            Assert.Equal(new object[] { "Invalid" }, row5.Value);
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace ExcelMapper.Tests
             Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
 
             StringArrayClass row2 = sheet.ReadRow<StringArrayClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+            Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
 
             StringArrayClass row3 = sheet.ReadRow<StringArrayClass>();
             Assert.Equal(new string[] { "1" }, row3.Value);
@@ -92,7 +92,7 @@ namespace ExcelMapper.Tests
             Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
 
             IEnumerableObjectClass row2 = sheet.ReadRow<IEnumerableObjectClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+            Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
 
             IEnumerableObjectClass row3 = sheet.ReadRow<IEnumerableObjectClass>();
             Assert.Equal(new string[] { "1" }, row3.Value);
@@ -138,7 +138,7 @@ namespace ExcelMapper.Tests
             Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
 
             ICollectionObjectClass row2 = sheet.ReadRow<ICollectionObjectClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+            Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
 
             ICollectionObjectClass row3 = sheet.ReadRow<ICollectionObjectClass>();
             Assert.Equal(new string[] { "1" }, row3.Value);
@@ -181,19 +181,19 @@ namespace ExcelMapper.Tests
             sheet.ReadHeading();
 
             IListObjectClass row1 = sheet.ReadRow<IListObjectClass>();
-            Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+            Assert.Equal(new object[] { "1", "2", "3" }, row1.Value);
 
             IListObjectClass row2 = sheet.ReadRow<IListObjectClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+            Assert.Equal(new object?[] { "1", null, "2" }, row2.Value);
 
             IListObjectClass row3 = sheet.ReadRow<IListObjectClass>();
-            Assert.Equal(new string[] { "1" }, row3.Value);
+            Assert.Equal(new object[] { "1" }, row3.Value);
 
             IListObjectClass row4 = sheet.ReadRow<IListObjectClass>();
             Assert.Empty(row4.Value);
 
             IListObjectClass row5 = sheet.ReadRow<IListObjectClass>();
-            Assert.Equal(new string[] { "Invalid" }, row5.Value);
+            Assert.Equal(new object[] { "Invalid" }, row5.Value);
         }
 
         [Fact]
@@ -230,7 +230,7 @@ namespace ExcelMapper.Tests
             Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
 
             IReadOnlyCollectionObjectClass row2 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+            Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
 
             IReadOnlyCollectionObjectClass row3 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
             Assert.Equal(new string[] { "1" }, row3.Value);
@@ -276,7 +276,7 @@ namespace ExcelMapper.Tests
             Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
 
             IReadOnlyListObjectClass row2 = sheet.ReadRow<IReadOnlyListObjectClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+            Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
 
             IReadOnlyListObjectClass row3 = sheet.ReadRow<IReadOnlyListObjectClass>();
             Assert.Equal(new string[] { "1" }, row3.Value);
@@ -322,7 +322,7 @@ namespace ExcelMapper.Tests
             Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
 
             ListObjectClass row2 = sheet.ReadRow<ListObjectClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+            Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
 
             ListObjectClass row3 = sheet.ReadRow<ListObjectClass>();
             Assert.Equal(new string[] { "1" }, row3.Value);
@@ -828,19 +828,19 @@ namespace ExcelMapper.Tests
             sheet.ReadHeading();
 
             ObjectArrayClass row1 = sheet.ReadRow<ObjectArrayClass>();
-            Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+            Assert.Equal(new object[] { "1", "2", "3" }, row1.Value);
 
             ObjectArrayClass row2 = sheet.ReadRow<ObjectArrayClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+            Assert.Equal(new object?[] { "1", null, "2" }, row2.Value);
 
             ObjectArrayClass row3 = sheet.ReadRow<ObjectArrayClass>();
-            Assert.Equal(new string[] { "1" }, row3.Value);
+            Assert.Equal(new object[] { "1" }, row3.Value);
 
             ObjectArrayClass row4 = sheet.ReadRow<ObjectArrayClass>();
             Assert.Empty(row4.Value);
 
             ObjectArrayClass row5 = sheet.ReadRow<ObjectArrayClass>();
-            Assert.Equal(new string[] { "Invalid" }, row5.Value);
+            Assert.Equal(new object[] { "Invalid" }, row5.Value);
         }
 
         [Fact]
@@ -856,7 +856,7 @@ namespace ExcelMapper.Tests
             Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
 
             StringArrayClass row2 = sheet.ReadRow<StringArrayClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+            Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
 
             StringArrayClass row3 = sheet.ReadRow<StringArrayClass>();
             Assert.Equal(new string[] { "1" }, row3.Value);
@@ -904,7 +904,7 @@ namespace ExcelMapper.Tests
             Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
 
             IEnumerableObjectClass row2 = sheet.ReadRow<IEnumerableObjectClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+            Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
 
             IEnumerableObjectClass row3 = sheet.ReadRow<IEnumerableObjectClass>();
             Assert.Equal(new string[] { "1" }, row3.Value);
@@ -952,7 +952,7 @@ namespace ExcelMapper.Tests
             Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
 
             ICollectionObjectClass row2 = sheet.ReadRow<ICollectionObjectClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+            Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
 
             ICollectionObjectClass row3 = sheet.ReadRow<ICollectionObjectClass>();
             Assert.Equal(new string[] { "1" }, row3.Value);
@@ -997,19 +997,19 @@ namespace ExcelMapper.Tests
             sheet.ReadHeading();
 
             IListObjectClass row1 = sheet.ReadRow<IListObjectClass>();
-            Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+            Assert.Equal(new object[] { "1", "2", "3" }, row1.Value);
 
             IListObjectClass row2 = sheet.ReadRow<IListObjectClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+            Assert.Equal(new object?[] { "1", null, "2" }, row2.Value);
 
             IListObjectClass row3 = sheet.ReadRow<IListObjectClass>();
-            Assert.Equal(new string[] { "1" }, row3.Value);
+            Assert.Equal(new object[] { "1" }, row3.Value);
 
             IListObjectClass row4 = sheet.ReadRow<IListObjectClass>();
             Assert.Empty(row4.Value);
 
             IListObjectClass row5 = sheet.ReadRow<IListObjectClass>();
-            Assert.Equal(new string[] { "Invalid" }, row5.Value);
+            Assert.Equal(new object[] { "Invalid" }, row5.Value);
         }
 
         [Fact]
@@ -1048,7 +1048,7 @@ namespace ExcelMapper.Tests
             Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
 
             IReadOnlyCollectionObjectClass row2 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+            Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
 
             IReadOnlyCollectionObjectClass row3 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
             Assert.Equal(new string[] { "1" }, row3.Value);
@@ -1096,7 +1096,7 @@ namespace ExcelMapper.Tests
             Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
 
             IReadOnlyListObjectClass row2 = sheet.ReadRow<IReadOnlyListObjectClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+            Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
 
             IReadOnlyListObjectClass row3 = sheet.ReadRow<IReadOnlyListObjectClass>();
             Assert.Equal(new string[] { "1" }, row3.Value);
@@ -1144,7 +1144,7 @@ namespace ExcelMapper.Tests
             Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
 
             ListObjectClass row2 = sheet.ReadRow<ListObjectClass>();
-            Assert.Equal(new string[] { "1", null, "2" }, row2.Value);
+            Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
 
             ListObjectClass row3 = sheet.ReadRow<ListObjectClass>();
             Assert.Equal(new string[] { "1" }, row3.Value);
@@ -2339,7 +2339,7 @@ namespace ExcelMapper.Tests
 
         public class ObjectArrayClass
         {
-            public object[] Value { get; set; }
+            public object?[] Value { get; set; } = default!;
         }
 
         public class DefaultObjectArrayClassMap : ExcelClassMap<ObjectArrayClass>
@@ -2352,7 +2352,7 @@ namespace ExcelMapper.Tests
 
         public class StringArrayClass
         {
-            public string[] Value { get; set; }
+            public string?[] Value { get; set; } = default!;
         }
 
         public class DefaultStringArrayClassMap : ExcelClassMap<StringArrayClass>
@@ -2365,7 +2365,7 @@ namespace ExcelMapper.Tests
 
         public class IntArrayClass
         {
-            public int[] Value { get; set; }
+            public int[] Value { get; set; } = default!;
         }
 
         public class DefaultIntArrayClassMap : ExcelClassMap<IntArrayClass>
@@ -2390,7 +2390,7 @@ namespace ExcelMapper.Tests
 
         public class IEnumerableObjectClass
         {
-            public IEnumerable<object> Value { get; set; }
+            public IEnumerable<object?> Value { get; set; } = default!;
         }
 
         public class DefaultIEnumerableObjectClassMap : ExcelClassMap<IEnumerableObjectClass>
@@ -2403,7 +2403,7 @@ namespace ExcelMapper.Tests
 
         public class IEnumerableIntClass
         {
-            public IEnumerable<int> Value { get; set; }
+            public IEnumerable<int> Value { get; set; } = default!;
         }
 
         public class CustomConstructorIEnumerableIntClassMap : ExcelClassMap<IEnumerableIntClass>
@@ -2428,7 +2428,7 @@ namespace ExcelMapper.Tests
 
         public class ICollectionObjectClass
         {
-            public ICollection<object> Value { get; set; }
+            public ICollection<object?> Value { get; set; } = default!;
         }
 
         public class DefaultICollectionObjectClassMap : ExcelClassMap<ICollectionObjectClass>
@@ -2441,7 +2441,7 @@ namespace ExcelMapper.Tests
 
         public class ICollectionIntClass
         {
-            public ICollection<int> Value { get; set; }
+            public ICollection<int> Value { get; set; } = default!;
         }
 
         public class DefaultICollectionIntClassMap : ExcelClassMap<ICollectionIntClass>
@@ -2466,7 +2466,7 @@ namespace ExcelMapper.Tests
 
         public class IListObjectClass
         {
-            public IList<object> Value { get; set; }
+            public IList<object?> Value { get; set; } = default!;
         }
 
         public class DefaultIListObjectClassMap : ExcelClassMap<IListObjectClass>
@@ -2479,7 +2479,7 @@ namespace ExcelMapper.Tests
 
         public class IListIntClass
         {
-            public IList<int> Value { get; set; }
+            public IList<int> Value { get; set; } = default!;
         }
 
         public class DefaultIListIntClassMap : ExcelClassMap<IListIntClass>
@@ -2504,7 +2504,7 @@ namespace ExcelMapper.Tests
 
         public class IReadOnlyCollectionObjectClass
         {
-            public IReadOnlyCollection<object> Value { get; set; }
+            public IReadOnlyCollection<object?> Value { get; set; } = default!;
         }
 
         public class DefaultIReadOnlyCollectionObjectClassMap : ExcelClassMap<IReadOnlyCollectionObjectClass>
@@ -2517,7 +2517,7 @@ namespace ExcelMapper.Tests
 
         public class IReadOnlyCollectionIntClass
         {
-            public IReadOnlyCollection<int> Value { get; set; }
+            public IReadOnlyCollection<int> Value { get; set; } = default!;
         }
 
         public class DefaultIReadOnlyCollectionIntClassMap : ExcelClassMap<IReadOnlyCollectionIntClass>
@@ -2542,7 +2542,7 @@ namespace ExcelMapper.Tests
 
         public class IReadOnlyListObjectClass
         {
-            public IReadOnlyList<object> Value { get; set; }
+            public IReadOnlyList<object?> Value { get; set; } = default!;
         }
 
         public class DefaultIReadOnlyListObjectClassMap : ExcelClassMap<IReadOnlyListObjectClass>
@@ -2555,7 +2555,7 @@ namespace ExcelMapper.Tests
 
         public class IReadOnlyListIntClass
         {
-            public IReadOnlyList<int> Value { get; set; }
+            public IReadOnlyList<int> Value { get; set; } = default!;
         }
 
         public class DefaultIReadOnlyListIntClassMap : ExcelClassMap<IReadOnlyListIntClass>
@@ -2580,7 +2580,7 @@ namespace ExcelMapper.Tests
 
         public class ListObjectClass
         {
-            public List<object> Value { get; set; }
+            public List<object?> Value { get; set; } = default!;
         }
 
         public class DefaultListObjectClassMap : ExcelClassMap<ListObjectClass>
@@ -2593,7 +2593,7 @@ namespace ExcelMapper.Tests
 
         public class ListIntClass
         {
-            public List<int> Value { get; set; }
+            public List<int> Value { get; set; } = default!;
         }
 
         public class DefaultListIntClassMap : ExcelClassMap<ListIntClass>
@@ -2618,7 +2618,7 @@ namespace ExcelMapper.Tests
 
         public class ObservableCollectionIntClass
         {
-            public ObservableCollection<int> Value { get; set; }
+            public ObservableCollection<int> Value { get; set; } = default!;
         }
 
         public class DefaultObservableCollectionIntClassMap : ExcelClassMap<ObservableCollectionIntClass>
@@ -2643,7 +2643,7 @@ namespace ExcelMapper.Tests
 
         public class QueueIntClass
         {
-            public Queue<int> Value { get; set; }
+            public Queue<int> Value { get; set; } = default!;
         }
 
         public class DefaultQueueIntClassMap : ExcelClassMap<QueueIntClass>
@@ -2668,7 +2668,7 @@ namespace ExcelMapper.Tests
 
         public class StackIntClass
         {
-            public Stack<int> Value { get; set; }
+            public Stack<int> Value { get; set; } = default!;
         }
 
         public class DefaultStackIntClassMap : ExcelClassMap<StackIntClass>
@@ -2693,7 +2693,7 @@ namespace ExcelMapper.Tests
 
         public class SortedSetIntClass
         {
-            public SortedSet<int> Value { get; set; }
+            public SortedSet<int> Value { get; set; } = default!;
         }
 
         public class DefaultSortedSetIntClassMap : ExcelClassMap<SortedSetIntClass>
@@ -2718,7 +2718,7 @@ namespace ExcelMapper.Tests
 
         public class HashSetIntClass
         {
-            public HashSet<int> Value { get; set; }
+            public HashSet<int> Value { get; set; } = default!;
         }
 
         public class DefaultHashSetIntClassMap : ExcelClassMap<HashSetIntClass>
@@ -2743,7 +2743,7 @@ namespace ExcelMapper.Tests
 
         public class IImmutableListIntClass
         {
-            public IImmutableList<int> Value { get; set; }
+            public IImmutableList<int> Value { get; set; } = default!;
         }
 
         public class DefaultIImmutableListIntClassMap : ExcelClassMap<IImmutableListIntClass>
@@ -2768,7 +2768,7 @@ namespace ExcelMapper.Tests
 
         public class IImmutableStackIntClass
         {
-            public IImmutableStack<int> Value { get; set; }
+            public IImmutableStack<int> Value { get; set; } = default!;
         }
 
         public class DefaultIImmutableStackIntClassMap : ExcelClassMap<IImmutableStackIntClass>
@@ -2793,7 +2793,7 @@ namespace ExcelMapper.Tests
 
         public class IImmutableQueueIntClass
         {
-            public IImmutableQueue<int> Value { get; set; }
+            public IImmutableQueue<int> Value { get; set; } = default!;
         }
 
         public class DefaultIImmutableQueueIntClassMap : ExcelClassMap<IImmutableQueueIntClass>
@@ -2818,7 +2818,7 @@ namespace ExcelMapper.Tests
 
         public class IImmutableSetIntClass
         {
-            public IImmutableSet<int> Value { get; set; }
+            public IImmutableSet<int> Value { get; set; } = default!;
         }
 
         public class DefaultIImmutableSetIntClassMap : ExcelClassMap<IImmutableSetIntClass>
@@ -2868,7 +2868,7 @@ namespace ExcelMapper.Tests
 
         public class ImmutableListIntClass
         {
-            public ImmutableList<int> Value { get; set; }
+            public ImmutableList<int> Value { get; set; } = default!;
         }
 
         public class DefaultImmutableListIntClassMap : ExcelClassMap<ImmutableListIntClass>
@@ -2893,7 +2893,7 @@ namespace ExcelMapper.Tests
 
         public class ImmutableStackIntClass
         {
-            public ImmutableStack<int> Value { get; set; }
+            public ImmutableStack<int> Value { get; set; } = default!;
         }
 
         public class DefaultImmutableStackIntClassMap : ExcelClassMap<ImmutableStackIntClass>
@@ -2918,7 +2918,7 @@ namespace ExcelMapper.Tests
 
         public class ImmutableQueueIntClass
         {
-            public ImmutableQueue<int> Value { get; set; }
+            public ImmutableQueue<int> Value { get; set; } = default!;
         }
 
         public class DefaultImmutableQueueIntClassMap : ExcelClassMap<ImmutableQueueIntClass>
@@ -2943,7 +2943,7 @@ namespace ExcelMapper.Tests
 
         public class ImmutableSortedSetIntClass
         {
-            public ImmutableSortedSet<int> Value { get; set; }
+            public ImmutableSortedSet<int> Value { get; set; } = default!;
         }
 
         public class DefaultImmutableSortedSetIntClassMap : ExcelClassMap<ImmutableSortedSetIntClass>
@@ -2968,7 +2968,7 @@ namespace ExcelMapper.Tests
 
         public class ImmutableHashSetIntClass
         {
-            public ImmutableHashSet<int> Value { get; set; }
+            public ImmutableHashSet<int> Value { get; set; } = default!;
         }
 
         public class DefaultImmutableHashSetIntClassMap : ExcelClassMap<ImmutableHashSetIntClass>
@@ -2993,7 +2993,7 @@ namespace ExcelMapper.Tests
 
         public class ConcurrentQueueIntClass
         {
-            public ConcurrentQueue<int> Value { get; set; }
+            public ConcurrentQueue<int> Value { get; set; } = default!;
         }
 
         public class DefaultConcurrentQueueIntClassMap : ExcelClassMap<ConcurrentQueueIntClass>
@@ -3018,7 +3018,7 @@ namespace ExcelMapper.Tests
 
         public class ConcurrentStackIntClass
         {
-            public ConcurrentStack<int> Value { get; set; }
+            public ConcurrentStack<int> Value { get; set; } = default!;
         }
 
         public class DefaultConcurrentStackIntClassMap : ExcelClassMap<ConcurrentStackIntClass>
@@ -3043,7 +3043,7 @@ namespace ExcelMapper.Tests
 
         public class ConcurrentBagIntClass
         {
-            public ConcurrentBag<int> Value { get; set; }
+            public ConcurrentBag<int> Value { get; set; } = default!;
         }
 
         public class DefaultConcurrentBagIntClassMap : ExcelClassMap<ConcurrentBagIntClass>
@@ -3068,7 +3068,7 @@ namespace ExcelMapper.Tests
 
         public class BlockingCollectionIntClass
         {
-            public BlockingCollection<int> Value { get; set; }
+            public BlockingCollection<int> Value { get; set; } = default!;
         }
 
         public class DefaultBlockingCollectionIntClassMap : ExcelClassMap<BlockingCollectionIntClass>
@@ -3107,7 +3107,7 @@ namespace ExcelMapper.Tests
 
         public class CustomConstructorIEnumerableIntClass
         {
-            public CustomConstructorIEnumerable<int> Value { get; set; }
+            public CustomConstructorIEnumerable<int> Value { get; set; } = default!;
         }
 
         public class DefaultCustomConstructorIEnumerableIntClassMap : ExcelClassMap<CustomConstructorIEnumerableIntClass>
@@ -3143,7 +3143,7 @@ namespace ExcelMapper.Tests
 
         public class CustomAddIEnumerableIntClass
         {
-            public CustomAddIEnumerable<int> Value { get; set; }
+            public CustomAddIEnumerable<int> Value { get; set; } = default!;
         }
 
         public class DefaultCustomAddIEnumerableIntClassMap : ExcelClassMap<CustomAddIEnumerableIntClass>
@@ -3193,7 +3193,7 @@ namespace ExcelMapper.Tests
 
         public class MissingColumnClass
         {
-            public int[] MissingColumn { get; set; }
+            public int[] MissingColumn { get; set; } = default!;
         }
 
         private class DefaultMissingColumnClassMap : ExcelClassMap<MissingColumnClass>
@@ -3238,7 +3238,7 @@ namespace ExcelMapper.Tests
 
         public class ImmutableArrayBuilderIntClass
         {
-            public ImmutableArray<int>.Builder Value { get; set; }
+            public ImmutableArray<int>.Builder Value { get; set; } = default!;
         }
 
         public class DefaultImmutableArrayBuilderIntClassMap : ExcelClassMap<ImmutableArrayBuilderIntClass>
@@ -3274,7 +3274,7 @@ namespace ExcelMapper.Tests
 
         public class ImmutableDictionaryBuilderIntClass
         {
-            public ImmutableDictionary<string, int>.Builder Value { get; set; }
+            public ImmutableDictionary<string, int>.Builder Value { get; set; } = default!;
         }
 
         public class DefaultImmutableDictionaryBuilderIntClassMap : ExcelClassMap<ImmutableDictionaryBuilderIntClass>

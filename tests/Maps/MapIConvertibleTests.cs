@@ -72,7 +72,7 @@ namespace ExcelMapper.Tests
 
         private class ConvertibleClass
         {
-            public IConvertible Value { get; set; }
+            public IConvertible Value { get; set; } = default!;
         }
 
         private class DefaultConvertibleClassMap : ExcelClassMap<ConvertibleClass>

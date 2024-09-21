@@ -29,7 +29,7 @@ namespace ExcelMapper.Mappers.Tests
         [Fact]
         public void Ctor_NullEnumType_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("enumType", () => new EnumMapper(null));
+            Assert.Throws<ArgumentNullException>("enumType", () => new EnumMapper(null!));
         }
 
         [Theory]
@@ -58,9 +58,9 @@ namespace ExcelMapper.Mappers.Tests
             Assert.Null(result.Exception);
         }
 
-        public static IEnumerable<object[]> GetProperty_InvalidStringValue_TestData()
+        public static IEnumerable<object?[]> GetProperty_InvalidStringValue_TestData()
         {
-            yield return new object[] { new EnumMapper(typeof(ConsoleColor)), null };
+            yield return new object?[] { new EnumMapper(typeof(ConsoleColor)), null };
             yield return new object[] { new EnumMapper(typeof(ConsoleColor)), "" };
             yield return new object[] { new EnumMapper(typeof(ConsoleColor)), "Invalid" };
             yield return new object[] { new EnumMapper(typeof(ConsoleColor)), "black" };
@@ -68,7 +68,7 @@ namespace ExcelMapper.Mappers.Tests
 
         [Theory]
         [MemberData(nameof(GetProperty_InvalidStringValue_TestData))]
-        public void GetProperty_InvalidStringValue_ReturnsInvalid(EnumMapper item, string stringValue)
+        public void GetProperty_InvalidStringValue_ReturnsInvalid(EnumMapper item, string? stringValue)
         {
             CellValueMapperResult result = item.MapCellValue(new ReadCellValueResult(-1, stringValue));
             Assert.False(result.Succeeded);

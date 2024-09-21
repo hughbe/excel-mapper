@@ -18,14 +18,16 @@ namespace ExcelMapper.Mappers
             {
                 return CellValueMapperResult.Success(s_boxedTrue);
             }
-            else if (readResult.StringValue == "0")
+            if (readResult.StringValue == "0")
             {
                 return CellValueMapperResult.Success(s_boxedFalse);
             }
 
             try
             {
-                bool result = bool.Parse(readResult.StringValue);
+                // Discarding readResult.StringValue nullability warning.
+                // If null - CellValueMapperResult.Invalid with ArgumentNullException will be returned
+                bool result = bool.Parse(readResult.StringValue!);
                 return CellValueMapperResult.Success(result);
             }
             catch (Exception exception)

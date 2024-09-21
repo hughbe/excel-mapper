@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Xunit;
 
 namespace ExcelMapper.Tests
@@ -18,7 +17,7 @@ namespace ExcelMapper.Tests
         [Fact]
         public void Ctor_NullType_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("type", () => new ExcelClassMap(null));
+            Assert.Throws<ArgumentNullException>("type", () => new ExcelClassMap(null!));
         }
     }
 }

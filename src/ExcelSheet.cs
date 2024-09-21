@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using ExcelDataReader;
 using ExcelMapper.Utilities;
 
@@ -95,7 +96,7 @@ namespace ExcelMapper
         /// Gets the heading that was read from the sheet. This will return null if HasHeading is false
         /// or the heading has not been read yet by calling ReadHeading or ReadRows.
         /// </summary>
-        public ExcelHeading Heading { get; private set; }
+        public ExcelHeading? Heading { get; private set; }
 
         /// <summary>
         /// Gets the index of the row currently being mapped.
@@ -144,7 +145,7 @@ namespace ExcelMapper
                 ReadHeading();
             }
 
-            while (TryReadRow(out T row))
+            while (TryReadRow(out T? row))
             {
                 yield return row;
             }
@@ -186,7 +187,7 @@ namespace ExcelMapper
         /// <returns>An object of type T mapped from a single row in the sheet.</returns>
         public T ReadRow<T>()
         {
-            if (!TryReadRow(out T value))
+            if (!TryReadRow(out T? value))
             {
                 throw new ExcelMappingException($"No more rows in \"{Name}\".");
             }
@@ -202,7 +203,7 @@ namespace ExcelMapper
         /// <typeparam name="T">The type of the object to map a single row to.</typeparam>
         /// <param name="value">An object of type T mapped from a single row in the sheet.</param>
         /// <returns>False if there are no more rows in the sheet or the row cannot be mapped to an object, else false.</returns>
-        public bool TryReadRow<T>(out T value)
+        public bool TryReadRow<T>([NotNullWhen(true)] out T? value)
         {
             Importer.MoveToSheet(this);
 
@@ -240,14 +241,14 @@ namespace ExcelMapper
                 }
             }
 
-            if (!Importer.Configuration.TryGetClassMap<T>(out IMap classMap))
+            if (!Importer.Configuration.TryGetClassMap<T>(out IMap? classMap))
             {
                 if (!HasHeading)
                 {
                     throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\" as the sheet has no heading.");
                 }
 
-                if (!AutoMapper.TryAutoMap<T>(FallbackStrategy.ThrowIfPrimitive, out IMap map))
+                if (!AutoMapper.TryAutoMap<T>(FallbackStrategy.ThrowIfPrimitive, out IMap? map))
                 {
                     throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\".");
                 }
@@ -256,8 +257,8 @@ namespace ExcelMapper
                 Importer.Configuration.RegisterClassMap(typeof(T), classMap);
             }
 
-            bool result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out object valueObject);
-            value = (T)valueObject;
+            bool result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out object? valueObject);
+            value = (T?)valueObject;
             return result;
         }
 

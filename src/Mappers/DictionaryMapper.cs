@@ -9,35 +9,37 @@ namespace ExcelMapper.Mappers
     /// </summary>
     public class DictionaryMapper<T> : ICellValueMapper
     {
+        private readonly Dictionary<string, T> _mappingDictionary;
+
         /// <summary>
         /// Gets the dictionary used to map the value of a cell to an object.
         /// </summary>
-        public IReadOnlyDictionary<string, T> MappingDictionary { get; }
+        public IReadOnlyDictionary<string, T> MappingDictionary => _mappingDictionary;
 
         /// <summary>
         /// Constructs a mapper that tries to map the value of a cell to an object using a mapping dictionary.
         /// </summary>
         /// <param name="mappingDictionary">The dictionary used to map the value of a cell to an object.</param>
         /// <param name="comparer">The equality comparer used to the value of a cell to an object.</param>
-        public DictionaryMapper(IDictionary<string, T> mappingDictionary, IEqualityComparer<string> comparer)
+        public DictionaryMapper(IDictionary<string, T> mappingDictionary, IEqualityComparer<string>? comparer)
         {
             if (mappingDictionary == null)
             {
                 throw new ArgumentNullException(nameof(mappingDictionary));
             }
 
-            MappingDictionary = new Dictionary<string, T>(mappingDictionary, comparer);
+            _mappingDictionary = new Dictionary<string, T>(mappingDictionary, comparer);
         }
 
         public CellValueMapperResult MapCellValue(ReadCellValueResult readResult)
         {
             // If we didn't find anything, keep going. This is not necessarily a fatal error.
-            if (!MappingDictionary.TryGetValue(readResult.StringValue, out T result))
+            if (readResult.StringValue is null || !_mappingDictionary.TryGetValue(readResult.StringValue, out T result))
             {
                 return CellValueMapperResult.Ignore();
             }
 
-            return CellValueMapperResult.Success(result);
+            return CellValueMapperResult.Success(result!);
         }
     }
 }

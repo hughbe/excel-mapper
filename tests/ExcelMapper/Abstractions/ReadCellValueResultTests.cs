@@ -16,7 +16,7 @@ namespace ExcelMapper.Abstractions.Tests
         [InlineData(-1, null)]
         [InlineData(0, "")]
         [InlineData(2, "abc")]
-        public void Ctor_ColumnIndex_StringValue(int columnIndex, string stringValue)
+        public void Ctor_ColumnIndex_StringValue(int columnIndex, string? stringValue)
         {
             var result = new ReadCellValueResult(columnIndex, stringValue);
             Assert.Equal(columnIndex, result.ColumnIndex);

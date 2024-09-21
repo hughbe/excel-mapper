@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Readers;
 using Xunit;
@@ -26,7 +25,7 @@ namespace ExcelMapper.Tests
         {
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            Assert.Throws<ArgumentNullException>("cellValuesReader", () => new ManyToOneEnumerableMap<string>(null, elementPipeline, createElementsFactory));
+            Assert.Throws<ArgumentNullException>("cellValuesReader", () => new ManyToOneEnumerableMap<string>(null!, elementPipeline, createElementsFactory));
         }
 
         [Fact]
@@ -34,7 +33,7 @@ namespace ExcelMapper.Tests
         {
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             CreateElementsFactory<string> createElementsFactory = elements => elements;
-            Assert.Throws<ArgumentNullException>("elementPipeline", () => new ManyToOneEnumerableMap<string>(cellValuesReader, null, createElementsFactory));
+            Assert.Throws<ArgumentNullException>("elementPipeline", () => new ManyToOneEnumerableMap<string>(cellValuesReader, null!, createElementsFactory));
         }
 
         [Fact]
@@ -42,7 +41,7 @@ namespace ExcelMapper.Tests
         {
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
-            Assert.Throws<ArgumentNullException>("createElementsFactory", () => new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, null));
+            Assert.Throws<ArgumentNullException>("createElementsFactory", () => new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, null!));
         }
 
         public static IEnumerable<object[]> CellValuesReader_Set_TestData()
@@ -75,7 +74,7 @@ namespace ExcelMapper.Tests
             var elementPipeline = new ValuePipeline<string>();
             CreateElementsFactory<string> createElementsFactory = elements => elements;
             var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
-            Assert.Throws<ArgumentNullException>("value", () => propertyMap.CellValuesReader = null);
+            Assert.Throws<ArgumentNullException>("value", () => propertyMap.CellValuesReader = null!);
         }
 
         [Theory]
@@ -153,7 +152,7 @@ namespace ExcelMapper.Tests
             CreateElementsFactory<string> createElementsFactory = elements => elements;
             var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
 
-            Assert.Throws<ArgumentNullException>("elementMap", () => propertyMap.WithElementMap(null));
+            Assert.Throws<ArgumentNullException>("elementMap", () => propertyMap.WithElementMap(null!));
         }
 
         [Fact]
@@ -164,7 +163,7 @@ namespace ExcelMapper.Tests
             CreateElementsFactory<string> createElementsFactory = elements => elements;
             var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
 
-            Assert.Throws<ArgumentNullException>("elementMap", () => propertyMap.WithElementMap(e => null));
+            Assert.Throws<ArgumentNullException>("elementMap", () => propertyMap.WithElementMap(_ => null!));
         }
 
         [Fact]
@@ -203,7 +202,7 @@ namespace ExcelMapper.Tests
             CreateElementsFactory<string> createElementsFactory = elements => elements;
             var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
 
-            Assert.Throws<ArgumentNullException>("columnName", () => propertyMap.WithColumnName(null));
+            Assert.Throws<ArgumentNullException>("columnName", () => propertyMap.WithColumnName(null!));
         }
 
         [Fact]
@@ -285,7 +284,7 @@ namespace ExcelMapper.Tests
 
         [Theory]
         [MemberData(nameof(Separators_Char_TestData))]
-        public void WithSeparators_IEnumerableChar_Success(IEnumerable<char> separators)
+        public void WithSeparators_IEnumerableChar_Success(ICollection<char> separators)
         {
             var cellValuesReader = new StringSplitCellValueReader(new ColumnNameValueReader("Column"));
             var elementPipeline = new ValuePipeline<string>();
@@ -322,7 +321,7 @@ namespace ExcelMapper.Tests
 
         [Theory]
         [MemberData(nameof(Separators_String_TestData))]
-        public void WithSeparators_IEnumerableString_Success(IEnumerable<string> separators)
+        public void WithSeparators_IEnumerableString_Success(ICollection<string> separators)
         {
             var cellValuesReader = new StringSplitCellValueReader(new ColumnNameValueReader("Column"));
             var elementPipeline = new ValuePipeline<string>();
@@ -342,10 +341,10 @@ namespace ExcelMapper.Tests
             CreateElementsFactory<string> createElementsFactory = elements => elements;
             var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory);
 
-            Assert.Throws<ArgumentNullException>("value", () => propertyMap.WithSeparators((char[])null));
-            Assert.Throws<ArgumentNullException>("value", () => propertyMap.WithSeparators((IEnumerable<char>)null));
-            Assert.Throws<ArgumentNullException>("value", () => propertyMap.WithSeparators((string[])null));
-            Assert.Throws<ArgumentNullException>("value", () => propertyMap.WithSeparators((IEnumerable<string>)null));
+            Assert.Throws<ArgumentNullException>("separators", () => propertyMap.WithSeparators((char[])null!));
+            Assert.Throws<ArgumentNullException>("separators", () => propertyMap.WithSeparators((IEnumerable<char>)null!));
+            Assert.Throws<ArgumentNullException>("separators", () => propertyMap.WithSeparators((string[])null!));
+            Assert.Throws<ArgumentNullException>("separators", () => propertyMap.WithSeparators((IEnumerable<string>)null!));
         }
 
         [Fact]
@@ -363,7 +362,7 @@ namespace ExcelMapper.Tests
         }
 
         [Fact]
-        public void WithSeperators_MultiMap_ThrowsExcelMappingException()
+        public void WithSeparators_MultiMap_ThrowsExcelMappingException()
         {
             var cellValuesReader = new MultipleColumnNamesValueReader("Column");
             var elementPipeline = new ValuePipeline<string>();
@@ -412,8 +411,8 @@ namespace ExcelMapper.Tests
             CreateElementsFactory<string> createElementsFactory = elements => elements;
             var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
-            Assert.Throws<ArgumentNullException>("columnNames", () => propertyMap.WithColumnNames(null));
-            Assert.Throws<ArgumentNullException>("columnNames", () => propertyMap.WithColumnNames((IEnumerable<string>)null));
+            Assert.Throws<ArgumentNullException>("columnNames", () => propertyMap.WithColumnNames(null!));
+            Assert.Throws<ArgumentNullException>("columnNames", () => propertyMap.WithColumnNames((IEnumerable<string>)null!));
         }
 
         [Fact]
@@ -436,8 +435,8 @@ namespace ExcelMapper.Tests
             CreateElementsFactory<string> createElementsFactory = elements => elements;
             var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
-            Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new string[] { null }));
-            Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new List<string> { null }));
+            Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new string[] { null! }));
+            Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new List<string> { null! }));
         }
 
         [Fact]
@@ -476,8 +475,8 @@ namespace ExcelMapper.Tests
             CreateElementsFactory<string> createElementsFactory = elements => elements;
             var propertyMap = new ManyToOneEnumerableMap<string>(cellValuesReader, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
-            Assert.Throws<ArgumentNullException>("columnIndices", () => propertyMap.WithColumnIndices(null));
-            Assert.Throws<ArgumentNullException>("columnIndices", () => propertyMap.WithColumnIndices((IEnumerable<int>)null));
+            Assert.Throws<ArgumentNullException>("columnIndices", () => propertyMap.WithColumnIndices(null!));
+            Assert.Throws<ArgumentNullException>("columnIndices", () => propertyMap.WithColumnIndices((IEnumerable<int>)null!));
         }
 
         [Fact]
@@ -502,11 +501,6 @@ namespace ExcelMapper.Tests
 
             Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => propertyMap.WithColumnIndices(new int[] { -1 }));
             Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => propertyMap.WithColumnIndices(new List<int> { -1 }));
-        }
-
-        private class TestClass
-        {
-            public string[] Value { get; set; }
         }
     }
 }

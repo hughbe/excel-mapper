@@ -16,7 +16,7 @@ namespace ExcelMapper.Readers.Tests
         [Fact]
         public void Ctor_NullColumnNames_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("columnNames", () => new MultipleColumnNamesValueReader(null));
+            Assert.Throws<ArgumentNullException>("columnNames", () => new MultipleColumnNamesValueReader(null!));
         }
 
         [Fact]
@@ -28,7 +28,7 @@ namespace ExcelMapper.Readers.Tests
         [Fact]
         public void Ctor_NullValueInColumnNames_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>("columnNames", () => new MultipleColumnNamesValueReader(new string[] { null }));
+            Assert.Throws<ArgumentException>("columnNames", () => new MultipleColumnNamesValueReader(new string[] { null! }));
         }
     }
 }

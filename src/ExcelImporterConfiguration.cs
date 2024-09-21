@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper
 {
@@ -25,7 +26,7 @@ namespace ExcelMapper
         /// <param name="classType">The type of the object to get the class map for.</param>
         /// <param name="classMap">The class map for the given type if it exists, else null.</param>
         /// <returns>True if a class map exists for the given type, else false.</returns>
-        public bool TryGetClassMap(Type classType, out IMap classMap)
+        public bool TryGetClassMap(Type classType, [NotNullWhen(true)] out IMap? classMap)
         {
             if (classType == null)
             {
@@ -41,7 +42,7 @@ namespace ExcelMapper
         /// <typeparam name="T">The type of the object to get the class map for.</typeparam>
         /// <param name="classMap">The class map for the given type if it exists, else null.</param>
         /// <returns>True if a class map exists for the given type, else false.</returns>
-        public bool TryGetClassMap<T>(out IMap classMap) => TryGetClassMap(typeof(T), out classMap);
+        public bool TryGetClassMap<T>([NotNullWhen(true)] out IMap? classMap) => TryGetClassMap(typeof(T), out classMap);
 
         /// <summary>
         /// Registers a class map of the given type to be used when mapping a row to an object.

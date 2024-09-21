@@ -69,7 +69,7 @@ namespace ExcelMapper.Tests
 
         private class StringValue
         {
-            public string Value { get; set; }
+            public string Value { get; set; } = default!;
         }
 
         private class ColumnMatchingClassMap : ExcelClassMap<StringValue>
@@ -103,7 +103,7 @@ namespace ExcelMapper.Tests
             public NoColumnMatchingClassMap()
             {
                 Map(o => o.Value)
-                    .WithColumnNameMatching(s => false);
+                    .WithColumnNameMatching(_ => false);
             }
         }
 
@@ -112,7 +112,7 @@ namespace ExcelMapper.Tests
             public NoColumnOptionalMatchingClassMap()
             {
                 Map(o => o.Value)
-                    .WithColumnNameMatching(s => false)
+                    .WithColumnNameMatching(_ => false)
                     .MakeOptional();
             }
         }

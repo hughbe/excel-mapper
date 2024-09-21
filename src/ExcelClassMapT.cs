@@ -54,7 +54,7 @@ namespace ExcelMapper
         public OneToOneMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
-            if (!AutoMapper.TryCreatePrimitiveMap(memberExpression.Member, EmptyValueStrategy, out OneToOneMap<TProperty> map))
+            if (!AutoMapper.TryCreatePrimitiveMap(memberExpression.Member, EmptyValueStrategy, out OneToOneMap<TProperty>? map))
             {
                 throw new ExcelMappingException($"Don't know how to map type {typeof(TProperty)}.");
             }
@@ -270,7 +270,7 @@ namespace ExcelMapper
         public ExcelClassMap<TProperty> MapObject<TProperty>(Expression<Func<T, TProperty>> expression)
         {
             MemberExpression memberExpression = GetMemberExpression(expression);
-            if (!AutoMapper.TryCreateObjectMap(EmptyValueStrategy, out ExcelClassMap<TProperty> map))
+            if (!AutoMapper.TryCreateObjectMap(EmptyValueStrategy, out ExcelClassMap<TProperty>? map))
             {
                 throw new ExcelMappingException($"Could not map object of type \"{typeof(TProperty)}\".");
             }
@@ -331,7 +331,6 @@ namespace ExcelMapper
         /// Creates a map for a property or field given a MemberExpression reading the property or field.
         /// This is used for map ExpandoObjects.
         /// </summary>
-        /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
         /// <param name="expression">A MemberExpression reading the property or field.</param>
         /// <returns>The map for the given property or field.</returns>
         public ManyToOneDictionaryMap<object> Map(Expression<Func<T, ExpandoObject>> expression)
@@ -345,7 +344,7 @@ namespace ExcelMapper
 
         private ManyToOneEnumerableMap<TProperty> GetMultiMap<TProperty>(MemberInfo member)
         {
-            if (!AutoMapper.TryCreateGenericEnumerableMap(member, EmptyValueStrategy, out ManyToOneEnumerableMap<TProperty> map))
+            if (!AutoMapper.TryCreateGenericEnumerableMap(member, EmptyValueStrategy, out ManyToOneEnumerableMap<TProperty>? map))
             {
                 throw new ExcelMappingException($"No known way to instantiate type \"{member.MemberType()}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
             }
@@ -355,7 +354,7 @@ namespace ExcelMapper
 
         private ManyToOneDictionaryMap<TValue> GetDictionaryMap<TKey, TValue>(MemberInfo member)
         {
-            if (!AutoMapper.TryCreateGenericDictionaryMap<TKey, TValue>(member.MemberType(), EmptyValueStrategy, out ManyToOneDictionaryMap<TValue> map))
+            if (!AutoMapper.TryCreateGenericDictionaryMap<TKey, TValue>(member.MemberType(), EmptyValueStrategy, out ManyToOneDictionaryMap<TValue>? map))
             {
                 throw new ExcelMappingException($"No known way to instantiate type \"{member.MemberType()}\".");
             }
@@ -424,15 +423,15 @@ namespace ExcelMapper
         /// of this class map, and creates a map for each sub member access.
         /// This enables support for expressions such as p => p.prop.subprop.field.final.
         /// </summary>
-        /// <param name="propertymap">The map for the final member access in the stack.</param>
+        /// <param name="propertyMap">The map for the final member access in the stack.</param>
         /// <param name="memberExpressions">A stack of each MemberExpression in the list of member access expressions.</param>
-        protected internal void CreateObjectMap(ExcelPropertyMap propertymap, Stack<MemberExpression> memberExpressions)
+        protected internal void CreateObjectMap(ExcelPropertyMap propertyMap, Stack<MemberExpression> memberExpressions)
         {
             MemberExpression memberExpression = memberExpressions.Pop();
             if (memberExpressions.Count == 0)
             {
                 // This is the final member.
-                Properties.Add(propertymap);
+                Properties.Add(propertyMap);
                 return;
             }
 
@@ -441,17 +440,20 @@ namespace ExcelMapper
             MethodInfo method = MapObjectMethod.MakeGenericMethod(memberType);
             try
             {
-                method.Invoke(this, new object[] { propertymap, memberExpression, memberExpressions });
+                method.Invoke(this, new object[] { propertyMap, memberExpression, memberExpressions });
             }
             catch (TargetInvocationException exception)
             {
-                throw exception.InnerException;
+                // Discarding InnerException's nullability warning
+                // because it will never be null.
+                // It is nullable only because base Exception has it as nullable.
+                throw exception.InnerException!;
             }
         }
 
         private void CreateObjectMapGeneric<TProperty>(ExcelPropertyMap propertyMap, MemberExpression memberExpression, Stack<MemberExpression> memberExpressions)
         {
-            ExcelPropertyMap map = Properties.FirstOrDefault(m => m.Member.Equals(memberExpression.Member));
+            ExcelPropertyMap? map = Properties.FirstOrDefault(m => m.Member.Equals(memberExpression.Member));
 
             ExcelClassMap<TProperty> objectPropertyMap;
             if (map == null)
@@ -461,7 +463,7 @@ namespace ExcelMapper
             }
             else if (!(map.Map is ExcelClassMap<TProperty> existingMap))
             {
-                throw new InvalidOperationException($"Expression is already mapped differently as {map.GetType().ToString()}.");
+                throw new InvalidOperationException($"Expression is already mapped differently as {map.GetType()}.");
             }
             else
             {
@@ -510,7 +512,7 @@ namespace ExcelMapper
             return this;
         }
 
-        private static MethodInfo s_mapObjectMethod;
+        private static MethodInfo? s_mapObjectMethod;
         private static MethodInfo MapObjectMethod => s_mapObjectMethod ?? (s_mapObjectMethod = typeof(ExcelClassMap<T>).GetTypeInfo().GetDeclaredMethod(nameof(CreateObjectMapGeneric)));
     }
 }

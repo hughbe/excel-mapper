@@ -17,7 +17,7 @@ namespace ExcelMapper.Tests
         [Fact]
         public void Ctor_NullName_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("name", () => new ExcelColumnNameAttribute(null));
+            Assert.Throws<ArgumentNullException>("name", () => new ExcelColumnNameAttribute(null!));
         }
 
         [Fact]
@@ -42,7 +42,7 @@ namespace ExcelMapper.Tests
         public void Name_SetNull_ThrowsArgumentNullException()
         {
             var attribute = new ExcelColumnNameAttribute("Name");
-            Assert.Throws<ArgumentNullException>("value", () => attribute.Name = null);
+            Assert.Throws<ArgumentNullException>("value", () => attribute.Name = null!);
         }
 
         [Fact]

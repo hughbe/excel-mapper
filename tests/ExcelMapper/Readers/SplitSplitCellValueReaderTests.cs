@@ -21,7 +21,7 @@ namespace ExcelMapper.Readers.Tests
         [Fact]
         public void Ctor_NullCellReader_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("cellReader", () => new SubSplitCellValueReader(null));
+            Assert.Throws<ArgumentNullException>("cellReader", () => new SubSplitCellValueReader(null!));
         }
 
         [Theory]
@@ -48,14 +48,14 @@ namespace ExcelMapper.Readers.Tests
         public void CellReader_SetNull_ThrowsArgumentNullException()
         {
             var reader = new SubSplitCellValueReader(new ColumnNameValueReader("ColumnName"));
-            Assert.Throws<ArgumentNullException>("value", () => reader.CellReader = null);
+            Assert.Throws<ArgumentNullException>("value", () => reader.CellReader = null!);
         }
 
         [Fact]
         public void GetValues_NullReaderValue_ReturnsEmpty()
         {
             var reader = new SubSplitCellValueReader(new NullValueReader());
-            Assert.True(reader.TryGetValues(null, 0, null, out IEnumerable<ReadCellValueResult> result));
+            Assert.True(reader.TryGetValues(null!, 0, null!, out IEnumerable<ReadCellValueResult>? result));
             Assert.Empty(result);
         }
 

@@ -16,7 +16,7 @@ namespace ExcelMapper.Readers.Tests
         [Fact]
         public void Ctor_NullColumnIndices_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("columnIndices", () => new MultipleColumnIndicesValueReader(null));
+            Assert.Throws<ArgumentNullException>("columnIndices", () => new MultipleColumnIndicesValueReader(null!));
         }
 
         [Fact]

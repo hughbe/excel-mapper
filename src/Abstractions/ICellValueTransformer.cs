@@ -2,6 +2,6 @@
 {
     public interface ICellValueTransformer
     {
-        string TransformStringValue(ExcelSheet sheet, int rowIndex, ReadCellValueResult stringValue);
+        string? TransformStringValue(ExcelSheet sheet, int rowIndex, ReadCellValueResult stringValue);
     }
 }

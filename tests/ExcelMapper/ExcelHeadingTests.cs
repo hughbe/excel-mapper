@@ -39,7 +39,7 @@ namespace ExcelMapper.Tests
             ExcelSheet sheet = importer.ReadSheet();
             ExcelHeading heading = sheet.ReadHeading();
 
-            Assert.Throws<ArgumentNullException>("key", () => heading.GetColumnIndex(null));
+            Assert.Throws<ArgumentNullException>("key", () => heading.GetColumnIndex(null!));
         }
 
         [Theory]
@@ -64,7 +64,8 @@ namespace ExcelMapper.Tests
             string[] columnNames = heading.ColumnNames.ToArray();
             for (int i = 0; i < columnNames.Length; i++)
             {
-                Assert.Equal(i, heading.GetFirstColumnMatchingIndex(e => e == columnNames[i]));
+                var scopedIndex = i;
+                Assert.Equal(i, heading.GetFirstColumnMatchingIndex(e => e == columnNames[scopedIndex]));
                 Assert.Equal(columnNames[i], heading.GetColumnName(i));
             }
         }
@@ -118,7 +119,7 @@ namespace ExcelMapper.Tests
             ExcelSheet sheet = importer.ReadSheet();
             ExcelHeading heading = sheet.ReadHeading();
 
-            Assert.Throws<ArgumentNullException>("key", () => heading.TryGetColumnIndex(null, out int index));
+            Assert.Throws<ArgumentNullException>("key", () => heading.TryGetColumnIndex(null!, out _));
         }
 
         [Theory]
@@ -144,7 +145,8 @@ namespace ExcelMapper.Tests
             string[] columnNames = heading.ColumnNames.ToArray();
             for (int i = 0; i < columnNames.Length; i++)
             {
-                Assert.True(heading.TryGetFirstColumnMatchingIndex(e => e == columnNames[i], out int index));
+                var scopedIndex = i;
+                Assert.True(heading.TryGetFirstColumnMatchingIndex(e => e == columnNames[scopedIndex], out int index));
                 Assert.Equal(i, index);
                 Assert.Equal(columnNames[i], heading.GetColumnName(i));
             }

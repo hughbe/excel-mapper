@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
@@ -45,7 +46,7 @@ namespace ExcelMapper.Readers
             ColumnIndices = columnIndices;
         }
 
-        public bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out IEnumerable<ReadCellValueResult> result)
+        public bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, [NotNullWhen(true)] out IEnumerable<ReadCellValueResult>? result)
         {
             result = ColumnIndices.Select(columnIndex =>
             {

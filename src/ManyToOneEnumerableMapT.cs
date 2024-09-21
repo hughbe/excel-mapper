@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
@@ -8,7 +9,7 @@ using ExcelMapper.Readers;
 
 namespace ExcelMapper
 {
-    public delegate IEnumerable<T> CreateElementsFactory<T>(IEnumerable<T> elements);
+    public delegate IEnumerable<T?> CreateElementsFactory<T>(IEnumerable<T?> elements);
 
     /// <summary>
     /// Reads multiple cells of an excel sheet and maps the value of the cell to the
@@ -16,7 +17,7 @@ namespace ExcelMapper
     /// </summary>
     public class ManyToOneEnumerableMap<TElement> : IMap
     {
-        public IMultipleCellValuesReader _cellValuesReader;
+        private IMultipleCellValuesReader _cellValuesReader;
 
         public IMultipleCellValuesReader CellValuesReader
         {
@@ -36,14 +37,14 @@ namespace ExcelMapper
         /// </summary>
         public ManyToOneEnumerableMap(IMultipleCellValuesReader cellValuesReader, IValuePipeline<TElement> elementPipeline, CreateElementsFactory<TElement> createElementsFactory)
         {
-            CellValuesReader = cellValuesReader ?? throw new ArgumentNullException(nameof(cellValuesReader));
+            _cellValuesReader = cellValuesReader ?? throw new ArgumentNullException(nameof(cellValuesReader));
             ElementPipeline = elementPipeline ?? throw new ArgumentNullException(nameof(elementPipeline));
             CreateElementsFactory = createElementsFactory ?? throw new ArgumentNullException(nameof(createElementsFactory));
         }
 
-        public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object value)
+        public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
         {
-            if (!CellValuesReader.TryGetValues(sheet, rowIndex, reader, out IEnumerable<ReadCellValueResult> results))
+            if (!CellValuesReader.TryGetValues(sheet, rowIndex, reader, out IEnumerable<ReadCellValueResult>? results))
             {
                 if (Optional)
                 {
@@ -51,13 +52,13 @@ namespace ExcelMapper
                     return false;
                 }
 
-                throw new ExcelMappingException($"Could not read value for {member.Name}", sheet, rowIndex, -1);
+                throw new ExcelMappingException($"Could not read value for {member?.Name}", sheet, rowIndex, -1);
             }
 
-            var elements = new List<TElement>();
+            var elements = new List<TElement?>();
             foreach (ReadCellValueResult result in results)
             {
-                TElement elementValue = (TElement)ValuePipeline.GetPropertyValue(ElementPipeline, sheet, rowIndex, reader, result, member);
+                var elementValue = (TElement?)ValuePipeline.GetPropertyValue(ElementPipeline, sheet, rowIndex, result, member);
                 elements.Add(elementValue);
             }
 
@@ -144,6 +145,11 @@ namespace ExcelMapper
         /// <returns>The property map that invoked this method.</returns>
         public ManyToOneEnumerableMap<TElement> WithSeparators(params char[] separators)
         {
+            if (separators is null)
+            {
+                throw new ArgumentNullException(nameof(separators));
+            }
+
             if (!(CellValuesReader is SplitCellValueReader splitColumnReader))
             {
                 throw new ExcelMappingException("The mapping comes from multiple columns, so cannot be split.");
@@ -165,7 +171,12 @@ namespace ExcelMapper
         /// <returns>The property map that invoked this method.</returns>
         public ManyToOneEnumerableMap<TElement> WithSeparators(IEnumerable<char> separators)
         {
-            return WithSeparators(separators?.ToArray());
+            if (separators == null)
+            {
+                throw new ArgumentNullException(nameof(separators));
+            }
+
+            return WithSeparators(separators.ToArray());
         }
 
         /// <summary>
@@ -176,6 +187,11 @@ namespace ExcelMapper
         /// <returns>The property map that invoked this method.</returns>
         public ManyToOneEnumerableMap<TElement> WithSeparators(params string[] separators)
         {
+            if (separators is null)
+            {
+                throw new ArgumentNullException(nameof(separators));
+            }
+            
             if (!(CellValuesReader is SplitCellValueReader splitColumnReader))
             {
                 throw new ExcelMappingException("The mapping comes from multiple columns, so cannot be split.");
@@ -197,7 +213,12 @@ namespace ExcelMapper
         /// <returns>The property map that invoked this method.</returns>
         public ManyToOneEnumerableMap<TElement> WithSeparators(IEnumerable<string> separators)
         {
-            return WithSeparators(separators?.ToArray());
+            if (separators == null)
+            {
+                throw new ArgumentNullException(nameof(separators));
+            }
+
+            return WithSeparators(separators.ToArray());
         }
 
         /// <summary>
@@ -220,7 +241,12 @@ namespace ExcelMapper
         /// <returns>The property map that invoked this method.</returns>
         public ManyToOneEnumerableMap<TElement> WithColumnNames(IEnumerable<string> columnNames)
         {
-            return WithColumnNames(columnNames?.ToArray());
+            if (columnNames == null)
+            {
+                throw new ArgumentNullException(nameof(columnNames));
+            }
+
+            return WithColumnNames(columnNames.ToArray());
         }
 
         /// <summary>
@@ -243,7 +269,12 @@ namespace ExcelMapper
         /// <returns>The property map that invoked this method.</returns>
         public ManyToOneEnumerableMap<TElement> WithColumnIndices(IEnumerable<int> columnIndices)
         {
-            return WithColumnIndices(columnIndices?.ToArray());
+            if (columnIndices == null)
+            {
+                throw new ArgumentNullException(nameof(columnIndices));
+            }
+            
+            return WithColumnIndices(columnIndices.ToArray());
         }
     }
 }

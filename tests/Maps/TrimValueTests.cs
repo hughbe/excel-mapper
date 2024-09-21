@@ -27,7 +27,7 @@ namespace ExcelMapper.Tests
 
         private class StringValue
         {
-            public string Value { get; set; }
+            public string Value { get; set; } = default!;
         }
 
         private class TrimStringValueMap : ExcelClassMap<StringValue>

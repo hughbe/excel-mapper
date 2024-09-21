@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Reflection;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Readers;
@@ -29,25 +30,25 @@ namespace ExcelMapper.Tests
 
         private class NestedObjectValue
         {
-            public SubValue1 SubValue1 { get; set; }
-            public SubValue2 SubValue2 { get; set; }
+            public SubValue1 SubValue1 { get; set; } = default!;
+            public SubValue2 SubValue2 { get; set; } = default!;
         }
 
         private class SubValue1
         {
-            public string StringValue { get; set; }
-            public string[] SplitStringValue { get; set; }
+            public string StringValue { get; set; } = default!;
+            public string[] SplitStringValue { get; set; } = default!;
         }
 
         private class SubValue2
         {
             public int IntValue { get; set; }
-            public SubValue3 SubValue { get; set; }
+            public SubValue3 SubValue { get; set; } = default!;
         }
 
         private class SubValue3
         {
-            public string SubString { get; set; }
+            public string SubString { get; set; } = default!;
             public int SubInt { get; set; }
         }
 
@@ -142,21 +143,21 @@ namespace ExcelMapper.Tests
             Assert.Equal("TheTuesdayClose", row1.BusinessHours[1].EndTime);
         }
 
-        public class NestedListParentClass
+        private class NestedListParentClass
         {
-            public string Name { get; set; }
-            public string Address { get; set; }
-            public List<BusinessHours> BusinessHours { get; set; }
+            public string Name { get; set; } = default!;
+            public string Address { get; set; } = default!;
+            public List<BusinessHours> BusinessHours { get; set; } = default!;
         }
 
-        public class BusinessHours
+        private class BusinessHours
         {
-            public string DayLabel { get; set; }
-            public string StartTime { get; set; }
-            public string EndTime { get; set; }
+            public string? DayLabel { get; set; }
+            public string? StartTime { get; set; }
+            public string? EndTime { get; set; }
         }
 
-        public class NestedListParentClassMap : ExcelClassMap<NestedListParentClass>
+        private class NestedListParentClassMap : ExcelClassMap<NestedListParentClass>
         {
             public NestedListParentClassMap()
             {
@@ -173,7 +174,7 @@ namespace ExcelMapper.Tests
             private int _previousRowIndex = -1;
             private int _currentIndex = 0;
 
-            public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo member, out object value)
+            public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
             {
                 // Note: only works for 2 days (Monday, Tuesday) as written, but easy to extend.
                 var result = new List<BusinessHours>();

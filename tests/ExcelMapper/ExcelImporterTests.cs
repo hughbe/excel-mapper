@@ -22,7 +22,7 @@ namespace ExcelMapper.Tests
         [Fact]
         public void Ctor_NullStream_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("stream", () => new ExcelImporter((Stream)null));
+            Assert.Throws<ArgumentNullException>("stream", () => new ExcelImporter((Stream)null!));
         }
 
         [Fact]
@@ -40,7 +40,7 @@ namespace ExcelMapper.Tests
         [Fact]
         public void Ctor_NullReader_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("reader", () => new ExcelImporter((IExcelDataReader)null));
+            Assert.Throws<ArgumentNullException>("reader", () => new ExcelImporter((IExcelDataReader)null!));
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace ExcelMapper.Tests
                 ExcelSheet[] sheets = importer.ReadSheets().ToArray();
                 Assert.Equal(new string[] { "Primitives", "Empty", "Third Sheet" }, sheets.Select(sheet => sheet.Name));
                 Assert.Equal(new bool[] { true, true, true }, sheets.Select(sheet => sheet.HasHeading));
-                Assert.Equal(new ExcelHeading[] { null, null, null }, sheets.Select(sheet => sheet.Heading));
+                Assert.Equal(new ExcelHeading?[] { null, null, null }, sheets.Select(sheet => sheet.Heading));
             }
         }
 
@@ -64,13 +64,13 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new string[] { "Primitives", "Empty", "Third Sheet" }, sheets.Select(sheet => sheet.Name));
                 Assert.Equal(new int[] { 0, 1, 2 }, sheets.Select(sheet => sheet.Index));
                 Assert.Equal(new bool[] { true, true, true }, sheets.Select(sheet => sheet.HasHeading));
-                Assert.Equal(new ExcelHeading[] { null, null, null }, sheets.Select(sheet => sheet.Heading));
+                Assert.Equal(new ExcelHeading?[] { null, null, null }, sheets.Select(sheet => sheet.Heading));
 
                 sheets = importer.ReadSheets().ToArray();
                 Assert.Equal(new string[] { "Primitives", "Empty", "Third Sheet" }, sheets.Select(sheet => sheet.Name));
                 Assert.Equal(new int[] { 0, 1, 2 }, sheets.Select(sheet => sheet.Index));
                 Assert.Equal(new bool[] { true, true, true }, sheets.Select(sheet => sheet.HasHeading));
-                Assert.Equal(new ExcelHeading[] { null, null, null }, sheets.Select(sheet => sheet.Heading));
+                Assert.Equal(new ExcelHeading?[] { null, null, null }, sheets.Select(sheet => sheet.Heading));
             }
         }
 
@@ -83,7 +83,7 @@ namespace ExcelMapper.Tests
                 Assert.Equal(new string[] { "Primitives", "Empty", "Third Sheet" }, sheets.Select(sheet => sheet.Name));
                 Assert.Equal(new int[] { 0, 1, 2 }, sheets.Select(sheet => sheet.Index));
                 Assert.Equal(new bool[] { true, true, true }, sheets.Select(sheet => sheet.HasHeading));
-                Assert.Equal(new ExcelHeading[] { null, null, null }, sheets.Select(sheet => sheet.Heading));
+                Assert.Equal(new ExcelHeading?[] { null, null, null }, sheets.Select(sheet => sheet.Heading));
 
                 ExcelSheet nextSheet = importer.ReadSheet();
                 Assert.Equal("Primitives", nextSheet.Name);
@@ -142,24 +142,27 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.Equal("Primitives", sheet1.Name);
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.NotNull(sheet1);
+                Assert.Equal("Primitives", sheet1!.Name);
                 Assert.Equal(ExcelSheetVisibility.Visible, sheet1.Visibility);
                 Assert.Equal(0, sheet1.Index);
                 Assert.True(sheet1.HasHeading);
                 Assert.Null(sheet1.Heading);
                 Assert.Equal(-1, sheet1.CurrentRowIndex);
 
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.Equal("Empty", sheet2.Name);
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet2));
+                Assert.NotNull(sheet2);
+                Assert.Equal("Empty", sheet2!.Name);
                 Assert.Equal(ExcelSheetVisibility.Visible, sheet2.Visibility);
                 Assert.Equal(1, sheet2.Index);
                 Assert.True(sheet2.HasHeading);
                 Assert.Null(sheet2.Heading);
                 Assert.Equal(-1, sheet2.CurrentRowIndex);
 
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
-                Assert.Equal("Third Sheet", sheet3.Name);
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
+                Assert.NotNull(sheet3);
+                Assert.Equal("Third Sheet", sheet3!.Name);
                 Assert.Equal(ExcelSheetVisibility.Visible, sheet3.Visibility);
                 Assert.Equal(2, sheet3.Index);
                 Assert.True(sheet3.HasHeading);
@@ -177,7 +180,7 @@ namespace ExcelMapper.Tests
                 importer.ReadSheet();
                 importer.ReadSheet();
 
-                Assert.False(importer.TryReadSheet(out ExcelSheet sheet));
+                Assert.False(importer.TryReadSheet(out ExcelSheet? sheet));
                 Assert.Null(sheet);
             }
         }
@@ -240,7 +243,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.Throws<ArgumentNullException>("sheetName", () => importer.ReadSheet(null));
+                Assert.Throws<ArgumentNullException>("sheetName", () => importer.ReadSheet(null!));
             }
         }
 
@@ -263,8 +266,9 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.True(importer.TryReadSheet("Empty", out ExcelSheet sheet));
-                Assert.Equal("Empty", sheet.Name);
+                Assert.True(importer.TryReadSheet("Empty", out ExcelSheet? sheet));
+                Assert.NotNull(sheet);
+                Assert.Equal("Empty", sheet!.Name);
                 Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
@@ -292,8 +296,9 @@ namespace ExcelMapper.Tests
                 importer.ReadSheet();
 
                 // Reading a named sheet should reset the reader before finding the sheet.
-                Assert.True(importer.TryReadSheet("Empty", out ExcelSheet sheet));
-                Assert.Equal("Empty", sheet.Name);
+                Assert.True(importer.TryReadSheet("Empty", out ExcelSheet? sheet));
+                Assert.NotNull(sheet);
+                Assert.Equal("Empty", sheet!.Name);
                 Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
@@ -322,7 +327,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.False(importer.TryReadSheet(sheetName, out ExcelSheet sheet));
+                Assert.False(importer.TryReadSheet(sheetName, out ExcelSheet? sheet));
                 Assert.Null(sheet);
             }
         }
@@ -396,8 +401,9 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.True(importer.TryReadSheet(1, out ExcelSheet sheet));
-                Assert.Equal("Empty", sheet.Name);
+                Assert.True(importer.TryReadSheet(1, out ExcelSheet? sheet));
+                Assert.NotNull(sheet);
+                Assert.Equal("Empty", sheet!.Name);
                 Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
@@ -425,8 +431,9 @@ namespace ExcelMapper.Tests
                 importer.ReadSheet();
 
                 // Reading a named sheet should reset the reader before finding the sheet.
-                Assert.True(importer.TryReadSheet(1, out ExcelSheet sheet));
-                Assert.Equal("Empty", sheet.Name);
+                Assert.True(importer.TryReadSheet(1, out ExcelSheet? sheet));
+                Assert.NotNull(sheet);
+                Assert.Equal("Empty", sheet!.Name);
                 Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
                 Assert.Equal(1, sheet.Index);
                 Assert.True(sheet.HasHeading);
@@ -451,7 +458,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.False(importer.TryReadSheet(sheetIndex, out ExcelSheet sheet));
+                Assert.False(importer.TryReadSheet(sheetIndex, out ExcelSheet? sheet));
                 Assert.Null(sheet);
             }
         }
@@ -461,11 +468,11 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.True(importer.TryReadSheet(out _));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
 
-                sheet1.ReadHeading();
+                sheet1!.ReadHeading();
 
                 TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
                 Assert.Equal("a", sheet1Row1.StringValue);
@@ -476,7 +483,7 @@ namespace ExcelMapper.Tests
                 TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
                 Assert.Null(sheet1Row3.StringValue);
 
-                sheet3.ReadHeading();
+                sheet3!.ReadHeading();
 
                 TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
                 Assert.Equal("s1", sheet3Row1.StringValue);
@@ -494,12 +501,12 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.True(importer.TryReadSheet(out _));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
 
-                sheet1.ReadHeading();
-                sheet3.ReadHeading();
+                sheet1!.ReadHeading();
+                sheet3!.ReadHeading();
 
                 TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
                 Assert.Equal("a", sheet1Row1.StringValue);
@@ -526,12 +533,12 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.True(importer.TryReadSheet(out _));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
 
-                sheet1.ReadHeading();
-                sheet3.ReadHeading();
+                sheet1!.ReadHeading();
+                sheet3!.ReadHeading();
 
                 TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
                 Assert.Equal("s1", sheet3Row1.StringValue);
@@ -558,11 +565,11 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.True(importer.TryReadSheet(out _));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
 
-                sheet3.ReadHeading();
+                sheet3!.ReadHeading();
 
                 TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
                 Assert.Equal("s1", sheet3Row1.StringValue);
@@ -573,7 +580,7 @@ namespace ExcelMapper.Tests
                 TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
                 Assert.Equal("s3", sheet3Row3.StringValue);
 
-                sheet1.ReadHeading();
+                sheet1!.ReadHeading();
 
                 TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
                 Assert.Equal("a", sheet1Row1.StringValue);
@@ -591,12 +598,12 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.True(importer.TryReadSheet(out _));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
 
-                sheet3.ReadHeading();
-                sheet1.ReadHeading();
+                sheet3!.ReadHeading();
+                sheet1!.ReadHeading();
 
                 TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
                 Assert.Equal("a", sheet1Row1.StringValue);
@@ -623,12 +630,12 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.True(importer.TryReadSheet(out _));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
 
-                sheet3.ReadHeading();
-                sheet1.ReadHeading();
+                sheet3!.ReadHeading();
+                sheet1!.ReadHeading();
 
                 TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
                 Assert.Equal("s1", sheet3Row1.StringValue);
@@ -655,12 +662,12 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.True(importer.TryReadSheet(out _));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
 
-                sheet1.ReadHeading();
-                sheet3.ReadHeading();
+                sheet1!.ReadHeading();
+                sheet3!.ReadHeading();
 
                 TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
                 Assert.Equal("a", sheet1Row1.StringValue);
@@ -687,12 +694,12 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.True(importer.TryReadSheet(out _));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
 
-                sheet1.ReadHeading();
-                sheet3.ReadHeading();
+                sheet1!.ReadHeading();
+                sheet3!.ReadHeading();
 
                 TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
                 Assert.Equal("a", sheet1Row1.StringValue);
@@ -719,12 +726,12 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.True(importer.TryReadSheet(out _));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
 
-                sheet1.ReadHeading();
-                sheet3.ReadHeading();
+                sheet1!.ReadHeading();
+                sheet3!.ReadHeading();
 
                 TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
                 Assert.Equal("s1", sheet3Row1.StringValue);
@@ -751,12 +758,12 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.True(importer.TryReadSheet(out _));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
 
-                sheet1.ReadHeading();
-                sheet3.ReadHeading();
+                sheet1!.ReadHeading();
+                sheet3!.ReadHeading();
 
                 TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
                 Assert.Equal("s1", sheet3Row1.StringValue);
@@ -785,12 +792,12 @@ namespace ExcelMapper.Tests
             {
                 importer.Configuration.RegisterClassMap<TestClassMapColumnIndex>();
 
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.True(importer.TryReadSheet(out _));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
 
-                sheet1.HasHeading = false;
-                sheet3.HasHeading = false;
+                sheet1!.HasHeading = false;
+                sheet3!.HasHeading = false;
 
                 TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
                 Assert.Equal("StringValue", sheet1Row1.StringValue);
@@ -819,12 +826,12 @@ namespace ExcelMapper.Tests
             {
                 importer.Configuration.RegisterClassMap<TestClassMapColumnIndex>();
 
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.True(importer.TryReadSheet(out _));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
 
-                sheet1.HasHeading = false;
-                sheet3.HasHeading = false;
+                sheet1!.HasHeading = false;
+                sheet3!.HasHeading = false;
 
                 TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
                 Assert.Equal("StringValue", sheet3Row1.StringValue);
@@ -853,12 +860,12 @@ namespace ExcelMapper.Tests
             {
                 importer.Configuration.RegisterClassMap<TestClassMapColumnIndex>();
 
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.True(importer.TryReadSheet(out _));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
 
-                sheet1.HasHeading = false;
-                sheet3.HasHeading = false;
+                sheet1!.HasHeading = false;
+                sheet3!.HasHeading = false;
 
                 TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
                 Assert.Equal("StringValue", sheet1Row1.StringValue);
@@ -887,12 +894,12 @@ namespace ExcelMapper.Tests
             {
                 importer.Configuration.RegisterClassMap<TestClassMapColumnIndex>();
 
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.True(importer.TryReadSheet(out _));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
 
-                sheet1.HasHeading = false;
-                sheet3.HasHeading = false;
+                sheet1!.HasHeading = false;
+                sheet3!.HasHeading = false;
 
                 TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
                 Assert.Equal("StringValue", sheet1Row1.StringValue);
@@ -921,12 +928,12 @@ namespace ExcelMapper.Tests
             {
                 importer.Configuration.RegisterClassMap<TestClassMapColumnIndex>();
 
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.True(importer.TryReadSheet(out _));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
 
-                sheet1.HasHeading = false;
-                sheet3.HasHeading = false;
+                sheet1!.HasHeading = false;
+                sheet3!.HasHeading = false;
 
                 TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
                 Assert.Equal("StringValue", sheet3Row1.StringValue);
@@ -955,12 +962,12 @@ namespace ExcelMapper.Tests
             {
                 importer.Configuration.RegisterClassMap<TestClassMapColumnIndex>();
 
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet1));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet2));
-                Assert.True(importer.TryReadSheet(out ExcelSheet sheet3));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet1));
+                Assert.True(importer.TryReadSheet(out _));
+                Assert.True(importer.TryReadSheet(out ExcelSheet? sheet3));
 
-                sheet1.HasHeading = false;
-                sheet3.HasHeading = false;
+                sheet1!.HasHeading = false;
+                sheet3!.HasHeading = false;
 
                 TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
                 Assert.Equal("StringValue", sheet3Row1.StringValue);
@@ -993,7 +1000,7 @@ namespace ExcelMapper.Tests
 
         private class TestClass
         {
-            public string StringValue { get; set; }
+            public string? StringValue { get; set; }
         }
     }
 }

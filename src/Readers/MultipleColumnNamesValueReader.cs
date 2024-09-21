@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Utilities;
@@ -45,7 +45,7 @@ namespace ExcelMapper.Readers
             ColumnNames = columnNames;
         }
 
-        public bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out IEnumerable<ReadCellValueResult> result)
+        public bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, [NotNullWhen(true)] out IEnumerable<ReadCellValueResult>? result)
         {
             if (sheet.Heading == null)
             {

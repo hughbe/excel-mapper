@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
+﻿using System.Dynamic;
 using Xunit;
 
 namespace ExcelMapper.Tests
@@ -123,7 +121,7 @@ namespace ExcelMapper.Tests
 
         private class ExpandoObjectClass
         {
-            public ExpandoObject Value { get; set; }
+            public ExpandoObject Value { get; set; } = default!;
         }
 
         private class DefaultExpandoObjectClassMap : ExcelClassMap<ExpandoObjectClass>

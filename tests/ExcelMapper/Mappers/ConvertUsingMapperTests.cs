@@ -17,7 +17,7 @@ namespace ExcelMapper.Mappers.Tests
         [Fact]
         public void Ctor_NullConverter_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("converter", () => new ConvertUsingMapper(null));
+            Assert.Throws<ArgumentNullException>("converter", () => new ConvertUsingMapper(null!));
         }
 
         [Fact]

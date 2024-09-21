@@ -20,7 +20,7 @@ namespace ExcelMapper.Mappers.Tests
         [Fact]
         public void Formats_SetValid_GetReturnsExpected()
         {
-            var formats = new string[] { null, "", "abc" };
+            var formats = new string[] { null!, "", "abc" };
             var item = new DateTimeMapper { Formats = formats };
             Assert.Same(formats, item.Formats);
         }
@@ -29,7 +29,7 @@ namespace ExcelMapper.Mappers.Tests
         public void Formats_SetNull_ThrowsArgumentNullException()
         {
             var item = new DateTimeMapper();
-            Assert.Throws<ArgumentNullException>("value", () => item.Formats = null);
+            Assert.Throws<ArgumentNullException>("value", () => item.Formats = null!);
         }
 
         [Fact]

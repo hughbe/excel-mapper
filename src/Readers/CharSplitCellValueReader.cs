@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using ExcelDataReader;
 using ExcelMapper.Abstractions;
 
 namespace ExcelMapper.Readers

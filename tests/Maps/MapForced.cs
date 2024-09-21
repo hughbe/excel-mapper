@@ -28,7 +28,7 @@ namespace ExcelMapper.Tests
 
         private class ObjectValue
         {
-            public object Value { get; set; }
+            public object Value { get; set; } = default!;
         }
 
         private class ForcedInt32ValueMap : ExcelClassMap<ObjectValue>

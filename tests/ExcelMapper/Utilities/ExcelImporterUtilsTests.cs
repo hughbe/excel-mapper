@@ -38,7 +38,7 @@ namespace ExcelMapper.Utilities.Tests
         {
             using (var importer = Helpers.GetImporter("Strings.xlsx"))
             {
-                Assert.Throws<ArgumentNullException>("assembly", () => ExcelImporterUtils.RegisterClassMapsInNamespace(importer, null, "ExcelMapper.Utilities.Tests"));
+                Assert.Throws<ArgumentNullException>("assembly", () => ExcelImporterUtils.RegisterClassMapsInNamespace(importer, null!, "ExcelMapper.Utilities.Tests"));
             }
         }
 
@@ -48,7 +48,7 @@ namespace ExcelMapper.Utilities.Tests
             using (var importer = Helpers.GetImporter("Strings.xlsx"))
             {
                 Assembly assembly = typeof(ExcelImporterUtils).GetTypeInfo().Assembly;
-                Assert.Throws<ArgumentNullException>("namespaceString", () => ExcelImporterUtils.RegisterClassMapsInNamespace(importer, assembly, null));
+                Assert.Throws<ArgumentNullException>("namespaceString", () => ExcelImporterUtils.RegisterClassMapsInNamespace(importer, assembly, null!));
             }
         }
 
@@ -79,6 +79,6 @@ namespace ExcelMapper.Utilities.Tests
 
     public class TestClass
     {
-        public string Value { get; set; }
+        public string Value { get; set; } = default!;
     }
 }

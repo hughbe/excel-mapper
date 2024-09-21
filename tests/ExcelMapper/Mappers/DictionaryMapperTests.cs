@@ -22,7 +22,7 @@ namespace ExcelMapper.Mappers.Tests
         [Fact]
         public void Ctor_NullDictionary_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("mappingDictionary", () => new DictionaryMapper<int>(null, StringComparer.CurrentCulture));
+            Assert.Throws<ArgumentNullException>("mappingDictionary", () => new DictionaryMapper<int>(null!, StringComparer.CurrentCulture));
         }
 
         [Theory]

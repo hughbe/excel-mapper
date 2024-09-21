@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using ExcelDataReader;
 
 namespace ExcelMapper.Abstractions
@@ -9,6 +10,6 @@ namespace ExcelMapper.Abstractions
     /// </summary>
     public interface IMultipleCellValuesReader
     {
-        bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out IEnumerable<ReadCellValueResult> result);
+        bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, [NotNullWhen(true)] out IEnumerable<ReadCellValueResult>? result);
     }
 }

@@ -71,7 +71,7 @@ namespace ExcelMapper.Tests
 
         private class StringClass
         {
-            public string Value { get; set; }
+            public string Value { get; set; } = default!;
         }
 
         private class DefaultStringClassMap : ExcelClassMap<StringClass>

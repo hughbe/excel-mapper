@@ -37,7 +37,7 @@ namespace ExcelMapper.Mappers
         /// <summary>
         /// Gets or sets the IFormatProvider used to map the value to a DateTime.
         /// </summary>
-        public IFormatProvider Provider { get; set; }
+        public IFormatProvider? Provider { get; set; }
 
         /// <summary>
         /// Gets or sets the DateTimeStyles used to map the value to a DateTime.

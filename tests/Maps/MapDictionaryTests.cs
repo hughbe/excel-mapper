@@ -1146,7 +1146,7 @@ namespace ExcelMapper.Tests
 
         private class IEnumerableKeyValuePairStringObjectClass
         {
-            public IEnumerable<KeyValuePair<string, object>> Value { get; set; }
+            public IEnumerable<KeyValuePair<string, object>> Value { get; set; } = default!;
         }
 
         private class DefaultIEnumerableKeyValuePairStringObjectClassMap : ExcelClassMap<IEnumerableKeyValuePairStringObjectClass>
@@ -1168,7 +1168,7 @@ namespace ExcelMapper.Tests
 
         private class IEnumerableKeyValuePairStringIntClass
         {
-            public IEnumerable<KeyValuePair<string, int>> Value { get; set; }
+            public IEnumerable<KeyValuePair<string, int>> Value { get; set; } = default!;
         }
 
         private class DefaultIEnumerableKeyValuePairStringIntClassMap : ExcelClassMap<IEnumerableKeyValuePairStringIntClass>
@@ -1190,7 +1190,7 @@ namespace ExcelMapper.Tests
 
         private class ICollectionKeyValuePairStringObjectClass
         {
-            public ICollection<KeyValuePair<string, object>> Value { get; set; }
+            public ICollection<KeyValuePair<string, object>> Value { get; set; } = default!;
         }
 
         private class DefaultICollectionKeyValuePairStringObjectClassMap : ExcelClassMap<ICollectionKeyValuePairStringObjectClass>
@@ -1212,7 +1212,7 @@ namespace ExcelMapper.Tests
 
         private class ICollectionKeyValuePairStringIntClass
         {
-            public ICollection<KeyValuePair<string, int>> Value { get; set; }
+            public ICollection<KeyValuePair<string, int>> Value { get; set; } = default!;
         }
 
         private class DefaultICollectionKeyValuePairStringIntClassMap : ExcelClassMap<ICollectionKeyValuePairStringIntClass>
@@ -1234,7 +1234,7 @@ namespace ExcelMapper.Tests
 
         private class IReadOnlyCollectionKeyValuePairStringObjectClass
         {
-            public IReadOnlyCollection<KeyValuePair<string, object>> Value { get; set; }
+            public IReadOnlyCollection<KeyValuePair<string, object>> Value { get; set; } = default!;
         }
 
         private class DefaultIReadOnlyCollectionKeyValuePairStringObjectClassMap : ExcelClassMap<IReadOnlyCollectionKeyValuePairStringObjectClass>
@@ -1256,7 +1256,7 @@ namespace ExcelMapper.Tests
 
         private class IReadOnlyCollectionKeyValuePairStringIntClass
         {
-            public IReadOnlyCollection<KeyValuePair<string, int>> Value { get; set; }
+            public IReadOnlyCollection<KeyValuePair<string, int>> Value { get; set; } = default!;
         }
 
         private class DefaultIReadOnlyCollectionKeyValuePairStringIntClassMap : ExcelClassMap<IReadOnlyCollectionKeyValuePairStringIntClass>
@@ -1278,7 +1278,7 @@ namespace ExcelMapper.Tests
 
         private class IDictionaryStringObjectClass
         {
-            public IDictionary<string, object> Value { get; set; }
+            public IDictionary<string, object> Value { get; set; } = default!;
         }
 
         private class DefaultIDictionaryStringObjectClassMap : ExcelClassMap<IDictionaryStringObjectClass>
@@ -1300,7 +1300,7 @@ namespace ExcelMapper.Tests
 
         private class IDictionaryStringIntClass
         {
-            public IDictionary<string, int> Value { get; set; }
+            public IDictionary<string, int> Value { get; set; } = default!;
         }
 
         private class DefaultIDictionaryStringIntClassMap : ExcelClassMap<IDictionaryStringIntClass>
@@ -1322,7 +1322,7 @@ namespace ExcelMapper.Tests
 
         private class IReadOnlyDictionaryStringObjectClass
         {
-            public IReadOnlyDictionary<string, object> Value { get; set; }
+            public IReadOnlyDictionary<string, object> Value { get; set; } = default!;
         }
 
         private class DefaultIReadOnlyDictionaryStringObjectClassMap : ExcelClassMap<IReadOnlyDictionaryStringObjectClass>
@@ -1344,7 +1344,7 @@ namespace ExcelMapper.Tests
 
         private class IReadOnlyDictionaryStringIntClass
         {
-            public IReadOnlyDictionary<string, int> Value { get; set; }
+            public IReadOnlyDictionary<string, int> Value { get; set; } = default!;
         }
 
         private class DefaultIReadOnlyDictionaryStringIntClassMap : ExcelClassMap<IReadOnlyDictionaryStringIntClass>
@@ -1366,7 +1366,7 @@ namespace ExcelMapper.Tests
 
         private class DictionaryStringObjectClass
         {
-            public Dictionary<string, object> Value { get; set; }
+            public Dictionary<string, object> Value { get; set; } = default!;
         }
 
         private class DefaultDictionaryStringObjectClassMap : ExcelClassMap<DictionaryStringObjectClass>
@@ -1388,7 +1388,7 @@ namespace ExcelMapper.Tests
 
         private class DictionaryStringIntClass
         {
-            public Dictionary<string, int> Value { get; set; }
+            public Dictionary<string, int> Value { get; set; } = default!;
         }
 
         private class DefaultDictionaryStringIntClassMap : ExcelClassMap<DictionaryStringIntClass>
@@ -1410,12 +1410,12 @@ namespace ExcelMapper.Tests
 
         private class DictionaryStringInvalidClass
         {
-            public Dictionary<string, ExcelSheet> Value { get; set; }
+            public Dictionary<string, ExcelSheet> Value { get; set; } = default!;
         }
 
         private class SortedDictionaryStringIntClass
         {
-            public SortedDictionary<string, int> Value { get; set; }
+            public SortedDictionary<string, int> Value { get; set; } = default!;
         }
 
         private class DefaultSortedDictionaryStringIntClassMap : ExcelClassMap<SortedDictionaryStringIntClass>
@@ -1437,7 +1437,7 @@ namespace ExcelMapper.Tests
 
         private class IImmutableDictionaryStringIntClass
         {
-            public IImmutableDictionary<string, int> Value { get; set; }
+            public IImmutableDictionary<string, int> Value { get; set; } = default!;
         }
 
         private class DefaultIImmutableDictionaryStringIntClassMap : ExcelClassMap<IImmutableDictionaryStringIntClass>
@@ -1459,7 +1459,7 @@ namespace ExcelMapper.Tests
 
         private class ImmutableDictionaryStringIntClass
         {
-            public ImmutableDictionary<string, int> Value { get; set; }
+            public ImmutableDictionary<string, int> Value { get; set; } = default!;
         }
 
         private class DefaultImmutableDictionaryStringIntClassMap : ExcelClassMap<ImmutableDictionaryStringIntClass>
@@ -1481,7 +1481,7 @@ namespace ExcelMapper.Tests
 
         private class ImmutableSortedDictionaryStringIntClass
         {
-            public ImmutableSortedDictionary<string, int> Value { get; set; }
+            public ImmutableSortedDictionary<string, int> Value { get; set; } = default!;
         }
 
         private class DefaultImmutableSortedDictionaryStringIntClassMap : ExcelClassMap<ImmutableSortedDictionaryStringIntClass>
@@ -1503,7 +1503,7 @@ namespace ExcelMapper.Tests
 
         private class ConcurrentDictionaryStringIntClass
         {
-            public ConcurrentDictionary<string, int> Value { get; set; }
+            public ConcurrentDictionary<string, int> Value { get; set; } = default!;
         }
 
         private class DefaultConcurrentDictionaryStringIntClassMap : ExcelClassMap<ConcurrentDictionaryStringIntClass>
