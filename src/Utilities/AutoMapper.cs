@@ -163,12 +163,6 @@ namespace ExcelMapper.Utilities
                 emptyFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, isEmpty: true);
                 invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, isEmpty: false);
             }
-            else if (type == typeof(string) || type == typeof(object) || type == typeof(IConvertible))
-            {
-                mapper = new StringMapper();
-                emptyFallback = ReconcileFallback(FallbackStrategy.SetToDefaultValue, isEmpty: true);
-                invalidFallback = ReconcileFallback(FallbackStrategy.SetToDefaultValue, isEmpty: false);
-            }
             else if (type == typeof(Uri))
             {
                 mapper = new UriMapper();
@@ -183,10 +177,9 @@ namespace ExcelMapper.Utilities
             }
             else
             {
-                mapper = null;
-                emptyFallback = null;
-                invalidFallback = null;
-                return false;
+                mapper = new StringMapper();
+                emptyFallback = ReconcileFallback(FallbackStrategy.SetToDefaultValue, isEmpty: true);
+                invalidFallback = ReconcileFallback(FallbackStrategy.SetToDefaultValue, isEmpty: false);
             }
 
             return true;
