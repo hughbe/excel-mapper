@@ -52,7 +52,9 @@ namespace ExcelMapper.Utilities.Tests
             public string _field = default!;
             protected string _protectedField = default!;
             internal string _internalField = default!;
+#pragma warning disable CS0414 // Field is never assigned to, and will always have its default value
             private string _privateField = default!;
+#pragma warning restore CS0414 // Field is never assigned to, and will always have its default value
             public static string s_field = default!;
             
             public string Property { get; set; } = default!;
