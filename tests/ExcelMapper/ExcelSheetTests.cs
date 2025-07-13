@@ -225,6 +225,21 @@ namespace ExcelMapper.Tests
             Assert.True(sheet.HasHeading);
         }
 
+        [Theory]
+        [MemberData(nameof(ReadRows_Area_TestData))]
+        public void ReadRows_IndexCountNotReadHeading_ReturnsExpected(int startIndex, int count, string?[] expectedValues)
+        {
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            ExcelSheet sheet = importer.ReadSheet();
+
+            IEnumerable<StringValue> rows = sheet.ReadRows<StringValue>(startIndex, count);
+            Assert.Equal(expectedValues, rows.Select(p => p.Value).ToArray());
+            Assert.Equal(startIndex + count, sheet.CurrentRowIndex);
+
+            Assert.NotNull(sheet.Heading);
+            Assert.True(sheet.HasHeading);
+        }
+
         [Fact]
         public void ReadRows_BlankLinesNotSkipped_ThrowsExcelMappingException()
         {

@@ -153,7 +153,8 @@ namespace ExcelMapper
 
         /// <summary>
         /// Maps each row within the range specified to an object using a registered mapping. If no map is registered for this
-        /// type then the type will be automapped. This method will not read the sheet's heading.
+        /// type then the type will be automapped. This method will read the sheet's heading if the sheet has
+        /// a heading and the heading has not yet been read.
         /// </summary>
         /// <param name="startIndex">The zero-based index from the first row of the document (including the header) of the range of rows to map from.</param>
         /// <param name="count">The number of rows to read and map.</param>
@@ -168,6 +169,11 @@ namespace ExcelMapper
             if (count < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(count), count, "The number of rows cannot be negative.");
+            }
+
+            if (HasHeading && Heading == null)
+            {
+                ReadHeading();
             }
 
             CurrentRowIndex = startIndex;
