@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using Microsoft.VisualBasic;
 using Xunit;
 
 namespace ExcelMapper.Tests
@@ -174,6 +178,36 @@ namespace ExcelMapper.Tests
             // Invalid cell value.
             NullableDateTimeValue row6 = sheet.ReadRow<NullableDateTimeValue>();
             Assert.Equal(new DateTime(2017, 07, 21), row6.Value);
+        }
+
+        [Fact]
+        public void ReadRow_InvalidFormat_ThrowsErrorWithRightMessage()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            using var importer = Helpers.GetImporter("DateTimes_Errors.xlsx");
+            importer.Configuration.RegisterClassMap<DateTimeValueClassMap>();
+
+            var sheet = importer.ReadSheet("Sheet1");
+            sheet.HeadingIndex = 0;
+
+            // Valid cell value.
+            var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<DateTimeValueInt>(0, 2).ToArray());
+            Assert.IsType<FormatException>(ex.InnerException);
+            Assert.Equal("Invalid assigning \"1/1/2025 1:01:01 AM\" to member \"Value\" of type \"System.Int32\" in column \"Date\" on row 1 in sheet \"Sheet1\".", ex.Message);
+        }
+
+        private class DateTimeValueInt
+        {
+            public int Value { get; set; }
+        }
+
+        private class DateTimeValueClassMap : ExcelClassMap<DateTimeValueInt>
+        {
+            public DateTimeValueClassMap()
+            {
+                Map(m => m.Value).WithColumnIndex(0);
+            }
         }
 
         private class DateTimeValue
