@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using ExcelDataReader;
+using ExcelMapper.Utilities;
 
 namespace ExcelMapper
 {
@@ -41,6 +42,39 @@ namespace ExcelMapper
             }
 
             Reader = ExcelReaderFactory.CreateReader(stream);
+        }
+
+                /// <summary>
+        /// Constructs an importer that reads an Excel file from a stream.
+        /// </summary>
+        /// <param name="stream">A stream containing the Excel file bytes.</param>
+        /// <param name="extension">The extension of the file (.xslx, .csv ...).</param>
+        public ExcelImporter(Stream stream, string extension)
+        {
+            if (stream == null)
+            {
+                throw new ArgumentNullException(nameof(stream));
+            }
+            if (extension is null)
+            {
+                throw new ArgumentNullException(nameof(extension));
+            }
+            if (!FileUtils.IsSupportedExtension(extension))
+            {
+                throw new ArgumentException(nameof(stream));
+            }
+
+            if (FileUtils.IsCsvExtension(extension))
+            {
+                Reader = ExcelReaderFactory.CreateCsvReader(stream);
+                return;
+            }
+            if (FileUtils.IsExcelExtension(extension))
+            {
+                Reader = ExcelReaderFactory.CreateReader(stream);
+                return;
+            }
+            throw new ArgumentException(nameof(stream));
         }
 
         /// <summary>
