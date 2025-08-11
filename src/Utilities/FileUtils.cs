@@ -8,40 +8,45 @@ namespace ExcelMapper.Utilities;
 public static class FileUtils
 {
     #region CSV Extensions
+
     /// <summary>
     /// Comma-separated values file extension.
     /// </summary>
-    public const string Csv = ".csv";
+    private const string Csv = ".csv";
+
     #endregion
 
     #region Excel Extensions
+
     /// <summary>
     /// Excel 97-2003 workbook file extension.
     /// </summary>
-    public const string Xls = ".xls";
-    
+    private const string Xls = ".xls";
+
     /// <summary>
     /// Excel workbook file extension.
     /// </summary>
-    public const string Xlsx = ".xlsx";
-    
+    private const string Xlsx = ".xlsx";
+
     /// <summary>
     /// Excel macro-enabled workbook file extension.
     /// </summary>
-    public const string Xlsm = ".xlsm";
-    
+    private const string Xlsm = ".xlsm";
+
     /// <summary>
     /// Excel binary workbook file extension.
     /// </summary>
-    public const string Xlsb = ".xlsb";
+    private const string Xlsb = ".xlsb";
+
     #endregion
 
 
     #region Collections
+
     /// <summary>
     /// All supported CSV file extensions.
     /// </summary>
-    public static readonly string[] CsvExtensions = 
+    public static readonly string[] CsvExtensions =
     {
         Csv
     };
@@ -49,7 +54,7 @@ public static class FileUtils
     /// <summary>
     /// All supported Excel file extensions.
     /// </summary>
-    public static readonly string[] ExcelExtensions = 
+    public static readonly string[] ExcelExtensions =
     {
         Xls,
         Xlsx,
@@ -68,9 +73,11 @@ public static class FileUtils
         Xlsm,
         Xlsb
     ];
+
     #endregion
 
     #region Helper Methods
+
     /// <summary>
     /// Determines if the specified extension is a CSV file.
     /// </summary>
@@ -78,10 +85,8 @@ public static class FileUtils
     /// <returns>True if the extension represents a CSV file; otherwise, false.</returns>
     public static bool IsCsvExtension(string extension)
     {
-        if (string.IsNullOrWhiteSpace(extension))
-            return false;
-
-        return string.Equals(extension, Csv, StringComparison.OrdinalIgnoreCase);
+        return !string.IsNullOrWhiteSpace(extension) &&
+               string.Equals(NormalizeExtension(extension), Csv, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -94,8 +99,8 @@ public static class FileUtils
         if (string.IsNullOrWhiteSpace(extension))
             return false;
 
-        return Array.Exists(ExcelExtensions, 
-            ext => string.Equals(ext, extension, StringComparison.OrdinalIgnoreCase));
+        return Array.Exists(ExcelExtensions,
+            ext => string.Equals(ext, NormalizeExtension(extension), StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
@@ -109,7 +114,7 @@ public static class FileUtils
             return false;
 
         return Array.Exists(AllSupportedExtensions,
-            ext => string.Equals(ext, extension, StringComparison.OrdinalIgnoreCase));
+            ext => string.Equals(ext, NormalizeExtension(extension), StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
@@ -123,11 +128,12 @@ public static class FileUtils
             return null;
 
         extension = extension.Trim();
-        
+
         if (!extension.StartsWith("."))
             extension = "." + extension;
 
         return extension.ToLowerInvariant();
     }
+
     #endregion
 }

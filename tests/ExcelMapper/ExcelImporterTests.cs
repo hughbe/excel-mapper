@@ -989,6 +989,91 @@ namespace ExcelMapper.Tests
             }
         }
 
+        /// <summary>
+        /// Tests that the constructor with a stream and .csv extension creates a valid importer.
+        /// </summary>
+        [Fact]
+        public void Ctor_StreamWithCsvExtension_Success()
+        {
+            using (var stream = Helpers.GetResource("Primitives.csv"))
+            using (var importer = new ExcelImporter(stream, ".csv"))
+            {
+                var sheet = importer.ReadSheet();
+                Assert.Equal(string.Empty, sheet.Name);
+                Assert.Equal(1, importer.NumberOfSheets);
+            }
+        }
+
+        /// <summary>
+        /// Tests that the constructor with a stream and .xlsx extension creates a valid importer.
+        /// </summary>
+        [Fact]
+        public void Ctor_StreamWithXlsxExtension_Success()
+        {
+            using (var stream = Helpers.GetResource("Primitives.xlsx"))
+            using (var importer = new ExcelImporter(stream, ".xlsx"))
+            {
+                Assert.Equal("Primitives", importer.ReadSheet().Name);
+                Assert.Equal(3, importer.NumberOfSheets);
+            }
+        }
+
+        /// <summary>
+        /// Tests that the constructor with a stream and an unsupported extension throws an ArgumentException.
+        /// </summary>
+        [Fact]
+        public void Ctor_StreamWithUnsupportedExtension_ThrowsArgumentException()
+        {
+            using (var stream = Helpers.GetResource("Primitives.xlsx"))
+            {
+                Assert.Throws<ArgumentException>("extension", () => new ExcelImporter(stream, ".txt"));
+            }
+        }
+
+        /// <summary>
+        /// Tests that the constructor with a stream and a null extension throws an ArgumentNullException.
+        /// </summary>
+        [Fact]
+        public void Ctor_StreamWithNullExtension_ThrowsArgumentNullException()
+        {
+            using (var stream = Helpers.GetResource("Primitives.xlsx"))
+            {
+                Assert.Throws<ArgumentNullException>("extension", () => new ExcelImporter(stream, null!));
+            }
+        }
+
+        /// <summary>
+        /// Tests reading a simple CSV file and mapping it to a class.
+        /// </summary>
+        [Fact]
+        public void ReadSheet_Csv_ReturnsExpected()
+        {
+            using (var stream = Helpers.GetResource("Primitives.csv"))
+            using (var importer = new ExcelImporter(stream, ".csv"))
+            {
+                var sheet = importer.ReadSheet();
+                var rows = sheet.ReadRows<TestClass>().ToArray();
+                Assert.Equal(3, rows.Length);
+                Assert.Equal("a", rows[0].StringValue);
+                Assert.Equal("b", rows[1].StringValue);
+                Assert.Null(rows[2].StringValue);
+            }
+        }
+
+        /// <summary>
+        /// Tests reading an empty CSV file.
+        /// </summary>
+        [Fact]
+        public void ReadSheet_EmptyCsv_ReturnsExpected()
+        {
+            using (var stream = Helpers.GetResource("Empty.csv"))
+            using (var importer = new ExcelImporter(stream, ".csv"))
+            {
+                var sheet = importer.ReadSheet();
+                var rows = sheet.ReadRows<TestClass>().ToArray();
+                Assert.Empty(rows);
+            }
+        }
         private class TestClassMapColumnIndex : ExcelClassMap<TestClass>
         {
             public TestClassMapColumnIndex()

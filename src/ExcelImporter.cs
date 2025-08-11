@@ -44,7 +44,7 @@ namespace ExcelMapper
             Reader = ExcelReaderFactory.CreateReader(stream);
         }
 
-                /// <summary>
+        /// <summary>
         /// Constructs an importer that reads an Excel file from a stream.
         /// </summary>
         /// <param name="stream">A stream containing the Excel file bytes.</param>
@@ -61,7 +61,7 @@ namespace ExcelMapper
             }
             if (!FileUtils.IsSupportedExtension(extension))
             {
-                throw new ArgumentException(nameof(stream));
+                throw new ArgumentException("Unsupported File extension", nameof(extension));
             }
 
             if (FileUtils.IsCsvExtension(extension))
@@ -74,7 +74,7 @@ namespace ExcelMapper
                 Reader = ExcelReaderFactory.CreateReader(stream);
                 return;
             }
-            throw new ArgumentException(nameof(stream));
+            throw new ArgumentException("Unsupported file extension.", nameof(extension));
         }
 
         /// <summary>
