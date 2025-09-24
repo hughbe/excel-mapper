@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net46;$(TargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net462;$(TargetFrameworks)</TargetFrameworks>
     <LangVersion>default</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -11,20 +11,20 @@
     <PackageId>ExcelDataReader.Mapping</PackageId>
     <PackageVersion>2.3.0</PackageVersion>
     <Authors>Hugh Bellamy</Authors>
-    <Title>Excel Mapping Helper</Title>
+    <Title>Excel Mapper</Title>
     <Description>An extension of ExcelDataReader that supports fluent mapping of rows to C# objects.</Description>
     <PackageProjectUrl>https://github.com/hughbe/excel-mapper</PackageProjectUrl>
     <RepositoryUrl>https://github.com/hughbe/excel-mapper</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>Copyright 2018 (c) Hugh Bellamy. All rights reserved.</Copyright>
-    <PackageTags>excel mapping mapper</PackageTags>
-    <PackageReleaseNotes>Add license and upgrade ExcelDataReader.</PackageReleaseNotes>
+    <Copyright>Copyright 2025 (c) Hugh Bellamy. All rights reserved.</Copyright>
+    <PackageTags>excel;mapping;mapper</PackageTags>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="ExcelDataReader" Version="3.6.0" />
+    <PackageReference Include="ExcelDataReader" Version="3.8.0" />
   </ItemGroup>
 
   <PropertyGroup>

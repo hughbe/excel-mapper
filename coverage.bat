@@ -1,3 +1,6 @@
 cd tests
-dotnet test -f netcoreapp3.1 /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
-dotnet reportgenerator -reports:coverage.opencover.xml -targetdir:../resources/coverage
+rmdir TestResults /s /q
+rmdir coverage /s /q
+dotnet test --settings coverage.runsettings
+if %errorlevel% neq 0 exit /b %errorlevel%
+dotnet reportgenerator -reports:".\**\TestResults\**\coverage.cobertura.xml" -targetdir:"coverage" -reporttypes:Html
