@@ -103,7 +103,7 @@ namespace ExcelMapper
                 throw new ArgumentNullException(nameof(formats));
             }
             
-            return propertyMap.WithDateFormats(formats.ToArray());
+            return propertyMap.WithDateFormats([.. formats]);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace ExcelMapper
                 throw new ArgumentNullException(nameof(formats));
             }
             
-            return propertyMap.WithDateFormats(formats.ToArray());
+            return propertyMap.WithDateFormats([.. formats]);
         }
 
         private static void AddFormats(this IValuePipeline propertyMap, string[] formats)

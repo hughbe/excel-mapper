@@ -107,7 +107,7 @@ namespace ExcelMapper
                 throw new ArgumentNullException(nameof(columnNames));
             }
 
-            return WithColumnNames(columnNames.ToArray());
+            return WithColumnNames([.. columnNames]);
         }
 
         /// <summary>

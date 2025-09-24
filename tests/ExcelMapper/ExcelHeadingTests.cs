@@ -13,7 +13,7 @@ namespace ExcelMapper.Tests
             ExcelSheet sheet = importer.ReadSheet();
             ExcelHeading heading = sheet.ReadHeading();
 
-            string[] columnNames = heading.ColumnNames.ToArray();
+            string[] columnNames = [.. heading.ColumnNames];
             for (int i = 0; i < columnNames.Length; i++)
             {
                 Assert.Equal(i, heading.GetColumnIndex(columnNames[i]));
@@ -61,7 +61,7 @@ namespace ExcelMapper.Tests
             ExcelSheet sheet = importer.ReadSheet();
             ExcelHeading heading = sheet.ReadHeading();
 
-            string[] columnNames = heading.ColumnNames.ToArray();
+            string[] columnNames = [.. heading.ColumnNames];
             for (int i = 0; i < columnNames.Length; i++)
             {
                 var scopedIndex = i;
@@ -89,7 +89,7 @@ namespace ExcelMapper.Tests
             ExcelSheet sheet = importer.ReadSheet();
             ExcelHeading heading = sheet.ReadHeading();
 
-            string[] columnNames = heading.ColumnNames.ToArray();
+            string[] columnNames = [.. heading.ColumnNames];
             for (int i = 0; i < columnNames.Length; i++)
             {
                 Assert.True(heading.TryGetColumnIndex(columnNames[i], out int index));
@@ -142,7 +142,7 @@ namespace ExcelMapper.Tests
             ExcelSheet sheet = importer.ReadSheet();
             ExcelHeading heading = sheet.ReadHeading();
 
-            string[] columnNames = heading.ColumnNames.ToArray();
+            string[] columnNames = [.. heading.ColumnNames];
             for (int i = 0; i < columnNames.Length; i++)
             {
                 var scopedIndex = i;

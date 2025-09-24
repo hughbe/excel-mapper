@@ -273,7 +273,7 @@ namespace ExcelMapper.Tests
         [MemberData(nameof(Separators_Char_TestData))]
         public void WithSeparators_ParamsChar_Success(IEnumerable<char> separators)
         {
-            char[] separatorsArray = separators.ToArray();
+            char[] separatorsArray = [.. separators];
 
             var cellValuesReader = new StringSplitCellValueReader(new ColumnNameValueReader("Column"));
             var elementPipeline = new ValuePipeline<string>();
@@ -310,7 +310,7 @@ namespace ExcelMapper.Tests
         [MemberData(nameof(Separators_String_TestData))]
         public void WithSeparators_ParamsString_Success(IEnumerable<string> separators)
         {
-            string[] separatorsArray = separators.ToArray();
+            string[] separatorsArray = [.. separators];
 
             var cellValuesReader = new StringSplitCellValueReader(new ColumnNameValueReader("Column"));
             var elementPipeline = new ValuePipeline<string>();

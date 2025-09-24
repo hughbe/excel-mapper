@@ -17,7 +17,7 @@ namespace ExcelMapper.Utilities.Tests
             Assert.Equal(typeof(TestClass), classMap.Type);
             Assert.Equal(5, classMap.Properties.Count);
 
-            List<string> members = classMap.Properties.Select(m => m.Member.Name).ToList();
+            List<string> members = [.. classMap.Properties.Select(m => m.Member.Name)];
             Assert.Contains("_inheritedField", members);
             Assert.Contains("_field", members);
             Assert.Contains("InheritedProperty", members);

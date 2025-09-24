@@ -116,7 +116,7 @@ namespace ExcelMapper.Utilities
             [NotNullWhen(true)] out IFallbackItem? invalidFallback)
         {
             Type type = memberType.GetNullableTypeOrThis(out bool isNullable);
-            Type[] interfaces = type.GetTypeInfo().ImplementedInterfaces.ToArray();
+            Type[] interfaces = [.. type.GetTypeInfo().ImplementedInterfaces];
 
             IFallbackItem ReconcileFallback(FallbackStrategy strategyToPursue, bool isEmpty)
             {

@@ -33,7 +33,7 @@ namespace ExcelMapper
                 .GetTypes()
                 .Where(type => typeof(ExcelClassMap).IsAssignableFrom(type) && type.Namespace == namespaceString);
 
-            ExcelClassMap[] classMaps = classMapTypes.Select(Activator.CreateInstance).OfType<ExcelClassMap>().ToArray();
+            ExcelClassMap[] classMaps = [.. classMapTypes.Select(Activator.CreateInstance).OfType<ExcelClassMap>()];
             if (classMaps.Length == 0)
             {
                 throw new ArgumentException($"No classmaps found in the namespace \"{namespaceString}\" in the assembly \"{assembly}\".", nameof(namespaceString));

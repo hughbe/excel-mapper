@@ -164,7 +164,7 @@ namespace ExcelMapper.Tests
             Assert.NotNull(sheet.Heading);
             Assert.True(sheet.HasHeading);
 
-            StringValue[] rows2 = sheet.ReadRows<StringValue>().ToArray();
+            StringValue[] rows2 = [.. sheet.ReadRows<StringValue>()];
             Assert.Empty(rows2.Select(p => p.Value).ToArray());
         }
 
@@ -184,7 +184,7 @@ namespace ExcelMapper.Tests
             Assert.Null(sheet.Heading);
             Assert.False(sheet.HasHeading);
 
-            StringValue[] rows2 = sheet.ReadRows<StringValue>().ToArray();
+            StringValue[] rows2 = [.. sheet.ReadRows<StringValue>()];
             Assert.Empty(rows2.Select(p => p.Value).ToArray());
         }
 
@@ -303,7 +303,7 @@ namespace ExcelMapper.Tests
             importer.Configuration.SkipBlankLines = true;
             ExcelSheet sheet = importer.ReadSheet();
 
-            BlankLinesClass[] rows = sheet.ReadRows<BlankLinesClass>().ToArray();
+            BlankLinesClass[] rows = [.. sheet.ReadRows<BlankLinesClass>()];
             Assert.Equal(4, rows.Length);
             Assert.Equal("A", rows[0].StringValue);
             Assert.Equal(1, rows[0].IntValue);

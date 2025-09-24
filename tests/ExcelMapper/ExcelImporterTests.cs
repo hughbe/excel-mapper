@@ -48,7 +48,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                ExcelSheet[] sheets = importer.ReadSheets().ToArray();
+                ExcelSheet[] sheets = [.. importer.ReadSheets()];
                 Assert.Equal(new string[] { "Primitives", "Empty", "Third Sheet" }, sheets.Select(sheet => sheet.Name));
                 Assert.Equal(new bool[] { true, true, true }, sheets.Select(sheet => sheet.HasHeading));
                 Assert.Equal(new ExcelHeading?[] { null, null, null }, sheets.Select(sheet => sheet.Heading));
@@ -60,13 +60,13 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                ExcelSheet[] sheets = importer.ReadSheets().ToArray();
+                ExcelSheet[] sheets = [.. importer.ReadSheets()];
                 Assert.Equal(new string[] { "Primitives", "Empty", "Third Sheet" }, sheets.Select(sheet => sheet.Name));
                 Assert.Equal(new int[] { 0, 1, 2 }, sheets.Select(sheet => sheet.Index));
                 Assert.Equal(new bool[] { true, true, true }, sheets.Select(sheet => sheet.HasHeading));
                 Assert.Equal(new ExcelHeading?[] { null, null, null }, sheets.Select(sheet => sheet.Heading));
 
-                sheets = importer.ReadSheets().ToArray();
+                sheets = [.. importer.ReadSheets()];
                 Assert.Equal(new string[] { "Primitives", "Empty", "Third Sheet" }, sheets.Select(sheet => sheet.Name));
                 Assert.Equal(new int[] { 0, 1, 2 }, sheets.Select(sheet => sheet.Index));
                 Assert.Equal(new bool[] { true, true, true }, sheets.Select(sheet => sheet.HasHeading));
@@ -79,7 +79,7 @@ namespace ExcelMapper.Tests
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                ExcelSheet[] sheets = importer.ReadSheets().ToArray();
+                ExcelSheet[] sheets = [.. importer.ReadSheets()];
                 Assert.Equal(new string[] { "Primitives", "Empty", "Third Sheet" }, sheets.Select(sheet => sheet.Name));
                 Assert.Equal(new int[] { 0, 1, 2 }, sheets.Select(sheet => sheet.Index));
                 Assert.Equal(new bool[] { true, true, true }, sheets.Select(sheet => sheet.HasHeading));

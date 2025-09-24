@@ -246,7 +246,7 @@ namespace ExcelMapper
                 throw new ArgumentNullException(nameof(columnNames));
             }
 
-            return WithColumnNames(columnNames.ToArray());
+            return WithColumnNames([.. columnNames]);
         }
 
         /// <summary>
@@ -274,7 +274,7 @@ namespace ExcelMapper
                 throw new ArgumentNullException(nameof(columnIndices));
             }
             
-            return WithColumnIndices(columnIndices.ToArray());
+            return WithColumnIndices([.. columnIndices]);
         }
     }
 }
