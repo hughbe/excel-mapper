@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using ExcelDataReader;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Readers;
 using Xunit;
@@ -176,6 +179,163 @@ namespace ExcelMapper.Tests
 
             Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new string[] { null! }));
             Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new List<string> { null! }));
+        }
+
+        [Fact]
+        public void TryGetValue_InvokeCanRead_Success()
+        {
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            var reader = new MockReader(() => (true, []));
+            var valuePipeline = new ValuePipeline<string>();
+            CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+            var map = new ManyToOneDictionaryMap<string>(reader, valuePipeline, createDictionaryFactory);
+            object? result = null;
+            Assert.True(map.TryGetValue(sheet, 0, importer.Reader, null, out result));
+            Assert.Empty(Assert.IsType<Dictionary<string, string>>(result));
+        }
+
+        [Fact]
+        public void TryGetValue_InvokeNullSheet_ThrowsArgumentNullException()
+        {
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            var reader = new MockReader(() => (false, null));
+            var valuePipeline = new ValuePipeline<string>();
+            CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+            var map = new ManyToOneDictionaryMap<string>(reader, valuePipeline, createDictionaryFactory);
+            MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
+            object? result = null;
+            Assert.Throws<ArgumentNullException>("sheet", () => map.TryGetValue(null!, 0, importer.Reader, member, out result));
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void TryGetValue_InvokeSheetWithoutHeadingHasHeading_ThrowsExcelMappingException()
+        {
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            ExcelSheet sheet = importer.ReadSheet();
+
+            var reader = new MockReader(() => (false, null));
+            var valuePipeline = new ValuePipeline<string>();
+            CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+            var map = new ManyToOneDictionaryMap<string>(reader, valuePipeline, createDictionaryFactory);
+            MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
+            object? result = null;
+            Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void TryGetValue_InvokeSheetWithoutHeadingHasNoHeading_ThrowsExcelMappingException()
+        {
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.HasHeading = false;
+
+            var reader = new MockReader(() => (false, null));
+            var valuePipeline = new ValuePipeline<string>();
+            CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+            var map = new ManyToOneDictionaryMap<string>(reader, valuePipeline, createDictionaryFactory);
+            MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
+            object? result = null;
+            Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void TryGetValue_InvokeCantReadPropertyInfo_ThrowsExcelMappingException()
+        {
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            var reader = new MockReader(() => (false, null));
+            var valuePipeline = new ValuePipeline<string>();
+            CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+            var map = new ManyToOneDictionaryMap<string>(reader, valuePipeline, createDictionaryFactory);
+            MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
+            object? result = null;
+            Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void TryGetValue_InvokeCantReadFieldInfo_ThrowsExcelMappingException()
+        {
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            var reader = new MockReader(() => (false, null));
+            var valuePipeline = new ValuePipeline<string>();
+            CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+            var map = new ManyToOneDictionaryMap<string>(reader, valuePipeline, createDictionaryFactory);
+            MemberInfo member = typeof(TestClass).GetField(nameof(TestClass._field))!;
+            object? result = null;
+            Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void TryGetValue_InvokeCantReadEventInfo_ThrowsExcelMappingException()
+        {
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            var reader = new MockReader(() => (false, null));
+            var valuePipeline = new ValuePipeline<string>();
+            CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+            var map = new ManyToOneDictionaryMap<string>(reader, valuePipeline, createDictionaryFactory);
+            MemberInfo member = typeof(TestClass).GetEvent(nameof(TestClass.Event))!;
+            object? result = null;
+            Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void TryGetValue_InvokeCantReadNullMember_ThrowsExcelMappingException()
+        {
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
+
+            var reader = new MockReader(() => (false, null));
+            var valuePipeline = new ValuePipeline<string>();
+            CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+            var map = new ManyToOneDictionaryMap<string>(reader, valuePipeline, createDictionaryFactory);
+            object? result = null;
+            Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
+            Assert.Null(result);
+        }
+
+        private class MockReader : IMultipleCellValuesReader
+        {
+            public MockReader(Func<(bool, IEnumerable<ReadCellValueResult>?)> action)
+            {
+                Action = action;
+            }
+
+            public Func<(bool, IEnumerable<ReadCellValueResult>?)> Action { get; }
+
+            public bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, [NotNullWhen(true)] out IEnumerable<ReadCellValueResult>? result)
+            {
+                (bool ret, IEnumerable<ReadCellValueResult>? res) = Action();
+                result = res;
+                return ret;
+            }
+        }
+
+        private class TestClass
+        {
+            public string Value { get; set; } = default!;
+#pragma warning disable 0649
+            public string _field = default!;
+#pragma warning restore 0649
+
+            public event EventHandler Event { add { } remove { } }
         }
     }
 }

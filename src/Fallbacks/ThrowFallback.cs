@@ -12,7 +12,12 @@ namespace ExcelMapper.Fallbacks
     {
         public object PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellValueResult readResult, Exception? exception, MemberInfo? member)
         {
-            throw new ExcelMappingException($"Invalid assigning \"{readResult.StringValue}\" to member \"{member?.Name}\" of type \"{member?.MemberType()}\"", sheet, rowIndex, readResult.ColumnIndex, exception);
+            if (member == null)
+            {
+                throw new ExcelMappingException($"Cannot assign \"{readResult.StringValue}\"", sheet, rowIndex, readResult.ColumnIndex, exception);   
+            }
+
+            throw new ExcelMappingException($"Cannot assign \"{readResult.StringValue}\" to member \"{member.Name}\" of type \"{member.MemberType()}\"", sheet, rowIndex, readResult.ColumnIndex, exception);
         }
     }
 }

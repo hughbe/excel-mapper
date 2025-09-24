@@ -16,7 +16,7 @@ namespace ExcelMapper.Fallbacks.Tests
 
         [Theory]
         [MemberData(nameof(InnerException_TestData))]
-        public void GetProperty_InvokePropertyInfo_ThrowsExcelMappingException(Exception? exception)
+        public void PerformFallback_InvokePropertyInfo_ThrowsExcelMappingException(Exception? exception)
         {
             var fallback = new ThrowFallback();
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
@@ -26,7 +26,7 @@ namespace ExcelMapper.Fallbacks.Tests
 
         [Theory]
         [MemberData(nameof(InnerException_TestData))]
-        public void GetProperty_InvokeFieldInfo_ThrowsExcelMappingException(Exception exception)
+        public void PerformFallback_InvokeFieldInfo_ThrowsExcelMappingException(Exception exception)
         {
             var fallback = new ThrowFallback();
             MemberInfo fieldInfo = typeof(TestClass).GetField(nameof(TestClass._field))!;
@@ -36,12 +36,20 @@ namespace ExcelMapper.Fallbacks.Tests
 
         [Theory]
         [MemberData(nameof(InnerException_TestData))]
-        public void GetProperty_InvokeEventInfo_ThrowsArgumentException(Exception exception)
+        public void PerformFallback_InvokeEventInfo_ThrowsArgumentException(Exception exception)
         {
             var fallback = new ThrowFallback();
             MemberInfo eventInfo = typeof(TestClass).GetEvent(nameof(TestClass.Event))!;
 
             Assert.Throws<ArgumentException>("member", () => fallback.PerformFallback(null!, 0, new ReadCellValueResult(), exception, eventInfo));
+        }
+
+        [Theory]
+        [MemberData(nameof(InnerException_TestData))]
+        public void PerformFallback_InvokeNullMember_ThrowsExcelMappingException(Exception exception)
+        {
+            var fallback = new ThrowFallback();
+            Assert.Throws<ExcelMappingException>(() => fallback.PerformFallback(null!, 0, new ReadCellValueResult(), exception, null));
         }
 
         private class TestClass

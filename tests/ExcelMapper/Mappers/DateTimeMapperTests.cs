@@ -84,7 +84,7 @@ namespace ExcelMapper.Mappers.Tests
         [InlineData("")]
         [InlineData("invalid")]
         [InlineData("12/07/2017 07:57:61")]
-        public void GetProperty_InvalidStringValue_ReturnsInvalid(string stringValue)
+        public void GetProperty_InvalidStringValue_ReturnsInvalid(string? stringValue)
         {
             var item = new DateTimeMapper();
             CellValueMapperResult result = item.MapCellValue(new ReadCellValueResult(-1, stringValue));

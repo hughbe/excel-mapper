@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
+using ExcelDataReader;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
@@ -165,11 +167,85 @@ namespace ExcelMapper.Tests
             Assert.Throws<ArgumentNullException>("transformer", () => map.AddCellValueTransformer(null!));
         }
 
+        [Fact]
+        public void TryGetValue_InvokeCantReadPropertyInfo_ThrowsExcelMappingException()
+        {
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            ExcelSheet sheet = importer.ReadSheet();
+
+            var reader = new MockReader();
+            var map = new SubOneToOneMap<int>(reader);
+            MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
+            object? result = null;
+            Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void TryGetValue_InvokeCantReadFieldInfo_ThrowsExcelMappingException()
+        {
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            ExcelSheet sheet = importer.ReadSheet();
+
+            var reader = new MockReader();
+            var map = new SubOneToOneMap<int>(reader);
+            MemberInfo member = typeof(TestClass).GetField(nameof(TestClass._field))!;
+            object? result = null;
+            Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void TryGetValue_InvokeCantReadEventInfo_ThrowsExcelMappingException()
+        {
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            ExcelSheet sheet = importer.ReadSheet();
+
+            var reader = new MockReader();
+            var map = new SubOneToOneMap<int>(reader);
+            MemberInfo member = typeof(TestClass).GetEvent(nameof(TestClass.Event))!;
+            object? result = null;
+            Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void TryGetValue_InvokeCantReadNullMember_ThrowsExcelMappingException()
+        {
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            ExcelSheet sheet = importer.ReadSheet();
+
+            var reader = new MockReader();
+            var map = new SubOneToOneMap<int>(reader);
+            object? result = null;
+            Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
+            Assert.Null(result);
+        }
+
         private class SubOneToOneMap<T> : OneToOneMap<T>
         {
             public SubOneToOneMap(ISingleCellValueReader reader) : base(reader)
             {
             }
+        }
+
+        private class MockReader : ISingleCellValueReader
+        {
+            public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out ReadCellValueResult result)
+            {
+                result = default;
+                return false;
+            }
+        }        
+
+        private class TestClass
+        {
+            public string Value { get; set; } = default!;
+#pragma warning disable 0649
+            public string _field = default!;
+#pragma warning restore 0649
+
+            public event EventHandler Event { add { } remove { } }
         }
     }
 }

@@ -45,7 +45,7 @@ namespace ExcelMapper.Mappers.Tests
         [InlineData(typeof(uint), "abc")]
         [InlineData(typeof(uint), "")]
         [InlineData(typeof(uint), null)]
-        public void GetProperty_InvalidStringValue_ReturnsInvalid(Type type, string stringValue)
+        public void GetProperty_InvalidStringValue_ReturnsInvalid(Type type, string? stringValue)
         {
             var item = new ChangeTypeMapper(type);
 

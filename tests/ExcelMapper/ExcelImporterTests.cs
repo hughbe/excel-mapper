@@ -323,11 +323,11 @@ namespace ExcelMapper.Tests
         [InlineData(" Empty ")]
         [InlineData("invalid")]
         [InlineData("  \r \t  ")]
-        public void TryReadSheet_NoSuchSheet_ReturnsFalse(string sheetName)
+        public void TryReadSheet_NoSuchSheet_ReturnsFalse(string? sheetName)
         {
             using (var importer = Helpers.GetImporter("Primitives.xlsx"))
             {
-                Assert.False(importer.TryReadSheet(sheetName, out ExcelSheet? sheet));
+                Assert.False(importer.TryReadSheet(sheetName!, out ExcelSheet? sheet));
                 Assert.Null(sheet);
             }
         }

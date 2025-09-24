@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using ExcelDataReader;
@@ -13,9 +14,13 @@ namespace ExcelMapper.Readers
     {
         public bool TryGetValues(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, [NotNullWhen(true)] out IEnumerable<ReadCellValueResult>? result)
         {
+            if (sheet == null)
+            {
+                throw new ArgumentNullException(nameof(sheet));
+            }
             if (sheet.Heading == null)
             {
-                throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
+                throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
             }
 
             result = sheet.Heading.ColumnNames

@@ -192,9 +192,9 @@ namespace ExcelMapper.Tests
             sheet.HeadingIndex = 0;
 
             // Valid cell value.
-            var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<DateTimeValueInt>(0, 2).ToArray());
+            var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<DateTimeValueInt>(1, 1).ToArray());
             Assert.IsType<FormatException>(ex.InnerException);
-            Assert.Equal("Invalid assigning \"1/1/2025 1:01:01 AM\" to member \"Value\" of type \"System.Int32\" in column \"Date\" on row 1 in sheet \"Sheet1\".", ex.Message);
+            Assert.Equal("Cannot assign \"01/01/2025 01:01:01\" to member \"Value\" of type \"System.Int32\" in column \"Date\" on row 2 in sheet \"Sheet1\".", ex.Message);
         }
 
         private class DateTimeValueInt

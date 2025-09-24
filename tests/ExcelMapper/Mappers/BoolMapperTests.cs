@@ -24,7 +24,7 @@ namespace ExcelMapper.Mappers.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData("invalid")]
-        public void GetProperty_InvalidStringValue_ReturnsInvalid(string stringValue)
+        public void GetProperty_InvalidStringValue_ReturnsInvalid(string? stringValue)
         {
             var item = new BoolMapper();
 

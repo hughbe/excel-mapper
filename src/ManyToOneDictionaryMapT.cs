@@ -52,6 +52,14 @@ namespace ExcelMapper
 
         public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
         {
+            if (sheet == null)
+            {
+                throw new ArgumentNullException(nameof(sheet));
+            }
+            if (sheet.Heading == null)
+            {
+                throw new ExcelMappingException("The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
+            }
             if (!CellValuesReader.TryGetValues(sheet, rowIndex, reader, out IEnumerable<ReadCellValueResult>? valueResults))
             {
                 throw new ExcelMappingException($"Could not read value for \"{member?.Name}\"", sheet, rowIndex, -1);
@@ -67,8 +75,7 @@ namespace ExcelMapper
                 values.Add(keyValue);
             }
 
-            var heading = sheet.Heading ?? sheet.ReadHeading();
-
+            var heading = sheet.Heading;
             IEnumerable<string> keys = valueResultsList.Select(r => heading.GetColumnName(r.ColumnIndex));
             IEnumerable<KeyValuePair<string, T>> elements = keys.Zip(values, (key, keyValue) => new KeyValuePair<string, T>(key, keyValue));
             value = CreateDictionaryFactory(elements);

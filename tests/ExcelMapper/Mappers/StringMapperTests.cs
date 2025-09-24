@@ -9,7 +9,7 @@ namespace ExcelMapper.Mappers.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData("abc")]
-        public void GetProperty_Invoke_ReturnsBegan(string stringValue)
+        public void GetProperty_Invoke_ReturnsBegan(string? stringValue)
         {
             var item = new StringMapper();
 
