@@ -140,6 +140,7 @@ namespace ExcelMapper
         /// <returns>A list of objects of type T mapped from each row in the sheet.</returns>
         public IEnumerable<T> ReadRows<T>()
         {
+            // Read the heading if we haven't already.
             if (HasHeading && Heading == null)
             {
                 ReadHeading();
@@ -166,17 +167,31 @@ namespace ExcelMapper
             {
                 throw new ArgumentOutOfRangeException(nameof(startIndex), startIndex, "Start index cannot be negative.");
             }
+            if (HasHeading && startIndex <= HeadingIndex)
+            {
+                throw new ArgumentOutOfRangeException(nameof(startIndex), startIndex, "Start index must be greater than heading index");
+            }
             if (count < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(count), count, "The number of rows cannot be negative.");
             }
-
+            
+            // Read the heading if we haven't already.
             if (HasHeading && Heading == null)
             {
                 ReadHeading();
             }
 
+            // Reset the reader as we need to seek to the specific row.
+            Reader.Reset();
+            Importer.MoveToSheet(this);
+            for (int i = HeadingIndex; i < startIndex; i++)
+            {
+                Reader.Read();
+            }
+
             CurrentRowIndex = startIndex;
+            
             for (int i = 0; i < count; i++)
             {
                 yield return ReadRow<T>();

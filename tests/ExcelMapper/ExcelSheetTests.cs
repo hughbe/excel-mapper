@@ -202,15 +202,17 @@ namespace ExcelMapper.Tests
             Assert.Empty(sheet.ReadRows<StringValue>());
         }
 
-        public static IEnumerable<object[]> ReadRows_Area_TestData()
+        public static IEnumerable<object[]> ReadRows_IndexCount_TestData()
         {
+            yield return new object[] { 1, 4, new string?[] { "value", "  value  ", null, "value" } };
+            yield return new object[] { 1, 3, new string?[] { "value", "  value  ", null } };
             yield return new object[] { 1, 2, new string?[] { "value", "  value  " } };
-            yield return new object[] { 0, 4, new string?[] { "value", "  value  ", null, "value" } };
-            yield return new object[] { 1, 0, new string?[0] };
+            yield return new object[] { 2, 1, new string?[] { "  value  " } };
+            yield return new object[] { 1, 0, Array.Empty<string?>() };
         }
 
         [Theory]
-        [MemberData(nameof(ReadRows_Area_TestData))]
+        [MemberData(nameof(ReadRows_IndexCount_TestData))]
         public void ReadRows_IndexCount_ReturnsExpected(int startIndex, int count, string?[] expectedValues)
         {
             using var importer = Helpers.GetImporter("Strings.xlsx");
@@ -226,7 +228,7 @@ namespace ExcelMapper.Tests
         }
 
         [Theory]
-        [MemberData(nameof(ReadRows_Area_TestData))]
+        [MemberData(nameof(ReadRows_IndexCount_TestData))]
         public void ReadRows_IndexCountNotReadHeading_ReturnsExpected(int startIndex, int count, string?[] expectedValues)
         {
             using var importer = Helpers.GetImporter("Strings.xlsx");
@@ -238,6 +240,50 @@ namespace ExcelMapper.Tests
 
             Assert.NotNull(sheet.Heading);
             Assert.True(sheet.HasHeading);
+        }
+
+        [Theory]
+        [MemberData(nameof(ReadRows_IndexCount_TestData))]
+        public void ReadRows_IndexCountReadHeading_ReturnsExpected(int startIndex, int count, string?[] expectedValues)
+        {
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            ExcelSheet sheet = importer.ReadSheet();
+
+            ExcelHeading heading = sheet.ReadHeading();
+
+            IEnumerable<StringValue> rows = sheet.ReadRows<StringValue>(startIndex, count);
+            Assert.Equal(expectedValues, rows.Select(p => p.Value).ToArray());
+            Assert.Equal(startIndex + count, sheet.CurrentRowIndex);
+
+            Assert.NotNull(sheet.Heading);
+            Assert.Same(heading, sheet.Heading);
+            Assert.True(sheet.HasHeading);
+        }
+
+        public static IEnumerable<object[]> ReadRows_IndexCountNoHeading_TestData()
+        {
+            yield return new object[] { 0, 5, new string?[] { "Value", "value", "  value  ", null, "value" } };
+            yield return new object[] { 0, 4, new string?[] { "Value", "value", "  value  ", null } };
+            yield return new object[] { 1, 4, new string?[] { "value", "  value  ", null, "value" } };
+            yield return new object[] { 1, 2, new string?[] { "value", "  value  " } };
+            yield return new object[] { 1, 0, new string?[0] };
+        }
+
+        [Theory]
+        [MemberData(nameof(ReadRows_IndexCountNoHeading_TestData))]
+        public void ReadRows_IndexCountNoHeading_ReturnsExpected(int startIndex, int count, string?[] expectedValues)
+        {
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            importer.Configuration.RegisterClassMap<StringValueClassMapColumnIndex>();
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.HasHeading = false;
+
+            IEnumerable<StringValue> rows = sheet.ReadRows<StringValue>(startIndex, count).ToList();
+            Assert.Equal(expectedValues, rows.Select(p => p.Value).ToArray());
+            Assert.Equal(startIndex + count, sheet.CurrentRowIndex);
+
+            Assert.Null(sheet.Heading);
+            Assert.False(sheet.HasHeading);
         }
 
         [Fact]
@@ -356,12 +402,24 @@ namespace ExcelMapper.Tests
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => sheet.ReadRows<StringValue>(-1, 0).ToArray());
         }
 
+        [Theory]
+        [InlineData(0, 0)]
+        [InlineData(1, 0)]
+        [InlineData(1, 1)]
+        public void ReadRows_StartIndexLargerThanHeadingIndex_ThrowsArgumentOutOfRangeException(int headingIndex, int startIndex)
+        {
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.HeadingIndex = headingIndex;
+            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => sheet.ReadRows<StringValue>(startIndex, 0).ToArray());
+        }
+
         [Fact]
         public void ReadRows_NegativeCount_ThrowsArgumentOutOfRangeException()
         {
             using var importer = Helpers.GetImporter("Strings.xlsx");
             ExcelSheet sheet = importer.ReadSheet();
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => sheet.ReadRows<StringValue>(0, -1).ToArray());
+            Assert.Throws<ArgumentOutOfRangeException>("count", () => sheet.ReadRows<StringValue>(1, -1).ToArray());
         }
 
         [Fact]
