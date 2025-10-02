@@ -436,6 +436,43 @@ public class ExcelSheetTests
     }
 
     [Fact]
+    public void ReadRow_BlankLinesEmptySkipped_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("BlankLines_Empty.xlsx");
+        importer.Configuration.SkipBlankLines = true;
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<BlankLinesClass>();
+        Assert.Equal("A", row1.StringValue);
+        Assert.Equal(1, row1.IntValue);
+        Assert.Equal(1, sheet.CurrentRowIndex);
+
+        var row2 = sheet.ReadRow<BlankLinesClass>();
+        Assert.Equal("B", row2.StringValue);
+        Assert.Equal(2, row2.IntValue);
+        Assert.Equal(3, sheet.CurrentRowIndex);
+
+        var row3 = sheet.ReadRow<BlankLinesClass>();
+        Assert.Null(row3.StringValue);
+        Assert.Equal(3, row3.IntValue);
+        Assert.Equal(6, sheet.CurrentRowIndex);
+
+        var row4 = sheet.ReadRow<BlankLinesClass>();
+        Assert.Equal("C", row4.StringValue);
+        Assert.Equal(0, row4.IntValue);
+        Assert.Equal(8, sheet.CurrentRowIndex);
+
+        var row5 = sheet.ReadRow<BlankLinesClass>();
+        Assert.Equal("25/10/2025 00:00:00", row5.StringValue);
+        Assert.Equal(4, row5.IntValue);
+        Assert.Equal(998, sheet.CurrentRowIndex);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
+        Assert.Equal(998, sheet.CurrentRowIndex);
+    }
+
+    [Fact]
     public void ReadRows_NegativeStartIndex_ThrowsArgumentOutOfRangeException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");

@@ -289,7 +289,8 @@ public class ExcelSheet
             {
                 for (int i = 0; i < Reader.FieldCount; i++)
                 {
-                    if (Reader.GetValue(i) is not null)
+                    var value = Reader.GetValue(i);
+                    if (value is not null && !(value is string stringValue && string.IsNullOrEmpty(stringValue)))
                     {
                         return false;
                     }
