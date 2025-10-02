@@ -10,5 +10,5 @@ namespace ExcelMapper.Abstractions;
 /// </summary>
 public interface ICellsReader
 {
-    bool TryGetValues(IExcelDataReader reader, [NotNullWhen(true)] out IEnumerable<ReadCellResult>? result);
+    bool TryGetValues(IExcelDataReader reader, bool preserveFormatting, [NotNullWhen(true)] out IEnumerable<ReadCellResult>? result);
 }

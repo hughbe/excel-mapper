@@ -167,6 +167,17 @@ public class MapSByteTests
         Assert.Equal((sbyte)10, row3.Value);
     }
 
+    [Fact]
+    public void ReadRow_SByteOverflow_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Overflow_Signed.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<sbyte>());
+    }
+
     private class SByteValue
     {
         public sbyte Value { get; set; }

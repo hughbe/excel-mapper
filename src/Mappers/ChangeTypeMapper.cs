@@ -36,9 +36,10 @@ public class ChangeTypeMapper : ICellMapper
 
     public CellMapperResult MapCellValue(ReadCellResult readResult)
     {
+        var value = readResult.GetValue();
         try
         {
-            object result = Convert.ChangeType(readResult.StringValue, Type);
+            var result = Convert.ChangeType(value, Type);
             return CellMapperResult.Success(result);
         }
         catch (Exception exception)

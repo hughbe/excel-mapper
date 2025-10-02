@@ -1,6 +1,8 @@
 using System;
+using System.Globalization;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
+using ExcelNumberFormat;
 
 namespace ExcelMapper.Readers;
 
@@ -21,7 +23,7 @@ public class ColumnIndexReader : ICellReader
         ColumnIndex = columnIndex;
     }
 
-    public bool TryGetValue(IExcelDataReader reader, out ReadCellResult result)
+    public bool TryGetValue(IExcelDataReader reader, bool preserveFormatting, out ReadCellResult result)
     {
         if (ColumnIndex >= reader.FieldCount)
         {
@@ -29,8 +31,7 @@ public class ColumnIndexReader : ICellReader
             return false;
         }
 
-        var value = reader[ColumnIndex]?.ToString();
-        result = new ReadCellResult(ColumnIndex, value);
+        result = new ReadCellResult(ColumnIndex, reader, preserveFormatting);
         return true;
     }
 }

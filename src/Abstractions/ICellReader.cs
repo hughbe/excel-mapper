@@ -8,5 +8,5 @@ namespace ExcelMapper.Abstractions;
 /// </summary>
 public interface ICellReader
 {
-    bool TryGetValue(IExcelDataReader reader, out ReadCellResult result);
+    bool TryGetValue(IExcelDataReader reader, bool preserveFormatting, out ReadCellResult result);
 }

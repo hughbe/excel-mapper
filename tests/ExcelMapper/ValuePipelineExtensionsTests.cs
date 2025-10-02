@@ -16,56 +16,56 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithReaderFactory_ValidReader_Success()
     {
         var factory = new ColumnNameReaderFactory("ColumnName");
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
-        Assert.False(propertyMap.Optional);
-        Assert.Same(propertyMap, propertyMap.WithReaderFactory(factory));
-        Assert.Same(factory, propertyMap.ReaderFactory);
+        var map = Map(t => t.Value);
+        Assert.False(map.Optional);
+        Assert.Same(map, map.WithReaderFactory(factory));
+        Assert.Same(factory, map.ReaderFactory);
     }
 
     [Fact]
     public void WithReaderFactory_OptionalColumn_Success()
     {
         var factory = new ColumnNameReaderFactory("ColumnName");
-        OneToOneMap<string> propertyMap = Map(t => t.Value).MakeOptional();
-        Assert.True(propertyMap.Optional);
-        Assert.Same(propertyMap, propertyMap.WithReaderFactory(factory));
-        Assert.True(propertyMap.Optional);
-        Assert.Same(factory, propertyMap.ReaderFactory);
+        var map = Map(t => t.Value).MakeOptional();
+        Assert.True(map.Optional);
+        Assert.Same(map, map.WithReaderFactory(factory));
+        Assert.True(map.Optional);
+        Assert.Same(factory, map.ReaderFactory);
     }
 
     [Fact]
     public void WithReaderFactory_NullReader_ThrowsArgumentNullException()
     {
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
+        var map = Map(t => t.Value);
 
-        Assert.Throws<ArgumentNullException>("readerFactory", () => propertyMap.WithReaderFactory(null!));
+        Assert.Throws<ArgumentNullException>("readerFactory", () => map.WithReaderFactory(null!));
     }
 
     [Fact]
     public void WithCellValueMappers_ValidMappers_ThrowsArgumentNullException()
     {
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
-        ICellMapper mapper1 = Assert.Single(propertyMap.Pipeline.CellValueMappers);
+        var map = Map(t => t.Value);
+        ICellMapper mapper1 = Assert.Single(map.Pipeline.CellValueMappers);
         ICellMapper mapper2 = new BoolMapper();
 
-        Assert.Same(propertyMap, propertyMap.WithCellValueMappers(mapper2));
-        Assert.Equal([mapper1, mapper2], propertyMap.Pipeline.CellValueMappers);
+        Assert.Same(map, map.WithCellValueMappers(mapper2));
+        Assert.Equal([mapper1, mapper2], map.Pipeline.CellValueMappers);
     }
 
     [Fact]
     public void WithCellValueMappers_NullMappers_ThrowsArgumentNullException()
     {
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
+        var map = Map(t => t.Value);
 
-        Assert.Throws<ArgumentNullException>("mappers", () => propertyMap.WithCellValueMappers(null!));
+        Assert.Throws<ArgumentNullException>("mappers", () => map.WithCellValueMappers(null!));
     }
 
     [Fact]
     public void WithCellValueMappers_NullMapperInMapperss_ThrowsArgumentNullException()
     {
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
+        var map = Map(t => t.Value);
 
-        Assert.Throws<ArgumentNullException>("mappers", () => propertyMap.WithCellValueMappers([null!]));
+        Assert.Throws<ArgumentNullException>("mappers", () => map.WithCellValueMappers([null!]));
     }
 
     [Fact]
@@ -74,10 +74,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var dictionaryMapping = new Dictionary<string, DateTime> { { "key", DateTime.MinValue } };
         StringComparer comparer = StringComparer.CurrentCultureIgnoreCase;
 
-        OneToOneMap<DateTime> propertyMap = Map(t => t.DateValue);
-        Assert.Same(propertyMap, propertyMap.WithMapping(dictionaryMapping, comparer));
+        OneToOneMap<DateTime> map = Map(t => t.DateValue);
+        Assert.Same(map, map.WithMapping(dictionaryMapping, comparer));
 
-        DictionaryMapper<DateTime> item = propertyMap.Pipeline.CellValueMappers.OfType<DictionaryMapper<DateTime>>().Single();
+        DictionaryMapper<DateTime> item = map.Pipeline.CellValueMappers.OfType<DictionaryMapper<DateTime>>().Single();
         Assert.NotSame(dictionaryMapping, item.MappingDictionary);
         Assert.Equal(dictionaryMapping, item.MappingDictionary);
 
@@ -87,41 +87,64 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [Fact]
     public void WithMapping_NullMapping_ThrowsArgumentNullException()
     {
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
+        var map = Map(t => t.Value);
 
-        Assert.Throws<ArgumentNullException>("mappingDictionary", () => propertyMap.WithMapping((Dictionary<string, string>)null!));
+        Assert.Throws<ArgumentNullException>("mappingDictionary", () => map.WithMapping((Dictionary<string, string>)null!));
     }
 
     [Fact]
     public void MakeOptional_HasMapper_ReturnsExpected()
     {
         var factory = new ColumnIndexReaderFactory(1);
-        OneToOneMap<string> propertyMap = Map(t => t.Value).WithReaderFactory(factory);
-        Assert.False(propertyMap.Optional);
-        Assert.Same(propertyMap, propertyMap.MakeOptional());
-        Assert.True(propertyMap.Optional);
-        Assert.Same(factory, propertyMap.ReaderFactory);
+        var map = Map(t => t.Value).WithReaderFactory(factory);
+        Assert.False(map.Optional);
+        Assert.Same(map, map.MakeOptional());
+        Assert.True(map.Optional);
+        Assert.Same(factory, map.ReaderFactory);
     }
 
     [Fact]
     public void MakeOptional_AlreadyOptional_ReturnsExpected()
     {
         var factory = new ColumnIndexReaderFactory(1);
-        OneToOneMap<string> propertyMap = Map(t => t.Value).WithReaderFactory(factory);
-        Assert.Same(propertyMap, propertyMap.MakeOptional());
-        Assert.True(propertyMap.Optional);
-        Assert.Same(propertyMap, propertyMap.MakeOptional());
-        Assert.True(propertyMap.Optional);
-        Assert.Same(factory, propertyMap.ReaderFactory);
+        var map = Map(t => t.Value).WithReaderFactory(factory);
+        Assert.Same(map, map.MakeOptional());
+        Assert.True(map.Optional);
+        Assert.Same(map, map.MakeOptional());
+        Assert.True(map.Optional);
+        Assert.Same(factory, map.ReaderFactory);
+    }
+
+    [Fact]
+    public void MakePreserveFormatting_HasMapper_ReturnsExpected()
+    {
+        var factory = new ColumnIndexReaderFactory(1);
+        var map = Map(t => t.Value).WithReaderFactory(factory);
+        Assert.False(map.PreserveFormatting);
+        Assert.Same(map, map.MakePreserveFormatting());
+        Assert.True(map.PreserveFormatting);
+        Assert.Same(factory, map.ReaderFactory);
+    }
+
+    [Fact]
+    public void MakePreserveFormatting_AlreadyPreserveFormatting_ReturnsExpected()
+    {
+        var factory = new ColumnIndexReaderFactory(1);
+        var map = Map(t => t.Value).WithReaderFactory(factory);
+        Assert.Same(map, map.MakePreserveFormatting());
+        Assert.True(map.PreserveFormatting);
+        Assert.Same(map, map.MakePreserveFormatting());
+        Assert.True(map.PreserveFormatting);
+        Assert.Same(factory, map.ReaderFactory);
     }
 
     [Fact]
     public void WithTrim_Invoke_Success()
     {
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
-        Assert.Same(propertyMap, propertyMap.WithTrim());
+        var map = Map(t => t.Value);
+        Assert.Same(map, map.WithTrim());
 
-        ICellTransformer transformer = Assert.Single(propertyMap.Pipeline.CellValueTransformers);
+        ICellTransformer transformer = Assert.Single(map.Pipeline.CellValueTransformers);
         Assert.IsType<TrimCellValueTransformer>(transformer);
     }
 
@@ -138,10 +161,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var formatsArray = formats.ToArray();
 
-        OneToOneMap<DateTime> propertyMap = Map(t => t.DateValue);
-        Assert.Same(propertyMap, propertyMap.WithDateFormats(formatsArray));
+        OneToOneMap<DateTime> map = Map(t => t.DateValue);
+        Assert.Same(map, map.WithDateFormats(formatsArray));
 
-        DateTimeMapper item = propertyMap.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
+        DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -151,12 +174,12 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var formatsArray = formats.ToArray();
 
-        OneToOneMap<DateTime> propertyMap = Map(t => t.DateValue);
-        propertyMap.Pipeline.RemoveCellValueMapper(0);
+        OneToOneMap<DateTime> map = Map(t => t.DateValue);
+        map.Pipeline.RemoveCellValueMapper(0);
 
-        Assert.Same(propertyMap, propertyMap.WithDateFormats(formatsArray));
+        Assert.Same(map, map.WithDateFormats(formatsArray));
 
-        DateTimeMapper item = propertyMap.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
+        DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -164,10 +187,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [MemberData(nameof(Formats_TestData))]
     public void WithDateFormats_AutoMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        OneToOneMap<DateTime> propertyMap = Map(t => t.DateValue);
-        Assert.Same(propertyMap, propertyMap.WithDateFormats(formats));
+        OneToOneMap<DateTime> map = Map(t => t.DateValue);
+        Assert.Same(map, map.WithDateFormats(formats));
 
-        DateTimeMapper item = propertyMap.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
+        DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -175,31 +198,31 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [MemberData(nameof(Formats_TestData))]
     public void WithDateFormats_NotMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        OneToOneMap<DateTime> propertyMap = Map(t => t.DateValue);
-        propertyMap.Pipeline.RemoveCellValueMapper(0);
+        OneToOneMap<DateTime> map = Map(t => t.DateValue);
+        map.Pipeline.RemoveCellValueMapper(0);
 
-        Assert.Same(propertyMap, propertyMap.WithDateFormats(formats));
+        Assert.Same(map, map.WithDateFormats(formats));
 
-        DateTimeMapper item = propertyMap.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
+        DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
     [Fact]
     public void WithDateFormats_NullFormats_ThrowsArgumentNullException()
     {
-        OneToOneMap<DateTime> propertyMap = Map(t => t.DateValue);
+        OneToOneMap<DateTime> map = Map(t => t.DateValue);
 
-        Assert.Throws<ArgumentNullException>("formats", () => propertyMap.WithDateFormats(null!));
-        Assert.Throws<ArgumentNullException>("formats", () => propertyMap.WithDateFormats((IEnumerable<string>)null!));
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithDateFormats(null!));
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithDateFormats((IEnumerable<string>)null!));
     }
 
     [Fact]
     public void WithDateFormats_EmptyFormats_ThrowsArgumentException()
     {
-        OneToOneMap<DateTime> propertyMap = Map(t => t.DateValue);
+        OneToOneMap<DateTime> map = Map(t => t.DateValue);
 
-        Assert.Throws<ArgumentException>("formats", () => propertyMap.WithDateFormats([]));
-        Assert.Throws<ArgumentException>("formats", () => propertyMap.WithDateFormats(new List<string>()));
+        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats([]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats(new List<string>()));
     }
 
     [Theory]
@@ -208,10 +231,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var formatsArray = formats.ToArray();
 
-        OneToOneMap<DateTime?> propertyMap = Map(t => t.NullableDateValue);
-        Assert.Same(propertyMap, propertyMap.WithDateFormats(formatsArray));
+        OneToOneMap<DateTime?> map = Map(t => t.NullableDateValue);
+        Assert.Same(map, map.WithDateFormats(formatsArray));
 
-        DateTimeMapper item = propertyMap.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
+        DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -221,12 +244,12 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var formatsArray = formats.ToArray();
 
-        OneToOneMap<DateTime?> propertyMap = Map(t => t.NullableDateValue);
-        propertyMap.Pipeline.RemoveCellValueMapper(0);
+        OneToOneMap<DateTime?> map = Map(t => t.NullableDateValue);
+        map.Pipeline.RemoveCellValueMapper(0);
 
-        Assert.Same(propertyMap, propertyMap.WithDateFormats(formatsArray));
+        Assert.Same(map, map.WithDateFormats(formatsArray));
 
-        DateTimeMapper item = propertyMap.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
+        DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -234,10 +257,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [MemberData(nameof(Formats_TestData))]
     public void WithDateFormats_NullableAutoMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        OneToOneMap<DateTime?> propertyMap = Map(t => t.NullableDateValue);
-        Assert.Same(propertyMap, propertyMap.WithDateFormats(formats));
+        OneToOneMap<DateTime?> map = Map(t => t.NullableDateValue);
+        Assert.Same(map, map.WithDateFormats(formats));
 
-        DateTimeMapper item = propertyMap.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
+        DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -245,12 +268,12 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [MemberData(nameof(Formats_TestData))]
     public void WithDateFormats_NullableNotMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        OneToOneMap<DateTime?> propertyMap = Map(t => t.NullableDateValue);
-        propertyMap.Pipeline.RemoveCellValueMapper(0);
+        OneToOneMap<DateTime?> map = Map(t => t.NullableDateValue);
+        map.Pipeline.RemoveCellValueMapper(0);
 
-        Assert.Same(propertyMap, propertyMap.WithDateFormats(formats));
+        Assert.Same(map, map.WithDateFormats(formats));
 
-        DateTimeMapper item = propertyMap.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
+        DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -266,24 +289,24 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [Fact]
     public void WithDateFormats_NullableEmptyFormats_ThrowsArgumentException()
     {
-        OneToOneMap<DateTime?> propertyMap = Map(t => t.NullableDateValue);
+        OneToOneMap<DateTime?> map = Map(t => t.NullableDateValue);
 
-        Assert.Throws<ArgumentException>("formats", () => propertyMap.WithDateFormats([]));
-        Assert.Throws<ArgumentException>("formats", () => propertyMap.WithDateFormats(new List<string>()));
+        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats([]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats(new List<string>()));
     }
 
     [Fact]
     public void WithConverter_SuccessConverterSimple_ReturnsExpected()
     {
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
-        Assert.Same(propertyMap, propertyMap.WithConverter(stringValue =>
+        var map = Map(t => t.Value);
+        Assert.Same(map, map.WithConverter(stringValue =>
         {
             Assert.Equal("stringValue", stringValue);
             return "abc";
         }));
-        ConvertUsingMapper item = propertyMap.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
+        ConvertUsingMapper item = map.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
 
-        CellMapperResult result = item.Converter(new ReadCellResult(-1, "stringValue"));
+        CellMapperResult result = item.Converter(new ReadCellResult(-1, "stringValue", preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal("abc", result.Value);
         Assert.Null(result.Exception);
@@ -298,11 +321,11 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
             throw new NotSupportedException();
         };
 
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
-        Assert.Same(propertyMap, propertyMap.WithConverter(converter));
-        ConvertUsingMapper item = propertyMap.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
+        var map = Map(t => t.Value);
+        Assert.Same(map, map.WithConverter(converter));
+        ConvertUsingMapper item = map.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
 
-        CellMapperResult result = item.Converter(new ReadCellResult(-1, "stringValue"));
+        CellMapperResult result = item.Converter(new ReadCellResult(-1, "stringValue", preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.IsType<NotSupportedException>(result.Exception);
@@ -311,15 +334,15 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [Fact]
     public void WithConverter_SuccessConverterAdvanced_ReturnsExpected()
     {
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
-        Assert.Same(propertyMap, propertyMap.WithConverter(readResult =>
+        var map = Map(t => t.Value);
+        Assert.Same(map, map.WithConverter(readResult =>
         {
             Assert.Equal("stringValue", readResult.StringValue);
             return CellMapperResult.Success("abc");
         }));
-        ConvertUsingMapper item = propertyMap.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
+        ConvertUsingMapper item = map.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
 
-        CellMapperResult result = item.Converter(new ReadCellResult(-1, "stringValue"));
+        CellMapperResult result = item.Converter(new ReadCellResult(-1, "stringValue", preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal("abc", result.Value);
         Assert.Null(result.Exception);
@@ -334,30 +357,30 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
             throw new NotSupportedException();
         };
 
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
-        Assert.Same(propertyMap, propertyMap.WithConverter(converter));
-        ConvertUsingMapper item = propertyMap.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
+        var map = Map(t => t.Value);
+        Assert.Same(map, map.WithConverter(converter));
+        ConvertUsingMapper item = map.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
 
-        Assert.Throws<NotSupportedException>(() => item.Converter(new ReadCellResult(-1, "stringValue")));
+        Assert.Throws<NotSupportedException>(() => item.Converter(new ReadCellResult(-1, "stringValue", preserveFormatting: false)));
     }
 
     [Fact]
     public void WithConverter_NullConverter_ThrowsArgumentNullException()
     {
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
+        var map = Map(t => t.Value);
 
-        Assert.Throws<ArgumentNullException>("converter", () => propertyMap.WithConverter((ConvertUsingSimpleMapperDelegate<string>)null!));
-        Assert.Throws<ArgumentNullException>("converter", () => propertyMap.WithConverter((ConvertUsingMapperDelegate)null!));
+        Assert.Throws<ArgumentNullException>("converter", () => map.WithConverter((ConvertUsingSimpleMapperDelegate<string>)null!));
+        Assert.Throws<ArgumentNullException>("converter", () => map.WithConverter((ConvertUsingMapperDelegate)null!));
     }
 
     [Fact]
     public void WithValueFallback_Invoke_Success()
     {
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
-        Assert.Same(propertyMap, propertyMap.WithValueFallback("abc"));
+        var map = Map(t => t.Value);
+        Assert.Same(map, map.WithValueFallback("abc"));
 
-        FixedValueFallback emptyFallback = Assert.IsType<FixedValueFallback>(propertyMap.Pipeline.EmptyFallback);
-        FixedValueFallback invalidFallback = Assert.IsType<FixedValueFallback>(propertyMap.Pipeline.InvalidFallback);
+        FixedValueFallback emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
+        FixedValueFallback invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
 
         Assert.Equal("abc", emptyFallback.Value);
         Assert.Equal("abc", invalidFallback.Value);
@@ -366,83 +389,83 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [Fact]
     public void WithThrowingFallback_Invoke_Success()
     {
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
-        Assert.Same(propertyMap, propertyMap.WithThrowingFallback());
+        var map = Map(t => t.Value);
+        Assert.Same(map, map.WithThrowingFallback());
 
-        Assert.IsType<ThrowFallback>(propertyMap.Pipeline.EmptyFallback);
-        Assert.IsType<ThrowFallback>(propertyMap.Pipeline.InvalidFallback);
+        Assert.IsType<ThrowFallback>(map.Pipeline.EmptyFallback);
+        Assert.IsType<ThrowFallback>(map.Pipeline.InvalidFallback);
     }
 
     [Fact]
     public void WithEmptyFallback_Invoke_Success()
     {
-        OneToOneMap<string> propertyMapping = Map(t => t.Value);
-        Assert.Same(propertyMapping, propertyMapping.WithEmptyFallback("abc"));
+        var mapping = Map(t => t.Value);
+        Assert.Same(mapping, mapping.WithEmptyFallback("abc"));
 
-        FixedValueFallback fallback = Assert.IsType<FixedValueFallback>(propertyMapping.Pipeline.EmptyFallback);
+        FixedValueFallback fallback = Assert.IsType<FixedValueFallback>(mapping.Pipeline.EmptyFallback);
         Assert.Equal("abc", fallback.Value);
     }
 
     [Fact]
     public void WithThrowingEmptyFallback_Invoke_Success()
     {
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
-        Assert.Same(propertyMap, propertyMap.WithThrowingEmptyFallback());
+        var map = Map(t => t.Value);
+        Assert.Same(map, map.WithThrowingEmptyFallback());
 
-        Assert.IsType<ThrowFallback>(propertyMap.Pipeline.EmptyFallback);
+        Assert.IsType<ThrowFallback>(map.Pipeline.EmptyFallback);
     }
 
     [Fact]
     public void WithEmptyFallbackItem_ValidFallbackItem_Success()
     {
         IFallbackItem fallback = new FixedValueFallback(10);
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
-        Assert.Same(propertyMap, propertyMap.WithEmptyFallbackItem(fallback));
+        var map = Map(t => t.Value);
+        Assert.Same(map, map.WithEmptyFallbackItem(fallback));
 
-        Assert.Same(fallback, propertyMap.Pipeline.EmptyFallback);
+        Assert.Same(fallback, map.Pipeline.EmptyFallback);
     }
 
     [Fact]
     public void WithEmptyFallbackItem_NullFallbackItem_ThrowsArgumentNullException()
     {
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
+        var map = Map(t => t.Value);
 
-        Assert.Throws<ArgumentNullException>("fallbackItem", () => propertyMap.WithEmptyFallbackItem(null!));
+        Assert.Throws<ArgumentNullException>("fallbackItem", () => map.WithEmptyFallbackItem(null!));
     }
 
     [Fact]
     public void WithInvalidFallback_Invoke_Success()
     {
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
-        Assert.Same(propertyMap, propertyMap.WithInvalidFallback("abc"));
+        var map = Map(t => t.Value);
+        Assert.Same(map, map.WithInvalidFallback("abc"));
 
-        FixedValueFallback fallback = Assert.IsType<FixedValueFallback>(propertyMap.Pipeline.InvalidFallback);
+        FixedValueFallback fallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
         Assert.Equal("abc", fallback.Value);
     }
 
     [Fact]
     public void WithThrowingInvalidFallback_Invoke_Success()
     {
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
-        Assert.Same(propertyMap, propertyMap.WithThrowingInvalidFallback());
+        var map = Map(t => t.Value);
+        Assert.Same(map, map.WithThrowingInvalidFallback());
 
-        Assert.IsType<ThrowFallback>(propertyMap.Pipeline.InvalidFallback);
+        Assert.IsType<ThrowFallback>(map.Pipeline.InvalidFallback);
     }
 
     [Fact]
     public void WithInvalidFallbackItem_ValidFallbackItem_Success()
     {
         IFallbackItem fallback = new FixedValueFallback(10);
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
-        Assert.Same(propertyMap, propertyMap.WithInvalidFallbackItem(fallback));
+        var map = Map(t => t.Value);
+        Assert.Same(map, map.WithInvalidFallbackItem(fallback));
 
-        Assert.Same(fallback, propertyMap.Pipeline.InvalidFallback);
+        Assert.Same(fallback, map.Pipeline.InvalidFallback);
     }
 
     [Fact]
     public void WithInvalidFallbackItem_NullFallbackItem_ThrowsArgumentNullException()
     {
-        OneToOneMap<string> propertyMap = Map(t => t.Value);
-        Assert.Throws<ArgumentNullException>("fallbackItem", () => propertyMap.WithInvalidFallbackItem(null!));
+        var map = Map(t => t.Value);
+        Assert.Throws<ArgumentNullException>("fallbackItem", () => map.WithInvalidFallbackItem(null!));
     }
 }

@@ -55,23 +55,24 @@ public abstract class SplitReaderFactory : ICellsReaderFactory
 
     private class Reader(ICellReader Reader, SplitReaderFactory Splitter) : ICellsReader
     {
-        public bool TryGetValues(IExcelDataReader reader, [NotNullWhen(true)] out IEnumerable<ReadCellResult>? result)
+        public bool TryGetValues(IExcelDataReader reader, bool preserveFormatting, [NotNullWhen(true)] out IEnumerable<ReadCellResult>? result)
         {
-            if (!Reader.TryGetValue(reader, out var readResult))
+            if (!Reader.TryGetValue(reader, preserveFormatting, out var readResult))
             {
                 result = null;
                 return false;
             }
 
-            if (readResult.StringValue == null)
+            var stringValue = readResult.GetString();
+            if (stringValue == null)
             {
                 result = [];
                 return true;
             }
 
             result = Splitter
-                .GetValues(readResult.StringValue)
-                .Select(s => new ReadCellResult(readResult.ColumnIndex, s));
+                .GetValues(stringValue)
+                .Select(s => new ReadCellResult(readResult.ColumnIndex, s, preserveFormatting));
             return true;
         }
     }

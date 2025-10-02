@@ -29,7 +29,7 @@ public class ThrowFallbackTests
     public void PerformFallback_InvokeFieldInfo_ThrowsExcelMappingException(Exception exception)
     {
         var fallback = new ThrowFallback();
-        MemberInfo fieldInfo = typeof(TestClass).GetField(nameof(TestClass._field))!;
+        var fieldInfo = typeof(TestClass).GetField(nameof(TestClass._field))!;
 
         Assert.Throws<ExcelMappingException>(() => fallback.PerformFallback(null!, 0, new ReadCellResult(), exception, fieldInfo));
     }
@@ -39,7 +39,7 @@ public class ThrowFallbackTests
     public void PerformFallback_InvokeEventInfo_ThrowsArgumentException(Exception exception)
     {
         var fallback = new ThrowFallback();
-        MemberInfo eventInfo = typeof(TestClass).GetEvent(nameof(TestClass.Event))!;
+        var eventInfo = typeof(TestClass).GetEvent(nameof(TestClass.Event))!;
 
         Assert.Throws<ArgumentException>("member", () => fallback.PerformFallback(null!, 0, new ReadCellResult(), exception, eventInfo));
     }

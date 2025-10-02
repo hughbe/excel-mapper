@@ -167,6 +167,17 @@ public class MapInt64Tests
         Assert.Equal(10, row3.Value);
     }
 
+    [Fact]
+    public void ReadRow_Int64Overflow_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Overflow_Signed.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<long>());
+    }
+
     private class Int64Value
     {
         public long Value { get; set; }

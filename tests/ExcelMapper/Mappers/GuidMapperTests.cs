@@ -22,7 +22,7 @@ public class GuidMapperTests
     {
         var item = new GuidMapper();
 
-        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, stringValue));
+        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, stringValue, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(expected, result.Value);
         Assert.Null(result.Exception);
@@ -36,7 +36,7 @@ public class GuidMapperTests
     {
         var item = new GuidMapper();
 
-        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, stringValue));
+        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, stringValue, preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);

@@ -358,7 +358,7 @@ public class ExcelClassMap<T> : ExcelClassMap
 
     private ManyToOneDictionaryMap<TValue> GetDictionaryMap<TKey, TValue>(MemberInfo member)
     {
-        if (!AutoMapper.TryCreateGenericDictionaryMap<TKey, TValue>(member.MemberType(), EmptyValueStrategy, out ManyToOneDictionaryMap<TValue>? map))
+        if (!AutoMapper.TryCreateGenericDictionaryMap<TKey, TValue>(member, member.MemberType(), EmptyValueStrategy, out ManyToOneDictionaryMap<TValue>? map))
         {
             throw new ExcelMappingException($"No known way to instantiate type \"{member.MemberType()}\".");
         }

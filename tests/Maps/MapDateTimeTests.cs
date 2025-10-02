@@ -230,7 +230,7 @@ public class MapDateTimeTests
 
         // Valid cell value.
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<DateTimeValueInt>(1, 1).ToArray());
-        Assert.IsType<FormatException>(ex.InnerException);
+        Assert.IsType<InvalidCastException>(ex.InnerException);
         Assert.Equal("Cannot assign \"01/01/2025 01:01:01\" to member \"Value\" of type \"System.Int32\" in column \"Date\" on row 2 in sheet \"Sheet1\".", ex.Message);
     }
 
@@ -243,7 +243,8 @@ public class MapDateTimeTests
     {
         public DateTimeValueClassMap()
         {
-            Map(m => m.Value).WithColumnIndex(0);
+            Map(m => m.Value)
+                .WithColumnIndex(0);
         }
     }
 

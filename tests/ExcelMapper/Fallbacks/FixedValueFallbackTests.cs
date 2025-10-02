@@ -14,7 +14,7 @@ public class FixedValueFallbackTests
         var fallback = new FixedValueFallback(value);
         Assert.Same(value, fallback.Value);
 
-        object? result = fallback.PerformFallback(null!, 0, new ReadCellResult(), null, null!);
+        var result = fallback.PerformFallback(null!, 0, new ReadCellResult(), null, null!);
         Assert.Same(value, result);
     }
 }

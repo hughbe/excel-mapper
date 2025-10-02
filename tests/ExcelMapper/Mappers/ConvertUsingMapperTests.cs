@@ -31,7 +31,7 @@ public class ConvertUsingMapperTests
         };
         var item = new ConvertUsingMapper(converter);
         
-        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, "string"));
+        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, "string", preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(10, result.Value);
         Assert.Null(result.Exception);
@@ -48,7 +48,7 @@ public class ConvertUsingMapperTests
         };
         var item = new ConvertUsingMapper(converter);
         
-        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, "string"));
+        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, "string", preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.IsType<DivideByZeroException>(result.Exception);
