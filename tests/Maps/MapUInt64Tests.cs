@@ -185,8 +185,8 @@ public class MapUInt64Tests
         public CustomUInt64ValueMap()
         {
             Map(o => o.Value)
-                .WithEmptyFallback((ulong)11)
-                .WithInvalidFallback((ulong)10);
+                .WithEmptyFallback(11)
+                .WithInvalidFallback(10);
         }
     }
 

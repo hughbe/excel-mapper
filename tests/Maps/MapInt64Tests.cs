@@ -185,8 +185,8 @@ public class MapInt64Tests
         public CustomInt64ValueMap()
         {
             Map(o => o.Value)
-                .WithEmptyFallback((long)-10)
-                .WithInvalidFallback((long)10);
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
         }
     }
 
@@ -208,8 +208,8 @@ public class MapInt64Tests
         public CustomNullableInt64ClassMap()
         {
             Map(o => o.Value)
-                .WithEmptyFallback((long)-10)
-                .WithInvalidFallback((long)10);
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
         }
     }
 }

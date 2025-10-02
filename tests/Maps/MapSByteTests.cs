@@ -185,8 +185,8 @@ public class MapSByteTests
         public CustomSByteValueMap()
         {
             Map(o => o.Value)
-                .WithEmptyFallback((sbyte)-10)
-                .WithInvalidFallback((sbyte)10);
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
         }
     }
 
@@ -208,8 +208,8 @@ public class MapSByteTests
         public CustomNullableSByteClassMap()
         {
             Map(o => o.Value)
-                .WithEmptyFallback((sbyte)-10)
-                .WithInvalidFallback((sbyte)10);
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
         }
     }
 }

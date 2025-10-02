@@ -185,8 +185,8 @@ public class MapInt16Tests
         public CustomInt16ValueMap()
         {
             Map(o => o.Value)
-                .WithEmptyFallback((short)-10)
-                .WithInvalidFallback((short)10);
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
         }
     }
 
@@ -208,8 +208,8 @@ public class MapInt16Tests
         public CustomNullableInt16ClassMap()
         {
             Map(o => o.Value)
-                .WithEmptyFallback((short)-10)
-                .WithInvalidFallback((short)10);
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
         }
     }
 }

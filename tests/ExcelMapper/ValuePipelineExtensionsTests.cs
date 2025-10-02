@@ -13,24 +13,24 @@ namespace ExcelMapper.Tests;
 public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 {
     [Fact]
-    public void WithMapper_ValidMapper_Success()
+    public void WithReaderFactory_ValidReader_Success()
     {
         var factory = new ColumnNameReaderFactory("ColumnName");
         OneToOneMap<string> propertyMap = Map(t => t.Value);
+        Assert.False(propertyMap.Optional);
         Assert.Same(propertyMap, propertyMap.WithReaderFactory(factory));
-
         Assert.Same(factory, propertyMap.ReaderFactory);
     }
 
     [Fact]
     public void WithReaderFactory_OptionalColumn_Success()
     {
-        var innerReader = new ColumnNameReaderFactory("ColumnName");
+        var factory = new ColumnNameReaderFactory("ColumnName");
         OneToOneMap<string> propertyMap = Map(t => t.Value).MakeOptional();
         Assert.True(propertyMap.Optional);
-        Assert.Same(propertyMap, propertyMap.WithReaderFactory(innerReader));
+        Assert.Same(propertyMap, propertyMap.WithReaderFactory(factory));
         Assert.True(propertyMap.Optional);
-        Assert.Same(innerReader, propertyMap.ReaderFactory);
+        Assert.Same(factory, propertyMap.ReaderFactory);
     }
 
     [Fact]
@@ -95,24 +95,24 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [Fact]
     public void MakeOptional_HasMapper_ReturnsExpected()
     {
-        var innerReader = new ColumnIndexReaderFactory(1);
-        OneToOneMap<string> propertyMap = Map(t => t.Value).WithReaderFactory(innerReader);
+        var factory = new ColumnIndexReaderFactory(1);
+        OneToOneMap<string> propertyMap = Map(t => t.Value).WithReaderFactory(factory);
         Assert.False(propertyMap.Optional);
         Assert.Same(propertyMap, propertyMap.MakeOptional());
         Assert.True(propertyMap.Optional);
-        Assert.Same(innerReader, propertyMap.ReaderFactory);
+        Assert.Same(factory, propertyMap.ReaderFactory);
     }
 
     [Fact]
     public void MakeOptional_AlreadyOptional_ReturnsExpected()
     {
-        var innerReader = new ColumnIndexReaderFactory(1);
-        OneToOneMap<string> propertyMap = Map(t => t.Value).WithReaderFactory(innerReader);
+        var factory = new ColumnIndexReaderFactory(1);
+        OneToOneMap<string> propertyMap = Map(t => t.Value).WithReaderFactory(factory);
         Assert.Same(propertyMap, propertyMap.MakeOptional());
         Assert.True(propertyMap.Optional);
         Assert.Same(propertyMap, propertyMap.MakeOptional());
         Assert.True(propertyMap.Optional);
-        Assert.Same(innerReader, propertyMap.ReaderFactory);
+        Assert.Same(factory, propertyMap.ReaderFactory);
     }
 
     [Fact]

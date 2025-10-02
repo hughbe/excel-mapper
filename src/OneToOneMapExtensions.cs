@@ -1,6 +1,7 @@
 using System;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Readers;
+using ExcelMapper.Fallbacks;
 
 namespace ExcelMapper;
 

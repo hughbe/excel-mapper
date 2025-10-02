@@ -185,8 +185,8 @@ public class MapUInt16Tests
         public CustomUInt16ValueMap()
         {
             Map(o => o.Value)
-                .WithEmptyFallback((ushort)11)
-                .WithInvalidFallback((ushort)10);
+                .WithEmptyFallback(11)
+                .WithInvalidFallback(10);
         }
     }
 
@@ -208,8 +208,8 @@ public class MapUInt16Tests
         public CustomNullableUInt16ClassMap()
         {
             Map(o => o.Value)
-                .WithEmptyFallback((ushort)11)
-                .WithInvalidFallback((ushort)10);
+                .WithEmptyFallback(11)
+                .WithInvalidFallback(10);
         }
     }
 }

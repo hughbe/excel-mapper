@@ -240,8 +240,8 @@ public class MapDecimalTests
         public NullableDecimalNullValueFallbackMap()
         {
             Map(o => o.Value)
-                .WithEmptyFallback((decimal?)null)
-                .WithInvalidFallback((decimal?)null);
+                .WithEmptyFallback(null)
+                .WithInvalidFallback(null);
         }
     }
 }

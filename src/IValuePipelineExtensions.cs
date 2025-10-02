@@ -210,6 +210,19 @@ public static class IValuePipelineExtensions
     }
 
     /// <summary>
+    /// Specifies that the property map should throw an exception if the value of a cell if empty or cannot be mapped.
+    /// </summary>
+    /// <typeparam name="TPropertyMap">The type of the property map.</typeparam>
+    /// <param name="propertyMap">The property map to use.</param>
+    /// <returns>The property map on which this method was invoked.</returns>
+    public static TPropertyMap WithThrowingFallback<TPropertyMap>(this TPropertyMap propertyMap) where TPropertyMap : IValuePipeline
+    {
+        return propertyMap
+            .WithThrowingEmptyFallback()
+            .WithThrowingInvalidFallback();
+    }
+
+    /// <summary>
     /// Specifies a fixed fallback to be used if the value of a cell is empty or cannot be mapped.
     /// </summary>
     /// <typeparam name="TPropertyMap">The type of the property map.</typeparam>
@@ -221,19 +234,6 @@ public static class IValuePipelineExtensions
         return propertyMap
             .WithEmptyFallback(defaultValue)
             .WithInvalidFallback(defaultValue);
-    }
-
-    /// <summary>
-    /// Specifies that the property map should throw an exception if the value of a cell if empty or cannot be mapped.
-    /// </summary>
-    /// <typeparam name="TPropertyMap">The type of the property map.</typeparam>
-    /// <param name="propertyMap">The property map to use.</param>
-    /// <returns>The property map on which this method was invoked.</returns>
-    public static TPropertyMap WithThrowingFallback<TPropertyMap>(this TPropertyMap propertyMap) where TPropertyMap : IValuePipeline
-    {
-        return propertyMap
-            .WithThrowingEmptyFallback()
-            .WithThrowingInvalidFallback();
     }
 
     /// <summary>

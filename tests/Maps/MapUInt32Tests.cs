@@ -185,8 +185,8 @@ public class MapUInt32Tests
         public CustomUInt32ValueMap()
         {
             Map(o => o.Value)
-                .WithEmptyFallback((uint)11)
-                .WithInvalidFallback((uint)10);
+                .WithEmptyFallback(11)
+                .WithInvalidFallback(10);
         }
     }
 
@@ -208,8 +208,8 @@ public class MapUInt32Tests
         public CustomNullableUInt32ClassMap()
         {
             Map(o => o.Value)
-                .WithEmptyFallback((uint)11)
-                .WithInvalidFallback((uint)10);
+                .WithEmptyFallback(11)
+                .WithInvalidFallback(10);
         }
     }
 }
