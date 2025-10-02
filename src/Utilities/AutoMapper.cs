@@ -93,6 +93,12 @@ public static class AutoMapper
             return false;
         }
 
+        var defaultValueAttribute = member.GetCustomAttribute<ExcelDefaultValueAttribute>();
+        if (defaultValueAttribute != null)
+        {
+            emptyFallback = new FixedValueFallback(defaultValueAttribute.Value);
+        }
+
         var defaultReader = GetDefaultCellReaderFactory(member, out var isOptional);
         map = new OneToOneMap<T>(defaultReader)
             .WithCellValueMappers(mapper)

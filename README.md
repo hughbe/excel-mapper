@@ -98,6 +98,26 @@ public class President
 }
 ```
 
+### Default Values
+By default, ExcelMapper sets types that can be null to `null` if the value is empty. Otherwise, it throws an exception, for example for value types.
+
+You can change this behaviour by applying the `ExcelDefaultValueAttribute` to provide a default value.
+| Name           | Age |
+|----------------| --- |
+| Donald Trump   |     |
+| Barack Obama   | 2   |
+
+```cs
+public class President
+{
+    public string Name { get; set; }
+
+    // Default to minus one - no exception thrown if column value is empty.
+    [ExcelDefaultValue(-1)]
+    public int Age { get; set; }
+}
+```
+
 ### Optional Properties
 By default, ExcelMapper throws an exception if a property or field is not found in the Excel file. You can change this behavior by applying the `ExcelOptionalAttribute` to make a property optional. This is useful when a column may not always be included in the Excel file.
 
