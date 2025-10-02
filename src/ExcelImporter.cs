@@ -131,6 +131,11 @@ public class ExcelImporter : IDisposable
     /// <returns>False if there are no more sheets in the document, else true.</returns>
     public bool TryReadSheet([NotNullWhen(true)] out ExcelSheet? sheet)
     {
+        if (Reader.IsClosed)
+        {
+            throw new ExcelMappingException($"The underlying reader is closed.");
+        }
+
         sheet = null;
 
         if (SheetIndex != -1)
@@ -154,6 +159,11 @@ public class ExcelImporter : IDisposable
     /// <returns>True if the sheet was found, else false.</returns>
     public bool TryReadSheet(string sheetName, [NotNullWhen(true)] out ExcelSheet? sheet)
     {
+        if (Reader.IsClosed)
+        {
+            throw new ExcelMappingException($"The underlying reader is closed.");
+        }
+
         sheet = null;
         ResetReader();
 
@@ -179,6 +189,11 @@ public class ExcelImporter : IDisposable
     /// <returns>True if the sheet was found, else false.</returns>
     public bool TryReadSheet(int sheetIndex, [NotNullWhen(true)] out ExcelSheet? sheet)
     {
+        if (Reader.IsClosed)
+        {
+            throw new ExcelMappingException($"The underlying reader is closed.");
+        }
+
         sheet = null;
 
         if (sheetIndex < 0 || sheetIndex > NumberOfSheets - 1)

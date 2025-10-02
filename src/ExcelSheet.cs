@@ -146,6 +146,11 @@ public class ExcelSheet
     /// <returns>A list of objects of type T mapped from each row in the sheet.</returns>
     public IEnumerable<T> ReadRows<T>()
     {
+        if (Reader.IsClosed)
+        {
+            throw new ExcelMappingException($"The underlying reader is closed.");
+        }
+
         // Read the heading if we haven't already.
         if (HasHeading && Heading == null)
         {
@@ -169,6 +174,10 @@ public class ExcelSheet
     /// <returns>A list of objects of type T mapped from each row within the range specified.</returns>
     public IEnumerable<T> ReadRows<T>(int startIndex, int count)
     {
+        if (Reader.IsClosed)
+        {
+            throw new ExcelMappingException($"The underlying reader is closed.");
+        }
         if (startIndex < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(startIndex), startIndex, "Start index cannot be negative.");
@@ -261,6 +270,11 @@ public class ExcelSheet
 
     private bool MoveToNextRow()
     {
+        if (Reader.IsClosed)
+        {
+            throw new ExcelMappingException($"The underlying reader is closed.");
+        }
+
         Importer.MoveToSheet(this);
         if (!Reader.Read())
         {
@@ -302,6 +316,10 @@ public class ExcelSheet
     {
         for (int i = 0; i <= HeadingIndex; i++)
         {
+            if (Reader.IsClosed)
+            {
+                throw new ExcelMappingException($"The underlying reader is closed.");
+            }
             if (!Reader.Read())
             {
                 throw new ExcelMappingException($"Sheet \"{Name}\" has no heading.");

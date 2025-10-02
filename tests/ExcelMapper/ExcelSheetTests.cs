@@ -98,6 +98,17 @@ public class ExcelSheetTests
     }
 
     [Fact]
+    public void ReadHeading_Closed_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        importer.Dispose();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadHeading());
+        Assert.Equal("The underlying reader is closed.", ex.Message);
+    }
+
+    [Fact]
     public void ReadRows_NotReadHeading_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
@@ -210,6 +221,17 @@ public class ExcelSheetTests
         Assert.Empty(sheet.ReadRows<StringValue>());
     }
 
+    [Fact]
+    public void ReadRows_Closed_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        importer.Dispose();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>().ToArray());
+        Assert.Equal("The underlying reader is closed.", ex.Message);
+    }
+
     public static IEnumerable<object[]> ReadRows_IndexCount_TestData()
     {
         yield return new object[] { 1, 4, new string?[] { "value", "  value  ", null, "value" } };
@@ -292,6 +314,17 @@ public class ExcelSheetTests
 
         Assert.Null(sheet.Heading);
         Assert.False(sheet.HasHeading);
+    }
+
+    [Fact]
+    public void ReadRows_IntIntClosed_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        importer.Dispose();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>(0, 1).ToArray());
+        Assert.Equal("The underlying reader is closed.", ex.Message);
     }
 
     [Fact]
@@ -591,8 +624,39 @@ public class ExcelSheetTests
         Assert.NotEmpty(sheet.ReadRows<object>().ToArray());
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<object>());
+    }
+
+    [Fact]
+    public void TryReadRow_NoMoreRows_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        Assert.NotEmpty(sheet.ReadRows<object>().ToArray());
+
         Assert.False(sheet.TryReadRow(out object? row));
         Assert.Null(row);
+    }
+
+    [Fact]
+    public void ReadRow_Closed_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        importer.Dispose();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValue>());
+        Assert.Equal("The underlying reader is closed.", ex.Message);
+    }
+
+    [Fact]
+    public void TryReadRow_Closed_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        importer.Dispose();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.TryReadRow<StringValue>(out var row));
+        Assert.Equal("The underlying reader is closed.", ex.Message);
     }
 
     private class BlankLinesClass
