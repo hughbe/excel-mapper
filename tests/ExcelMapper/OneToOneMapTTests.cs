@@ -26,6 +26,7 @@ public class OneToOneMapTTests
         Assert.Same(map.CellValueTransformers, map.CellValueTransformers);
         Assert.Same(map.CellValueTransformers, map.Pipeline.CellValueTransformers);
         Assert.False(map.Optional);
+        Assert.False(map.PreserveFormatting);
     }
 
     [Fact]
@@ -111,6 +112,27 @@ public class OneToOneMapTTests
         // Set different.
         map.Optional = !value;
         Assert.Equal(!value, map.Optional);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void PreserveFormatting_Set_GetReturnsExpected(bool value)
+    {
+        var factory = new ColumnNameReaderFactory("Column");
+        var map = new SubOneToOneMap<int>(factory)
+        {
+            PreserveFormatting = value
+        };
+        Assert.Equal(value, map.PreserveFormatting);
+
+        // Set same.
+        map.PreserveFormatting = value;
+        Assert.Equal(value, map.PreserveFormatting);
+
+        // Set different.
+        map.PreserveFormatting = !value;
+        Assert.Equal(!value, map.PreserveFormatting);
     }
 
     [Fact]
@@ -233,7 +255,7 @@ public class OneToOneMapTTests
     {
         public Func<(bool, ReadCellResult)> Action { get; } = action;
 
-        public bool TryGetValue(IExcelDataReader factory, out ReadCellResult result)
+        public bool TryGetValue(IExcelDataReader factory, bool preserveFormatting, out ReadCellResult result)
         {   
             var (ret, res) = Action();
             result = res;

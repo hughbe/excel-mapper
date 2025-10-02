@@ -8,5 +8,5 @@ namespace ExcelMapper.Mappers;
 public class StringMapper : ICellMapper
 {
     public CellMapperResult MapCellValue(ReadCellResult result)
-        => CellMapperResult.SuccessIfNoOtherSuccess(result.StringValue);
+        => CellMapperResult.SuccessIfNoOtherSuccess(result.GetString());
 }

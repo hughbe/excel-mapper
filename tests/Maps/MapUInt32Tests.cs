@@ -167,6 +167,18 @@ public class MapUInt32Tests
         Assert.Equal(10u, row3.Value);
     }
 
+    [Fact]
+    public void ReadRow_UInt32Overflow_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Overflow_Signed.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<uint>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<uint>());
+    }
+
     private class UInt32Value
     {
         public uint Value { get; set; }

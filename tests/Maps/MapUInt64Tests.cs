@@ -167,6 +167,18 @@ public class MapUInt64Tests
         Assert.Equal(10u, row3.Value);
     }
 
+    [Fact]
+    public void ReadRow_UInt64Overflow_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Overflow_Signed.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ulong>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ulong>());
+    }
+
     private class UInt64Value
     {
         public ulong Value { get; set; }

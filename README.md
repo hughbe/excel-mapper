@@ -187,6 +187,25 @@ Console.WriteLine(president[1].NoSuchColumn); // null
 Console.WriteLine(president[1].PreviousPresident); // null
 ```
 
+### Preserve formatting
+By default, ExcelMapper reads string values without formatting. You can change this behavior by applying the `ExcelPreserveFormattingAttribute` to retain formatting when reading string values.
+
+For example, the below will preserve number values with a leading zeroes number format.
+| Name           | Age  |
+|----------------|------|
+| Donald Trump   | 073  |
+| Barack Obama   | 058  |
+
+```cs
+public class President
+{
+    public string Name { get; set; }
+
+    // If you want to preserve formatting.
+    [ExcelPreserveFormatting]
+    public string Age { get; set; }
+}
+
 ## Defining a custom mapping
 
 ExcelMapper allows you to customize the class map used when mapping Excel sheet rows to objects.

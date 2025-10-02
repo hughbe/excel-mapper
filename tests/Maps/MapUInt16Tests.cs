@@ -167,6 +167,18 @@ public class MapUInt16Tests
         Assert.Equal((ushort)10, row3.Value);
     }
 
+    [Fact]
+    public void ReadRow_UInt16Overflow_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Overflow_Signed.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ushort>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ushort>());
+    }
+
     private class UInt16Value
     {
         public ushort Value { get; set; }

@@ -26,6 +26,8 @@ public class ManyToOneEnumerableMap<TElement> : IMap
     }
 
     public bool Optional { get; set; }
+    
+    public bool PreserveFormatting { get; set; }
 
     public IValuePipeline<TElement> ElementPipeline { get; private set; }
 
@@ -57,7 +59,7 @@ public class ManyToOneEnumerableMap<TElement> : IMap
         }
 
 
-        if (cellsReader == null || !cellsReader.TryGetValues(reader, out IEnumerable<ReadCellResult>? results))
+        if (cellsReader == null || !cellsReader.TryGetValues(reader, PreserveFormatting, out var results))
         {
             if (Optional)
             {
@@ -71,7 +73,7 @@ public class ManyToOneEnumerableMap<TElement> : IMap
         var elements = new List<TElement?>();
         foreach (ReadCellResult result in results)
         {
-            var elementValue = (TElement?)ValuePipeline.GetPropertyValue(ElementPipeline, sheet, rowIndex, result, member);
+            var elementValue = (TElement?)ValuePipeline.GetPropertyValue(ElementPipeline, sheet, rowIndex, result, PreserveFormatting, member);
             elements.Add(elementValue);
         }
 
@@ -80,13 +82,23 @@ public class ManyToOneEnumerableMap<TElement> : IMap
     }
 
     /// <summary>
-    /// Makes the reader of the property map optional. For example, if the column doesn't exist
-    /// or the index is invalid, an exception will not be thrown.
+    /// Makes the reader of the property map peserve formatting when reading string values.
     /// </summary>
     /// <returns>The property map on which this method was invoked.</returns>
     public ManyToOneEnumerableMap<TElement> MakeOptional()
     {
         Optional = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Makes the reader of the property map optional. For example, if the column doesn't exist
+    /// or the index is invalid, an exception will not be thrown.
+    /// </summary>
+    /// <returns>The property map on which this method was invoked.</returns>
+    public ManyToOneEnumerableMap<TElement> MakePreserveFormatting()
+    {
+        PreserveFormatting = true;
         return this;
     }
 

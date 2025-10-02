@@ -25,6 +25,8 @@ public class OneToOneMap<T> : IValuePipeline<T>, IMap
 
     public bool Optional { get; set; }
 
+    public bool PreserveFormatting { get; set; }
+
     public ValuePipeline<T> Pipeline { get; } = new ValuePipeline<T>();
 
     private readonly Dictionary<ExcelSheet, ICellReader?> _factoryCache = [];
@@ -37,7 +39,7 @@ public class OneToOneMap<T> : IValuePipeline<T>, IMap
             _factoryCache.Add(sheet, cellReader);
         }
 
-        if (cellReader == null || !cellReader.TryGetValue(reader, out ReadCellResult readResult))
+        if (cellReader == null || !cellReader.TryGetValue(reader, PreserveFormatting, out ReadCellResult readResult))
         {
             if (Optional)
             {
@@ -48,7 +50,7 @@ public class OneToOneMap<T> : IValuePipeline<T>, IMap
             throw new ExcelMappingException($"Could not read value for {member?.Name}", sheet, rowIndex, -1);
         }
 
-        result = (T)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, readResult, member)!;
+        result = (T)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, readResult, PreserveFormatting, member)!;
         return true;
     }
 

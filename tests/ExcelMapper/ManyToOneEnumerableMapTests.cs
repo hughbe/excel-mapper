@@ -17,9 +17,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
-        Assert.False(propertyMap.Optional);
-        Assert.NotNull(propertyMap.ElementPipeline);
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        Assert.False(map.Optional);
+        Assert.False(map.PreserveFormatting);
+        Assert.NotNull(map.ElementPipeline);
     }
 
     [Fact]
@@ -58,15 +59,15 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory)
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory)
         {
             ReaderFactory = value
         };
-        Assert.Same(value, propertyMap.ReaderFactory);
+        Assert.Same(value, map.ReaderFactory);
 
         // Set same.
-        propertyMap.ReaderFactory = value;
-        Assert.Same(value, propertyMap.ReaderFactory);
+        map.ReaderFactory = value;
+        Assert.Same(value, map.ReaderFactory);
     }
 
     [Fact]
@@ -75,8 +76,8 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
-        Assert.Throws<ArgumentNullException>("value", () => propertyMap.ReaderFactory = null!);
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        Assert.Throws<ArgumentNullException>("value", () => map.ReaderFactory = null!);
     }
 
     [Theory]
@@ -87,19 +88,42 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory)
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory)
         {
             Optional = value
         };
-        Assert.Equal(value, propertyMap.Optional);
+        Assert.Equal(value, map.Optional);
 
         // Set same.
-        propertyMap.Optional = value;
-        Assert.Equal(value, propertyMap.Optional);
+        map.Optional = value;
+        Assert.Equal(value, map.Optional);
 
         // Set different.
-        propertyMap.Optional = !value;
-        Assert.Equal(!value, propertyMap.Optional);
+        map.Optional = !value;
+        Assert.Equal(!value, map.Optional);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void PreserveFormatting_Set_GetReturnsExpected(bool value)
+    {
+        var factory = new ColumnNamesReaderFactory("Column");
+        var elementPipeline = new ValuePipeline<string>();
+        CreateElementsFactory<string> createElementsFactory = elements => elements;
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory)
+        {
+            PreserveFormatting = value
+        };
+        Assert.Equal(value, map.PreserveFormatting);
+
+        // Set same.
+        map.PreserveFormatting = value;
+        Assert.Equal(value, map.PreserveFormatting);
+
+        // Set different.
+        map.PreserveFormatting = !value;
+        Assert.Equal(!value, map.PreserveFormatting);
     }
 
     [Fact]
@@ -108,11 +132,11 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
-        Assert.False(propertyMap.Optional);
-        Assert.Same(propertyMap, propertyMap.MakeOptional());
-        Assert.True(propertyMap.Optional);
-        Assert.Same(factory, propertyMap.ReaderFactory);
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        Assert.False(map.Optional);
+        Assert.Same(map, map.MakeOptional());
+        Assert.True(map.Optional);
+        Assert.Same(factory, map.ReaderFactory);
     }
 
     [Fact]
@@ -121,12 +145,39 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
-        Assert.Same(propertyMap, propertyMap.MakeOptional());
-        Assert.True(propertyMap.Optional);
-        Assert.Same(propertyMap, propertyMap.MakeOptional());
-        Assert.True(propertyMap.Optional);
-        Assert.Same(factory, propertyMap.ReaderFactory);
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        Assert.Same(map, map.MakeOptional());
+        Assert.True(map.Optional);
+        Assert.Same(map, map.MakeOptional());
+        Assert.True(map.Optional);
+        Assert.Same(factory, map.ReaderFactory);
+    }
+
+    [Fact]
+    public void MakePreserveFormatting_HasMapper_ReturnsExpected()
+    {
+        var factory = new ColumnNamesReaderFactory("Column");
+        var elementPipeline = new ValuePipeline<string>();
+        CreateElementsFactory<string> createElementsFactory = elements => elements;
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        Assert.False(map.PreserveFormatting);
+        Assert.Same(map, map.MakePreserveFormatting());
+        Assert.True(map.PreserveFormatting);
+        Assert.Same(factory, map.ReaderFactory);
+    }
+
+    [Fact]
+    public void MakePreserveFormatting_AlreadyPreserveFormatting_ReturnsExpected()
+    {
+        var factory = new ColumnNamesReaderFactory("Column");
+        var elementPipeline = new ValuePipeline<string>();
+        CreateElementsFactory<string> createElementsFactory = elements => elements;
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        Assert.Same(map, map.MakePreserveFormatting());
+        Assert.True(map.PreserveFormatting);
+        Assert.Same(map, map.MakePreserveFormatting());
+        Assert.True(map.PreserveFormatting);
+        Assert.Same(factory, map.ReaderFactory);
     }
 
     [Fact]
@@ -135,15 +186,15 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
 
         var newElementPipeline = new ValuePipeline<string>();
-        Assert.Same(propertyMap, propertyMap.WithElementMap(e =>
+        Assert.Same(map, map.WithElementMap(e =>
         {
-            Assert.Same(e, propertyMap.ElementPipeline);
+            Assert.Same(e, map.ElementPipeline);
             return newElementPipeline;
         }));
-        Assert.Same(newElementPipeline, propertyMap.ElementPipeline);
+        Assert.Same(newElementPipeline, map.ElementPipeline);
     }
 
     [Fact]
@@ -152,9 +203,9 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
 
-        Assert.Throws<ArgumentNullException>("elementMap", () => propertyMap.WithElementMap(null!));
+        Assert.Throws<ArgumentNullException>("elementMap", () => map.WithElementMap(null!));
     }
 
     [Fact]
@@ -163,9 +214,9 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
 
-        Assert.Throws<ArgumentNullException>("elementMap", () => propertyMap.WithElementMap(_ => null!));
+        Assert.Throws<ArgumentNullException>("elementMap", () => map.WithElementMap(_ => null!));
     }
 
     [Fact]
@@ -174,10 +225,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new CharSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
-        Assert.Same(propertyMap, propertyMap.WithColumnName("ColumnName"));
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        Assert.Same(map, map.WithColumnName("ColumnName"));
 
-        var newFactory = Assert.IsType<CharSplitReaderFactory>(propertyMap.ReaderFactory);
+        var newFactory = Assert.IsType<CharSplitReaderFactory>(map.ReaderFactory);
         ColumnNameReaderFactory innerReader = Assert.IsType<ColumnNameReaderFactory>(newFactory.ReaderFactory);
         Assert.Equal("ColumnName", innerReader.ColumnName);
     }
@@ -188,10 +239,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnName");
-        Assert.Same(propertyMap, propertyMap.WithColumnName("ColumnName"));
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnName");
+        Assert.Same(map, map.WithColumnName("ColumnName"));
 
-        var newFactory = Assert.IsType<CharSplitReaderFactory>(propertyMap.ReaderFactory);
+        var newFactory = Assert.IsType<CharSplitReaderFactory>(map.ReaderFactory);
         ColumnNameReaderFactory innerReader = Assert.IsType<ColumnNameReaderFactory>(newFactory.ReaderFactory);
         Assert.Equal("ColumnName", innerReader.ColumnName);
     }
@@ -202,9 +253,9 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
 
-        Assert.Throws<ArgumentNullException>("columnName", () => propertyMap.WithColumnName(null!));
+        Assert.Throws<ArgumentNullException>("columnName", () => map.WithColumnName(null!));
     }
 
     [Fact]
@@ -213,9 +264,9 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
 
-        Assert.Throws<ArgumentException>("columnName", () => propertyMap.WithColumnName(string.Empty));
+        Assert.Throws<ArgumentException>("columnName", () => map.WithColumnName(string.Empty));
     }
 
     [Theory]
@@ -226,10 +277,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new CharSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
-        Assert.Same(propertyMap, propertyMap.WithColumnIndex(columnIndex));
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        Assert.Same(map, map.WithColumnIndex(columnIndex));
 
-        var newFactory = Assert.IsType<CharSplitReaderFactory>(propertyMap.ReaderFactory);
+        var newFactory = Assert.IsType<CharSplitReaderFactory>(map.ReaderFactory);
         var innerReader = Assert.IsType<ColumnIndexReaderFactory>(newFactory.ReaderFactory);
         Assert.Equal(columnIndex, innerReader.ColumnIndex);
     }
@@ -242,10 +293,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnName");
-        Assert.Same(propertyMap, propertyMap.WithColumnIndex(columnIndex));
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnName");
+        Assert.Same(map, map.WithColumnIndex(columnIndex));
 
-        var newFactory = Assert.IsType<CharSplitReaderFactory>(propertyMap.ReaderFactory);
+        var newFactory = Assert.IsType<CharSplitReaderFactory>(map.ReaderFactory);
         var innerReader = Assert.IsType<ColumnIndexReaderFactory>(newFactory.ReaderFactory);
         Assert.Equal(columnIndex, innerReader.ColumnIndex);
     }
@@ -256,9 +307,9 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
 
-        Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => propertyMap.WithColumnIndex(-1));
+        Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => map.WithColumnIndex(-1));
     }
 
     public static IEnumerable<object[]> Separators_Char_TestData()
@@ -277,10 +328,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
-        Assert.Same(propertyMap, propertyMap.WithSeparators(separatorsArray));
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        Assert.Same(map, map.WithSeparators(separatorsArray));
 
-        var newFactory = Assert.IsType<CharSplitReaderFactory>(propertyMap.ReaderFactory);
+        var newFactory = Assert.IsType<CharSplitReaderFactory>(map.ReaderFactory);
         Assert.Same(separatorsArray, newFactory.Separators);
     }
 
@@ -291,10 +342,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
-        Assert.Same(propertyMap, propertyMap.WithSeparators(separators));
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        Assert.Same(map, map.WithSeparators(separators));
 
-        var newFactory = Assert.IsType<CharSplitReaderFactory>(propertyMap.ReaderFactory);
+        var newFactory = Assert.IsType<CharSplitReaderFactory>(map.ReaderFactory);
         Assert.Equal(separators, newFactory.Separators);
     }
 
@@ -314,10 +365,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
-        Assert.Same(propertyMap, propertyMap.WithSeparators(separatorsArray));
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        Assert.Same(map, map.WithSeparators(separatorsArray));
 
-        StringSplitReaderFactory newFactory = Assert.IsType<StringSplitReaderFactory>(propertyMap.ReaderFactory);
+        StringSplitReaderFactory newFactory = Assert.IsType<StringSplitReaderFactory>(map.ReaderFactory);
         Assert.Same(separatorsArray, newFactory.Separators);
     }
 
@@ -328,10 +379,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
-        Assert.Same(propertyMap, propertyMap.WithSeparators(separators));
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        Assert.Same(map, map.WithSeparators(separators));
 
-        StringSplitReaderFactory newFactory = Assert.IsType<StringSplitReaderFactory>(propertyMap.ReaderFactory);
+        StringSplitReaderFactory newFactory = Assert.IsType<StringSplitReaderFactory>(map.ReaderFactory);
         Assert.Equal(separators, newFactory.Separators);
     }
 
@@ -341,12 +392,12 @@ public class ManyToOneEnumerableMapTests
         var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
 
-        Assert.Throws<ArgumentNullException>("separators", () => propertyMap.WithSeparators((char[])null!));
-        Assert.Throws<ArgumentNullException>("separators", () => propertyMap.WithSeparators((IEnumerable<char>)null!));
-        Assert.Throws<ArgumentNullException>("separators", () => propertyMap.WithSeparators((string[])null!));
-        Assert.Throws<ArgumentNullException>("separators", () => propertyMap.WithSeparators((IEnumerable<string>)null!));
+        Assert.Throws<ArgumentNullException>("separators", () => map.WithSeparators((char[])null!));
+        Assert.Throws<ArgumentNullException>("separators", () => map.WithSeparators((IEnumerable<char>)null!));
+        Assert.Throws<ArgumentNullException>("separators", () => map.WithSeparators((string[])null!));
+        Assert.Throws<ArgumentNullException>("separators", () => map.WithSeparators((IEnumerable<string>)null!));
     }
 
     [Fact]
@@ -355,12 +406,12 @@ public class ManyToOneEnumerableMapTests
         var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
 
-        Assert.Throws<ArgumentException>("value", () => propertyMap.WithSeparators(new char[0]));
-        Assert.Throws<ArgumentException>("value", () => propertyMap.WithSeparators(new List<char>()));
-        Assert.Throws<ArgumentException>("value", () => propertyMap.WithSeparators(new string[0]));
-        Assert.Throws<ArgumentException>("value", () => propertyMap.WithSeparators(new List<string>()));
+        Assert.Throws<ArgumentException>("value", () => map.WithSeparators(new char[0]));
+        Assert.Throws<ArgumentException>("value", () => map.WithSeparators(new List<char>()));
+        Assert.Throws<ArgumentException>("value", () => map.WithSeparators(new string[0]));
+        Assert.Throws<ArgumentException>("value", () => map.WithSeparators(new List<string>()));
     }
 
     [Fact]
@@ -369,12 +420,12 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
-        Assert.Throws<ExcelMappingException>(() => propertyMap.WithSeparators(new char[0]));
-        Assert.Throws<ExcelMappingException>(() => propertyMap.WithSeparators(new List<char>()));
-        Assert.Throws<ExcelMappingException>(() => propertyMap.WithSeparators(new string[0]));
-        Assert.Throws<ExcelMappingException>(() => propertyMap.WithSeparators(new List<string>()));
+        Assert.Throws<ExcelMappingException>(() => map.WithSeparators(new char[0]));
+        Assert.Throws<ExcelMappingException>(() => map.WithSeparators(new List<char>()));
+        Assert.Throws<ExcelMappingException>(() => map.WithSeparators(new string[0]));
+        Assert.Throws<ExcelMappingException>(() => map.WithSeparators(new List<string>()));
     }
 
     [Fact]
@@ -384,10 +435,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
-        Assert.Same(propertyMap, propertyMap.WithColumnNames(columnNames));
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+        Assert.Same(map, map.WithColumnNames(columnNames));
 
-        ColumnNamesReaderFactory newFactory = Assert.IsType<ColumnNamesReaderFactory>(propertyMap.ReaderFactory);
+        ColumnNamesReaderFactory newFactory = Assert.IsType<ColumnNamesReaderFactory>(map.ReaderFactory);
         Assert.Same(columnNames, newFactory.ColumnNames);
     }
 
@@ -398,10 +449,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
-        Assert.Same(propertyMap, propertyMap.WithColumnNames((IEnumerable<string>)columnNames));
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+        Assert.Same(map, map.WithColumnNames((IEnumerable<string>)columnNames));
 
-        ColumnNamesReaderFactory newFactory = Assert.IsType<ColumnNamesReaderFactory>(propertyMap.ReaderFactory);
+        ColumnNamesReaderFactory newFactory = Assert.IsType<ColumnNamesReaderFactory>(map.ReaderFactory);
         Assert.Equal(columnNames, newFactory.ColumnNames);
     }
 
@@ -411,10 +462,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
-        Assert.Throws<ArgumentNullException>("columnNames", () => propertyMap.WithColumnNames(null!));
-        Assert.Throws<ArgumentNullException>("columnNames", () => propertyMap.WithColumnNames((IEnumerable<string>)null!));
+        Assert.Throws<ArgumentNullException>("columnNames", () => map.WithColumnNames(null!));
+        Assert.Throws<ArgumentNullException>("columnNames", () => map.WithColumnNames((IEnumerable<string>)null!));
     }
 
     [Fact]
@@ -423,10 +474,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
-        Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames([]));
-        Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new List<string>()));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([]));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string>()));
     }
 
     [Fact]
@@ -435,10 +486,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
-        Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames([null!]));
-        Assert.Throws<ArgumentException>("columnNames", () => propertyMap.WithColumnNames(new List<string> { null! }));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([null!]));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string> { null! }));
     }
 
     [Fact]
@@ -448,10 +499,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
-        Assert.Same(propertyMap, propertyMap.WithColumnIndices(columnIndices));
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+        Assert.Same(map, map.WithColumnIndices(columnIndices));
 
-        var newFactory = Assert.IsType<ColumnIndicesReaderFactory>(propertyMap.ReaderFactory);
+        var newFactory = Assert.IsType<ColumnIndicesReaderFactory>(map.ReaderFactory);
         Assert.Same(columnIndices, newFactory.ColumnIndices);
     }
 
@@ -462,10 +513,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
-        Assert.Same(propertyMap, propertyMap.WithColumnIndices(columnIndices));
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+        Assert.Same(map, map.WithColumnIndices(columnIndices));
 
-        var newFactory = Assert.IsType<ColumnIndicesReaderFactory>(propertyMap.ReaderFactory);
+        var newFactory = Assert.IsType<ColumnIndicesReaderFactory>(map.ReaderFactory);
         Assert.Equal(columnIndices, newFactory.ColumnIndices);
     }
 
@@ -475,10 +526,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
-        Assert.Throws<ArgumentNullException>("columnIndices", () => propertyMap.WithColumnIndices(null!));
-        Assert.Throws<ArgumentNullException>("columnIndices", () => propertyMap.WithColumnIndices((IEnumerable<int>)null!));
+        Assert.Throws<ArgumentNullException>("columnIndices", () => map.WithColumnIndices(null!));
+        Assert.Throws<ArgumentNullException>("columnIndices", () => map.WithColumnIndices((IEnumerable<int>)null!));
     }
 
     [Fact]
@@ -487,10 +538,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
-        Assert.Throws<ArgumentException>("columnIndices", () => propertyMap.WithColumnIndices([]));
-        Assert.Throws<ArgumentException>("columnIndices", () => propertyMap.WithColumnIndices(new List<int>()));
+        Assert.Throws<ArgumentException>("columnIndices", () => map.WithColumnIndices([]));
+        Assert.Throws<ArgumentException>("columnIndices", () => map.WithColumnIndices(new List<int>()));
     }
 
     [Fact]
@@ -499,10 +550,10 @@ public class ManyToOneEnumerableMapTests
         var factory = new ColumnNamesReaderFactory("Column");
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
-        var propertyMap = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
+        var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory).WithColumnNames("ColumnNames");
 
-        Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => propertyMap.WithColumnIndices([-1]));
-        Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => propertyMap.WithColumnIndices(new List<int> { -1 }));
+        Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => map.WithColumnIndices([-1]));
+        Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => map.WithColumnIndices(new List<int> { -1 }));
     }
 
     [Fact]
@@ -528,7 +579,7 @@ public class ManyToOneEnumerableMapTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        var factory = new MockReaderFactory(new MockReader(() => (true, [new ReadCellResult(0, "Value1"),new ReadCellResult(1, "Value1")])));
+        var factory = new MockReaderFactory(new MockReader(() => (true, [new ReadCellResult(0, "Value1", false),new ReadCellResult(1, "Value1", false)])));
         var elementPipeline = new ValuePipeline<string>();
         CreateElementsFactory<string> createElementsFactory = elements => elements;
         var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, createElementsFactory);
@@ -655,7 +706,7 @@ public class ManyToOneEnumerableMapTests
 
         public Func<(bool, IEnumerable<ReadCellResult>?)> Action { get; }
 
-        public bool TryGetValues(IExcelDataReader factory, [NotNullWhen(true)] out IEnumerable<ReadCellResult>? result)
+        public bool TryGetValues(IExcelDataReader factory, bool preserveFormatting, [NotNullWhen(true)] out IEnumerable<ReadCellResult>? result)
         {
             var (ret, res) = Action();
             result = res;

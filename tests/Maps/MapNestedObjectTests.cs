@@ -211,9 +211,9 @@ public class MapNestedObjectTests
                 var startTimeReader = startTimeReaderFactory.GetReader(sheet)!;
                 var endTimeReader = endTimeReaderFactory.GetReader(sheet)!;
 
-                if (!labelReader.TryGetValue(reader, out ReadCellResult labelResult) ||
-                    !startTimeReader.TryGetValue(reader, out ReadCellResult startTimeResult) ||
-                    !endTimeReader.TryGetValue(reader, out ReadCellResult endTimeResult))
+                if (!labelReader.TryGetValue(reader, false, out ReadCellResult labelResult) ||
+                    !startTimeReader.TryGetValue(reader, false,  out ReadCellResult startTimeResult) ||
+                    !endTimeReader.TryGetValue(reader, false, out ReadCellResult endTimeResult))
                 {
                     throw new InvalidOperationException("No such column");
                 }

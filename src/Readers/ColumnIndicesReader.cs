@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Globalization;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Utilities;
+using ExcelNumberFormat;
 
 namespace ExcelMapper.Readers;
 
@@ -41,13 +43,9 @@ public class ColumnIndicesReader : ICellsReader
         ColumnIndices = columnIndices;
     }
 
-    public bool TryGetValues(IExcelDataReader reader, [NotNullWhen(true)] out IEnumerable<ReadCellResult>? result)
+    public bool TryGetValues(IExcelDataReader reader, bool preserveFormatting, [NotNullWhen(true)] out IEnumerable<ReadCellResult>? result)
     {
-        result = ColumnIndices.Select(columnIndex =>
-        {
-            var value = reader[columnIndex]?.ToString();
-            return new ReadCellResult(columnIndex, value);
-        });
+        result = ColumnIndices.Select(columnIndex => new ReadCellResult(columnIndex, reader, preserveFormatting));
         return true;
     }
 }

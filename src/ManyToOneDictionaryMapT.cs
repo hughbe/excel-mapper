@@ -36,6 +36,8 @@ public class ManyToOneDictionaryMap<T> : IMap
     /// </summary>
     public IValuePipeline<T> ValuePipeline { get; private set; }
 
+    public bool PreserveFormatting { get; set; }
+
     /// <summary>
     /// Gets the reader that reads one or more values from one or more cells used to map each
     /// element of the property or field.
@@ -68,7 +70,7 @@ public class ManyToOneDictionaryMap<T> : IMap
             _factoryCache.Add(sheet, cellsReader);
         }
         
-        if (cellsReader == null || !cellsReader.TryGetValues(reader, out IEnumerable<ReadCellResult>? valueResults))
+        if (cellsReader == null || !cellsReader.TryGetValues(reader, PreserveFormatting, out IEnumerable<ReadCellResult>? valueResults))
         {
             throw new ExcelMappingException($"Could not read value for \"{member?.Name}\"", sheet, rowIndex, -1);
         }
@@ -79,7 +81,7 @@ public class ManyToOneDictionaryMap<T> : IMap
         foreach (ReadCellResult valueResult in valueResultsList)
         {
             // Discarding nullability check because it may be indended to be this way (T may be nullable)
-            T keyValue = (T)ExcelMapper.ValuePipeline.GetPropertyValue(ValuePipeline, sheet, rowIndex, valueResult, member)!;
+            T keyValue = (T)ExcelMapper.ValuePipeline.GetPropertyValue(ValuePipeline, sheet, rowIndex, valueResult, PreserveFormatting, member)!;
             values.Add(keyValue);
         }
 
@@ -116,6 +118,17 @@ public class ManyToOneDictionaryMap<T> : IMap
         }
 
         return WithColumnNames([.. columnNames]);
+    }
+
+    /// <summary>
+    /// Makes the reader of the property map optional. For example, if the column doesn't exist
+    /// or the index is invalid, an exception will not be thrown.
+    /// </summary>
+    /// <returns>The property map on which this method was invoked.</returns>
+    public ManyToOneDictionaryMap<T> MakePreserveFormatting()
+    {
+        PreserveFormatting = true;
+        return this;
     }
 
     /// <summary>

@@ -167,6 +167,18 @@ public class MapByteTests
         Assert.Equal((byte)10, row3.Value);
     }
 
+    [Fact]
+    public void ReadRow_ByteOverflow_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Overflow_Signed.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<byte>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<byte>());
+    }
+
     private class ByteValue
     {
         public byte Value { get; set; }

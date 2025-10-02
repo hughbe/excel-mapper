@@ -10,7 +10,7 @@ namespace ExcelMapper.Readers.Tests;
 public class AllColumnNamesValueReaderTests
 {
     [Fact]
-    public void GetReaders_InvokeCanRead_Success()
+    public void GetReader_InvokeCanRead_Success()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
         ExcelSheet sheet = importer.ReadSheet();
@@ -20,7 +20,7 @@ public class AllColumnNamesValueReaderTests
         var reader = factory.GetReader(sheet);
         Assert.NotNull(reader);
         IEnumerable<ReadCellResult>? result = null;
-        Assert.True(reader.TryGetValues(importer.Reader, out result));
+        Assert.True(reader.TryGetValues(importer.Reader, false, out result));
         Assert.Equal(["Value"], result.Select(r => r.StringValue));
     }
 

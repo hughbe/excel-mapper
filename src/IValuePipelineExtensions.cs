@@ -181,18 +181,18 @@ public static class IValuePipelineExtensions
             throw new ArgumentNullException(nameof(converter));
         }
 
-        ConvertUsingMapperDelegate actualConverter = (ReadCellResult readResult) =>
+        CellMapperResult actualConverter(ReadCellResult readResult)
         {
             try
             {
-                object? result = converter(readResult.StringValue);
+                object? result = converter(readResult.GetString());
                 return CellMapperResult.Success(result);
             }
             catch (Exception exception)
             {
                 return CellMapperResult.Invalid(exception);
             }
-        };
+        }
 
         return propertyMap.WithConverter(actualConverter);
     }

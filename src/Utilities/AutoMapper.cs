@@ -44,7 +44,7 @@ public static class AutoMapper
 
         // Secondly, check if this is a dictionary.
         // This requires converting each value to the value type of the collection.
-        if (TryCreateDictionaryMap<TMember>(emptyValueStrategy, out var dictionaryMap))
+        if (TryCreateDictionaryMap<TMember>(member, emptyValueStrategy, out var dictionaryMap))
         {
             map = dictionaryMap;
             return true;
@@ -130,6 +130,10 @@ public static class AutoMapper
         if (Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)))
         {
             map.Optional = true;
+        }
+        if (Attribute.IsDefined(member, typeof(ExcelPreserveFormattingAttribute)))
+        {
+            map.PreserveFormatting = true;
         }
 
         return map;
@@ -332,9 +336,13 @@ public static class AutoMapper
         }
 
         map = new ManyToOneEnumerableMap<TElement>(defaultReaderFactory, elementMapping, factory);
-if (member != null && Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)))
+        if (member != null && Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)))
         {
             map.Optional = true;
+        }
+        if (member != null && Attribute.IsDefined(member, typeof(ExcelPreserveFormattingAttribute)))
+        {
+            map.PreserveFormatting = true;
         }
 
         return true;
@@ -440,16 +448,16 @@ if (member != null && Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)
         return false;
     }
 
-    private static bool TryCreateDictionaryMap<T>(FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
+    private static bool TryCreateDictionaryMap<TMember>(MemberInfo? member, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
     {
-        if (!TryGetDictionaryKeyValueType<T>(out var keyType, out var valueType))
+        if (!TryGetDictionaryKeyValueType<TMember>(out var keyType, out var valueType))
         {
             map = null;
             return false;
         }
 
         MethodInfo method = TryCreateGenericDictionaryMapMethod.MakeGenericMethod(keyType, valueType);
-        var parameters = new object?[] { typeof(T), emptyValueStrategy, null };
+        var parameters = new object?[] { member, typeof(TMember), emptyValueStrategy, null };
         bool result = (bool)method.Invoke(null, parameters);
         if (result)
         {
@@ -461,7 +469,7 @@ if (member != null && Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)
         return false;
     }
 
-    internal static bool TryCreateGenericDictionaryMap<TKey, TValue>(Type memberType, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneDictionaryMap<TValue>? map)
+    internal static bool TryCreateGenericDictionaryMap<TKey, TValue>(MemberInfo? member, Type memberType, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneDictionaryMap<TValue>? map)
     {
         if (!TryCreatePrimitivePipeline(emptyValueStrategy, out ValuePipeline<TValue>? valuePipeline))
         {
@@ -478,6 +486,10 @@ if (member != null && Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)
         // Default to all columns.
         var defaultReader = new AllColumnNamesReaderFactory();
         map = new ManyToOneDictionaryMap<TValue>(defaultReader, valuePipeline, factory);
+        if (member != null && Attribute.IsDefined(member, typeof(ExcelPreserveFormattingAttribute)))
+        {
+            map.PreserveFormatting = true;
+        }
         return true;
     }
 
@@ -612,7 +624,7 @@ if (member != null && Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)
             return true;
         }
         // User may ask to map the row to a dictionary.
-        else if (TryCreateDictionaryMap<T>(emptyValueStrategy, out var dictionaryMap))
+        else if (TryCreateDictionaryMap<T>(null, emptyValueStrategy, out var dictionaryMap))
         {
             result = new BuiltinClassMap<T>(dictionaryMap);
             return true;

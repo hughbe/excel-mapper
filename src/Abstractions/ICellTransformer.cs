@@ -2,5 +2,5 @@
 
 public interface ICellTransformer
 {
-    string? TransformStringValue(ExcelSheet sheet, int rowIndex, ReadCellResult stringValue);
+    string? TransformStringValue(ExcelSheet sheet, int rowIndex, ReadCellResult readResult);
 }

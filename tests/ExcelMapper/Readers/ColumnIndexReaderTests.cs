@@ -29,7 +29,7 @@ public class ColumnIndexReaderTests
         sheet.ReadHeading();
 
         var reader = new ColumnIndexReader(0);
-        Assert.True(reader.TryGetValue(importer.Reader, out var result));
+        Assert.True(reader.TryGetValue(importer.Reader, false, out var result));
         Assert.Equal(0, result.ColumnIndex);
         Assert.Equal("Value", result.StringValue);
     }
@@ -44,7 +44,7 @@ public class ColumnIndexReaderTests
         sheet.ReadHeading();
 
         var reader = new ColumnIndexReader(columnIndex);
-        Assert.False(reader.TryGetValue(importer.Reader, out var result));
+        Assert.False(reader.TryGetValue(importer.Reader, false, out var result));
         Assert.Equal(0, result.ColumnIndex);
         Assert.Null(result.StringValue);
     }

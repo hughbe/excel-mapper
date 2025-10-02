@@ -167,6 +167,17 @@ public class MapInt32Tests
         Assert.Equal(10, row3.Value);
     }
 
+    [Fact]
+    public void ReadRow_Int32Overflow_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Overflow_Signed.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<int>());
+    }
+
     private class Int32Value
     {
         public int Value { get; set; }

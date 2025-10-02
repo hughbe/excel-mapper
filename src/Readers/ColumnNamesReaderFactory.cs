@@ -39,7 +39,7 @@ public sealed class ColumnNamesReaderFactory : ICellsReaderFactory
         var indices = new int[ColumnNames.Length];
         for (int i = 0; i < ColumnNames.Length; i++)
         {
-            if (!sheet.Heading.TryGetColumnIndex(ColumnNames[i], out int index))
+            if (!sheet.Heading.TryGetColumnIndex(ColumnNames[i], out var index))
             {
                 return null;
             }

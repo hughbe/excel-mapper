@@ -22,6 +22,18 @@ public static class OneToOneMapExtensions
         map.Optional = true;
         return map;
     }
+    
+    /// <summary>
+    /// Makes the reader of the property map peserve formatting when reading string values.
+    /// </summary>
+    /// <typeparam name="T">The type of the property map.</typeparam>
+    /// <param name="map">The property map to use.</param>
+    /// <returns>The property map on which this method was invoked.</returns>
+    public static OneToOneMap<T> MakePreserveFormatting<T>(this OneToOneMap<T> map)
+    {
+        map.PreserveFormatting = true;
+        return map;
+    }
 
     /// <summary>
     /// Sets the reader of the property map to read the value of a single cell contained in the column with

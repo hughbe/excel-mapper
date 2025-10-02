@@ -63,7 +63,7 @@ public class DictionaryMapperTests
         var comparer = StringComparer.OrdinalIgnoreCase;
         var item = new DictionaryMapper<object>(mapping, comparer, DictionaryMapperBehavior.Optional);
 
-        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, stringValue));
+        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, stringValue, preserveFormatting: false));
         Assert.Equal(expectedSucceeded, result.Succeeded);
         Assert.Equal(expectedAction, result.Action);
         Assert.Equal(expectedValue, result.Value);
@@ -81,7 +81,7 @@ public class DictionaryMapperTests
         var comparer = StringComparer.OrdinalIgnoreCase;
         var item = new DictionaryMapper<object>(mapping, comparer, DictionaryMapperBehavior.Optional);
 
-        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, stringValue));
+        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, stringValue, preserveFormatting: false));
         Assert.Equal(expectedSucceeded, result.Succeeded);
         Assert.Equal(expectedAction, result.Action);
         Assert.Equal(expectedValue, result.Value);

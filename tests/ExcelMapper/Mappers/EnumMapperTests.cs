@@ -52,7 +52,7 @@ public class EnumMapperTests
     public void GetProperty_ValidStringValue_ReturnsSuccess(EnumMapper item, string stringValue, Enum expected)
     {
         
-        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, stringValue));
+        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, stringValue, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(expected, result.Value);
         Assert.Null(result.Exception);
@@ -70,7 +70,7 @@ public class EnumMapperTests
     [MemberData(nameof(GetProperty_InvalidStringValue_TestData))]
     public void GetProperty_InvalidStringValue_ReturnsInvalid(EnumMapper item, string? stringValue)
     {
-        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, stringValue));
+        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, stringValue, preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);

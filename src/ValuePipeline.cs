@@ -83,14 +83,15 @@ public class ValuePipeline : IValuePipeline
         ExcelSheet sheet,
         int rowIndex,
         ReadCellResult readResult,
+        bool preserveFormatting,
         MemberInfo? member)
     {
         foreach (ICellTransformer transformer in pipeline.CellValueTransformers)
         {
-            readResult = new ReadCellResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult));
+            readResult = new ReadCellResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult), preserveFormatting);
         }
 
-        if (string.IsNullOrEmpty(readResult.StringValue) && pipeline.EmptyFallback != null)
+        if (readResult.IsEmpty() && pipeline.EmptyFallback != null)
         {
             return pipeline.EmptyFallback.PerformFallback(sheet, rowIndex, readResult, null, member);
         }

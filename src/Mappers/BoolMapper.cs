@@ -13,21 +13,28 @@ namespace ExcelMapper.Mappers
 
         public CellMapperResult MapCellValue(ReadCellResult readResult)
         {
+            if (readResult.Reader != null && readResult.Reader.GetValue(readResult.ColumnIndex) is bool boolValue)
+            {
+                return CellMapperResult.Success(boolValue);
+            }
+            
+            var stringValue = readResult.GetString();
+
             // Excel transforms bool values such as "true" or "false" to "1" or "0".
-            if (readResult.StringValue == "1")
+            if (stringValue == "1")
             {
                 return CellMapperResult.Success(s_boxedTrue);
             }
-            if (readResult.StringValue == "0")
+            if (stringValue == "0")
             {
                 return CellMapperResult.Success(s_boxedFalse);
             }
 
             try
             {
-                // Discarding readResult.StringValue nullability warning.
+                // Discarding stringValue nullability warning.
                 // If null - CellMapperResult.Invalid with ArgumentNullException will be returned
-                bool result = bool.Parse(readResult.StringValue!);
+                var result = bool.Parse(stringValue!);
                 return CellMapperResult.Success(result);
             }
             catch (Exception exception)
