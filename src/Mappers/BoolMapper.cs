@@ -6,33 +6,40 @@ namespace ExcelMapper.Mappers
     /// <summary>
     /// A mapper that tries to map the value of a cell to a bool.
     /// </summary>
-    public class BoolMapper : ICellValueMapper
+    public class BoolMapper : ICellMapper
     {
-        private static object s_boxedTrue = true;
-        private static object s_boxedFalse = false;
+        private static readonly object s_boxedTrue = true;
+        private static readonly object s_boxedFalse = false;
 
-        public CellValueMapperResult MapCellValue(ReadCellValueResult readResult)
+        public CellMapperResult MapCellValue(ReadCellResult readResult)
         {
-            // Excel transforms bool values such as "true" or "false" to "1" or "0".
-            if (readResult.StringValue == "1")
+            if (readResult.Reader != null && readResult.Reader.GetValue(readResult.ColumnIndex) is bool boolValue)
             {
-                return CellValueMapperResult.Success(s_boxedTrue);
+                return CellMapperResult.Success(boolValue);
             }
-            if (readResult.StringValue == "0")
+            
+            var stringValue = readResult.GetString();
+
+            // Excel transforms bool values such as "true" or "false" to "1" or "0".
+            if (stringValue == "1")
             {
-                return CellValueMapperResult.Success(s_boxedFalse);
+                return CellMapperResult.Success(s_boxedTrue);
+            }
+            if (stringValue == "0")
+            {
+                return CellMapperResult.Success(s_boxedFalse);
             }
 
             try
             {
-                // Discarding readResult.StringValue nullability warning.
-                // If null - CellValueMapperResult.Invalid with ArgumentNullException will be returned
-                bool result = bool.Parse(readResult.StringValue!);
-                return CellValueMapperResult.Success(result);
+                // Discarding stringValue nullability warning.
+                // If null - CellMapperResult.Invalid with ArgumentNullException will be returned
+                var result = bool.Parse(stringValue!);
+                return CellMapperResult.Success(result);
             }
             catch (Exception exception)
             {
-                return CellValueMapperResult.Invalid(exception);
+                return CellMapperResult.Invalid(exception);
             }
         }
     }

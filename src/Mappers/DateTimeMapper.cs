@@ -7,9 +7,9 @@ namespace ExcelMapper.Mappers
     /// <summary>
     /// A mapper that tries to map the value of a cell to a DateTime.
     /// </summary>
-    public class DateTimeMapper : ICellValueMapper
+    public class DateTimeMapper : ICellMapper
     {
-        private string[] _formats = new string[] { "G" };
+        private string[] _formats = ["G"];
 
         /// <summary>
         /// Gets or sets the date formats used to map the value to a DateTime.
@@ -44,16 +44,22 @@ namespace ExcelMapper.Mappers
         /// </summary>
         public DateTimeStyles Style { get; set; }
 
-        public CellValueMapperResult MapCellValue(ReadCellValueResult readResult)
+        public CellMapperResult MapCellValue(ReadCellResult readResult)
         {
+            if (readResult.Reader != null && readResult.Reader.GetValue(readResult.ColumnIndex) is DateTime dateTimeValue)
+            {
+                return CellMapperResult.Success(dateTimeValue);
+            }
+            
+            var stringValue = readResult.GetString();
             try
             {
-                DateTime result = DateTime.ParseExact(readResult.StringValue, Formats, Provider, Style);
-                return CellValueMapperResult.Success(result);
+                DateTime result = DateTime.ParseExact(stringValue, Formats, Provider, Style);
+                return CellMapperResult.Success(result);
             }
             catch (Exception exception)
             {
-                return CellValueMapperResult.Invalid(exception);
+                return CellMapperResult.Invalid(exception);
             }
         }
     }

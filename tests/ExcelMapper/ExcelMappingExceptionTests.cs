@@ -33,27 +33,23 @@ namespace ExcelMapper.Tests
         [Fact]
         public void Ctor_Message_SheetWithReadHeading_RowIndex_ColumnIndex()
         {
-            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
-            {
-                ExcelSheet sheet = importer.ReadSheet();
-                sheet.ReadHeading();
+            using var importer = Helpers.GetImporter("Primitives.xlsx");
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
 
-                var exception = new ExcelMappingException("Message", sheet, 10, 1);
-                Assert.Equal("Message in column \"StringValue\" on row 10 in sheet \"Primitives\".", exception.Message);
-                Assert.Null(exception.InnerException);
-            }
+            var exception = new ExcelMappingException("Message", sheet, 10, 1);
+            Assert.Equal("Message in column \"StringValue\" on row 10 in sheet \"Primitives\".", exception.Message);
+            Assert.Null(exception.InnerException);
         }
 
         [Fact]
         public void Ctor_Message_SheetWithNonReadHeading_RowIndex_ColumnIndex()
         {
-            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
-            {
-                ExcelSheet sheet = importer.ReadSheet();
-                var exception = new ExcelMappingException("Message", sheet, 10, 1);
-                Assert.Equal("Message in column \"StringValue\" on row 10 in sheet \"Primitives\".", exception.Message);
-                Assert.Null(exception.InnerException);
-            }
+            using var importer = Helpers.GetImporter("Primitives.xlsx");
+            ExcelSheet sheet = importer.ReadSheet();
+            var exception = new ExcelMappingException("Message", sheet, 10, 1);
+            Assert.Equal("Message in column \"StringValue\" on row 10 in sheet \"Primitives\".", exception.Message);
+            Assert.Null(exception.InnerException);
         }
     }
 }

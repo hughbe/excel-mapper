@@ -1,71 +1,408 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Dynamic;
 using System.Linq;
 using Xunit;
 
-namespace ExcelMapper.Utilities.Tests
+namespace ExcelMapper.Utilities.Tests;
+
+public class AutoMapperTests
 {
-    public class AutoMapperTests
+    [Theory]
+    [InlineData(FallbackStrategy.ThrowIfPrimitive)]
+    [InlineData(FallbackStrategy.SetToDefaultValue)]
+    public void TryCreateClass_Map_ValidType_ReturnsTrue(FallbackStrategy emptyValueStrategy)
     {
-        [Theory]
-        [InlineData(FallbackStrategy.ThrowIfPrimitive)]
-        [InlineData(FallbackStrategy.SetToDefaultValue)]
-        public void TryCreateClassMap_ValidType_ReturnsTrue(FallbackStrategy emptyValueStrategy)
-        {
-            Assert.True(AutoMapper.TryCreateClassMap<TestClass>(emptyValueStrategy, out ExcelClassMap<TestClass>? classMap));
-            Assert.Equal(emptyValueStrategy, classMap!.EmptyValueStrategy);
-            Assert.Equal(typeof(TestClass), classMap.Type);
-            Assert.Equal(5, classMap.Properties.Count);
+        Assert.True(AutoMapper.TryCreateClassMap(emptyValueStrategy, out ExcelClassMap<TestClass>? classMap));
+        Assert.Equal(emptyValueStrategy, classMap!.EmptyValueStrategy);
+        Assert.Equal(typeof(TestClass), classMap.Type);
+        Assert.Equal(5, classMap.Properties.Count);
 
-            List<string> members = [.. classMap.Properties.Select(m => m.Member.Name)];
-            Assert.Contains("_inheritedField", members);
-            Assert.Contains("_field", members);
-            Assert.Contains("InheritedProperty", members);
-            Assert.Contains("Property", members);
-            Assert.Contains("PrivateGetProperty", members);
-        }
+        List<string> members = [.. classMap.Properties.Select(m => m.Member.Name)];
+        Assert.Contains("_inheritedField", members);
+        Assert.Contains("_field", members);
+        Assert.Contains("InheritedProperty", members);
+        Assert.Contains("Property", members);
+        Assert.Contains("PrivateGetProperty", members);
+    }
 
-        [Fact]
-        public void TryCreateClassMap_InterfaceType_ReturnsFalse()
-        {
-            Assert.False(AutoMapper.TryCreateClassMap<IConvertible>(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IConvertible>? classMap));
-            Assert.Null(classMap);
-        }
+    [Fact]
+    public void TryCreateClass_Map_ObjectType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<object>? classMap));
+        Assert.NotNull(classMap);
+    }
 
-        [Theory]
-        [InlineData(FallbackStrategy.ThrowIfPrimitive - 1)]
-        [InlineData(FallbackStrategy.SetToDefaultValue + 1)]
-        public void TryCreateClassMap_InvalidFallbackStrategy_ThrowsArgumentException(FallbackStrategy emptyValueStrategy)
-        {
-            Assert.Throws<ArgumentException>("emptyValueStrategy", () => AutoMapper.TryCreateClassMap<IConvertible>(emptyValueStrategy, out _));
-        }
+    [Fact]
+    public void TryCreateClass_Map_StringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<string>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_ByteType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<byte>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SByteType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<sbyte>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_UInt16_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ushort>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_Int16_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<short>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_IntType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<int>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_UIntType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<uint>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_UInt64_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<long>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_Int64_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<long>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_FloatType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<float>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_DoubleType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<double>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_DecimalType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<decimal>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_BoolType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<bool>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_DateTimeType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<DateTime>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_MapGuidType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Guid>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_MapEnumType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<MyEnum>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_MapUri_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<MyEnum>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_IConvertibleImplementer_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ConvertibleClass>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_ArrayStringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<string[]>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_ImmutableArrayStringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ImmutableArray<string>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_IEnumerableType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IEnumerable>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_IEnumerableObjectType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IEnumerable<object>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_IEnumerableStringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IEnumerable<string>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_IEnumerableGenericType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IEnumerable<IList<string>>>? classMap));
+        Assert.Null(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_ICollectionType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ICollection>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_ICollectionObjectType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ICollection<object>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_ICollectionStringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ICollection<string>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_IReadOnlyCollectionObjectType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IReadOnlyCollection<object>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_IListType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IList>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_IListObjectType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IList<object>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_IListStringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IList<string>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_IReadOnlyListStringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IReadOnlyList<string>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_ArrayListType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ArrayList>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_ListStringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<List<string>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_ImmutableListStringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ImmutableList<string>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_IEnumerableKeyValuePairStringObjectType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IEnumerable<KeyValuePair<string, object>>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_IDictionaryType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IDictionary>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_IDictionaryStringObjectType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IDictionary<string, object>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_HashtableType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Hashtable>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_DictionaryStringObjectType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Dictionary<string, object>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_ExpandoObjectType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ExpandoObject>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_InterfaceType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IDisposable>? classMap));
+        Assert.Null(classMap);
+    }
+
+    [Theory]
+    [InlineData(FallbackStrategy.ThrowIfPrimitive - 1)]
+    [InlineData(FallbackStrategy.SetToDefaultValue + 1)]
+    public void TryCreateClass_Map_InvalidFallbackStrategy_ThrowsArgumentException(FallbackStrategy emptyValueStrategy)
+    {
+        Assert.Throws<ArgumentException>("emptyValueStrategy", () => AutoMapper.TryCreateClassMap<TestClass>(emptyValueStrategy, out _));
+    }
+
+    private enum MyEnum
+    {
+    }
+
+    private class ConvertibleClass : IConvertible
+    {
+        public TypeCode GetTypeCode() => throw new NotImplementedException();
+
+        public bool ToBoolean(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public byte ToByte(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public char ToChar(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public DateTime ToDateTime(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public decimal ToDecimal(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public double ToDouble(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public short ToInt16(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public int ToInt32(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public long ToInt64(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public sbyte ToSByte(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public float ToSingle(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public string ToString(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public object ToType(Type conversionType, IFormatProvider? provider) => throw new NotImplementedException();
+
+        public ushort ToUInt16(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public uint ToUInt32(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public ulong ToUInt64(IFormatProvider? provider) => throw new NotImplementedException();
+    }
 
 #pragma warning disable 0649, 0169
-        private class BaseClass
-        {
-            public string _inheritedField = default!;
-            public string InheritedProperty { get; set; } = default!;
-        }
-
-        private class TestClass : BaseClass
-        {
-            public string _field = default!;
-            protected string _protectedField = default!;
-            internal string _internalField = default!;
-#pragma warning disable CS0414 // Field is never assigned to, and will always have its default value
-            private string _privateField = default!;
-#pragma warning restore CS0414 // Field is never assigned to, and will always have its default value
-            public static string s_field = default!;
-            
-            public string Property { get; set; } = default!;
-            protected string ProtectedProperty { get; set; } = default!;
-            internal string InternalProperty { get; set; } = default!;
-            private string PrivateProperty { get; set; } = default!;
-            public static string StaticProperty { get; set; } = default!;
-
-            public string PrivateSetProperty { get; private set; } = default!;
-            public string PrivateGetProperty { private get; set; } = default!;
-        }
-#pragma warning restore 0649
+    private class BaseClass
+    {
+        public string _inheritedField = default!;
+        public string InheritedProperty { get; set; } = default!;
     }
+
+    private class TestClass : BaseClass
+    {
+        public string _field = default!;
+        protected string _protectedField = default!;
+        internal string _internalField = default!;
+#pragma warning disable CS0414 // Field is never assigned to, and will always have its default value
+        private readonly string _privateField = default!;
+#pragma warning restore CS0414 // Field is never assigned to, and will always have its default value
+        public static string s_field = default!;
+        
+        public string Property { get; set; } = default!;
+        protected string ProtectedProperty { get; set; } = default!;
+        internal string InternalProperty { get; set; } = default!;
+        private string PrivateProperty { get; set; } = default!;
+        public static string StaticProperty { get; set; } = default!;
+
+        public string PrivateSetProperty { get; private set; } = default!;
+        public string PrivateGetProperty { private get; set; } = default!;
+    }
+#pragma warning restore 0649
 }

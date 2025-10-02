@@ -1,104 +1,118 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
-namespace ExcelMapper.Utilities
+namespace ExcelMapper.Utilities;
+
+internal static class ReflectionUtilities
 {
-    internal static class ReflectionUtilities
+    public static bool ImplementsInterface(this Type type, Type interfaceType)
     {
-        public static bool ImplementsInterface(this Type type, Type interfaceType)
+        return type.GetTypeInfo().ImplementedInterfaces.Any(t => t == interfaceType);
+    }
+
+    public static bool ImplementsGenericInterface(
+        this Type type,
+        Type genericInterfaceType,
+        [NotNullWhen(true)] out Type? elementType)
+    {
+        bool CheckInterface(Type interfaceType, [NotNullWhen(true)] out Type? elementTypeResult)
         {
-            return type.GetTypeInfo().ImplementedInterfaces.Any(t => t == interfaceType);
-        }
-
-        public static bool ImplementsGenericInterface(
-            this Type type,
-            Type genericInterfaceType,
-            [NotNullWhen(true)] out Type? elementType)
-        {
-            bool CheckInterface(Type interfaceType, [NotNullWhen(true)] out Type? elementTypeResult)
+            if (interfaceType.GetTypeInfo().IsGenericType && interfaceType.GetGenericTypeDefinition() == genericInterfaceType)
             {
-                if (interfaceType.GetTypeInfo().IsGenericType && interfaceType.GetGenericTypeDefinition() == genericInterfaceType)
-                {
-                    elementTypeResult = interfaceType.GenericTypeArguments[0];
-                    return true;
-                }
-
-                elementTypeResult = null;
-                return false;
-            }
-
-            // This type may actually be the interface in question.
-            // So return true if this is the case.
-            if (type.GetTypeInfo().IsInterface && CheckInterface(type, out elementType))
-            {
+                elementTypeResult = interfaceType.GenericTypeArguments[0];
                 return true;
             }
 
-            foreach (Type interfaceType in type.GetTypeInfo().ImplementedInterfaces)
-            {
-                if (CheckInterface(interfaceType, out elementType))
-                {
-                    return true;
-                }
-            }
-
-            elementType = null;
+            elementTypeResult = null;
             return false;
         }
 
-        public static object? DefaultValue(this Type type)
+        // This type may actually be the interface in question.
+        // So return true if this is the case.
+        if (type.GetTypeInfo().IsInterface && CheckInterface(type, out elementType))
         {
-            if (type.GetTypeInfo().IsValueType)
-            {
-                return Activator.CreateInstance(type);
-            }
-
-            return null;
+            return true;
         }
 
-        public static Type MemberType(this MemberInfo member)
+        foreach (Type interfaceType in type.GetTypeInfo().ImplementedInterfaces)
         {
-            if (member is PropertyInfo property)
+            if (CheckInterface(interfaceType, out elementType))
             {
-                return property.PropertyType;
-            }
-            else if (member is FieldInfo field)
-            {
-                return field.FieldType;
-            }
-
-            throw new ArgumentException($"Member \"{member.Name}\" is not a property or field.", nameof(member));
-        }
-
-        public static Type GetNullableTypeOrThis(this Type type, out bool isNullable)
-        {
-            isNullable = type.IsNullable();
-            return isNullable ? type.GenericTypeArguments[0] : type;
-        }
-
-        private static bool IsNullable(this Type type)
-        {
-            return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
-        }
-
-        /// <summary>
-        /// Gets the element type or the IEnumerable&lt;T&gt; type of the given type.
-        /// </summary>
-        /// <param name="type">The type to get the element type of.</param>
-        /// <param name="elementType">The element type or IEnumerable&lt;T&gt; of the given type.</param>
-        /// <returns>True if the type has an element type, else false.</returns>
-        public static bool GetElementTypeOrEnumerableType(this Type type, [NotNullWhen(true)] out Type? elementType)
-        {
-            if (type.IsArray)
-            {
-                elementType = type.GetElementType();
                 return true;
             }
-
-            return type.ImplementsGenericInterface(typeof(IEnumerable<>), out elementType);
         }
+
+        elementType = null;
+        return false;
+    }
+
+    public static object? DefaultValue(this Type type)
+    {
+        if (type.GetTypeInfo().IsValueType)
+        {
+            return Activator.CreateInstance(type);
+        }
+
+        return null;
+    }
+
+    public static Type MemberType(this MemberInfo member)
+    {
+        if (member is PropertyInfo property)
+        {
+            return property.PropertyType;
+        }
+        else if (member is FieldInfo field)
+        {
+            return field.FieldType;
+        }
+
+        throw new ArgumentException($"Member \"{member.Name}\" is not a property or field.", nameof(member));
+    }
+
+    public static Type GetNullableTypeOrThis(this Type type, out bool isNullable)
+    {
+        isNullable = type.IsNullable();
+        return isNullable ? type.GenericTypeArguments[0] : type;
+    }
+
+    private static bool IsNullable(this Type type)
+    {
+        return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+    }
+
+    /// <summary>
+    /// Gets the element type or the IEnumerable&lt;T&gt; type of the given type.
+    /// </summary>
+    /// <param name="type">The type to get the element type of.</param>
+    /// <param name="elementType">The element type or IEnumerable&lt;T&gt; of the given type.</param>
+    /// <returns>True if the type has an element type, else false.</returns>
+    public static bool GetElementTypeOrEnumerableType(this Type type, [NotNullWhen(true)] out Type? elementType)
+    {
+        // Array type.
+        if (type.IsArray)
+        {
+            elementType = type.GetElementType();
+            return true;
+        }
+
+        // Generic lists use type object.
+        if (type.ImplementsGenericInterface(typeof(IEnumerable<>), out elementType))
+        {
+            return true;
+        }
+        
+        // Non-generic interfaces use type object.
+        if (type == typeof(IEnumerable) || type.ImplementsInterface(typeof(IEnumerable)))
+        {
+            elementType = typeof(object);
+            return true;
+        }
+
+        return false;
     }
 }

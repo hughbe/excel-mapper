@@ -1,120 +1,194 @@
 ﻿using Xunit;
 
-namespace ExcelMapper.Tests
+namespace ExcelMapper.Tests;
+
+public class MatchingMapTests
 {
-    public class MatchingMapTests
+    [Fact]
+    public void ReadRow_ColumnNamesHasHeader_ReturnsExpected()
     {
-        [Fact]
-        public void ReadRow_HasHeader_ReturnsExpected()
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<ColumnMatchingColumnNamesClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<StringValue>();
+        Assert.Equal("1", row1.Value);
+
+        var row2 = sheet.ReadRow<StringValue>();
+        Assert.Equal("2", row2.Value);
+
+        var row3 = sheet.ReadRow<StringValue>();
+        Assert.Equal("abc", row3.Value);
+    }
+
+    [Fact]
+    public void ReadRow_ColumnNamesNoHeader_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Non Zero Header Index.xlsx");
+        importer.Configuration.RegisterClassMap<ColumnMatchingColumnNamesClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValue>());
+    }
+
+    [Fact]
+    public void ReadRow_ColumnNamesNothingMatchingNotOptional_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<NoColumnMatchingColumnNamesClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValue>());
+    }
+
+    [Fact]
+    public void ReadRow_ColumnNamesNothingMatchingOptional_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<NoColumnMatchingColumnNamesOptionalClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<StringValue>();
+        Assert.Null(row1.Value);
+    }
+
+    [Fact]
+    public void ReadRow_PredicateHasHeader_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<ColumnMatchingPredicateClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<StringValue>();
+        Assert.Equal("1", row1.Value);
+
+        var row2 = sheet.ReadRow<StringValue>();
+        Assert.Equal("2", row2.Value);
+
+        var row3 = sheet.ReadRow<StringValue>();
+        Assert.Equal("abc", row3.Value);
+    }
+
+    [Fact]
+    public void ReadRow_PredicateNoHeader_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Non Zero Header Index.xlsx");
+        importer.Configuration.RegisterClassMap<ColumnMatchingPredicateClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValue>());
+    }
+
+    [Fact]
+    public void ReadRow_PredicateNothingMatchingNotOptional_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<NoColumnMatchingPredicateClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValue>());
+    }
+
+    [Fact]
+    public void ReadRow_PredicateNothingMatchingOptional_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<NoColumnMatchingPredicateOptionalClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<StringValue>();
+        Assert.Null(row1.Value);
+    }
+
+    private class StringValue
+    {
+        public string Value { get; set; } = default!;
+    }
+
+    private class NoColumnMatchingColumnNamesClassMap : ExcelClassMap<StringValue>
+    {
+        public NoColumnMatchingColumnNamesClassMap()
         {
-            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
-            {
-                importer.Configuration.RegisterClassMap<ColumnMatchingClassMap>();
-
-                ExcelSheet sheet = importer.ReadSheet();
-                sheet.ReadHeading();
-
-                StringValue row1 = sheet.ReadRow<StringValue>();
-                Assert.Equal("1", row1.Value);
-
-                StringValue row2 = sheet.ReadRow<StringValue>();
-                Assert.Equal("b", row2.Value);
-
-                StringValue row3 = sheet.ReadRow<StringValue>();
-                Assert.Null(row3.Value);
-            }
+            Map(o => o.Value)
+                .WithColumnNameMatching("NoSuchColumn");
         }
+    }
 
-        [Fact]
-        public void ReadRow_NoHeader_ThrowsExcelMappingException()
+    private class NoColumnMatchingColumnNamesOptionalClassMap : ExcelClassMap<StringValue>
+    {
+        public NoColumnMatchingColumnNamesOptionalClassMap()
         {
-            using (var importer = Helpers.GetImporter("Non Zero Header Index.xlsx"))
-            {
-                importer.Configuration.RegisterClassMap<ColumnMatchingClassMap>();
-
-                ExcelSheet sheet = importer.ReadSheet();
-
-                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValue>());
-            }
+            Map(o => o.Value)
+                .WithColumnNameMatching("NoSuchColumn")
+                .MakeOptional();
         }
+    }
 
-        [Fact]
-        public void ReadRow_NothingMatchingNotOptional_ThrowsExcelMappingException()
+    private class ColumnMatchingColumnNamesClassMap : ExcelClassMap<StringValue>
+    {
+        public ColumnMatchingColumnNamesClassMap()
         {
-            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
-            {
-                importer.Configuration.RegisterClassMap<NoColumnMatchingClassMap>();
-
-                ExcelSheet sheet = importer.ReadSheet();
-                sheet.ReadHeading();
-
-                Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValue>());
-            }
+            Map(o => o.Value)
+                .WithColumnNameMatching("NoSuchColumn", "Int Value");
         }
+    }
 
-        [Fact]
-        public void ReadRow_NothingMatchingOptional_ReturnsExpected()
+    private class ColumnMatchingPredicateClassMap : ExcelClassMap<StringValue>
+    {
+        public ColumnMatchingPredicateClassMap()
         {
-            using (var importer = Helpers.GetImporter("Primitives.xlsx"))
-            {
-                importer.Configuration.RegisterClassMap<NoColumnOptionalMatchingClassMap>();
+            int i = 0;
 
-                ExcelSheet sheet = importer.ReadSheet();
-                sheet.ReadHeading();
-
-                StringValue row1 = sheet.ReadRow<StringValue>();
-                Assert.Null(row1.Value);
-            }
-        }
-
-        private class StringValue
-        {
-            public string Value { get; set; } = default!;
-        }
-
-        private class ColumnMatchingClassMap : ExcelClassMap<StringValue>
-        {
-            public ColumnMatchingClassMap()
-            {
-                int i = 0;
-
-                Map(o => o.Value)
-                    .WithColumnNameMatching(s =>
+            Map(o => o.Value)
+                .WithColumnNameMatching(s =>
+                {
+                    if (s == "Int Value" && i == 0)
                     {
-                        if (s == "Int Value" && i == 0)
-                        {
-                            i++;
-                            return true;
-                        }
+                        i++;
+                        return true;
+                    }
 
-                        if (s == "StringValue")
-                        {
-                            i++;
-                            return true;
-                        }
+                    if (s == "StringValue")
+                    {
+                        i++;
+                        return true;
+                    }
 
-                        return false;
-                    });
-            }
+                    return false;
+                });
         }
+    }
 
-        private class NoColumnMatchingClassMap : ExcelClassMap<StringValue>
+    private class NoColumnMatchingPredicateClassMap : ExcelClassMap<StringValue>
+    {
+        public NoColumnMatchingPredicateClassMap()
         {
-            public NoColumnMatchingClassMap()
-            {
-                Map(o => o.Value)
-                    .WithColumnNameMatching(_ => false);
-            }
+            Map(o => o.Value)
+                .WithColumnNameMatching(_ => false);
         }
+    }
 
-        private class NoColumnOptionalMatchingClassMap : ExcelClassMap<StringValue>
+    private class NoColumnMatchingPredicateOptionalClassMap : ExcelClassMap<StringValue>
+    {
+        public NoColumnMatchingPredicateOptionalClassMap()
         {
-            public NoColumnOptionalMatchingClassMap()
-            {
-                Map(o => o.Value)
-                    .WithColumnNameMatching(_ => false)
-                    .MakeOptional();
-            }
+            Map(o => o.Value)
+                .WithColumnNameMatching(_ => false)
+                .MakeOptional();
         }
     }
 }

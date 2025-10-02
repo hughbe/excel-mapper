@@ -1,26 +1,27 @@
 ﻿using System;
 using ExcelMapper.Abstractions;
 
-namespace ExcelMapper.Mappers
+namespace ExcelMapper.Mappers;
+
+/// <summary>
+/// A mapper that tries to map the value of a cell to a guid.
+/// </summary>
+public class GuidMapper : ICellMapper
 {
-    /// <summary>
-    /// A mapper that tries to map the value of a cell to a guid.
-    /// </summary>
-    public class GuidMapper : ICellValueMapper
+    public CellMapperResult MapCellValue(ReadCellResult readResult)
     {
-        public CellValueMapperResult MapCellValue(ReadCellValueResult readResult)
+        var stringValue = readResult.GetString();
+
+        try
         {
-            try
-            {
-                // Discarding readResult.StringValue nullability warning.
-                // If null - CellValueMapperResult.Invalid with ArgumentNullException will be returned
-                Guid result = Guid.Parse(readResult.StringValue!);
-                return CellValueMapperResult.Success(result);
-            }
-            catch (Exception exception)
-            {
-                return CellValueMapperResult.Invalid(exception);
-            }
+            // Discarding readResult.StringValue nullability warning.
+            // If null - CellMapperResult.Invalid with ArgumentNullException will be returned
+            Guid result = Guid.Parse(stringValue!);
+            return CellMapperResult.Success(result);
+        }
+        catch (Exception exception)
+        {
+            return CellMapperResult.Invalid(exception);
         }
     }
 }

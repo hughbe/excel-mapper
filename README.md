@@ -81,8 +81,70 @@ Console.WriteLine(president[1].Name); // Barack Obama
 Console.WriteLine(president[1].Age); // 58
 ```
 
+You can apply multiple `ExcelColumnName` attributes to support matching different variants
+of a column name.
+
+In the example below, ExcelMapper will first try to read from the `Column1` column, then the `Column2` column, and then throw an exception if the property or field is not found.
+
+```cs
+public class President
+{
+    [ExcelColumnName("Full Name")]
+    public string Name { get; set; }
+
+    [ExcelColumnName("Age")]
+    [ExcelColumnName("#Age")]
+    public int Age { get; set; }
+}
+```
+
+### Default Values
+By default, ExcelMapper sets types that can be null to `null` if the value is empty. Otherwise, it throws an exception, for example for value types.
+
+You can change this behaviour by applying the `ExcelDefaultValueAttribute` to provide a default value.
+| Name           | Age |
+|----------------| --- |
+| Donald Trump   |     |
+| Barack Obama   | 2   |
+
+```cs
+public class President
+{
+    public string Name { get; set; }
+
+    // Default to minus one - no exception thrown if column value is empty.
+    [ExcelDefaultValue(-1)]
+    public int Age { get; set; }
+}
+```
+
+### Optional Properties
+By default, ExcelMapper throws an exception if a property or field is not found in the Excel file. You can change this behavior by applying the `ExcelOptionalAttribute` to make a property optional. This is useful when a column may not always be included in the Excel file.
+
+In the example below, no exception will be thrown if the `Age` column is missing.
+| Name           |
+|----------------|
+| Donald Trump   |
+| Barack Obama   |
+
+```cs
+public class President
+{
+    public string Name { get; set; }
+
+    // Optional property - no exception thrown if column is missing
+    [ExcelOptional]
+    public int Age { get; set; }
+}
+```
+
 ### Ignoring Properties
 ExcelMapper supports ignoring properties when deserializing with the `ExcelIgnoreAttribute` attribute. This is useful for cases where the the data structure is recursive, or the property is missing data and you don't want to create a custom mapper and call `MakeOptional`.
+
+In the example below:
+* The `Age` column will never be read.
+* An exception will not be thrown for the missing `NoSuchColumn`.
+* The `President` object will not be recursively read.
 
 | Name           | Age |
 |----------------|-----|
@@ -125,19 +187,47 @@ Console.WriteLine(president[1].NoSuchColumn); // null
 Console.WriteLine(president[1].PreviousPresident); // null
 ```
 
+### Preserve formatting
+By default, ExcelMapper reads string values without formatting. You can change this behavior by applying the `ExcelPreserveFormattingAttribute` to retain formatting when reading string values.
+
+For example, the below will preserve number values with a leading zeroes number format.
+| Name           | Age  |
+|----------------|------|
+| Donald Trump   | 073  |
+| Barack Obama   | 058  |
+
+```cs
+public class President
+{
+    public string Name { get; set; }
+
+    // If you want to preserve formatting.
+    [ExcelPreserveFormatting]
+    public string Age { get; set; }
+}
+
 ## Defining a custom mapping
 
-ExcelMapper allows customizing the class map used when mapping a row in an Excel sheet to an object.
+ExcelMapper allows you to customize the class map used when mapping Excel sheet rows to objects.
 
-Custom class maps allow you to change the column used to map a cell or make that column optional. You can also change the default map of the class, adding custom conversions.
+Custom class maps let you change which column maps to a property, make columns optional, or add custom conversions to the default class map.
 
-| Name           | Marrital Status | Number of Children | Approval Rating (%) | Date of Birth |
-|----------------|-----------------|--------------------|---------------------|---------------|
-| Donald Trump   | Twice Married   | 5                  | 60%                 | 1946-06-14    |
-| Barack Obama   | Married         | 2                  | 50                  | 04/08/1961    |
-| Ronald Reagan  | Divorced        | 5                  | 75                  | 06/03/1911    |
-| James Buchanan | Single          | 0                  | 100                 | 1791-04-23    |
+To define a class map, create an `ExcelClassMap<T>` and call `Map(t => t.PropertyOrField)` in the constructor for each property or field you want to map.
 
+By default, ExcelMapper maps each property or field to a column with the same name. You can use the following helpers on the result of `Map` to customize the column mapping:
+
+* `WithColumnName(string columnName)` - Read from a specific column name
+* `WithColumnIndex(int columnIndex)` - Read from a specific column index
+* `WithColumnNameMatching(params string[] columnNames)` - Read from the first matching column in a list of column names
+* `WithColumnNameMatching(Func<string, bool> predicate)` - Read from the first column matching a predicate
+
+For example:
+| Name           | Marrital Status | Number of Children | Approval Rating (%) | Date of Birth | Party      |
+|----------------|-----------------|--------------------|---------------------|---------------| ---------- |
+| Donald Trump   | Twice Married   | 5                  | 60%                 | 1946-06-14    | Republican |
+| Barack Obama   | Married         | 2                  | 50                  | 04/08/1961    | Democrat   |
+| Ronald Reagan  | Divorced        | 5                  | 75                  | 06/03/1911    | Republican |
+| James Buchanan | Single          | 0                  | 100                 | 1791-04-23    | Democrat   |
 
 
 ```cs
@@ -155,8 +245,8 @@ public class President
     public int NumberOfChildren { get; set; }
     public float ApprovalRating { get; set; }
     public DateTime DateOfBirth { get; set; }
-
     public int NumberOfTerms { get; set; }
+    public string PoliticalParty { get; set; }
 }
 
 public class PresidentClassMap : ExcelClassMap<President>
@@ -191,6 +281,10 @@ public class PresidentClassMap : ExcelClassMap<President>
         // Read a missing column.
         Map(president => president.NumberOfTerms)
             .MakeOptional();
+
+        // Read from a list of column names.
+        Map(president => president.PoliticalParty)
+            .WithColumnNameMatching("Political Party", "Party", "Affiliation");
     }
 }
 

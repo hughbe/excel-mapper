@@ -4,19 +4,18 @@
 
 using System;
 
-namespace ExcelMapper
+namespace ExcelMapper;
+
+/// <summary>
+/// Prevents a property from being deserialized.
+/// </summary>
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
+public sealed class ExcelIgnoreAttribute : Attribute
 {
     /// <summary>
-    /// Prevents a property from being deserialized.
+    /// Initializes a new instance of <see cref="ExcelIgnoreAttribute"/>.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-    public sealed class ExcelIgnoreAttribute : Attribute
+    public ExcelIgnoreAttribute()
     {
-        /// <summary>
-        /// Initializes a new instance of <see cref="ExcelIgnoreAttribute"/>.
-        /// </summary>
-        public ExcelIgnoreAttribute()
-        {
-        }
     }
 }
