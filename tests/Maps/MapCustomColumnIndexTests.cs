@@ -410,19 +410,19 @@ namespace ExcelMapper.Tests
             sheet.ReadHeading();
 
             CustomIndexEnumerablePropertyClass row1 = sheet.ReadRow<CustomIndexEnumerablePropertyClass>();
-            Assert.Equal(new object[] { "1", "2", "3" }, row1.CustomValue);
+            Assert.Equal(["1", "2", "3"], row1.CustomValue);
 
             CustomIndexEnumerablePropertyClass row2 = sheet.ReadRow<CustomIndexEnumerablePropertyClass>();
-            Assert.Equal(new object?[] { "1", null, "2" }, row2.CustomValue);
+            Assert.Equal(["1", null, "2"], row2.CustomValue);
 
             CustomIndexEnumerablePropertyClass row3 = sheet.ReadRow<CustomIndexEnumerablePropertyClass>();
-            Assert.Equal(new object[] { "1" }, row3.CustomValue);
+            Assert.Equal(["1"], row3.CustomValue);
 
             CustomIndexEnumerablePropertyClass row4 = sheet.ReadRow<CustomIndexEnumerablePropertyClass>();
             Assert.Empty(row4.CustomValue);
 
             CustomIndexEnumerablePropertyClass row5 = sheet.ReadRow<CustomIndexEnumerablePropertyClass>();
-            Assert.Equal(new object[] { "Invalid" }, row5.CustomValue);
+            Assert.Equal(["Invalid"], row5.CustomValue);
         }
 
         [Fact]
@@ -434,19 +434,19 @@ namespace ExcelMapper.Tests
             sheet.ReadHeading();
 
             CustomIndexEnumerableFieldClass row1 = sheet.ReadRow<CustomIndexEnumerableFieldClass>();
-            Assert.Equal(new object[] { "1", "2", "3" }, row1.CustomValue);
+            Assert.Equal(["1", "2", "3"], row1.CustomValue);
 
             CustomIndexEnumerableFieldClass row2 = sheet.ReadRow<CustomIndexEnumerableFieldClass>();
             Assert.Equal(new object?[] { "1", null, "2" }, row2.CustomValue);
 
             CustomIndexEnumerableFieldClass row3 = sheet.ReadRow<CustomIndexEnumerableFieldClass>();
-            Assert.Equal(new object[] { "1" }, row3.CustomValue);
+            Assert.Equal(["1"], row3.CustomValue);
 
             CustomIndexEnumerableFieldClass row4 = sheet.ReadRow<CustomIndexEnumerableFieldClass>();
             Assert.Empty(row4.CustomValue);
 
             CustomIndexEnumerableFieldClass row5 = sheet.ReadRow<CustomIndexEnumerableFieldClass>();
-            Assert.Equal(new object[] { "Invalid" }, row5.CustomValue);
+            Assert.Equal(["Invalid"], row5.CustomValue);
         }
 
         [Fact]
@@ -459,19 +459,19 @@ namespace ExcelMapper.Tests
             sheet.ReadHeading();
 
             CustomIndexEnumerablePropertyClass row1 = sheet.ReadRow<CustomIndexEnumerablePropertyClass>();
-            Assert.Equal(new object[] { "1", "2", "3" }, row1.CustomValue);
+            Assert.Equal(["1", "2", "3"], row1.CustomValue);
 
             CustomIndexEnumerablePropertyClass row2 = sheet.ReadRow<CustomIndexEnumerablePropertyClass>();
-            Assert.Equal(new object?[] { "1", null, "2" }, row2.CustomValue);
+            Assert.Equal(["1", null, "2"], row2.CustomValue);
 
             CustomIndexEnumerablePropertyClass row3 = sheet.ReadRow<CustomIndexEnumerablePropertyClass>();
-            Assert.Equal(new object[] { "1" }, row3.CustomValue);
+            Assert.Equal(["1"], row3.CustomValue);
 
             CustomIndexEnumerablePropertyClass row4 = sheet.ReadRow<CustomIndexEnumerablePropertyClass>();
             Assert.Empty(row4.CustomValue);
 
             CustomIndexEnumerablePropertyClass row5 = sheet.ReadRow<CustomIndexEnumerablePropertyClass>();
-            Assert.Equal(new object[] { "Invalid" }, row5.CustomValue);
+            Assert.Equal(["Invalid"], row5.CustomValue);
         }
 
         [Fact]
@@ -484,19 +484,19 @@ namespace ExcelMapper.Tests
             sheet.ReadHeading();
 
             CustomIndexEnumerableFieldClass row1 = sheet.ReadRow<CustomIndexEnumerableFieldClass>();
-            Assert.Equal(new object[] { "1", "2", "3" }, row1.CustomValue);
+            Assert.Equal(["1", "2", "3"], row1.CustomValue);
 
             CustomIndexEnumerableFieldClass row2 = sheet.ReadRow<CustomIndexEnumerableFieldClass>();
             Assert.Equal(new object?[] { "1", null, "2" }, row2.CustomValue);
 
             CustomIndexEnumerableFieldClass row3 = sheet.ReadRow<CustomIndexEnumerableFieldClass>();
-            Assert.Equal(new object[] { "1" }, row3.CustomValue);
+            Assert.Equal(["1"], row3.CustomValue);
 
             CustomIndexEnumerableFieldClass row4 = sheet.ReadRow<CustomIndexEnumerableFieldClass>();
             Assert.Empty(row4.CustomValue);
 
             CustomIndexEnumerableFieldClass row5 = sheet.ReadRow<CustomIndexEnumerableFieldClass>();
-            Assert.Equal(new object[] { "Invalid" }, row5.CustomValue);
+            Assert.Equal(["Invalid"], row5.CustomValue);
         }
 
         private class CustomIndexEnumerablePropertyClass

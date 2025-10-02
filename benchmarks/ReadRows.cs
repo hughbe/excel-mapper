@@ -1,103 +1,100 @@
-﻿using System;
-using System.IO;
-using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Running;
+﻿using BenchmarkDotNet.Attributes;
 using ExcelMapper.Tests;
 
-namespace ExcelMapper.Benchmarks
+namespace ExcelMapper.Benchmarks;
+
+[MemoryDiagnoser]
+public class ReadRows
 {
-    public class ReadRows
+    [Benchmark]
+    public void DefaultMap()
     {
-        [Benchmark]
-        public void DefaultMap()
-        {
-            using var original = Helpers.GetResource("VeryLargeSheet.xlsx");
-            var importer = new ExcelImporter(original);
-            importer.Configuration.RegisterClassMap<DataClassMap>();
+        using var original = Helpers.GetResource("VeryLargeSheet.xlsx");
+        var importer = new ExcelImporter(original);
+        importer.Configuration.RegisterClassMap<DataClassMap>();
 
-            ExcelSheet sheet = importer.ReadSheet();
-            foreach (object value in sheet.ReadRows<DataClass>())
-            {
-            }
+        ExcelSheet sheet = importer.ReadSheet();
+        foreach (object value in sheet.ReadRows<DataClass>())
+        {
         }
+    }
 
-        [Benchmark]
-        public void SkipBlankLinesMap()
+    [Benchmark]
+    public void SkipBlankLinesMap()
+    {
+        using var original = Helpers.GetResource("VeryLargeSheet.xlsx");
+        var importer = new ExcelImporter(original);
+        importer.Configuration.SkipBlankLines = true;
+        importer.Configuration.RegisterClassMap<DataClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        foreach (object value in sheet.ReadRows<DataClass>())
         {
-            using var original = Helpers.GetResource("VeryLargeSheet.xlsx");
-            var importer = new ExcelImporter(original);
-            importer.Configuration.SkipBlankLines = true;
-            importer.Configuration.RegisterClassMap<DataClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            foreach (object value in sheet.ReadRows<DataClass>())
-            {
-            }
         }
+    }
 
-        [Benchmark]
-        public void OptionalMap()
+    [Benchmark]
+    public void OptionalMap()
+    {
+        using var original = Helpers.GetResource("VeryLargeSheet.xlsx");
+        var importer = new ExcelImporter(original);
+        importer.Configuration.RegisterClassMap<OptionalDataClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        foreach (object value in sheet.ReadRows<DataClass>())
         {
-            using var original = Helpers.GetResource("VeryLargeSheet.xlsx");
-            var importer = new ExcelImporter(original);
-            importer.Configuration.RegisterClassMap<OptionalDataClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            foreach (object value in sheet.ReadRows<DataClass>())
-            {
-            }
         }
+    }
 
-        [Benchmark]
-        public void OptionalNoSuchValueMap()
+    [Benchmark]
+    public void OptionalNoSuchValueMap()
+    {
+        using var original = Helpers.GetResource("VeryLargeSheet.xlsx");
+        var importer = new ExcelImporter(original);
+        importer.Configuration.RegisterClassMap<OptionalDataWithMissingValueClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        foreach (object value in sheet.ReadRows<DataClassWithMissingValue>())
         {
-            using var original = Helpers.GetResource("VeryLargeSheet.xlsx");
-            var importer = new ExcelImporter(original);
-            importer.Configuration.RegisterClassMap<OptionalDataWithMissingValueClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            foreach (object value in sheet.ReadRows<DataClassWithMissingValue>())
-            {
-            }
         }
+    }
 
-        private class DataClass
+    private class DataClass
+    {
+        public int Value { get; set; }
+    }
+
+    private class DataClassWithMissingValue
+    {
+        public int Value { get; set; }
+        public int NoSuchValue { get; set; }
+    }
+
+    private class DataClassMap : ExcelClassMap<DataClass>
+    {
+        public DataClassMap()
         {
-            public int Value { get; set; }
+            Map(p => p.Value);
         }
+    }
 
-        private class DataClassWithMissingValue
+    private class OptionalDataClassMap : ExcelClassMap<DataClass>
+    {
+        public OptionalDataClassMap()
         {
-            public int Value { get; set; }
-            public int NoSuchValue { get; set; }
+            Map(p => p.Value);
         }
+    }
 
-        private class DataClassMap : ExcelClassMap<DataClass>
+    private class OptionalDataWithMissingValueClassMap : ExcelClassMap<DataClassWithMissingValue>
+    {
+        public OptionalDataWithMissingValueClassMap()
         {
-            public DataClassMap()
-            {
-                Map(p => p.Value);
-            }
-        }
+            Map(p => p.Value);
 
-        private class OptionalDataClassMap : ExcelClassMap<DataClass>
-        {
-            public OptionalDataClassMap()
-            {
-                Map(p => p.Value);
-            }
-        }
-
-        private class OptionalDataWithMissingValueClassMap : ExcelClassMap<DataClassWithMissingValue>
-        {
-            public OptionalDataWithMissingValueClassMap()
-            {
-                Map(p => p.Value);
-
-                Map(p => p.NoSuchValue)
-                    .MakeOptional()
-                    .WithEmptyFallback(0);
-            }
+            Map(p => p.NoSuchValue)
+                .MakeOptional()
+                .WithEmptyFallback(0);
         }
     }
 }

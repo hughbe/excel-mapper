@@ -12,8 +12,8 @@ namespace ExcelMapper.Tests
             OneToOneMap<string> propertyMap = Map(t => t.Value);
             Assert.Same(propertyMap, propertyMap.WithColumnName("ColumnName"));
 
-            ColumnNameValueReader reader = Assert.IsType<ColumnNameValueReader>(propertyMap.CellReader);
-            Assert.Equal("ColumnName", reader.ColumnName);
+            var factory = Assert.IsType<ColumnNameReaderFactory>(propertyMap.ReaderFactory);
+            Assert.Equal("ColumnName", factory.ColumnName);
         }
 
         [Fact]
@@ -22,7 +22,7 @@ namespace ExcelMapper.Tests
             OneToOneMap<string> propertyMap = Map(t => t.Value).WithColumnNameMatching(e => e == "ColumnName");
             Assert.Same(propertyMap, propertyMap.WithColumnNameMatching(e => e == "ColumnName"));
 
-            Assert.IsType<ColumnNameMatchingValueReader>(propertyMap.CellReader);
+            Assert.IsType<ColumnNameMatchingReaderFactory>(propertyMap.ReaderFactory);
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace ExcelMapper.Tests
             Assert.Same(propertyMap, propertyMap.WithColumnName("ColumnName"));
             Assert.True(propertyMap.Optional);
 
-            ColumnNameValueReader innerReader = Assert.IsType<ColumnNameValueReader>(propertyMap.CellReader);
+            var innerReader = Assert.IsType<ColumnNameReaderFactory>(propertyMap.ReaderFactory);
             Assert.Equal("ColumnName", innerReader.ColumnName);
         }
 
@@ -59,8 +59,8 @@ namespace ExcelMapper.Tests
             OneToOneMap<string> propertyMap = Map(t => t.Value);
             Assert.Same(propertyMap, propertyMap.WithColumnIndex(columnIndex));
 
-            ColumnIndexValueReader reader = Assert.IsType<ColumnIndexValueReader>(propertyMap.CellReader);
-            Assert.Equal(columnIndex, reader.ColumnIndex);
+            var factory = Assert.IsType<ColumnIndexReaderFactory>(propertyMap.ReaderFactory);
+            Assert.Equal(columnIndex, factory.ColumnIndex);
         }
 
         [Fact]
@@ -71,7 +71,7 @@ namespace ExcelMapper.Tests
             Assert.Same(propertyMap, propertyMap.WithColumnIndex(1));
             Assert.True(propertyMap.Optional);
 
-            ColumnIndexValueReader innerReader = Assert.IsType<ColumnIndexValueReader>(propertyMap.CellReader);
+            var innerReader = Assert.IsType<ColumnIndexReaderFactory>(propertyMap.ReaderFactory);
             Assert.Equal(1, innerReader.ColumnIndex);
         }
 

@@ -1,6 +1,5 @@
-namespace ExcelMapper.Abstractions
+namespace ExcelMapper.Abstractions;
+
+public interface IValuePipeline<out T> : IValuePipeline
 {
-    public interface IValuePipeline<out T> : IValuePipeline
-    {
-    }
 }

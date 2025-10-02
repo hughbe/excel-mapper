@@ -8,44 +8,38 @@ namespace ExcelMapper.Tests
         [Fact]
         public void ReadHeading_WithDuplicatedColumns_AssignsRandomNameToTheSecondOne()
         {
-            using (var importer = Helpers.GetImporter("DuplicatedColumns.xlsx"))
-            {
-                var sheet = importer.ReadSheet();
-                var heading = sheet.ReadHeading();
-                var columnNames = heading.ColumnNames.ToArray();
+            using var importer = Helpers.GetImporter("DuplicatedColumns.xlsx");
+            var sheet = importer.ReadSheet();
+            var heading = sheet.ReadHeading();
+            var columnNames = heading.ColumnNames.ToArray();
 
-                Assert.Equal("MyColumn", columnNames[0]);
-                Assert.StartsWith("MyColumn", columnNames[0]);
-            }
+            Assert.Equal("MyColumn", columnNames[0]);
+            Assert.StartsWith("MyColumn", columnNames[0]);
         }
 
         [Fact]
         public void ReadRow_CustomMapped_CorrectlyMapByIndex()
         {
-            using (var importer = Helpers.GetImporter("DuplicatedColumns.xlsx"))
-            {
-                importer.Configuration.RegisterClassMap<MyValuesMap>();
+            using var importer = Helpers.GetImporter("DuplicatedColumns.xlsx");
+            importer.Configuration.RegisterClassMap<MyValuesMap>();
 
-                var sheet = importer.ReadSheet();
-                sheet.ReadHeading();
+            var sheet = importer.ReadSheet();
+            sheet.ReadHeading();
 
-                var row1 = sheet.ReadRow<MyValues>();
-                Assert.Equal("value1", row1.MyColumn);
-                Assert.Equal("value2", row1.AnotherColumn);
-            }
+            var row1 = sheet.ReadRow<MyValues>();
+            Assert.Equal("value1", row1.MyColumn);
+            Assert.Equal("value2", row1.AnotherColumn);
         }
 
         [Fact]
         public void ReadRow_AutoMapped_Success()
         {
-            using (var importer = Helpers.GetImporter("DuplicatedColumns.xlsx"))
-            {
-                var sheet = importer.ReadSheet();
-                sheet.ReadHeading();
+            using var importer = Helpers.GetImporter("DuplicatedColumns.xlsx");
+            var sheet = importer.ReadSheet();
+            sheet.ReadHeading();
 
-                var row1 = sheet.ReadRow<MyValuesWithOneColumn>();
-                Assert.Equal("value1", row1.MyColumn);
-            }
+            var row1 = sheet.ReadRow<MyValuesWithOneColumn>();
+            Assert.Equal("value1", row1.MyColumn);
         }
 
         private class MyValuesWithOneColumn

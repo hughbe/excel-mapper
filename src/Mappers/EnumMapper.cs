@@ -2,65 +2,64 @@
 using System.Reflection;
 using ExcelMapper.Abstractions;
 
-namespace ExcelMapper.Mappers
+namespace ExcelMapper.Mappers;
+
+/// <summary>
+/// A mapper that tries to map the value of a cell to an enum of a given type.
+/// </summary>
+public class EnumMapper : ICellMapper
 {
     /// <summary>
-    /// A mapper that tries to map the value of a cell to an enum of a given type.
+    /// Gets the type of the enum to map the value of a cell to.
     /// </summary>
-    public class EnumMapper : ICellValueMapper
+    public Type EnumType { get; }
+
+    /// <summary>
+    /// Gets whether enum parsing is case insensitive.
+    /// </summary>
+    public bool IgnoreCase { get; }
+
+    /// <summary>
+    /// Constructs a mapper that tries to map the value of a cell to an enum of a given type.
+    /// </summary>
+    /// <param name="enumType">The type of the enum to convert the value of a cell to.</param>
+    public EnumMapper(Type enumType) : this(enumType, ignoreCase: false)
     {
-        /// <summary>
-        /// Gets the type of the enum to map the value of a cell to.
-        /// </summary>
-        public Type EnumType { get; }
+    }
 
-        /// <summary>
-        /// Gets whether enum parsing is case insensitive.
-        /// </summary>
-        public bool IgnoreCase { get; }
-
-        /// <summary>
-        /// Constructs a mapper that tries to map the value of a cell to an enum of a given type.
-        /// </summary>
-        /// <param name="enumType">The type of the enum to convert the value of a cell to.</param>
-        public EnumMapper(Type enumType) : this(enumType, ignoreCase: false)
+    /// <summary>
+    /// Constructs a mapper that tries to map the value of a cell to an enum of a given type.
+    /// </summary>
+    /// <param name="enumType">The type of the enum to convert the value of a cell to.</param>
+    /// <param name="ignoreCase">A flag indicating whether enum parsing is case insensitive.</param>
+    public EnumMapper(Type enumType, bool ignoreCase)
+    {
+        if (enumType == null)
         {
+            throw new ArgumentNullException(nameof(enumType));
         }
 
-        /// <summary>
-        /// Constructs a mapper that tries to map the value of a cell to an enum of a given type.
-        /// </summary>
-        /// <param name="enumType">The type of the enum to convert the value of a cell to.</param>
-        /// <param name="ignoreCase">A flag indicating whether enum parsing is case insensitive.</param>
-        public EnumMapper(Type enumType, bool ignoreCase)
+        if (!enumType.GetTypeInfo().IsEnum)
         {
-            if (enumType == null)
-            {
-                throw new ArgumentNullException(nameof(enumType));
-            }
-
-            if (!enumType.GetTypeInfo().IsEnum)
-            {
-                throw new ArgumentException($"Type {enumType} is not an Enum.", nameof(enumType));
-            }
-
-            EnumType = enumType;
-            IgnoreCase = ignoreCase;
+            throw new ArgumentException($"Type {enumType} is not an Enum.", nameof(enumType));
         }
 
-        public CellValueMapperResult MapCellValue(ReadCellValueResult readResult)
+        EnumType = enumType;
+        IgnoreCase = ignoreCase;
+    }
+
+    public CellMapperResult MapCellValue(ReadCellResult readResult)
+    {
+        try
         {
-            try
-            {
-                // Discarding readResult.StringValue nullability warning.
-                // If null - CellValueMapperResult.Invalid with ArgumentNullException will be returned
-                object result = Enum.Parse(EnumType, readResult.StringValue!, IgnoreCase);
-                return CellValueMapperResult.Success(result);
-            }
-            catch (Exception exception)
-            {
-                return CellValueMapperResult.Invalid(exception);
-            }
+            // Discarding readResult.StringValue nullability warning.
+            // If null - CellMapperResult.Invalid with ArgumentNullException will be returned
+            object result = Enum.Parse(EnumType, readResult.StringValue!, IgnoreCase);
+            return CellMapperResult.Success(result);
+        }
+        catch (Exception exception)
+        {
+            return CellMapperResult.Invalid(exception);
         }
     }
 }

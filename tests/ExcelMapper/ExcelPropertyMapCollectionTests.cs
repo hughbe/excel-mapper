@@ -11,9 +11,9 @@ namespace ExcelMapper.Tests
         public void Add_ValidItem_Success()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Property))!;
-            var map1 = new OneToOneMap<int>(new ColumnNameValueReader("Property"));
+            var map1 = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
             var propertyMap1 = new ExcelPropertyMap(propertyInfo, map1);
-            var map2 = new OneToOneMap<int>(new ColumnNameValueReader("Property"));
+            var map2 = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
             var propertyMap2 = new ExcelPropertyMap(propertyInfo, map2);
             ExcelPropertyMapCollection mappings = new TestClassMap().Properties;
 
@@ -41,9 +41,9 @@ namespace ExcelMapper.Tests
         public void Insert_ValidItem_Success()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Property))!;
-            var map1 = new OneToOneMap<int>(new ColumnNameValueReader("Property"));
+            var map1 = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
             var propertyMap1 = new ExcelPropertyMap(propertyInfo, map1);
-            var map2 = new OneToOneMap<int>(new ColumnNameValueReader("Property"));
+            var map2 = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
             var propertyMap2 = new ExcelPropertyMap(propertyInfo, map2);
             ExcelPropertyMapCollection mappings = new TestClassMap().Properties;
 
@@ -71,9 +71,9 @@ namespace ExcelMapper.Tests
         public void Item_SetValidItem_GetReturnsExpected()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Property))!;
-            var map1 = new OneToOneMap<int>(new ColumnNameValueReader("Property"));
+            var map1 = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
             var propertyMap1 = new ExcelPropertyMap(propertyInfo, map1);
-            var map2 = new OneToOneMap<int>(new ColumnNameValueReader("Property"));
+            var map2 = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
             var propertyMap2 = new ExcelPropertyMap(propertyInfo, map2);
             ExcelPropertyMapCollection mappings = new TestClassMap().Properties;
             mappings.Add(propertyMap1);
@@ -86,7 +86,7 @@ namespace ExcelMapper.Tests
         public void Item_SetNull_ThrowsArgumentNullException()
         {
             MemberInfo propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Property))!;
-            var map = new OneToOneMap<int>(new ColumnNameValueReader("Property"));
+            var map = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
             var propertyMap = new ExcelPropertyMap(propertyInfo, map);
             ExcelPropertyMapCollection mappings = new TestClassMap().Properties;
             mappings.Add(propertyMap);

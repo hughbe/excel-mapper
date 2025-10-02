@@ -7,22 +7,20 @@ namespace ExcelMapper.Tests
         [Fact]
         public void ReadRow_CustomMappedString_Success()
         {
-            using (var importer = Helpers.GetImporter("Strings.xlsx"))
-            {
-                importer.Configuration.RegisterClassMap<TrimStringValueMap>();
+            using var importer = Helpers.GetImporter("Strings.xlsx");
+            importer.Configuration.RegisterClassMap<TrimStringValueMap>();
 
-                ExcelSheet sheet = importer.ReadSheet();
-                sheet.ReadHeading();
+            ExcelSheet sheet = importer.ReadSheet();
+            sheet.ReadHeading();
 
-                StringValue row1 = sheet.ReadRow<StringValue>();
-                Assert.Equal("value", row1.Value);
+            StringValue row1 = sheet.ReadRow<StringValue>();
+            Assert.Equal("value", row1.Value);
 
-                StringValue row2 = sheet.ReadRow<StringValue>();
-                Assert.Equal("value", row2.Value);
+            StringValue row2 = sheet.ReadRow<StringValue>();
+            Assert.Equal("value", row2.Value);
 
-                StringValue row3 = sheet.ReadRow<StringValue>();
-                Assert.Null(row3.Value);
-            }
+            StringValue row3 = sheet.ReadRow<StringValue>();
+            Assert.Null(row3.Value);
         }
 
         private class StringValue

@@ -1,14 +1,13 @@
 using Xunit;
 
-namespace ExcelMapper.Tests
+namespace ExcelMapper.Tests;
+
+public class ExcelIgnoreAttributeTests
 {
-    public class ExcelIgnoreAttributeTests
+    [Fact]
+    public void Ctor_Default()
     {
-        [Fact]
-        public void Ctor_Default()
-        {
-            var exception = Record.Exception(() => new ExcelIgnoreAttribute());
-            Assert.Null(exception);
-        }
+        var exception = Record.Exception(() => new ExcelIgnoreAttribute());
+        Assert.Null(exception);
     }
 }

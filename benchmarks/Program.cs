@@ -1,12 +1,11 @@
 using BenchmarkDotNet.Running;
 
-namespace ExcelMapper.Benchmarks
+namespace ExcelMapper.Benchmarks;
+
+public class Program
 {
-    public class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
-        {
-            var summary = BenchmarkRunner.Run<ReadRows>();
-        }
+        var summary = BenchmarkRunner.Run<ReadRows>();
     }
 }

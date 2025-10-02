@@ -11,7 +11,7 @@ namespace ExcelMapper.Tests
         public void Ctor_PropertyInfoMember_Success()
         {
             MemberInfo propertyInfo = typeof(ClassWithEvent).GetProperty(nameof(ClassWithEvent.Property))!;
-            var map = new OneToOneMap<int>(new ColumnNameValueReader("Property"));
+            var map = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
 
             var propertyMap = new ExcelPropertyMap(propertyInfo, map);
             Assert.Same(propertyInfo, propertyMap.Member);
@@ -26,7 +26,7 @@ namespace ExcelMapper.Tests
         public void Ctor_FieldInfoMember_Success()
         {
             MemberInfo fieldInfo = typeof(ClassWithEvent).GetField(nameof(ClassWithEvent._field))!;
-            var map = new OneToOneMap<int>(new ColumnNameValueReader("Property"));
+            var map = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
 
             var propertyMap = new ExcelPropertyMap(fieldInfo, map);
             Assert.Same(fieldInfo, propertyMap.Member);
@@ -40,7 +40,7 @@ namespace ExcelMapper.Tests
         [Fact]
         public void Ctor_NullMember_ThrowsArgumentNullException()
         {
-            var map = new OneToOneMap<int>(new ColumnNameValueReader("Property"));
+            var map = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
             Assert.Throws<ArgumentNullException>("member", () => new ExcelPropertyMap(null!, map));
         }
 
@@ -55,7 +55,7 @@ namespace ExcelMapper.Tests
         public void Ctor_MemberNotFieldOrProperty_ThrowsArgumentException()
         {
             MemberInfo eventInfo = typeof(ClassWithEvent).GetEvent(nameof(ClassWithEvent.Event))!;
-            var map = new OneToOneMap<int>(new ColumnNameValueReader("Property"));
+            var map = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
             Assert.Throws<ArgumentException>("member", () => new ExcelPropertyMap(eventInfo, map));
         }
 
@@ -63,7 +63,7 @@ namespace ExcelMapper.Tests
         public void Ctor_PropertyReadOnly_ThrowsArgumentException()
         {
             MemberInfo propertyInfo = typeof(ClassWithEvent).GetProperty(nameof(ClassWithEvent.ReadOnlyProperty))!;
-            var map = new OneToOneMap<int>(new ColumnNameValueReader("Property"));
+            var map = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
             Assert.Throws<ArgumentException>("member", () => new ExcelPropertyMap(propertyInfo, map));
         }
 

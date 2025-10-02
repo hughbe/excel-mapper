@@ -4,45 +4,44 @@
 
 using System;
 
-namespace ExcelMapper
+namespace ExcelMapper;
+
+/// <summary>
+/// Specifies the column index that is used when deserializing a property
+/// </summary>
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
+public class ExcelColumnIndexAttribute : Attribute
 {
+    private int _index;
+
     /// <summary>
-    /// Specifies the column index that is used when deserializing a property
+    /// Initializes a new instance of <see cref="ExcelColumnIndexAttribute"/> with the specified column index.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-    public class ExcelColumnIndexAttribute : Attribute
+    /// <param name="index">The index of the column.</param>
+    public ExcelColumnIndexAttribute(int index)
     {
-        private int _index;
+        CheckIndexGreaterOrEqualToZero(index, nameof(index));
+        Index = index;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="ExcelColumnIndexAttribute"/> with the specified column index.
-        /// </summary>
-        /// <param name="index">The index of the column.</param>
-        public ExcelColumnIndexAttribute(int index)
+    /// <summary>
+    /// The index of the column.
+    /// </summary>
+    public int Index
+    {
+        get => _index;
+        set
         {
-            CheckIndexGreaterOrEqualToZero(index, nameof(index));
-            Index = index;
+            CheckIndexGreaterOrEqualToZero(value, nameof(value));
+            _index = value;
         }
+    }
 
-        /// <summary>
-        /// The index of the column.
-        /// </summary>
-        public int Index
+    private void CheckIndexGreaterOrEqualToZero(int index, string paramName)
+    {
+        if (index < 0)
         {
-            get => _index;
-            set
-            {
-                CheckIndexGreaterOrEqualToZero(value, nameof(value));
-                _index = value;
-            }
-        }
-
-        private void CheckIndexGreaterOrEqualToZero(int index, string paramName)
-        {
-            if (index < 0)
-            {
-                throw new ArgumentOutOfRangeException(paramName, index, $"Column index {index} must be greater or equal to zero.");
-            }
+            throw new ArgumentOutOfRangeException(paramName, index, $"Column index {index} must be greater or equal to zero.");
         }
     }
 }
