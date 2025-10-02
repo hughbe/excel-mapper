@@ -112,7 +112,7 @@ public static class AutoMapper
             emptyFallback = new FixedValueFallback(defaultValueAttribute.Value);
         }
 
-        var defaultReader = GetDefaultCellReaderFactory(member, out var isOptional);
+        var defaultReader = GetDefaultCellReaderFactory(member);
         var map = new OneToOneMap<T>(defaultReader);
 
         if (mapper != null)
@@ -127,7 +127,7 @@ public static class AutoMapper
         {
             map.InvalidFallback = invalidFallback;
         }
-        if (isOptional)
+        if (Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)))
         {
             map.Optional = true;
         }
@@ -135,10 +135,8 @@ public static class AutoMapper
         return map;
     }
 
-    private static ICellReaderFactory GetDefaultCellReaderFactory(MemberInfo member, out bool isOptional)
+    private static ICellReaderFactory GetDefaultCellReaderFactory(MemberInfo member)
     {
-        isOptional = Attribute.IsDefined(member, typeof(ExcelOptionalAttribute));
-
         var columnNameAttributes = member.GetCustomAttributes<ExcelColumnNameAttribute>().ToArray();
         // A single [ExcelColumnName] attribute represents one column.
         if (columnNameAttributes.Length == 1)
@@ -297,7 +295,7 @@ public static class AutoMapper
         bool result = (bool)method.Invoke(null, parameters);
         if (result)
         {
-            map = (IMap)parameters[2]!;
+            map = (IMap)parameters[parameters.Length - 1]!;
             return true;
         }
 
@@ -330,10 +328,15 @@ public static class AutoMapper
         }
         else
         {
-            defaultReaderFactory = new CharSplitReaderFactory(GetDefaultCellReaderFactory(member, out var _));
+            defaultReaderFactory = new CharSplitReaderFactory(GetDefaultCellReaderFactory(member));
         }
 
         map = new ManyToOneEnumerableMap<TElement>(defaultReaderFactory, elementMapping, factory);
+if (member != null && Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)))
+        {
+            map.Optional = true;
+        }
+
         return true;
     }
 
@@ -450,7 +453,7 @@ public static class AutoMapper
         bool result = (bool)method.Invoke(null, parameters);
         if (result)
         {
-            map = (IMap)parameters[2]!;
+            map = (IMap)parameters[parameters.Length - 1]!;
             return true;
         }
 
