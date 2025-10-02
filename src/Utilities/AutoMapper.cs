@@ -109,13 +109,19 @@ public static class AutoMapper
     {
         isOptional = Attribute.IsDefined(member, typeof(ExcelOptionalAttribute));
 
-        ExcelColumnNameAttribute colummnNameAttribute = member.GetCustomAttribute<ExcelColumnNameAttribute>();
-        if (colummnNameAttribute != null)
+        var columnNameAttributes = member.GetCustomAttributes<ExcelColumnNameAttribute>().ToArray();
+        // A single [ExcelColumnName] attribute represents one column.
+        if (columnNameAttributes.Length == 1)
         {
-            return new ColumnNameReaderFactory(colummnNameAttribute.Name);
+            return new ColumnNameReaderFactory(columnNameAttributes[0].Name);
+        }
+        // Multiple [ExcelColumnName] attribute still represents one column, but multiple options.
+        else if (columnNameAttributes.Length > 1)
+        {
+            return new ColumnNameMatchingReaderFactory(columnNameAttributes.Select(c => c.Name).ToArray());
         }
 
-        ExcelColumnIndexAttribute colummnIndexAttribute = member.GetCustomAttribute<ExcelColumnIndexAttribute>();
+        var colummnIndexAttribute = member.GetCustomAttribute<ExcelColumnIndexAttribute>();
         if (colummnIndexAttribute != null)
         {
             return new ColumnIndexReaderFactory(colummnIndexAttribute.Index);

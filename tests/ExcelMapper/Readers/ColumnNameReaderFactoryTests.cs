@@ -6,11 +6,14 @@ namespace ExcelMapper.Readers.Tests;
 
 public class ColumnNameReaderFactoryTests
 {
-    [Fact]
-    public void Ctor_ColumnName()
+    [Theory]
+    [InlineData("ColumnName")]
+    [InlineData("  ColumnName  ")]
+    [InlineData("  ")]
+    public void Ctor_String(string columnName)
     {
-        var factory = new ColumnNameReaderFactory("ColumnName");
-        Assert.Equal("ColumnName", factory.ColumnName);
+        var factory = new ColumnNameReaderFactory(columnName);
+        Assert.Equal(columnName, factory.ColumnName);
     }
 
     [Fact]

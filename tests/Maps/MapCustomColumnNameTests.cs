@@ -29,6 +29,30 @@ public class MapCustomColumnIndexTests
     }
 
     [Fact]
+    public void ReadRows_AutoMappedCustomNamesProperty_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNamesPropertyClass>();
+        Assert.Equal("a", row1.CustomName);
+    }
+
+    [Fact]
+    public void ReadRows_AutoMappedCustomNamesField_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNamesFieldClass>();
+        Assert.Equal("a", row1.CustomName);
+    }
+
+    [Fact]
     public void ReadRows_DefaultMappedCustomNameProperty_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
@@ -51,6 +75,32 @@ public class MapCustomColumnIndexTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomNameFieldClass>();
+        Assert.Equal("a", row1.CustomName);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedCustomNamesProperty_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultCustomNamesPropertyClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNamesPropertyClass>();
+        Assert.Equal("a", row1.CustomName);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedCustomNamesField_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultCustomNamesFieldClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNamesFieldClass>();
         Assert.Equal("a", row1.CustomName);
     }
 
@@ -86,9 +136,24 @@ public class MapCustomColumnIndexTests
         public string CustomName { get; set; } = default!;
     }
 
+    private class CustomNamesPropertyClass
+    {
+        [ExcelColumnName("NoSuchColumn")]
+        [ExcelColumnName("StringValue")]
+        public string CustomName { get; set; } = default!;
+    }
+
     private class DefaultCustomNamePropertyClassMap : ExcelClassMap<CustomNamePropertyClass>
     {
         public DefaultCustomNamePropertyClassMap()
+        {
+            Map(p => p.CustomName);
+        }
+    }
+
+    private class DefaultCustomNamesPropertyClassMap : ExcelClassMap<CustomNamesPropertyClass>
+    {
+        public DefaultCustomNamesPropertyClassMap()
         {
             Map(p => p.CustomName);
         }
@@ -108,10 +173,25 @@ public class MapCustomColumnIndexTests
         [ExcelColumnName("StringValue")]
         public string CustomName { get; set; } = default!;
     }
+    
+    private class CustomNamesFieldClass
+    {
+        [ExcelColumnName("NoSuchColumn")]
+        [ExcelColumnName("StringValue")]
+        public string CustomName { get; set; } = default!;
+    }
 
     private class DefaultCustomNameFieldClassMap : ExcelClassMap<CustomNameFieldClass>
     {
         public DefaultCustomNameFieldClassMap()
+        {
+            Map(p => p.CustomName);
+        }
+    }
+
+    private class DefaultCustomNamesFieldClassMap : ExcelClassMap<CustomNamesFieldClass>
+    {
+        public DefaultCustomNamesFieldClassMap()
         {
             Map(p => p.CustomName);
         }

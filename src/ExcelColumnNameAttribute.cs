@@ -3,13 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using ExcelMapper.Utilities;
 
 namespace ExcelMapper;
 
 /// <summary>
 /// Specifies the column name that is used when deserializing a property
 /// </summary>
-[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true)]
 public class ExcelColumnNameAttribute : Attribute
 {
     private string _name;
@@ -20,7 +21,7 @@ public class ExcelColumnNameAttribute : Attribute
     /// <param name="name">The name of the column.</param>
     public ExcelColumnNameAttribute(string name)
     {
-        CheckNameNullOrEmpty(name , nameof(name));
+        ColumnNameUtilities.ValidateColumnName(name , nameof(name));
         _name = name;
     }
 
@@ -32,21 +33,8 @@ public class ExcelColumnNameAttribute : Attribute
         get => _name;
         set
         {
-            CheckNameNullOrEmpty(value , nameof(value));
+            ColumnNameUtilities.ValidateColumnName(value , nameof(value));
             _name = value;
-        }
-    }
-    
-    private void CheckNameNullOrEmpty(string name, string paramName)
-    {
-        if (name == null)
-        {
-            throw new ArgumentNullException(paramName);
-        }
-
-        if (name.Length == 0)
-        {
-            throw new ArgumentException("Column name cannot be empty.", paramName);
         }
     }
 }

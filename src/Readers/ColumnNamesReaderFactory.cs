@@ -21,24 +21,7 @@ public sealed class ColumnNamesReaderFactory : ICellsReaderFactory
     /// <param name="columnNames">The names of each column to read.</param>
     public ColumnNamesReaderFactory(params string[] columnNames)
     {
-        if (columnNames == null)
-        {
-            throw new ArgumentNullException(nameof(columnNames));
-        }
-
-        if (columnNames.Length == 0)
-        {
-            throw new ArgumentException("Column names cannot be empty.", nameof(columnNames));
-        }
-
-        foreach (string columnName in columnNames)
-        {
-            if (columnName == null)
-            {
-                throw new ArgumentException($"Null column name in {columnNames.ArrayJoin()}.", nameof(columnNames));
-            }
-        }
-
+        ColumnNameUtilities.ValidateColumnNames(columnNames, nameof(columnNames));
         ColumnNames = columnNames;
     }
 

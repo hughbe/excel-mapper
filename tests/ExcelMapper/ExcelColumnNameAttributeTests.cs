@@ -8,6 +8,8 @@ public class ExcelColumnNameAttributeTests
     [Theory]
     [InlineData("columnname")]
     [InlineData("ColumnName")]
+    [InlineData("  ColumnName  ")]
+    [InlineData("    ")]
     public void Ctor_String(string name)
     {
         var attribute = new ExcelColumnNameAttribute(name);

@@ -7,10 +7,18 @@ namespace ExcelMapper.Readers.Tests;
 
 public class ColumnNamesReaderFactoryTests
 {
-    [Fact]
-    public void Ctor_ColumnNames()
+    public static IEnumerable<object[]> Ctor_ParamsString()
     {
-        var columnNames = new string[] { "ColumnName1", "ColumnName2" };
+        yield return new object[] { new string[] { "ColumnName1" } };
+        yield return new object[] { new string[] { "ColumnName1", "ColumnName2" } };
+        yield return new object[] { new string[] { " " } };
+        yield return new object[] { new string[] { "ColumnName", "ColumnName" } };
+    }
+
+    [Theory]
+    [MemberData(nameof(Ctor_ParamsString))]
+    public void Ctor_ColumnNames(string[] columnNames)
+    {
         var reader = new ColumnNamesReaderFactory(columnNames);
         Assert.Same(columnNames, reader.ColumnNames);
     }

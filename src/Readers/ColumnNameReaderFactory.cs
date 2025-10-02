@@ -1,5 +1,6 @@
 ﻿using System;
 using ExcelMapper.Abstractions;
+using ExcelMapper.Utilities;
 
 namespace ExcelMapper.Readers;
 
@@ -19,16 +20,7 @@ public sealed class ColumnNameReaderFactory : ICellReaderFactory
     /// <param name="columnName">The name of the column to read.</param>
     public ColumnNameReaderFactory(string columnName)
     {
-        if (columnName == null)
-        {
-            throw new ArgumentNullException(nameof(columnName));
-        }
-
-        if (columnName.Length == 0)
-        {
-            throw new ArgumentException("Column name cannot be empty.", nameof(columnName));
-        }
-
+        ColumnNameUtilities.ValidateColumnName(columnName, nameof(columnName));
         ColumnName = columnName;
     }
 
