@@ -14,7 +14,7 @@ public class ExcelClassMap : IMap
 
     public Type Type { get; }
 
-    public ExcelPropertyMapCollection Properties { get; } = new ExcelPropertyMapCollection();
+    public ExcelPropertyMapCollection Properties { get; } = [];
 
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
     {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ExcelMapper.Mappers;
 using Xunit;
 
 namespace ExcelMapper.Tests;
@@ -31,6 +32,27 @@ public class MapWithMappingTests
         Assert.Null(row4.StringValue);
         Assert.Equal(MapUsingValueEnum.Unknown, row4.EnumValue);
     }
+    [Fact]
+    public void ReadRow_WithRequiredMappingMap_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("WithMappings.xlsx");
+        importer.Configuration.RegisterClassMap<WithMappingValueRequiredMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        WithMappingValue row1 = sheet.ReadRow<WithMappingValue>();
+        Assert.Equal("12345", row1.StringValue);
+
+        WithMappingValue row2 = sheet.ReadRow<WithMappingValue>();
+        Assert.Equal("Missing", row2.StringValue);
+
+        WithMappingValue row3 = sheet.ReadRow<WithMappingValue>();
+        Assert.Equal("Missing", row3.StringValue);
+
+        WithMappingValue row4 = sheet.ReadRow<WithMappingValue>();
+        Assert.Null(row4.StringValue);
+    }
 
     private enum MapUsingValueEnum
     {
@@ -61,6 +83,20 @@ public class MapWithMappingTests
                     { "one", MapUsingValueEnum.First }
                 })
                 .WithInvalidFallback(MapUsingValueEnum.Unknown);
+        }
+    }
+
+    private class WithMappingValueRequiredMap : ExcelClassMap<WithMappingValue>
+    {
+        public WithMappingValueRequiredMap()
+        {
+            Map(c => c.StringValue)
+                .WithMapping(new Dictionary<string, string>
+                    {
+                        { "a", "12345" }
+                    }, behavior: DictionaryMapperBehavior.Required)
+                .WithColumnIndex(0)
+                .WithInvalidFallback("Missing");
         }
     }
 }

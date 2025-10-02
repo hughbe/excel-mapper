@@ -11,22 +11,22 @@ namespace ExcelMapper;
 /// </summary>
 public class ValuePipeline : IValuePipeline
 {
-    private readonly List<ICellTransformer> _cellValueTransformers = new List<ICellTransformer>();
-    private readonly List<ICellMapper> _cellValueMappers = new List<ICellMapper>();
+    private readonly List<ICellTransformer> _cellValueTransformers = [];
+    private readonly List<ICellMapper> _cellValueMappers = [];
 
     /// <summary>
     /// Gets the list of objects that take the initial string value read from a cell and
     /// modifies the string value. This is useful for things like trimming the string value
     /// before mapping it.
     /// </summary>
-    public IEnumerable<ICellTransformer> CellValueTransformers => _cellValueTransformers;
+    public IReadOnlyList<ICellTransformer> CellValueTransformers => _cellValueTransformers;
 
     /// <summary>
     /// Gets the pipeline of items that take the initial string value read from a cell and
     /// converts the string value into the type of the property or field. The items form
     /// a pipeline: if a mapper fails to parse or map the cell value, the next item is used.
     /// </summary>
-    public IEnumerable<ICellMapper> CellValueMappers => _cellValueMappers;
+    public IReadOnlyList<ICellMapper> CellValueMappers => _cellValueMappers;
 
     /// <summary>
     /// Adds the given mapper to the pipeline of cell value mappers.

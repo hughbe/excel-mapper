@@ -51,9 +51,9 @@ public class OneToOneMap<T> : IValuePipeline<T>, IMap
         return result != null;
     }
 
-    public IEnumerable<ICellTransformer> CellValueTransformers => Pipeline.CellValueTransformers;
+    public IReadOnlyList<ICellTransformer> CellValueTransformers => Pipeline.CellValueTransformers;
 
-    public IEnumerable<ICellMapper> CellValueMappers => Pipeline.CellValueMappers;
+    public IReadOnlyList<ICellMapper> CellValueMappers => Pipeline.CellValueMappers;
 
     public IFallbackItem? EmptyFallback
     {

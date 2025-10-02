@@ -10,7 +10,7 @@ namespace ExcelMapper;
 /// </summary>
 public class ExcelImporterConfiguration
 {
-    private Dictionary<Type, IMap> ClassMaps { get; } = new Dictionary<Type, IMap>();
+    private Dictionary<Type, IMap> ClassMaps { get; } = [];
 
     /// <summary>
     ///  Gets or sets whether blank lines should be skipped during reading.

@@ -68,10 +68,11 @@ public static class IValuePipelineExtensions
     /// <param name="propertyMap">The property map to use.</param>
     /// <param name="mappingDictionary">A dictionary that maps a fixed string value to a fixed value of T.</param>
     /// <param name="comparer">The comparer uses to map fixed string values. This allows for case-insensitive mappings, for example.</param>
+    /// <param name="behavior">Whether or not an error a failure to match is an error.</param>
     /// <returns>The property map on which this method was invoked.</returns>
-    public static TPropertyMap WithMapping<TPropertyMap, T>(this TPropertyMap propertyMap, IDictionary<string, T> mappingDictionary, IEqualityComparer<string>? comparer = null) where TPropertyMap : IValuePipeline<T>
+    public static TPropertyMap WithMapping<TPropertyMap, T>(this TPropertyMap propertyMap, IDictionary<string, T> mappingDictionary, IEqualityComparer<string>? comparer = null, DictionaryMapperBehavior behavior = DictionaryMapperBehavior.Optional) where TPropertyMap : IValuePipeline<T>
     {
-        var item = new DictionaryMapper<T>(mappingDictionary, comparer);
+        var item = new DictionaryMapper<T>(mappingDictionary, comparer, behavior);
         propertyMap.AddCellValueMapper(item);
         return propertyMap;
     }
