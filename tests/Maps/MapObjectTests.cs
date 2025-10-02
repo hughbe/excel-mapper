@@ -88,6 +88,25 @@ public class MapObjectTests
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ObjectValue>());
     }
 
+    [Fact]
+    public void ReadRow_Record_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<RecordClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<RecordClass>();
+        Assert.Equal(2, row1.Id!.Value);
+
+        var row2 = sheet.ReadRow<RecordClass>();
+        Assert.Null(row2.Id);
+
+        var row3 = sheet.ReadRow<RecordClass>();
+        Assert.Null(row3.Id);
+    }
+
     private class ObjectValue
     {
         public object Value { get; set; } = default!;
@@ -100,6 +119,23 @@ public class MapObjectTests
             Map(o => o.Value)
                 .WithEmptyFallback("empty")
                 .WithInvalidFallback("invalid");
+        }
+    }
+    
+    public record Id(int Value);
+
+    public class RecordClass
+    {
+        public Id? Id { get; private set; }
+    }
+
+    public class RecordClassMap : ExcelClassMap<RecordClass>
+    {
+        public RecordClassMap()
+        {
+            Map(data => data.Id)
+                .WithConverter(v => new Id(int.Parse(v!)))
+                .WithColumnName("Value");
         }
     }
 }

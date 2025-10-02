@@ -173,8 +173,8 @@ public static class IValuePipelineExtensions
     /// <returns>The property map on which this method was invoked.</returns>
     public static TPropertyMap WithConverter<TPropertyMap, T>(
         this TPropertyMap propertyMap,
-        ConvertUsingSimpleMapperDelegate<T> converter)
-        where TPropertyMap : IValuePipeline<T>
+        ConvertUsingSimpleMapperDelegate<T?> converter)
+        where TPropertyMap : IValuePipeline<T?>
     {
         if (converter == null)
         {

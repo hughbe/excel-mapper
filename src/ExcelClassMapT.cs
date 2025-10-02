@@ -49,17 +49,13 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map primitives such as string, int etc.
     /// </summary>
-    /// <typeparam name="TElement">The type of the property or field to map.</typeparam>
+    /// <typeparam name="TProperty">The type of the property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public OneToOneMap<TElement> Map<TElement>(Expression<Func<T, TElement>> expression)
+    public OneToOneMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
     {
         MemberExpression memberExpression = GetMemberExpression(expression);
-        if (!AutoMapper.TryCreatePrimitiveMap(memberExpression.Member, EmptyValueStrategy, out OneToOneMap<TElement>? map))
-        {
-            throw new ExcelMappingException($"Don't know how to map type {typeof(TElement)}.");
-        }
-
+        var map = AutoMapper.CreateMemberMap<TProperty>(memberExpression.Member, EmptyValueStrategy, false)!;
         AddMap(new ExcelPropertyMap<T>(memberExpression.Member, map), expression);
         return map;
     }

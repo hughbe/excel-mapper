@@ -32,7 +32,7 @@ public class ExcelImporterConfigurationTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<TestMap>();
 
-        Assert.True(importer.Configuration.TryGetClassMap<int>(out IMap? classMap));
+        Assert.True(importer.Configuration.TryGetClassMap<int>(out var classMap));
         TestMap map = Assert.IsType<TestMap>(classMap);
         Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
         Assert.Equal(typeof(int), map.Type);
@@ -52,7 +52,7 @@ public class ExcelImporterConfigurationTests
         var map = new TestMap();
         importer.Configuration.RegisterClassMap(map);
 
-        Assert.True(importer.Configuration.TryGetClassMap<int>(out IMap? classMap));
+        Assert.True(importer.Configuration.TryGetClassMap<int>(out var classMap));
         Assert.Same(map, classMap);
 
         Assert.True(importer.Configuration.TryGetClassMap(typeof(int), out classMap));
@@ -66,7 +66,7 @@ public class ExcelImporterConfigurationTests
         var map = new CustomIMap();
         importer.Configuration.RegisterClassMap(typeof(int), map);
 
-        Assert.True(importer.Configuration.TryGetClassMap<int>(out IMap? classMap));
+        Assert.True(importer.Configuration.TryGetClassMap<int>(out var classMap));
         Assert.Same(map, classMap);
 
         Assert.True(importer.Configuration.TryGetClassMap(typeof(int), out classMap));
@@ -100,6 +100,26 @@ public class ExcelImporterConfigurationTests
     }
 
     [Fact]
+    public void RegisterClassMap_ContainsPropertyWithMappers_Success()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var map = new ValidMapperClassMap();
+        importer.Configuration.RegisterClassMap(map);
+        
+        Assert.True(importer.Configuration.TryGetClassMap<RecordClass>(out var classMap));
+        Assert.Same(map, classMap);
+    }
+
+    [Fact]
+    public void RegisterClassMap_ContainsPropertyWithoutMappers_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<NoMapperClassMap>());
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new NoMapperClassMap()));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(RecordClass), new NoMapperClassMap()));
+    }
+
+    [Fact]
     public void TryGetClassMap_NullClassType_ThrowsArgumentNullException()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
@@ -114,7 +134,7 @@ public class ExcelImporterConfigurationTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<OtherTestMap>();
 
-        Assert.False(importer.Configuration.TryGetClassMap<TestMap>(out IMap? classMap));
+        Assert.False(importer.Configuration.TryGetClassMap<TestMap>(out var classMap));
         Assert.Null(classMap);
 
         Assert.False(importer.Configuration.TryGetClassMap(typeof(TestMap), out classMap));
@@ -125,7 +145,7 @@ public class ExcelImporterConfigurationTests
     public void TryGetClassMap_NoRegisteredClassMaps_ReturnsFalse()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        Assert.False(importer.Configuration.TryGetClassMap<TestMap>(out IMap? classMap));
+        Assert.False(importer.Configuration.TryGetClassMap<TestMap>(out var classMap));
         Assert.Null(classMap);
 
         Assert.False(importer.Configuration.TryGetClassMap(typeof(TestMap), out classMap));
@@ -144,5 +164,31 @@ public class ExcelImporterConfigurationTests
 
     private class OtherTestMap : ExcelClassMap<int>
     {
+    }
+
+    public record Id(int Value);
+
+    public class RecordClass
+    {
+        public Id? Id { get; private set; }
+    }
+
+    public class ValidMapperClassMap : ExcelClassMap<RecordClass>
+    {
+        public ValidMapperClassMap()
+        {
+            Map(data => data.Id)
+                .WithConverter(v => new Id(int.Parse(v!)))
+                .WithColumnName("Value");
+        }
+    }
+
+    public class NoMapperClassMap : ExcelClassMap<RecordClass>
+    {
+        public NoMapperClassMap()
+        {
+            Map(data => data.Id)
+                .WithColumnName("Value");
+        }
     }
 }

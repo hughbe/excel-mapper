@@ -15,11 +15,11 @@ namespace ExcelMapper.Utilities;
 
 public static class AutoMapper
 {
-    private static MethodInfo? s_tryCreateMemberMapMethod;
-    private static MethodInfo TryCreateMemberMapMethod => s_tryCreateMemberMapMethod ?? (s_tryCreateMemberMapMethod = typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateMemberMap)));
+    private static MethodInfo? s_tryAutoMapMemberMethod;
+    private static MethodInfo TryAutoMapMemberMethod => s_tryAutoMapMemberMethod ?? (s_tryAutoMapMemberMethod = typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryAutoMapMember)));
 
-    private static MethodInfo? s_TryCreateSplitGenericMapMethod;
-    private static MethodInfo TryCreateSplitGenericMapMethod => s_TryCreateSplitGenericMapMethod ?? (s_TryCreateSplitGenericMapMethod = typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateSplitMapGeneric)));
+    private static MethodInfo? s_tryCreateSplitGenericMapMethod;
+    private static MethodInfo TryCreateSplitGenericMapMethod => s_tryCreateSplitGenericMapMethod ?? (s_tryCreateSplitGenericMapMethod = typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateSplitMapGeneric)));
 
     private static MethodInfo? s_tryCreateGenericDictionaryMapMethod;
     private static MethodInfo TryCreateGenericDictionaryMapMethod => s_tryCreateGenericDictionaryMapMethod ?? (s_tryCreateGenericDictionaryMapMethod = typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateGenericDictionaryMap)));
@@ -32,11 +32,11 @@ public static class AutoMapper
     /// <param name="emptyValueStrategy">The behaviour if the value is empty.</param>
     /// <param name="map">The pipeline.</param>
     /// <returns>True if the member is able to be mapped.</returns>
-    private static bool TryCreateMemberMap<TMember>(MemberInfo member, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
+    private static bool TryAutoMapMember<TMember>(MemberInfo member, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
     {
         // First, check if this is a well-known type (e.g. string/int).
         // This is a simple conversion from the cell's value to the type.
-        if (TryCreatePrimitiveMap(member, emptyValueStrategy, out OneToOneMap<TMember>? singleMap))
+        if (TryCreatePrimitiveMap(member, emptyValueStrategy, true, out OneToOneMap<TMember>? singleMap))
         {
             map = singleMap;
             return true;
@@ -44,7 +44,7 @@ public static class AutoMapper
 
         // Secondly, check if this is a dictionary.
         // This requires converting each value to the value type of the collection.
-        if (TryCreateDictionaryMap<TMember>(emptyValueStrategy, out IMap? dictionaryMap))
+        if (TryCreateDictionaryMap<TMember>(emptyValueStrategy, out var dictionaryMap))
         {
             map = dictionaryMap;
             return true;
@@ -52,7 +52,7 @@ public static class AutoMapper
 
         // Thirdly, check if this is a collection (e.g. array, list).
         // This requires converting each value to the element type of the collection.
-        if (TryCreateSplitMap(member, emptyValueStrategy, out IMap? multiMap))
+        if (TryCreateSplitMap(member, emptyValueStrategy, out var multiMap))
         {
             map = multiMap;
             return true;
@@ -60,7 +60,7 @@ public static class AutoMapper
 
         // Fourthly, check if this is an object.
         // This requires converting each member and setting it on the object.
-        if (TryCreateObjectMap(emptyValueStrategy, out ExcelClassMap<TMember>? objectMap))
+        if (TryCreateObjectMap<TMember>(emptyValueStrategy, out var objectMap))
         {
             map = objectMap;
             return true;
@@ -85,12 +85,25 @@ public static class AutoMapper
         return true;
     }
 
-    internal static bool TryCreatePrimitiveMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out OneToOneMap<T>? map)
+    private static bool TryCreatePrimitiveMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out OneToOneMap<T>? map)
+    {
+        map = CreateMemberMap<T>(member, emptyValueStrategy, isAutoMapping);
+        return map != null;
+    }
+
+    internal static OneToOneMap<T>? CreateMemberMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, bool isAutoMapping)
     {
         if (!TryGetWellKnownMap<T>(emptyValueStrategy, out ICellMapper? mapper, out IFallbackItem? emptyFallback, out IFallbackItem? invalidFallback))
         {
-            map = null;
-            return false;
+            // Cannot auto map an unsupported primitive.
+            // But allow `Map(o => o.Value)` as the user can define a custom converter after
+            // creating the map.
+            // If the user doesn't add any mappers to the property, an ExcelMappingException
+            // will be thrown at the point of registering the class map.
+            if (isAutoMapping)
+            {
+                return null;
+            }
         }
 
         var defaultValueAttribute = member.GetCustomAttribute<ExcelDefaultValueAttribute>();
@@ -100,15 +113,26 @@ public static class AutoMapper
         }
 
         var defaultReader = GetDefaultCellReaderFactory(member, out var isOptional);
-        map = new OneToOneMap<T>(defaultReader)
-            .WithCellValueMappers(mapper)
-            .WithEmptyFallbackItem(emptyFallback)
-            .WithInvalidFallbackItem(invalidFallback);
+        var map = new OneToOneMap<T>(defaultReader);
+
+        if (mapper != null)
+        {
+            map.AddCellValueMapper(mapper);
+        }
+        if (emptyFallback != null)
+        {
+            map.EmptyFallback = emptyFallback;
+        }
+        if (invalidFallback != null)
+        {
+            map.InvalidFallback = invalidFallback;
+        }
         if (isOptional)
         {
-            map = map.MakeOptional();
+            map.Optional = true;
         }
-        return true;
+
+        return map;
     }
 
     private static ICellReaderFactory GetDefaultCellReaderFactory(MemberInfo member, out bool isOptional)
@@ -121,7 +145,7 @@ public static class AutoMapper
         {
             return new ColumnNameReaderFactory(columnNameAttributes[0].Name);
         }
-        // Multiple [ExcelColumnName] attribute still represents one column, but multiple options.
+        // Multiple [ExcelColumnName] attributes still represents one column, but multiple options.
         else if (columnNameAttributes.Length > 1)
         {
             return new ColumnNameMatchingReaderFactory(columnNameAttributes.Select(c => c.Name).ToArray());
@@ -538,7 +562,7 @@ public static class AutoMapper
 
             // Infer the mapping for each member (property/field) belonging to the type.
             Type memberType = member.MemberType();
-            MethodInfo method = TryCreateMemberMapMethod.MakeGenericMethod(memberType);
+            MethodInfo method = TryAutoMapMemberMethod.MakeGenericMethod(memberType);
             if (memberType == type)
             {
                 throw new ExcelMappingException($"Cannot map recursive property \"{member.Name}\" of type {memberType}. Consider applying the ExcelIgnore attribute.");

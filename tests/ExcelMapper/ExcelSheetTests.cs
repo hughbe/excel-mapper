@@ -623,7 +623,8 @@ public class ExcelSheetTests
         ExcelSheet sheet = importer.ReadSheet();
         Assert.NotEmpty(sheet.ReadRows<object>().ToArray());
 
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<object>());
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<object>());
+        Assert.Equal("No more rows in sheet \"Primitives\".", ex.Message);
     }
 
     [Fact]

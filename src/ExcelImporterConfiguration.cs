@@ -18,7 +18,6 @@ public class ExcelImporterConfiguration
 {
     private Dictionary<Type, IMap> ClassMaps { get; } = [];
 
-    private Dictionary<Type, IMap> BackupClassMaps { get; } = [];
 
     /// <summary>
     ///  Gets or sets whether blank lines should be skipped during reading.
@@ -95,6 +94,21 @@ public class ExcelImporterConfiguration
         if (ClassMaps.ContainsKey(classType))
         {
             throw new ExcelMappingException($"Class map already exists for type \"{classType.FullName}\"");
+        }
+        
+        // Class maps with no property mappers cannot be registered
+        if (classMap is ExcelClassMap excelClassMap)
+        {
+            foreach (var propertyMap in excelClassMap.Properties)
+            {
+                if (propertyMap.Map is IValuePipeline pipeline)
+                {
+                    if (pipeline.CellValueMappers.Count == 0)
+                    {
+                        throw new ExcelMappingException($"Cannot map member \"{propertyMap.Member.Name}\" of type \"{propertyMap.Member.MemberType()}\", as no CellValueMappers are defined.");
+                    }
+                }
+            }
         }
 
         ClassMaps.Add(classType, classMap);

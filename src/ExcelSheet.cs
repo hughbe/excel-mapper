@@ -225,7 +225,7 @@ public class ExcelSheet
     {
         if (!TryReadRow<T>(out var value))
         {
-            throw new ExcelMappingException($"Cannot read row \"{Name}\".");
+            throw new ExcelMappingException($"No more rows in sheet \"{Name}\".");
         }
 
         return value;

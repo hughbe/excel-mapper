@@ -55,13 +55,21 @@ public class ExcelClassMapTTests : ExcelClassMap<Helpers.TestClass>
     [Fact]
     public void Map_IEnumerable_ThrowsExcelMappingException()
     {
-        Assert.Throws<ExcelMappingException>(() => Map(p => p.ConcreteIEnumerable));
+        using var stream = Helpers.GetResource("Primitives.xlsx");
+        using var importer = new ExcelImporter(stream);
+
+        Map(p => p.ConcreteIEnumerable);
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(this));
     }
 
     [Fact]
     public void Map_IDictionary_ThrowsExcelMappingException()
     {
-        Assert.Throws<ExcelMappingException>(() => Map(p => p.ConcreteIDictionary));
+        using var stream = Helpers.GetResource("Primitives.xlsx");
+        using var importer = new ExcelImporter(stream);
+
+        Map(p => p.ConcreteIDictionary);
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(this));
     }
 
     [Fact]
@@ -137,7 +145,11 @@ public class ExcelClassMapTTests : ExcelClassMap<Helpers.TestClass>
     [Fact]
     public void Map_InvalidCastExpression_ThrowsExcelMappingException()
     {
-        Assert.Throws<ExcelMappingException>(() => Map(p => (CollectionAttribute)p.ObjectValue));
+        using var stream = Helpers.GetResource("Primitives.xlsx");
+        using var importer = new ExcelImporter(stream);
+
+        Map(p => (CollectionAttribute)p.ObjectValue);
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(this));
     }
 
     [Fact]
