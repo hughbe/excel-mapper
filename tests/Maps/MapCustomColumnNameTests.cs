@@ -1,530 +1,529 @@
 using Xunit;
 
-namespace ExcelMapper.Tests
+namespace ExcelMapper.Tests;
+
+public class MapCustomColumnIndexTests
 {
-    public class MapCustomColumnIndexTests
+    [Fact]
+    public void ReadRows_AutoMappedCustomNameProperty_ReturnsExpected()
     {
-        [Fact]
-        public void ReadRows_AutoMappedCustomNameProperty_ReturnsExpected()
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNamePropertyClass>();
+        Assert.Equal("a", row1.CustomName);
+    }
+
+    [Fact]
+    public void ReadRows_AutoMappedCustomNameField_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameFieldClass>();
+        Assert.Equal("a", row1.CustomName);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedCustomNameProperty_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultCustomNamePropertyClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNamePropertyClass>();
+        Assert.Equal("a", row1.CustomName);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedCustomNameField_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultCustomNameFieldClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameFieldClass>();
+        Assert.Equal("a", row1.CustomName);
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedCustomNameProperty_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<CustomCustomNamePropertyClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNamePropertyClass>();
+        Assert.Equal("1", row1.CustomName);
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedCustomNameField_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<CustomCustomNameFieldClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameFieldClass>();
+        Assert.Equal("1", row1.CustomName);
+    }
+
+    private class CustomNamePropertyClass
+    {
+        [ExcelColumnName("StringValue")]
+        public string CustomName { get; set; } = default!;
+    }
+
+    private class DefaultCustomNamePropertyClassMap : ExcelClassMap<CustomNamePropertyClass>
+    {
+        public DefaultCustomNamePropertyClassMap()
         {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNamePropertyClass row1 = sheet.ReadRow<CustomNamePropertyClass>();
-            Assert.Equal("a", row1.CustomName);
+            Map(p => p.CustomName);
         }
+    }
 
-        [Fact]
-        public void ReadRows_AutoMappedCustomNameField_ReturnsExpected()
+    private class CustomCustomNamePropertyClassMap : ExcelClassMap<CustomNamePropertyClass>
+    {
+        public CustomCustomNamePropertyClassMap()
         {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameFieldClass row1 = sheet.ReadRow<CustomNameFieldClass>();
-            Assert.Equal("a", row1.CustomName);
+            Map(p => p.CustomName)
+                .WithColumnName("Int Value");
         }
+    }
+    
+    private class CustomNameFieldClass
+    {
+        [ExcelColumnName("StringValue")]
+        public string CustomName { get; set; } = default!;
+    }
 
-        [Fact]
-        public void ReadRows_DefaultMappedCustomNameProperty_ReturnsExpected()
+    private class DefaultCustomNameFieldClassMap : ExcelClassMap<CustomNameFieldClass>
+    {
+        public DefaultCustomNameFieldClassMap()
         {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-            importer.Configuration.RegisterClassMap<DefaultCustomNamePropertyClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNamePropertyClass row1 = sheet.ReadRow<CustomNamePropertyClass>();
-            Assert.Equal("a", row1.CustomName);
+            Map(p => p.CustomName);
         }
+    }
 
-        [Fact]
-        public void ReadRows_DefaultMappedCustomNameField_ReturnsExpected()
+    private class CustomCustomNameFieldClassMap : ExcelClassMap<CustomNameFieldClass>
+    {
+        public CustomCustomNameFieldClassMap()
         {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-            importer.Configuration.RegisterClassMap<DefaultCustomNameFieldClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameFieldClass row1 = sheet.ReadRow<CustomNameFieldClass>();
-            Assert.Equal("a", row1.CustomName);
+            Map(p => p.CustomName)
+                .WithColumnName("Int Value");
         }
+    }
 
-        [Fact]
-        public void ReadRows_CustomMappedCustomNameProperty_ReturnsExpected()
+    [Fact]
+    public void ReadRows_AutoMappedCustomNameEnumProperty_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameEnumPropertyClass>();
+        Assert.Equal(CustomEnum.a, row1.CustomName);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomNameEnumPropertyClass>());
+    }
+
+    [Fact]
+    public void ReadRows_AutoMappedCustomNameEnumField_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameEnumFieldClass>();
+        Assert.Equal(CustomEnum.a, row1.CustomName);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomNameEnumFieldClass>());
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedCustomNameEnumProperty_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultCustomNameEnumPropertyClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameEnumPropertyClass>();
+        Assert.Equal(CustomEnum.a, row1.CustomName);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomNameEnumPropertyClass>());
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedCustomNameEnumField_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultCustomNameEnumFieldClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameEnumFieldClass>();
+        Assert.Equal(CustomEnum.a, row1.CustomName);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomNameEnumFieldClass>());
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedCustomNameEnumProperty_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<CustomCustomNameEnumPropertyClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameEnumPropertyClass>();
+        Assert.Equal(CustomEnum.a, row1.CustomName);
+
+        var row2 = sheet.ReadRow<CustomNameEnumPropertyClass>();
+        Assert.Equal(CustomEnum.B, row2.CustomName);
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedCustomNameEnumField_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<CustomCustomNameEnumFieldClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameEnumFieldClass>();
+        Assert.Equal(CustomEnum.a, row1.CustomName);
+
+        var row2 = sheet.ReadRow<CustomNameEnumFieldClass>();
+        Assert.Equal(CustomEnum.B, row2.CustomName);
+    }
+
+    [Fact]
+    public void ReadRows_AutoMappedCustomNameNullableEnumProperty_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameNullableEnumPropertyClass>();
+        Assert.Equal(CustomEnum.a, row1.CustomName);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomNameNullableEnumPropertyClass>());
+    }
+
+
+    [Fact]
+    public void ReadRows_AutoMappedCustomNameNullableEnumField_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameNullableEnumFieldClass>();
+        Assert.Equal(CustomEnum.a, row1.CustomName);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomNameNullableEnumFieldClass>());
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedCustomNameNullableEnumProperty_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultCustomNameNullableEnumPropertyClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameNullableEnumPropertyClass>();
+        Assert.Equal(CustomEnum.a, row1.CustomName);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomNameNullableEnumPropertyClass>());
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedCustomNameNullableEnumField_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultCustomNameNullableEnumFieldClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameNullableEnumFieldClass>();
+        Assert.Equal(CustomEnum.a, row1.CustomName);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomNameNullableEnumFieldClass>());
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedCustomNameNullableEnumProperty_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<CustomCustomNameNullableEnumPropertyClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameNullableEnumPropertyClass>();
+        Assert.Equal(CustomEnum.a, row1.CustomName);
+
+        var row2 = sheet.ReadRow<CustomNameNullableEnumPropertyClass>();
+        Assert.Equal(CustomEnum.B, row2.CustomName);
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedCustomNameNullableEnumField_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<CustomCustomNameNullableEnumFieldClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameNullableEnumFieldClass>();
+        Assert.Equal(CustomEnum.a, row1.CustomName);
+
+        var row2 = sheet.ReadRow<CustomNameNullableEnumFieldClass>();
+        Assert.Equal(CustomEnum.B, row2.CustomName);
+    }
+
+    private class CustomNameEnumPropertyClass
+    {
+        [ExcelColumnName("StringValue")]
+        public CustomEnum CustomName { get; set; }
+    }
+
+    private class DefaultCustomNameEnumPropertyClassMap : ExcelClassMap<CustomNameEnumPropertyClass>
+    {
+        public DefaultCustomNameEnumPropertyClassMap()
         {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-            importer.Configuration.RegisterClassMap<CustomCustomNamePropertyClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNamePropertyClass row1 = sheet.ReadRow<CustomNamePropertyClass>();
-            Assert.Equal("1", row1.CustomName);
+            Map(p => p.CustomName);
         }
+    }
 
-        [Fact]
-        public void ReadRows_CustomMappedCustomNameField_ReturnsExpected()
+    private class CustomCustomNameEnumPropertyClassMap : ExcelClassMap<CustomNameEnumPropertyClass>
+    {
+        public CustomCustomNameEnumPropertyClassMap()
         {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-            importer.Configuration.RegisterClassMap<CustomCustomNameFieldClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameFieldClass row1 = sheet.ReadRow<CustomNameFieldClass>();
-            Assert.Equal("1", row1.CustomName);
+            Map(p => p.CustomName, ignoreCase: true);
         }
+    }
 
-        private class CustomNamePropertyClass
+    private class CustomNameNullableEnumPropertyClass
+    {
+        [ExcelColumnName("StringValue")]
+        public CustomEnum? CustomName { get; set; }
+    }
+
+    private class DefaultCustomNameNullableEnumPropertyClassMap : ExcelClassMap<CustomNameNullableEnumPropertyClass>
+    {
+        public DefaultCustomNameNullableEnumPropertyClassMap()
         {
-            [ExcelColumnName("StringValue")]
-            public string CustomName { get; set; } = default!;
+            Map(p => p.CustomName);
         }
+    }
 
-        private class DefaultCustomNamePropertyClassMap : ExcelClassMap<CustomNamePropertyClass>
+    private class CustomCustomNameNullableEnumPropertyClassMap : ExcelClassMap<CustomNameNullableEnumPropertyClass>
+    {
+        public CustomCustomNameNullableEnumPropertyClassMap()
         {
-            public DefaultCustomNamePropertyClassMap()
-            {
-                Map(p => p.CustomName);
-            }
+            Map(p => p.CustomName, ignoreCase: true);
         }
+    }
+    
+    private class CustomNameEnumFieldClass
+    {
+        [ExcelColumnName("StringValue")]
+        public CustomEnum CustomName { get; set; }
+    }
 
-        private class CustomCustomNamePropertyClassMap : ExcelClassMap<CustomNamePropertyClass>
+    private class DefaultCustomNameEnumFieldClassMap : ExcelClassMap<CustomNameEnumFieldClass>
+    {
+        public DefaultCustomNameEnumFieldClassMap()
         {
-            public CustomCustomNamePropertyClassMap()
-            {
-                Map(p => p.CustomName)
-                    .WithColumnName("Int Value");
-            }
+            Map(p => p.CustomName);
         }
-        
-        private class CustomNameFieldClass
+    }
+
+    private class CustomCustomNameEnumFieldClassMap : ExcelClassMap<CustomNameEnumFieldClass>
+    {
+        public CustomCustomNameEnumFieldClassMap()
         {
-            [ExcelColumnName("StringValue")]
-            public string CustomName { get; set; } = default!;
+            Map(p => p.CustomName, ignoreCase: true);
         }
+    }
+    
+    private class CustomNameNullableEnumFieldClass
+    {
+        [ExcelColumnName("StringValue")]
+        public CustomEnum? CustomName { get; set; }
+    }
 
-        private class DefaultCustomNameFieldClassMap : ExcelClassMap<CustomNameFieldClass>
+    private class DefaultCustomNameNullableEnumFieldClassMap : ExcelClassMap<CustomNameNullableEnumFieldClass>
+    {
+        public DefaultCustomNameNullableEnumFieldClassMap()
         {
-            public DefaultCustomNameFieldClassMap()
-            {
-                Map(p => p.CustomName);
-            }
+            Map(p => p.CustomName);
         }
+    }
 
-        private class CustomCustomNameFieldClassMap : ExcelClassMap<CustomNameFieldClass>
+    private class CustomCustomNameNullableEnumFieldClassMap : ExcelClassMap<CustomNameNullableEnumFieldClass>
+    {
+        public CustomCustomNameNullableEnumFieldClassMap()
         {
-            public CustomCustomNameFieldClassMap()
-            {
-                Map(p => p.CustomName)
-                    .WithColumnName("Int Value");
-            }
+            Map(p => p.CustomName, ignoreCase: true);
         }
+    }
 
-        [Fact]
-        public void ReadRows_AutoMappedCustomNameEnumProperty_ReturnsExpected()
+    private enum CustomEnum
+    {
+        a,
+        B
+    }
+
+    [Fact]
+    public void ReadRows_AutoMappedCustomNameEnumerableProperty_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
+        Assert.Equal(["1", "2", "3"], row1.CustomValue);
+
+        var row2 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
+        Assert.Equal(["1", null, "2"], row2.CustomValue);
+
+        var row3 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
+        Assert.Equal(["1"], row3.CustomValue);
+
+        var row4 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
+        Assert.Empty(row4.CustomValue);
+
+        var row5 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
+        Assert.Equal(["Invalid"], row5.CustomValue);
+    }
+
+    [Fact]
+    public void ReadRows_AutoMappedCustomNameEnumerableField_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
+        Assert.Equal(["1", "2", "3"], row1.CustomValue);
+
+        var row2 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
+        Assert.Equal(["1", null, "2"], row2.CustomValue);
+
+        var row3 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
+        Assert.Equal(["1"], row3.CustomValue);
+
+        var row4 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
+        Assert.Empty(row4.CustomValue);
+
+        var row5 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
+        Assert.Equal(["Invalid"], row5.CustomValue);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedCustomNameEnumerableProperty_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultCustomNameEnumerablePropertyClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
+        Assert.Equal(["1", "2", "3"], row1.CustomValue);
+
+        var row2 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
+        Assert.Equal(["1", null, "2"], row2.CustomValue);
+
+        var row3 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
+        Assert.Equal(["1"], row3.CustomValue);
+
+        var row4 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
+        Assert.Empty(row4.CustomValue);
+
+        var row5 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
+        Assert.Equal(["Invalid"], row5.CustomValue);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedCustomNameEnumerableField_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultCustomNameEnumerableFieldClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
+        Assert.Equal(["1", "2", "3"], row1.CustomValue);
+
+        var row2 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
+        Assert.Equal(["1", null, "2"], row2.CustomValue);
+
+        var row3 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
+        Assert.Equal(["1"], row3.CustomValue);
+
+        var row4 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
+        Assert.Empty(row4.CustomValue);
+
+        var row5 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
+        Assert.Equal(["Invalid"], row5.CustomValue);
+    }
+
+    private class CustomNameEnumerablePropertyClass
+    {
+        [ExcelColumnName("Value")]
+        public object?[] CustomValue { get; set; } = default!;
+    }
+
+    private class DefaultCustomNameEnumerablePropertyClassMap : ExcelClassMap<CustomNameEnumerablePropertyClass>
+    {
+        public DefaultCustomNameEnumerablePropertyClassMap()
         {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameEnumPropertyClass row1 = sheet.ReadRow<CustomNameEnumPropertyClass>();
-            Assert.Equal(CustomEnum.a, row1.CustomName);
-
-            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomNameEnumPropertyClass>());
+            Map(p => p.CustomValue);
         }
+    }
+    
+    private class CustomNameEnumerableFieldClass
+    {
+        [ExcelColumnName("Value")]
+        public object?[] CustomValue { get; set; } = default!;
+    }
 
-        [Fact]
-        public void ReadRows_AutoMappedCustomNameEnumField_ReturnsExpected()
+    private class DefaultCustomNameEnumerableFieldClassMap : ExcelClassMap<CustomNameEnumerableFieldClass>
+    {
+        public DefaultCustomNameEnumerableFieldClassMap()
         {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameEnumFieldClass row1 = sheet.ReadRow<CustomNameEnumFieldClass>();
-            Assert.Equal(CustomEnum.a, row1.CustomName);
-
-            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomNameEnumFieldClass>());
-        }
-
-        [Fact]
-        public void ReadRows_DefaultMappedCustomNameEnumProperty_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-            importer.Configuration.RegisterClassMap<DefaultCustomNameEnumPropertyClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameEnumPropertyClass row1 = sheet.ReadRow<CustomNameEnumPropertyClass>();
-            Assert.Equal(CustomEnum.a, row1.CustomName);
-
-            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomNameEnumPropertyClass>());
-        }
-
-        [Fact]
-        public void ReadRows_DefaultMappedCustomNameEnumField_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-            importer.Configuration.RegisterClassMap<DefaultCustomNameEnumFieldClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameEnumFieldClass row1 = sheet.ReadRow<CustomNameEnumFieldClass>();
-            Assert.Equal(CustomEnum.a, row1.CustomName);
-
-            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomNameEnumFieldClass>());
-        }
-
-        [Fact]
-        public void ReadRows_CustomMappedCustomNameEnumProperty_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-            importer.Configuration.RegisterClassMap<CustomCustomNameEnumPropertyClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameEnumPropertyClass row1 = sheet.ReadRow<CustomNameEnumPropertyClass>();
-            Assert.Equal(CustomEnum.a, row1.CustomName);
-
-            CustomNameEnumPropertyClass row2 = sheet.ReadRow<CustomNameEnumPropertyClass>();
-            Assert.Equal(CustomEnum.B, row2.CustomName);
-        }
-
-        [Fact]
-        public void ReadRows_CustomMappedCustomNameEnumField_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-            importer.Configuration.RegisterClassMap<CustomCustomNameEnumFieldClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameEnumFieldClass row1 = sheet.ReadRow<CustomNameEnumFieldClass>();
-            Assert.Equal(CustomEnum.a, row1.CustomName);
-
-            CustomNameEnumFieldClass row2 = sheet.ReadRow<CustomNameEnumFieldClass>();
-            Assert.Equal(CustomEnum.B, row2.CustomName);
-        }
-
-        [Fact]
-        public void ReadRows_AutoMappedCustomNameNullableEnumProperty_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameNullableEnumPropertyClass row1 = sheet.ReadRow<CustomNameNullableEnumPropertyClass>();
-            Assert.Equal(CustomEnum.a, row1.CustomName);
-
-            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomNameNullableEnumPropertyClass>());
-        }
-
-
-        [Fact]
-        public void ReadRows_AutoMappedCustomNameNullableEnumField_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameNullableEnumFieldClass row1 = sheet.ReadRow<CustomNameNullableEnumFieldClass>();
-            Assert.Equal(CustomEnum.a, row1.CustomName);
-
-            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomNameNullableEnumFieldClass>());
-        }
-
-        [Fact]
-        public void ReadRows_DefaultMappedCustomNameNullableEnumProperty_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-            importer.Configuration.RegisterClassMap<DefaultCustomNameNullableEnumPropertyClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameNullableEnumPropertyClass row1 = sheet.ReadRow<CustomNameNullableEnumPropertyClass>();
-            Assert.Equal(CustomEnum.a, row1.CustomName);
-
-            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomNameNullableEnumPropertyClass>());
-        }
-
-        [Fact]
-        public void ReadRows_DefaultMappedCustomNameNullableEnumField_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-            importer.Configuration.RegisterClassMap<DefaultCustomNameNullableEnumFieldClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameNullableEnumFieldClass row1 = sheet.ReadRow<CustomNameNullableEnumFieldClass>();
-            Assert.Equal(CustomEnum.a, row1.CustomName);
-
-            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomNameNullableEnumFieldClass>());
-        }
-
-        [Fact]
-        public void ReadRows_CustomMappedCustomNameNullableEnumProperty_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-            importer.Configuration.RegisterClassMap<CustomCustomNameNullableEnumPropertyClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameNullableEnumPropertyClass row1 = sheet.ReadRow<CustomNameNullableEnumPropertyClass>();
-            Assert.Equal(CustomEnum.a, row1.CustomName);
-
-            CustomNameNullableEnumPropertyClass row2 = sheet.ReadRow<CustomNameNullableEnumPropertyClass>();
-            Assert.Equal(CustomEnum.B, row2.CustomName);
-        }
-
-        [Fact]
-        public void ReadRows_CustomMappedCustomNameNullableEnumField_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("Primitives.xlsx");
-            importer.Configuration.RegisterClassMap<CustomCustomNameNullableEnumFieldClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameNullableEnumFieldClass row1 = sheet.ReadRow<CustomNameNullableEnumFieldClass>();
-            Assert.Equal(CustomEnum.a, row1.CustomName);
-
-            CustomNameNullableEnumFieldClass row2 = sheet.ReadRow<CustomNameNullableEnumFieldClass>();
-            Assert.Equal(CustomEnum.B, row2.CustomName);
-        }
-
-        private class CustomNameEnumPropertyClass
-        {
-            [ExcelColumnName("StringValue")]
-            public CustomEnum CustomName { get; set; }
-        }
-
-        private class DefaultCustomNameEnumPropertyClassMap : ExcelClassMap<CustomNameEnumPropertyClass>
-        {
-            public DefaultCustomNameEnumPropertyClassMap()
-            {
-                Map(p => p.CustomName);
-            }
-        }
-
-        private class CustomCustomNameEnumPropertyClassMap : ExcelClassMap<CustomNameEnumPropertyClass>
-        {
-            public CustomCustomNameEnumPropertyClassMap()
-            {
-                Map(p => p.CustomName, ignoreCase: true);
-            }
-        }
-
-        private class CustomNameNullableEnumPropertyClass
-        {
-            [ExcelColumnName("StringValue")]
-            public CustomEnum? CustomName { get; set; }
-        }
-
-        private class DefaultCustomNameNullableEnumPropertyClassMap : ExcelClassMap<CustomNameNullableEnumPropertyClass>
-        {
-            public DefaultCustomNameNullableEnumPropertyClassMap()
-            {
-                Map(p => p.CustomName);
-            }
-        }
-
-        private class CustomCustomNameNullableEnumPropertyClassMap : ExcelClassMap<CustomNameNullableEnumPropertyClass>
-        {
-            public CustomCustomNameNullableEnumPropertyClassMap()
-            {
-                Map(p => p.CustomName, ignoreCase: true);
-            }
-        }
-        
-        private class CustomNameEnumFieldClass
-        {
-            [ExcelColumnName("StringValue")]
-            public CustomEnum CustomName { get; set; }
-        }
-
-        private class DefaultCustomNameEnumFieldClassMap : ExcelClassMap<CustomNameEnumFieldClass>
-        {
-            public DefaultCustomNameEnumFieldClassMap()
-            {
-                Map(p => p.CustomName);
-            }
-        }
-
-        private class CustomCustomNameEnumFieldClassMap : ExcelClassMap<CustomNameEnumFieldClass>
-        {
-            public CustomCustomNameEnumFieldClassMap()
-            {
-                Map(p => p.CustomName, ignoreCase: true);
-            }
-        }
-        
-        private class CustomNameNullableEnumFieldClass
-        {
-            [ExcelColumnName("StringValue")]
-            public CustomEnum? CustomName { get; set; }
-        }
-
-        private class DefaultCustomNameNullableEnumFieldClassMap : ExcelClassMap<CustomNameNullableEnumFieldClass>
-        {
-            public DefaultCustomNameNullableEnumFieldClassMap()
-            {
-                Map(p => p.CustomName);
-            }
-        }
-
-        private class CustomCustomNameNullableEnumFieldClassMap : ExcelClassMap<CustomNameNullableEnumFieldClass>
-        {
-            public CustomCustomNameNullableEnumFieldClassMap()
-            {
-                Map(p => p.CustomName, ignoreCase: true);
-            }
-        }
-
-        private enum CustomEnum
-        {
-            a,
-            B
-        }
-
-        [Fact]
-        public void ReadRows_AutoMappedCustomNameEnumerableProperty_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameEnumerablePropertyClass row1 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Equal(["1", "2", "3"], row1.CustomValue);
-
-            CustomNameEnumerablePropertyClass row2 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Equal(["1", null, "2"], row2.CustomValue);
-
-            CustomNameEnumerablePropertyClass row3 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Equal(["1"], row3.CustomValue);
-
-            CustomNameEnumerablePropertyClass row4 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Empty(row4.CustomValue);
-
-            CustomNameEnumerablePropertyClass row5 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Equal(["Invalid"], row5.CustomValue);
-        }
-
-        [Fact]
-        public void ReadRows_AutoMappedCustomNameEnumerableField_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameEnumerableFieldClass row1 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Equal(["1", "2", "3"], row1.CustomValue);
-
-            CustomNameEnumerableFieldClass row2 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Equal(["1", null, "2"], row2.CustomValue);
-
-            CustomNameEnumerableFieldClass row3 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Equal(["1"], row3.CustomValue);
-
-            CustomNameEnumerableFieldClass row4 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Empty(row4.CustomValue);
-
-            CustomNameEnumerableFieldClass row5 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Equal(["Invalid"], row5.CustomValue);
-        }
-
-        [Fact]
-        public void ReadRows_DefaultMappedCustomNameEnumerableProperty_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
-            importer.Configuration.RegisterClassMap<DefaultCustomNameEnumerablePropertyClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameEnumerablePropertyClass row1 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Equal(["1", "2", "3"], row1.CustomValue);
-
-            CustomNameEnumerablePropertyClass row2 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Equal(["1", null, "2"], row2.CustomValue);
-
-            CustomNameEnumerablePropertyClass row3 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Equal(["1"], row3.CustomValue);
-
-            CustomNameEnumerablePropertyClass row4 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Empty(row4.CustomValue);
-
-            CustomNameEnumerablePropertyClass row5 = sheet.ReadRow<CustomNameEnumerablePropertyClass>();
-            Assert.Equal(["Invalid"], row5.CustomValue);
-        }
-
-        [Fact]
-        public void ReadRows_DefaultMappedCustomNameEnumerableField_ReturnsExpected()
-        {
-            using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
-            importer.Configuration.RegisterClassMap<DefaultCustomNameEnumerableFieldClassMap>();
-
-            ExcelSheet sheet = importer.ReadSheet();
-            sheet.ReadHeading();
-
-            CustomNameEnumerableFieldClass row1 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Equal(["1", "2", "3"], row1.CustomValue);
-
-            CustomNameEnumerableFieldClass row2 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Equal(["1", null, "2"], row2.CustomValue);
-
-            CustomNameEnumerableFieldClass row3 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Equal(["1"], row3.CustomValue);
-
-            CustomNameEnumerableFieldClass row4 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Empty(row4.CustomValue);
-
-            CustomNameEnumerableFieldClass row5 = sheet.ReadRow<CustomNameEnumerableFieldClass>();
-            Assert.Equal(["Invalid"], row5.CustomValue);
-        }
-
-        private class CustomNameEnumerablePropertyClass
-        {
-            [ExcelColumnName("Value")]
-            public object?[] CustomValue { get; set; } = default!;
-        }
-
-        private class DefaultCustomNameEnumerablePropertyClassMap : ExcelClassMap<CustomNameEnumerablePropertyClass>
-        {
-            public DefaultCustomNameEnumerablePropertyClassMap()
-            {
-                Map(p => p.CustomValue);
-            }
-        }
-        
-        private class CustomNameEnumerableFieldClass
-        {
-            [ExcelColumnName("Value")]
-            public object?[] CustomValue { get; set; } = default!;
-        }
-
-        private class DefaultCustomNameEnumerableFieldClassMap : ExcelClassMap<CustomNameEnumerableFieldClass>
-        {
-            public DefaultCustomNameEnumerableFieldClassMap()
-            {
-                Map(p => p.CustomValue);
-            }
+            Map(p => p.CustomValue);
         }
     }
 }

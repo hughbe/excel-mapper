@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -92,12 +93,26 @@ internal static class ReflectionUtilities
     /// <returns>True if the type has an element type, else false.</returns>
     public static bool GetElementTypeOrEnumerableType(this Type type, [NotNullWhen(true)] out Type? elementType)
     {
+        // Array type.
         if (type.IsArray)
         {
             elementType = type.GetElementType();
             return true;
         }
 
-        return type.ImplementsGenericInterface(typeof(IEnumerable<>), out elementType);
+        // Generic lists use type object.
+        if (type.ImplementsGenericInterface(typeof(IEnumerable<>), out elementType))
+        {
+            return true;
+        }
+        
+        // Non-generic interfaces use type object.
+        if (type == typeof(IEnumerable) || type.ImplementsInterface(typeof(IEnumerable)))
+        {
+            elementType = typeof(object);
+            return true;
+        }
+
+        return false;
     }
 }

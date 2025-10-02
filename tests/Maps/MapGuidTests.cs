@@ -6,6 +6,69 @@ namespace ExcelMapper.Tests;
 public class MapGuidTests
 {
     [Fact]
+    public void ReadRow_Guid_Success()
+    {
+        using var importer = Helpers.GetImporter("Guids.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<Guid>();
+        Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f1"), row1);
+
+        var row2 = sheet.ReadRow<Guid>();
+        Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f2"), row2);
+
+        var row3 = sheet.ReadRow<Guid>();
+        Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f3"), row3);
+
+        var row4 = sheet.ReadRow<Guid>();
+        Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f4"), row4);
+
+        var row5 = sheet.ReadRow<Guid>();
+        Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f5"), row5);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<Guid>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<Guid>());
+    }
+
+    [Fact]
+    public void ReadRow_NullableGuid_Success()
+    {
+        using var importer = Helpers.GetImporter("Guids.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<Guid?>();
+        Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f1"), row1);
+
+        var row2 = sheet.ReadRow<Guid?>();
+        Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f2"), row2);
+
+        var row3 = sheet.ReadRow<Guid?>();
+        Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f3"), row3);
+
+        var row4 = sheet.ReadRow<Guid?>();
+        Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f4"), row4);
+
+        var row5 = sheet.ReadRow<Guid?>();
+        Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f5"), row5);
+
+        // Empty cell value.
+        var row6 = sheet.ReadRow<Guid?>();
+        Assert.Null(row6);
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<Guid?>());
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedGuid_Success()
     {
         using var importer = Helpers.GetImporter("Guids.xlsx");
@@ -14,19 +77,19 @@ public class MapGuidTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        GuidClass row1 = sheet.ReadRow<GuidClass>();
+        var row1 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f1"), row1.Value);
 
-        GuidClass row2 = sheet.ReadRow<GuidClass>();
+        var row2 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f2"), row2.Value);
 
-        GuidClass row3 = sheet.ReadRow<GuidClass>();
+        var row3 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f3"), row3.Value);
 
-        GuidClass row4 = sheet.ReadRow<GuidClass>();
+        var row4 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f4"), row4.Value);
 
-        GuidClass row5 = sheet.ReadRow<GuidClass>();
+        var row5 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f5"), row5.Value);
 
         // Empty cell value.
@@ -45,28 +108,29 @@ public class MapGuidTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableGuidClass row1 = sheet.ReadRow<NullableGuidClass>();
+        var row1 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f1"), row1.Value);
 
-        NullableGuidClass row2 = sheet.ReadRow<NullableGuidClass>();
+        var row2 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f2"), row2.Value);
 
-        NullableGuidClass row3 = sheet.ReadRow<NullableGuidClass>();
+        var row3 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f3"), row3.Value);
 
-        NullableGuidClass row4 = sheet.ReadRow<NullableGuidClass>();
+        var row4 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f4"), row4.Value);
 
-        NullableGuidClass row5 = sheet.ReadRow<NullableGuidClass>();
+        var row5 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f5"), row5.Value);
 
         // Empty cell value.
-        NullableGuidClass row6 = sheet.ReadRow<NullableGuidClass>();
+        var row6 = sheet.ReadRow<NullableGuidClass>();
         Assert.Null(row6.Value);
 
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableGuidClass>());
     }
+
     [Fact]
     public void ReadRow_DefaultMappedGuid_Success()
     {
@@ -77,19 +141,19 @@ public class MapGuidTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        GuidClass row1 = sheet.ReadRow<GuidClass>();
+        var row1 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f1"), row1.Value);
 
-        GuidClass row2 = sheet.ReadRow<GuidClass>();
+        var row2 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f2"), row2.Value);
 
-        GuidClass row3 = sheet.ReadRow<GuidClass>();
+        var row3 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f3"), row3.Value);
 
-        GuidClass row4 = sheet.ReadRow<GuidClass>();
+        var row4 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f4"), row4.Value);
 
-        GuidClass row5 = sheet.ReadRow<GuidClass>();
+        var row5 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f5"), row5.Value);
 
         // Empty cell value.
@@ -109,23 +173,23 @@ public class MapGuidTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableGuidClass row1 = sheet.ReadRow<NullableGuidClass>();
+        var row1 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f1"), row1.Value);
 
-        NullableGuidClass row2 = sheet.ReadRow<NullableGuidClass>();
+        var row2 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f2"), row2.Value);
 
-        NullableGuidClass row3 = sheet.ReadRow<NullableGuidClass>();
+        var row3 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f3"), row3.Value);
 
-        NullableGuidClass row4 = sheet.ReadRow<NullableGuidClass>();
+        var row4 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f4"), row4.Value);
 
-        NullableGuidClass row5 = sheet.ReadRow<NullableGuidClass>();
+        var row5 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f5"), row5.Value);
 
         // Empty cell value.
-        NullableGuidClass row6 = sheet.ReadRow<NullableGuidClass>();
+        var row6 = sheet.ReadRow<NullableGuidClass>();
         Assert.Null(row6.Value);
 
         // Invalid cell value.
@@ -142,27 +206,27 @@ public class MapGuidTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        GuidClass row1 = sheet.ReadRow<GuidClass>();
+        var row1 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f1"), row1.Value);
 
-        GuidClass row2 = sheet.ReadRow<GuidClass>();
+        var row2 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f2"), row2.Value);
 
-        GuidClass row3 = sheet.ReadRow<GuidClass>();
+        var row3 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f3"), row3.Value);
 
-        GuidClass row4 = sheet.ReadRow<GuidClass>();
+        var row4 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f4"), row4.Value);
 
-        GuidClass row5 = sheet.ReadRow<GuidClass>();
+        var row5 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f5"), row5.Value);
 
         // Empty cell value.
-        GuidClass row6 = sheet.ReadRow<GuidClass>();
+        var row6 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f6"), row6.Value);
 
         // Invalid cell value.
-        GuidClass row7 = sheet.ReadRow<GuidClass>();
+        var row7 = sheet.ReadRow<GuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f7"), row7.Value);
     }
 
@@ -176,27 +240,27 @@ public class MapGuidTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableGuidClass row1 = sheet.ReadRow<NullableGuidClass>();
+        var row1 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f1"), row1.Value);
 
-        NullableGuidClass row2 = sheet.ReadRow<NullableGuidClass>();
+        var row2 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f2"), row2.Value);
 
-        NullableGuidClass row3 = sheet.ReadRow<NullableGuidClass>();
+        var row3 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f3"), row3.Value);
 
-        NullableGuidClass row4 = sheet.ReadRow<NullableGuidClass>();
+        var row4 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f4"), row4.Value);
 
-        NullableGuidClass row5 = sheet.ReadRow<NullableGuidClass>();
+        var row5 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f5"), row5.Value);
 
         // Empty cell value.
-        NullableGuidClass row6 = sheet.ReadRow<NullableGuidClass>();
+        var row6 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f6"), row6.Value);
 
         // Invalid cell value.
-        NullableGuidClass row7 = sheet.ReadRow<NullableGuidClass>();
+        var row7 = sheet.ReadRow<NullableGuidClass>();
         Assert.Equal(new Guid("a8a110d5fc4943c5bf46802db8f843f7"), row7.Value);
     }
 

@@ -9,7 +9,7 @@ using ExcelMapper.Readers;
 
 namespace ExcelMapper;
 
-public delegate IEnumerable<T?> CreateElementsFactory<T>(IEnumerable<T?> elements);
+public delegate object CreateElementsFactory<T>(IEnumerable<T?> elements);
 
 /// <summary>
 /// Reads multiple cells of an excel sheet and maps the value of the cell to the

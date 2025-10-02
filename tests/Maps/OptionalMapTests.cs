@@ -13,7 +13,7 @@ public class OptionalMapTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        OptionalValue row1 = sheet.ReadRow<OptionalValue>();
+        var row1 = sheet.ReadRow<OptionalValue>();
         Assert.Equal(0, row1.NoSuchColumnNoName);
         Assert.Equal(0, row1.NoSuchColumnWithNameBefore);
         Assert.Equal(0, row1.NoSuchColumnWithNameAfter);

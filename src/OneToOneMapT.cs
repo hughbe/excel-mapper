@@ -47,8 +47,8 @@ public class OneToOneMap<T> : IValuePipeline<T>, IMap
             throw new ExcelMappingException($"Could not read value for {member?.Name}", sheet, rowIndex, -1);
         }
 
-        result = (T?)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, readResult, member);
-        return result != null;
+        result = (T)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, readResult, member)!;
+        return true;
     }
 
     public IReadOnlyList<ICellTransformer> CellValueTransformers => Pipeline.CellValueTransformers;

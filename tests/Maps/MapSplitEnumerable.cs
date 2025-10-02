@@ -18,19 +18,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ObjectArrayClass row1 = sheet.ReadRow<ObjectArrayClass>();
+        var row1 = sheet.ReadRow<ObjectArrayClass>();
         Assert.Equal(["1", "2", "3"], row1.Value);
 
-        ObjectArrayClass row2 = sheet.ReadRow<ObjectArrayClass>();
+        var row2 = sheet.ReadRow<ObjectArrayClass>();
         Assert.Equal(["1", null, "2"], row2.Value);
 
-        ObjectArrayClass row3 = sheet.ReadRow<ObjectArrayClass>();
+        var row3 = sheet.ReadRow<ObjectArrayClass>();
         Assert.Equal(["1"], row3.Value);
 
-        ObjectArrayClass row4 = sheet.ReadRow<ObjectArrayClass>();
+        var row4 = sheet.ReadRow<ObjectArrayClass>();
         Assert.Empty(row4.Value);
 
-        ObjectArrayClass row5 = sheet.ReadRow<ObjectArrayClass>();
+        var row5 = sheet.ReadRow<ObjectArrayClass>();
         Assert.Equal(["Invalid"], row5.Value);
     }
 
@@ -42,19 +42,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        StringArrayClass row1 = sheet.ReadRow<StringArrayClass>();
+        var row1 = sheet.ReadRow<StringArrayClass>();
         Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
 
-        StringArrayClass row2 = sheet.ReadRow<StringArrayClass>();
+        var row2 = sheet.ReadRow<StringArrayClass>();
         Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
 
-        StringArrayClass row3 = sheet.ReadRow<StringArrayClass>();
+        var row3 = sheet.ReadRow<StringArrayClass>();
         Assert.Equal(new string[] { "1" }, row3.Value);
 
-        StringArrayClass row4 = sheet.ReadRow<StringArrayClass>();
+        var row4 = sheet.ReadRow<StringArrayClass>();
         Assert.Empty(row4.Value);
 
-        StringArrayClass row5 = sheet.ReadRow<StringArrayClass>();
+        var row5 = sheet.ReadRow<StringArrayClass>();
         Assert.Equal(new string[] { "Invalid" }, row5.Value);
     }
 
@@ -66,18 +66,42 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IntArrayClass row1 = sheet.ReadRow<IntArrayClass>();
+        var row1 = sheet.ReadRow<IntArrayClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IntArrayClass>());
 
-        IntArrayClass row3 = sheet.ReadRow<IntArrayClass>();
+        var row3 = sheet.ReadRow<IntArrayClass>();
         Assert.Equal([1], row3.Value);
 
-        IntArrayClass row4 = sheet.ReadRow<IntArrayClass>();
+        var row4 = sheet.ReadRow<IntArrayClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IntArrayClass>());
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedIEnumerable_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<IEnumerableClass>();
+        Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+
+        var row2 = sheet.ReadRow<IEnumerableClass>();
+        Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
+
+        var row3 = sheet.ReadRow<IEnumerableClass>();
+        Assert.Equal(new string[] { "1" }, row3.Value);
+
+        var row4 = sheet.ReadRow<IEnumerableClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<IEnumerableClass>();
+        Assert.Equal(new string[] { "Invalid" }, row5.Value);
     }
 
     [Fact]
@@ -88,19 +112,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IEnumerableObjectClass row1 = sheet.ReadRow<IEnumerableObjectClass>();
+        var row1 = sheet.ReadRow<IEnumerableObjectClass>();
         Assert.Equal(["1", "2", "3"], row1.Value);
 
-        IEnumerableObjectClass row2 = sheet.ReadRow<IEnumerableObjectClass>();
+        var row2 = sheet.ReadRow<IEnumerableObjectClass>();
         Assert.Equal(["1", null, "2"], row2.Value);
 
-        IEnumerableObjectClass row3 = sheet.ReadRow<IEnumerableObjectClass>();
+        var row3 = sheet.ReadRow<IEnumerableObjectClass>();
         Assert.Equal(["1"], row3.Value);
 
-        IEnumerableObjectClass row4 = sheet.ReadRow<IEnumerableObjectClass>();
+        var row4 = sheet.ReadRow<IEnumerableObjectClass>();
         Assert.Empty(row4.Value);
 
-        IEnumerableObjectClass row5 = sheet.ReadRow<IEnumerableObjectClass>();
+        var row5 = sheet.ReadRow<IEnumerableObjectClass>();
         Assert.Equal(["Invalid"], row5.Value);
     }
 
@@ -112,18 +136,42 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IEnumerableIntClass row1 = sheet.ReadRow<IEnumerableIntClass>();
+        var row1 = sheet.ReadRow<IEnumerableIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IEnumerableIntClass>());
 
-        IEnumerableIntClass row3 = sheet.ReadRow<IEnumerableIntClass>();
+        var row3 = sheet.ReadRow<IEnumerableIntClass>();
         Assert.Equal([1], row3.Value);
 
-        IEnumerableIntClass row4 = sheet.ReadRow<IEnumerableIntClass>();
+        var row4 = sheet.ReadRow<IEnumerableIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IEnumerableIntClass>());
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedICollection_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ICollectionClass>();
+        Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+
+        var row2 = sheet.ReadRow<ICollectionClass>();
+        Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
+
+        var row3 = sheet.ReadRow<ICollectionClass>();
+        Assert.Equal(new string[] { "1" }, row3.Value);
+
+        var row4 = sheet.ReadRow<ICollectionClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<ICollectionClass>();
+        Assert.Equal(new string[] { "Invalid" }, row5.Value);
     }
 
     [Fact]
@@ -134,19 +182,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ICollectionObjectClass row1 = sheet.ReadRow<ICollectionObjectClass>();
+        var row1 = sheet.ReadRow<ICollectionObjectClass>();
         Assert.Equal(["1", "2", "3"], row1.Value);
 
-        ICollectionObjectClass row2 = sheet.ReadRow<ICollectionObjectClass>();
+        var row2 = sheet.ReadRow<ICollectionObjectClass>();
         Assert.Equal(["1", null, "2"], row2.Value);
 
-        ICollectionObjectClass row3 = sheet.ReadRow<ICollectionObjectClass>();
+        var row3 = sheet.ReadRow<ICollectionObjectClass>();
         Assert.Equal(["1"], row3.Value);
 
-        ICollectionObjectClass row4 = sheet.ReadRow<ICollectionObjectClass>();
+        var row4 = sheet.ReadRow<ICollectionObjectClass>();
         Assert.Empty(row4.Value);
 
-        ICollectionObjectClass row5 = sheet.ReadRow<ICollectionObjectClass>();
+        var row5 = sheet.ReadRow<ICollectionObjectClass>();
         Assert.Equal(["Invalid"], row5.Value);
     }
 
@@ -158,18 +206,42 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ICollectionIntClass row1 = sheet.ReadRow<ICollectionIntClass>();
+        var row1 = sheet.ReadRow<ICollectionIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ICollectionIntClass>());
 
-        ICollectionIntClass row3 = sheet.ReadRow<ICollectionIntClass>();
+        var row3 = sheet.ReadRow<ICollectionIntClass>();
         Assert.Equal([1], row3.Value);
 
-        ICollectionIntClass row4 = sheet.ReadRow<ICollectionIntClass>();
+        var row4 = sheet.ReadRow<ICollectionIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ICollectionIntClass>());
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedIList_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<IListClass>();
+        Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+
+        var row2 = sheet.ReadRow<IListClass>();
+        Assert.Equal(new string?[] { "1", null, "2"}, row2.Value);
+
+        var row3 = sheet.ReadRow<IListClass>();
+        Assert.Equal(new string[] { "1" }, row3.Value);
+
+        var row4 = sheet.ReadRow<IListClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<IListClass>();
+        Assert.Equal(new string[] { "Invalid" }, row5.Value);
     }
 
     [Fact]
@@ -180,19 +252,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IListObjectClass row1 = sheet.ReadRow<IListObjectClass>();
+        var row1 = sheet.ReadRow<IListObjectClass>();
         Assert.Equal(["1", "2", "3"], row1.Value);
 
-        IListObjectClass row2 = sheet.ReadRow<IListObjectClass>();
+        var row2 = sheet.ReadRow<IListObjectClass>();
         Assert.Equal(["1", null, "2"], row2.Value);
 
-        IListObjectClass row3 = sheet.ReadRow<IListObjectClass>();
+        var row3 = sheet.ReadRow<IListObjectClass>();
         Assert.Equal(["1"], row3.Value);
 
-        IListObjectClass row4 = sheet.ReadRow<IListObjectClass>();
+        var row4 = sheet.ReadRow<IListObjectClass>();
         Assert.Empty(row4.Value);
 
-        IListObjectClass row5 = sheet.ReadRow<IListObjectClass>();
+        var row5 = sheet.ReadRow<IListObjectClass>();
         Assert.Equal(["Invalid"], row5.Value);
     }
 
@@ -204,15 +276,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IListIntClass row1 = sheet.ReadRow<IListIntClass>();
+        var row1 = sheet.ReadRow<IListIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IListIntClass>());
 
-        IListIntClass row3 = sheet.ReadRow<IListIntClass>();
+        var row3 = sheet.ReadRow<IListIntClass>();
         Assert.Equal([1], row3.Value);
 
-        IListIntClass row4 = sheet.ReadRow<IListIntClass>();
+        var row4 = sheet.ReadRow<IListIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IListIntClass>());
@@ -226,19 +298,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IReadOnlyCollectionObjectClass row1 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+        var row1 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
         Assert.Equal(["1", "2", "3"], row1.Value);
 
-        IReadOnlyCollectionObjectClass row2 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+        var row2 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
         Assert.Equal(["1", null, "2"], row2.Value);
 
-        IReadOnlyCollectionObjectClass row3 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+        var row3 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
         Assert.Equal(["1"], row3.Value);
 
-        IReadOnlyCollectionObjectClass row4 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+        var row4 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
         Assert.Empty(row4.Value);
 
-        IReadOnlyCollectionObjectClass row5 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+        var row5 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
         Assert.Equal(["Invalid"], row5.Value);
     }
 
@@ -250,15 +322,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IReadOnlyCollectionIntClass row1 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+        var row1 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyCollectionIntClass>());
 
-        IReadOnlyCollectionIntClass row3 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+        var row3 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
         Assert.Equal([1], row3.Value);
 
-        IReadOnlyCollectionIntClass row4 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+        var row4 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyCollectionIntClass>());
@@ -272,19 +344,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IReadOnlyListObjectClass row1 = sheet.ReadRow<IReadOnlyListObjectClass>();
+        var row1 = sheet.ReadRow<IReadOnlyListObjectClass>();
         Assert.Equal(["1", "2", "3"], row1.Value);
 
-        IReadOnlyListObjectClass row2 = sheet.ReadRow<IReadOnlyListObjectClass>();
+        var row2 = sheet.ReadRow<IReadOnlyListObjectClass>();
         Assert.Equal(["1", null, "2"], row2.Value);
 
-        IReadOnlyListObjectClass row3 = sheet.ReadRow<IReadOnlyListObjectClass>();
+        var row3 = sheet.ReadRow<IReadOnlyListObjectClass>();
         Assert.Equal(["1"], row3.Value);
 
-        IReadOnlyListObjectClass row4 = sheet.ReadRow<IReadOnlyListObjectClass>();
+        var row4 = sheet.ReadRow<IReadOnlyListObjectClass>();
         Assert.Empty(row4.Value);
 
-        IReadOnlyListObjectClass row5 = sheet.ReadRow<IReadOnlyListObjectClass>();
+        var row5 = sheet.ReadRow<IReadOnlyListObjectClass>();
         Assert.Equal(["Invalid"], row5.Value);
     }
 
@@ -296,18 +368,42 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IReadOnlyListIntClass row1 = sheet.ReadRow<IReadOnlyListIntClass>();
+        var row1 = sheet.ReadRow<IReadOnlyListIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyListIntClass>());
 
-        IReadOnlyListIntClass row3 = sheet.ReadRow<IReadOnlyListIntClass>();
+        var row3 = sheet.ReadRow<IReadOnlyListIntClass>();
         Assert.Equal([1], row3.Value);
 
-        IReadOnlyListIntClass row4 = sheet.ReadRow<IReadOnlyListIntClass>();
+        var row4 = sheet.ReadRow<IReadOnlyListIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyListIntClass>());
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedArrayListClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal(new ArrayList { "1", "2", "3" }, row1.Value);
+
+        var row2 = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal(new ArrayList { "1", null, "2" }, row2.Value);
+
+        var row3 = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal(new ArrayList { "1" }, row3.Value);
+
+        var row4 = sheet.ReadRow<ArrayListClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal(new ArrayList { "Invalid" }, row5.Value);
     }
 
     [Fact]
@@ -318,19 +414,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ListObjectClass row1 = sheet.ReadRow<ListObjectClass>();
+        var row1 = sheet.ReadRow<ListObjectClass>();
         Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
 
-        ListObjectClass row2 = sheet.ReadRow<ListObjectClass>();
+        var row2 = sheet.ReadRow<ListObjectClass>();
         Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
 
-        ListObjectClass row3 = sheet.ReadRow<ListObjectClass>();
+        var row3 = sheet.ReadRow<ListObjectClass>();
         Assert.Equal(new string[] { "1" }, row3.Value);
 
-        ListObjectClass row4 = sheet.ReadRow<ListObjectClass>();
+        var row4 = sheet.ReadRow<ListObjectClass>();
         Assert.Empty(row4.Value);
 
-        ListObjectClass row5 = sheet.ReadRow<ListObjectClass>();
+        var row5 = sheet.ReadRow<ListObjectClass>();
         Assert.Equal(new string[] { "Invalid" }, row5.Value);
     }
 
@@ -342,15 +438,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ListIntClass row1 = sheet.ReadRow<ListIntClass>();
+        var row1 = sheet.ReadRow<ListIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ListIntClass>());
 
-        ListIntClass row3 = sheet.ReadRow<ListIntClass>();
+        var row3 = sheet.ReadRow<ListIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ListIntClass row4 = sheet.ReadRow<ListIntClass>();
+        var row4 = sheet.ReadRow<ListIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ListIntClass>());
@@ -364,15 +460,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ObservableCollectionIntClass row1 = sheet.ReadRow<ObservableCollectionIntClass>();
+        var row1 = sheet.ReadRow<ObservableCollectionIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ObservableCollectionIntClass>());
 
-        ObservableCollectionIntClass row3 = sheet.ReadRow<ObservableCollectionIntClass>();
+        var row3 = sheet.ReadRow<ObservableCollectionIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ObservableCollectionIntClass row4 = sheet.ReadRow<ObservableCollectionIntClass>();
+        var row4 = sheet.ReadRow<ObservableCollectionIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ObservableCollectionIntClass>());
@@ -386,15 +482,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        QueueIntClass row1 = sheet.ReadRow<QueueIntClass>();
+        var row1 = sheet.ReadRow<QueueIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<QueueIntClass>());
 
-        QueueIntClass row3 = sheet.ReadRow<QueueIntClass>();
+        var row3 = sheet.ReadRow<QueueIntClass>();
         Assert.Equal([1], row3.Value);
 
-        QueueIntClass row4 = sheet.ReadRow<QueueIntClass>();
+        var row4 = sheet.ReadRow<QueueIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<QueueIntClass>());
@@ -408,15 +504,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        StackIntClass row1 = sheet.ReadRow<StackIntClass>();
+        var row1 = sheet.ReadRow<StackIntClass>();
         Assert.Equal([3, 2, 1], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StackIntClass>());
 
-        StackIntClass row3 = sheet.ReadRow<StackIntClass>();
+        var row3 = sheet.ReadRow<StackIntClass>();
         Assert.Equal([1], row3.Value);
 
-        StackIntClass row4 = sheet.ReadRow<StackIntClass>();
+        var row4 = sheet.ReadRow<StackIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StackIntClass>());
@@ -430,15 +526,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        SortedSetIntClass row1 = sheet.ReadRow<SortedSetIntClass>();
+        var row1 = sheet.ReadRow<SortedSetIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SortedSetIntClass>());
 
-        SortedSetIntClass row3 = sheet.ReadRow<SortedSetIntClass>();
+        var row3 = sheet.ReadRow<SortedSetIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        SortedSetIntClass row4 = sheet.ReadRow<SortedSetIntClass>();
+        var row4 = sheet.ReadRow<SortedSetIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SortedSetIntClass>());
@@ -452,15 +548,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        HashSetIntClass row1 = sheet.ReadRow<HashSetIntClass>();
+        var row1 = sheet.ReadRow<HashSetIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<HashSetIntClass>());
 
-        HashSetIntClass row3 = sheet.ReadRow<HashSetIntClass>();
+        var row3 = sheet.ReadRow<HashSetIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        HashSetIntClass row4 = sheet.ReadRow<HashSetIntClass>();
+        var row4 = sheet.ReadRow<HashSetIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<HashSetIntClass>());
@@ -474,15 +570,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IImmutableListIntClass row1 = sheet.ReadRow<IImmutableListIntClass>();
+        var row1 = sheet.ReadRow<IImmutableListIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableListIntClass>());
 
-        IImmutableListIntClass row3 = sheet.ReadRow<IImmutableListIntClass>();
+        var row3 = sheet.ReadRow<IImmutableListIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        IImmutableListIntClass row4 = sheet.ReadRow<IImmutableListIntClass>();
+        var row4 = sheet.ReadRow<IImmutableListIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableListIntClass>());
@@ -496,15 +592,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IImmutableStackIntClass row1 = sheet.ReadRow<IImmutableStackIntClass>();
+        var row1 = sheet.ReadRow<IImmutableStackIntClass>();
         Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableStackIntClass>());
 
-        IImmutableStackIntClass row3 = sheet.ReadRow<IImmutableStackIntClass>();
+        var row3 = sheet.ReadRow<IImmutableStackIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        IImmutableStackIntClass row4 = sheet.ReadRow<IImmutableStackIntClass>();
+        var row4 = sheet.ReadRow<IImmutableStackIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableStackIntClass>());
@@ -518,15 +614,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IImmutableQueueIntClass row1 = sheet.ReadRow<IImmutableQueueIntClass>();
+        var row1 = sheet.ReadRow<IImmutableQueueIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableQueueIntClass>());
 
-        IImmutableQueueIntClass row3 = sheet.ReadRow<IImmutableQueueIntClass>();
+        var row3 = sheet.ReadRow<IImmutableQueueIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        IImmutableQueueIntClass row4 = sheet.ReadRow<IImmutableQueueIntClass>();
+        var row4 = sheet.ReadRow<IImmutableQueueIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableQueueIntClass>());
@@ -540,15 +636,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IImmutableSetIntClass row1 = sheet.ReadRow<IImmutableSetIntClass>();
+        var row1 = sheet.ReadRow<IImmutableSetIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableSetIntClass>());
 
-        IImmutableSetIntClass row3 = sheet.ReadRow<IImmutableSetIntClass>();
+        var row3 = sheet.ReadRow<IImmutableSetIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        IImmutableSetIntClass row4 = sheet.ReadRow<IImmutableSetIntClass>();
+        var row4 = sheet.ReadRow<IImmutableSetIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableSetIntClass>());
@@ -562,15 +658,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableArrayIntClass row1 = sheet.ReadRow<ImmutableArrayIntClass>();
+        var row1 = sheet.ReadRow<ImmutableArrayIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableArrayIntClass>());
 
-        ImmutableArrayIntClass row3 = sheet.ReadRow<ImmutableArrayIntClass>();
+        var row3 = sheet.ReadRow<ImmutableArrayIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableArrayIntClass row4 = sheet.ReadRow<ImmutableArrayIntClass>();
+        var row4 = sheet.ReadRow<ImmutableArrayIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableArrayIntClass>());
@@ -584,15 +680,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableListIntClass row1 = sheet.ReadRow<ImmutableListIntClass>();
+        var row1 = sheet.ReadRow<ImmutableListIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableListIntClass>());
 
-        ImmutableListIntClass row3 = sheet.ReadRow<ImmutableListIntClass>();
+        var row3 = sheet.ReadRow<ImmutableListIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableListIntClass row4 = sheet.ReadRow<ImmutableListIntClass>();
+        var row4 = sheet.ReadRow<ImmutableListIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableListIntClass>());
@@ -606,15 +702,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableStackIntClass row1 = sheet.ReadRow<ImmutableStackIntClass>();
+        var row1 = sheet.ReadRow<ImmutableStackIntClass>();
         Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableStackIntClass>());
 
-        ImmutableStackIntClass row3 = sheet.ReadRow<ImmutableStackIntClass>();
+        var row3 = sheet.ReadRow<ImmutableStackIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableStackIntClass row4 = sheet.ReadRow<ImmutableStackIntClass>();
+        var row4 = sheet.ReadRow<ImmutableStackIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableStackIntClass>());
@@ -628,15 +724,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableQueueIntClass row1 = sheet.ReadRow<ImmutableQueueIntClass>();
+        var row1 = sheet.ReadRow<ImmutableQueueIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableQueueIntClass>());
 
-        ImmutableQueueIntClass row3 = sheet.ReadRow<ImmutableQueueIntClass>();
+        var row3 = sheet.ReadRow<ImmutableQueueIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableQueueIntClass row4 = sheet.ReadRow<ImmutableQueueIntClass>();
+        var row4 = sheet.ReadRow<ImmutableQueueIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableQueueIntClass>());
@@ -650,15 +746,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableSortedSetIntClass row1 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+        var row1 = sheet.ReadRow<ImmutableSortedSetIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableSortedSetIntClass>());
 
-        ImmutableSortedSetIntClass row3 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+        var row3 = sheet.ReadRow<ImmutableSortedSetIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableSortedSetIntClass row4 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+        var row4 = sheet.ReadRow<ImmutableSortedSetIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableSortedSetIntClass>());
@@ -672,15 +768,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableHashSetIntClass row1 = sheet.ReadRow<ImmutableHashSetIntClass>();
+        var row1 = sheet.ReadRow<ImmutableHashSetIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableHashSetIntClass>());
 
-        ImmutableHashSetIntClass row3 = sheet.ReadRow<ImmutableHashSetIntClass>();
+        var row3 = sheet.ReadRow<ImmutableHashSetIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableHashSetIntClass row4 = sheet.ReadRow<ImmutableHashSetIntClass>();
+        var row4 = sheet.ReadRow<ImmutableHashSetIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableHashSetIntClass>());
@@ -694,15 +790,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ConcurrentQueueIntClass row1 = sheet.ReadRow<ConcurrentQueueIntClass>();
+        var row1 = sheet.ReadRow<ConcurrentQueueIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentQueueIntClass>());
 
-        ConcurrentQueueIntClass row3 = sheet.ReadRow<ConcurrentQueueIntClass>();
+        var row3 = sheet.ReadRow<ConcurrentQueueIntClass>();
         Assert.Equal([1], row3.Value);
 
-        ConcurrentQueueIntClass row4 = sheet.ReadRow<ConcurrentQueueIntClass>();
+        var row4 = sheet.ReadRow<ConcurrentQueueIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentQueueIntClass>());
@@ -716,15 +812,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ConcurrentStackIntClass row1 = sheet.ReadRow<ConcurrentStackIntClass>();
+        var row1 = sheet.ReadRow<ConcurrentStackIntClass>();
         Assert.Equal([3, 2, 1], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentStackIntClass>());
 
-        ConcurrentStackIntClass row3 = sheet.ReadRow<ConcurrentStackIntClass>();
+        var row3 = sheet.ReadRow<ConcurrentStackIntClass>();
         Assert.Equal([1], row3.Value);
 
-        ConcurrentStackIntClass row4 = sheet.ReadRow<ConcurrentStackIntClass>();
+        var row4 = sheet.ReadRow<ConcurrentStackIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentStackIntClass>());
@@ -738,15 +834,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ConcurrentBagIntClass row1 = sheet.ReadRow<ConcurrentBagIntClass>();
+        var row1 = sheet.ReadRow<ConcurrentBagIntClass>();
         Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentBagIntClass>());
 
-        ConcurrentBagIntClass row3 = sheet.ReadRow<ConcurrentBagIntClass>();
+        var row3 = sheet.ReadRow<ConcurrentBagIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ConcurrentBagIntClass row4 = sheet.ReadRow<ConcurrentBagIntClass>();
+        var row4 = sheet.ReadRow<ConcurrentBagIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentBagIntClass>());
@@ -760,15 +856,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        BlockingCollectionIntClass row1 = sheet.ReadRow<BlockingCollectionIntClass>();
+        var row1 = sheet.ReadRow<BlockingCollectionIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlockingCollectionIntClass>());
 
-        BlockingCollectionIntClass row3 = sheet.ReadRow<BlockingCollectionIntClass>();
+        var row3 = sheet.ReadRow<BlockingCollectionIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        BlockingCollectionIntClass row4 = sheet.ReadRow<BlockingCollectionIntClass>();
+        var row4 = sheet.ReadRow<BlockingCollectionIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlockingCollectionIntClass>());
@@ -782,15 +878,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        CustomConstructorIEnumerableIntClass row1 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+        var row1 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomConstructorIEnumerableIntClass>());
 
-        CustomConstructorIEnumerableIntClass row3 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+        var row3 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
         Assert.Equal([1], row3.Value);
 
-        CustomConstructorIEnumerableIntClass row4 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+        var row4 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomConstructorIEnumerableIntClass>());
@@ -804,15 +900,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        CustomAddIEnumerableIntClass row1 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+        var row1 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomAddIEnumerableIntClass>());
 
-        CustomAddIEnumerableIntClass row3 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+        var row3 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        CustomAddIEnumerableIntClass row4 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+        var row4 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomAddIEnumerableIntClass>());
@@ -827,19 +923,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ObjectArrayClass row1 = sheet.ReadRow<ObjectArrayClass>();
+        var row1 = sheet.ReadRow<ObjectArrayClass>();
         Assert.Equal(["1", "2", "3"], row1.Value);
 
-        ObjectArrayClass row2 = sheet.ReadRow<ObjectArrayClass>();
+        var row2 = sheet.ReadRow<ObjectArrayClass>();
         Assert.Equal(["1", null, "2"], row2.Value);
 
-        ObjectArrayClass row3 = sheet.ReadRow<ObjectArrayClass>();
+        var row3 = sheet.ReadRow<ObjectArrayClass>();
         Assert.Equal(["1"], row3.Value);
 
-        ObjectArrayClass row4 = sheet.ReadRow<ObjectArrayClass>();
+        var row4 = sheet.ReadRow<ObjectArrayClass>();
         Assert.Empty(row4.Value);
 
-        ObjectArrayClass row5 = sheet.ReadRow<ObjectArrayClass>();
+        var row5 = sheet.ReadRow<ObjectArrayClass>();
         Assert.Equal(["Invalid"], row5.Value);
     }
 
@@ -852,19 +948,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        StringArrayClass row1 = sheet.ReadRow<StringArrayClass>();
+        var row1 = sheet.ReadRow<StringArrayClass>();
         Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
 
-        StringArrayClass row2 = sheet.ReadRow<StringArrayClass>();
+        var row2 = sheet.ReadRow<StringArrayClass>();
         Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
 
-        StringArrayClass row3 = sheet.ReadRow<StringArrayClass>();
+        var row3 = sheet.ReadRow<StringArrayClass>();
         Assert.Equal(new string[] { "1" }, row3.Value);
 
-        StringArrayClass row4 = sheet.ReadRow<StringArrayClass>();
+        var row4 = sheet.ReadRow<StringArrayClass>();
         Assert.Empty(row4.Value);
 
-        StringArrayClass row5 = sheet.ReadRow<StringArrayClass>();
+        var row5 = sheet.ReadRow<StringArrayClass>();
         Assert.Equal(new string[] { "Invalid" }, row5.Value);
     }
 
@@ -877,18 +973,43 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IntArrayClass row1 = sheet.ReadRow<IntArrayClass>();
+        var row1 = sheet.ReadRow<IntArrayClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IntArrayClass>());
 
-        IntArrayClass row3 = sheet.ReadRow<IntArrayClass>();
+        var row3 = sheet.ReadRow<IntArrayClass>();
         Assert.Equal([1], row3.Value);
 
-        IntArrayClass row4 = sheet.ReadRow<IntArrayClass>();
+        var row4 = sheet.ReadRow<IntArrayClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IntArrayClass>());
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedIEnumerable_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultIEnumerableClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<IEnumerableClass>();
+        Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+
+        var row2 = sheet.ReadRow<IEnumerableClass>();
+        Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
+
+        var row3 = sheet.ReadRow<IEnumerableClass>();
+        Assert.Equal(new string[] { "1" }, row3.Value);
+
+        var row4 = sheet.ReadRow<IEnumerableClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<IEnumerableClass>();
+        Assert.Equal(new string[] { "Invalid" }, row5.Value);
     }
 
     [Fact]
@@ -900,19 +1021,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IEnumerableObjectClass row1 = sheet.ReadRow<IEnumerableObjectClass>();
+        var row1 = sheet.ReadRow<IEnumerableObjectClass>();
         Assert.Equal(["1", "2", "3"], row1.Value);
 
-        IEnumerableObjectClass row2 = sheet.ReadRow<IEnumerableObjectClass>();
+        var row2 = sheet.ReadRow<IEnumerableObjectClass>();
         Assert.Equal(["1", null, "2"], row2.Value);
 
-        IEnumerableObjectClass row3 = sheet.ReadRow<IEnumerableObjectClass>();
+        var row3 = sheet.ReadRow<IEnumerableObjectClass>();
         Assert.Equal(["1"], row3.Value);
 
-        IEnumerableObjectClass row4 = sheet.ReadRow<IEnumerableObjectClass>();
+        var row4 = sheet.ReadRow<IEnumerableObjectClass>();
         Assert.Empty(row4.Value);
 
-        IEnumerableObjectClass row5 = sheet.ReadRow<IEnumerableObjectClass>();
+        var row5 = sheet.ReadRow<IEnumerableObjectClass>();
         Assert.Equal(["Invalid"], row5.Value);
     }
 
@@ -925,18 +1046,43 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IEnumerableIntClass row1 = sheet.ReadRow<IEnumerableIntClass>();
+        var row1 = sheet.ReadRow<IEnumerableIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IEnumerableIntClass>());
 
-        IEnumerableIntClass row3 = sheet.ReadRow<IEnumerableIntClass>();
+        var row3 = sheet.ReadRow<IEnumerableIntClass>();
         Assert.Equal([1], row3.Value);
 
-        IEnumerableIntClass row4 = sheet.ReadRow<IEnumerableIntClass>();
+        var row4 = sheet.ReadRow<IEnumerableIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IEnumerableIntClass>());
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedICollection_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultICollectionObjectClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ICollectionClass>();
+        Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+
+        var row2 = sheet.ReadRow<ICollectionClass>();
+        Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
+
+        var row3 = sheet.ReadRow<ICollectionClass>();
+        Assert.Equal(new string[] { "1" }, row3.Value);
+
+        var row4 = sheet.ReadRow<ICollectionClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<ICollectionClass>();
+        Assert.Equal(new string[] { "Invalid" }, row5.Value);
     }
 
     [Fact]
@@ -948,19 +1094,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ICollectionObjectClass row1 = sheet.ReadRow<ICollectionObjectClass>();
+        var row1 = sheet.ReadRow<ICollectionObjectClass>();
         Assert.Equal(["1", "2", "3"], row1.Value);
 
-        ICollectionObjectClass row2 = sheet.ReadRow<ICollectionObjectClass>();
+        var row2 = sheet.ReadRow<ICollectionObjectClass>();
         Assert.Equal(["1", null, "2"], row2.Value);
 
-        ICollectionObjectClass row3 = sheet.ReadRow<ICollectionObjectClass>();
+        var row3 = sheet.ReadRow<ICollectionObjectClass>();
         Assert.Equal(["1"], row3.Value);
 
-        ICollectionObjectClass row4 = sheet.ReadRow<ICollectionObjectClass>();
+        var row4 = sheet.ReadRow<ICollectionObjectClass>();
         Assert.Empty(row4.Value);
 
-        ICollectionObjectClass row5 = sheet.ReadRow<ICollectionObjectClass>();
+        var row5 = sheet.ReadRow<ICollectionObjectClass>();
         Assert.Equal(["Invalid"], row5.Value);
     }
 
@@ -973,18 +1119,43 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ICollectionIntClass row1 = sheet.ReadRow<ICollectionIntClass>();
+        var row1 = sheet.ReadRow<ICollectionIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ICollectionIntClass>());
 
-        ICollectionIntClass row3 = sheet.ReadRow<ICollectionIntClass>();
+        var row3 = sheet.ReadRow<ICollectionIntClass>();
         Assert.Equal([1], row3.Value);
 
-        ICollectionIntClass row4 = sheet.ReadRow<ICollectionIntClass>();
+        var row4 = sheet.ReadRow<ICollectionIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ICollectionIntClass>());
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedIList_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultIListClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<IListClass>();
+        Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
+
+        var row2 = sheet.ReadRow<IListClass>();
+        Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
+
+        var row3 = sheet.ReadRow<IListClass>();
+        Assert.Equal(new string[] { "1" }, row3.Value);
+
+        var row4 = sheet.ReadRow<IListClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<IListClass>();
+        Assert.Equal(new string[] { "Invalid" }, row5.Value);
     }
 
     [Fact]
@@ -996,19 +1167,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IListObjectClass row1 = sheet.ReadRow<IListObjectClass>();
+        var row1 = sheet.ReadRow<IListObjectClass>();
         Assert.Equal(["1", "2", "3"], row1.Value);
 
-        IListObjectClass row2 = sheet.ReadRow<IListObjectClass>();
+        var row2 = sheet.ReadRow<IListObjectClass>();
         Assert.Equal(["1", null, "2"], row2.Value);
 
-        IListObjectClass row3 = sheet.ReadRow<IListObjectClass>();
+        var row3 = sheet.ReadRow<IListObjectClass>();
         Assert.Equal(["1"], row3.Value);
 
-        IListObjectClass row4 = sheet.ReadRow<IListObjectClass>();
+        var row4 = sheet.ReadRow<IListObjectClass>();
         Assert.Empty(row4.Value);
 
-        IListObjectClass row5 = sheet.ReadRow<IListObjectClass>();
+        var row5 = sheet.ReadRow<IListObjectClass>();
         Assert.Equal(["Invalid"], row5.Value);
     }
 
@@ -1021,15 +1192,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IListIntClass row1 = sheet.ReadRow<IListIntClass>();
+        var row1 = sheet.ReadRow<IListIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IListIntClass>());
 
-        IListIntClass row3 = sheet.ReadRow<IListIntClass>();
+        var row3 = sheet.ReadRow<IListIntClass>();
         Assert.Equal([1], row3.Value);
 
-        IListIntClass row4 = sheet.ReadRow<IListIntClass>();
+        var row4 = sheet.ReadRow<IListIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IListIntClass>());
@@ -1044,19 +1215,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IReadOnlyCollectionObjectClass row1 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+        var row1 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
         Assert.Equal(["1", "2", "3"], row1.Value);
 
-        IReadOnlyCollectionObjectClass row2 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+        var row2 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
         Assert.Equal(["1", null, "2"], row2.Value);
 
-        IReadOnlyCollectionObjectClass row3 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+        var row3 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
         Assert.Equal(["1"], row3.Value);
 
-        IReadOnlyCollectionObjectClass row4 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+        var row4 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
         Assert.Empty(row4.Value);
 
-        IReadOnlyCollectionObjectClass row5 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
+        var row5 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
         Assert.Equal(["Invalid"], row5.Value);
     }
 
@@ -1069,15 +1240,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IReadOnlyCollectionIntClass row1 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+        var row1 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyCollectionIntClass>());
 
-        IReadOnlyCollectionIntClass row3 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+        var row3 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
         Assert.Equal([1], row3.Value);
 
-        IReadOnlyCollectionIntClass row4 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+        var row4 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyCollectionIntClass>());
@@ -1092,19 +1263,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IReadOnlyListObjectClass row1 = sheet.ReadRow<IReadOnlyListObjectClass>();
+        var row1 = sheet.ReadRow<IReadOnlyListObjectClass>();
         Assert.Equal(["1", "2", "3"], row1.Value);
 
-        IReadOnlyListObjectClass row2 = sheet.ReadRow<IReadOnlyListObjectClass>();
+        var row2 = sheet.ReadRow<IReadOnlyListObjectClass>();
         Assert.Equal(["1", null, "2"], row2.Value);
 
-        IReadOnlyListObjectClass row3 = sheet.ReadRow<IReadOnlyListObjectClass>();
+        var row3 = sheet.ReadRow<IReadOnlyListObjectClass>();
         Assert.Equal(["1"], row3.Value);
 
-        IReadOnlyListObjectClass row4 = sheet.ReadRow<IReadOnlyListObjectClass>();
+        var row4 = sheet.ReadRow<IReadOnlyListObjectClass>();
         Assert.Empty(row4.Value);
 
-        IReadOnlyListObjectClass row5 = sheet.ReadRow<IReadOnlyListObjectClass>();
+        var row5 = sheet.ReadRow<IReadOnlyListObjectClass>();
         Assert.Equal(["Invalid"], row5.Value);
     }
 
@@ -1117,22 +1288,47 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IReadOnlyListIntClass row1 = sheet.ReadRow<IReadOnlyListIntClass>();
+        var row1 = sheet.ReadRow<IReadOnlyListIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyListIntClass>());
 
-        IReadOnlyListIntClass row3 = sheet.ReadRow<IReadOnlyListIntClass>();
+        var row3 = sheet.ReadRow<IReadOnlyListIntClass>();
         Assert.Equal([1], row3.Value);
 
-        IReadOnlyListIntClass row4 = sheet.ReadRow<IReadOnlyListIntClass>();
+        var row4 = sheet.ReadRow<IReadOnlyListIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyListIntClass>());
     }
 
     [Fact]
-    public void ReadRow_DefaultMappedListObject_ReturnsExpected()
+    public void ReadRow_DefaultMappedArrayListClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultArrayListClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal(new ArrayList { "1", "2", "3" }, row1.Value);
+
+        var row2 = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal(new ArrayList { "1", null, "2" }, row2.Value);
+
+        var row3 = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal(new ArrayList { "1" }, row3.Value);
+
+        var row4 = sheet.ReadRow<ArrayListClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal(new ArrayList { "Invalid" }, row5.Value);
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedListObjectClass_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultListObjectClassMap>();
@@ -1140,19 +1336,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ListObjectClass row1 = sheet.ReadRow<ListObjectClass>();
+        var row1 = sheet.ReadRow<ListObjectClass>();
         Assert.Equal(new string[] { "1", "2", "3" }, row1.Value);
 
-        ListObjectClass row2 = sheet.ReadRow<ListObjectClass>();
+        var row2 = sheet.ReadRow<ListObjectClass>();
         Assert.Equal(new string?[] { "1", null, "2" }, row2.Value);
 
-        ListObjectClass row3 = sheet.ReadRow<ListObjectClass>();
+        var row3 = sheet.ReadRow<ListObjectClass>();
         Assert.Equal(new string[] { "1" }, row3.Value);
 
-        ListObjectClass row4 = sheet.ReadRow<ListObjectClass>();
+        var row4 = sheet.ReadRow<ListObjectClass>();
         Assert.Empty(row4.Value);
 
-        ListObjectClass row5 = sheet.ReadRow<ListObjectClass>();
+        var row5 = sheet.ReadRow<ListObjectClass>();
         Assert.Equal(new string[] { "Invalid" }, row5.Value);
     }
 
@@ -1165,15 +1361,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ListIntClass row1 = sheet.ReadRow<ListIntClass>();
+        var row1 = sheet.ReadRow<ListIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ListIntClass>());
 
-        ListIntClass row3 = sheet.ReadRow<ListIntClass>();
+        var row3 = sheet.ReadRow<ListIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ListIntClass row4 = sheet.ReadRow<ListIntClass>();
+        var row4 = sheet.ReadRow<ListIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ListIntClass>());
@@ -1188,15 +1384,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ObservableCollectionIntClass row1 = sheet.ReadRow<ObservableCollectionIntClass>();
+        var row1 = sheet.ReadRow<ObservableCollectionIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ObservableCollectionIntClass>());
 
-        ObservableCollectionIntClass row3 = sheet.ReadRow<ObservableCollectionIntClass>();
+        var row3 = sheet.ReadRow<ObservableCollectionIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ObservableCollectionIntClass row4 = sheet.ReadRow<ObservableCollectionIntClass>();
+        var row4 = sheet.ReadRow<ObservableCollectionIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ObservableCollectionIntClass>());
@@ -1211,15 +1407,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        QueueIntClass row1 = sheet.ReadRow<QueueIntClass>();
+        var row1 = sheet.ReadRow<QueueIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<QueueIntClass>());
 
-        QueueIntClass row3 = sheet.ReadRow<QueueIntClass>();
+        var row3 = sheet.ReadRow<QueueIntClass>();
         Assert.Equal([1], row3.Value);
 
-        QueueIntClass row4 = sheet.ReadRow<QueueIntClass>();
+        var row4 = sheet.ReadRow<QueueIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<QueueIntClass>());
@@ -1234,15 +1430,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        SortedSetIntClass row1 = sheet.ReadRow<SortedSetIntClass>();
+        var row1 = sheet.ReadRow<SortedSetIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SortedSetIntClass>());
 
-        SortedSetIntClass row3 = sheet.ReadRow<SortedSetIntClass>();
+        var row3 = sheet.ReadRow<SortedSetIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        SortedSetIntClass row4 = sheet.ReadRow<SortedSetIntClass>();
+        var row4 = sheet.ReadRow<SortedSetIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SortedSetIntClass>());
@@ -1257,15 +1453,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        HashSetIntClass row1 = sheet.ReadRow<HashSetIntClass>();
+        var row1 = sheet.ReadRow<HashSetIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<HashSetIntClass>());
 
-        HashSetIntClass row3 = sheet.ReadRow<HashSetIntClass>();
+        var row3 = sheet.ReadRow<HashSetIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        HashSetIntClass row4 = sheet.ReadRow<HashSetIntClass>();
+        var row4 = sheet.ReadRow<HashSetIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<HashSetIntClass>());
@@ -1280,15 +1476,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        StackIntClass row1 = sheet.ReadRow<StackIntClass>();
+        var row1 = sheet.ReadRow<StackIntClass>();
         Assert.Equal([3, 2, 1], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StackIntClass>());
 
-        StackIntClass row3 = sheet.ReadRow<StackIntClass>();
+        var row3 = sheet.ReadRow<StackIntClass>();
         Assert.Equal([1], row3.Value);
 
-        StackIntClass row4 = sheet.ReadRow<StackIntClass>();
+        var row4 = sheet.ReadRow<StackIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StackIntClass>());
@@ -1303,15 +1499,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IImmutableListIntClass row1 = sheet.ReadRow<IImmutableListIntClass>();
+        var row1 = sheet.ReadRow<IImmutableListIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableListIntClass>());
 
-        IImmutableListIntClass row3 = sheet.ReadRow<IImmutableListIntClass>();
+        var row3 = sheet.ReadRow<IImmutableListIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        IImmutableListIntClass row4 = sheet.ReadRow<IImmutableListIntClass>();
+        var row4 = sheet.ReadRow<IImmutableListIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableListIntClass>());
@@ -1326,15 +1522,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IImmutableStackIntClass row1 = sheet.ReadRow<IImmutableStackIntClass>();
+        var row1 = sheet.ReadRow<IImmutableStackIntClass>();
         Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableStackIntClass>());
 
-        IImmutableStackIntClass row3 = sheet.ReadRow<IImmutableStackIntClass>();
+        var row3 = sheet.ReadRow<IImmutableStackIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        IImmutableStackIntClass row4 = sheet.ReadRow<IImmutableStackIntClass>();
+        var row4 = sheet.ReadRow<IImmutableStackIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableStackIntClass>());
@@ -1349,15 +1545,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IImmutableQueueIntClass row1 = sheet.ReadRow<IImmutableQueueIntClass>();
+        var row1 = sheet.ReadRow<IImmutableQueueIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableQueueIntClass>());
 
-        IImmutableQueueIntClass row3 = sheet.ReadRow<IImmutableQueueIntClass>();
+        var row3 = sheet.ReadRow<IImmutableQueueIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        IImmutableQueueIntClass row4 = sheet.ReadRow<IImmutableQueueIntClass>();
+        var row4 = sheet.ReadRow<IImmutableQueueIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableQueueIntClass>());
@@ -1372,15 +1568,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IImmutableSetIntClass row1 = sheet.ReadRow<IImmutableSetIntClass>();
+        var row1 = sheet.ReadRow<IImmutableSetIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableSetIntClass>());
 
-        IImmutableSetIntClass row3 = sheet.ReadRow<IImmutableSetIntClass>();
+        var row3 = sheet.ReadRow<IImmutableSetIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        IImmutableSetIntClass row4 = sheet.ReadRow<IImmutableSetIntClass>();
+        var row4 = sheet.ReadRow<IImmutableSetIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IImmutableSetIntClass>());
@@ -1395,15 +1591,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableArrayIntClass row1 = sheet.ReadRow<ImmutableArrayIntClass>();
+        var row1 = sheet.ReadRow<ImmutableArrayIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableArrayIntClass>());
 
-        ImmutableArrayIntClass row3 = sheet.ReadRow<ImmutableArrayIntClass>();
+        var row3 = sheet.ReadRow<ImmutableArrayIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableArrayIntClass row4 = sheet.ReadRow<ImmutableArrayIntClass>();
+        var row4 = sheet.ReadRow<ImmutableArrayIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableArrayIntClass>());
@@ -1418,15 +1614,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableListIntClass row1 = sheet.ReadRow<ImmutableListIntClass>();
+        var row1 = sheet.ReadRow<ImmutableListIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableListIntClass>());
 
-        ImmutableListIntClass row3 = sheet.ReadRow<ImmutableListIntClass>();
+        var row3 = sheet.ReadRow<ImmutableListIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableListIntClass row4 = sheet.ReadRow<ImmutableListIntClass>();
+        var row4 = sheet.ReadRow<ImmutableListIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableListIntClass>());
@@ -1441,15 +1637,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableStackIntClass row1 = sheet.ReadRow<ImmutableStackIntClass>();
+        var row1 = sheet.ReadRow<ImmutableStackIntClass>();
         Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableStackIntClass>());
 
-        ImmutableStackIntClass row3 = sheet.ReadRow<ImmutableStackIntClass>();
+        var row3 = sheet.ReadRow<ImmutableStackIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableStackIntClass row4 = sheet.ReadRow<ImmutableStackIntClass>();
+        var row4 = sheet.ReadRow<ImmutableStackIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableStackIntClass>());
@@ -1464,15 +1660,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableQueueIntClass row1 = sheet.ReadRow<ImmutableQueueIntClass>();
+        var row1 = sheet.ReadRow<ImmutableQueueIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableQueueIntClass>());
 
-        ImmutableQueueIntClass row3 = sheet.ReadRow<ImmutableQueueIntClass>();
+        var row3 = sheet.ReadRow<ImmutableQueueIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableQueueIntClass row4 = sheet.ReadRow<ImmutableQueueIntClass>();
+        var row4 = sheet.ReadRow<ImmutableQueueIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableQueueIntClass>());
@@ -1487,15 +1683,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableSortedSetIntClass row1 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+        var row1 = sheet.ReadRow<ImmutableSortedSetIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableSortedSetIntClass>());
 
-        ImmutableSortedSetIntClass row3 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+        var row3 = sheet.ReadRow<ImmutableSortedSetIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableSortedSetIntClass row4 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+        var row4 = sheet.ReadRow<ImmutableSortedSetIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableSortedSetIntClass>());
@@ -1510,15 +1706,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableHashSetIntClass row1 = sheet.ReadRow<ImmutableHashSetIntClass>();
+        var row1 = sheet.ReadRow<ImmutableHashSetIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableHashSetIntClass>());
 
-        ImmutableHashSetIntClass row3 = sheet.ReadRow<ImmutableHashSetIntClass>();
+        var row3 = sheet.ReadRow<ImmutableHashSetIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableHashSetIntClass row4 = sheet.ReadRow<ImmutableHashSetIntClass>();
+        var row4 = sheet.ReadRow<ImmutableHashSetIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableHashSetIntClass>());
@@ -1533,15 +1729,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ConcurrentQueueIntClass row1 = sheet.ReadRow<ConcurrentQueueIntClass>();
+        var row1 = sheet.ReadRow<ConcurrentQueueIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentQueueIntClass>());
 
-        ConcurrentQueueIntClass row3 = sheet.ReadRow<ConcurrentQueueIntClass>();
+        var row3 = sheet.ReadRow<ConcurrentQueueIntClass>();
         Assert.Equal([1], row3.Value);
 
-        ConcurrentQueueIntClass row4 = sheet.ReadRow<ConcurrentQueueIntClass>();
+        var row4 = sheet.ReadRow<ConcurrentQueueIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentQueueIntClass>());
@@ -1556,15 +1752,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ConcurrentStackIntClass row1 = sheet.ReadRow<ConcurrentStackIntClass>();
+        var row1 = sheet.ReadRow<ConcurrentStackIntClass>();
         Assert.Equal([3, 2, 1], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentStackIntClass>());
 
-        ConcurrentStackIntClass row3 = sheet.ReadRow<ConcurrentStackIntClass>();
+        var row3 = sheet.ReadRow<ConcurrentStackIntClass>();
         Assert.Equal([1], row3.Value);
 
-        ConcurrentStackIntClass row4 = sheet.ReadRow<ConcurrentStackIntClass>();
+        var row4 = sheet.ReadRow<ConcurrentStackIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentStackIntClass>());
@@ -1579,15 +1775,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ConcurrentBagIntClass row1 = sheet.ReadRow<ConcurrentBagIntClass>();
+        var row1 = sheet.ReadRow<ConcurrentBagIntClass>();
         Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentBagIntClass>());
 
-        ConcurrentBagIntClass row3 = sheet.ReadRow<ConcurrentBagIntClass>();
+        var row3 = sheet.ReadRow<ConcurrentBagIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ConcurrentBagIntClass row4 = sheet.ReadRow<ConcurrentBagIntClass>();
+        var row4 = sheet.ReadRow<ConcurrentBagIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentBagIntClass>());
@@ -1602,15 +1798,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        BlockingCollectionIntClass row1 = sheet.ReadRow<BlockingCollectionIntClass>();
+        var row1 = sheet.ReadRow<BlockingCollectionIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlockingCollectionIntClass>());
 
-        BlockingCollectionIntClass row3 = sheet.ReadRow<BlockingCollectionIntClass>();
+        var row3 = sheet.ReadRow<BlockingCollectionIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        BlockingCollectionIntClass row4 = sheet.ReadRow<BlockingCollectionIntClass>();
+        var row4 = sheet.ReadRow<BlockingCollectionIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlockingCollectionIntClass>());
@@ -1625,15 +1821,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        CustomConstructorIEnumerableIntClass row1 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+        var row1 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomConstructorIEnumerableIntClass>());
 
-        CustomConstructorIEnumerableIntClass row3 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+        var row3 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
         Assert.Equal([1], row3.Value);
 
-        CustomConstructorIEnumerableIntClass row4 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+        var row4 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomConstructorIEnumerableIntClass>());
@@ -1648,15 +1844,15 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        CustomAddIEnumerableIntClass row1 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+        var row1 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomAddIEnumerableIntClass>());
 
-        CustomAddIEnumerableIntClass row3 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+        var row3 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        CustomAddIEnumerableIntClass row4 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+        var row4 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomAddIEnumerableIntClass>());
@@ -1671,19 +1867,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IntArrayClass row1 = sheet.ReadRow<IntArrayClass>();
+        var row1 = sheet.ReadRow<IntArrayClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
-        IntArrayClass row2 = sheet.ReadRow<IntArrayClass>();
+        var row2 = sheet.ReadRow<IntArrayClass>();
         Assert.Equal([1, -1, 2], row2.Value);
 
-        IntArrayClass row3 = sheet.ReadRow<IntArrayClass>();
+        var row3 = sheet.ReadRow<IntArrayClass>();
         Assert.Equal([1], row3.Value);
 
-        IntArrayClass row4 = sheet.ReadRow<IntArrayClass>();
+        var row4 = sheet.ReadRow<IntArrayClass>();
         Assert.Empty(row4.Value);
 
-        IntArrayClass row5 = sheet.ReadRow<IntArrayClass>();
+        var row5 = sheet.ReadRow<IntArrayClass>();
         Assert.Equal([-2], row5.Value);
     }
 
@@ -1696,19 +1892,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ICollectionIntClass row1 = sheet.ReadRow<ICollectionIntClass>();
+        var row1 = sheet.ReadRow<ICollectionIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
-        ICollectionIntClass row2 = sheet.ReadRow<ICollectionIntClass>();
+        var row2 = sheet.ReadRow<ICollectionIntClass>();
         Assert.Equal([1, -1, 2], row2.Value);
 
-        ICollectionIntClass row3 = sheet.ReadRow<ICollectionIntClass>();
+        var row3 = sheet.ReadRow<ICollectionIntClass>();
         Assert.Equal([1], row3.Value);
 
-        ICollectionIntClass row4 = sheet.ReadRow<ICollectionIntClass>();
+        var row4 = sheet.ReadRow<ICollectionIntClass>();
         Assert.Empty(row4.Value);
 
-        ICollectionIntClass row5 = sheet.ReadRow<ICollectionIntClass>();
+        var row5 = sheet.ReadRow<ICollectionIntClass>();
         Assert.Equal([-2], row5.Value);
     }
 
@@ -1721,19 +1917,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IListIntClass row1 = sheet.ReadRow<IListIntClass>();
+        var row1 = sheet.ReadRow<IListIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
-        IListIntClass row2 = sheet.ReadRow<IListIntClass>();
+        var row2 = sheet.ReadRow<IListIntClass>();
         Assert.Equal([1, -1, 2], row2.Value);
 
-        IListIntClass row3 = sheet.ReadRow<IListIntClass>();
+        var row3 = sheet.ReadRow<IListIntClass>();
         Assert.Equal([1], row3.Value);
 
-        IListIntClass row4 = sheet.ReadRow<IListIntClass>();
+        var row4 = sheet.ReadRow<IListIntClass>();
         Assert.Empty(row4.Value);
 
-        IListIntClass row5 = sheet.ReadRow<IListIntClass>();
+        var row5 = sheet.ReadRow<IListIntClass>();
         Assert.Equal([-2], row5.Value);
     }
 
@@ -1746,19 +1942,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IReadOnlyCollectionIntClass row1 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+        var row1 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
-        IReadOnlyCollectionIntClass row2 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+        var row2 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
         Assert.Equal([1, -1, 2], row2.Value);
 
-        IReadOnlyCollectionIntClass row3 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+        var row3 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
         Assert.Equal([1], row3.Value);
 
-        IReadOnlyCollectionIntClass row4 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+        var row4 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
         Assert.Empty(row4.Value);
 
-        IReadOnlyCollectionIntClass row5 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
+        var row5 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
         Assert.Equal([-2], row5.Value);
     }
 
@@ -1771,19 +1967,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IReadOnlyListIntClass row1 = sheet.ReadRow<IReadOnlyListIntClass>();
+        var row1 = sheet.ReadRow<IReadOnlyListIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
-        IReadOnlyListIntClass row2 = sheet.ReadRow<IReadOnlyListIntClass>();
+        var row2 = sheet.ReadRow<IReadOnlyListIntClass>();
         Assert.Equal([1, -1, 2], row2.Value);
 
-        IReadOnlyListIntClass row3 = sheet.ReadRow<IReadOnlyListIntClass>();
+        var row3 = sheet.ReadRow<IReadOnlyListIntClass>();
         Assert.Equal([1], row3.Value);
 
-        IReadOnlyListIntClass row4 = sheet.ReadRow<IReadOnlyListIntClass>();
+        var row4 = sheet.ReadRow<IReadOnlyListIntClass>();
         Assert.Empty(row4.Value);
 
-        IReadOnlyListIntClass row5 = sheet.ReadRow<IReadOnlyListIntClass>();
+        var row5 = sheet.ReadRow<IReadOnlyListIntClass>();
         Assert.Equal([-2], row5.Value);
     }
 
@@ -1796,19 +1992,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ListIntClass row1 = sheet.ReadRow<ListIntClass>();
+        var row1 = sheet.ReadRow<ListIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
-        ListIntClass row2 = sheet.ReadRow<ListIntClass>();
+        var row2 = sheet.ReadRow<ListIntClass>();
         Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
 
-        ListIntClass row3 = sheet.ReadRow<ListIntClass>();
+        var row3 = sheet.ReadRow<ListIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ListIntClass row4 = sheet.ReadRow<ListIntClass>();
+        var row4 = sheet.ReadRow<ListIntClass>();
         Assert.Empty(row4.Value);
 
-        ListIntClass row5 = sheet.ReadRow<ListIntClass>();
+        var row5 = sheet.ReadRow<ListIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -1821,19 +2017,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ObservableCollectionIntClass row1 = sheet.ReadRow<ObservableCollectionIntClass>();
+        var row1 = sheet.ReadRow<ObservableCollectionIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
-        ObservableCollectionIntClass row2 = sheet.ReadRow<ObservableCollectionIntClass>();
+        var row2 = sheet.ReadRow<ObservableCollectionIntClass>();
         Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
 
-        ObservableCollectionIntClass row3 = sheet.ReadRow<ObservableCollectionIntClass>();
+        var row3 = sheet.ReadRow<ObservableCollectionIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ObservableCollectionIntClass row4 = sheet.ReadRow<ObservableCollectionIntClass>();
+        var row4 = sheet.ReadRow<ObservableCollectionIntClass>();
         Assert.Empty(row4.Value);
 
-        ObservableCollectionIntClass row5 = sheet.ReadRow<ObservableCollectionIntClass>();
+        var row5 = sheet.ReadRow<ObservableCollectionIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -1846,19 +2042,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        QueueIntClass row1 = sheet.ReadRow<QueueIntClass>();
+        var row1 = sheet.ReadRow<QueueIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
-        QueueIntClass row2 = sheet.ReadRow<QueueIntClass>();
+        var row2 = sheet.ReadRow<QueueIntClass>();
         Assert.Equal([1, -1, 2], row2.Value);
 
-        QueueIntClass row3 = sheet.ReadRow<QueueIntClass>();
+        var row3 = sheet.ReadRow<QueueIntClass>();
         Assert.Equal([1], row3.Value);
 
-        QueueIntClass row4 = sheet.ReadRow<QueueIntClass>();
+        var row4 = sheet.ReadRow<QueueIntClass>();
         Assert.Empty(row4.Value);
 
-        QueueIntClass row5 = sheet.ReadRow<QueueIntClass>();
+        var row5 = sheet.ReadRow<QueueIntClass>();
         Assert.Equal([-2], row5.Value);
     }
 
@@ -1871,19 +2067,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        SortedSetIntClass row1 = sheet.ReadRow<SortedSetIntClass>();
+        var row1 = sheet.ReadRow<SortedSetIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
-        SortedSetIntClass row2 = sheet.ReadRow<SortedSetIntClass>();
+        var row2 = sheet.ReadRow<SortedSetIntClass>();
         Assert.Equal(new int[] { -1, 1, 2 }, row2.Value);
 
-        SortedSetIntClass row3 = sheet.ReadRow<SortedSetIntClass>();
+        var row3 = sheet.ReadRow<SortedSetIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        SortedSetIntClass row4 = sheet.ReadRow<SortedSetIntClass>();
+        var row4 = sheet.ReadRow<SortedSetIntClass>();
         Assert.Empty(row4.Value);
 
-        SortedSetIntClass row5 = sheet.ReadRow<SortedSetIntClass>();
+        var row5 = sheet.ReadRow<SortedSetIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -1896,19 +2092,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        HashSetIntClass row1 = sheet.ReadRow<HashSetIntClass>();
+        var row1 = sheet.ReadRow<HashSetIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
-        HashSetIntClass row2 = sheet.ReadRow<HashSetIntClass>();
+        var row2 = sheet.ReadRow<HashSetIntClass>();
         Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
 
-        HashSetIntClass row3 = sheet.ReadRow<HashSetIntClass>();
+        var row3 = sheet.ReadRow<HashSetIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        HashSetIntClass row4 = sheet.ReadRow<HashSetIntClass>();
+        var row4 = sheet.ReadRow<HashSetIntClass>();
         Assert.Empty(row4.Value);
 
-        HashSetIntClass row5 = sheet.ReadRow<HashSetIntClass>();
+        var row5 = sheet.ReadRow<HashSetIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -1921,19 +2117,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        StackIntClass row1 = sheet.ReadRow<StackIntClass>();
+        var row1 = sheet.ReadRow<StackIntClass>();
         Assert.Equal([3, 2, 1], row1.Value);
 
-        StackIntClass row2 = sheet.ReadRow<StackIntClass>();
+        var row2 = sheet.ReadRow<StackIntClass>();
         Assert.Equal([2, -1, 1], row2.Value);
 
-        StackIntClass row3 = sheet.ReadRow<StackIntClass>();
+        var row3 = sheet.ReadRow<StackIntClass>();
         Assert.Equal([1], row3.Value);
 
-        StackIntClass row4 = sheet.ReadRow<StackIntClass>();
+        var row4 = sheet.ReadRow<StackIntClass>();
         Assert.Empty(row4.Value);
 
-        StackIntClass row5 = sheet.ReadRow<StackIntClass>();
+        var row5 = sheet.ReadRow<StackIntClass>();
         Assert.Equal([-2], row5.Value);
     }
 
@@ -1946,19 +2142,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IImmutableListIntClass row1 = sheet.ReadRow<IImmutableListIntClass>();
+        var row1 = sheet.ReadRow<IImmutableListIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
-        IImmutableListIntClass row2 = sheet.ReadRow<IImmutableListIntClass>();
+        var row2 = sheet.ReadRow<IImmutableListIntClass>();
         Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
 
-        IImmutableListIntClass row3 = sheet.ReadRow<IImmutableListIntClass>();
+        var row3 = sheet.ReadRow<IImmutableListIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        IImmutableListIntClass row4 = sheet.ReadRow<IImmutableListIntClass>();
+        var row4 = sheet.ReadRow<IImmutableListIntClass>();
         Assert.Empty(row4.Value);
 
-        IImmutableListIntClass row5 = sheet.ReadRow<IImmutableListIntClass>();
+        var row5 = sheet.ReadRow<IImmutableListIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -1971,19 +2167,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IImmutableStackIntClass row1 = sheet.ReadRow<IImmutableStackIntClass>();
+        var row1 = sheet.ReadRow<IImmutableStackIntClass>();
         Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
 
-        IImmutableStackIntClass row2 = sheet.ReadRow<IImmutableStackIntClass>();
+        var row2 = sheet.ReadRow<IImmutableStackIntClass>();
         Assert.Equal(new int[] { 2, -1, 1 }, row2.Value);
 
-        IImmutableStackIntClass row3 = sheet.ReadRow<IImmutableStackIntClass>();
+        var row3 = sheet.ReadRow<IImmutableStackIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        IImmutableStackIntClass row4 = sheet.ReadRow<IImmutableStackIntClass>();
+        var row4 = sheet.ReadRow<IImmutableStackIntClass>();
         Assert.Empty(row4.Value);
 
-        IImmutableStackIntClass row5 = sheet.ReadRow<IImmutableStackIntClass>();
+        var row5 = sheet.ReadRow<IImmutableStackIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -1996,19 +2192,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IImmutableQueueIntClass row1 = sheet.ReadRow<IImmutableQueueIntClass>();
+        var row1 = sheet.ReadRow<IImmutableQueueIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
-        IImmutableQueueIntClass row2 = sheet.ReadRow<IImmutableQueueIntClass>();
+        var row2 = sheet.ReadRow<IImmutableQueueIntClass>();
         Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
 
-        IImmutableQueueIntClass row3 = sheet.ReadRow<IImmutableQueueIntClass>();
+        var row3 = sheet.ReadRow<IImmutableQueueIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        IImmutableQueueIntClass row4 = sheet.ReadRow<IImmutableQueueIntClass>();
+        var row4 = sheet.ReadRow<IImmutableQueueIntClass>();
         Assert.Empty(row4.Value);
 
-        IImmutableQueueIntClass row5 = sheet.ReadRow<IImmutableQueueIntClass>();
+        var row5 = sheet.ReadRow<IImmutableQueueIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -2021,19 +2217,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IImmutableSetIntClass row1 = sheet.ReadRow<IImmutableSetIntClass>();
+        var row1 = sheet.ReadRow<IImmutableSetIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
-        IImmutableSetIntClass row2 = sheet.ReadRow<IImmutableSetIntClass>();
+        var row2 = sheet.ReadRow<IImmutableSetIntClass>();
         Assert.Equal(new int[] { -1, 1, 2 }, row2.Value);
 
-        IImmutableSetIntClass row3 = sheet.ReadRow<IImmutableSetIntClass>();
+        var row3 = sheet.ReadRow<IImmutableSetIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        IImmutableSetIntClass row4 = sheet.ReadRow<IImmutableSetIntClass>();
+        var row4 = sheet.ReadRow<IImmutableSetIntClass>();
         Assert.Empty(row4.Value);
 
-        IImmutableSetIntClass row5 = sheet.ReadRow<IImmutableSetIntClass>();
+        var row5 = sheet.ReadRow<IImmutableSetIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -2046,19 +2242,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableArrayIntClass row1 = sheet.ReadRow<ImmutableArrayIntClass>();
+        var row1 = sheet.ReadRow<ImmutableArrayIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
-        ImmutableArrayIntClass row2 = sheet.ReadRow<ImmutableArrayIntClass>();
+        var row2 = sheet.ReadRow<ImmutableArrayIntClass>();
         Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
 
-        ImmutableArrayIntClass row3 = sheet.ReadRow<ImmutableArrayIntClass>();
+        var row3 = sheet.ReadRow<ImmutableArrayIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableArrayIntClass row4 = sheet.ReadRow<ImmutableArrayIntClass>();
+        var row4 = sheet.ReadRow<ImmutableArrayIntClass>();
         Assert.Empty(row4.Value);
 
-        ImmutableArrayIntClass row5 = sheet.ReadRow<ImmutableArrayIntClass>();
+        var row5 = sheet.ReadRow<ImmutableArrayIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -2071,19 +2267,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableListIntClass row1 = sheet.ReadRow<ImmutableListIntClass>();
+        var row1 = sheet.ReadRow<ImmutableListIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
-        ImmutableListIntClass row2 = sheet.ReadRow<ImmutableListIntClass>();
+        var row2 = sheet.ReadRow<ImmutableListIntClass>();
         Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
 
-        ImmutableListIntClass row3 = sheet.ReadRow<ImmutableListIntClass>();
+        var row3 = sheet.ReadRow<ImmutableListIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableListIntClass row4 = sheet.ReadRow<ImmutableListIntClass>();
+        var row4 = sheet.ReadRow<ImmutableListIntClass>();
         Assert.Empty(row4.Value);
 
-        ImmutableListIntClass row5 = sheet.ReadRow<ImmutableListIntClass>();
+        var row5 = sheet.ReadRow<ImmutableListIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -2096,19 +2292,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableStackIntClass row1 = sheet.ReadRow<ImmutableStackIntClass>();
+        var row1 = sheet.ReadRow<ImmutableStackIntClass>();
         Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
 
-        ImmutableStackIntClass row2 = sheet.ReadRow<ImmutableStackIntClass>();
+        var row2 = sheet.ReadRow<ImmutableStackIntClass>();
         Assert.Equal(new int[] { 2, -1, 1 }, row2.Value);
 
-        ImmutableStackIntClass row3 = sheet.ReadRow<ImmutableStackIntClass>();
+        var row3 = sheet.ReadRow<ImmutableStackIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableStackIntClass row4 = sheet.ReadRow<ImmutableStackIntClass>();
+        var row4 = sheet.ReadRow<ImmutableStackIntClass>();
         Assert.Empty(row4.Value);
 
-        ImmutableStackIntClass row5 = sheet.ReadRow<ImmutableStackIntClass>();
+        var row5 = sheet.ReadRow<ImmutableStackIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -2121,19 +2317,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableQueueIntClass row1 = sheet.ReadRow<ImmutableQueueIntClass>();
+        var row1 = sheet.ReadRow<ImmutableQueueIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
-        ImmutableQueueIntClass row2 = sheet.ReadRow<ImmutableQueueIntClass>();
+        var row2 = sheet.ReadRow<ImmutableQueueIntClass>();
         Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
 
-        ImmutableQueueIntClass row3 = sheet.ReadRow<ImmutableQueueIntClass>();
+        var row3 = sheet.ReadRow<ImmutableQueueIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableQueueIntClass row4 = sheet.ReadRow<ImmutableQueueIntClass>();
+        var row4 = sheet.ReadRow<ImmutableQueueIntClass>();
         Assert.Empty(row4.Value);
 
-        ImmutableQueueIntClass row5 = sheet.ReadRow<ImmutableQueueIntClass>();
+        var row5 = sheet.ReadRow<ImmutableQueueIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -2146,19 +2342,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableSortedSetIntClass row1 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+        var row1 = sheet.ReadRow<ImmutableSortedSetIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
-        ImmutableSortedSetIntClass row2 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+        var row2 = sheet.ReadRow<ImmutableSortedSetIntClass>();
         Assert.Equal(new int[] { -1, 1, 2 }, row2.Value);
 
-        ImmutableSortedSetIntClass row3 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+        var row3 = sheet.ReadRow<ImmutableSortedSetIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableSortedSetIntClass row4 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+        var row4 = sheet.ReadRow<ImmutableSortedSetIntClass>();
         Assert.Empty(row4.Value);
 
-        ImmutableSortedSetIntClass row5 = sheet.ReadRow<ImmutableSortedSetIntClass>();
+        var row5 = sheet.ReadRow<ImmutableSortedSetIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -2171,19 +2367,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ImmutableHashSetIntClass row1 = sheet.ReadRow<ImmutableHashSetIntClass>();
+        var row1 = sheet.ReadRow<ImmutableHashSetIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
-        ImmutableHashSetIntClass row2 = sheet.ReadRow<ImmutableHashSetIntClass>();
+        var row2 = sheet.ReadRow<ImmutableHashSetIntClass>();
         Assert.Equal(new int[] { -1, 1, 2 }, row2.Value);
 
-        ImmutableHashSetIntClass row3 = sheet.ReadRow<ImmutableHashSetIntClass>();
+        var row3 = sheet.ReadRow<ImmutableHashSetIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ImmutableHashSetIntClass row4 = sheet.ReadRow<ImmutableHashSetIntClass>();
+        var row4 = sheet.ReadRow<ImmutableHashSetIntClass>();
         Assert.Empty(row4.Value);
 
-        ImmutableHashSetIntClass row5 = sheet.ReadRow<ImmutableHashSetIntClass>();
+        var row5 = sheet.ReadRow<ImmutableHashSetIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -2196,19 +2392,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ConcurrentQueueIntClass row1 = sheet.ReadRow<ConcurrentQueueIntClass>();
+        var row1 = sheet.ReadRow<ConcurrentQueueIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
-        ConcurrentQueueIntClass row2 = sheet.ReadRow<ConcurrentQueueIntClass>();
+        var row2 = sheet.ReadRow<ConcurrentQueueIntClass>();
         Assert.Equal([1, -1, 2], row2.Value);
 
-        ConcurrentQueueIntClass row3 = sheet.ReadRow<ConcurrentQueueIntClass>();
+        var row3 = sheet.ReadRow<ConcurrentQueueIntClass>();
         Assert.Equal([1], row3.Value);
 
-        ConcurrentQueueIntClass row4 = sheet.ReadRow<ConcurrentQueueIntClass>();
+        var row4 = sheet.ReadRow<ConcurrentQueueIntClass>();
         Assert.Empty(row4.Value);
 
-        ConcurrentQueueIntClass row5 = sheet.ReadRow<ConcurrentQueueIntClass>();
+        var row5 = sheet.ReadRow<ConcurrentQueueIntClass>();
         Assert.Equal([-2], row5.Value);
     }
 
@@ -2221,19 +2417,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ConcurrentStackIntClass row1 = sheet.ReadRow<ConcurrentStackIntClass>();
+        var row1 = sheet.ReadRow<ConcurrentStackIntClass>();
         Assert.Equal([3, 2, 1], row1.Value);
 
-        ConcurrentStackIntClass row2 = sheet.ReadRow<ConcurrentStackIntClass>();
+        var row2 = sheet.ReadRow<ConcurrentStackIntClass>();
         Assert.Equal([2, -1, 1], row2.Value);
 
-        ConcurrentStackIntClass row3 = sheet.ReadRow<ConcurrentStackIntClass>();
+        var row3 = sheet.ReadRow<ConcurrentStackIntClass>();
         Assert.Equal([1], row3.Value);
 
-        ConcurrentStackIntClass row4 = sheet.ReadRow<ConcurrentStackIntClass>();
+        var row4 = sheet.ReadRow<ConcurrentStackIntClass>();
         Assert.Empty(row4.Value);
 
-        ConcurrentStackIntClass row5 = sheet.ReadRow<ConcurrentStackIntClass>();
+        var row5 = sheet.ReadRow<ConcurrentStackIntClass>();
         Assert.Equal([-2], row5.Value);
     }
 
@@ -2246,19 +2442,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ConcurrentBagIntClass row1 = sheet.ReadRow<ConcurrentBagIntClass>();
+        var row1 = sheet.ReadRow<ConcurrentBagIntClass>();
         Assert.Equal(new int[] { 3, 2, 1 }, row1.Value);
 
-        ConcurrentBagIntClass row2 = sheet.ReadRow<ConcurrentBagIntClass>();
+        var row2 = sheet.ReadRow<ConcurrentBagIntClass>();
         Assert.Equal(new int[] { 2, -1, 1 }, row2.Value);
 
-        ConcurrentBagIntClass row3 = sheet.ReadRow<ConcurrentBagIntClass>();
+        var row3 = sheet.ReadRow<ConcurrentBagIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        ConcurrentBagIntClass row4 = sheet.ReadRow<ConcurrentBagIntClass>();
+        var row4 = sheet.ReadRow<ConcurrentBagIntClass>();
         Assert.Empty(row4.Value);
 
-        ConcurrentBagIntClass row5 = sheet.ReadRow<ConcurrentBagIntClass>();
+        var row5 = sheet.ReadRow<ConcurrentBagIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -2271,19 +2467,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        BlockingCollectionIntClass row1 = sheet.ReadRow<BlockingCollectionIntClass>();
+        var row1 = sheet.ReadRow<BlockingCollectionIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
-        BlockingCollectionIntClass row2 = sheet.ReadRow<BlockingCollectionIntClass>();
+        var row2 = sheet.ReadRow<BlockingCollectionIntClass>();
         Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
 
-        BlockingCollectionIntClass row3 = sheet.ReadRow<BlockingCollectionIntClass>();
+        var row3 = sheet.ReadRow<BlockingCollectionIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        BlockingCollectionIntClass row4 = sheet.ReadRow<BlockingCollectionIntClass>();
+        var row4 = sheet.ReadRow<BlockingCollectionIntClass>();
         Assert.Empty(row4.Value);
 
-        BlockingCollectionIntClass row5 = sheet.ReadRow<BlockingCollectionIntClass>();
+        var row5 = sheet.ReadRow<BlockingCollectionIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -2296,19 +2492,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        CustomConstructorIEnumerableIntClass row1 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+        var row1 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
         Assert.Equal([1, 2, 3], row1.Value);
 
-        CustomConstructorIEnumerableIntClass row2 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+        var row2 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
         Assert.Equal([1, -1, 2], row2.Value);
 
-        CustomConstructorIEnumerableIntClass row3 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+        var row3 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
         Assert.Equal([1], row3.Value);
 
-        CustomConstructorIEnumerableIntClass row4 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+        var row4 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
         Assert.Empty(row4.Value);
 
-        CustomConstructorIEnumerableIntClass row5 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
+        var row5 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
         Assert.Equal([-2], row5.Value);
     }
 
@@ -2321,19 +2517,19 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        CustomAddIEnumerableIntClass row1 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+        var row1 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
         Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
 
-        CustomAddIEnumerableIntClass row2 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+        var row2 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
         Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
 
-        CustomAddIEnumerableIntClass row3 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+        var row3 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
         Assert.Equal(new int[] { 1 }, row3.Value);
 
-        CustomAddIEnumerableIntClass row4 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+        var row4 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
         Assert.Empty(row4.Value);
 
-        CustomAddIEnumerableIntClass row5 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
+        var row5 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -2388,6 +2584,19 @@ public class MapSplitEnumerableTests
         }
     }
 
+    public class IEnumerableClass
+    {
+        public IEnumerable Value { get; set; } = default!;
+    }
+
+    public class DefaultIEnumerableClassMap : ExcelClassMap<IEnumerableClass>
+    {
+        public DefaultIEnumerableClassMap()
+        {
+            MapList<object>(p => p.Value);
+        }
+    }
+
     public class IEnumerableObjectClass
     {
         public IEnumerable<object?> Value { get; set; } = default!;
@@ -2421,6 +2630,19 @@ public class MapSplitEnumerableTests
     public class DefaultIEnumerableIntClassMap : ExcelClassMap<IEnumerableIntClass>
     {
         public DefaultIEnumerableIntClassMap()
+        {
+            Map(p => p.Value);
+        }
+    }
+
+    public class ICollectionClass
+    {
+        public ICollection Value { get; set; } = default!;
+    }
+
+    public class DefaultICollectionClassMap : ExcelClassMap<ICollectionClass>
+    {
+        public DefaultICollectionClassMap()
         {
             Map(p => p.Value);
         }
@@ -2461,6 +2683,19 @@ public class MapSplitEnumerableTests
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2)
                 );
+        }
+    }
+
+    public class IListClass
+    {
+        public IList Value { get; set; } = default!;
+    }
+
+    public class DefaultIListClassMap : ExcelClassMap<IListClass>
+    {
+        public DefaultIListClassMap()
+        {
+            MapList<object>(p => p.Value);
         }
     }
 
@@ -2575,6 +2810,19 @@ public class MapSplitEnumerableTests
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2)
                 );
+        }
+    }
+
+    public class ArrayListClass
+    {
+        public ArrayList Value { get; set; } = default!;
+    }
+
+    public class DefaultArrayListClassMap : ExcelClassMap<ArrayListClass>
+    {
+        public DefaultArrayListClassMap()
+        {
+            MapList<string>(p => p.Value);
         }
     }
 
@@ -3132,7 +3380,7 @@ public class MapSplitEnumerableTests
 
     public class CustomAddIEnumerable<T> : IEnumerable<T>
     {
-        private readonly List<T> _inner = new List<T>();
+        private readonly List<T> _inner = new();
 
         public IEnumerator<T> GetEnumerator() => _inner.GetEnumerator();
 
@@ -3187,7 +3435,7 @@ public class MapSplitEnumerableTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        MissingColumnClass row = sheet.ReadRow<MissingColumnClass>();
+        var row = sheet.ReadRow<MissingColumnClass>();
         Assert.Null(row.MissingColumn);
     }
 
@@ -3281,7 +3529,7 @@ public class MapSplitEnumerableTests
     {
         public DefaultImmutableDictionaryBuilderIntClassMap()
         {
-            Map<int>(p => (IDictionary<string, int>)p.Value);
+            Map(p => (IDictionary<string, int>)p.Value);
         }
     }
 }

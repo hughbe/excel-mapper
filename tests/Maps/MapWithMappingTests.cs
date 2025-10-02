@@ -16,19 +16,19 @@ public class MapWithMappingTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        WithMappingValue row1 = sheet.ReadRow<WithMappingValue>();
+        var row1 = sheet.ReadRow<WithMappingValue>();
         Assert.Equal("a", row1.StringValue);
         Assert.Equal(MapUsingValueEnum.First, row1.EnumValue);
 
-        WithMappingValue row2 = sheet.ReadRow<WithMappingValue>();
+        var row2 = sheet.ReadRow<WithMappingValue>();
         Assert.Equal("extra", row2.StringValue);
         Assert.Equal(MapUsingValueEnum.First, row2.EnumValue);
 
-        WithMappingValue row3 = sheet.ReadRow<WithMappingValue>();
+        var row3 = sheet.ReadRow<WithMappingValue>();
         Assert.Equal("extra", row3.StringValue);
         Assert.Equal(MapUsingValueEnum.Second, row3.EnumValue);
 
-        WithMappingValue row4 = sheet.ReadRow<WithMappingValue>();
+        var row4 = sheet.ReadRow<WithMappingValue>();
         Assert.Null(row4.StringValue);
         Assert.Equal(MapUsingValueEnum.Unknown, row4.EnumValue);
     }
@@ -41,16 +41,16 @@ public class MapWithMappingTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        WithMappingValue row1 = sheet.ReadRow<WithMappingValue>();
+        var row1 = sheet.ReadRow<WithMappingValue>();
         Assert.Equal("12345", row1.StringValue);
 
-        WithMappingValue row2 = sheet.ReadRow<WithMappingValue>();
+        var row2 = sheet.ReadRow<WithMappingValue>();
         Assert.Equal("Missing", row2.StringValue);
 
-        WithMappingValue row3 = sheet.ReadRow<WithMappingValue>();
+        var row3 = sheet.ReadRow<WithMappingValue>();
         Assert.Equal("Missing", row3.StringValue);
 
-        WithMappingValue row4 = sheet.ReadRow<WithMappingValue>();
+        var row4 = sheet.ReadRow<WithMappingValue>();
         Assert.Null(row4.StringValue);
     }
 

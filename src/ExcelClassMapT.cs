@@ -7,6 +7,8 @@ using System.Reflection;
 using ExcelMapper.Utilities;
 using ExcelMapper.Mappers;
 using System.Linq;
+using ExcelMapper.Abstractions;
+using System.Collections;
 
 namespace ExcelMapper;
 
@@ -47,15 +49,15 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map primitives such as string, int etc.
     /// </summary>
-    /// <typeparam name="TProperty">The type of the property or field to map.</typeparam>
+    /// <typeparam name="TElement">The type of the property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public OneToOneMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
+    public OneToOneMap<TElement> Map<TElement>(Expression<Func<T, TElement>> expression)
     {
         MemberExpression memberExpression = GetMemberExpression(expression);
-        if (!AutoMapper.TryCreatePrimitiveMap(memberExpression.Member, EmptyValueStrategy, out OneToOneMap<TProperty>? map))
+        if (!AutoMapper.TryCreatePrimitiveMap(memberExpression.Member, EmptyValueStrategy, out OneToOneMap<TElement>? map))
         {
-            throw new ExcelMappingException($"Don't know how to map type {typeof(TProperty)}.");
+            throw new ExcelMappingException($"Don't know how to map type {typeof(TElement)}.");
         }
 
         AddMap(new ExcelPropertyMap<T>(memberExpression.Member, map), expression);
@@ -79,7 +81,7 @@ public class ExcelClassMap<T> : ExcelClassMap
 
         var memberExpression = GetMemberExpression(expression);
         var mapper = new EnumMapper(typeof(TProperty), ignoreCase);
-        var defaultReader = AutoMapper.GetDefaultSingleCellValueReader(memberExpression.Member);
+        var defaultReader = AutoMapper.GetDefaultCellReaderFactory(memberExpression.Member);
         var map = new OneToOneMap<TProperty>(defaultReader)
             .WithCellValueMappers(mapper)
             .WithThrowingEmptyFallback()
@@ -97,7 +99,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <param name="ignoreCase">A flag indicating whether enum parsing is case insensitive.</param>
     /// <returns>The map for the given property or field.</returns>
-    public OneToOneMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty?>> expression, bool ignoreCase) where TProperty : struct
+    public OneToOneMap<TProperty?> Map<TProperty>(Expression<Func<T, TProperty?>> expression, bool ignoreCase) where TProperty : struct
     {
         if (!typeof(TProperty).GetTypeInfo().IsEnum)
         {
@@ -106,12 +108,12 @@ public class ExcelClassMap<T> : ExcelClassMap
 
         var memberExpression = GetMemberExpression(expression);
         var mapper = new EnumMapper(typeof(TProperty), ignoreCase);
-        var defaultReader = AutoMapper.GetDefaultSingleCellValueReader(memberExpression.Member);
-        var map = new OneToOneMap<TProperty>(defaultReader)
+        var defaultReader = AutoMapper.GetDefaultCellReaderFactory(memberExpression.Member);
+        var map = new OneToOneMap<TProperty?>(defaultReader)
             .WithCellValueMappers(mapper)
             .WithEmptyFallback(null)
             .WithThrowingInvalidFallback();
-        AddMap(new ExcelPropertyMap<TProperty>(memberExpression.Member, map), expression);
+        AddMap(new ExcelPropertyMap<TProperty?>(memberExpression.Member, map), expression);
         return map;
     }
 
@@ -119,15 +121,31 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map enumerables.
     /// </summary>
-    /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneEnumerableMap<TProperty> Map<TProperty>(Expression<Func<T, IEnumerable<TProperty>>> expression)
+    public ManyToOneEnumerableMap<TElement> MapList<TElement>(Expression<Func<T, IEnumerable>> expression)
     {
         MemberExpression memberExpression = GetMemberExpression(expression);
-        ManyToOneEnumerableMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+        ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
-        AddMap(new ExcelPropertyMap<TProperty>(memberExpression.Member, map), expression);
+        AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
+        return map;
+    }
+
+    /// <summary>
+    /// Creates a map for a property or field given a MemberExpression reading the property or field.
+    /// This is used for map enumerables.
+    /// </summary>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
+    /// <param name="expression">A MemberExpression reading the property or field.</param>
+    /// <returns>The map for the given property or field.</returns>
+    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IEnumerable<TElement>>> expression)
+    {
+        MemberExpression memberExpression = GetMemberExpression(expression);
+        ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
+
+        AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
         return map;
     }
 
@@ -135,15 +153,15 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map ICollections.
     /// </summary>
-    /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneEnumerableMap<TProperty> Map<TProperty>(Expression<Func<T, ICollection<TProperty>>> expression)
+    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ICollection<TElement>>> expression)
     {
         MemberExpression memberExpression = GetMemberExpression(expression);
-        ManyToOneEnumerableMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+        ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
-        AddMap(new ExcelPropertyMap<TProperty>(memberExpression.Member, map), expression);
+        AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
         return map;
     }
 
@@ -151,15 +169,15 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map Collection.
     /// </summary>
-    /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneEnumerableMap<TProperty> Map<TProperty>(Expression<Func<T, Collection<TProperty>>> expression)
+    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, Collection<TElement>>> expression)
     {
         MemberExpression memberExpression = GetMemberExpression(expression);
-        ManyToOneEnumerableMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+        ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
-        AddMap(new ExcelPropertyMap<TProperty>(memberExpression.Member, map), expression);
+        AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
         return map;
     }
 
@@ -167,15 +185,15 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map ObservableCollection.
     /// </summary>
-    /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneEnumerableMap<TProperty> Map<TProperty>(Expression<Func<T, ObservableCollection<TProperty>>> expression)
+    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ObservableCollection<TElement>>> expression)
     {
         MemberExpression memberExpression = GetMemberExpression(expression);
-        ManyToOneEnumerableMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+        ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
-        AddMap(new ExcelPropertyMap<TProperty>(memberExpression.Member, map), expression);
+        AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
         return map;
     }
 
@@ -183,15 +201,15 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map ILists.
     /// </summary>
-    /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneEnumerableMap<TProperty> Map<TProperty>(Expression<Func<T, IList<TProperty>>> expression)
+    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IList<TElement>>> expression)
     {
         MemberExpression memberExpression = GetMemberExpression(expression);
-        ManyToOneEnumerableMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+        ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
-        AddMap(new ExcelPropertyMap<TProperty>(memberExpression.Member, map), expression);
+        AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
         return map;
     }
 
@@ -199,13 +217,13 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map IReadOnlyCollections.
     /// </summary>
-    /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneEnumerableMap<TProperty> Map<TProperty>(Expression<Func<T, IReadOnlyCollection<TProperty>>> expression)
+    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlyCollection<TElement>>> expression)
     {
         MemberExpression memberExpression = GetMemberExpression(expression);
-        ManyToOneEnumerableMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+        ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap(memberExpression.Member, map), expression);
         return map;
@@ -215,13 +233,13 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map IReadOnlyLists.
     /// </summary>
-    /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneEnumerableMap<TProperty> Map<TProperty>(Expression<Func<T, IReadOnlyList<TProperty>>> expression)
+    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlyList<TElement>>> expression)
     {
         MemberExpression memberExpression = GetMemberExpression(expression);
-        ManyToOneEnumerableMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+        ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap(memberExpression.Member, map), expression);
         return map;
@@ -231,15 +249,15 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map lists.
     /// </summary>
-    /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneEnumerableMap<TProperty> Map<TProperty>(Expression<Func<T, List<TProperty>>> expression)
+    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, List<TElement>>> expression)
     {
         MemberExpression memberExpression = GetMemberExpression(expression);
-        ManyToOneEnumerableMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+        ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
-        AddMap(new ExcelPropertyMap<TProperty>(memberExpression.Member, map), expression);
+        AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
         return map;
     }
 
@@ -247,15 +265,15 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map arrays.
     /// </summary>
-    /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneEnumerableMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty[]>> expression)
+    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, TElement[]>> expression)
     {
         MemberExpression memberExpression = GetMemberExpression(expression);
-        ManyToOneEnumerableMap<TProperty> map = GetMultiMap<TProperty>(memberExpression.Member);
+        ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
-        AddMap(new ExcelPropertyMap<TProperty>(memberExpression.Member, map), expression);
+        AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
         return map;
     }
 
@@ -263,18 +281,18 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map objects that contain nested objects, primitives or enumerables.
     /// </summary>
-    /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ExcelClassMap<TProperty> MapObject<TProperty>(Expression<Func<T, TProperty>> expression)
+    public ExcelClassMap<TElement> MapObject<TElement>(Expression<Func<T, TElement>> expression)
     {
         MemberExpression memberExpression = GetMemberExpression(expression);
-        if (!AutoMapper.TryCreateObjectMap(EmptyValueStrategy, out ExcelClassMap<TProperty>? map))
+        if (!AutoMapper.TryCreateObjectMap(EmptyValueStrategy, out ExcelClassMap<TElement>? map))
         {
-            throw new ExcelMappingException($"Could not map object of type \"{typeof(TProperty)}\".");
+            throw new ExcelMappingException($"Could not map object of type \"{typeof(TElement)}\".");
         }
 
-        AddMap(new ExcelPropertyMap<TProperty>(memberExpression.Member, map), expression);
+        AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
         return map;
     }
 
@@ -282,15 +300,15 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map IDictionarys.
     /// </summary>
-    /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneDictionaryMap<TProperty> Map<TProperty>(Expression<Func<T, IDictionary<string, TProperty>>> expression)
+    public ManyToOneDictionaryMap<TElement> Map<TElement>(Expression<Func<T, IDictionary<string, TElement>>> expression)
     {
         MemberExpression memberExpression = GetMemberExpression(expression);
-        var map = GetDictionaryMap<string, TProperty>(memberExpression.Member);
+        var map = GetDictionaryMap<string, TElement>(memberExpression.Member);
 
-        AddMap(new ExcelPropertyMap<TProperty>(memberExpression.Member, map), expression);
+        AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
         return map;
     }
 
@@ -298,13 +316,13 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map IReadOnlyDictionarys.
     /// </summary>
-    /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneDictionaryMap<TProperty> Map<TProperty>(Expression<Func<T, IReadOnlyDictionary<string, TProperty>>> expression)
+    public ManyToOneDictionaryMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlyDictionary<string, TElement>>> expression)
     {
         MemberExpression memberExpression = GetMemberExpression(expression);
-        var map = GetDictionaryMap<string, TProperty>(memberExpression.Member);
+        var map = GetDictionaryMap<string, TElement>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap(memberExpression.Member, map), expression);
         return map;
@@ -314,15 +332,15 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map IDictionarys.
     /// </summary>
-    /// <typeparam name="TProperty">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneDictionaryMap<TProperty> Map<TProperty>(Expression<Func<T, Dictionary<string, TProperty>>> expression)
+    public ManyToOneDictionaryMap<TElement> Map<TElement>(Expression<Func<T, Dictionary<string, TElement>>> expression)
     {
         MemberExpression memberExpression = GetMemberExpression(expression);
-        var map = GetDictionaryMap<string, TProperty>(memberExpression.Member);
+        var map = GetDictionaryMap<string, TElement>(memberExpression.Member);
 
-        AddMap(new ExcelPropertyMap<TProperty>(memberExpression.Member, map), expression);
+        AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
         return map;
     }
 
@@ -341,14 +359,14 @@ public class ExcelClassMap<T> : ExcelClassMap
         return map;
     }
 
-    private ManyToOneEnumerableMap<TProperty> GetMultiMap<TProperty>(MemberInfo member)
+    private ManyToOneEnumerableMap<TElement> GetMultiMap<TElement>(MemberInfo member)
     {
-        if (!AutoMapper.TryCreateGenericEnumerableMap(member, EmptyValueStrategy, out ManyToOneEnumerableMap<TProperty>? map))
+        if (!AutoMapper.TryCreateSplitMap<TElement>(member, EmptyValueStrategy, out var map))
         {
             throw new ExcelMappingException($"No known way to instantiate type \"{member.MemberType()}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
         }
 
-        return map;
+        return (ManyToOneEnumerableMap<TElement>)map;
     }
 
     private ManyToOneDictionaryMap<TValue> GetDictionaryMap<TKey, TValue>(MemberInfo member)
@@ -372,7 +390,7 @@ public class ExcelClassMap<T> : ExcelClassMap
         return body;
     }
 
-    protected internal MemberExpression GetMemberExpression<TProperty>(Expression<Func<T, TProperty>> expression)
+    protected internal MemberExpression GetMemberExpression<TElement>(Expression<Func<T, TElement>> expression)
     {
         Expression body = GetExpressionBody(expression.Body);
         if (body is not MemberExpression rootMemberExpression)
@@ -383,7 +401,7 @@ public class ExcelClassMap<T> : ExcelClassMap
         return rootMemberExpression;
     }
 
-    protected internal void AddMap<TProperty>(ExcelPropertyMap map, Expression<Func<T, TProperty>> expression)
+    protected internal void AddMap<TElement>(ExcelPropertyMap map, Expression<Func<T, TElement>> expression)
     {
         Expression expressionBody = GetExpressionBody(expression.Body);
         var expressions = new Stack<MemberExpression>();
@@ -450,17 +468,17 @@ public class ExcelClassMap<T> : ExcelClassMap
         }
     }
 
-    private void CreateObjectMapGeneric<TProperty>(ExcelPropertyMap propertyMap, MemberExpression memberExpression, Stack<MemberExpression> memberExpressions)
+    private void CreateObjectMapGeneric<TElement>(ExcelPropertyMap propertyMap, MemberExpression memberExpression, Stack<MemberExpression> memberExpressions)
     {
         ExcelPropertyMap? map = Properties.FirstOrDefault(m => m.Member.Equals(memberExpression.Member));
 
-        ExcelClassMap<TProperty> objectPropertyMap;
+        ExcelClassMap<TElement> objectPropertyMap;
         if (map == null)
         {
-            objectPropertyMap = new ExcelClassMap<TProperty>();
+            objectPropertyMap = new ExcelClassMap<TElement>();
             Properties.Add(new ExcelPropertyMap(memberExpression.Member, objectPropertyMap));
         }
-        else if (map.Map is not ExcelClassMap<TProperty> existingMap)
+        else if (map.Map is not ExcelClassMap<TElement> existingMap)
         {
             throw new InvalidOperationException($"Expression is already mapped differently as {map.GetType()}.");
         }

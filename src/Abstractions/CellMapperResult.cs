@@ -25,25 +25,25 @@ public readonly struct CellMapperResult
     /// The value could be mapped. This mapped value will be used to set the value of the property or
     /// field.
     /// </summary>
-    public static CellMapperResult Success(object? value) => new CellMapperResult(value, null, HandleAction.UseResultAndStopMapping);
+    public static CellMapperResult Success(object? value) => new(value, null, HandleAction.UseResultAndStopMapping);
 
     /// <summary>
     /// The value could be mapped, but prefer the result of mapping items further on in
     /// the mapping pipeline. This can be used for specifiying value mappers that are lower priority.
     /// </summary>
-    public static CellMapperResult SuccessIfNoOtherSuccess(object? result) => new CellMapperResult(result, null, HandleAction.UseResultAndContinueMapping);
+    public static CellMapperResult SuccessIfNoOtherSuccess(object? result) => new(result, null, HandleAction.UseResultAndContinueMapping);
 
     /// <summary>
     /// The value could not be mapped, but is not invalid. This can be used
     /// for optional value mappers.
     /// </summary>
-    public static CellMapperResult Ignore() => new CellMapperResult(null, null, HandleAction.IgnoreResultAndContinueMapping);
+    public static CellMapperResult Ignore() => new(null, null, HandleAction.IgnoreResultAndContinueMapping);
 
     /// <summary>
     /// The value was invalid. The InvalidFallback will be invoked if no other value mappers are
     /// successful.
     /// </summary>
-    public static CellMapperResult Invalid(Exception exception) => new CellMapperResult(null, exception, HandleAction.UseResultAndContinueMapping);
+    public static CellMapperResult Invalid(Exception exception) => new(null, exception, HandleAction.UseResultAndContinueMapping);
 
     public enum HandleAction
     {

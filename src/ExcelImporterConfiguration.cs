@@ -1,6 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using ExcelDataReader;
+using ExcelMapper.Abstractions;
+using ExcelMapper.Readers;
+using ExcelMapper.Utilities;
 
 namespace ExcelMapper;
 
@@ -12,11 +18,14 @@ public class ExcelImporterConfiguration
 {
     private Dictionary<Type, IMap> ClassMaps { get; } = [];
 
+    private Dictionary<Type, IMap> BackupClassMaps { get; } = [];
+
     /// <summary>
     ///  Gets or sets whether blank lines should be skipped during reading.
     ///  This may have performance implications so is off by default.
     /// </summary>
     public bool SkipBlankLines { get; set; }
+
 
     internal ExcelImporterConfiguration() { }
 

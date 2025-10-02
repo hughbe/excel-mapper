@@ -5,6 +5,45 @@ namespace ExcelMapper.Tests;
 public class MapInt32Tests
 {
     [Fact]
+    public void ReadRow_Int32_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<int>();
+        Assert.Equal(2, row1);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<int>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<int>());
+    }
+
+    [Fact]
+    public void ReadRow_NullableInt32_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<int?>();
+        Assert.Equal(2, row1);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<int?>();
+        Assert.Null(row2);
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<Int32Value>());
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedInt32_Success()
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
@@ -13,7 +52,7 @@ public class MapInt32Tests
         sheet.ReadHeading();
 
         // Valid cell value.
-        Int32Value row1 = sheet.ReadRow<Int32Value>();
+        var row1 = sheet.ReadRow<Int32Value>();
         Assert.Equal(2, row1.Value);
 
         // Empty cell value.
@@ -32,11 +71,11 @@ public class MapInt32Tests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableInt32Class row1 = sheet.ReadRow<NullableInt32Class>();
+        var row1 = sheet.ReadRow<NullableInt32Class>();
         Assert.Equal(2, row1.Value);
 
         // Empty cell value.
-        NullableInt32Class row2 = sheet.ReadRow<NullableInt32Class>();
+        var row2 = sheet.ReadRow<NullableInt32Class>();
         Assert.Null(row2.Value);
 
         // Invalid cell value.
@@ -53,7 +92,7 @@ public class MapInt32Tests
         sheet.ReadHeading();
 
         // Valid cell value.
-        Int32Value row1 = sheet.ReadRow<Int32Value>();
+        var row1 = sheet.ReadRow<Int32Value>();
         Assert.Equal(2, row1.Value);
 
         // Empty cell value.
@@ -73,11 +112,11 @@ public class MapInt32Tests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableInt32Class row1 = sheet.ReadRow<NullableInt32Class>();
+        var row1 = sheet.ReadRow<NullableInt32Class>();
         Assert.Equal(2, row1.Value);
 
         // Empty cell value.
-        NullableInt32Class row2 = sheet.ReadRow<NullableInt32Class>();
+        var row2 = sheet.ReadRow<NullableInt32Class>();
         Assert.Null(row2.Value);
 
         // Invalid cell value.
@@ -94,15 +133,15 @@ public class MapInt32Tests
         sheet.ReadHeading();
 
         // Valid cell value.
-        Int32Value row1 = sheet.ReadRow<Int32Value>();
+        var row1 = sheet.ReadRow<Int32Value>();
         Assert.Equal(2, row1.Value);
 
         // Empty cell value.
-        Int32Value row2 = sheet.ReadRow<Int32Value>();
+        var row2 = sheet.ReadRow<Int32Value>();
         Assert.Equal(-10, row2.Value);
 
         // Invalid cell value.
-        Int32Value row3 = sheet.ReadRow<Int32Value>();
+        var row3 = sheet.ReadRow<Int32Value>();
         Assert.Equal(10, row3.Value);
     }
 
@@ -116,15 +155,15 @@ public class MapInt32Tests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableInt32Class row1 = sheet.ReadRow<NullableInt32Class>();
+        var row1 = sheet.ReadRow<NullableInt32Class>();
         Assert.Equal(2, row1.Value);
 
         // Empty cell value.
-        NullableInt32Class row2 = sheet.ReadRow<NullableInt32Class>();
+        var row2 = sheet.ReadRow<NullableInt32Class>();
         Assert.Equal(-10, row2.Value);
 
         // Invalid cell value.
-        NullableInt32Class row3 = sheet.ReadRow<NullableInt32Class>();
+        var row3 = sheet.ReadRow<NullableInt32Class>();
         Assert.Equal(10, row3.Value);
     }
 

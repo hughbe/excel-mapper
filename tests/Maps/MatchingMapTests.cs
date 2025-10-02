@@ -13,13 +13,13 @@ public class MatchingMapTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        StringValue row1 = sheet.ReadRow<StringValue>();
+        var row1 = sheet.ReadRow<StringValue>();
         Assert.Equal("1", row1.Value);
 
-        StringValue row2 = sheet.ReadRow<StringValue>();
+        var row2 = sheet.ReadRow<StringValue>();
         Assert.Equal("2", row2.Value);
 
-        StringValue row3 = sheet.ReadRow<StringValue>();
+        var row3 = sheet.ReadRow<StringValue>();
         Assert.Equal("abc", row3.Value);
     }
 
@@ -55,7 +55,7 @@ public class MatchingMapTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        StringValue row1 = sheet.ReadRow<StringValue>();
+        var row1 = sheet.ReadRow<StringValue>();
         Assert.Null(row1.Value);
     }
 

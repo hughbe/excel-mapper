@@ -5,6 +5,45 @@ namespace ExcelMapper.Tests;
 public class MapDecimalTests
 {
     [Fact]
+    public void ReadRow_Decimal_Success()
+    {
+        using var importer = Helpers.GetImporter("Doubles.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<decimal>();
+        Assert.Equal(2.2345m, row1);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<decimal>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<decimal>());
+    }
+
+    [Fact]
+    public void ReadRow_NullableDecimal_Success()
+    {
+        using var importer = Helpers.GetImporter("Doubles.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<NullableDecimalClass>();
+        Assert.Equal(2.2345m, row1.Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<NullableDecimalClass>();
+        Assert.Null(row2.Value);
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DecimalClass>());
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedDecimal_Success()
     {
         using var importer = Helpers.GetImporter("Doubles.xlsx");
@@ -13,7 +52,7 @@ public class MapDecimalTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        DecimalClass row1 = sheet.ReadRow<DecimalClass>();
+        var row1 = sheet.ReadRow<DecimalClass>();
         Assert.Equal(2.2345m, row1.Value);
 
         // Empty cell value.
@@ -32,16 +71,17 @@ public class MapDecimalTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableDecimalClass row1 = sheet.ReadRow<NullableDecimalClass>();
+        var row1 = sheet.ReadRow<NullableDecimalClass>();
         Assert.Equal(2.2345m, row1.Value);
 
         // Empty cell value.
-        NullableDecimalClass row2 = sheet.ReadRow<NullableDecimalClass>();
+        var row2 = sheet.ReadRow<NullableDecimalClass>();
         Assert.Null(row2.Value);
 
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DecimalClass>());
     }
+
     [Fact]
     public void ReadRow_DefaultMappedDecimal_Success()
     {
@@ -52,7 +92,7 @@ public class MapDecimalTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        DecimalClass row1 = sheet.ReadRow<DecimalClass>();
+        var row1 = sheet.ReadRow<DecimalClass>();
         Assert.Equal(2.2345m, row1.Value);
 
         // Empty cell value.
@@ -72,11 +112,11 @@ public class MapDecimalTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableDecimalClass row1 = sheet.ReadRow<NullableDecimalClass>();
+        var row1 = sheet.ReadRow<NullableDecimalClass>();
         Assert.Equal(2.2345m, row1.Value);
 
         // Empty cell value.
-        NullableDecimalClass row2 = sheet.ReadRow<NullableDecimalClass>();
+        var row2 = sheet.ReadRow<NullableDecimalClass>();
         Assert.Null(row2.Value);
 
         // Invalid cell value.
@@ -93,15 +133,15 @@ public class MapDecimalTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        DecimalClass row1 = sheet.ReadRow<DecimalClass>();
+        var row1 = sheet.ReadRow<DecimalClass>();
         Assert.Equal(2.2345m, row1.Value);
 
         // Empty cell value.
-        DecimalClass row2 = sheet.ReadRow<DecimalClass>();
+        var row2 = sheet.ReadRow<DecimalClass>();
         Assert.Equal(-10, row2.Value);
 
         // Invalid cell value.
-        DecimalClass row3 = sheet.ReadRow<DecimalClass>();
+        var row3 = sheet.ReadRow<DecimalClass>();
         Assert.Equal(10, row3.Value);
     }
 
@@ -115,15 +155,15 @@ public class MapDecimalTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableDecimalClass row1 = sheet.ReadRow<NullableDecimalClass>();
+        var row1 = sheet.ReadRow<NullableDecimalClass>();
         Assert.Equal(2.2345m, row1.Value);
 
         // Empty cell value.
-        NullableDecimalClass row2 = sheet.ReadRow<NullableDecimalClass>();
+        var row2 = sheet.ReadRow<NullableDecimalClass>();
         Assert.Equal(-10, row2.Value);
 
         // Invalid cell value.
-        NullableDecimalClass row3 = sheet.ReadRow<NullableDecimalClass>();
+        var row3 = sheet.ReadRow<NullableDecimalClass>();
         Assert.Equal(10, row3.Value);
     }
 
@@ -137,15 +177,15 @@ public class MapDecimalTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableDecimalClass row1 = sheet.ReadRow<NullableDecimalClass>();
+        var row1 = sheet.ReadRow<NullableDecimalClass>();
         Assert.Equal(2.2345m, row1.Value);
 
         // Empty cell value.
-        NullableDecimalClass row2 = sheet.ReadRow<NullableDecimalClass>();
+        var row2 = sheet.ReadRow<NullableDecimalClass>();
         Assert.Equal((decimal?)null, row2.Value);
 
         // Invalid cell value.
-        NullableDecimalClass row3 = sheet.ReadRow<NullableDecimalClass>();
+        var row3 = sheet.ReadRow<NullableDecimalClass>();
         Assert.Equal((decimal?)null, row3.Value);
     }
 

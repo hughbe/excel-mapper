@@ -5,6 +5,45 @@ namespace ExcelMapper.Tests;
 public class MapFloatTests
 {
     [Fact]
+    public void ReadRow_Float_Success()
+    {
+        using var importer = Helpers.GetImporter("Doubles.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<float>();
+        Assert.Equal(2.2345f, row1);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<float>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<float>());
+    }
+
+    [Fact]
+    public void ReadRow_NullableFloat_Success()
+    {
+        using var importer = Helpers.GetImporter("Doubles.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<float?>();
+        Assert.Equal(2.2345f, row1);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<float?>();
+        Assert.Null(row2);
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<float?>());
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedFloat_Success()
     {
         using var importer = Helpers.GetImporter("Doubles.xlsx");
@@ -13,7 +52,7 @@ public class MapFloatTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        FloatClass row1 = sheet.ReadRow<FloatClass>();
+        var row1 = sheet.ReadRow<FloatClass>();
         Assert.Equal(2.2345f, row1.Value);
 
         // Empty cell value.
@@ -32,16 +71,17 @@ public class MapFloatTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableFloatClass row1 = sheet.ReadRow<NullableFloatClass>();
+        var row1 = sheet.ReadRow<NullableFloatClass>();
         Assert.Equal(2.2345f, row1.Value);
 
         // Empty cell value.
-        NullableFloatClass row2 = sheet.ReadRow<NullableFloatClass>();
+        var row2 = sheet.ReadRow<NullableFloatClass>();
         Assert.Null(row2.Value);
 
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableFloatClass>());
     }
+
     [Fact]
     public void ReadRow_DefaultMappedFloat_Success()
     {
@@ -52,7 +92,7 @@ public class MapFloatTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        FloatClass row1 = sheet.ReadRow<FloatClass>();
+        var row1 = sheet.ReadRow<FloatClass>();
         Assert.Equal(2.2345f, row1.Value);
 
         // Empty cell value.
@@ -72,11 +112,11 @@ public class MapFloatTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableFloatClass row1 = sheet.ReadRow<NullableFloatClass>();
+        var row1 = sheet.ReadRow<NullableFloatClass>();
         Assert.Equal(2.2345f, row1.Value);
 
         // Empty cell value.
-        NullableFloatClass row2 = sheet.ReadRow<NullableFloatClass>();
+        var row2 = sheet.ReadRow<NullableFloatClass>();
         Assert.Null(row2.Value);
 
         // Invalid cell value.
@@ -93,15 +133,15 @@ public class MapFloatTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        FloatClass row1 = sheet.ReadRow<FloatClass>();
+        var row1 = sheet.ReadRow<FloatClass>();
         Assert.Equal(2.2345f, row1.Value);
 
         // Empty cell value.
-        FloatClass row2 = sheet.ReadRow<FloatClass>();
+        var row2 = sheet.ReadRow<FloatClass>();
         Assert.Equal(-10, row2.Value);
 
         // Invalid cell value.
-        FloatClass row3 = sheet.ReadRow<FloatClass>();
+        var row3 = sheet.ReadRow<FloatClass>();
         Assert.Equal(10, row3.Value);
     }
 
@@ -115,15 +155,15 @@ public class MapFloatTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableFloatClass row1 = sheet.ReadRow<NullableFloatClass>();
+        var row1 = sheet.ReadRow<NullableFloatClass>();
         Assert.Equal(2.2345f, row1.Value);
 
         // Empty cell value.
-        NullableFloatClass row2 = sheet.ReadRow<NullableFloatClass>();
+        var row2 = sheet.ReadRow<NullableFloatClass>();
         Assert.Equal(-10, row2.Value);
 
         // Invalid cell value.
-        NullableFloatClass row3 = sheet.ReadRow<NullableFloatClass>();
+        var row3 = sheet.ReadRow<NullableFloatClass>();
         Assert.Equal(10, row3.Value);
     }
 

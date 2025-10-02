@@ -13,7 +13,7 @@ public class MapUsingTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        ConvertUsingValue row1 = sheet.ReadRow<ConvertUsingValue>();
+        var row1 = sheet.ReadRow<ConvertUsingValue>();
         Assert.Equal("aextra", row1.StringValue);
     }
 

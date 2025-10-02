@@ -14,15 +14,15 @@ public class MapForced
         sheet.ReadHeading();
 
         // Valid cell value.
-        ObjectValue row1 = sheet.ReadRow<ObjectValue>();
+        var row1 = sheet.ReadRow<ObjectValue>();
         Assert.Equal(2, row1.Value);
 
         // Empty cell value.
-        ObjectValue row2 = sheet.ReadRow<ObjectValue>();
+        var row2 = sheet.ReadRow<ObjectValue>();
         Assert.Equal(-10, row2.Value);
 
         // Invalid cell value.
-        ObjectValue row3 = sheet.ReadRow<ObjectValue>();
+        var row3 = sheet.ReadRow<ObjectValue>();
         Assert.Equal(10, row3.Value);
     }
 

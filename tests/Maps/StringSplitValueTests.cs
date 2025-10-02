@@ -15,10 +15,10 @@ public class StringSplitValueTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        AutoSplitWithSeparatorClass row1 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
+        var row1 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
         Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, row1.Value);
 
-        AutoSplitWithSeparatorClass row2 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
+        var row2 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
         Assert.Equal(new string[] { "1", "2", "3" }, row2.Value);
     }
 
@@ -31,10 +31,10 @@ public class StringSplitValueTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        AutoSplitWithSeparatorClass row1 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
+        var row1 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
         Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, row1.Value);
 
-        AutoSplitWithSeparatorClass row2 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
+        var row2 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
         Assert.Equal(new string[] { "1", "2", "3" }, row2.Value);
     }
 

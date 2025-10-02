@@ -334,7 +334,7 @@ public class ExcelSheetTests
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
         Assert.Equal(0, sheet.CurrentRowIndex);
 
-        BlankLinesClass row1 = sheet.ReadRow<BlankLinesClass>();
+        var row1 = sheet.ReadRow<BlankLinesClass>();
         Assert.Equal("A", row1.StringValue);
         Assert.Equal(1, row1.IntValue);
         Assert.Equal(1, sheet.CurrentRowIndex);
@@ -342,7 +342,7 @@ public class ExcelSheetTests
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
         Assert.Equal(2, sheet.CurrentRowIndex);
 
-        BlankLinesClass row2 = sheet.ReadRow<BlankLinesClass>();
+        var row2 = sheet.ReadRow<BlankLinesClass>();
         Assert.Equal("B", row2.StringValue);
         Assert.Equal(2, row2.IntValue);
         Assert.Equal(3, sheet.CurrentRowIndex);
@@ -353,7 +353,7 @@ public class ExcelSheetTests
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
         Assert.Equal(5, sheet.CurrentRowIndex);
 
-        BlankLinesClass row3 = sheet.ReadRow<BlankLinesClass>();
+        var row3 = sheet.ReadRow<BlankLinesClass>();
         Assert.Null(row3.StringValue);
         Assert.Equal(3, row3.IntValue);
         Assert.Equal(6, sheet.CurrentRowIndex);
@@ -361,7 +361,7 @@ public class ExcelSheetTests
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
         Assert.Equal(7, sheet.CurrentRowIndex);
 
-        BlankLinesClass row4 = sheet.ReadRow<BlankLinesClass>();
+        var row4 = sheet.ReadRow<BlankLinesClass>();
         Assert.Equal("C", row4.StringValue);
         Assert.Equal(0, row4.IntValue);
         Assert.Equal(8, sheet.CurrentRowIndex);
@@ -378,22 +378,22 @@ public class ExcelSheetTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        BlankLinesClass row1 = sheet.ReadRow<BlankLinesClass>();
+        var row1 = sheet.ReadRow<BlankLinesClass>();
         Assert.Equal("A", row1.StringValue);
         Assert.Equal(1, row1.IntValue);
         Assert.Equal(1, sheet.CurrentRowIndex);
 
-        BlankLinesClass row2 = sheet.ReadRow<BlankLinesClass>();
+        var row2 = sheet.ReadRow<BlankLinesClass>();
         Assert.Equal("B", row2.StringValue);
         Assert.Equal(2, row2.IntValue);
         Assert.Equal(3, sheet.CurrentRowIndex);
 
-        BlankLinesClass row3 = sheet.ReadRow<BlankLinesClass>();
+        var row3 = sheet.ReadRow<BlankLinesClass>();
         Assert.Null(row3.StringValue);
         Assert.Equal(3, row3.IntValue);
         Assert.Equal(6, sheet.CurrentRowIndex);
 
-        BlankLinesClass row4 = sheet.ReadRow<BlankLinesClass>();
+        var row4 = sheet.ReadRow<BlankLinesClass>();
         Assert.Equal("C", row4.StringValue);
         Assert.Equal(0, row4.IntValue);
         Assert.Equal(8, sheet.CurrentRowIndex);
@@ -570,7 +570,7 @@ public class ExcelSheetTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         ExcelSheet sheet = importer.ReadSheet();
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<Helpers.IListInterface>());
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IConvertible>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IDisposable>());
     }
 
     [Fact]

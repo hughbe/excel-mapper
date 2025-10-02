@@ -6,6 +6,27 @@ namespace ExcelMapper.Tests;
 public class MapIConvertibleTests
 {
     [Fact]
+    public void ReadRow_IConvertible_Success()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid value
+        var row1 = sheet.ReadRow<IConvertible>();
+        Assert.Equal("value", row1);
+
+        // Valid value
+        var row2 = sheet.ReadRow<IConvertible>();
+        Assert.Equal("  value  ", row2);
+
+        // Empty value
+        var row3 = sheet.ReadRow<IConvertible>();
+        Assert.Null(row3);
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedIConvertible_Success()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
@@ -14,15 +35,15 @@ public class MapIConvertibleTests
         sheet.ReadHeading();
 
         // Valid value
-        ConvertibleClass row1 = sheet.ReadRow<ConvertibleClass>();
+        var row1 = sheet.ReadRow<ConvertibleClass>();
         Assert.Equal("value", row1.Value);
 
         // Valid value
-        ConvertibleClass row2 = sheet.ReadRow<ConvertibleClass>();
+        var row2 = sheet.ReadRow<ConvertibleClass>();
         Assert.Equal("  value  ", row2.Value);
 
         // Empty value
-        ConvertibleClass row3 = sheet.ReadRow<ConvertibleClass>();
+        var row3 = sheet.ReadRow<ConvertibleClass>();
         Assert.Null(row3.Value);
     }
 
@@ -36,15 +57,15 @@ public class MapIConvertibleTests
         sheet.ReadHeading();
 
         // Valid value
-        ConvertibleClass row1 = sheet.ReadRow<ConvertibleClass>();
+        var row1 = sheet.ReadRow<ConvertibleClass>();
         Assert.Equal("value", row1.Value);
 
         // Valid value
-        ConvertibleClass row2 = sheet.ReadRow<ConvertibleClass>();
+        var row2 = sheet.ReadRow<ConvertibleClass>();
         Assert.Equal("  value  ", row2.Value);
 
         // Empty value
-        ConvertibleClass row3 = sheet.ReadRow<ConvertibleClass>();
+        var row3 = sheet.ReadRow<ConvertibleClass>();
         Assert.Null(row3.Value);
     }
 
@@ -58,15 +79,15 @@ public class MapIConvertibleTests
         sheet.ReadHeading();
 
         // Valid value
-        ConvertibleClass row1 = sheet.ReadRow<ConvertibleClass>();
+        var row1 = sheet.ReadRow<ConvertibleClass>();
         Assert.Equal("value", row1.Value);
 
         // Valid value
-        ConvertibleClass row2 = sheet.ReadRow<ConvertibleClass>();
+        var row2 = sheet.ReadRow<ConvertibleClass>();
         Assert.Equal("  value  ", row2.Value);
 
         // Empty value
-        ConvertibleClass row3 = sheet.ReadRow<ConvertibleClass>();
+        var row3 = sheet.ReadRow<ConvertibleClass>();
         Assert.Equal("empty", row3.Value);
     }
 

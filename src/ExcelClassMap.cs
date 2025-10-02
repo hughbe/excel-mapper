@@ -16,7 +16,7 @@ public class ExcelClassMap : IMap
 
     public ExcelPropertyMapCollection Properties { get; } = [];
 
-    public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
+    public virtual bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
     {
         object instance = Activator.CreateInstance(Type);
         foreach (ExcelPropertyMap property in Properties)

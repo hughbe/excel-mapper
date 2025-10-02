@@ -59,7 +59,7 @@ public class MapOptionalTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        MissingColumnPropertyClass row1 = sheet.ReadRow<MissingColumnPropertyClass>();
+        var row1 = sheet.ReadRow<MissingColumnPropertyClass>();
         Assert.Equal(10, row1.NoSuchColumn);
     }
 
@@ -72,7 +72,7 @@ public class MapOptionalTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        MissingColumnFieldClass row1 = sheet.ReadRow<MissingColumnFieldClass>();
+        var row1 = sheet.ReadRow<MissingColumnFieldClass>();
         Assert.Equal(10, row1.NoSuchColumn);
     }
 
@@ -130,7 +130,7 @@ public class MapOptionalTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IgnoredColumnPropertyClass row1 = sheet.ReadRow<IgnoredColumnPropertyClass>();
+        var row1 = sheet.ReadRow<IgnoredColumnPropertyClass>();
         Assert.Equal("CustomValue", row1.StringValue);
         Assert.Equal("a", row1.MappedValue);
     }
@@ -143,7 +143,7 @@ public class MapOptionalTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IgnoredColumnFieldClass row1 = sheet.ReadRow<IgnoredColumnFieldClass>();
+        var row1 = sheet.ReadRow<IgnoredColumnFieldClass>();
         Assert.Equal("CustomValue", row1.StringValue);
         Assert.Equal("a", row1.MappedValue);
     }
@@ -156,7 +156,7 @@ public class MapOptionalTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        MissingColumnIgnoredPropertyClass row1 = sheet.ReadRow<MissingColumnIgnoredPropertyClass>();
+        var row1 = sheet.ReadRow<MissingColumnIgnoredPropertyClass>();
         Assert.Equal(10, row1.NoSuchColumn);
         Assert.Equal("a", row1.MappedValue);
     }
@@ -169,7 +169,7 @@ public class MapOptionalTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        MissingColumnIgnoredFieldClass row1 = sheet.ReadRow<MissingColumnIgnoredFieldClass>();
+        var row1 = sheet.ReadRow<MissingColumnIgnoredFieldClass>();
         Assert.Equal(10, row1.NoSuchColumn);
         Assert.Equal("a", row1.MappedValue);
     }
@@ -238,7 +238,7 @@ public class MapOptionalTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IgnoredRecursivePropertyClass row1 = sheet.ReadRow<IgnoredRecursivePropertyClass>();
+        var row1 = sheet.ReadRow<IgnoredRecursivePropertyClass>();
         Assert.Null(row1.StringValue);
         Assert.Equal("a", row1.MappedValue);
     }
@@ -251,7 +251,7 @@ public class MapOptionalTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        IgnoredRecursiveFieldClass row1 = sheet.ReadRow<IgnoredRecursiveFieldClass>();
+        var row1 = sheet.ReadRow<IgnoredRecursiveFieldClass>();
         Assert.Null(row1.StringValue);
         Assert.Equal("a", row1.MappedValue);
     }

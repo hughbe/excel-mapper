@@ -5,6 +5,45 @@ namespace ExcelMapper.Tests;
 public class MapDoubleTests
 {
     [Fact]
+    public void ReadRow_Double_Success()
+    {
+        using var importer = Helpers.GetImporter("Doubles.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<double>();
+        Assert.Equal(2.2345, row1);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<double>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<double>());
+    }
+
+    [Fact]
+    public void ReadRow_NullableDouble_Success()
+    {
+        using var importer = Helpers.GetImporter("Doubles.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<double?>();
+        Assert.Equal(2.2345, row1);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<double?>();
+        Assert.Null(row2);
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<double?>());
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedDouble_Success()
     {
         using var importer = Helpers.GetImporter("Doubles.xlsx");
@@ -13,7 +52,7 @@ public class MapDoubleTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        DoubleClass row1 = sheet.ReadRow<DoubleClass>();
+        var row1 = sheet.ReadRow<DoubleClass>();
         Assert.Equal(2.2345, row1.Value);
 
         // Empty cell value.
@@ -32,11 +71,11 @@ public class MapDoubleTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableDoubleClass row1 = sheet.ReadRow<NullableDoubleClass>();
+        var row1 = sheet.ReadRow<NullableDoubleClass>();
         Assert.Equal(2.2345, row1.Value);
 
         // Empty cell value.
-        NullableDoubleClass row2 = sheet.ReadRow<NullableDoubleClass>();
+        var row2 = sheet.ReadRow<NullableDoubleClass>();
         Assert.Null(row2.Value);
 
         // Invalid cell value.
@@ -53,7 +92,7 @@ public class MapDoubleTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        DoubleClass row1 = sheet.ReadRow<DoubleClass>();
+        var row1 = sheet.ReadRow<DoubleClass>();
         Assert.Equal(2.2345, row1.Value);
 
         // Empty cell value.
@@ -73,11 +112,11 @@ public class MapDoubleTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableDoubleClass row1 = sheet.ReadRow<NullableDoubleClass>();
+        var row1 = sheet.ReadRow<NullableDoubleClass>();
         Assert.Equal(2.2345, row1.Value);
 
         // Empty cell value.
-        NullableDoubleClass row2 = sheet.ReadRow<NullableDoubleClass>();
+        var row2 = sheet.ReadRow<NullableDoubleClass>();
         Assert.Null(row2.Value);
 
         // Invalid cell value.
@@ -94,15 +133,15 @@ public class MapDoubleTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        DoubleClass row1 = sheet.ReadRow<DoubleClass>();
+        var row1 = sheet.ReadRow<DoubleClass>();
         Assert.Equal(2.2345, row1.Value);
 
         // Empty cell value.
-        DoubleClass row2 = sheet.ReadRow<DoubleClass>();
+        var row2 = sheet.ReadRow<DoubleClass>();
         Assert.Equal(-10, row2.Value);
 
         // Invalid cell value.
-        DoubleClass row3 = sheet.ReadRow<DoubleClass>();
+        var row3 = sheet.ReadRow<DoubleClass>();
         Assert.Equal(10, row3.Value);
     }
 
@@ -116,15 +155,15 @@ public class MapDoubleTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableDoubleClass row1 = sheet.ReadRow<NullableDoubleClass>();
+        var row1 = sheet.ReadRow<NullableDoubleClass>();
         Assert.Equal(2.2345, row1.Value);
 
         // Empty cell value.
-        NullableDoubleClass row2 = sheet.ReadRow<NullableDoubleClass>();
+        var row2 = sheet.ReadRow<NullableDoubleClass>();
         Assert.Equal(-10, row2.Value);
 
         // Invalid cell value.
-        NullableDoubleClass row3 = sheet.ReadRow<NullableDoubleClass>();
+        var row3 = sheet.ReadRow<NullableDoubleClass>();
         Assert.Equal(10, row3.Value);
     }
 

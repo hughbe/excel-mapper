@@ -5,6 +5,51 @@ namespace ExcelMapper.Tests;
 public class MapEnumTests
 {
     [Fact]
+    public void ReadRow_Enum_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Enums.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<TestEnum>();
+        Assert.Equal(TestEnum.Member, row1);
+
+        // Different case cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TestEnum>());
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TestEnum>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TestEnum>());
+    }
+
+    [Fact]
+    public void ReadRow_NullableEnum_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Enums.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<TestEnum?>();
+        Assert.Equal(TestEnum.Member, row1);
+
+        // Different case cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TestEnum?>());
+
+        // Empty cell value.
+        var row3 = sheet.ReadRow<TestEnum?>();
+        Assert.Null(row3);
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TestEnum?>());
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedEnum_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Enums.xlsx");
@@ -13,11 +58,11 @@ public class MapEnumTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        EnumClass row1 = sheet.ReadRow<EnumClass>();
+        var row1 = sheet.ReadRow<EnumClass>();
         Assert.Equal(TestEnum.Member, row1.Value);
 
         // Different case cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableEnumClass>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumClass>());
 
         // Empty cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumClass>());
@@ -35,14 +80,14 @@ public class MapEnumTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableEnumClass row1 = sheet.ReadRow<NullableEnumClass>();
+        var row1 = sheet.ReadRow<NullableEnumClass>();
         Assert.Equal(TestEnum.Member, row1.Value);
 
         // Different case cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableEnumClass>());
 
         // Empty cell value.
-        NullableEnumClass row3 = sheet.ReadRow<NullableEnumClass>();
+        var row3 = sheet.ReadRow<NullableEnumClass>();
         Assert.Null(row3.Value);
 
         // Invalid cell value.
@@ -59,11 +104,11 @@ public class MapEnumTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        EnumClass row1 = sheet.ReadRow<EnumClass>();
+        var row1 = sheet.ReadRow<EnumClass>();
         Assert.Equal(TestEnum.Member, row1.Value);
 
         // Different case cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableEnumClass>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumClass>());
 
         // Empty cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumClass>());
@@ -82,14 +127,14 @@ public class MapEnumTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableEnumClass row1 = sheet.ReadRow<NullableEnumClass>();
+        var row1 = sheet.ReadRow<NullableEnumClass>();
         Assert.Equal(TestEnum.Member, row1.Value);
 
         // Different case cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableEnumClass>());
 
         // Empty cell value.
-        NullableEnumClass row3 = sheet.ReadRow<NullableEnumClass>();
+        var row3 = sheet.ReadRow<NullableEnumClass>();
         Assert.Null(row3.Value);
 
         // Invalid cell value.
@@ -106,19 +151,19 @@ public class MapEnumTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        EnumClass row1 = sheet.ReadRow<EnumClass>();
+        var row1 = sheet.ReadRow<EnumClass>();
         Assert.Equal(TestEnum.Member, row1.Value);
 
         // Different case cell value.
-        EnumClass row2 = sheet.ReadRow<EnumClass>();
+        var row2 = sheet.ReadRow<EnumClass>();
         Assert.Equal(TestEnum.Invalid, row2.Value);
 
         // Empty cell value.
-        EnumClass row3 = sheet.ReadRow<EnumClass>();
+        var row3 = sheet.ReadRow<EnumClass>();
         Assert.Equal(TestEnum.Empty, row3.Value);
 
         // Invalid cell value.
-        EnumClass row4 = sheet.ReadRow<EnumClass>();
+        var row4 = sheet.ReadRow<EnumClass>();
         Assert.Equal(TestEnum.Invalid, row4.Value);
     }
 
@@ -132,19 +177,19 @@ public class MapEnumTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        EnumClass row1 = sheet.ReadRow<EnumClass>();
+        var row1 = sheet.ReadRow<EnumClass>();
         Assert.Equal(TestEnum.Member, row1.Value);
 
         // Different case cell value.
-        EnumClass row2 = sheet.ReadRow<EnumClass>();
+        var row2 = sheet.ReadRow<EnumClass>();
         Assert.Equal(TestEnum.Member, row2.Value);
 
         // Empty cell value.
-        EnumClass row3 = sheet.ReadRow<EnumClass>();
+        var row3 = sheet.ReadRow<EnumClass>();
         Assert.Equal(TestEnum.Empty, row3.Value);
 
         // Invalid cell value.
-        EnumClass row4 = sheet.ReadRow<EnumClass>();
+        var row4 = sheet.ReadRow<EnumClass>();
         Assert.Equal(TestEnum.Invalid, row4.Value);
     }
 
@@ -158,19 +203,19 @@ public class MapEnumTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableEnumClass row1 = sheet.ReadRow<NullableEnumClass>();
+        var row1 = sheet.ReadRow<NullableEnumClass>();
         Assert.Equal(TestEnum.Member, row1.Value);
 
         // Different case cell value.
-        NullableEnumClass row2 = sheet.ReadRow<NullableEnumClass>();
+        var row2 = sheet.ReadRow<NullableEnumClass>();
         Assert.Equal(TestEnum.Invalid, row2.Value);
 
         // Empty cell value.
-        NullableEnumClass row3 = sheet.ReadRow<NullableEnumClass>();
+        var row3 = sheet.ReadRow<NullableEnumClass>();
         Assert.Equal(TestEnum.Empty, row3.Value);
 
         // Invalid cell value.
-        NullableEnumClass row4 = sheet.ReadRow<NullableEnumClass>();
+        var row4 = sheet.ReadRow<NullableEnumClass>();
         Assert.Equal(TestEnum.Invalid, row4.Value);
     }
 
@@ -184,19 +229,19 @@ public class MapEnumTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        NullableEnumClass row1 = sheet.ReadRow<NullableEnumClass>();
+        var row1 = sheet.ReadRow<NullableEnumClass>();
         Assert.Equal(TestEnum.Member, row1.Value);
 
         // Different case cell value.
-        NullableEnumClass row2 = sheet.ReadRow<NullableEnumClass>();
+        var row2 = sheet.ReadRow<NullableEnumClass>();
         Assert.Equal(TestEnum.Member, row2.Value);
 
         // Empty cell value.
-        NullableEnumClass row3 = sheet.ReadRow<NullableEnumClass>();
+        var row3 = sheet.ReadRow<NullableEnumClass>();
         Assert.Equal(TestEnum.Empty, row3.Value);
 
         // Invalid cell value.
-        NullableEnumClass row4 = sheet.ReadRow<NullableEnumClass>();
+        var row4 = sheet.ReadRow<NullableEnumClass>();
         Assert.Equal(TestEnum.Invalid, row4.Value);
     }
 

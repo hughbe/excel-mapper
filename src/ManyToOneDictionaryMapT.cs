@@ -9,7 +9,7 @@ using ExcelMapper.Readers;
 
 namespace ExcelMapper;
 
-public delegate IDictionary<string, T> CreateDictionaryFactory<T>(IEnumerable<KeyValuePair<string, T>> elements);
+public delegate object CreateDictionaryFactory<T>(IEnumerable<KeyValuePair<string, T>> elements);
 
 /// <summary>
 /// A map that reads one or more values from one or more cells and maps these values to the type of the

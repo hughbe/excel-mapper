@@ -20,7 +20,7 @@ public class MapNestedObjectTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        NestedObjectValue row1 = sheet.ReadRow<NestedObjectValue>();
+        var row1 = sheet.ReadRow<NestedObjectValue>();
         Assert.Equal("a", row1.SubValue1.StringValue);
         Assert.Equal(new string[] { "a", "b" }, row1.SubValue1.SplitStringValue);
         Assert.Equal(1, row1.SubValue2.IntValue);
@@ -61,7 +61,7 @@ public class MapNestedObjectTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        NestedObjectValue row1 = sheet.ReadRow<NestedObjectValue>();
+        var row1 = sheet.ReadRow<NestedObjectValue>();
         Assert.Equal("a", row1.SubValue1.StringValue);
         Assert.Equal(new string[] { "a", "b" }, row1.SubValue1.SplitStringValue);
         Assert.Equal(1, row1.SubValue2.IntValue);
@@ -102,7 +102,7 @@ public class MapNestedObjectTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        NestedObjectValue row1 = sheet.ReadRow<NestedObjectValue>();
+        var row1 = sheet.ReadRow<NestedObjectValue>();
         Assert.Equal("a", row1.SubValue1.StringValue);
         Assert.Equal(new string[] { "a", "b" }, row1.SubValue1.SplitStringValue);
         Assert.Equal(1, row1.SubValue2.IntValue);
@@ -131,7 +131,7 @@ public class MapNestedObjectTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        NestedListParentClass row1 = sheet.ReadRow<NestedListParentClass>();
+        var row1 = sheet.ReadRow<NestedListParentClass>();
         Assert.Equal("TheName", row1.Name);
         Assert.Equal("TheAddress", row1.Address);
         Assert.Equal(2, row1.BusinessHours.Count);
