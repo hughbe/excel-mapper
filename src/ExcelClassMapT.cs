@@ -79,15 +79,10 @@ public class ExcelClassMap<T> : ExcelClassMap
             throw new ArgumentException($"The type ${typeof(TProperty)} must be an Enum.", nameof(TProperty));
         }
 
-        var memberExpression = GetMemberExpression(expression);
         var mapper = new EnumMapper(typeof(TProperty), ignoreCase);
-        var defaultReader = AutoMapper.GetDefaultCellReaderFactory(memberExpression.Member);
-        var map = new OneToOneMap<TProperty>(defaultReader)
-            .WithCellValueMappers(mapper)
-            .WithThrowingEmptyFallback()
-            .WithThrowingInvalidFallback();
-
-        AddMap(new ExcelPropertyMap<TProperty>(memberExpression.Member, map), expression);
+        var map = Map(expression);
+        map.RemoveCellValueMapper(0);
+        map.AddCellValueMapper(mapper);
         return map;
     }
 
@@ -106,14 +101,10 @@ public class ExcelClassMap<T> : ExcelClassMap
             throw new ArgumentException($"The type ${typeof(TProperty)} must be an Enum.", nameof(TProperty));
         }
 
-        var memberExpression = GetMemberExpression(expression);
         var mapper = new EnumMapper(typeof(TProperty), ignoreCase);
-        var defaultReader = AutoMapper.GetDefaultCellReaderFactory(memberExpression.Member);
-        var map = new OneToOneMap<TProperty?>(defaultReader)
-            .WithCellValueMappers(mapper)
-            .WithEmptyFallback(null)
-            .WithThrowingInvalidFallback();
-        AddMap(new ExcelPropertyMap<TProperty?>(memberExpression.Member, map), expression);
+        var map = Map(expression);
+        map.RemoveCellValueMapper(0);
+        map.AddCellValueMapper(mapper);
         return map;
     }
 

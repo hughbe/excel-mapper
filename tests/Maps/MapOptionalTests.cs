@@ -51,6 +51,18 @@ public class MapOptionalTests
     }
 
     [Fact]
+    public void ReadRows_CustomAttributeMappedPropertyDoesNotExist_Success()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<MissingColumnPropertyAttributeClass>();
+        Assert.Equal(10, row1.NoSuchColumn);
+    }
+
+    [Fact]
     public void ReadRows_CustomMappedPropertyDoesNotExist_Success()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
@@ -78,6 +90,12 @@ public class MapOptionalTests
 
     private class MissingColumnPropertyClass
     {
+        public int NoSuchColumn { get; set; } = 10;
+    }
+
+    private class MissingColumnPropertyAttributeClass
+    {
+        [ExcelOptional]
         public int NoSuchColumn { get; set; } = 10;
     }
 

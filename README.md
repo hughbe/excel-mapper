@@ -81,8 +81,34 @@ Console.WriteLine(president[1].Name); // Barack Obama
 Console.WriteLine(president[1].Age); // 58
 ```
 
+### Optional Properties
+By default, ExcelMapper throws an exception if a property or field is not found. This default can be changed by applying the `ExcelOptionalAttribute`. This is useful for cases where the a column is not always
+included in an Excel file.
+
+In the example below, no exception will be thrown if the `Age` column is missing.
+| Name           |
+|----------------|
+| Donald Trump   |
+| Barack Obama   |
+
+```cs
+public class President
+{
+    public string Name { get; set; }
+
+    // If you want to support a property that may or may have a relevant column.
+    [ExcelOptional]
+    public int Age { get; set; }
+}
+```
+
 ### Ignoring Properties
 ExcelMapper supports ignoring properties when deserializing with the `ExcelIgnoreAttribute` attribute. This is useful for cases where the the data structure is recursive, or the property is missing data and you don't want to create a custom mapper and call `MakeOptional`.
+
+In the example below:
+* The `Age` column will never be read.
+* An exception will not be thrown for the missing `NoSuchColumn`.
+* The `President` object will not be recursively read.
 
 | Name           | Age |
 |----------------|-----|

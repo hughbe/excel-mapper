@@ -93,16 +93,22 @@ public static class AutoMapper
             return false;
         }
 
-        var defaultReader = GetDefaultCellReaderFactory(member);
+        var defaultReader = GetDefaultCellReaderFactory(member, out var isOptional);
         map = new OneToOneMap<T>(defaultReader)
             .WithCellValueMappers(mapper)
             .WithEmptyFallbackItem(emptyFallback)
             .WithInvalidFallbackItem(invalidFallback);
+        if (isOptional)
+        {
+            map = map.MakeOptional();
+        }
         return true;
     }
 
-    internal static ICellReaderFactory GetDefaultCellReaderFactory(MemberInfo member)
+    private static ICellReaderFactory GetDefaultCellReaderFactory(MemberInfo member, out bool isOptional)
     {
+        isOptional = Attribute.IsDefined(member, typeof(ExcelOptionalAttribute));
+
         ExcelColumnNameAttribute colummnNameAttribute = member.GetCustomAttribute<ExcelColumnNameAttribute>();
         if (colummnNameAttribute != null)
         {
@@ -288,7 +294,7 @@ public static class AutoMapper
         }
         else
         {
-            defaultReaderFactory = new CharSplitReaderFactory(GetDefaultCellReaderFactory(member));
+            defaultReaderFactory = new CharSplitReaderFactory(GetDefaultCellReaderFactory(member, out var _));
         }
 
         map = new ManyToOneEnumerableMap<TElement>(defaultReaderFactory, elementMapping, factory);
