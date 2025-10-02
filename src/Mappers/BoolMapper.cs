@@ -13,7 +13,7 @@ namespace ExcelMapper.Mappers
 
         public CellMapperResult MapCellValue(ReadCellResult readResult)
         {
-            if (readResult.Reader != null && readResult.Reader.GetValue(readResult.ColumnIndex) is bool boolValue)
+            if (readResult.GetValue() is bool boolValue)
             {
                 return CellMapperResult.Success(boolValue);
             }

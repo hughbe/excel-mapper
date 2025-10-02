@@ -46,7 +46,7 @@ namespace ExcelMapper.Mappers
 
         public CellMapperResult MapCellValue(ReadCellResult readResult)
         {
-            if (readResult.Reader != null && readResult.Reader.GetValue(readResult.ColumnIndex) is DateTime dateTimeValue)
+            if (readResult.GetValue() is DateTime dateTimeValue)
             {
                 return CellMapperResult.Success(dateTimeValue);
             }
@@ -54,7 +54,7 @@ namespace ExcelMapper.Mappers
             var stringValue = readResult.GetString();
             try
             {
-                DateTime result = DateTime.ParseExact(stringValue, Formats, Provider, Style);
+                var result = DateTime.ParseExact(stringValue, Formats, Provider, Style);
                 return CellMapperResult.Success(result);
             }
             catch (Exception exception)

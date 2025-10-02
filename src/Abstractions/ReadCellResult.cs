@@ -45,6 +45,23 @@ public struct ReadCellResult
         }
     }
 
+    public object? GetValue()
+    {
+        if (Reader == null || _stringValue != null)
+        {
+            return _stringValue;
+        }
+
+        var value = Reader.GetValue(ColumnIndex);
+        // Cache the string value for performance to save us needing to read it again.
+        if (value is string stringValue)
+        {
+            _stringValue = stringValue;
+        }
+
+        return value;
+    }
+
     public bool IsEmpty()
     {
         if (Reader == null || _stringValue != null)
@@ -58,21 +75,8 @@ public struct ReadCellResult
             return string.IsNullOrEmpty(GetString());
         }
 
-        // For performance, don't get this as a string.
-        var value = Reader.GetValue(ColumnIndex);
-        if (value is null)
-        {
-            return true;
-        }
-
-        // Cache the string value for performance to save us needing to read it again.
-        if (value is string stringValue)
-        {
-            _stringValue = stringValue;
-            return string.IsNullOrEmpty(stringValue);
-        }
-
-        return false;
+        var value = GetValue();
+        return value is null || (value is string stringValue && string.IsNullOrEmpty(stringValue));
     }
 
     /// <summary>
