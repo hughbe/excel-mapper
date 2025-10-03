@@ -1,14 +1,99 @@
 # ExcelMapper
 
-A library that reads a row of an Excel sheet and maps it to an object. A flexible and extensible fluent mapping system allows you to customize the way the row is mapped to an object.
+ExcelMapper is a library that reads a row of an Excel sheet and maps it to an object. A flexible and extensible fluent mapping system allows you to customize the way the row is mapped to an object.
 
 ![.NET Core](https://github.com/hughbe/excel-mapper/workflows/.NET%20Core/badge.svg)
 [![Nuget](https://img.shields.io/nuget/v/ExcelDataReader.Mapping)](https://www.nuget.org/packages/ExcelDataReader.Mapping/)
 
-## Basic Mapping
+The library is based on [ExcelDataReader](https://github.com/ExcelDataReader/ExcelDataReader).
 
-ExcelMapper will go through each public property or field and attempt to map the value of the cell in the column with the name of the member. If the column cannot be found or mapped, an exception will be thrown.
+## Reading a workbook
+To read a workbook, construct an `ExcelImporter` object.
+```cs
+using ExcelMapping;
 
+// Excel.
+using var stream = File.OpenRead("File.xlsx");
+using var importer = new ExcelImporter(stream)
+
+// Csv.
+using var stream = File.OpenRead("File.csv");
+using var importer = new ExcelImporter(stream, ExcelImporterFileType.Csv);
+
+// Custom reader.
+using var stream = File.OpenRead("File.xlsx");
+using var excelReader = ExcelReaderFactory.CreateReader(stream);
+using var importer = new ExcelImporter(excelReader);
+```
+
+### Reading Sheets
+To read all sheets, invoke `ExcelImporter.ReadSheets()`.
+```cs
+var sheets = importer.ReadSheets();
+
+var name = sheets[0].Name;
+var visibility = sheets[0].Visibility;
+var index = sheets[0].Index;
+var numberOfColumns = sheets[0].NumberOfColumns;
+```
+
+To read sheet's in order, invoke `ExcelSheet ReadSheet()` or the `bool TryReadSheet(out ExcelSheet sheet)`.
+```cs
+// Throws an error if there are no more sheets.
+var sheet1 = importer.ReadSheet();
+
+// Returns false if there are no more sheets.
+if (importer.TryReadSheet(out var sheet2))
+{
+}
+```
+
+To read a sheet by name, invoke `ReadSheet(string sheetName)` or the `TryReadSheet(string sheetName, out ExcelSheet sheet)`.
+```cs
+// Throws an error if the sheet does not exist.
+var sheet = importer.ReadSheet("SheetName");
+
+// Returns false if the sheet does not exist.
+if (importer.TryReadSheet("SheetName", out var sheet2))
+{
+}
+```
+
+To read a sheet by zero-based index, invoke `ReadSheet(int sheetIndex)` or the `TryReadSheet(int sheetIndex, out ExcelSheet sheet)`.
+```cs
+// Throws an error if the sheet does not exist.
+var sheet = importer.ReadSheet(1);
+
+// Returns false if the sheet does not exist.
+if (importer.TryReadSheet(1, out var sheet2))
+{
+}
+```
+
+## Reading Rows
+By default, ExcelMapper automatically maps each public property or field and attempt to map the value of the cell in the column with the name of the member. If the column cannot be found or mapped, an exception will be thrown.
+
+Invoke `ReadRows<T>()` to read all rows in a sheet.
+```cs
+var rows = sheet.ReadRows<T>();
+```
+
+Invoke ReadRows<T>(int startIndex, int count)` to read rows in a specific range.
+```cs
+var rows = sheet.ReadRows<T>();
+```
+
+Invoke `ReadRow<T>()` or `TryReadRow<T>(out T row)` to read rows in order.
+```cs
+var row1 = sheet.ReadRow<T>();
+if (sheet.TryReadRow<T>(out var row2))
+{
+}
+```
+
+You can skip blank lines by setting `importer.Configuration.SkipBlankLines = true`. This is off by default for performance reasons.
+
+For example:
 | Name          | Location         | Attendance | Date       | Link                    | Revenue | Successful | Cause   |
 |---------------|------------------|------------|------------|-------------------------|---------|------------|---------|
 | Pub Quiz      | The Blue Anchor  | 20         | 18/07/2017 | http://eventbrite.com   | 100.2   | TRUE       | Charity |
@@ -44,10 +129,6 @@ Console.WriteLine(events[0].Name); // Pub Quiz
 Console.WriteLine(events[1].Name); // Live Music
 Console.WriteLine(events[2].Name); // Live Football
 ```
-
-You can skip blank lines by setting `importer.Configuration.SkipBlankLines = true`. This is off by default for performance reasons.
-
-## Attribute Mapping
 
 ### Custom Column Names
 ExcelMapper supports specifying a custom column name with the `ExcelColumnName` attribute. This is useful for cases where we want to map a column name that is different from the property name in the data structure, for example the column name contains whitespace or the column name contains characters that can't be represented in C#.
@@ -665,73 +746,6 @@ using (var importer = new ExcelImporter(stream))
     Console.WriteLine(events[0].Name); // Pub Quiz
     Console.WriteLine(events[1].Name); // Live Music
     Console.WriteLine(events[2].Name); // Live Football
-}
-```
-
-# Reading Sheets
-
-ExcelMapper supports multiple sheets and provides APIs to read particular sheets.
-
-## Enumerating through all sheets
-
-Use the `ReadSheets` method to enumerate through all sheets in a document. Enumeration is reset at the end.
-
-```cs
-using (var stream = File.OpenRead("Sheet.xlsx"))
-using (var importer = new ExcelImporter(stream))
-{
-    foreach (ExcelSheet sheet in importer.ReadSheets())
-    {
-        // Do something with the sheet.
-    }
-}
-```
-
-## Getting the next sheet
-
-Use the `ReadSheet()` method to read the next sheet. This will throw if there are no more sheets. Use the `TryReadSheet(out ExcelSheet sheet)` method to avoid throwing behaviour.
-
-```cs
-using (var stream = File.OpenRead("Sheet.xlsx"))
-using (var importer = new ExcelImporter(stream))
-{
-    // Either:
-    ExcelSheet sheet = importer.ReadSheet();
-
-    // Or:
-    bool success = importer.TryReadSheet(out ExcelSheet sheet);
-}
-```
-
-## Getting a sheet by name
-
-Use the `ReadSheet(string sheetName)` method to read a particular sheet by name. This will throw if the sheet is not found. Use the `TryReadSheet(string sheetName, out ExcelSheet sheet)` method to avoid throwing behaviour.
-
-```cs
-using (var stream = File.OpenRead("Sheet.xlsx"))
-using (var importer = new ExcelImporter(stream))
-{
-    // Either:
-    ExcelSheet sheet = importer.ReadSheet("Sheet Name");
-
-    // Or:
-    bool success = importer.TryReadSheet("Sheet Name", out ExcelSheet sheet);
-}
-```
-
-## Getting a sheet by index
-
-Use the `ReadSheet(int sheetIndex)` method to read a particular sheet at the given zero-based index. This will throw if the sheet is not found. Use the `TryReadSheet(int sheetIndex, out ExcelSheet sheet)` method to avoid throwing behaviour.
-
-```cs
-using (var stream = File.OpenRead("Sheet.xlsx"))
-using (var importer = new ExcelImporter(stream))
-{
-    // Either:
-    ExcelSheet sheet = importer.ReadSheet(0);
-
-    // Or:
-    bool success = importer.TryReadSheet(0, out ExcelSheet sheet);
 }
 ```
 

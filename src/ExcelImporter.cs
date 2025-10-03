@@ -33,14 +33,29 @@ public class ExcelImporter : IDisposable
     /// Constructs an importer that reads an Excel file from a stream.
     /// </summary>
     /// <param name="stream">A stream containing the Excel file bytes.</param>
-    public ExcelImporter(Stream stream)
+    public ExcelImporter(Stream stream) : this(stream, ExcelImporterFileType.Excel)
+    {
+    }
+
+    
+    /// <summary>
+    /// Constructs an importer that reads an Excel or csv file from a stream.
+    /// </summary>
+    /// <param name="stream">A stream containing the file to read.</param>
+    /// <param name="fileType">The type of file.</param>
+    public ExcelImporter(Stream stream, ExcelImporterFileType fileType)
     {
         if (stream == null)
         {
             throw new ArgumentNullException(nameof(stream));
         }
 
-        Reader = ExcelReaderFactory.CreateReader(stream);
+        Reader = fileType switch
+        {
+            ExcelImporterFileType.Excel => ExcelReaderFactory.CreateReader(stream),
+            ExcelImporterFileType.Csv => ExcelReaderFactory.CreateCsvReader(stream),
+            _ => throw new ArgumentException($"Invalid value \"{fileType}\".", nameof(fileType))
+        };
     }
 
     /// <summary>
