@@ -44,6 +44,15 @@ public class ExcelImporterTests
         Assert.Equal("Primitives", importer.ReadSheet().Name);
         Assert.Equal(3, importer.NumberOfSheets);
     }
+    
+    [Fact]
+    public void Ctor_Stream_OpenXml()
+    {
+        using var stream = Helpers.GetResource("OpenXML.xlsx");
+        using var importer = new ExcelImporter(stream);
+        Assert.Equal("Primitives", importer.ReadSheet().Name);
+        Assert.Equal(3, importer.NumberOfSheets);
+    }
 
     [Fact]
     public void Ctor_Stream_ExcelImporterFileType_Excel()
