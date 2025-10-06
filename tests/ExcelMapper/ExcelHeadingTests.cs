@@ -9,8 +9,9 @@ public class ExcelHeadingTests
     public void GetColumnName_GetColumnIndex_Roundtrips()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
-        ExcelHeading heading = sheet.ReadHeading();
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
+        Assert.Equal(["Int Value", "StringValue", "Bool Value", "Enum Value", "DateValue", "ArrayValue", "MappedValue", "TrimmedValue"], heading.ColumnNames);
 
         string[] columnNames = [.. heading.ColumnNames];
         for (int i = 0; i < columnNames.Length; i++)
@@ -20,12 +21,23 @@ public class ExcelHeadingTests
         }
     }
 
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(8)]
+    public void GetColumnName_InvalidIndex_ThrowsArgumentOutOfRangeException(int columnIndex)
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
+        Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => heading.GetColumnName(columnIndex));
+    }
+
     [Fact]
     public void GetColumnIndex_InvokeValidColumnName_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
-        ExcelHeading heading = sheet.ReadHeading();
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
 
         Assert.Equal(1, heading.GetColumnIndex("StringValue"));
         Assert.Equal(1, heading.GetColumnIndex("stringvalue"));
@@ -35,8 +47,8 @@ public class ExcelHeadingTests
     public void GetColumnIndex_NullColumnName_ThrowsArgumentNullException()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
-        ExcelHeading heading = sheet.ReadHeading();
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
 
         Assert.Throws<ArgumentNullException>("key", () => heading.GetColumnIndex(null!));
     }
@@ -47,8 +59,8 @@ public class ExcelHeadingTests
     public void GetColumnIndex_NoSuchColumnName_ThrowsExcelMappingException(string columnName)
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
-        ExcelHeading heading = sheet.ReadHeading();
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => heading.GetColumnIndex(columnName));
     }
@@ -57,8 +69,8 @@ public class ExcelHeadingTests
     public void GetColumnName_GetFirstColumnMatchingIndex_Roundtrips()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
-        ExcelHeading heading = sheet.ReadHeading();
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
 
         string[] columnNames = [.. heading.ColumnNames];
         for (int i = 0; i < columnNames.Length; i++)
@@ -75,8 +87,8 @@ public class ExcelHeadingTests
     public void GetFirstColumnMatchingIndex_NoSuchColumnName_ThrowsExcelMappingException(string columnName)
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
-        ExcelHeading heading = sheet.ReadHeading();
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => heading.GetFirstColumnMatchingIndex(e => e == columnName));
     }
@@ -85,8 +97,8 @@ public class ExcelHeadingTests
     public void GetColumnName_TryGetColumnIndex_Roundtrips()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
-        ExcelHeading heading = sheet.ReadHeading();
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
 
         string[] columnNames = [.. heading.ColumnNames];
         for (int i = 0; i < columnNames.Length; i++)
@@ -101,8 +113,8 @@ public class ExcelHeadingTests
     public void TryGetColumnIndex_InvokeValidColumnName_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
-        ExcelHeading heading = sheet.ReadHeading();
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
 
         Assert.True(heading.TryGetColumnIndex("StringValue", out int index));
         Assert.Equal(1, index);
@@ -115,8 +127,8 @@ public class ExcelHeadingTests
     public void TryGetColumnIndex_NullColumnName_ThrowsArgumentNullException()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
-        ExcelHeading heading = sheet.ReadHeading();
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
 
         Assert.Throws<ArgumentNullException>("key", () => heading.TryGetColumnIndex(null!, out _));
     }
@@ -127,8 +139,8 @@ public class ExcelHeadingTests
     public void TryGetColumnIndex_NoSuchColumnName_ReturnsFalse(string columnName)
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
-        ExcelHeading heading = sheet.ReadHeading();
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
 
         Assert.False(heading.TryGetColumnIndex(columnName, out int index));
         Assert.Equal(0, index);
@@ -138,8 +150,8 @@ public class ExcelHeadingTests
     public void GetColumnName_TryGetFirstColumnMatchingIndex_Roundtrips()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
-        ExcelHeading heading = sheet.ReadHeading();
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
 
         string[] columnNames = [.. heading.ColumnNames];
         for (int i = 0; i < columnNames.Length; i++)
@@ -157,8 +169,8 @@ public class ExcelHeadingTests
     public void TryGetFirstColumnMatchingIndex_NoSuchColumnName_ReturnsFalse(string columnName)
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
-        ExcelHeading heading = sheet.ReadHeading();
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
 
         Assert.False(heading.TryGetFirstColumnMatchingIndex(e => e == columnName, out int index));
         Assert.Equal(-1, index);

@@ -45,9 +45,21 @@ public class ExcelHeading
     /// <summary>
     /// Gets the name of the column at the given zero-based index.
     /// </summary>
-    /// <param name="index">The zero-based index to get the name of.</param>
+    /// <param name="columnIndex">The zero-based index to get the name of.</param>
     /// <returns>The name of the column at the given zero-based index.</returns>
-    public string GetColumnName(int index) => _columnNames[index];
+    public string GetColumnName(int columnIndex)
+    {
+        if (columnIndex < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(columnIndex), columnIndex, "Column index cannot be negative.");
+        }
+        if (columnIndex >= _columnNames.Length)
+        {
+            throw new ArgumentOutOfRangeException(nameof(columnIndex), columnIndex, "Column index must be less than the number of columns.");
+        }
+
+        return _columnNames[columnIndex];
+    }
 
     /// <summary>
     /// Gets the zero-based index of the column with the given name. This method throws an ExcelMappingException

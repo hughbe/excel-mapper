@@ -58,6 +58,7 @@ public class ExcelSheet
     /// <summary>
     /// Gets or sets whether the sheet has a heading. This is true by default.
     /// </summary>
+    [MemberNotNullWhen(true, nameof(Heading))]
     public bool HasHeading
     {
         get => _hasHeading;
