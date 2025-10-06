@@ -21,25 +21,26 @@ public sealed class ColumnIndicesReaderFactory : ICellsReaderFactory
     /// <param name="columnIndices">The list of zero-based column indices to read.</param>
     public ColumnIndicesReaderFactory(params int[] columnIndices)
     {
-        if (columnIndices == null)
-        {
-            throw new ArgumentNullException(nameof(columnIndices));
+        ColumnNameUtilities.ValidateColumnIndices(columnIndices, nameof(columnIndices));
+ColumnIndices = columnIndices;
         }
 
-        if (columnIndices.Length == 0)
+public ICellReader? GetCellReader(ExcelSheet sheet)
+    {
+        if (sheet == null)
         {
-            throw new ArgumentException("Column indices cannot be empty.", nameof(columnIndices));
+            throw new ArgumentNullException(nameof(sheet));
         }
 
-        foreach (int columnIndex in columnIndices)
+        foreach (int columnIndex in ColumnIndices)
         {
-            if (columnIndex < 0)
+            if (columnIndex < sheet.NumberOfColumns)
             {
-                throw new ArgumentOutOfRangeException(nameof(columnIndices), columnIndex, $"Negative column index in {columnIndices.ArrayJoin()}.");
+                return new ColumnIndexReader(columnIndex);
             }
         }
 
-        ColumnIndices = columnIndices;
+        return null;
     }
 
     public ICellsReader? GetReader(ExcelSheet sheet)

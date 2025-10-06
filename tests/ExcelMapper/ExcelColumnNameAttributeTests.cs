@@ -17,15 +17,15 @@ public class ExcelColumnNameAttributeTests
     }
 
     [Fact]
-    public void Ctor_NullName_ThrowsArgumentNullException()
+    public void Ctor_NullColumnName_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>("name", () => new ExcelColumnNameAttribute(null!));
+        Assert.Throws<ArgumentNullException>("columnName", () => new ExcelColumnNameAttribute(null!));
     }
 
     [Fact]
-    public void Ctor_EmptyName_ThrowsArgumentNullException()
+    public void Ctor_EmptyColumnName_ThrowsArgumentException()
     {
-        Assert.Throws<ArgumentException>("name", () => new ExcelColumnNameAttribute(string.Empty));
+        Assert.Throws<ArgumentException>("columnName", () => new ExcelColumnNameAttribute(string.Empty));
     }
 
     [Theory]
@@ -52,7 +52,7 @@ public class ExcelColumnNameAttributeTests
     }
 
     [Fact]
-    public void Name_SetEmpty_ThrowsArgumentNullException()
+    public void Name_SetEmpty_ThrowsArgumentException()
     {
         var attribute = new ExcelColumnNameAttribute("Name");
         Assert.Throws<ArgumentException>("value", () => attribute.Name = string.Empty);

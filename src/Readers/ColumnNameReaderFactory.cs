@@ -20,7 +20,7 @@ public sealed class ColumnNameReaderFactory : ICellReaderFactory
     /// <param name="columnName">The name of the column to read.</param>
     public ColumnNameReaderFactory(string columnName)
     {
-        ColumnNameUtilities.ValidateColumnName(columnName, nameof(columnName));
+        ColumnUtilities.ValidateColumnName(columnName, nameof(columnName));
         ColumnName = columnName;
     }
 

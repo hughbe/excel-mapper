@@ -21,7 +21,7 @@ public sealed class ColumnNamesReaderFactory : ICellsReaderFactory
     /// <param name="columnNames">The names of each column to read.</param>
     public ColumnNamesReaderFactory(params string[] columnNames)
     {
-        ColumnNameUtilities.ValidateColumnNames(columnNames, nameof(columnNames));
+        ColumnUtilities.ValidateColumnNames(columnNames, nameof(columnNames));
         ColumnNames = columnNames;
     }
 

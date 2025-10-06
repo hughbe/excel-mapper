@@ -39,7 +39,7 @@ public class ExcelColumnIndexAttributeTests
     }
     
     [Fact]
-    public void Index_SettInvalidValue_ThrowsArgumentOutOfRangeException()
+    public void Index_SetInvalidValue_ThrowsArgumentOutOfRangeException()
     {
         var attribute = new ExcelColumnIndexAttribute(1);
         Assert.Throws<ArgumentOutOfRangeException>("value", () => attribute.Index = -1);

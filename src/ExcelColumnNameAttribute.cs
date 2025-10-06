@@ -8,21 +8,21 @@ using ExcelMapper.Utilities;
 namespace ExcelMapper;
 
 /// <summary>
-/// Specifies the column name that is used when deserializing a property
+/// Specifies the column name that is used when deserializing a property or field.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true)]
 public class ExcelColumnNameAttribute : Attribute
 {
-    private string _name;
+    private string _columnName;
 
     /// <summary>
     /// Initializes a new instance of <see cref="ExcelColumnNameAttribute"/> with the specified column name.
     /// </summary>
     /// <param name="name">The name of the column.</param>
-    public ExcelColumnNameAttribute(string name)
+    public ExcelColumnNameAttribute(string columnName)
     {
-        ColumnNameUtilities.ValidateColumnName(name , nameof(name));
-        _name = name;
+        ColumnUtilities.ValidateColumnName(columnName , nameof(columnName));
+        _columnName = columnName;
     }
 
     /// <summary>
@@ -30,11 +30,11 @@ public class ExcelColumnNameAttribute : Attribute
     /// </summary>
     public string Name
     {
-        get => _name;
+        get => _columnName;
         set
         {
-            ColumnNameUtilities.ValidateColumnName(value , nameof(value));
-            _name = value;
+            ColumnUtilities.ValidateColumnName(value , nameof(value));
+            _columnName = value;
         }
     }
 }

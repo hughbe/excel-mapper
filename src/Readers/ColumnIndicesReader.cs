@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Globalization;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Utilities;
@@ -18,28 +17,11 @@ public class ColumnIndicesReader : ICellsReader
     /// <summary>
     /// Gets the zero-based indices for each column to read.
     /// </summary>
-    public int[] ColumnIndices { get; }
+    public IList<int> ColumnIndices { get; }
 
-    public ColumnIndicesReader(int[] columnIndices)
+    public ColumnIndicesReader(IList<int> columnIndices)
     {
-        if (columnIndices == null)
-        {
-            throw new ArgumentNullException(nameof(columnIndices));
-        }
-
-        if (columnIndices.Length == 0)
-        {
-            throw new ArgumentException("Column indices cannot be empty.", nameof(columnIndices));
-        }
-
-        foreach (int columnIndex in columnIndices)
-        {
-            if (columnIndex < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(columnIndices), columnIndex, $"Negative column index in {columnIndices.ArrayJoin()}.");
-            }
-        }
-
+        ColumnUtilities.ValidateColumnIndices(columnIndices, nameof(columnIndices));
         ColumnIndices = columnIndices;
     }
 

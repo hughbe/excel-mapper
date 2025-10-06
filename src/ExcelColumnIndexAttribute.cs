@@ -3,13 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using ExcelMapper.Utilities;
 
 namespace ExcelMapper;
 
 /// <summary>
-/// Specifies the column index that is used when deserializing a property
+/// Specifies the column index that is used when deserializing a property or field.
 /// </summary>
-[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true)]
 public class ExcelColumnIndexAttribute : Attribute
 {
     private int _index;
@@ -20,7 +21,7 @@ public class ExcelColumnIndexAttribute : Attribute
     /// <param name="index">The index of the column.</param>
     public ExcelColumnIndexAttribute(int index)
     {
-        CheckIndexGreaterOrEqualToZero(index, nameof(index));
+        ColumnUtilities.ValidateColumnIndex(index, nameof(index));
         Index = index;
     }
 
@@ -32,16 +33,8 @@ public class ExcelColumnIndexAttribute : Attribute
         get => _index;
         set
         {
-            CheckIndexGreaterOrEqualToZero(value, nameof(value));
+            ColumnUtilities.ValidateColumnIndex(value, nameof(value));
             _index = value;
-        }
-    }
-
-    private void CheckIndexGreaterOrEqualToZero(int index, string paramName)
-    {
-        if (index < 0)
-        {
-            throw new ArgumentOutOfRangeException(paramName, index, $"Column index {index} must be greater or equal to zero.");
         }
     }
 }
