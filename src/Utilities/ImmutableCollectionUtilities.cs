@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -36,48 +37,52 @@ internal static class ImmutableCollectionUtilities
     private const string ImmutableSortedDictionaryTypeName = "System.Collections.Immutable.ImmutableSortedDictionary";
     private const string ImmutableSortedDictionaryGenericTypeName = "System.Collections.Immutable.ImmutableSortedDictionary`2";
 
-    public static bool IsImmutableEnumerableType(this Type type)
+    private static HashSet<string> ImmutableEnumerableTypeNames { get; } = new()
     {
-        if (!type.IsGenericType|| !type.Assembly.FullName.StartsWith("System.Collections.Immutable,", StringComparison.Ordinal))
-        {
-            return false;
-        }
+        ImmutableArrayGenericTypeName,
+        ImmutableListGenericTypeName,
+        ImmutableListGenericInterfaceTypeName,
+        ImmutableStackGenericTypeName,
+        ImmutableStackGenericInterfaceTypeName,
+        ImmutableQueueGenericTypeName,
+        ImmutableQueueGenericInterfaceTypeName,
+        ImmutableSortedSetGenericTypeName,
+        ImmutableHashSetGenericTypeName,
+        ImmutableSetGenericInterfaceTypeName
+    };
 
-        switch (type.GetGenericTypeDefinition().FullName)
-        {
-            case ImmutableArrayGenericTypeName:
-            case ImmutableListGenericTypeName:
-            case ImmutableListGenericInterfaceTypeName:
-            case ImmutableStackGenericTypeName:
-            case ImmutableStackGenericInterfaceTypeName:
-            case ImmutableQueueGenericTypeName:
-            case ImmutableQueueGenericInterfaceTypeName:
-            case ImmutableSortedSetGenericTypeName:
-            case ImmutableHashSetGenericTypeName:
-            case ImmutableSetGenericInterfaceTypeName:
-                return true;
-            default:
-                return false;
-        }
-    }
+    public static bool IsImmutableEnumerableType(this Type type) =>
+        IsImmutableCollectionsType(type) && 
+        ImmutableEnumerableTypeNames.Contains(type.GetGenericTypeDefinition().FullName);
 
-    public static bool IsImmutableDictionaryType(this Type type)
+    private static HashSet<string> ImmutableDictionaryTypeNames { get; } = new()
     {
-        if (!type.IsGenericType || !type.Assembly.FullName.StartsWith("System.Collections.Immutable,", StringComparison.Ordinal))
-        {
-            return false;
-        }
+        ImmutableDictionaryGenericTypeName,
+        ImmutableDictionaryGenericInterfaceTypeName,
+        ImmutableSortedDictionaryGenericTypeName
+    };
 
-        switch (type.GetGenericTypeDefinition().FullName)
-        {
-            case ImmutableDictionaryGenericTypeName:
-            case ImmutableDictionaryGenericInterfaceTypeName:
-            case ImmutableSortedDictionaryGenericTypeName:
-                return true;
-            default:
-                return false;
-        }
-    }
+    public static bool IsImmutableDictionaryType(this Type type) =>
+        IsImmutableCollectionsType(type) && 
+        ImmutableDictionaryTypeNames.Contains(type.GetGenericTypeDefinition().FullName);
+
+    private static bool IsImmutableCollectionsType(Type type)
+        => type.IsGenericType && type.Assembly.FullName.StartsWith("System.Collections.Immutable,", StringComparison.Ordinal);
+
+    private static Dictionary<string, string> ImmutableEnumerableConstructingTypeMap { get; } = new()
+    {
+        [ImmutableArrayGenericTypeName] = ImmutableArrayTypeName,
+        [ImmutableListGenericTypeName] = ImmutableListTypeName,
+        [ImmutableListGenericInterfaceTypeName] = ImmutableListTypeName,
+        [ImmutableStackGenericTypeName] = ImmutableStackTypeName,
+        [ImmutableStackGenericInterfaceTypeName] = ImmutableStackTypeName,
+        [ImmutableQueueGenericTypeName] = ImmutableQueueTypeName,
+        [ImmutableQueueGenericInterfaceTypeName] = ImmutableQueueTypeName,
+        [ImmutableSortedSetGenericTypeName] = ImmutableSortedSetTypeName,
+        [ImmutableHashSetGenericTypeName] = ImmutableHashSetTypeName,
+        [ImmutableSetGenericInterfaceTypeName] = ImmutableHashSetTypeName
+    };
+
 
     private static Type GetImmutableEnumerableConstructingType(Type type)
     {
@@ -87,37 +92,23 @@ internal static class ImmutableCollectionUtilities
         // an appropriate constructing type, i.e. a type that we can invoke the
         // `CreateRange<T>` method on, which returns the desired immutable collection.
         Type underlyingType = type.GetGenericTypeDefinition();
-        string constructingTypeName;
+        string fullName = underlyingType.FullName;
 
-        switch (underlyingType.FullName)
-        {
-            case ImmutableArrayGenericTypeName:
-                constructingTypeName = ImmutableArrayTypeName;
-                break;
-            case ImmutableListGenericTypeName:
-            case ImmutableListGenericInterfaceTypeName:
-                constructingTypeName = ImmutableListTypeName;
-                break;
-            case ImmutableStackGenericTypeName:
-            case ImmutableStackGenericInterfaceTypeName:
-                constructingTypeName = ImmutableStackTypeName;
-                break;
-            case ImmutableQueueGenericTypeName:
-            case ImmutableQueueGenericInterfaceTypeName:
-                constructingTypeName = ImmutableQueueTypeName;
-                break;
-            case ImmutableSortedSetGenericTypeName:
-                constructingTypeName = ImmutableSortedSetTypeName;
-                break;
-            default:
-                Debug.Assert(underlyingType.FullName == ImmutableHashSetGenericTypeName || underlyingType.FullName == ImmutableSetGenericInterfaceTypeName, $"Unknown type {underlyingType.FullName}");
-                constructingTypeName = ImmutableHashSetTypeName;
-                break;
-        }
+        Debug.Assert(ImmutableEnumerableConstructingTypeMap.ContainsKey(fullName), 
+            $"Unknown type {fullName}");
+
+        string constructingTypeName = ImmutableEnumerableConstructingTypeMap[fullName];
 
         // This won't be null because we verified the assembly is actually System.Collections.Immutable.
         return underlyingType.Assembly.GetType(constructingTypeName);
     }
+
+    private static readonly Dictionary<string, string> ImmutableDictionaryConstructingTypeMap = new()
+    {
+        [ImmutableDictionaryGenericTypeName] = ImmutableDictionaryTypeName,
+        [ImmutableDictionaryGenericInterfaceTypeName] = ImmutableDictionaryTypeName,
+        [ImmutableSortedDictionaryGenericTypeName] = ImmutableSortedDictionaryTypeName
+    };
 
     private static Type GetImmutableDictionaryConstructingType(Type type)
     {
@@ -127,19 +118,12 @@ internal static class ImmutableCollectionUtilities
         // an appropriate constructing type, i.e. a type that we can invoke the
         // `CreateRange<T>` method on, which returns the desired immutable collection.
         Type underlyingType = type.GetGenericTypeDefinition();
-        string constructingTypeName;
+        string fullName = underlyingType.FullName;
 
-        switch (underlyingType.FullName)
-        {
-            case ImmutableDictionaryGenericTypeName:
-            case ImmutableDictionaryGenericInterfaceTypeName:
-                constructingTypeName = ImmutableDictionaryTypeName;
-                break;
-            default:
-                Debug.Assert(underlyingType.FullName == ImmutableSortedDictionaryGenericTypeName, $"Unknown type {underlyingType.FullName}");
-                constructingTypeName = ImmutableSortedDictionaryTypeName;
-                break;
-        }
+        Debug.Assert(ImmutableDictionaryConstructingTypeMap.ContainsKey(fullName), 
+            $"Unknown type {fullName}");
+
+        string constructingTypeName = ImmutableDictionaryConstructingTypeMap[fullName];
 
         // This won't be null because we verified the assembly is actually System.Collections.Immutable.
         return underlyingType.Assembly.GetType(constructingTypeName);
