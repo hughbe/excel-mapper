@@ -18,6 +18,7 @@ public class ManyToOneDictionaryMapTests
         var valuePipeline = new ValuePipeline<string>();
         CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
         var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, createDictionaryFactory);
+Assert.False(map.Optional);
         Assert.False(map.PreserveFormatting);
         Assert.NotNull(map.ValuePipeline);
     }
@@ -46,6 +47,28 @@ public class ManyToOneDictionaryMapTests
         Assert.Throws<ArgumentNullException>("createDictionaryFactory", () => new ManyToOneDictionaryMap<string>(factory, valuePipeline, null!));
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Optional_Set_GetReturnsExpected(bool value)
+    {
+        var factory = new ColumnNamesReaderFactory("Column");
+        var valuePipeline = new ValuePipeline<string>();
+        CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, createDictionaryFactory)
+        {
+            Optional = value
+        };
+        Assert.Equal(value, map.Optional);
+
+        // Set same.
+        map.Optional = value;
+        Assert.Equal(value, map.Optional);
+
+        // Set different.
+        map.Optional = !value;
+        Assert.Equal(!value, map.Optional);
+    }
 
     [Theory]
     [InlineData(true)]
@@ -206,6 +229,35 @@ public class ManyToOneDictionaryMapTests
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string> { null! }));
     }
 
+
+    [Fact]
+    public void MakeOptional_HasMapper_ReturnsExpected()
+    {
+        var columnNames = new string[] { "ColumnName1", "ColumnName2" };
+        var factory = new ColumnNamesReaderFactory("Column");
+        var valuePipeline = new ValuePipeline<string>();
+        CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, createDictionaryFactory);
+        Assert.False(map.Optional);
+        Assert.Same(map, map.MakeOptional());
+        Assert.True(map.Optional);
+        Assert.Same(factory, map.ReaderFactory);
+    }
+
+    [Fact]
+    public void MakeOptional_AlreadyOptional_ReturnsExpected()
+    {
+        var columnNames = new string[] { "ColumnName1", "ColumnName2" };
+        var factory = new ColumnNamesReaderFactory("Column");
+        var valuePipeline = new ValuePipeline<string>();
+        CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, createDictionaryFactory);
+        Assert.Same(map, map.MakeOptional());
+        Assert.True(map.Optional);
+        Assert.Same(map, map.MakeOptional());
+        Assert.True(map.Optional);
+        Assert.Same(factory, map.ReaderFactory);
+    }
 
     [Fact]
     public void MakePreserveFormatting_HasMapper_ReturnsExpected()

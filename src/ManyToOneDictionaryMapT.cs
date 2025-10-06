@@ -9,21 +9,21 @@ using ExcelMapper.Readers;
 
 namespace ExcelMapper;
 
-public delegate object CreateDictionaryFactory<T>(IEnumerable<KeyValuePair<string, T>> elements);
+public delegate object CreateDictionaryFactory<TElement>(IEnumerable<KeyValuePair<string, TElement>> elements);
 
 /// <summary>
 /// A map that reads one or more values from one or more cells and maps these values to the type of the
 /// property or field. This is used to map IDictionary properties and fields.
 /// </summary>
-/// <typeparam name="T">The element type of the IDictionary property or field.</typeparam>
-public class ManyToOneDictionaryMap<T> : IMap
+/// <typeparam name="TElement">The element type of the IDictionary property or field.</typeparam>
+public class ManyToOneDictionaryMap<TElement> : IMap
 {
     /// <summary>
     /// Constructs a map reads one or more values from one or more cells and maps these values as element
     /// contained by the property or field.
     /// </summary>
     /// <param name="valuePipeline">The map that maps the value of a single cell to an object of the element type of the property or field.</param>
-    public ManyToOneDictionaryMap(ICellsReaderFactory readerFactory, IValuePipeline<T> valuePipeline, CreateDictionaryFactory<T> createDictionaryFactory)
+    public ManyToOneDictionaryMap(ICellsReaderFactory readerFactory, IValuePipeline<TElement> valuePipeline, CreateDictionaryFactory<TElement> createDictionaryFactory)
     {
         _readerFactory = readerFactory ?? throw new ArgumentNullException(nameof(readerFactory));
         ValuePipeline = valuePipeline ?? throw new ArgumentNullException(nameof(valuePipeline));
@@ -34,7 +34,9 @@ public class ManyToOneDictionaryMap<T> : IMap
     /// Gets the map that maps the value of a single cell to an object of the element type of the property
     /// or field.
     /// </summary>
-    public IValuePipeline<T> ValuePipeline { get; private set; }
+    public IValuePipeline<TElement> ValuePipeline { get; private set; }
+
+    public bool Optional { get; set; }
 
     public bool PreserveFormatting { get; set; }
 
@@ -50,11 +52,11 @@ public class ManyToOneDictionaryMap<T> : IMap
         set => _readerFactory = value ?? throw new ArgumentNullException(nameof(value));
     }
 
-    public CreateDictionaryFactory<T> CreateDictionaryFactory { get; }
+    public CreateDictionaryFactory<TElement> CreateDictionaryFactory { get; }
     
     private readonly Dictionary<ExcelSheet, ICellsReader?> _factoryCache = [];
 
-    public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
+    public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
     {
         if (sheet == null)
         {
@@ -64,31 +66,37 @@ public class ManyToOneDictionaryMap<T> : IMap
         {
             throw new ExcelMappingException("The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
         }
-        if (!_factoryCache.TryGetValue(sheet, out ICellsReader? cellsReader))
+        if (!_factoryCache.TryGetValue(sheet, out var cellsReader))
         {
-            cellsReader = _readerFactory.GetReader(sheet);
+            cellsReader = _readerFactory.GetCellsReader(sheet);
             _factoryCache.Add(sheet, cellsReader);
         }
         
         if (cellsReader == null || !cellsReader.TryGetValues(reader, PreserveFormatting, out IEnumerable<ReadCellResult>? valueResults))
         {
+if (Optional)
+            {
+                result = default;
+                return false;
+            }
+
             throw new ExcelMappingException($"Could not read value for \"{member?.Name}\"", sheet, rowIndex, -1);
         }
 
         var valueResultsList = valueResults.ToList();
 
-        var values = new List<T>();
+        var values = new List<TElement>();
         foreach (ReadCellResult valueResult in valueResultsList)
         {
             // Discarding nullability check because it may be indended to be this way (T may be nullable)
-            T keyValue = (T)ExcelMapper.ValuePipeline.GetPropertyValue(ValuePipeline, sheet, rowIndex, valueResult, PreserveFormatting, member)!;
-            values.Add(keyValue);
+            TElement value = (TElement)ExcelMapper.ValuePipeline.GetPropertyValue(ValuePipeline, sheet, rowIndex, valueResult, PreserveFormatting, member)!;
+            values.Add(value);
         }
 
         var heading = sheet.Heading;
-        IEnumerable<string> keys = valueResultsList.Select(r => heading.GetColumnName(r.ColumnIndex));
-        IEnumerable<KeyValuePair<string, T>> elements = keys.Zip(values, (key, keyValue) => new KeyValuePair<string, T>(key, keyValue));
-        value = CreateDictionaryFactory(elements);
+        var keys = valueResultsList.Select(r => heading.GetColumnName(r.ColumnIndex));
+        var elements = keys.Zip(values, (key, keyValue) => new KeyValuePair<string, TElement>(key, keyValue));
+        result = CreateDictionaryFactory(elements);
         return true;
     }
 
@@ -98,7 +106,7 @@ public class ManyToOneDictionaryMap<T> : IMap
     /// </summary>
     /// <param name="columnNames">The name of each column to read.</param>
     /// <returns>The property map that invoked this method.</returns>
-    public ManyToOneDictionaryMap<T> WithColumnNames(params string[] columnNames)
+    public ManyToOneDictionaryMap<TElement> WithColumnNames(params string[] columnNames)
     {
         ReaderFactory = new ColumnNamesReaderFactory(columnNames);
         return this;
@@ -110,7 +118,7 @@ public class ManyToOneDictionaryMap<T> : IMap
     /// </summary>
     /// <param name="columnNames">The name of each column to read.</param>
     /// <returns>The property map that invoked this method.</returns>
-    public ManyToOneDictionaryMap<T> WithColumnNames(IEnumerable<string> columnNames)
+    public ManyToOneDictionaryMap<TElement> WithColumnNames(IEnumerable<string> columnNames)
     {
         if (columnNames == null)
         {
@@ -119,13 +127,22 @@ public class ManyToOneDictionaryMap<T> : IMap
 
         return WithColumnNames([.. columnNames]);
     }
+    /// <summary>
+    /// Makes the reader of the property map peserve formatting when reading string values.
+    /// </summary>
+    /// <returns>The property map on which this method was invoked.</returns>
+    public ManyToOneDictionaryMap<TElement> MakeOptional()
+    {
+        Optional = true;
+        return this;
+    }
 
     /// <summary>
     /// Makes the reader of the property map optional. For example, if the column doesn't exist
     /// or the index is invalid, an exception will not be thrown.
     /// </summary>
     /// <returns>The property map on which this method was invoked.</returns>
-    public ManyToOneDictionaryMap<T> MakePreserveFormatting()
+    public ManyToOneDictionaryMap<TElement> MakePreserveFormatting()
     {
         PreserveFormatting = true;
         return this;
@@ -138,7 +155,7 @@ public class ManyToOneDictionaryMap<T> : IMap
     /// <param name="valueMap">The pipeline that maps the value of a single cell to an object of the element type of the property
     /// or field.</param>
     /// <returns>The property map that invoked this method.</returns>
-    public ManyToOneDictionaryMap<T> WithValueMap(Func<IValuePipeline<T>, IValuePipeline<T>> valueMap)
+    public ManyToOneDictionaryMap<TElement> WithValueMap(Func<IValuePipeline<TElement>, IValuePipeline<TElement>> valueMap)
     {
         if (valueMap == null)
         {

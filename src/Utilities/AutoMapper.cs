@@ -484,8 +484,10 @@ public static class AutoMapper
         }
 
         // Default to all columns.
-        var defaultReader = new AllColumnNamesReaderFactory();
-        map = new ManyToOneDictionaryMap<TValue>(defaultReader, valuePipeline, factory);
+        if (member != null && Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)))
+        {
+            map.Optional = true;
+        }
         if (member != null && Attribute.IsDefined(member, typeof(ExcelPreserveFormattingAttribute)))
         {
             map.PreserveFormatting = true;

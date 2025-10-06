@@ -1802,4 +1802,27 @@ public class MapDictionaryTest
                 .WithColumnNames("NoSuchColumn");
         }
     }
+
+    [Fact]
+    public void ReadRow_DictionaryMissingColumnOptional_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap<MissingColumnOptionalClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<IDictionaryStringObjectClass>();
+        Assert.Null(row.Value);
+    }
+
+    private class MissingColumnOptionalClassMap : ExcelClassMap<IDictionaryStringObjectClass>
+    {
+        public MissingColumnOptionalClassMap()
+        {
+            Map(p => p.Value)
+                .WithColumnNames("NoSuchColumn")
+                .MakeOptional();
+        }
+    }
 }
