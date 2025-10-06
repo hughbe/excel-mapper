@@ -53,7 +53,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public OneToOneMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
     {
-        MemberExpression memberExpression = GetMemberExpression(expression);
+        var memberExpression = GetMemberExpression(expression);
         var map = AutoMapper.CreateMemberMap<TProperty>(memberExpression.Member, EmptyValueStrategy, false)!;
         AddMap(new ExcelPropertyMap<T>(memberExpression.Member, map), expression);
         return map;
@@ -112,7 +112,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> MapList<TElement>(Expression<Func<T, IEnumerable>> expression)
     {
-        MemberExpression memberExpression = GetMemberExpression(expression);
+        var memberExpression = GetMemberExpression(expression);
         ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
@@ -128,7 +128,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IEnumerable<TElement>>> expression)
     {
-        MemberExpression memberExpression = GetMemberExpression(expression);
+        var memberExpression = GetMemberExpression(expression);
         ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
@@ -144,7 +144,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ICollection<TElement>>> expression)
     {
-        MemberExpression memberExpression = GetMemberExpression(expression);
+        var memberExpression = GetMemberExpression(expression);
         ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
@@ -160,7 +160,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, Collection<TElement>>> expression)
     {
-        MemberExpression memberExpression = GetMemberExpression(expression);
+        var memberExpression = GetMemberExpression(expression);
         ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
@@ -176,7 +176,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ObservableCollection<TElement>>> expression)
     {
-        MemberExpression memberExpression = GetMemberExpression(expression);
+        var memberExpression = GetMemberExpression(expression);
         ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
@@ -192,7 +192,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IList<TElement>>> expression)
     {
-        MemberExpression memberExpression = GetMemberExpression(expression);
+        var memberExpression = GetMemberExpression(expression);
         ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
@@ -208,7 +208,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlyCollection<TElement>>> expression)
     {
-        MemberExpression memberExpression = GetMemberExpression(expression);
+        var memberExpression = GetMemberExpression(expression);
         ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap(memberExpression.Member, map), expression);
@@ -224,7 +224,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlyList<TElement>>> expression)
     {
-        MemberExpression memberExpression = GetMemberExpression(expression);
+        var memberExpression = GetMemberExpression(expression);
         ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap(memberExpression.Member, map), expression);
@@ -240,7 +240,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, List<TElement>>> expression)
     {
-        MemberExpression memberExpression = GetMemberExpression(expression);
+        var memberExpression = GetMemberExpression(expression);
         ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
@@ -256,7 +256,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, TElement[]>> expression)
     {
-        MemberExpression memberExpression = GetMemberExpression(expression);
+        var memberExpression = GetMemberExpression(expression);
         ManyToOneEnumerableMap<TElement> map = GetMultiMap<TElement>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
@@ -272,7 +272,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ExcelClassMap<TElement> MapObject<TElement>(Expression<Func<T, TElement>> expression)
     {
-        MemberExpression memberExpression = GetMemberExpression(expression);
+        var memberExpression = GetMemberExpression(expression);
         if (!AutoMapper.TryCreateObjectMap(EmptyValueStrategy, out ExcelClassMap<TElement>? map))
         {
             throw new ExcelMappingException($"Could not map object of type \"{typeof(TElement)}\".");
@@ -291,7 +291,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneDictionaryMap<TElement> Map<TElement>(Expression<Func<T, IDictionary<string, TElement>>> expression)
     {
-        MemberExpression memberExpression = GetMemberExpression(expression);
+        var memberExpression = GetMemberExpression(expression);
         var map = GetDictionaryMap<string, TElement>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
@@ -307,7 +307,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneDictionaryMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlyDictionary<string, TElement>>> expression)
     {
-        MemberExpression memberExpression = GetMemberExpression(expression);
+        var memberExpression = GetMemberExpression(expression);
         var map = GetDictionaryMap<string, TElement>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap(memberExpression.Member, map), expression);
@@ -323,7 +323,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneDictionaryMap<TElement> Map<TElement>(Expression<Func<T, Dictionary<string, TElement>>> expression)
     {
-        MemberExpression memberExpression = GetMemberExpression(expression);
+        var memberExpression = GetMemberExpression(expression);
         var map = GetDictionaryMap<string, TElement>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
@@ -338,7 +338,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneDictionaryMap<object> Map(Expression<Func<T, ExpandoObject>> expression)
     {
-        MemberExpression memberExpression = GetMemberExpression(expression);
+        var memberExpression = GetMemberExpression(expression);
         var map = GetDictionaryMap<string, object>(memberExpression.Member);
 
         AddMap(new ExcelPropertyMap<object>(memberExpression.Member, map), expression);
@@ -389,7 +389,7 @@ public class ExcelClassMap<T> : ExcelClassMap
 
     protected internal void AddMap<TElement>(ExcelPropertyMap map, Expression<Func<T, TElement>> expression)
     {
-        Expression expressionBody = GetExpressionBody(expression.Body);
+        var expressionBody = GetExpressionBody(expression.Body);
         var expressions = new Stack<MemberExpression>();
         while (true)
         {
@@ -430,7 +430,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="memberExpressions">A stack of each MemberExpression in the list of member access expressions.</param>
     protected internal void CreateObjectMap(ExcelPropertyMap propertyMap, Stack<MemberExpression> memberExpressions)
     {
-        MemberExpression memberExpression = memberExpressions.Pop();
+        var memberExpression = memberExpressions.Pop();
         if (memberExpressions.Count == 0)
         {
             // This is the final member.
@@ -438,9 +438,8 @@ public class ExcelClassMap<T> : ExcelClassMap
             return;
         }
 
-        Type memberType = memberExpression.Member.MemberType();
-
-        MethodInfo method = MapObjectMethod.MakeGenericMethod(memberType);
+        var memberType = memberExpression.Member.MemberType();
+        var method = MapObjectMethod.MakeGenericMethod(memberType);
         try
         {
             method.Invoke(this, [propertyMap, memberExpression, memberExpressions]);
@@ -456,13 +455,13 @@ public class ExcelClassMap<T> : ExcelClassMap
 
     private void CreateObjectMapGeneric<TElement>(ExcelPropertyMap propertyMap, MemberExpression memberExpression, Stack<MemberExpression> memberExpressions)
     {
-        ExcelPropertyMap? map = Properties.FirstOrDefault(m => m.Member.Equals(memberExpression.Member));
+        var map = Properties.FirstOrDefault(m => m.Member.Equals(memberExpression.Member));
 
-        ExcelClassMap<TElement> objecTMap;
+        ExcelClassMap<TElement> classMap;
         if (map == null)
         {
-            objecTMap = new ExcelClassMap<TElement>();
-            Properties.Add(new ExcelPropertyMap(memberExpression.Member, objecTMap));
+            classMap = new ExcelClassMap<TElement>();
+            Properties.Add(new ExcelPropertyMap(memberExpression.Member, classMap));
         }
         else if (map.Map is not ExcelClassMap<TElement> existingMap)
         {
@@ -470,10 +469,10 @@ public class ExcelClassMap<T> : ExcelClassMap
         }
         else
         {
-            objecTMap = existingMap;
+            classMap = existingMap;
         }
 
-        objecTMap.CreateObjectMap(propertyMap, memberExpressions);
+        classMap.CreateObjectMap(propertyMap, memberExpressions);
     }
 
     /// <summary>
@@ -507,7 +506,7 @@ public class ExcelClassMap<T> : ExcelClassMap
         }
 
         Properties.Clear();
-        foreach (ExcelPropertyMap propertyMap in classMap.Properties)
+        foreach (var propertyMap in classMap.Properties)
         {
             Properties.Add(propertyMap);
         }
