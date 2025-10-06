@@ -27,7 +27,7 @@ public sealed class ColumnIndexReaderFactory : ICellReaderFactory
         ColumnIndex = columnIndex;
     }
 
-    public ICellReader? GetReader(ExcelSheet sheet)
+    public ICellReader? GetCellReader(ExcelSheet sheet)
     {
         if (sheet == null)
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
@@ -18,7 +19,7 @@ public class ManyToOneDictionaryMapTests
         var valuePipeline = new ValuePipeline<string>();
         CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
         var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, createDictionaryFactory);
-Assert.False(map.Optional);
+        Assert.False(map.Optional);
         Assert.False(map.PreserveFormatting);
         Assert.NotNull(map.ValuePipeline);
     }
@@ -229,6 +230,103 @@ Assert.False(map.Optional);
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string> { null! }));
     }
 
+    [Fact]
+    public void WithColumnsMatching_Invoke_Success()
+    {
+        var matcher = new NamesColumnMatcher("ColumnName1", "ColumnName2");
+        var columnIndices = new int[] { 0, 1 };
+        var columnNames = new List<string> { "ColumnName1", "ColumnName2" };
+        var factory = new ColumnNamesReaderFactory("Column");
+        var valuePipeline = new ValuePipeline<string>();
+        CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
+        Assert.Same(map, map.WithColumnsMatching(matcher));
+
+        var newFactory = Assert.IsType<ColumnsMatchingReaderFactory>(map.ReaderFactory);
+        Assert.Same(matcher, newFactory.Matcher);
+    }
+
+    [Fact]
+    public void WithColumnsMatching_NullMatcher_ThrowsArgumentNullException()
+    {
+        var columnIndices = new int[] { 0, 1 };
+        var columnNames = new List<string> { "ColumnName1", "ColumnName2" };
+        var factory = new ColumnNamesReaderFactory("Column");
+        var valuePipeline = new ValuePipeline<string>();
+        CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
+
+        Assert.Throws<ArgumentNullException>("matcher", () => map.WithColumnsMatching(null!));
+    }
+
+    [Fact]
+    public void WithColumnIndices_ParamsInt_Success()
+    {
+        var columnIndices = new int[] { 0, 1 };
+        var columnNames = new List<string> { "ColumnName1", "ColumnName2" };
+        var factory = new ColumnNamesReaderFactory("Column");
+        var valuePipeline = new ValuePipeline<string>();
+        CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
+        Assert.Same(map, map.WithColumnIndices(columnIndices));
+
+        var newFactory = Assert.IsType<ColumnIndicesReaderFactory>(map.ReaderFactory);
+        Assert.Same(columnIndices, newFactory.ColumnIndices);
+    }
+
+    [Fact]
+    public void WithColumnIndices_IEnumerableInt_Success()
+    {
+        var columnIndices = new List<int> { 0, 1 };
+        var columnNames = new List<string> { "ColumnName1", "ColumnName2" };
+        var factory = new ColumnNamesReaderFactory("Column");
+        var valuePipeline = new ValuePipeline<string>();
+        CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
+        Assert.Same(map, map.WithColumnIndices(columnIndices));
+
+        var newFactory = Assert.IsType<ColumnIndicesReaderFactory>(map.ReaderFactory);
+        Assert.Equal(columnIndices, newFactory.ColumnIndices);
+    }
+
+    [Fact]
+    public void WithColumnIndices_NullColumnIndices_ThrowsArgumentNullException()
+    {
+        var columnNames = new List<string> { "ColumnName1", "ColumnName2" };
+        var factory = new ColumnNamesReaderFactory("Column");
+        var valuePipeline = new ValuePipeline<string>();
+        CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
+
+        Assert.Throws<ArgumentNullException>("columnIndices", () => map.WithColumnIndices(null!));
+        Assert.Throws<ArgumentNullException>("columnIndices", () => map.WithColumnIndices((IEnumerable<int>)null!));
+    }
+
+    [Fact]
+    public void WithColumnIndices_EmptyColumnIndices_ThrowsArgumentException()
+    {
+        var columnNames = new List<string> { "ColumnName1", "ColumnName2" };
+        var factory = new ColumnNamesReaderFactory("Column");
+        var valuePipeline = new ValuePipeline<string>();
+        CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
+
+        Assert.Throws<ArgumentException>("columnIndices", () => map.WithColumnIndices([]));
+        Assert.Throws<ArgumentException>("columnIndices", () => map.WithColumnIndices(new List<int>()));
+    }
+
+    [Fact]
+    public void WithColumnIndices_NegativeValueInColumnIndices_ThrowsArgumentOutOfRangeException()
+    {
+        var columnNames = new List<string> { "ColumnName1", "ColumnName2" };
+        var factory = new ColumnNamesReaderFactory("Column");
+        var valuePipeline = new ValuePipeline<string>();
+        CreateDictionaryFactory<string> createDictionaryFactory = _ => new Dictionary<string, string>();
+        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, createDictionaryFactory).WithColumnNames("ColumnNames");
+
+        Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => map.WithColumnIndices([-1]));
+        Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => map.WithColumnIndices(new List<int> { -1 }));
+    }
 
     [Fact]
     public void MakeOptional_HasMapper_ReturnsExpected()
@@ -437,7 +535,7 @@ Assert.False(map.Optional);
 
     private class MockReaderFactory(ICellsReader Reader) : ICellsReaderFactory
     {
-        public ICellsReader? GetReader(ExcelSheet sheet) => Reader;
+        public ICellsReader? GetCellsReader(ExcelSheet sheet) => Reader;
     }
 
     private class TestClass
@@ -448,5 +546,18 @@ Assert.False(map.Optional);
 #pragma warning restore 0649
 
         public event EventHandler Event { add { } remove { } }
+    }
+
+    private class NamesColumnMatcher : IExcelColumnMatcher
+    {
+        public string[] ColumnNames { get; }
+
+        public NamesColumnMatcher(params string[] columnNames)
+        {
+            ColumnNames = columnNames;
+        }
+
+        public bool ColumnMatches(ExcelSheet sheet, int columnIndex)
+            => ColumnNames.Contains(sheet.Heading!.GetColumnName(columnIndex));
     }
 }

@@ -62,16 +62,16 @@ public class SplitCellValueReaderTests
     public void GetReader_Invoke_ReturnsExpected()
     {
         var factory = new SubSplitReaderFactory(new MockReaderFactory(new MockReader(() => (true, new ReadCellResult(0, string.Empty, preserveFormatting: false)))));
-        var reader = factory.GetReader(null!);
+        var reader = factory.GetCellsReader(null!);
         Assert.NotNull(reader);
-        Assert.NotSame(reader, factory.GetReader(null!));
+        Assert.NotSame(reader, factory.GetCellsReader(null!));
     }
 
     [Fact]
     public void GetReader_TryGetValuesNullReaderResult_ReturnsEmpty()
     {
         var factory = new SubSplitReaderFactory(new MockReaderFactory(new MockReader(() => (true, new ReadCellResult(0, (string?)null, preserveFormatting: false)))));
-        var reader = factory.GetReader(null!)!;
+        var reader = factory.GetCellsReader(null!)!;
         Assert.True(reader.TryGetValues(null!, false, out IEnumerable<ReadCellResult>? result));
         Assert.Empty(result);
     }
@@ -80,7 +80,7 @@ public class SplitCellValueReaderTests
     public void GetReader_TryGetValuesEmptyReaderResult_ReturnsEmpty()
     {
         var factory = new SubSplitReaderFactory(new MockReaderFactory(new MockReader(() => (true, new ReadCellResult(0, "", preserveFormatting: false)))));
-        var reader = factory.GetReader(null!)!;
+        var reader = factory.GetCellsReader(null!)!;
         Assert.True(reader.TryGetValues(null!, false, out IEnumerable<ReadCellResult>? result));
         Assert.Empty(result);
     }
@@ -89,14 +89,14 @@ public class SplitCellValueReaderTests
     public void GetReader_TryGetValuesNullReader_ReturnsNull()
     {
         var factory = new SubSplitReaderFactory(new MockReaderFactory(null));
-        Assert.Null(factory.GetReader(null!));
+        Assert.Null(factory.GetCellsReader(null!));
     }
 
     [Fact]
     public void GetReader_TryGetValuesFalseReader_ReturnsEmpty()
     {
         var factory = new SubSplitReaderFactory(new MockReaderFactory(new MockReader(() => (false, default))));
-        var reader = factory.GetReader(null!)!;
+        var reader = factory.GetCellsReader(null!)!;
         Assert.False(reader.TryGetValues(null!, false, out IEnumerable<ReadCellResult>? result));
         Assert.Null(result);
     }
@@ -118,6 +118,6 @@ public class SplitCellValueReaderTests
 
     private class MockReaderFactory(ICellReader? result) : ICellReaderFactory
     {
-        public ICellReader? GetReader(ExcelSheet sheet) => result;
+        public ICellReader? GetCellReader(ExcelSheet sheet) => result;
     }
 }

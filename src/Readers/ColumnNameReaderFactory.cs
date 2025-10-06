@@ -24,7 +24,7 @@ public sealed class ColumnNameReaderFactory : ICellReaderFactory
         ColumnName = columnName;
     }
 
-    public ICellReader? GetReader(ExcelSheet sheet)
+    public ICellReader? GetCellReader(ExcelSheet sheet)
     {
         if (sheet == null)
         {

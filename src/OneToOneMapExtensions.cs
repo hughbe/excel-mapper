@@ -36,15 +36,26 @@ public static class OneToOneMapExtensions
     }
 
     /// <summary>
-    /// Sets the reader of the property map to read the value of a single cell contained in the column with
-    /// the given names.
+    /// Sets the reader of the property map to read the value of a single cell with a column name
+    /// matching a predicate.
     /// </summary>
     /// <typeparam name="T">The type of the property map.</typeparam>
     /// <param name="map">The property map to use.</param>
     /// <param name="predicate">A predicate which returns whether a Column Name was matched or not</param>
     /// <returns>The property map on which this method was invoked.</returns>
     public static OneToOneMap<T> WithColumnNameMatching<T>(this OneToOneMap<T> map, Func<string, bool> predicate)
-        => map.WithReaderFactory(new ColumnNameMatchingReaderFactory(predicate));
+        => map.WithColumnMatching(new PredicateColumnMatcher(predicate));
+
+    /// <summary>
+    /// Sets the reader of the property map to read the value of a single cell for the first column matching
+    /// IExcelColumnMatcher.ColumnMatches(ExcelSheet sheet, int columnIndex).
+    /// </summary>
+    /// <typeparam name="T">The type of the property map.</typeparam>
+    /// <param name="map">The property map to use.</param>
+    /// <param name="matcher">An IExcelColumnMatcher that returns whether a Column Name was matched or not</param>
+    /// <returns>The property map on which this method was invoked.</returns>
+    public static OneToOneMap<T> WithColumnMatching<T>(this OneToOneMap<T> map, IExcelColumnMatcher matcher)
+        => map.WithReaderFactory(new ColumnsMatchingReaderFactory(matcher));
 
     /// <summary>
     /// Sets the reader of the property map to read the value of a single cell contained in the column with
@@ -55,7 +66,7 @@ public static class OneToOneMapExtensions
     /// <param name="predicate">A predicate which returns whether a Column Name was matched or not</param>
     /// <returns>The property map on which this method was invoked.</returns>
     public static OneToOneMap<T> WithColumnNameMatching<T>(this OneToOneMap<T> map, params string[] columnNames)
-        => map.WithReaderFactory(new ColumnNameMatchingReaderFactory(columnNames));
+        => map.WithReaderFactory(new ColumnNamesReaderFactory(columnNames));
 
     /// <summary>
     /// Sets the reader of the property map to read the value of a single cell contained in the column with

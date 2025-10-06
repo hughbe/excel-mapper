@@ -7,5 +7,5 @@
 /// </summary>
 public interface ICellReaderFactory
 {
-    ICellReader? GetReader(ExcelSheet sheet);
+    ICellReader? GetCellReader(ExcelSheet sheet);
 }

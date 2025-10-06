@@ -30,9 +30,9 @@ public class ColumnIndexReaderFactoryTests
         sheet.ReadHeading();
 
         var factory = new ColumnIndexReaderFactory(columnIndex);
-        var reader = Assert.IsType<ColumnIndexReader>(factory.GetReader(sheet));
+        var reader = Assert.IsType<ColumnIndexReader>(factory.GetCellReader(sheet));
         Assert.Equal(columnIndex, reader.ColumnIndex);
-        Assert.NotSame(reader, factory.GetReader(sheet));
+        Assert.NotSame(reader, factory.GetCellReader(sheet));
     }
 
     [Theory]
@@ -45,7 +45,7 @@ public class ColumnIndexReaderFactoryTests
         sheet.ReadHeading();
 
         var factory = new ColumnIndexReaderFactory(columnIndex);
-        Assert.Null(factory.GetReader(sheet));
+        Assert.Null(factory.GetCellReader(sheet));
     }
 
     [Theory]
@@ -56,9 +56,9 @@ public class ColumnIndexReaderFactoryTests
         ExcelSheet sheet = importer.ReadSheet();
 
         var factory = new ColumnIndexReaderFactory(columnIndex);
-        var reader = Assert.IsType<ColumnIndexReader>(factory.GetReader(sheet));
+        var reader = Assert.IsType<ColumnIndexReader>(factory.GetCellReader(sheet));
         Assert.Equal(columnIndex, reader.ColumnIndex);
-        Assert.NotSame(reader, factory.GetReader(sheet));
+        Assert.NotSame(reader, factory.GetCellReader(sheet));
         Assert.Null(sheet.Heading);
     }
 
@@ -71,9 +71,9 @@ public class ColumnIndexReaderFactoryTests
         sheet.HasHeading = false;
 
         var factory = new ColumnIndexReaderFactory(columnIndex);
-        var reader = Assert.IsType<ColumnIndexReader>(factory.GetReader(sheet));
+        var reader = Assert.IsType<ColumnIndexReader>(factory.GetCellReader(sheet));
         Assert.Equal(columnIndex, reader.ColumnIndex);
-        Assert.NotSame(reader, factory.GetReader(sheet));
+        Assert.NotSame(reader, factory.GetCellReader(sheet));
         Assert.Null(sheet.Heading);
     }
 
@@ -81,6 +81,6 @@ public class ColumnIndexReaderFactoryTests
     public void GetReader_NullSheet_ThrowsArgumentNullException()
     {
         var factory = new ColumnIndexReaderFactory(0);
-        Assert.Throws<ArgumentNullException>("sheet", () => factory.GetReader(null!));
+        Assert.Throws<ArgumentNullException>("sheet", () => factory.GetCellReader(null!));
     }
 }

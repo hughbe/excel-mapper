@@ -35,7 +35,7 @@ public class ManyToOneDictionaryMap<TElement> : IMap
     /// or field.
     /// </summary>
     public IValuePipeline<TElement> ValuePipeline { get; private set; }
-
+    
     public bool Optional { get; set; }
 
     public bool PreserveFormatting { get; set; }
@@ -74,7 +74,7 @@ public class ManyToOneDictionaryMap<TElement> : IMap
         
         if (cellsReader == null || !cellsReader.TryGetValues(reader, PreserveFormatting, out IEnumerable<ReadCellResult>? valueResults))
         {
-if (Optional)
+            if (Optional)
             {
                 result = default;
                 return false;
@@ -127,6 +127,47 @@ if (Optional)
 
         return WithColumnNames([.. columnNames]);
     }
+
+    /// <summary>
+    /// Sets the reader of the property map to read the values of one or more cells contained
+    /// in the columns matching the result of IExcelColumnMatcher.ColumnMatches.
+    /// </summary>
+    /// <param name="matcher">The matcher of each column to read.</param>
+    /// <returns>The property map that invoked this method.</returns>
+    public ManyToOneDictionaryMap<TElement> WithColumnsMatching(IExcelColumnMatcher matcher)
+    {
+        ReaderFactory = new ColumnsMatchingReaderFactory(matcher);
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the reader of the property map to read the values of one or more cells contained
+    /// in the columns with the given zero-based indices.
+    /// </summary>
+    /// <param name="columnIndices">The zero-based index of each column to read.</param>
+    /// <returns>The property map that invoked this method.</returns>
+    public ManyToOneDictionaryMap<TElement> WithColumnIndices(params int[] columnIndices)
+    {
+        ReaderFactory = new ColumnIndicesReaderFactory(columnIndices);
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the reader of the property map to read the values of one or more cells contained
+    /// in the columns with the given zero-based indices.
+    /// </summary>
+    /// <param name="columnIndices">The zero-based index of each column to read.</param>
+    /// <returns>The property map that invoked this method.</returns>
+    public ManyToOneDictionaryMap<TElement> WithColumnIndices(IEnumerable<int> columnIndices)
+    {
+        if (columnIndices == null)
+        {
+            throw new ArgumentNullException(nameof(columnIndices));
+        }
+        
+        return WithColumnIndices([.. columnIndices]);
+    }
+
     /// <summary>
     /// Makes the reader of the property map peserve formatting when reading string values.
     /// </summary>

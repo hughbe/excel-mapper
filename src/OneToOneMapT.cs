@@ -35,7 +35,7 @@ public class OneToOneMap<T> : IValuePipeline<T>, IMap
     {
         if (!_factoryCache.TryGetValue(sheet, out ICellReader? cellReader))
         {
-            cellReader = _readerFactory.GetReader(sheet);
+            cellReader = _readerFactory.GetCellReader(sheet);
             _factoryCache.Add(sheet, cellReader);
         }
 

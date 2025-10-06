@@ -52,12 +52,11 @@ public class ManyToOneEnumerableMap<TElement> : IMap
         {
             throw new ArgumentNullException(nameof(sheet));
         }
-        if (!_factoryCache.TryGetValue(sheet, out ICellsReader? cellsReader))
+        if (!_factoryCache.TryGetValue(sheet, out var cellsReader))
         {
-            cellsReader = _readerFactory.GetReader(sheet);
+            cellsReader = _readerFactory.GetCellsReader(sheet);
             _factoryCache.Add(sheet, cellsReader);
         }
-
 
         if (cellsReader == null || !cellsReader.TryGetValues(reader, PreserveFormatting, out var results))
         {
@@ -67,11 +66,11 @@ public class ManyToOneEnumerableMap<TElement> : IMap
                 return false;
             }
 
-            throw new ExcelMappingException($"Could not read value for {member?.Name}", sheet, rowIndex, -1);
+            throw new ExcelMappingException($"Could not read value for member \"{member?.Name}\"", sheet, rowIndex, -1);
         }
 
         var elements = new List<TElement?>();
-        foreach (ReadCellResult result in results)
+        foreach (var result in results)
         {
             var elementValue = (TElement?)ValuePipeline.GetPropertyValue(ElementPipeline, sheet, rowIndex, result, PreserveFormatting, member);
             elements.Add(elementValue);
@@ -272,6 +271,18 @@ public class ManyToOneEnumerableMap<TElement> : IMap
         }
 
         return WithColumnNames([.. columnNames]);
+    }
+
+    /// <summary>
+    /// Sets the reader of the property map to read the values of one or more cells contained
+    /// in the columns matching the result of IExcelColumnMatcher.ColumnMatches.
+    /// </summary>
+    /// <param name="matcher">The matcher of each column to read.</param>
+    /// <returns>The property map that invoked this method.</returns>
+    public ManyToOneEnumerableMap<TElement> WithColumnsMatching(IExcelColumnMatcher matcher)
+    {
+        ReaderFactory = new ColumnsMatchingReaderFactory(matcher);
+        return this;
     }
 
     /// <summary>

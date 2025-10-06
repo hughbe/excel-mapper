@@ -9,7 +9,7 @@ namespace ExcelMapper.Readers;
 /// </summary>
 public sealed class AllColumnNamesReaderFactory : ICellsReaderFactory
 {
-    public ICellsReader? GetReader(ExcelSheet sheet)
+    public ICellsReader? GetCellsReader(ExcelSheet sheet)
     {
         if (sheet == null)
         {

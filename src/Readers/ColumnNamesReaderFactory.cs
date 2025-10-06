@@ -7,7 +7,7 @@ namespace ExcelMapper.Readers;
 /// <summary>
 /// Reads a multiple values of one or more columns given the name of each column.
 /// </summary>
-public sealed class ColumnNamesReaderFactory : ICellsReaderFactory
+public sealed class ColumnNamesReaderFactory : ICellReaderFactory, ICellsReaderFactory
 {
     /// <summary>
     /// Gets the names of each column to read.
@@ -24,8 +24,30 @@ public sealed class ColumnNamesReaderFactory : ICellsReaderFactory
         ColumnUtilities.ValidateColumnNames(columnNames, nameof(columnNames));
         ColumnNames = columnNames;
     }
+    
+    public ICellReader? GetCellReader(ExcelSheet sheet)
+    {
+        if (sheet == null)
+        {
+            throw new ArgumentNullException(nameof(sheet));
+        }
+        if (sheet.Heading == null)
+        {
+            throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
+        }
 
-    public ICellsReader? GetReader(ExcelSheet sheet)
+        foreach (string columnName in ColumnNames)
+        {
+            if (sheet.Heading.TryGetColumnIndex(columnName, out var columnIndex))
+            {
+                return new ColumnIndexReader(columnIndex);
+            }
+        }
+
+        return null;
+    }
+
+    public ICellsReader? GetCellsReader(ExcelSheet sheet)
     {
         if (sheet == null)
         {

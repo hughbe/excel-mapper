@@ -42,9 +42,9 @@ public abstract class SplitReaderFactory : ICellsReaderFactory
 
     protected abstract string[] GetValues(string value);
 
-    public ICellsReader? GetReader(ExcelSheet sheet)
+    public ICellsReader? GetCellsReader(ExcelSheet sheet)
     {
-        ICellReader? reader = _readerFactory.GetReader(sheet);
+        ICellReader? reader = _readerFactory.GetCellReader(sheet);
         if (reader == null)
         {
             return null;

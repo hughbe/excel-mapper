@@ -162,8 +162,7 @@ Console.WriteLine(president[1].Name); // Barack Obama
 Console.WriteLine(president[1].Age); // 58
 ```
 
-You can apply multiple `ExcelColumnName` attributes to support matching different variants
-of a column name.
+You can apply an `ExcelColumnNames` attribute or multiple `ExcelColumnName` attributes to support matching different variants of a column name.
 
 In the example below, ExcelMapper will first try to read from the `Column1` column, then the `Column2` column, and then throw an exception if the property or field is not found.
 
@@ -173,8 +172,84 @@ public class President
     [ExcelColumnName("Full Name")]
     public string Name { get; set; }
 
+    // Either.
+    [ExcelColumnNames("Age")]
+    public int Age { get; set; }
+
+    // Or.
     [ExcelColumnName("Age")]
     [ExcelColumnName("#Age")]
+    public int Age { get; set; }
+}
+```
+
+### Matching Column Names
+ExcelMapper supports specifying a custom column name with the `ExcelColumnMatching` attribute. This is useful for cases where we want to map a column name that is different from the property name in the data structure, for example the column name contains whitespace or the column name contains characters that can't be represented in C#.
+
+| Pub              | 2025 Projected Attendance |
+|------------------|---------------------------|
+| The Blue Anchor  | 1,000                     |
+| The Rutland Arms | 2,000                     |
+
+```cs
+public class President
+{
+    [ExcelColumnName("Name")]
+    public string Name { get; set; }
+
+    [ExcelColumnMatching(@"\d* Attendance", RegexOptions.IgnoreCase)]
+    public int Attendance { get; set; }
+}
+
+### Custom Column Indices
+ExcelMapper supports specifying a custom column index with the `ExcelColumnIndex` attribute. This is useful for cases where we want to map a column without a name.
+
+|                |      |
+|----------------|------|
+| Donald Trump   | 73   |
+| Barack Obama   | 58   |
+
+```cs
+public class President
+{
+    [ExcelColumnIndex(0)]
+    public string Name { get; set; }
+
+    [ExcelColumnIndex(1)]
+    public int Age { get; set; }
+}
+
+
+// ...
+
+using var stream = File.OpenRead("Presidents.xlsx");
+using var importer = new ExcelImporter(stream);
+
+ExcelSheet sheet = importer.ReadSheet();
+President[] president = sheet.ReadRows<President>().ToArray();
+Console.WriteLine(president[0].Name); // Donald Trump
+Console.WriteLine(president[0].Age); // 73
+Console.WriteLine(president[1].Name); // Barack Obama
+Console.WriteLine(president[1].Age); // 58
+```
+
+You can apply an `ExcelColumnIndices` attribute or multiple `ExcelColumnIndex` attributes to support matching different variants of a column index.
+
+In the example below, ExcelMapper will first try to read from the column at index 2, then the column at index 1, and then throw an exception if the property or field is not found.
+
+```cs
+public class President
+{
+    [ExcelColumnIndex("Full Name")]
+    public string Name { get; set; }
+
+    // Either.
+    [ExcelColumnIndices("Age")]
+    public int Age { get; set; }
+
+    // Or.
+    [ExcelColumnIndex("Age")]
+    [ExcelColumnIndex("#Age")]
     public int Age { get; set; }
 }
 ```
@@ -301,6 +376,7 @@ By default, ExcelMapper maps each property or field to a column with the same na
 * `WithColumnIndex(int columnIndex)` - Read from a specific column index
 * `WithColumnNameMatching(params string[] columnNames)` - Read from the first matching column in a list of column names
 * `WithColumnNameMatching(Func<string, bool> predicate)` - Read from the first column matching a predicate
+* `WithColumnMatching(IExcelColumnMatcher matcher)` - Read from the first column matching the result of `IExcelColumnMatcher.ColumnMatches(ExcelSheet sheet, int columnIndex)`
 
 For example:
 | Name           | Marrital Status | Number of Children | Approval Rating (%) | Date of Birth | Party      |
@@ -526,7 +602,63 @@ using (var importer = new ExcelImporter(stream))
 
 ## Mapping enumerables
 
-ExcelMapper supports mapping enumerables and lists. If no column names or column indices are supplied then the value of the cell will be split with the `','` separator.
+ExcelMapper supports mapping enumerables and lists. By default, if no column names or column indices are supplied then the value of the cell will be split with the `','` separator.
+
+ExcelMapper supports specifying multiple columns by name with the `ExcelColumnNames` attribute.
+
+| Pub              | Drink1  | Drink2  |
+|------------------|---------|---------|
+| The Blue Anchor  | Fosters | Carling |
+| The Rutland Arms | Amstel  | Stella  |
+
+```cs
+public class President
+{
+    [ExcelColumnName("Pub")]
+    public string Name { get; set; }
+
+    [ExcelColumnNames("Drink1", "Drink2")]
+    public string[] Drinks { get; set; }
+}
+```
+
+ExcelMapper supports specifying multiple columns by zero-based index with the `ExcelColumnIndices` attribute.
+
+| Pub              | Drink1  | Drink2  |
+|------------------|---------|---------|
+| The Blue Anchor  | Fosters | Carling |
+| The Rutland Arms | Amstel  | Stella  |
+
+```cs
+public class President
+{
+    [ExcelColumnName("Pub")]
+    public string Name { get; set; }
+
+    [ExcelColumnIndices(1, 2)]
+    public string[] Drinks { get; set; }
+}
+```
+
+ExcelMapper supports specifying multiple columns by regex with the `ExcelColumnsMatching` attribute.
+
+| Pub              | Drink1  | Drink2  |
+|------------------|---------|---------|
+| The Blue Anchor  | Fosters | Carling |
+| The Rutland Arms | Amstel  | Stella  |
+
+```cs
+public class President
+{
+    [ExcelColumnName("Pub")]
+    public string Name { get; set; }
+
+    [ExcelColumnsMatching(@"Drink\d", RegexOptions.IgnoreCase)]
+    public string[] Drinks { get; set; }
+}
+```
+
+For more complex examples, define a class map:
 
 | Name         | Children Names | First Election | Second Election | First Inauguration | Second Inauguration |
 |--------------|----------------|----------------|-----------------|--------------------|---------------------|

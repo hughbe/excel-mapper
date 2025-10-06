@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ExcelMapper.Abstractions;
 using ExcelMapper.Tests;
 using Xunit;
 
@@ -40,8 +41,63 @@ public class ColumnNamesReaderFactoryTests
     {
         Assert.Throws<ArgumentException>("columnNames", () => new ColumnNamesReaderFactory([null!]));
     }
+    
 
-    public static IEnumerable<object[]> GetReader_TestData()
+    [Fact]
+    public void GetCellReader_InvokeColumnNamesSheetWithHeadingMatch_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var factory = new ColumnNamesReaderFactory("NoSuchColumn", "Value");
+        var reader = Assert.IsType<ColumnIndexReader>(factory.GetCellReader(sheet));
+        Assert.Equal(0, reader.ColumnIndex);
+        Assert.NotSame(reader, factory.GetCellReader(sheet));
+    }
+
+    [Fact]
+    public void GetCellReader_InvokeColumnNamesNoMatch_ReturnsNull()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var factory = new ColumnNamesReaderFactory("NoSuchColumn");
+        Assert.Null(factory.GetCellReader(sheet));
+    }
+
+    [Fact]
+    public void GetCellReader_NullSheet_ThrowsArgumentNullException()
+    {
+        var factory = new ColumnNamesReaderFactory("Value");
+        Assert.Throws<ArgumentNullException>(() => factory.GetCellReader(null!));
+    }
+
+    [Fact]
+    public void GetCellReader_InvokeColumnNamesSheetNoHeadingHasHeading_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+
+        var factory = new ColumnNamesReaderFactory("ColumnName");
+        Assert.Throws<ExcelMappingException>(() => factory.GetCellReader(sheet));
+        Assert.Null(sheet.Heading);
+    }
+
+    [Fact]
+    public void GetCellReader_InvokeColumnNamesSheetNoHeadingHasNoHeading_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.HasHeading = false;
+
+        var factory = new ColumnNamesReaderFactory("ColumnName");
+        Assert.Throws<ExcelMappingException>(() => factory.GetCellReader(sheet));
+        Assert.Null(sheet.Heading);
+    }
+
+    public static IEnumerable<object[]> GetCellsReader_TestData()
     {
         yield return new object[] { new string[] { "Value" }, new int[] { 0 } };
         yield return new object[] { new string[] { "Value", "Value" }, new int[] { 0, 0 } };
@@ -49,64 +105,64 @@ public class ColumnNamesReaderFactoryTests
     }
 
     [Theory]
-    [MemberData(nameof(GetReader_TestData))]
-    public void GetReader_InvokeSheetWithHeading_ReturnsExpected(string[] columnNames, int[] expectedColumnIndices)
+    [MemberData(nameof(GetCellsReader_TestData))]
+    public void GetCellsReader_InvokeSheetWithHeading_ReturnsExpected(string[] columnNames, int[] expectedColumnIndices)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new ColumnNamesReaderFactory(columnNames);
-        var reader = Assert.IsType<ColumnIndicesReader>(factory.GetReader(sheet));
+        var reader = Assert.IsType<ColumnIndicesReader>(factory.GetCellsReader(sheet));
         Assert.Equal(expectedColumnIndices, reader.ColumnIndices);
-        Assert.NotSame(reader, factory.GetReader(sheet));
+        Assert.NotSame(reader, factory.GetCellsReader(sheet));
     }
 
-    public static IEnumerable<object[]> GetReader_NoSuchColumn_TestData()
+    public static IEnumerable<object[]> GetCellsReader_NoSuchColumn_TestData()
     {
         yield return new object[] { new string[] { "NoSuchColumn" } };
         yield return new object[] { new string[] { "Value", "NoSuchColumn" } };
     }
 
     [Theory]
-    [MemberData(nameof(GetReader_NoSuchColumn_TestData))]
-    public void GetReader_InvokeNoMatch_ReturnsNull(string[] columnNames)
+    [MemberData(nameof(GetCellsReader_NoSuchColumn_TestData))]
+    public void GetCellsReader_InvokeNoMatch_ReturnsNull(string[] columnNames)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new ColumnNamesReaderFactory(columnNames);
-        Assert.Null(factory.GetReader(sheet));
+        Assert.Null(factory.GetCellsReader(sheet));
     }
 
     [Fact]
-    public void GetReader_NullSheet_ThrowsArgumentNullException()
+    public void GetCellsReader_NullSheet_ThrowsArgumentNullException()
     {
         var factory = new ColumnNamesReaderFactory("Value");
-        Assert.Throws<ArgumentNullException>(() => factory.GetReader(null!));
+        Assert.Throws<ArgumentNullException>(() => factory.GetCellsReader(null!));
     }
 
     [Fact]
-    public void GetReader_InvokeSheetNoHeadingHasHeading_ThrowsExcelMappingException()
+    public void GetCellsReader_InvokeSheetNoHeadingHasHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
         ExcelSheet sheet = importer.ReadSheet();
 
         var factory = new ColumnNamesReaderFactory("Value");
-        Assert.Throws<ExcelMappingException>(() => factory.GetReader(sheet));
+        Assert.Throws<ExcelMappingException>(() => factory.GetCellsReader(sheet));
         Assert.Null(sheet.Heading);
     }
 
     [Fact]
-    public void GetReader_InvokeSheetNoHeadingHasNoHeading_ThrowsExcelMappingException()
+    public void GetCellsReader_InvokeSheetNoHeadingHasNoHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
         ExcelSheet sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         var factory = new ColumnNamesReaderFactory("Value");
-        Assert.Throws<ExcelMappingException>(() => factory.GetReader(sheet));
+        Assert.Throws<ExcelMappingException>(() => factory.GetCellsReader(sheet));
         Assert.Null(sheet.Heading);
     }
 }

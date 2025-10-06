@@ -265,7 +265,7 @@ public class OneToOneMapTTests
 
     private class MockReaderFactory(ICellReader Result) : ICellReaderFactory
     {
-        public ICellReader? GetReader(ExcelSheet sheet) => Result;
+        public ICellReader? GetCellReader(ExcelSheet sheet) => Result;
     }
 
     private class TestClass

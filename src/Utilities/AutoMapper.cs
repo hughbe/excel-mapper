@@ -150,13 +150,41 @@ public static class AutoMapper
         // Multiple [ExcelColumnName] attributes still represents one column, but multiple options.
         else if (columnNameAttributes.Length > 1)
         {
-            return new ColumnNameMatchingReaderFactory(columnNameAttributes.Select(c => c.Name).ToArray());
+            return new ColumnNamesReaderFactory([.. columnNameAttributes.Select(c => c.Name)]);
         }
 
-        var colummnIndexAttribute = member.GetCustomAttribute<ExcelColumnIndexAttribute>();
-        if (colummnIndexAttribute != null)
+        // [ExcelColumnNames] attributes still represents one column, but multiple options.
+        var columnNamesAttribute = member.GetCustomAttribute<ExcelColumnNamesAttribute>();
+        if (columnNamesAttribute != null)
         {
-            return new ColumnIndexReaderFactory(colummnIndexAttribute.Index);
+            return new ColumnNamesReaderFactory(columnNamesAttribute.Names);
+        }
+        
+        // A single [ExcelColumnNameMatching] attributes still represents one column, but multiple options.
+        var columnNameMatchingAttribute = member.GetCustomAttribute<ExcelColumnMatchingAttribute>();
+        if (columnNameMatchingAttribute != null)
+        {
+            var matcher = (IExcelColumnMatcher)Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments);
+            return new ColumnsMatchingReaderFactory(matcher);
+        }
+
+        // A single [ExcelColumnIndex] attribute represents one column.
+        var colummnIndexAttributes = member.GetCustomAttributes<ExcelColumnIndexAttribute>().ToArray();
+        if (colummnIndexAttributes.Length == 1)
+        {
+            return new ColumnIndexReaderFactory(colummnIndexAttributes[0].Index);
+        }
+        // Multiple [ExcelColumnIndex] attributes still represents one column, but multiple options.
+        else if (colummnIndexAttributes.Length > 1)
+        {
+            return new ColumnIndicesReaderFactory(colummnIndexAttributes.Select(c => c.Index).ToArray());
+        }
+
+        // [ExcelColumnIndices] attributes still represents one column, but multiple options.
+        var columnIndicesAttribute = member.GetCustomAttribute<ExcelColumnIndicesAttribute>();
+        if (columnIndicesAttribute != null)
+        {
+            return new ColumnIndicesReaderFactory(columnIndicesAttribute.Indices);
         }
 
         return new ColumnNameReaderFactory(member.Name);
@@ -307,7 +335,7 @@ public static class AutoMapper
         return false;
     }
 
-    private static bool TryCreateSplitMapGeneric<TList, TElement>(MemberInfo member, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneEnumerableMap<TElement>? map)
+    private static bool TryCreateSplitMapGeneric<TList, TElement>(MemberInfo? member, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneEnumerableMap<TElement>? map)
     {
         // First, get the pipeline for the element. This is used to convert individual values
         // to be added to/included in the collection.
@@ -324,17 +352,8 @@ public static class AutoMapper
             return false;
         }
 
-        // Default to splitting if this is a member, otherwise read all the columns.
-        ICellsReaderFactory defaultReaderFactory;
-        if (member == null)
-        {
-            defaultReaderFactory = new AllColumnNamesReaderFactory();
-        }
-        else
-        {
-            defaultReaderFactory = new CharSplitReaderFactory(GetDefaultCellReaderFactory(member));
-        }
-
+        // Otherwise, fallback to splitting a single cell with the default comma separator.
+        var defaultReaderFactory = GetDefaultCellsReaderFactory(member) ??  new CharSplitReaderFactory(GetDefaultCellReaderFactory(member!));
         map = new ManyToOneEnumerableMap<TElement>(defaultReaderFactory, elementMapping, factory);
         if (member != null && Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)))
         {
@@ -346,6 +365,39 @@ public static class AutoMapper
         }
 
         return true;
+    }
+
+    private static ICellsReaderFactory? GetDefaultCellsReaderFactory(MemberInfo? member)
+    {
+        // If no member was specified, read all the cells.
+        if (member == null)
+        {
+            return new AllColumnNamesReaderFactory();
+        }
+
+        // [ExcelColumnNames] attributes represent multiple columns.
+        var columnNamesAttribute = member.GetCustomAttribute<ExcelColumnNamesAttribute>();
+        if (columnNamesAttribute != null)
+        {
+            return new ColumnNamesReaderFactory(columnNamesAttribute.Names);
+        }
+        
+        // [ExcelColumnsMatchingAttribute] attributes represent multiple columns.
+        var columnNameMatchingAttribute = member.GetCustomAttribute<ExcelColumnsMatchingAttribute>();
+        if (columnNameMatchingAttribute != null)
+        {
+            var matcher = (IExcelColumnMatcher)Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments);
+            return new ColumnsMatchingReaderFactory(matcher);
+        }
+
+        // [ExcelColumnIndices] attributes represents multiple columns.
+        var columnIndicesAttribute = member.GetCustomAttribute<ExcelColumnIndicesAttribute>();
+        if (columnIndicesAttribute != null)
+        {
+            return new ColumnIndicesReaderFactory(columnIndicesAttribute.Indices);
+        }
+
+        return null;
     }
 
     private static bool TryGetCreateElementsFactory<TList, TElement>([NotNullWhen(true)] out CreateElementsFactory<TElement>? result)
@@ -484,6 +536,8 @@ public static class AutoMapper
         }
 
         // Default to all columns.
+        var defaultReaderFactory = GetDefaultCellsReaderFactory(member) ?? new AllColumnNamesReaderFactory();
+        map = new ManyToOneDictionaryMap<TValue>(defaultReaderFactory, valuePipeline, factory);
         if (member != null && Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)))
         {
             map.Optional = true;

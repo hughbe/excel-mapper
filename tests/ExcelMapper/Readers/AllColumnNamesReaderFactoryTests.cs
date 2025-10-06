@@ -17,7 +17,7 @@ public class AllColumnNamesValueReaderTests
         sheet.ReadHeading();
 
         var factory = new AllColumnNamesReaderFactory();
-        var reader = factory.GetReader(sheet);
+        var reader = factory.GetCellsReader(sheet);
         Assert.NotNull(reader);
         IEnumerable<ReadCellResult>? result = null;
         Assert.True(reader.TryGetValues(importer.Reader, false, out result));
@@ -30,7 +30,7 @@ public class AllColumnNamesValueReaderTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         var factory = new AllColumnNamesReaderFactory();
         IEnumerable<ReadCellResult>? result = null;
-        Assert.Throws<ArgumentNullException>("sheet", () => factory.GetReader(null!));
+        Assert.Throws<ArgumentNullException>("sheet", () => factory.GetCellsReader(null!));
         Assert.Null(result);
     }
 
@@ -42,7 +42,7 @@ public class AllColumnNamesValueReaderTests
 
         var factory = new AllColumnNamesReaderFactory();
         IEnumerable<ReadCellResult>? result = null;
-        Assert.Throws<ExcelMappingException>(() => factory.GetReader(sheet));
+        Assert.Throws<ExcelMappingException>(() => factory.GetCellsReader(sheet));
         Assert.Null(result);
     }
 
@@ -55,7 +55,7 @@ public class AllColumnNamesValueReaderTests
 
         var factory = new AllColumnNamesReaderFactory();
         IEnumerable<ReadCellResult>? result = null;
-        Assert.Throws<ExcelMappingException>(() => factory.GetReader(sheet));
+        Assert.Throws<ExcelMappingException>(() => factory.GetCellsReader(sheet));
         Assert.Null(result);
     }
 }

@@ -207,9 +207,9 @@ public class MapNestedObjectTests
                 var startTimeReaderFactory = new ColumnNameReaderFactory(prefix + "Open");
                 var endTimeReaderFactory = new ColumnNameReaderFactory(prefix + "Close");
 
-                var labelReader = labelReaderFactory.GetReader(sheet)!;
-                var startTimeReader = startTimeReaderFactory.GetReader(sheet)!;
-                var endTimeReader = endTimeReaderFactory.GetReader(sheet)!;
+                var labelReader = labelReaderFactory.GetCellReader(sheet)!;
+                var startTimeReader = startTimeReaderFactory.GetCellReader(sheet)!;
+                var endTimeReader = endTimeReaderFactory.GetCellReader(sheet)!;
 
                 if (!labelReader.TryGetValue(reader, false, out ReadCellResult labelResult) ||
                     !startTimeReader.TryGetValue(reader, false,  out ReadCellResult startTimeResult) ||

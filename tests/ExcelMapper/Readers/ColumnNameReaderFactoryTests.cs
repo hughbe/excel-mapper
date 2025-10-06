@@ -38,9 +38,9 @@ public class ColumnNameReaderFactoryTests
         sheet.ReadHeading();
 
         var factory = new ColumnNameReaderFactory(columnName);
-        var reader = Assert.IsType<ColumnIndexReader>(factory.GetReader(sheet));
+        var reader = Assert.IsType<ColumnIndexReader>(factory.GetCellReader(sheet));
         Assert.Equal(0, reader.ColumnIndex);
-        Assert.NotSame(reader, factory.GetReader(sheet));
+        Assert.NotSame(reader, factory.GetCellReader(sheet));
     }
 
     [Fact]
@@ -51,14 +51,14 @@ public class ColumnNameReaderFactoryTests
         sheet.ReadHeading();
 
         var factory = new ColumnNameReaderFactory("NoSuchColumn");
-        Assert.Null(factory.GetReader(sheet));
+        Assert.Null(factory.GetCellReader(sheet));
     }
 
     [Fact]
     public void GetReader_NullSheet_ThrowsArgumentNullException()
     {
         var factory = new ColumnNameReaderFactory("Value");
-        Assert.Throws<ArgumentNullException>(() => factory.GetReader(null!));
+        Assert.Throws<ArgumentNullException>(() => factory.GetCellReader(null!));
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class ColumnNameReaderFactoryTests
         ExcelSheet sheet = importer.ReadSheet();
 
         var factory = new ColumnNameReaderFactory("Value");
-        Assert.Throws<ExcelMappingException>(() => factory.GetReader(sheet));
+        Assert.Throws<ExcelMappingException>(() => factory.GetCellReader(sheet));
         Assert.Null(sheet.Heading);
     }
 
@@ -80,7 +80,7 @@ public class ColumnNameReaderFactoryTests
         sheet.HasHeading = false;
 
         var factory = new ColumnNameReaderFactory("Value");
-        Assert.Throws<ExcelMappingException>(() => factory.GetReader(sheet));
+        Assert.Throws<ExcelMappingException>(() => factory.GetCellReader(sheet));
         Assert.Null(sheet.Heading);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ExcelMapper.Abstractions;
 using ExcelMapper.Readers;
 using Xunit;
 
@@ -32,14 +33,12 @@ public class OneToOneMapExtensionsTests : ExcelClassMap<Helpers.TestClass>
         OneToOneMap<string> map = Map(t => t.Value);
         Assert.Same(map, map.WithColumnNameMatching(columnNames));
         
-        var factory1 = Assert.IsType<ColumnNameMatchingReaderFactory>(map.ReaderFactory);
+        var factory1 = Assert.IsType<ColumnNamesReaderFactory>(map.ReaderFactory);
         Assert.Same(columnNames, factory1.ColumnNames);
-        Assert.Null(factory1.Predicate);
 
         Assert.Same(map, map.WithColumnNameMatching(columnNames));
-        var factory2 = Assert.IsType<ColumnNameMatchingReaderFactory>(map.ReaderFactory);
+        var factory2 = Assert.IsType<ColumnNamesReaderFactory>(map.ReaderFactory);
         Assert.Same(columnNames, factory2.ColumnNames);
-        Assert.Null(factory2.Predicate);
     }
 
     [Fact]
@@ -71,14 +70,12 @@ public class OneToOneMapExtensionsTests : ExcelClassMap<Helpers.TestClass>
         OneToOneMap<string> map = Map(t => t.Value);
         Assert.Same(map, map.WithColumnNameMatching(predicate1));
         
-        var factory1 = Assert.IsType<ColumnNameMatchingReaderFactory>(map.ReaderFactory);
-        Assert.Null(factory1.ColumnNames);
-        Assert.Same(predicate1, factory1.Predicate);
+        var factory1 = Assert.IsType<ColumnsMatchingReaderFactory>(map.ReaderFactory);
+        Assert.Same(predicate1, Assert.IsType<PredicateColumnMatcher>(factory1.Matcher).Predicate);
 
         Assert.Same(map, map.WithColumnNameMatching(predicate2));
-        var factory2 = Assert.IsType<ColumnNameMatchingReaderFactory>(map.ReaderFactory);
-        Assert.Null(factory2.ColumnNames);
-        Assert.Same(predicate2, factory2.Predicate);
+        var factory2 = Assert.IsType<ColumnsMatchingReaderFactory>(map.ReaderFactory);
+        Assert.Same(predicate2, Assert.IsType<PredicateColumnMatcher>(factory2.Matcher).Predicate);
     }
 
     [Fact]
@@ -86,6 +83,31 @@ public class OneToOneMapExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         OneToOneMap<string> map = Map(t => t.Value);
         Assert.Throws<ArgumentNullException>("predicate", () => map.WithColumnNameMatching((Func<string, bool>)null!));
+    }
+
+    [Fact]
+    public void WithColumnMatching_IExcelColumnMatcher_Success()
+    {
+        Func<string, bool> predicate1 = columnName => columnName == "ColumnName";
+        Func<string, bool> predicate2 = columnName => columnName == "ColumnName";
+        var matcher1 = new PredicateColumnMatcher(predicate1);
+        var matcher2 = new PredicateColumnMatcher(predicate1);
+        OneToOneMap<string> map = Map(t => t.Value);
+        Assert.Same(map, map.WithColumnMatching(matcher1));
+        
+        var factory1 = Assert.IsType<ColumnsMatchingReaderFactory>(map.ReaderFactory);
+        Assert.Same(matcher1, factory1.Matcher);
+
+        Assert.Same(map, map.WithColumnMatching(matcher2));
+        var factory2 = Assert.IsType<ColumnsMatchingReaderFactory>(map.ReaderFactory);
+        Assert.Same(matcher2, factory2.Matcher);
+    }
+
+    [Fact]
+    public void WithColumnMatching_NullMatcher_ThrowsArgumentNullException()
+    {
+        OneToOneMap<string> map = Map(t => t.Value);
+        Assert.Throws<ArgumentNullException>("matcher", () => map.WithColumnMatching((IExcelColumnMatcher)null!));
     }
 
     [Fact]

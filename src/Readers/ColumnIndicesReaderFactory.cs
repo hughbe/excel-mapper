@@ -7,7 +7,7 @@ namespace ExcelMapper.Readers;
 /// <summary>
 /// Reads a multiple values of one or more columns given the name of each column.
 /// </summary>
-public sealed class ColumnIndicesReaderFactory : ICellsReaderFactory
+public sealed class ColumnIndicesReaderFactory : ICellReaderFactory, ICellsReaderFactory
 {
     /// <summary>
     /// Gets the zero-based indices for each column to read.
@@ -21,11 +21,11 @@ public sealed class ColumnIndicesReaderFactory : ICellsReaderFactory
     /// <param name="columnIndices">The list of zero-based column indices to read.</param>
     public ColumnIndicesReaderFactory(params int[] columnIndices)
     {
-        ColumnNameUtilities.ValidateColumnIndices(columnIndices, nameof(columnIndices));
-ColumnIndices = columnIndices;
-        }
+        ColumnUtilities.ValidateColumnIndices(columnIndices, nameof(columnIndices));
+        ColumnIndices = columnIndices;
+    }
 
-public ICellReader? GetCellReader(ExcelSheet sheet)
+    public ICellReader? GetCellReader(ExcelSheet sheet)
     {
         if (sheet == null)
         {
@@ -43,7 +43,7 @@ public ICellReader? GetCellReader(ExcelSheet sheet)
         return null;
     }
 
-    public ICellsReader? GetReader(ExcelSheet sheet)
+    public ICellsReader? GetCellsReader(ExcelSheet sheet)
     {
         if (sheet == null)
         {
