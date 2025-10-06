@@ -13,7 +13,7 @@ public static class IManyToOneMapExtensions
     /// </summary>
     /// <param name="columnNames">The name of each column to read.</param>
     /// <returns>The map that invoked this method.</returns>
-    public static TPropertyMap WithColumnNames<TPropertyMap>(this TPropertyMap map, params string[] columnNames) where TPropertyMap : IManyToOneMap
+    public static TMap WithColumnNames<TMap>(this TMap map, params string[] columnNames) where TMap : IManyToOneMap
         => map.WithReaderFactory(new ColumnNamesReaderFactory(columnNames));
 
     /// <summary>
@@ -22,7 +22,7 @@ public static class IManyToOneMapExtensions
     /// </summary>
     /// <param name="columnNames">The name of each column to read.</param>
     /// <returns>The map that invoked this method.</returns>
-    public static TPropertyMap WithColumnNames<TPropertyMap>(this TPropertyMap map, IEnumerable<string> columnNames) where TPropertyMap : IManyToOneMap
+    public static TMap WithColumnNames<TMap>(this TMap map, IEnumerable<string> columnNames) where TMap : IManyToOneMap
     {
         if (columnNames == null)
         {
@@ -38,7 +38,7 @@ public static class IManyToOneMapExtensions
     /// </summary>
     /// <param name="matcher">The matcher of each column to read.</param>
     /// <returns>The map that invoked this method.</returns>
-    public static TPropertyMap WithColumnsMatching<TPropertyMap>(this TPropertyMap map, IExcelColumnMatcher matcher) where TPropertyMap : IManyToOneMap
+    public static TMap WithColumnsMatching<TMap>(this TMap map, IExcelColumnMatcher matcher) where TMap : IManyToOneMap
         => map.WithReaderFactory(new ColumnsMatchingReaderFactory(matcher));
 
     /// <summary>
@@ -47,7 +47,7 @@ public static class IManyToOneMapExtensions
     /// </summary>
     /// <param name="columnIndices">The zero-based index of each column to read.</param>
     /// <returns>The map that invoked this method.</returns>
-    public static TPropertyMap WithColumnIndices<TPropertyMap>(this TPropertyMap map, params int[] columnIndices) where TPropertyMap : IManyToOneMap
+    public static TMap WithColumnIndices<TMap>(this TMap map, params int[] columnIndices) where TMap : IManyToOneMap
         => map.WithReaderFactory(new ColumnIndicesReaderFactory(columnIndices));
 
     /// <summary>
@@ -56,7 +56,7 @@ public static class IManyToOneMapExtensions
     /// </summary>
     /// <param name="columnIndices">The zero-based index of each column to read.</param>
     /// <returns>The map that invoked this method.</returns>
-    public static TPropertyMap WithColumnIndices<TPropertyMap>(this TPropertyMap map, IEnumerable<int> columnIndices) where TPropertyMap : IManyToOneMap
+    public static TMap WithColumnIndices<TMap>(this TMap map, IEnumerable<int> columnIndices) where TMap : IManyToOneMap
     {
         if (columnIndices == null)
         {
@@ -68,11 +68,11 @@ public static class IManyToOneMapExtensions
     /// <summary>
     /// Sets the reader of the map to use a custom cell values reader.
     /// </summary>
-    /// <typeparam name="TPropertyMap">The type of the map.</typeparam>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="reader">The custom reader to use.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TPropertyMap WithReaderFactory<TPropertyMap>(this TPropertyMap map, ICellsReaderFactory readerFactory) where TPropertyMap : IManyToOneMap
+    public static TMap WithReaderFactory<TMap>(this TMap map, ICellsReaderFactory readerFactory) where TMap : IManyToOneMap
     {
         map.ReaderFactory = readerFactory ?? throw new ArgumentNullException(nameof(readerFactory));
         return map;

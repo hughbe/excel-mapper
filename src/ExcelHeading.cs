@@ -19,7 +19,7 @@ public class ExcelHeading
 
         for (int columnIndex = 0; columnIndex < reader.FieldCount; columnIndex++)
         {
-            string? columnName = reader.GetValue(columnIndex)?.ToString();
+            var columnName = reader.GetValue(columnIndex)?.ToString();
             if (columnName == null)
             {
                 columnNames[columnIndex] = string.Empty;

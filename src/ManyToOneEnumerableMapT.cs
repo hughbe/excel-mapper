@@ -89,7 +89,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// </summary>
     /// <param name="elementMap">The pipeline that maps the value of a single cell to an object of the element type of the property
     /// or field.</param>
-    /// <returns>The property map that invoked this method.</returns>
+    /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithElementMap(Func<IValuePipeline<TElement>, IValuePipeline<TElement>> elementMap)
     {
         if (elementMap == null)
@@ -106,7 +106,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// with a given name.
     /// </summary>
     /// <param name="columnName">The name of the column containing the cell to split.</param>
-    /// <returns>The property map that invoked this method.</returns>
+    /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithColumnName(string columnName)
     {
         var columnReader = new ColumnNameReaderFactory(columnName);
@@ -127,7 +127,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// at the given zero-based index.
     /// </summary>
     /// <param name="columnIndex">The zero-bassed index of the column containing the cell to split.</param>
-    /// <returns>The property map that invoked this method.</returns>
+    /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithColumnIndex(int columnIndex)
     {
         var factory = new ColumnIndexReaderFactory(columnIndex);
@@ -144,11 +144,11 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     }
 
     /// <summary>
-    /// Sets the reader of the property map to split the value of a single cell using the
+    /// Sets the reader of the map to split the value of a single cell using the
     /// given separators.
     /// </summary>
     /// <param name="separators">The separators used to split the value of a single cell.</param>
-    /// <returns>The property map that invoked this method.</returns>
+    /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithSeparators(params char[] separators)
     {
         if (separators is null)
@@ -170,11 +170,11 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     }
 
     /// <summary>
-    /// Sets the reader of the property map to split the value of a single cell using the
+    /// Sets the reader of the map to split the value of a single cell using the
     /// given separators.
     /// </summary>
     /// <param name="separators">The separators used to split the value of a single cell.</param>
-    /// <returns>The property map that invoked this method.</returns>
+    /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithSeparators(IEnumerable<char> separators)
     {
         if (separators == null)
@@ -186,11 +186,11 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     }
 
     /// <summary>
-    /// Sets the reader of the property map to split the value of a single cell using the
+    /// Sets the reader of the map to split the value of a single cell using the
     /// given separators.
     /// </summary>
     /// <param name="separators">The separators used to split the value of a single cell.</param>
-    /// <returns>The property map that invoked this method.</returns>
+    /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithSeparators(params string[] separators)
     {
         if (separators is null)
@@ -212,11 +212,11 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     }
 
     /// <summary>
-    /// Sets the reader of the property map to split the value of a single cell using the
+    /// Sets the reader of the map to split the value of a single cell using the
     /// given separators.
     /// </summary>
     /// <param name="separators">The separators used to split the value of a single cell.</param>
-    /// <returns>The property map that invoked this method.</returns>
+    /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithSeparators(IEnumerable<string> separators)
     {
         if (separators == null)

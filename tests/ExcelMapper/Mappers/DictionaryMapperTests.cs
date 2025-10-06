@@ -20,7 +20,7 @@ public class DictionaryMapperTests
         StringComparer comparer = StringComparer.CurrentCultureIgnoreCase;
         var item = new DictionaryMapper<object>(mappingDictionary, comparer, behavior);
 
-        Dictionary<string, object> itemMapping = Assert.IsType<Dictionary<string, object>>(item.MappingDictionary);
+        var itemMapping = Assert.IsType<Dictionary<string, object>>(item.MappingDictionary);
         Assert.Equal(mappingDictionary, itemMapping);
         Assert.Same(comparer, itemMapping.Comparer);
         Assert.Equal(behavior, item.Behavior);
@@ -32,7 +32,7 @@ public class DictionaryMapperTests
     {
         var item = new DictionaryMapper<object>(mappingDictionary, null, behavior);
 
-        Dictionary<string, object> itemMapping = Assert.IsType<Dictionary<string, object>>(item.MappingDictionary);
+        var itemMapping = Assert.IsType<Dictionary<string, object>>(item.MappingDictionary);
         Assert.Equal(mappingDictionary, itemMapping);
         Assert.NotNull(itemMapping.Comparer);
         Assert.Equal(behavior, item.Behavior);

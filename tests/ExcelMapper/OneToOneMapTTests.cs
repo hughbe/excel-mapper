@@ -17,7 +17,7 @@ public class OneToOneMapTTests
     public void Ctor_ICellReaderFactory()
     {
         var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<int>(factory);
+        var map = new SubOneToOneMap<string>(factory);
         Assert.Same(factory, map.ReaderFactory);
         Assert.Empty(map.CellValueMappers);
         Assert.Same(map.CellValueMappers, map.CellValueMappers);
@@ -32,7 +32,7 @@ public class OneToOneMapTTests
     [Fact]
     public void Ctor_NullReader_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>("readerFactory", () => new SubOneToOneMap<int>(null!));
+        Assert.Throws<ArgumentNullException>("readerFactory", () => new SubOneToOneMap<string>(null!));
     }
 
     public static IEnumerable<object[]> ReaderFactory_Set_TestData()
@@ -45,7 +45,7 @@ public class OneToOneMapTTests
     public void ReaderFactory_SetValid_GetReturnsExpected(ICellReaderFactory value)
     {
         var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<int>(factory)
+        var map = new SubOneToOneMap<string>(factory)
         {
             ReaderFactory = value
         };
@@ -60,7 +60,7 @@ public class OneToOneMapTTests
     public void ReaderFactory_SetNull_ThrowsArgumentNullException()
     {
         var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<int>(factory);
+        var map = new SubOneToOneMap<string>(factory);
 
         Assert.Throws<ArgumentNullException>("value", () => map.ReaderFactory = null!);
     }
@@ -69,7 +69,7 @@ public class OneToOneMapTTests
     public void EmptyFallback_Set_GetReturnsExpected()
     {
         var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<int>(factory);
+        var map = new SubOneToOneMap<string>(factory);
 
         var fallback = new FixedValueFallback(10);
         map.EmptyFallback = fallback;
@@ -83,7 +83,7 @@ public class OneToOneMapTTests
     public void InvalidFallback_Set_GetReturnsExpected()
     {
         var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<int>(factory);
+        var map = new SubOneToOneMap<string>(factory);
 
         var fallback = new FixedValueFallback(10);
         map.InvalidFallback = fallback;
@@ -99,7 +99,7 @@ public class OneToOneMapTTests
     public void Optional_Set_GetReturnsExpected(bool value)
     {
         var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<int>(factory)
+        var map = new SubOneToOneMap<string>(factory)
         {
             Optional = value
         };
@@ -120,7 +120,7 @@ public class OneToOneMapTTests
     public void PreserveFormatting_Set_GetReturnsExpected(bool value)
     {
         var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<int>(factory)
+        var map = new SubOneToOneMap<string>(factory)
         {
             PreserveFormatting = value
         };
@@ -135,11 +135,105 @@ public class OneToOneMapTTests
         Assert.Equal(!value, map.PreserveFormatting);
     }
 
+    [Theory]
+    [InlineData("abc")]
+    [InlineData(null)]
+    public void WithValueFallback_Invoke_Success(string? value)
+    {
+        var factory = new ColumnNameReaderFactory("Column");
+        var map = new SubOneToOneMap<string>(factory);
+        Assert.Same(map, map.WithValueFallback(value));
+
+        var emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
+        var invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
+
+        Assert.Same(emptyFallback, invalidFallback);
+        Assert.Equal(value, emptyFallback.Value);
+        Assert.Equal(value, invalidFallback.Value);
+    }
+
+    [Theory]
+    [InlineData("abc")]
+    [InlineData(null)]
+    public void WithValueFallback_InvokeWithFallbacks_Success(string? value)
+    {
+        var factory = new ColumnNameReaderFactory("Column");
+        var map = new SubOneToOneMap<string>(factory).WithEmptyFallback("Empty").WithInvalidFallback("Invalid");
+        Assert.Same(map, map.WithValueFallback(value));
+
+        var emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
+        var invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
+
+        Assert.Same(emptyFallback, invalidFallback);
+        Assert.Equal(value, emptyFallback.Value);
+        Assert.Equal(value, invalidFallback.Value);
+    }
+    
+
+    [Theory]
+    [InlineData("abc")]
+    [InlineData(null)]
+    public void WithEmptyFallback_Invoke_Success(string? value)
+    {
+        var factory = new ColumnNameReaderFactory("Column");
+        var map = new SubOneToOneMap<string>(factory);
+        Assert.Same(map, map.WithEmptyFallback(value));
+
+        var emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
+        Assert.Equal(value, emptyFallback.Value);
+    }
+
+    [Theory]
+    [InlineData("abc")]
+    [InlineData(null)]
+    public void WithEmptyFallback_InvokeWithInvalidFallback_Success(string? value)
+    {
+        var factory = new ColumnNameReaderFactory("Column");
+        var map = new SubOneToOneMap<string>(factory).WithInvalidFallback("Invalid");
+        Assert.Same(map, map.WithEmptyFallback(value));
+
+        var emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
+        Assert.Equal(value, emptyFallback.Value);
+        
+        var invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
+        Assert.Equal("Invalid", invalidFallback.Value);
+    }
+    
+
+    [Theory]
+    [InlineData("abc")]
+    [InlineData(null)]
+    public void WithInvalidFallback_Invoke_Success(string? value)
+    {
+        var factory = new ColumnNameReaderFactory("Column");
+        var map = new SubOneToOneMap<string>(factory);
+        Assert.Same(map, map.WithInvalidFallback(value));
+
+        var invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
+        Assert.Equal(value, invalidFallback.Value);
+    }
+
+    [Theory]
+    [InlineData("abc")]
+    [InlineData(null)]
+    public void WithInvalidFallback_InvokeWithEmptyFallback_Success(string? value)
+    {
+        var factory = new ColumnNameReaderFactory("Column");
+        var map = new SubOneToOneMap<string>(factory).WithEmptyFallback("Empty");
+        Assert.Same(map, map.WithInvalidFallback(value));
+
+        var invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
+        Assert.Equal(value, invalidFallback.Value);
+
+        var emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
+        Assert.Equal("Empty", emptyFallback.Value);
+    }
+
     [Fact]
     public void AddCellValueMapper_ValidItem_Success()
     {
         var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<int>(factory);
+        var map = new SubOneToOneMap<string>(factory);
         var item1 = new BoolMapper();
         var item2 = new BoolMapper();
 
@@ -152,7 +246,7 @@ public class OneToOneMapTTests
     public void AddCellValueMapper_NullItem_ThrowsArgumentNullException()
     {
         var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<int>(factory);
+        var map = new SubOneToOneMap<string>(factory);
 
         Assert.Throws<ArgumentNullException>("mapper", () => map.AddCellValueMapper(null!));
     }
@@ -161,7 +255,7 @@ public class OneToOneMapTTests
     public void RemoveCellValueMapper_Index_Success()
     {
         var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<int>(factory);
+        var map = new SubOneToOneMap<string>(factory);
         map.AddCellValueMapper(new BoolMapper());
 
         map.RemoveCellValueMapper(0);
@@ -172,7 +266,7 @@ public class OneToOneMapTTests
     public void AddCellValueTransformer_ValidTransformer_Success()
     {
         var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<int>(factory);
+        var map = new SubOneToOneMap<string>(factory);
         var transformer1 = new TrimCellValueTransformer();
         var transformer2 = new TrimCellValueTransformer();
 
@@ -185,7 +279,7 @@ public class OneToOneMapTTests
     public void AddCellValueTransformer_NullTransformer_ThrowsArgumentNullException()
     {
         var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<int>(factory);
+        var map = new SubOneToOneMap<string>(factory);
         Assert.Throws<ArgumentNullException>("transformer", () => map.AddCellValueTransformer(null!));
     }
 
@@ -193,10 +287,10 @@ public class OneToOneMapTTests
     public void TryGetValue_InvokeCantReadPropertyInfo_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var factory = new MockReaderFactory(new MockSingleCellValueReader(() => (false, default)));
-        var map = new SubOneToOneMap<int>(factory);
+        var map = new SubOneToOneMap<string>(factory);
         MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
@@ -207,10 +301,10 @@ public class OneToOneMapTTests
     public void TryGetValue_InvokeCantReadFieldInfo_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var factory = new MockReaderFactory(new MockSingleCellValueReader(() => (false, default)));
-        var map = new SubOneToOneMap<int>(factory);
+        var map = new SubOneToOneMap<string>(factory);
         MemberInfo member = typeof(TestClass).GetField(nameof(TestClass._field))!;
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
@@ -221,10 +315,10 @@ public class OneToOneMapTTests
     public void TryGetValue_InvokeCantReadEventInfo_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var factory = new MockReaderFactory(new MockSingleCellValueReader(() => (false, default)));
-        var map = new SubOneToOneMap<int>(factory);
+        var map = new SubOneToOneMap<string>(factory);
         MemberInfo member = typeof(TestClass).GetEvent(nameof(TestClass.Event))!;
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
@@ -235,10 +329,10 @@ public class OneToOneMapTTests
     public void TryGetValue_InvokeCantReadNullMember_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var factory = new MockReaderFactory(new MockSingleCellValueReader(() => (false, default)));
-        var map = new SubOneToOneMap<int>(factory);
+        var map = new SubOneToOneMap<string>(factory);
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Null(result);

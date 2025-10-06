@@ -104,7 +104,7 @@ public class ManyToOneDictionaryMap<TElement> : IManyToOneMap
     /// </summary>
     /// <param name="valueMap">The pipeline that maps the value of a single cell to an object of the element type of the property
     /// or field.</param>
-    /// <returns>The property map that invoked this method.</returns>
+    /// <returns>The map that invoked this method.</returns>
     public ManyToOneDictionaryMap<TElement> WithValueMap(Func<IValuePipeline<TElement>, IValuePipeline<TElement>> valueMap)
     {
         if (valueMap == null)

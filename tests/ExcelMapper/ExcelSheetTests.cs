@@ -713,10 +713,10 @@ public class ExcelSheetTests
         // One of the cells header row outside of the data range has a bold formatting applied to it
         // causing the ManyToOne Cell reader to add a header with an empty value
         using var importer = Helpers.GetImporter("DictionaryMappingIssue.xlsx");
-        var mapping = new ExcelClassMap<Dictionary>();
+        var map = new ExcelClassMap<Dictionary>();
 
-        mapping.Map(t => t.RawRow);
-        importer.Configuration.RegisterClassMap(mapping);
+        map.Map(t => t.RawRow);
+        importer.Configuration.RegisterClassMap(map);
         ExcelSheet sheet = importer.ReadSheet();
 
         var rows = sheet.ReadRows<Dictionary>().ToArray();

@@ -77,40 +77,31 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>
     public void AddCellValueTransformer(ICellTransformer transformer) => Pipeline.AddCellValueTransformer(transformer);
 
     public void RemoveCellValueMapper(int index) => Pipeline.RemoveCellValueMapper(index);
-    
 
     /// <summary>
     /// Specifies a fixed fallback to be used if the value of a cell is empty or cannot be mapped.
     /// </summary>
-    /// <typeparam name="T">The type of the property map.</typeparam>
-    /// <param name="defaultValue">The value that will be assigned to the property or field if the value of a cell is empty or cannot be mapped.</param>
-    /// <returns>The property map on which this method was invoked.</returns>
-    public OneToOneMap<T> WithValueFallback(T? defaultValue)
-    {
-        return this
-            .WithEmptyFallback(defaultValue)
-            .WithInvalidFallback(defaultValue);
-    }
+    /// <typeparam name="T">The type of the map.</typeparam>
+    /// <param name="value">The value that will be assigned to the property or field if the value of a cell is empty or cannot be mapped.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public OneToOneMap<T> WithValueFallback(T? value)
+        => this.WithFallbackItem(new FixedValueFallback(value));
 
     /// <summary>
     /// Specifies a fixed fallback to be used if the value of a cell is empty.
     /// </summary>
-    /// <typeparam name="T">The type of the property map.</typeparam>
+    /// <typeparam name="T">The type of the map.</typeparam>
     /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell is empty.</param>
-    /// <returns>The property map on which this method was invoked.</returns>
+    /// <returns>The map on which this method was invoked.</returns>
     public OneToOneMap<T> WithEmptyFallback(T? fallbackValue)
-    {
-        return this.WithEmptyFallbackItem(new FixedValueFallback(fallbackValue));
-    }
+        => this.WithEmptyFallbackItem(new FixedValueFallback(fallbackValue));
 
     /// <summary>
     /// Specifies a fixed fallback to be used if the value of a cell cannot be mapped.
     /// </summary>
-    /// <typeparam name="T">The type of the property map.</typeparam>
+    /// <typeparam name="T">The type of the map.</typeparam>
     /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell cannot be mapped.</param>
-    /// <returns>The property map on which this method was invoked.</returns>
+    /// <returns>The map on which this method was invoked.</returns>
     public OneToOneMap<T> WithInvalidFallback(T? fallbackValue)
-    {
-        return this.WithInvalidFallbackItem(new FixedValueFallback(fallbackValue));
-    }
+        => this.WithInvalidFallbackItem(new FixedValueFallback(fallbackValue));
 }

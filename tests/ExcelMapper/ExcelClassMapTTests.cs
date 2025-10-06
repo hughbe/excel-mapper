@@ -233,8 +233,8 @@ public class ExcelClassMapTTests : ExcelClassMap<Helpers.TestClass>
     public void MapObject_ClassMapFactory_ReturnsExpected()
     {
         var map = new TestClassMap(FallbackStrategy.ThrowIfPrimitive);
-        ExcelClassMap<string> mapping = map.MapObject(t => t.Value);
-        Assert.Empty(mapping.Properties);
+        var classMap = map.MapObject(t => t.Value);
+        Assert.Empty(classMap.Properties);
     }
 
     [Fact]

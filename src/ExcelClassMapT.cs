@@ -458,11 +458,11 @@ public class ExcelClassMap<T> : ExcelClassMap
     {
         ExcelPropertyMap? map = Properties.FirstOrDefault(m => m.Member.Equals(memberExpression.Member));
 
-        ExcelClassMap<TElement> objectPropertyMap;
+        ExcelClassMap<TElement> objecTMap;
         if (map == null)
         {
-            objectPropertyMap = new ExcelClassMap<TElement>();
-            Properties.Add(new ExcelPropertyMap(memberExpression.Member, objectPropertyMap));
+            objecTMap = new ExcelClassMap<TElement>();
+            Properties.Add(new ExcelPropertyMap(memberExpression.Member, objecTMap));
         }
         else if (map.Map is not ExcelClassMap<TElement> existingMap)
         {
@@ -470,10 +470,10 @@ public class ExcelClassMap<T> : ExcelClassMap
         }
         else
         {
-            objectPropertyMap = existingMap;
+            objecTMap = existingMap;
         }
 
-        objectPropertyMap.CreateObjectMap(propertyMap, memberExpressions);
+        objecTMap.CreateObjectMap(propertyMap, memberExpressions);
     }
 
     /// <summary>
@@ -481,7 +481,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// of a an object.
     /// </summary>
     /// <param name="classMapFactory">A delegate that allows configuring the default class map used.</param>
-    /// <returns>The property map that invoked this method.</returns>
+    /// <returns>The map that invoked this method.</returns>
     public ExcelClassMap<T> WithClassMap(Action<ExcelClassMap<T>> classMapFactory)
     {
         if (classMapFactory == null)
@@ -498,7 +498,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// of a an object.
     /// </summary>
     /// <param name="classMap">The new class map used.</param>
-    /// <returns>The property map that invoked this method.</returns>
+    /// <returns>The map that invoked this method.</returns>
     public ExcelClassMap<T> WithClassMap(ExcelClassMap<T> classMap)
     {
         if (classMap == null)

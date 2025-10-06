@@ -626,7 +626,7 @@ public static class AutoMapper
                 return false;
             }
 
-            // Get the out parameter representing the property map for the member.
+            // Get the out parameter representing the map for the member.
             map.Properties.Add(new ExcelPropertyMap(member, (IMap)parameters[2]!));
         }
 
