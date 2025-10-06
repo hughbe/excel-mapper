@@ -7,7 +7,6 @@ using System.Reflection;
 using ExcelMapper.Utilities;
 using ExcelMapper.Mappers;
 using System.Linq;
-using ExcelMapper.Abstractions;
 using System.Collections;
 
 namespace ExcelMapper;

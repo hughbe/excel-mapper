@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -72,7 +71,7 @@ internal static class ColumnUtilities
 
     private static string QuoteJoin(IEnumerable<string> values)
     {
-        IEnumerable<string> quoted = values.Select(v => $"\"{v}\"");
+        var quoted = values.Select(v => $"\"{v}\"");
         return $"[{string.Join(", ", quoted)}]";
     }
 }

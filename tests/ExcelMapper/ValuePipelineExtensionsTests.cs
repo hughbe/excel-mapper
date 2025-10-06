@@ -13,35 +13,6 @@ namespace ExcelMapper.Tests;
 public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 {
     [Fact]
-    public void WithReaderFactory_ValidReader_Success()
-    {
-        var factory = new ColumnNameReaderFactory("ColumnName");
-        var map = Map(t => t.Value);
-        Assert.False(map.Optional);
-        Assert.Same(map, map.WithReaderFactory(factory));
-        Assert.Same(factory, map.ReaderFactory);
-    }
-
-    [Fact]
-    public void WithReaderFactory_OptionalColumn_Success()
-    {
-        var factory = new ColumnNameReaderFactory("ColumnName");
-        var map = Map(t => t.Value).MakeOptional();
-        Assert.True(map.Optional);
-        Assert.Same(map, map.WithReaderFactory(factory));
-        Assert.True(map.Optional);
-        Assert.Same(factory, map.ReaderFactory);
-    }
-
-    [Fact]
-    public void WithReaderFactory_NullReader_ThrowsArgumentNullException()
-    {
-        var map = Map(t => t.Value);
-
-        Assert.Throws<ArgumentNullException>("readerFactory", () => map.WithReaderFactory(null!));
-    }
-
-    [Fact]
     public void WithCellValueMappers_ValidMappers_ThrowsArgumentNullException()
     {
         var map = Map(t => t.Value);
@@ -90,52 +61,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.Value);
 
         Assert.Throws<ArgumentNullException>("mappingDictionary", () => map.WithMapping((Dictionary<string, string>)null!));
-    }
-
-    [Fact]
-    public void MakeOptional_HasMapper_ReturnsExpected()
-    {
-        var factory = new ColumnIndexReaderFactory(1);
-        var map = Map(t => t.Value).WithReaderFactory(factory);
-        Assert.False(map.Optional);
-        Assert.Same(map, map.MakeOptional());
-        Assert.True(map.Optional);
-        Assert.Same(factory, map.ReaderFactory);
-    }
-
-    [Fact]
-    public void MakeOptional_AlreadyOptional_ReturnsExpected()
-    {
-        var factory = new ColumnIndexReaderFactory(1);
-        var map = Map(t => t.Value).WithReaderFactory(factory);
-        Assert.Same(map, map.MakeOptional());
-        Assert.True(map.Optional);
-        Assert.Same(map, map.MakeOptional());
-        Assert.True(map.Optional);
-        Assert.Same(factory, map.ReaderFactory);
-    }
-
-    [Fact]
-    public void MakePreserveFormatting_HasMapper_ReturnsExpected()
-    {
-        var factory = new ColumnIndexReaderFactory(1);
-        var map = Map(t => t.Value).WithReaderFactory(factory);
-        Assert.False(map.PreserveFormatting);
-        Assert.Same(map, map.MakePreserveFormatting());
-        Assert.True(map.PreserveFormatting);
-        Assert.Same(factory, map.ReaderFactory);
-    }
-
-    [Fact]
-    public void MakePreserveFormatting_AlreadyPreserveFormatting_ReturnsExpected()
-    {
-        var factory = new ColumnIndexReaderFactory(1);
-        var map = Map(t => t.Value).WithReaderFactory(factory);
-        Assert.Same(map, map.MakePreserveFormatting());
-        Assert.True(map.PreserveFormatting);
-        Assert.Same(map, map.MakePreserveFormatting());
-        Assert.True(map.PreserveFormatting);
-        Assert.Same(factory, map.ReaderFactory);
     }
 
     [Fact]

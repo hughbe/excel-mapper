@@ -15,18 +15,21 @@ public delegate object CreateElementsFactory<T>(IEnumerable<T?> elements);
 /// Reads multiple cells of an excel sheet and maps the value of the cell to the
 /// type of the property or field.
 /// </summary>
-public class ManyToOneEnumerableMap<TElement> : IMap
+public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
 {
     private ICellsReaderFactory _readerFactory;
 
+    /// <inheritdoc />
     public ICellsReaderFactory ReaderFactory
     {
         get => _readerFactory;
         set => _readerFactory = value ?? throw new ArgumentNullException(nameof(value));
     }
 
+    /// <inheritdoc />
     public bool Optional { get; set; }
     
+    /// <inheritdoc />
     public bool PreserveFormatting { get; set; }
 
     public IValuePipeline<TElement> ElementPipeline { get; private set; }
@@ -78,27 +81,6 @@ public class ManyToOneEnumerableMap<TElement> : IMap
 
         value = CreateElementsFactory(elements);
         return true;
-    }
-
-    /// <summary>
-    /// Makes the reader of the property map peserve formatting when reading string values.
-    /// </summary>
-    /// <returns>The property map on which this method was invoked.</returns>
-    public ManyToOneEnumerableMap<TElement> MakeOptional()
-    {
-        Optional = true;
-        return this;
-    }
-
-    /// <summary>
-    /// Makes the reader of the property map optional. For example, if the column doesn't exist
-    /// or the index is invalid, an exception will not be thrown.
-    /// </summary>
-    /// <returns>The property map on which this method was invoked.</returns>
-    public ManyToOneEnumerableMap<TElement> MakePreserveFormatting()
-    {
-        PreserveFormatting = true;
-        return this;
     }
 
     /// <summary>
@@ -243,73 +225,5 @@ public class ManyToOneEnumerableMap<TElement> : IMap
         }
 
         return WithSeparators(separators.ToArray());
-    }
-
-    /// <summary>
-    /// Sets the reader of the property map to read the values of one or more cells contained
-    /// in the columns with the given names.
-    /// </summary>
-    /// <param name="columnNames">The name of each column to read.</param>
-    /// <returns>The property map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumnNames(params string[] columnNames)
-    {
-        ReaderFactory = new ColumnNamesReaderFactory(columnNames);
-        return this;
-    }
-
-    /// <summary>
-    /// Sets the reader of the property map to read the values of one or more cells contained
-    /// in the columns with the given names.
-    /// </summary>
-    /// <param name="columnNames">The name of each column to read.</param>
-    /// <returns>The property map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumnNames(IEnumerable<string> columnNames)
-    {
-        if (columnNames == null)
-        {
-            throw new ArgumentNullException(nameof(columnNames));
-        }
-
-        return WithColumnNames([.. columnNames]);
-    }
-
-    /// <summary>
-    /// Sets the reader of the property map to read the values of one or more cells contained
-    /// in the columns matching the result of IExcelColumnMatcher.ColumnMatches.
-    /// </summary>
-    /// <param name="matcher">The matcher of each column to read.</param>
-    /// <returns>The property map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumnsMatching(IExcelColumnMatcher matcher)
-    {
-        ReaderFactory = new ColumnsMatchingReaderFactory(matcher);
-        return this;
-    }
-
-    /// <summary>
-    /// Sets the reader of the property map to read the values of one or more cells contained
-    /// in the columns with the given zero-based indices.
-    /// </summary>
-    /// <param name="columnIndices">The zero-based index of each column to read.</param>
-    /// <returns>The property map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumnIndices(params int[] columnIndices)
-    {
-        ReaderFactory = new ColumnIndicesReaderFactory(columnIndices);
-        return this;
-    }
-
-    /// <summary>
-    /// Sets the reader of the property map to read the values of one or more cells contained
-    /// in the columns with the given zero-based indices.
-    /// </summary>
-    /// <param name="columnIndices">The zero-based index of each column to read.</param>
-    /// <returns>The property map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumnIndices(IEnumerable<int> columnIndices)
-    {
-        if (columnIndices == null)
-        {
-            throw new ArgumentNullException(nameof(columnIndices));
-        }
-        
-        return WithColumnIndices([.. columnIndices]);
     }
 }

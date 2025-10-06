@@ -127,14 +127,7 @@ public static class AutoMapper
         {
             map.InvalidFallback = invalidFallback;
         }
-        if (Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)))
-        {
-            map.Optional = true;
-        }
-        if (Attribute.IsDefined(member, typeof(ExcelPreserveFormattingAttribute)))
-        {
-            map.PreserveFormatting = true;
-        }
+        ApplyMemberAttributesToMap(member, map);
 
         return map;
     }
@@ -355,14 +348,7 @@ public static class AutoMapper
         // Otherwise, fallback to splitting a single cell with the default comma separator.
         var defaultReaderFactory = GetDefaultCellsReaderFactory(member) ??  new CharSplitReaderFactory(GetDefaultCellReaderFactory(member!));
         map = new ManyToOneEnumerableMap<TElement>(defaultReaderFactory, elementMapping, factory);
-        if (member != null && Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)))
-        {
-            map.Optional = true;
-        }
-        if (member != null && Attribute.IsDefined(member, typeof(ExcelPreserveFormattingAttribute)))
-        {
-            map.PreserveFormatting = true;
-        }
+        ApplyMemberAttributesToMap(member, map);
 
         return true;
     }
@@ -538,14 +524,7 @@ public static class AutoMapper
         // Default to all columns.
         var defaultReaderFactory = GetDefaultCellsReaderFactory(member) ?? new AllColumnNamesReaderFactory();
         map = new ManyToOneDictionaryMap<TValue>(defaultReaderFactory, valuePipeline, factory);
-        if (member != null && Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)))
-        {
-            map.Optional = true;
-        }
-        if (member != null && Attribute.IsDefined(member, typeof(ExcelPreserveFormattingAttribute)))
-        {
-            map.PreserveFormatting = true;
-        }
+        ApplyMemberAttributesToMap(member, map);
         return true;
     }
 
@@ -701,7 +680,25 @@ public static class AutoMapper
         result = null;
         return false;
     }
-    
+
+    private static void ApplyMemberAttributesToMap(MemberInfo? member, IToOneMap map)
+    {
+        // If no member is specified, there is nothing to apply.
+        if (member == null)
+        {
+            return;
+        }
+
+        if (Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)))
+        {
+            map.Optional = true;
+        }
+        if (Attribute.IsDefined(member, typeof(ExcelPreserveFormattingAttribute)))
+        {
+            map.PreserveFormatting = true;
+        }
+    }
+
     private class BuiltinClassMap<T> : ExcelClassMap<T>
     {
         private IMap BuiltinMap { get; }

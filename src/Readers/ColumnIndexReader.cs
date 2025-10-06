@@ -1,8 +1,6 @@
 using System;
-using System.Globalization;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
-using ExcelNumberFormat;
 
 namespace ExcelMapper.Readers;
 

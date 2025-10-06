@@ -8,7 +8,7 @@ using ExcelMapper.Fallbacks;
 
 namespace ExcelMapper;
 
-public class OneToOneMap<T> : IValuePipeline<T>, IMap
+public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>
 {
     public OneToOneMap(ICellReaderFactory readerFactory)
     {
@@ -23,8 +23,10 @@ public class OneToOneMap<T> : IValuePipeline<T>, IMap
         set => _readerFactory = value ?? throw new ArgumentNullException(nameof(value));
     }
 
+    /// <inheritdoc />
     public bool Optional { get; set; }
 
+    /// <inheritdoc />
     public bool PreserveFormatting { get; set; }
 
     public ValuePipeline<T> Pipeline { get; } = new ValuePipeline<T>();

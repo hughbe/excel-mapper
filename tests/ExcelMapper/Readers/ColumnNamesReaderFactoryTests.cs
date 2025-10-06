@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using ExcelMapper.Abstractions;
 using ExcelMapper.Tests;
 using Xunit;
 
