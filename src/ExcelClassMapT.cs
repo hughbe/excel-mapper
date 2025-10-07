@@ -289,6 +289,22 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
+    public ManyToOneDictionaryMap<TElement> Map<TElement>(Expression<Func<T, IDictionary>> expression)
+    {
+        var memberExpression = GetMemberExpression(expression);
+        var map = GetDictionaryMap<string, TElement>(memberExpression.Member);
+
+        AddMap(new ExcelPropertyMap<TElement>(memberExpression.Member, map), expression);
+        return map;
+    }
+
+    /// <summary>
+    /// Creates a map for a property or field given a MemberExpression reading the property or field.
+    /// This is used for map IDictionarys.
+    /// </summary>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
+    /// <param name="expression">A MemberExpression reading the property or field.</param>
+    /// <returns>The map for the given property or field.</returns>
     public ManyToOneDictionaryMap<TElement> Map<TElement>(Expression<Func<T, IDictionary<string, TElement>>> expression)
     {
         var memberExpression = GetMemberExpression(expression);
@@ -355,7 +371,7 @@ public class ExcelClassMap<T> : ExcelClassMap
         return (ManyToOneEnumerableMap<TElement>)map;
     }
 
-    private ManyToOneDictionaryMap<TValue> GetDictionaryMap<TKey, TValue>(MemberInfo member)
+    private ManyToOneDictionaryMap<TValue> GetDictionaryMap<TKey, TValue>(MemberInfo member) where TKey : notnull
     {
         if (!AutoMapper.TryCreateGenericDictionaryMap<TKey, TValue>(member, member.MemberType(), EmptyValueStrategy, out ManyToOneDictionaryMap<TValue>? map))
         {

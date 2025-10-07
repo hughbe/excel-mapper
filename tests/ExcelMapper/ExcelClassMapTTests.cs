@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Xunit;
 
 namespace ExcelMapper.Tests;
@@ -73,6 +74,16 @@ public class ExcelClassMapTTests : ExcelClassMap<Helpers.TestClass>
     }
 
     [Fact]
+    public void Map_IDictionaryNoConstructor_ThrowsExcelMappingException()
+    {
+        using var stream = Helpers.GetResource("Primitives.xlsx");
+        using var importer = new ExcelImporter(stream);
+
+        Map(p => p.IDictionaryNoConstructor);
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(this));
+    }
+
+    [Fact]
     public void MultiMap_UnknownInterface_ThrowsExcelMappingException()
     {
         Assert.Throws<ExcelMappingException>(() => Map<string>(p => p.UnknownInterfaceValue));
@@ -94,6 +105,12 @@ public class ExcelClassMapTTests : ExcelClassMap<Helpers.TestClass>
     public void MultiMap_CantMapIDictionaryValueType_ThrowsExcelMappingException()
     {
         Assert.Throws<ExcelMappingException>(() => Map(p => p.CantMapDictionaryValueType));
+    }
+
+    [Fact]
+    public void MapObject_String_ThrowsExcelMappingException()
+    {
+        Assert.Throws<ExcelMappingException>(() => MapObject(p => p.Value));
     }
 
     [Fact]
@@ -233,7 +250,7 @@ public class ExcelClassMapTTests : ExcelClassMap<Helpers.TestClass>
     public void MapObject_ClassMapFactory_ReturnsExpected()
     {
         var map = new TestClassMap(FallbackStrategy.ThrowIfPrimitive);
-        var classMap = map.MapObject(t => t.Value);
+        var classMap = map.MapObject(t => t.ObjectValue);
         Assert.Empty(classMap.Properties);
     }
 

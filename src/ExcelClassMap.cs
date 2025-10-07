@@ -18,10 +18,10 @@ public class ExcelClassMap : IMap
 
     public virtual bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
     {
-        object instance = Activator.CreateInstance(Type);
-        foreach (ExcelPropertyMap property in Properties)
+        var instance = Activator.CreateInstance(Type);
+        foreach (var property in Properties)
         {
-            if (property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out object? value))
+            if (property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out var value))
             {
                 property.SetValueFactory(instance, value);
             }
