@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
+using ExcelMapper.Factories;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
 using ExcelMapper.Readers;
@@ -170,7 +172,7 @@ public static class AutoMapper
         // Multiple [ExcelColumnIndex] attributes still represents one column, but multiple options.
         else if (colummnIndexAttributes.Length > 1)
         {
-            return new ColumnIndicesReaderFactory(colummnIndexAttributes.Select(c => c.Index).ToArray());
+            return new ColumnIndicesReaderFactory([.. colummnIndexAttributes.Select(c => c.Index)]);
         }
 
         // [ExcelColumnIndices] attributes still represents one column, but multiple options.
@@ -386,21 +388,42 @@ public static class AutoMapper
         return null;
     }
 
-    private static bool TryGetCreateElementsFactory<TList, TElement>([NotNullWhen(true)] out CreateElementsFactory<TElement>? result)
+    private static bool TryGetCreateElementsFactory<TList, TElement>([NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
     {
         Type listType = typeof(TList);
         if (listType.IsArray)
         {
-            result = elements => elements.ToArray();
+            result = new ArrayEnumerableFactory<TElement>();
             return true;
         }
-        else if (listType.IsImmutableEnumerableType())
+        else if (listType == typeof(ImmutableArray<TElement>))
         {
-            MethodInfo createRangeMethod = listType.GetImmutableEnumerableCreateRangeMethod(typeof(TElement));
-            result = elements =>
-            {
-                return (IEnumerable<TElement>)createRangeMethod.Invoke(null, [elements]);
-            };
+            result = new ImmutableArrayEnumerableFactory<TElement>();
+            return true;
+        }
+        else if (listType == typeof(ImmutableList<TElement>) || listType == typeof(IImmutableList<TElement>))
+        {
+            result = new ImmutableListEnumerableFactory<TElement>();
+            return true;
+        }
+        else if (listType == typeof(ImmutableStack<TElement>) || listType == typeof(IImmutableStack<TElement>))
+        {
+            result = new ImmutableStackEnumerableFactory<TElement>();
+            return true;
+        }
+        else if (listType == typeof(ImmutableQueue<TElement>) || listType == typeof(IImmutableQueue<TElement>))
+        {
+            result = new ImmutableQueueEnumerableFactory<TElement>();
+            return true;
+        }
+        else if (listType == typeof(ImmutableSortedSet<TElement>))
+        {
+            result = new ImmutableSortedSetEnumerableFactory<TElement>();
+            return true;
+        }
+        else if (listType == typeof(ImmutableHashSet<TElement>) || listType == typeof(IImmutableSet<TElement>))
+        {
+            result = new ImmutableHashSetEnumerableFactory<TElement>();
             return true;
         }
         else if (listType.IsInterface)
@@ -408,51 +431,35 @@ public static class AutoMapper
             // Add values by creating a list and assigning to the property.
             if (listType.IsAssignableFrom(typeof(List<TElement>).GetTypeInfo()))
             {
-                result = elements => elements;
+                result = new ListEnumerableFactory<TElement>();
                 return true;
             }
         }
-        else if (listType.ImplementsInterface(typeof(ICollection<TElement>)))
+        // Otheriwse, we have to create the type.
+        else if (!listType.IsAbstract)
         {
-            result = elements =>
+            // Add values with through ICollection<TElement>.Add(TElement item).
+            if (listType.ImplementsInterface(typeof(ICollection<TElement>)))
             {
-                var value = (ICollection<TElement?>)Activator.CreateInstance(listType);
-                foreach (TElement? element in elements)
-                {
-                    value.Add(element);
-                }
+                result = new ICollectionTImplementingEnumerableFactory<TElement>(listType);
+                return true;
+            }
 
-                return value;
-            };
-            return true;
-        }
-
-        // Check if the type has .ctor(IEnumerable<T>) such as Queue or Stack.
-        ConstructorInfo? ctor = listType.GetConstructor([typeof(IEnumerable<TElement>)]);
-        if (ctor != null)
-        {
-            result = element =>
+            // Check if the type has .ctor(IEnumerable<T>) such as Queue or Stack.
+            var ctor = listType.GetConstructor([typeof(ICollection)]) ?? listType.GetConstructor([typeof(IEnumerable<TElement>)]);
+            if (ctor != null)
             {
-                return (IEnumerable<TElement?>)Activator.CreateInstance(listType, [element]);
-            };
-            return true;
-        }
+                result = new ConstructorEnumerableFactory<TElement>(listType);
+                return true;
+            }
 
-        // Check if the type has Add(T) such as BlockingCollection.
-        MethodInfo? addMethod = listType.GetMethod("Add", [typeof(TElement)]);
-        if (addMethod != null)
-        {
-            result = elements =>
+            // Check if the type has Add(T) such as BlockingCollection.
+            var addMethod = listType.GetMethod("Add", [typeof(TElement)]);
+            if (addMethod != null)
             {
-                var value = Activator.CreateInstance(listType);
-                foreach (TElement? element in elements)
-                {
-                    addMethod.Invoke(value, [element]);
-                }
-
-                return value;
-            };
-            return true;
+                result = new AddEnumerableFactory<TElement>(listType);
+                return true;
+            }
         }
 
         result = default;
@@ -507,15 +514,15 @@ public static class AutoMapper
         return false;
     }
 
-    internal static bool TryCreateGenericDictionaryMap<TKey, TValue>(MemberInfo? member, Type memberType, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneDictionaryMap<TValue>? map)
+    internal static bool TryCreateGenericDictionaryMap<TKey, TValue>(MemberInfo? member, Type memberType, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneDictionaryMap<TValue>? map) where TKey : notnull
     {
-        if (!TryCreatePrimitivePipeline(emptyValueStrategy, out ValuePipeline<TValue>? valuePipeline))
+        if (!TryCreatePrimitivePipeline<TValue>(emptyValueStrategy, out var valuePipeline))
         {
             map = null;
             return false;
         }
 
-        if (!TryGetCreateDictionaryFactory<TKey, TValue>(memberType, out CreateDictionaryFactory<TValue>? factory))
+        if (!TryGetCreateDictionaryFactory<TKey, TValue>(memberType, out var factory))
         {
             map = null;
             return false;
@@ -528,61 +535,38 @@ public static class AutoMapper
         return true;
     }
 
-    private static bool TryGetCreateDictionaryFactory<TKey, TValue>(Type memberType, [NotNullWhen(true)] out CreateDictionaryFactory<TValue>? result)
+    private static bool TryGetCreateDictionaryFactory<TKey, TValue>(Type memberType, [NotNullWhen(true)] out IDictionaryFactory<TValue>? result) where TKey : notnull
     {
-        if (memberType.IsImmutableDictionaryType())
+        if (memberType == typeof(ImmutableDictionary<TKey, TValue>) || memberType == typeof(IImmutableDictionary<TKey, TValue>))
         {
-            MethodInfo createRangeMethod = memberType.GetImmutableDictionaryCreateRangeMethod(typeof(TValue));
-            result = elements =>
-            {
-                return (IDictionary<string, TValue>)createRangeMethod.Invoke(null, [elements]);
-            };
+            result = new ImmutableDictionaryFactory<TValue>();
             return true;
         }
-        if (memberType.GetTypeInfo().IsInterface)
+        else if (memberType == typeof(ImmutableSortedDictionary<TKey, TValue>))
+        {
+            result = new ImmutableSortedDictionaryFactory<TValue>();
+            return true;
+        }
+        else if (memberType.GetTypeInfo().IsInterface)
         {
             if (memberType.GetTypeInfo().IsAssignableFrom(typeof(Dictionary<TKey, TValue>).GetTypeInfo()))
             {
-                result = elements =>
-                {
-                    var dictionary = new Dictionary<string, TValue>();
-                    foreach (KeyValuePair<string, TValue> keyValuePair in elements)
-                    {
-                        dictionary.Add(keyValuePair.Key, keyValuePair.Value);
-                    }
-
-                    return dictionary;
-                };
+                result = new DictionaryFactory<TValue>();
                 return true;
             }
         }
-        else if (memberType.ImplementsInterface(typeof(IDictionary<TKey, TValue>)))
+        else if (memberType.GetConstructor([]) is not null)
         {
-            result = elements =>
+            if (memberType.ImplementsInterface(typeof(IDictionary<TKey, TValue>)))
             {
-                IDictionary<string, TValue> dictionary = (IDictionary<string, TValue>)Activator.CreateInstance(memberType);
-                foreach (KeyValuePair<string, TValue> keyValuePair in elements)
-                {
-                    dictionary.Add(keyValuePair);
-                }
-
-                return dictionary;
-            };
-            return true;
-        }
-        else if (memberType.ImplementsInterface(typeof(IDictionary)))
-        {
-            result = elements =>
+                result = new IDictionaryTImplementingFactory<TValue>(memberType);
+                return true;
+            }
+            else if (memberType.ImplementsInterface(typeof(IDictionary)))
             {
-                IDictionary dictionary = (IDictionary)Activator.CreateInstance(memberType);
-                foreach (KeyValuePair<string, TValue> keyValuePair in elements)
-                {
-                    dictionary.Add(keyValuePair.Key, keyValuePair.Value);
-                }
-
-                return dictionary;
-            };
-            return true;
+                result = new IDictionaryImplementingFactory<TValue>(memberType);
+                return true;
+            }
         }
 
         result = default;
@@ -597,10 +581,20 @@ public static class AutoMapper
             classMap = null;
             return false;
         }
+        if (type.IsAbstract)
+        {
+            classMap = null;
+            return false;
+        }
+        if (type.GetConstructor([]) is null)
+        {
+            classMap = null;
+            return false;
+        }
 
         var map = new ExcelClassMap<T>(emptyValueStrategy);
-        IEnumerable<MemberInfo> properties = type.GetRuntimeProperties().Where(p => p.CanWrite && p.SetMethod.IsPublic && !p.SetMethod.IsStatic);
-        IEnumerable<MemberInfo> fields = type.GetRuntimeFields().Where(f => f.IsPublic && !f.IsStatic);
+        IEnumerable<MemberInfo> properties = type.GetRuntimeProperties().Where(ShouldAutoMapProperty);
+        IEnumerable<MemberInfo> fields = type.GetRuntimeFields().Where(ShouldAutoMapField);
 
         foreach (MemberInfo member in properties.Concat(fields))
         {
@@ -631,6 +625,40 @@ public static class AutoMapper
         }
 
         classMap = map;
+        return true;
+    }
+
+    private static bool ShouldAutoMapProperty(PropertyInfo property)
+    {
+        // Property must have a setter.
+        if (!property.CanWrite)
+        {
+            return false;
+        }
+        // Property must be a public instance property.
+        if (!property.SetMethod.IsPublic || property.SetMethod.IsStatic)
+        {
+            return false;
+        }
+
+        // Property must not be an indexer.
+        if (property.GetIndexParameters().Length > 0)
+        {
+            return false;
+        }
+
+        // Otherwise, this property can be mapped.
+        return true;
+    }
+
+    private static bool ShouldAutoMapField(FieldInfo field)
+    {
+        // Property must be a public instance property.
+        if (!field.IsPublic || field.IsStatic)
+        {
+            return false;
+        }
+
         return true;
     }
 

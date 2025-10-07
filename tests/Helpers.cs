@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
@@ -35,6 +36,7 @@ public static class Helpers
         public IListInterface UnknownInterfaceValue { get; set; } = default!;
         public ConcreteIEnumerable ConcreteIEnumerable { get; set; } = default!;
         public ConcreteIDictionary ConcreteIDictionary { get; set; } = default!;
+        public ImmutableDictionary<string, string>.Builder IDictionaryNoConstructor { get; set; } = default!;
         public IList<IList<string>> CantMapElementType { get; set; } = default!;
         public IDictionary<string, IList<string>> CantMapDictionaryValueType { get; set; } = default!;
         public string[,] MultiDimensionalArray { get; set; } = default!;

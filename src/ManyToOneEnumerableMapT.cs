@@ -9,8 +9,6 @@ using ExcelMapper.Readers;
 
 namespace ExcelMapper;
 
-public delegate object CreateElementsFactory<T>(IEnumerable<T?> elements);
-
 /// <summary>
 /// Reads multiple cells of an excel sheet and maps the value of the cell to the
 /// type of the property or field.
@@ -32,19 +30,25 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// <inheritdoc />
     public bool PreserveFormatting { get; set; }
 
+    /// <summary>
+    /// The mapping pipeline for each element in the list.
+    /// </summary>
     public IValuePipeline<TElement> ElementPipeline { get; private set; }
 
-    public CreateElementsFactory<TElement> CreateElementsFactory { get; }
+    /// <summary>
+    /// The factory for creating and adding elements to the list.
+    /// </summary>
+    public IEnumerableFactory<TElement> EnumerableFactory { get; }
 
     /// <summary>
     /// Constructs a map that reads one or more values from one or more cells and maps these values to one
     /// property and field of the type of the property or field.
     /// </summary>
-    public ManyToOneEnumerableMap(ICellsReaderFactory readerFactory, IValuePipeline<TElement> elementPipeline, CreateElementsFactory<TElement> createElementsFactory)
+    public ManyToOneEnumerableMap(ICellsReaderFactory readerFactory, IValuePipeline<TElement> elementPipeline, IEnumerableFactory<TElement> enumerableFactory)
     {
         _readerFactory = readerFactory ?? throw new ArgumentNullException(nameof(readerFactory));
         ElementPipeline = elementPipeline ?? throw new ArgumentNullException(nameof(elementPipeline));
-        CreateElementsFactory = createElementsFactory ?? throw new ArgumentNullException(nameof(createElementsFactory));
+        EnumerableFactory = enumerableFactory ?? throw new ArgumentNullException(nameof(enumerableFactory));
     }
 
     private readonly Dictionary<ExcelSheet, ICellsReader?> _factoryCache = [];
@@ -72,15 +76,22 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
             throw new ExcelMappingException($"Could not read value for member \"{member?.Name}\"", sheet, rowIndex, -1);
         }
 
-        var elements = new List<TElement?>();
-        foreach (var result in results)
+        EnumerableFactory.Begin(results.Count());
+        try
         {
-            var elementValue = (TElement?)ValuePipeline.GetPropertyValue(ElementPipeline, sheet, rowIndex, result, PreserveFormatting, member);
-            elements.Add(elementValue);
-        }
+            foreach (var result in results)
+            {
+                var elementValue = (TElement?)ValuePipeline.GetPropertyValue(ElementPipeline, sheet, rowIndex, result, PreserveFormatting, member);
+                EnumerableFactory.Add(elementValue);
+            }
 
-        value = CreateElementsFactory(elements);
-        return true;
+            value = EnumerableFactory.End();
+            return true;
+        }
+        finally
+        {
+            EnumerableFactory.Reset();
+        }
     }
 
     /// <summary>

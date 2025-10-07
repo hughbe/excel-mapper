@@ -3496,40 +3496,4 @@ public class MapSplitEnumerableTests
             Map(p => (IList<int>)p.Value);
         }
     }
-
-    [Fact]
-    public void ReadRow_AutoMappedMultiImmutableDictionaryBuilder_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
-
-        ExcelSheet sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableDictionaryBuilderIntClass>());
-    }
-
-    [Fact]
-    public void ReadRow_DefaultMappedMultiImmutableDictionaryBuilder_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
-        importer.Configuration.RegisterClassMap<DefaultImmutableDictionaryBuilderIntClassMap>();
-
-        ExcelSheet sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableDictionaryBuilderIntClass>());
-    }
-
-    public class ImmutableDictionaryBuilderIntClass
-    {
-        public ImmutableDictionary<string, int>.Builder Value { get; set; } = default!;
-    }
-
-    public class DefaultImmutableDictionaryBuilderIntClassMap : ExcelClassMap<ImmutableDictionaryBuilderIntClass>
-    {
-        public DefaultImmutableDictionaryBuilderIntClassMap()
-        {
-            Map(p => (IDictionary<string, int>)p.Value);
-        }
-    }
 }
