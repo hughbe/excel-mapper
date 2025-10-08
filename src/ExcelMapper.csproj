@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net462;$(TargetFrameworks)</TargetFrameworks>
-    <LangVersion>default</LangVersion>
+    <TargetFramework>net$(NETCoreAppMaximumVersion)</TargetFramework>
+    <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 

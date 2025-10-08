@@ -596,5 +596,55 @@ public class MapOptionalTests
 
         public string MappedValue = default!;
     }
+
+    [Fact]
+    public void ReadRows_CustomMappedArrayIndexerNoSuchColumn_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<CustomArrayIndexerNoSuchColumn>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ArrayIndexerClass>());
+    }
+
+    private class ArrayIndexerClass
+    {
+        public string[] Values { get; set; } = default!;
+    }
+
+    private class CustomArrayIndexerNoSuchColumn : ExcelClassMap<ArrayIndexerClass>
+    {
+        public CustomArrayIndexerNoSuchColumn()
+        {
+            Map(p => p.Values[0])
+                .WithColumnName("NoSuchColumn");
+        }
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedArrayIndexerNoSuchColumnOptionalValue_Success()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<CustomArrayIndexerNoSuchColumnOptionalValue>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ArrayIndexerClass>();
+        Assert.Equal(new object?[] { null }, row.Values);
+    }
+
+    private class CustomArrayIndexerNoSuchColumnOptionalValue : ExcelClassMap<ArrayIndexerClass>
+    {
+        public CustomArrayIndexerNoSuchColumnOptionalValue()
+        {
+            Map(p => p.Values[0])
+                .WithColumnName("NoSuchColumn")
+                .MakeOptional();
+        }
+    }
+
 #pragma warning restore CS0649
 }

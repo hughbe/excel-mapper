@@ -1,7 +1,14 @@
 #!/bin/bash
 
-set -e
-
 cd tests
-dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
-dotnet reportgenerator -reports:coverage.netcoreapp3.1.opencover.xml -targetdir:../coverage
+if [ -d "TestResults" ]; then
+    rm -rf TestResults
+fi
+if [ -d "coverage" ]; then
+    rm -rf coverage
+fi
+dotnet test --settings coverage.runsettings
+if [ $? -ne 0 ]; then
+    exit $?
+fi
+dotnet reportgenerator -reports:"./**/TestResults/**/coverage.cobertura.xml" -targetdir:"coverage" -reporttypes:Html

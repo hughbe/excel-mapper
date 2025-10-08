@@ -54,7 +54,7 @@ namespace ExcelMapper.Mappers
             var stringValue = readResult.GetString();
             try
             {
-                var result = DateTime.ParseExact(stringValue, Formats, Provider, Style);
+                var result = DateTime.ParseExact(stringValue!, Formats, Provider, Style);
                 return CellMapperResult.Success(result);
             }
             catch (Exception exception)

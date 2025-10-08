@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using Xunit;
 
@@ -66,6 +65,29 @@ public class ImmutableHashSetEnumerableFactoryTests
     {
         var factory = new ImmutableHashSetEnumerableFactory<int>();
         Assert.Throws<ExcelMappingException>(() => factory.Add(1));
+    }
+
+    [Fact]
+    public void Set_Invoke_ThrowsNotSupportedException()
+    {
+        var factory = new ImmutableHashSetEnumerableFactory<int>();
+        factory.Begin(1);
+        Assert.Throws<NotSupportedException>(() => factory.Set(0, 1));
+    }
+
+    [Fact]
+    public void Set_NotBegan_ThrowsExcelMappingException()
+    {
+        var factory = new ImmutableHashSetEnumerableFactory<int>();
+        Assert.Throws<ExcelMappingException>(() => factory.Set(0, 1));
+    }
+
+    [Fact]
+    public void Set_NegativeIndex_ThrowsNotSupportedException()
+    {
+        var factory = new ImmutableHashSetEnumerableFactory<int>();
+        factory.Begin(1);
+        Assert.Throws<NotSupportedException>(() => factory.Set(-1, 1));
     }
 
     [Fact]

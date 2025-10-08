@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using Xunit;
 
@@ -30,6 +29,7 @@ public class ImmutableSortedSetEnumerableFactoryTests
         factory.Begin(1);
         Assert.Throws<ExcelMappingException>(() => factory.Begin(1));
     }
+
     [Fact]
     public void Add_End_Success()
     {
@@ -66,6 +66,29 @@ public class ImmutableSortedSetEnumerableFactoryTests
     {
         var factory = new ImmutableSortedSetEnumerableFactory<int>();
         Assert.Throws<ExcelMappingException>(() => factory.Add(1));
+    }
+
+    [Fact]
+    public void Set_Invoke_ThrowsNotSupportedException()
+    {
+        var factory = new ImmutableSortedSetEnumerableFactory<int>();
+        factory.Begin(1);
+        Assert.Throws<NotSupportedException>(() => factory.Set(0, 1));
+    }
+
+    [Fact]
+    public void Set_NotBegan_ThrowsExcelMappingException()
+    {
+        var factory = new ImmutableSortedSetEnumerableFactory<int>();
+        Assert.Throws<ExcelMappingException>(() => factory.Set(0, 1));
+    }
+
+    [Fact]
+    public void Set_NegativeIndex_ThrowsNotSupportedException()
+    {
+        var factory = new ImmutableSortedSetEnumerableFactory<int>();
+        factory.Begin(1);
+        Assert.Throws<NotSupportedException>(() => factory.Set(-1, 1));
     }
 
     [Fact]

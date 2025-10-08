@@ -68,6 +68,42 @@ public class ListEnumerableFactoryTests
     }
 
     [Fact]
+    public void Set_Invoke_Success()
+    {
+        var factory = new ListEnumerableFactory<int>();
+        factory.Begin(1);
+
+        factory.Set(0, 1);
+        Assert.Equal([1], Assert.IsType<List<int>>(factory.End()));
+    }
+
+    [Fact]
+    public void Set_InvokeOutOfRange_Success()
+    {
+        var factory = new ListEnumerableFactory<int>();
+        factory.Begin(1);
+
+        factory.Set(0, 1);
+        factory.Set(5, 2);
+        Assert.Equal([1, 0, 0, 0, 0, 2], Assert.IsType<List<int>>(factory.End()));
+    }
+
+    [Fact]
+    public void Set_NotBegan_ThrowsExcelMappingException()
+    {
+        var factory = new ListEnumerableFactory<int>();
+        Assert.Throws<ExcelMappingException>(() => factory.Set(0, 1));
+    }
+
+    [Fact]
+    public void Set_NegativeIndex_ThrowsArgumentOutOfRangeException()
+    {
+        var factory = new ListEnumerableFactory<int>();
+        factory.Begin(1);
+        Assert.Throws<ArgumentOutOfRangeException>("index", () => factory.Set(-1, 1));
+    }
+
+    [Fact]
     public void End_NotBegan_ThrowsExcelMappingException()
     {
         var factory = new ListEnumerableFactory<int>();

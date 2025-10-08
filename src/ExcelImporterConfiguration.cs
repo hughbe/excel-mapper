@@ -72,6 +72,38 @@ public class ExcelImporterConfiguration
         RegisterClassMap(classMap.Type, classMap);
     }
 
+    private void ValidateMap(IMap map)
+    {
+        if (map is ExcelClassMap excelClassMap)
+        {
+            foreach (var propertyMap in excelClassMap.Properties)
+            {
+                ValidateMap(propertyMap.Map);
+            }
+        }
+        else if (map is IEnumerableIndexerMap enumerableIndexerMap)
+        {
+            foreach (var itemMap in enumerableIndexerMap.Values)
+            {
+                ValidateMap(itemMap.Value);
+            }
+        }
+        else if (map is IDictionaryIndexerMap dictionaryIndexerMap)
+        {
+            foreach (var itemMap in dictionaryIndexerMap.Values)
+            {
+                ValidateMap(itemMap.Value);
+            }
+        }
+        else if (map is IValuePipeline pipeline)
+        {
+            if (pipeline.CellValueMappers.Count == 0)
+            {
+                throw new ExcelMappingException("Cannot register a class map with a property that has no CellValueMappers defined.");
+            }
+        }
+    }
+
     /// <summary>
     /// Registers the given class map to be used when mapping a row to an object.
     /// </summary>
@@ -91,22 +123,8 @@ public class ExcelImporterConfiguration
         {
             throw new ExcelMappingException($"Class map already exists for type \"{classType.FullName}\"");
         }
-        
-        // Class maps with no property mappers cannot be registered
-        if (classMap is ExcelClassMap excelClassMap)
-        {
-            foreach (var propertyMap in excelClassMap.Properties)
-            {
-                if (propertyMap.Map is IValuePipeline pipeline)
-                {
-                    if (pipeline.CellValueMappers.Count == 0)
-                    {
-                        throw new ExcelMappingException($"Cannot map member \"{propertyMap.Member.Name}\" of type \"{propertyMap.Member.MemberType()}\", as no CellValueMappers are defined.");
-                    }
-                }
-            }
-        }
 
+        ValidateMap(classMap);
         ClassMaps.Add(classType, classMap);
     }
 }

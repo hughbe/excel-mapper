@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using ExcelMapper.Abstractions;
@@ -8,7 +9,7 @@ public class ImmutableSortedSetEnumerableFactory<T> : IEnumerableFactory<T>
 {
     private ImmutableSortedSet<T?>.Builder? _builder;
 
-    public void Begin(int capacity)
+    public void Begin(int count)
     {
         if (_builder is not null)
         {
@@ -22,6 +23,12 @@ public class ImmutableSortedSetEnumerableFactory<T> : IEnumerableFactory<T>
     {
         EnsureMapping();
         _builder.Add(item);
+    }
+
+    public void Set(int index, T? item)
+    {
+        EnsureMapping();
+        throw new NotSupportedException("Set is not supported for ImmutableSortedSetEnumerableFactory.");
     }
 
     public object End()

@@ -201,6 +201,7 @@ public class IOneToOneMapExtensionsTests
     
     private class CustomOneToOneMap : IOneToOneMap
     {
+        public Type Type => typeof(int);
         public bool Optional { get; set; }
         public bool PreserveFormatting { get; set; }
         public ICellReaderFactory ReaderFactory { get; set; } = default!;

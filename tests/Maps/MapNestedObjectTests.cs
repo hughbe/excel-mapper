@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 using System.Reflection;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
@@ -163,14 +162,15 @@ public class MapNestedObjectTests
         {
             Map(v => v.Name);
             Map(v => v.Address);
-            Expression<Func<NestedListParentClass, List<BusinessHours>>> expression = v => v.BusinessHours;
-            var businessMap = new ExcelPropertyMap(GetMemberExpression(expression).Member, new BusinessHoursMap());
-            AddMap(businessMap, v => v.BusinessHours);
+
+            var member = typeof(NestedListParentClass).GetProperty(nameof(NestedListParentClass.BusinessHours))!;
+            Properties.Add(new ExcelPropertyMap<List<BusinessHours>>(member, new BusinessHoursMap()));
         }
     }
 
-    public class BusinessHoursMap : IMap
+    private class BusinessHoursMap : IMap
     {
+        public Type Type => typeof(int);
         private int _previousRowIndex = -1;
         private int _currentIndex = 0;
 

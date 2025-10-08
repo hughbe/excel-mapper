@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelMapper.Abstractions;
@@ -37,20 +36,32 @@ public class ConstructorEnumerableFactory<T> : IEnumerableFactory<T>
         CollectionType = collectionType;
     }
 
-    public void Begin(int capacity)
+    public void Begin(int count)
     {
         if (_items is not null)
         {
             throw new ExcelMappingException("Cannot begin mapping until End() was called.");
         }
 
-        _items = new List<T?>(capacity);
+        _items = new List<T?>(count);
     }
 
     public void Add(T? item)
     {
         EnsureMapping();
         _items.Add(item);
+    }
+
+    public void Set(int index, T? item)
+    {
+        EnsureMapping();
+        // Grow the list if necessary.
+        while (_items.Count <= index)
+        {
+            _items.Add(default);
+        }
+
+        _items[index] = item;
     }
 
     public object End()

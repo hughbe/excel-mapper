@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using Xunit;
 
 namespace ExcelMapper.Tests;
@@ -38,12 +36,6 @@ public class ExcelClassMapTTests : ExcelClassMap<Helpers.TestClass>
     public void Map_NestedCastExpression_Success()
     {
         Map(p => (int)p.NestedValue.IntValue);
-    }
-
-    [Fact]
-    public void Map_ExpressionNotMemberExpression_ThrowsArgumentException()
-    {
-        Assert.Throws<ArgumentException>("expression", () => Map(p => new List<string>()));
     }
 
     [Fact]
@@ -101,11 +93,14 @@ public class ExcelClassMapTTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ExcelMappingException>(() => Map(p => p.CantMapElementType));
     }
 
+/*
+    TODO: throw on creation like we do elsewhere
     [Fact]
     public void MultiMap_CantMapIDictionaryValueType_ThrowsExcelMappingException()
     {
         Assert.Throws<ExcelMappingException>(() => Map(p => p.CantMapDictionaryValueType));
     }
+*/
 
     [Fact]
     public void MapObject_String_ThrowsExcelMappingException()

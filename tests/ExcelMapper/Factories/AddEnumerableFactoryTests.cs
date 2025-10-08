@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using ExcelDataReader.Log;
 using Xunit;
 
 namespace ExcelMapper.Factories;
@@ -63,6 +62,7 @@ public class AddEnumerableFactoryTests
         factory.Begin(1);
         Assert.Throws<ExcelMappingException>(() => factory.Begin(1));
     }
+
     [Fact]
     public void Add_End_Success()
     {
@@ -99,6 +99,21 @@ public class AddEnumerableFactoryTests
     {
         var factory = new AddEnumerableFactory<int>(typeof(List<int>));
         Assert.Throws<ExcelMappingException>(() => factory.Add(1));
+    }
+
+    [Fact]
+    public void Set_Invoke_ThrowsNotSupportedException()
+    {
+        var factory = new AddEnumerableFactory<int>(typeof(List<int>));
+        factory.Begin(1);
+        Assert.Throws<NotSupportedException>(() => factory.Set(0, 1));
+    }
+
+    [Fact]
+    public void Set_NotBegan_ThrowsExcelMappingException()
+    {
+        var factory = new AddEnumerableFactory<int>(typeof(List<int>));
+        Assert.Throws<ExcelMappingException>(() => factory.Set(0, 1));
     }
 
     [Fact]

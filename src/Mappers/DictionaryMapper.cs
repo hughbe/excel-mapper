@@ -44,7 +44,7 @@ public class DictionaryMapper<T> : ICellMapper
     {
         // If we didn't find anything, keep going. This is not necessarily a fatal error.
         var stringValue = readResult.GetString();
-        if (stringValue is null || !MappingDictionary.TryGetValue(stringValue, out T result))
+        if (stringValue is null || !MappingDictionary.TryGetValue(stringValue, out T? result))
         {
             if (Behavior == DictionaryMapperBehavior.Required)
             {

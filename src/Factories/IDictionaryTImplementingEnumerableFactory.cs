@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using ExcelMapper.Abstractions;
 using ExcelMapper.Utilities;
 
 namespace ExcelMapper.Factories;
@@ -33,14 +32,14 @@ public class IDictionaryTImplementingFactory<T> : Abstractions.IDictionaryFactor
         DictionaryType = dictionaryType;
     }
 
-    public void Begin(int capacity)
+    public void Begin(int count)
     {
         if (_items is not null)
         {
             throw new ExcelMappingException("Cannot begin mapping until End() was called.");
         }
 
-        _items = (IDictionary<string, T?>)Activator.CreateInstance(DictionaryType);
+        _items = (IDictionary<string, T?>)Activator.CreateInstance(DictionaryType)!;
     }
 
     public void Add(string key, T? value)

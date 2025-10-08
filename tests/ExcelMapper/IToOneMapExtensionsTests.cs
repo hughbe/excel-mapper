@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelDataReader;
@@ -48,6 +49,7 @@ public class IToOneMapExtensionsTests
 
     private class CustomToOneMap : IToOneMap
     {
+        public Type Type => typeof(int);
         public bool Optional { get; set; }
         public bool PreserveFormatting { get; set; }
 

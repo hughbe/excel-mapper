@@ -7,21 +7,30 @@ namespace ExcelMapper.Factories;
 public class ImmutableArrayEnumerableFactory<T> : IEnumerableFactory<T>
 {
     private ImmutableArray<T?>.Builder? _builder;
+    private int _currentIndex = -1;
 
-    public void Begin(int capacity)
+    public void Begin(int count)
     {
         if (_builder is not null)
         {
             throw new ExcelMappingException("Cannot begin mapping until End() was called.");
         }
 
-        _builder = ImmutableArray.CreateBuilder<T?>(capacity);
+        _builder = ImmutableArray.CreateBuilder<T?>(count);
+        _builder.Count = count;
+        _currentIndex = 0;
     }
 
     public void Add(T? item)
     {
         EnsureMapping();
-        _builder.Add(item);
+        _builder[_currentIndex++] = item;
+    }
+
+    public void Set(int index, T? item)
+    {
+        EnsureMapping();
+        _builder[index] = item;
     }
 
     public object End()

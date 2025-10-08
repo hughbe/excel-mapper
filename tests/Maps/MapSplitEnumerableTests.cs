@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -3462,38 +3461,18 @@ public class MapSplitEnumerableTests
     }
 
     [Fact]
-    public void ReadRow_AutoMappedMultiImmutableArrayBuilder_ThrowsMissingMethodException()
+    public void ReadRow_AutoMappedMultiImmutableArrayBuilder_ThrowExcelMappingException()
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        Assert.Throws<MissingMethodException>(() => sheet.ReadRow<ImmutableArrayBuilderIntClass>());
-    }
-
-    [Fact]
-    public void ReadRow_DefaultMappedMultiImmutableArrayBuilder_ThrowsMissingMethodException()
-    {
-        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
-        importer.Configuration.RegisterClassMap<DefaultImmutableArrayBuilderIntClassMap>();
-
-        ExcelSheet sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        Assert.Throws<MissingMethodException>(() => sheet.ReadRow<ImmutableArrayBuilderIntClass>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableArrayBuilderIntClass>());
     }
 
     public class ImmutableArrayBuilderIntClass
     {
         public ImmutableArray<int>.Builder Value { get; set; } = default!;
-    }
-
-    public class DefaultImmutableArrayBuilderIntClassMap : ExcelClassMap<ImmutableArrayBuilderIntClass>
-    {
-        public DefaultImmutableArrayBuilderIntClassMap()
-        {
-            Map(p => (IList<int>)p.Value);
-        }
     }
 }

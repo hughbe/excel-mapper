@@ -1,0 +1,11 @@
+using System.Collections.Generic;
+
+namespace ExcelMapper.Abstractions;
+
+public interface IDictionaryIndexerMap : IMap
+{
+    /// <summary>
+    /// The list of maps.
+    /// </summary>
+    Dictionary<string, IMap> Values { get; }
+}

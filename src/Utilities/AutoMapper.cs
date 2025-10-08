@@ -18,13 +18,7 @@ namespace ExcelMapper.Utilities;
 public static class AutoMapper
 {
     private static MethodInfo? s_tryAutoMapMemberMethod;
-    private static MethodInfo TryAutoMapMemberMethod => s_tryAutoMapMemberMethod ?? (s_tryAutoMapMemberMethod = typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryAutoMapMember)));
-
-    private static MethodInfo? s_tryCreateSplitGenericMapMethod;
-    private static MethodInfo TryCreateSplitGenericMapMethod => s_tryCreateSplitGenericMapMethod ?? (s_tryCreateSplitGenericMapMethod = typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateSplitMapGeneric)));
-
-    private static MethodInfo? s_tryCreateGenericDictionaryMapMethod;
-    private static MethodInfo TryCreateGenericDictionaryMapMethod => s_tryCreateGenericDictionaryMapMethod ?? (s_tryCreateGenericDictionaryMapMethod = typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateGenericDictionaryMap)));
+    private static MethodInfo TryAutoMapMemberMethod => s_tryAutoMapMemberMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryAutoMapMember))!;
 
     /// <summary>
     /// Creates a map to assign a value to a specific member.
@@ -46,7 +40,7 @@ public static class AutoMapper
 
         // Secondly, check if this is a dictionary.
         // This requires converting each value to the value type of the collection.
-        if (TryCreateDictionaryMap<TMember>(member, emptyValueStrategy, out var dictionaryMap))
+        if (TryCreateDictionaryMap<TMember>(member, emptyValueStrategy, isAutoMapping: true, out var dictionaryMap))
         {
             map = dictionaryMap;
             return true;
@@ -72,18 +66,30 @@ public static class AutoMapper
         return false;
     }
 
-    internal static bool TryCreatePrimitivePipeline<T>(FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ValuePipeline<T>? pipeline)
+    internal static bool TryCreatePrimitivePipeline<T>(FallbackStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out ValuePipeline<T>? pipeline)
     {
-        if (!TryGetWellKnownMap<T>(emptyValueStrategy, out ICellMapper? mapper, out IFallbackItem? emptyFallback, out IFallbackItem? invalidFallback))
+        if (!TryGetWellKnownMap<T>(emptyValueStrategy, out var mapper, out var emptyFallback, out var invalidFallback))
         {
-            pipeline = null;
-            return false;
+            if (isAutoMapping)
+            {
+                pipeline = null;
+                return false;
+            }
         }
 
         pipeline = new ValuePipeline<T>();
-        pipeline.AddCellValueMapper(mapper);
-        pipeline.EmptyFallback = emptyFallback;
-        pipeline.InvalidFallback = invalidFallback;
+        if (mapper != null)
+        {
+            pipeline.AddCellValueMapper(mapper);
+        }
+        if (emptyFallback != null)
+        {
+            pipeline.EmptyFallback = emptyFallback;
+        }
+        if (invalidFallback != null)
+        {
+            pipeline.InvalidFallback = invalidFallback;
+        }
         return true;
     }
 
@@ -159,7 +165,7 @@ public static class AutoMapper
         var columnNameMatchingAttribute = member.GetCustomAttribute<ExcelColumnMatchingAttribute>();
         if (columnNameMatchingAttribute != null)
         {
-            var matcher = (IExcelColumnMatcher)Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments);
+            var matcher = (IExcelColumnMatcher)Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments)!;
             return new ColumnsMatchingReaderFactory(matcher);
         }
 
@@ -267,23 +273,25 @@ public static class AutoMapper
 
         return true;
     }
+    
+    private static MethodInfo? s_tryCreateSplitGenericMapMethod;
+    private static MethodInfo TryCreateSplitGenericMapMethod => s_tryCreateSplitGenericMapMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateSplitMapGeneric))!;
 
     internal static bool TryCreateSplitMap(MemberInfo member, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
     {
-        Type listType = member.MemberType();
-        if (!listType.GetElementTypeOrEnumerableType(out Type? elementType))
+        var listType = member.MemberType();
+        if (!listType.GetElementTypeOrEnumerableType(out var elementType))
         {
             map = null;
             return false;
         }
 
-        MethodInfo method = TryCreateSplitGenericMapMethod.MakeGenericMethod([listType, elementType]);
-
-        var parameters = new object?[] { member, emptyValueStrategy, null };
-        bool result = (bool)method.Invoke(null, parameters);
+        var method = TryCreateSplitGenericMapMethod.MakeGenericMethod([elementType]);
+        var parameters = new object?[] { member, listType, emptyValueStrategy, null };
+        var result = (bool)method.Invoke(null, parameters)!;
         if (result)
         {
-            map = (IMap)parameters[2]!;
+            map = (IMap)parameters[^1]!;
             return true;
         }
 
@@ -293,13 +301,12 @@ public static class AutoMapper
 
     internal static bool TryCreateSplitMap<TElement>(MemberInfo member, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
     {
-        MethodInfo method = TryCreateSplitGenericMapMethod.MakeGenericMethod([member.MemberType(), typeof(TElement)]);
-
-        var parameters = new object?[] { member, emptyValueStrategy, null };
-        bool result = (bool)method.Invoke(null, parameters);
+        var method = TryCreateSplitGenericMapMethod.MakeGenericMethod([typeof(TElement)]);
+        var parameters = new object?[] { member, member.MemberType(), emptyValueStrategy, null };
+        var result = (bool)method.InvokeUnwrapped(null, parameters)!;
         if (result)
         {
-            map = (IMap)parameters[2]!;
+            map = (IMap)parameters[^1]!;
             return true;
         }
 
@@ -310,19 +317,18 @@ public static class AutoMapper
     internal static bool TryCreateEnumerableMap<T>(FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
     {
         Type listType = typeof(T);
-        if (!listType.GetElementTypeOrEnumerableType(out Type? elementType))
+        if (!listType.GetElementTypeOrEnumerableType(out var elementType))
         {
             map = null;
             return false;
         }
 
-        MethodInfo method = TryCreateSplitGenericMapMethod.MakeGenericMethod([listType, elementType]);
-
-        var parameters = new object?[] { null, emptyValueStrategy, null };
-        bool result = (bool)method.Invoke(null, parameters);
+        var method = TryCreateSplitGenericMapMethod.MakeGenericMethod([elementType]);
+        var parameters = new object?[] { null, listType, emptyValueStrategy, null };
+        var result = (bool)method.InvokeUnwrapped(null, parameters)!;
         if (result)
         {
-            map = (IMap)parameters[parameters.Length - 1]!;
+            map = (IMap)parameters[^1]!;
             return true;
         }
 
@@ -330,18 +336,18 @@ public static class AutoMapper
         return false;
     }
 
-    private static bool TryCreateSplitMapGeneric<TList, TElement>(MemberInfo? member, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneEnumerableMap<TElement>? map)
+    private static bool TryCreateSplitMapGeneric<TElement>(MemberInfo? member, Type listType, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneEnumerableMap<TElement>? map)
     {
         // First, get the pipeline for the element. This is used to convert individual values
         // to be added to/included in the collection.
-        if (!TryCreatePrimitivePipeline<TElement>(emptyValueStrategy, out var elementMapping))
+        if (!TryCreatePrimitivePipeline<TElement>(emptyValueStrategy, isAutoMapping: true, out var elementMapping))
         {
             map = null;
             return false;
         }
 
         // Secondly, find the right way of adding the converted value to the collection.
-        if (!TryGetCreateElementsFactory<TList, TElement>(out var factory))
+        if (!TryGetCreateEnumerableFactory<TElement>(listType, out var factory))
         {
             map = null;
             return false;
@@ -374,7 +380,7 @@ public static class AutoMapper
         var columnNameMatchingAttribute = member.GetCustomAttribute<ExcelColumnsMatchingAttribute>();
         if (columnNameMatchingAttribute != null)
         {
-            var matcher = (IExcelColumnMatcher)Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments);
+            var matcher = (IExcelColumnMatcher)Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments)!;
             return new ColumnsMatchingReaderFactory(matcher);
         }
 
@@ -388,9 +394,8 @@ public static class AutoMapper
         return null;
     }
 
-    private static bool TryGetCreateElementsFactory<TList, TElement>([NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
+    private static bool TryGetCreateEnumerableFactory<TElement>(Type listType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
     {
-        Type listType = typeof(TList);
         if (listType.IsArray)
         {
             result = new ArrayEnumerableFactory<TElement>();
@@ -438,11 +443,22 @@ public static class AutoMapper
         // Otheriwse, we have to create the type.
         else if (!listType.IsAbstract)
         {
-            // Add values with through ICollection<TElement>.Add(TElement item).
-            if (listType.ImplementsInterface(typeof(ICollection<TElement>)))
+            var hasDefaultConstructor = listType.GetConstructor([]) is not null;
+            if (hasDefaultConstructor)
             {
-                result = new ICollectionTImplementingEnumerableFactory<TElement>(listType);
-                return true;
+                // Add values with through IList<TElement>.Add(TElement item).
+                if (listType.ImplementsInterface(typeof(IList<TElement>)))
+                {
+                    result = new IListTImplementingEnumerableFactory<TElement>(listType);
+                    return true;
+                }
+
+                // Add values with through ICollection<TElement>.Add(TElement item).
+                if (listType.ImplementsInterface(typeof(ICollection<TElement>)))
+                {
+                    result = new ICollectionTImplementingEnumerableFactory<TElement>(listType);
+                    return true;
+                }
             }
 
             // Check if the type has .ctor(IEnumerable<T>) such as Queue or Stack.
@@ -454,11 +470,14 @@ public static class AutoMapper
             }
 
             // Check if the type has Add(T) such as BlockingCollection.
-            var addMethod = listType.GetMethod("Add", [typeof(TElement)]);
-            if (addMethod != null)
+            if (hasDefaultConstructor)
             {
-                result = new AddEnumerableFactory<TElement>(listType);
-                return true;
+                var addMethod = listType.GetMethod("Add", [typeof(TElement)]);
+                if (addMethod != null)
+                {
+                    result = new AddEnumerableFactory<TElement>(listType);
+                    return true;
+                }
             }
         }
 
@@ -466,10 +485,161 @@ public static class AutoMapper
         return false;
     }
 
-    private static bool TryGetDictionaryKeyValueType<T>([NotNullWhen(true)] out Type? keyType, [NotNullWhen(true)] out Type? valueType)
+    private static MethodInfo? s_getOrCreateArrayIndexerMapGenericMethod;
+    private static MethodInfo GetOrCreateArrayIndexerMapGenericMethod => s_getOrCreateArrayIndexerMapGenericMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(GetOrCreateArrayIndexerMapGeneric))!;
+
+    internal static IMap GetOrCreateArrayIndexerMap(IMap parentMap, MemberInfo? member, Type arrayType, object? index, Type elementType)
+    {
+        var method = GetOrCreateArrayIndexerMapGenericMethod.MakeGenericMethod([elementType]);
+        var parameters = new object?[] { parentMap, member, arrayType, index };
+        return (IMap)method.InvokeUnwrapped(null, parameters)!;
+    }
+
+    private static ManyToOneEnumerableIndexerMapT<TElement> GetOrCreateArrayIndexerMapGeneric<TElement>(IMap parentMap, MemberInfo? member, Type arrayType, object? index)
+    {
+        if (GetExistingMap(parentMap, member, index) is { } existingMap)
+        {
+            if (existingMap is not ManyToOneEnumerableIndexerMapT<TElement> arrayIndexerMap)
+            {
+                throw new InvalidOperationException($"Expression is already mapped differently as {existingMap.GetType()}.");
+            }
+
+            return arrayIndexerMap;
+        }
+
+        // Create a new array indexer map.
+        if (!TryCreateArrayIndexerMapGeneric<TElement>(member, arrayType, GetEmptyValueStrategy(parentMap), out var mapObj))
+        {
+            throw new ExcelMappingException($"Could not map array of type \"{arrayType}\".");
+        }
+
+        AddExistingMap(parentMap, member, index, mapObj);
+        return mapObj;
+    }
+
+    private static bool TryCreateArrayIndexerMapGeneric<TElement>(MemberInfo? member, Type listType, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneEnumerableIndexerMapT<TElement>? map)
+    {
+        if (!TryGetCreateEnumerableFactory<TElement>(listType, out var factory))
+        {
+            map = null;
+            return false;
+        }
+
+        // Get the column names/indices from the attributes on the member.
+        map = new ManyToOneEnumerableIndexerMapT<TElement>(factory);
+        return true;
+    }
+
+    private static MethodInfo? s_getOrCreateDictionaryIndexerMapGenericMethod;
+    private static MethodInfo GetOrCreateDictionaryIndexerMapGenericMethod => s_getOrCreateDictionaryIndexerMapGenericMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(GetOrCreateDictionaryIndexerMapGeneric))!;
+
+    internal static IDictionaryIndexerMap GetOrCreateDictionaryIndexerMap(IMap parentMap, MemberInfo? member, Type dictionaryType, object? index, Type keyType, Type valueType)
+    {
+        var method = GetOrCreateDictionaryIndexerMapGenericMethod.MakeGenericMethod([keyType, valueType]);
+        var parameters = new object?[] { parentMap, member, dictionaryType, index };
+        return (IDictionaryIndexerMap)method.InvokeUnwrapped(null, parameters)!;
+    }
+
+    private static ManyToOneDictionaryIndexerMapT<TValue> GetOrCreateDictionaryIndexerMapGeneric<TKey, TValue>(IMap parentMap, MemberInfo? member, Type dictionaryType, object? index) where TKey : notnull
+    {
+        if (GetExistingMap(parentMap, member, index) is { } existingMap)
+        {
+            if (existingMap is not ManyToOneDictionaryIndexerMapT<TValue> dictionaryIndexerMap)
+            {
+                throw new InvalidOperationException($"Expression is already mapped differently as {existingMap.GetType()}.");
+            }
+
+            return dictionaryIndexerMap;
+        }
+
+        // Create a new dictionary indexer map.
+        if (!TryCreateDictionaryIndexerMapGeneric<TKey, TValue>(member, dictionaryType, GetEmptyValueStrategy(parentMap), out var mapObj))
+        {
+            throw new ExcelMappingException($"Could not map dictionary of type \"{dictionaryType}\".");
+        }
+        
+        AddExistingMap(parentMap, member, index, mapObj);
+        return mapObj;
+    }
+
+    private static bool TryCreateDictionaryIndexerMapGeneric<TKey, TValue>(MemberInfo? member, Type dictionaryType, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneDictionaryIndexerMapT<TValue>? map) where TKey : notnull
+    {
+        if (!TryGetCreateDictionaryFactory<TKey, TValue>(dictionaryType, out var factory))
+        {
+            map = null;
+            return false;
+        }
+
+        map = new ManyToOneDictionaryIndexerMapT<TValue>(factory);
+        return true;
+    }
+
+    internal static IMap CreateArrayIndexerElementMap(int index, Type valueType, FallbackStrategy emptyValueStrategy)
+        => CreateIndexerElementMap(new ColumnIndexReaderFactory(index), valueType, emptyValueStrategy);
+
+    internal static IMap CreateDictionaryIndexerElementMap(string key, Type valueType, FallbackStrategy emptyValueStrategy)
+        => CreateIndexerElementMap(new ColumnNameReaderFactory(key), valueType, emptyValueStrategy);
+
+    private static MethodInfo? s_tryCreateIndexerElementMapGenericMethod;
+    private static MethodInfo CreateIndexerElementMapGenericMethod => s_tryCreateIndexerElementMapGenericMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(CreateIndexerElementMapGeneric))!;
+
+    private static IMap CreateIndexerElementMap(ICellReaderFactory defaultReaderFactory, Type valueType, FallbackStrategy emptyValueStrategy)
+    {
+        var method = CreateIndexerElementMapGenericMethod.MakeGenericMethod(valueType);
+        var parameters = new object?[] { defaultReaderFactory, emptyValueStrategy };
+        return (IMap)method.InvokeUnwrapped(null, parameters)!;
+    }
+
+    private static IMap CreateIndexerElementMapGeneric<T>(ICellReaderFactory defaultReaderFactory, FallbackStrategy emptyValueStrategy)
+    {
+        // Try to create a primitive map for the value type.
+        _ = TryGetWellKnownMap<T>(emptyValueStrategy, out var mapper, out var emptyFallback, out var invalidFallback);
+
+        var map = new OneToOneMap<T>(defaultReaderFactory);
+        if (mapper != null)
+        {
+            map.AddCellValueMapper(mapper);
+        }
+        if (emptyFallback != null)
+        {
+            map.EmptyFallback = emptyFallback;
+        }
+        if (invalidFallback != null)
+        {
+            map.InvalidFallback = invalidFallback;
+        }
+        
+        return map;
+    }
+
+    private static MethodInfo? s_tryCreateDictionaryMapGeneric;
+    private static MethodInfo TryCreateDictionaryMapGeneric => s_tryCreateDictionaryMapGeneric ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateGenericDictionaryMap))!;
+
+    private static bool TryCreateDictionaryMap<TMember>(MemberInfo? member, FallbackStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out IMap? map)
+    {
+        if (!TryGetDictionaryKeyValueType(typeof(TMember), out var keyType, out var valueType))
+        {
+            map = null;
+            return false;
+        }
+
+        var method = TryCreateDictionaryMapGeneric.MakeGenericMethod(keyType, valueType);
+        var parameters = new object?[] { member, typeof(TMember), emptyValueStrategy, isAutoMapping, null };
+        var result = (bool)method.InvokeUnwrapped(null, parameters)!;
+        if (result)
+        {
+            map = (IMap)parameters[^1]!;
+            return true;
+        }
+
+        map = null;
+        return false;
+    }
+
+    private static bool TryGetDictionaryKeyValueType(Type dictionaryType, [NotNullWhen(true)] out Type? keyType, [NotNullWhen(true)] out Type? valueType)
     {
         // We should be able to parse anything that implements IEnumerable<KeyValuePair<TKey, TValue>>
-        if (typeof(T).ImplementsGenericInterface(typeof(IEnumerable<>), out Type? keyValuePairType))
+        if (dictionaryType.ImplementsGenericInterface(typeof(IEnumerable<>), out Type? keyValuePairType))
         {
             if (keyValuePairType.IsGenericType && keyValuePairType.GetGenericTypeDefinition() == typeof(KeyValuePair<,>))
             {
@@ -481,7 +651,7 @@ public static class AutoMapper
         }
 
         // Otherwise we can parse regular IDictionary.
-        if (typeof(T) == typeof(IDictionary) || typeof(T).ImplementsInterface(typeof(IDictionary)))
+        if (dictionaryType == typeof(IDictionary) || dictionaryType.ImplementsInterface(typeof(IDictionary)))
         {
             keyType = typeof(string);
             valueType = typeof(object);
@@ -493,36 +663,15 @@ public static class AutoMapper
         return false;
     }
 
-    private static bool TryCreateDictionaryMap<TMember>(MemberInfo? member, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
+    internal static bool TryCreateGenericDictionaryMap<TKey, TValue>(MemberInfo? member, Type dictionaryType, FallbackStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out ManyToOneDictionaryMap<TValue>? map) where TKey : notnull
     {
-        if (!TryGetDictionaryKeyValueType<TMember>(out var keyType, out var valueType))
+        if (!TryCreatePrimitivePipeline<TValue>(emptyValueStrategy, isAutoMapping, out var valuePipeline))
         {
             map = null;
             return false;
         }
 
-        MethodInfo method = TryCreateGenericDictionaryMapMethod.MakeGenericMethod(keyType, valueType);
-        var parameters = new object?[] { member, typeof(TMember), emptyValueStrategy, null };
-        bool result = (bool)method.Invoke(null, parameters);
-        if (result)
-        {
-            map = (IMap)parameters[parameters.Length - 1]!;
-            return true;
-        }
-
-        map = null;
-        return false;
-    }
-
-    internal static bool TryCreateGenericDictionaryMap<TKey, TValue>(MemberInfo? member, Type memberType, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneDictionaryMap<TValue>? map) where TKey : notnull
-    {
-        if (!TryCreatePrimitivePipeline<TValue>(emptyValueStrategy, out var valuePipeline))
-        {
-            map = null;
-            return false;
-        }
-
-        if (!TryGetCreateDictionaryFactory<TKey, TValue>(memberType, out var factory))
+        if (!TryGetCreateDictionaryFactory<TKey, TValue>(dictionaryType, out var factory))
         {
             map = null;
             return false;
@@ -535,36 +684,36 @@ public static class AutoMapper
         return true;
     }
 
-    private static bool TryGetCreateDictionaryFactory<TKey, TValue>(Type memberType, [NotNullWhen(true)] out IDictionaryFactory<TValue>? result) where TKey : notnull
+    private static bool TryGetCreateDictionaryFactory<TKey, TValue>(Type dictionaryType, [NotNullWhen(true)] out IDictionaryFactory<TValue>? result) where TKey : notnull
     {
-        if (memberType == typeof(ImmutableDictionary<TKey, TValue>) || memberType == typeof(IImmutableDictionary<TKey, TValue>))
+        if (dictionaryType == typeof(ImmutableDictionary<TKey, TValue>) || dictionaryType == typeof(IImmutableDictionary<TKey, TValue>))
         {
             result = new ImmutableDictionaryFactory<TValue>();
             return true;
         }
-        else if (memberType == typeof(ImmutableSortedDictionary<TKey, TValue>))
+        else if (dictionaryType == typeof(ImmutableSortedDictionary<TKey, TValue>))
         {
             result = new ImmutableSortedDictionaryFactory<TValue>();
             return true;
         }
-        else if (memberType.GetTypeInfo().IsInterface)
+        else if (dictionaryType.GetTypeInfo().IsInterface)
         {
-            if (memberType.GetTypeInfo().IsAssignableFrom(typeof(Dictionary<TKey, TValue>).GetTypeInfo()))
+            if (dictionaryType.GetTypeInfo().IsAssignableFrom(typeof(Dictionary<TKey, TValue>).GetTypeInfo()))
             {
                 result = new DictionaryFactory<TValue>();
                 return true;
             }
         }
-        else if (memberType.GetConstructor([]) is not null)
+        else if (dictionaryType.GetConstructor([]) is not null)
         {
-            if (memberType.ImplementsInterface(typeof(IDictionary<TKey, TValue>)))
+            if (dictionaryType.ImplementsInterface(typeof(IDictionary<TKey, TValue>)))
             {
-                result = new IDictionaryTImplementingFactory<TValue>(memberType);
+                result = new IDictionaryTImplementingFactory<TValue>(dictionaryType);
                 return true;
             }
-            else if (memberType.ImplementsInterface(typeof(IDictionary)))
+            else if (dictionaryType.ImplementsInterface(typeof(IDictionary)))
             {
-                result = new IDictionaryImplementingFactory<TValue>(memberType);
+                result = new IDictionaryImplementingFactory<TValue>(dictionaryType);
                 return true;
             }
         }
@@ -606,14 +755,14 @@ public static class AutoMapper
 
             // Infer the mapping for each member (property/field) belonging to the type.
             Type memberType = member.MemberType();
-            MethodInfo method = TryAutoMapMemberMethod.MakeGenericMethod(memberType);
+            var method = TryAutoMapMemberMethod.MakeGenericMethod(memberType);
             if (memberType == type)
             {
                 throw new ExcelMappingException($"Cannot map recursive property \"{member.Name}\" of type {memberType}. Consider applying the ExcelIgnore attribute.");
             }
 
             var parameters = new object?[] { member, emptyValueStrategy, null };
-            bool result = (bool)method.Invoke(null, parameters);
+            var result = (bool)method.Invoke(null, parameters)!;
             if (!result)
             {
                 classMap = null;
@@ -636,7 +785,7 @@ public static class AutoMapper
             return false;
         }
         // Property must be a public instance property.
-        if (!property.SetMethod.IsPublic || property.SetMethod.IsStatic)
+        if (!property.SetMethod!.IsPublic || property.SetMethod.IsStatic)
         {
             return false;
         }
@@ -660,6 +809,80 @@ public static class AutoMapper
         }
 
         return true;
+    }
+
+    private static FallbackStrategy GetEmptyValueStrategy(IMap map)
+    {
+        if (map is ExcelClassMap classMap)
+        {
+            return classMap.EmptyValueStrategy;
+        }
+
+        return FallbackStrategy.ThrowIfPrimitive;
+    }
+
+    private static IMap? GetExistingMap(IMap parentMap, MemberInfo? member, object? index)
+    {
+        if (parentMap is ExcelClassMap parentClassMap)
+        {
+            return parentClassMap.Properties.FirstOrDefault(m => m.Member.Equals(member))?.Map;
+        }
+        else if (parentMap is IEnumerableIndexerMap enumerableIndexerMap)
+        {
+            return enumerableIndexerMap.Values.TryGetValue((int)index!, out var map) ? map : null;
+        }
+        else
+        {
+            var dictionaryIndexerMap = (IDictionaryIndexerMap)parentMap;
+            return dictionaryIndexerMap.Values.TryGetValue((string)index!, out var map) ? map : null;
+        }
+    }
+
+    private static IMap AddExistingMap(IMap parentMap, MemberInfo? member, object? index, IMap map)
+    {
+        if (parentMap is ExcelClassMap parentClassMap)
+        {
+            parentClassMap.Properties.Add(new ExcelPropertyMap(member!, map));
+        }
+        else if (parentMap is IEnumerableIndexerMap enumerableIndexerMap)
+        {
+            enumerableIndexerMap.Values[(int)index!] = map;
+        }
+        else
+        {
+            var dictionaryIndexerMap = (IDictionaryIndexerMap)parentMap;
+            dictionaryIndexerMap.Values[(string)index!] = map;
+        }
+
+        return map;
+    }
+
+    private static MethodInfo? s_getOrCreateNestedMapGenericMethod;
+    private static MethodInfo GetOrCreateNestedMapGenericMethod => s_getOrCreateNestedMapGenericMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(GetOrCreateNestedMapGeneric))!;
+
+    public static ExcelClassMap GetOrCreateNestedMap(IMap parentMap, MemberInfo? member, Type memberType, object? index)
+    {
+        var method = GetOrCreateNestedMapGenericMethod.MakeGenericMethod(memberType);
+        var parameters = new object?[] { parentMap, member, index };
+        return (ExcelClassMap)method.InvokeUnwrapped(null, parameters)!;
+    }
+
+    private static IMap GetOrCreateNestedMapGeneric<TProperty>(IMap parentMap, MemberInfo member, object? index)
+    {
+        if (GetExistingMap(parentMap, member, index) is { } existingMap)
+        {
+            if (existingMap is not ExcelClassMap<TProperty> existingTypedMap)
+            {
+                throw new InvalidOperationException($"Expression is already mapped differently as {existingMap.GetType()}.");
+            }
+
+            return existingMap;
+        }
+
+        // By default, do not auto map nested fields.
+        var classMap = new ExcelClassMap<TProperty>();
+        AddExistingMap(parentMap, member, index, classMap);
+        return classMap;
     }
 
     /// <summary>
@@ -687,7 +910,7 @@ public static class AutoMapper
             return true;
         }
         // User may ask to map the row to a dictionary.
-        else if (TryCreateDictionaryMap<T>(null, emptyValueStrategy, out var dictionaryMap))
+        else if (TryCreateDictionaryMap<T>(null, emptyValueStrategy, true, out var dictionaryMap))
         {
             result = new BuiltinClassMap<T>(dictionaryMap);
             return true;

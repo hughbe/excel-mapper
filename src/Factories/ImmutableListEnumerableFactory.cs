@@ -24,6 +24,19 @@ public class ImmutableListEnumerableFactory<T> : IEnumerableFactory<T>
         _builder.Add(item);
     }
 
+    public void Set(int index, T? item)
+    {
+        EnsureMapping();
+
+        // Grow the list if necessary.
+        while (_builder.Count <= index)
+        {
+            _builder.Add(default);
+        }
+
+        _builder[index] = item;
+    }
+
     public object End()
     {
         EnsureMapping();
