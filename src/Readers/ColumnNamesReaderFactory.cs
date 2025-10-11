@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Utilities;
 
@@ -7,7 +8,7 @@ namespace ExcelMapper.Readers;
 /// <summary>
 /// Reads a multiple values of one or more columns given the name of each column.
 /// </summary>
-public sealed class ColumnNamesReaderFactory : ICellReaderFactory, ICellsReaderFactory
+public sealed class ColumnNamesReaderFactory : ICellReaderFactory, ICellsReaderFactory, IColumnNamesProviderCellReaderFactory
 {
     /// <summary>
     /// Gets the names of each column to read.
@@ -71,4 +72,6 @@ public sealed class ColumnNamesReaderFactory : ICellReaderFactory, ICellsReaderF
 
         return new ColumnIndicesReader(indices);
     }
+
+    public string[] GetColumnNames(ExcelSheet sheet) => ColumnNames;
 }

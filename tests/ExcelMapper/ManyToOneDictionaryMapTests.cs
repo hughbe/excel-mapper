@@ -295,6 +295,109 @@ public class ManyToOneDictionaryMapTests
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Null(result);
     }
+
+    [Fact]
+    public void TryGetValue_InvokeCantReadNullMemberIColumnNamesProviderCellReaderFactoryEmpty_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var factory = new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(s => false));
+        var valuePipeline = new ValuePipeline<string>();
+        var dictionaryFactory = new DictionaryFactory<string>();
+        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        object? result = null;
+        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void TryGetValue_InvokeCantReadNullMemberIColumnNamesProviderCellReaderFactorySingle_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var factory = new ColumnNamesReaderFactory("NoSuchColumn");
+        var valuePipeline = new ValuePipeline<string>();
+        var dictionaryFactory = new DictionaryFactory<string>();
+        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        object? result = null;
+        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void TryGetValue_InvokeCantReadNullMemberIColumnNamesProviderCellReaderFactoryMultiple_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var factory = new ColumnNamesReaderFactory("NoSuchColumn1", "NoSuchColumn2");
+        var valuePipeline = new ValuePipeline<string>();
+        var dictionaryFactory = new DictionaryFactory<string>();
+        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        object? result = null;
+        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void TryGetValue_InvokeCantReadNullMemberIColumnIndicesProviderCellReaderFactoryEmpty_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var factory = new EmptyColumnIndicesReaderFactory();
+        var valuePipeline = new ValuePipeline<string>();
+        var dictionaryFactory = new DictionaryFactory<string>();
+        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        object? result = null;
+        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void TryGetValue_InvokeCantReadNullMemberIColumnIndicesProviderCellReaderFactorySingle_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var factory = new ColumnIndicesReaderFactory(10);
+        var valuePipeline = new ValuePipeline<string>();
+        var dictionaryFactory = new DictionaryFactory<string>();
+        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        object? result = null;
+        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void TryGetValue_InvokeCantReadNullMemberIColumnIndicesProviderCellReaderFactoryMultiple_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var factory = new ColumnIndicesReaderFactory(0, 1);
+        var valuePipeline = new ValuePipeline<string>();
+        var dictionaryFactory = new DictionaryFactory<string>();
+        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        object? result = null;
+        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
+        Assert.Null(result);
+    }
+
+    private class EmptyColumnIndicesReaderFactory : ICellsReaderFactory, IColumnIndicesProviderCellReaderFactory
+    {
+        public ICellsReader? GetCellsReader(ExcelSheet sheet) => new ColumnIndicesReaderFactory(int.MaxValue).GetCellsReader(sheet);
+
+        public int[] GetColumnIndices(ExcelSheet sheet) => [];
+    }
     
     private class MockReader : ICellsReader
     {

@@ -7,7 +7,7 @@ namespace ExcelMapper.Readers;
 /// <summary>
 /// Reads the value of a multiples cells given a list of column names or a predicate matching the column name.
 /// </summary>
-public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsReaderFactory
+public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsReaderFactory, IColumnIndicesProviderCellReaderFactory, IColumnNamesProviderCellReaderFactory
 {
     public IExcelColumnMatcher Matcher { get; }
 
@@ -60,5 +60,47 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
         }
 
         return new ColumnIndicesReader(indices);
+    }
+
+    public string[] GetColumnNames(ExcelSheet sheet)
+    {
+        if (sheet == null)
+        {
+            throw new ArgumentNullException(nameof(sheet));
+        }
+        if (sheet.Heading == null)
+        {
+            return null!;
+        }
+
+        var names = new List<string>();
+        for (var columnIndex = 0; columnIndex < sheet.NumberOfColumns; columnIndex++)
+        {
+            if (Matcher.ColumnMatches(sheet, columnIndex))
+            {
+                names.Add(sheet.Heading.GetColumnName(columnIndex)!);
+            }
+        }
+
+        return names.ToArray();
+    }
+
+    public int[] GetColumnIndices(ExcelSheet sheet)
+    {
+        if (sheet == null)
+        {
+            throw new ArgumentNullException(nameof(sheet));
+        }
+
+        var indices = new List<int>();
+        for (var columnIndex = 0; columnIndex < sheet.NumberOfColumns; columnIndex++)
+        {
+            if (Matcher.ColumnMatches(sheet, columnIndex))
+            {
+                indices.Add(columnIndex);
+            }
+        }
+
+        return indices.ToArray();
     }
 }

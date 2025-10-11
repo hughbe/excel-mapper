@@ -37,7 +37,7 @@ public class ColumnIndexReaderTests
     [Theory]
     [InlineData(1)]
     [InlineData(int.MaxValue)]
-    public void GetReader_InvokeNoMatch_ReturnsNull(int columnIndex)
+    public void TryGetValue_InvokeNoMatch_ReturnsNull(int columnIndex)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
         ExcelSheet sheet = importer.ReadSheet();

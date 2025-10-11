@@ -189,4 +189,41 @@ public class ColumnIndicesReaderFactoryTests
         var factory = new ColumnIndicesReaderFactory(0);
         Assert.Throws<ArgumentNullException>("sheet", () => factory.GetCellsReader(null!));
     }
+
+#pragma warning disable CS0184 // The is operator is being used to test interface implementation
+    [Fact]
+    public void Interfaces_IColumnNameProviderCellReaderFactory_DoesNotImplement()
+    {
+        var factory = new ColumnIndicesReaderFactory(0);
+        Assert.False(factory is IColumnNameProviderCellReaderFactory);
+    }
+
+    [Fact]
+    public void Interfaces_IColumnIndexProviderCellReaderFactory_DoesNotImplement()
+    {
+        var factory = new ColumnIndicesReaderFactory(0);
+        Assert.False(factory is IColumnIndexProviderCellReaderFactory);
+    }
+
+    [Fact]
+    public void Interfaces_IColumnNamesProviderCellReaderFactory_DoesImplement()
+    {
+        var factory = new ColumnIndicesReaderFactory(0);
+        Assert.False(factory is IColumnNamesProviderCellReaderFactory);
+    }
+
+    [Fact]
+    public void Interfaces_IColumnIndicesProviderCellReaderFactory_DoesImplement()
+    {
+        var factory = new ColumnIndicesReaderFactory(0);
+        Assert.True(factory is IColumnIndicesProviderCellReaderFactory);
+    }
+#pragma warning restore CS0184
+
+    [Fact]
+    public void GetColumnIndices_Invoke_ReturnsExpected()
+    {
+        var factory = new ColumnIndicesReaderFactory(new int[] { 1, 2, 3 });
+        Assert.Equal(new int[] { 1, 2, 3 }, factory.GetColumnIndices(null!)!);
+    }
 }

@@ -79,7 +79,7 @@ public class ManyToOneDictionaryMap<TValue> : IManyToOneMap
                 return false;
             }
 
-            throw new ExcelMappingException($"Could not read value for \"{member?.Name}\"", sheet, rowIndex, -1);
+            throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
         }
 
         DictionaryFactory.Begin(valueResults.Count());

@@ -11,7 +11,7 @@ namespace ExcelMapper.Readers;
 /// Reads the value of a cell and produces multiple values by splitting the string value
 /// using the given separators.
 /// </summary>
-public abstract class SplitReaderFactory : ICellsReaderFactory
+public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesProviderCellReaderFactory, IColumnNamesProviderCellReaderFactory
 {
     /// <summary>
     /// Gets or sets the options used to split the string value of the cell.
@@ -51,6 +51,27 @@ public abstract class SplitReaderFactory : ICellsReaderFactory
         }
 
         return new Reader(reader, this);
+    }
+
+    public string[]? GetColumnNames(ExcelSheet sheet)
+    {
+        if (_readerFactory is IColumnNameProviderCellReaderFactory nameProvider)
+        {
+            return [nameProvider.GetColumnName(sheet)];
+        }
+
+        return null;
+    }
+
+
+    public int[]? GetColumnIndices(ExcelSheet sheet)
+    {
+        if (_readerFactory is IColumnIndexProviderCellReaderFactory indexProvider)
+        {
+            return [indexProvider.GetColumnIndex(sheet)];
+        }
+
+        return null;
     }
 
     private class Reader(ICellReader Reader, SplitReaderFactory Splitter) : ICellsReader

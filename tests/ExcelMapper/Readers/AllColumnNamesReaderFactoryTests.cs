@@ -58,4 +58,34 @@ public class AllColumnNamesValueReaderTests
         Assert.Throws<ExcelMappingException>(() => factory.GetCellsReader(sheet));
         Assert.Null(result);
     }
+
+#pragma warning disable CS0184 // The is operator is being used to test interface implementation
+    [Fact]
+    public void Interfaces_IColumnNameProviderCellReaderFactory_DoesNotImplement()
+    {
+        var factory = new AllColumnNamesReaderFactory();
+        Assert.False(factory is IColumnNameProviderCellReaderFactory);
+    }
+
+    [Fact]
+    public void Interfaces_IColumnIndexProviderCellReaderFactory_DoesNotImplement()
+    {
+        var factory = new AllColumnNamesReaderFactory();
+        Assert.False(factory is IColumnIndexProviderCellReaderFactory);
+    }
+
+    [Fact]
+    public void Interfaces_IColumnNamesProviderCellReaderFactory_DoesNotImplement()
+    {
+        var factory = new AllColumnNamesReaderFactory();
+        Assert.False(factory is IColumnNamesProviderCellReaderFactory);
+    }
+
+    [Fact]
+    public void Interfaces_IColumnIndicesProviderCellReaderFactory_DoesNotImplement()
+    {
+        var factory = new AllColumnNamesReaderFactory();
+        Assert.False(factory is IColumnIndicesProviderCellReaderFactory);
+    }
+#pragma warning restore CS0184
 }

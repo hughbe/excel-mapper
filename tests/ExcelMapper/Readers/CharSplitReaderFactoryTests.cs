@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ExcelMapper.Abstractions;
+using System;
 using Xunit;
 
 namespace ExcelMapper.Readers.Tests;
@@ -59,5 +60,68 @@ public class CharSplitReaderFactoryTests
             Options = value
         };
         Assert.Equal(value, factory.Options);
+    }
+
+#pragma warning disable CS0184 // The is operator is being used to test interface implementation
+    [Fact]
+    public void Interfaces_IColumnNameProviderCellReaderFactory_DoesNotImplement()
+    {
+        var factory = new CharSplitReaderFactory(new ColumnNameReaderFactory("ColumnName"));
+        Assert.False(factory is IColumnNameProviderCellReaderFactory);
+    }
+
+    [Fact]
+    public void Interfaces_IColumnIndexProviderCellReaderFactory_DoesNotImplement()
+    {
+        var factory = new CharSplitReaderFactory(new ColumnNameReaderFactory("ColumnName"));
+        Assert.False(factory is IColumnIndexProviderCellReaderFactory);
+    }
+
+    [Fact]
+    public void Interfaces_IColumnNamesProviderCellReaderFactory_DoesImplement()
+    {
+        var factory = new CharSplitReaderFactory(new ColumnNameReaderFactory("ColumnName"));
+        Assert.True(factory is IColumnNamesProviderCellReaderFactory);
+    }
+
+    [Fact]
+    public void Interfaces_IColumnIndicesProviderCellReaderFactory_DoesImplement()
+    {
+        var factory = new CharSplitReaderFactory(new ColumnNameReaderFactory("ColumnName"));
+        Assert.True(factory is IColumnIndicesProviderCellReaderFactory);
+    }
+#pragma warning restore CS0184
+
+    [Fact]
+    public void GetColumnNames_Invoke_ReturnsExpected()
+    {
+        var factory = new CharSplitReaderFactory(new ColumnNameReaderFactory("ColumnName"));
+        Assert.Equal(["ColumnName"], factory.GetColumnNames(null!)!);
+    }
+
+    [Fact]
+    public void GetColumnNames_InvokeNotColumnNameProviderReaderFactory_ReturnsNull()
+    {
+        var factory = new CharSplitReaderFactory(new CustomCellReaderFactory());
+        Assert.Null(factory.GetColumnNames(null!));
+    }
+
+    [Fact]
+    public void GetColumnIndices_Invoke_ReturnsExpected()
+    {
+        var factory = new CharSplitReaderFactory(new ColumnIndexReaderFactory(5));
+        Assert.Equal([5], factory.GetColumnIndices(null!)!);
+    }
+
+    [Fact]
+    public void GetColumnIndices_InvokeNotColumnIndexProviderReaderFactory_ReturnsNull()
+    {
+        var factory = new CharSplitReaderFactory(new CustomCellReaderFactory());
+        Assert.Null(factory.GetColumnIndices(null!));
+    }
+
+    private class CustomCellReaderFactory : ICellReaderFactory
+    {
+        public ICellReader GetCellReader(ExcelSheet sheet) => throw new NotImplementedException();
     }
 }

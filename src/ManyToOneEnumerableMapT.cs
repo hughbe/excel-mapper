@@ -73,7 +73,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
                 return false;
             }
 
-            throw new ExcelMappingException($"Could not read value for member \"{member?.Name}\"", sheet, rowIndex, -1);
+            throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
         }
 
         EnumerableFactory.Begin(results.Count());

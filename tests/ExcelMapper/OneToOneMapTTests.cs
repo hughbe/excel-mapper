@@ -338,6 +338,34 @@ public class OneToOneMapTTests
         Assert.Null(result);
     }
 
+    [Fact]
+    public void TryGetValue_InvokeCantReadNullMemberIColumnNameProviderCellReaderFactory_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var factory = new ColumnNameReaderFactory("NoSuchColumn");
+        var map = new SubOneToOneMap<string>(factory);
+        object? result = null;
+        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void TryGetValue_InvokeCantReadNullMemberIColumnIndexProviderCellReaderFactory_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        importer.Reader.Read();
+
+        var factory = new ColumnIndexReaderFactory(int.MaxValue);
+        var map = new SubOneToOneMap<string>(factory);
+        object? result = null;
+        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
+        Assert.Null(result);
+    }
+
     private class SubOneToOneMap<T> : OneToOneMap<T>
     {
         public SubOneToOneMap(ICellReaderFactory factory) : base(factory)

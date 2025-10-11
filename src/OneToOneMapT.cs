@@ -35,13 +35,13 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>
 
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
     {
-        if (!_factoryCache.TryGetValue(sheet, out ICellReader? cellReader))
+        if (!_factoryCache.TryGetValue(sheet, out var cellReader))
         {
             cellReader = _readerFactory.GetCellReader(sheet);
             _factoryCache.Add(sheet, cellReader);
         }
 
-        if (cellReader == null || !cellReader.TryGetValue(reader, PreserveFormatting, out ReadCellResult readResult))
+        if (cellReader == null || !cellReader.TryGetValue(reader, PreserveFormatting, out var readResult))
         {
             if (Optional)
             {
@@ -49,7 +49,7 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>
                 return false;
             }
 
-            throw new ExcelMappingException($"Could not read value for {member?.Name}", sheet, rowIndex, -1);
+            throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
         }
 
         result = (T)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, readResult, PreserveFormatting, member)!;

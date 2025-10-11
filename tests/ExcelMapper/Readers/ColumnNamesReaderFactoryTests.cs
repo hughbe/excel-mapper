@@ -164,4 +164,41 @@ public class ColumnNamesReaderFactoryTests
         Assert.Throws<ExcelMappingException>(() => factory.GetCellsReader(sheet));
         Assert.Null(sheet.Heading);
     }
+
+#pragma warning disable CS0184 // The is operator is being used to test interface implementation
+    [Fact]
+    public void Interfaces_IColumnNameProviderCellReaderFactory_DoesNotImplement()
+    {
+        var factory = new ColumnNamesReaderFactory("ColumnName");
+        Assert.False(factory is IColumnNameProviderCellReaderFactory);
+    }
+
+    [Fact]
+    public void Interfaces_IColumnIndexProviderCellReaderFactory_DoesNotImplement()
+    {
+        var factory = new ColumnNamesReaderFactory("ColumnName");
+        Assert.False(factory is IColumnIndexProviderCellReaderFactory);
+    }
+
+    [Fact]
+    public void Interfaces_IColumnNamesProviderCellReaderFactory_Implements()
+    {
+        var factory = new ColumnNamesReaderFactory("ColumnName");
+        Assert.True(factory is IColumnNamesProviderCellReaderFactory);
+    }
+
+    [Fact]
+    public void Interfaces_IColumnIndicesProviderCellReaderFactory_DoesImplement()
+    {
+        var factory = new ColumnNamesReaderFactory("ColumnName");
+        Assert.False(factory is IColumnIndicesProviderCellReaderFactory);
+    }
+#pragma warning restore CS0184
+
+    [Fact]
+    public void GetColumnNames_Invoke_ReturnsExpected()
+    {
+        var factory = new ColumnNamesReaderFactory("Column1", "Column2");
+        Assert.Equal(new string[] { "Column1", "Column2" }, factory.GetColumnNames(null!));
+    }
 }

@@ -6,7 +6,7 @@ namespace ExcelMapper.Readers;
 /// <summary>
 /// Reads the value of a single cell given the zero-based index of it's column.
 /// </summary>
-public sealed class ColumnIndexReaderFactory : ICellReaderFactory
+public sealed class ColumnIndexReaderFactory : ICellReaderFactory, IColumnIndexProviderCellReaderFactory
 {
     /// <summary>
     /// The zero-based index of the column to read.
@@ -40,4 +40,6 @@ public sealed class ColumnIndexReaderFactory : ICellReaderFactory
 
         return new ColumnIndexReader(ColumnIndex);
     }
+
+    public int GetColumnIndex(ExcelSheet sheet) => ColumnIndex;
 }

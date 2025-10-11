@@ -83,4 +83,11 @@ public class ColumnNameReaderFactoryTests
         Assert.Throws<ExcelMappingException>(() => factory.GetCellReader(sheet));
         Assert.Null(sheet.Heading);
     }
+
+    [Fact]
+    public void GetColumnName_Invoke_ReturnsExpected()
+    {
+        var factory = new ColumnNameReaderFactory("ColumnName");
+        Assert.Equal("ColumnName", factory.GetColumnName(null!));
+    }
 }

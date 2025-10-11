@@ -92,7 +92,7 @@ internal static class ExpressionAutoMapper
     private static (int index, Type valueType) ParseArrayOrListIndexer(Expression expression)
     {
         var index = GetIndexFromArrayOrListIndexer(expression);
-        
+
         Type valueType;
         if (IsArrayIndexerExpression(expression))
         {
@@ -104,7 +104,7 @@ internal static class ExpressionAutoMapper
             var methodCallExpression = (MethodCallExpression)expression;
             valueType = methodCallExpression.Method.ReturnType;
         }
-        
+
         return (index, valueType);
     }
 
