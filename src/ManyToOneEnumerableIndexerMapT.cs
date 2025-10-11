@@ -9,10 +9,9 @@ using ExcelMapper.Abstractions;
 namespace ExcelMapper;
 
 /// <summary>
-/// A map that reads one or more values from one or more cells and maps these values to the type of the
-/// property or field. This is used to map IEnumerable properties and fields.
+/// A map that reads multiple cells of an excel sheet and maps the values of the cells to a
+/// list property or field by their indices.
 /// </summary>
-/// <typeparam name="TValue">The value type of the IEnumerable property or field.</typeparam>
 public class ManyToOneEnumerableIndexerMapT<TValue> : IEnumerableIndexerMap
 {
     public ManyToOneEnumerableIndexerMapT(IEnumerableFactory<TValue> enumerableFactory)

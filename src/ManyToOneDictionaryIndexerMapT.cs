@@ -8,10 +8,9 @@ using ExcelMapper.Abstractions;
 namespace ExcelMapper;
 
 /// <summary>
-/// A map that reads one or more values from one or more cells and maps these values to the type of the
-/// property or field. This is used to map IDictionary properties and fields.
+/// A map that reads multiple cells of an excel sheet and maps the values of the cells to
+/// a dictionary property or field by their keys.
 /// </summary>
-/// <typeparam name="TValue">The value type of the IDictionary property or field.</typeparam>
 public class ManyToOneDictionaryIndexerMapT<TValue> : IDictionaryIndexerMap
 {
     public ManyToOneDictionaryIndexerMapT(IDictionaryFactory<TValue> dictionaryFactory)

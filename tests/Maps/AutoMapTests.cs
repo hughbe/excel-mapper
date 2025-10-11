@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Frozen;
 using Xunit;
 
 namespace ExcelMapper.Tests;

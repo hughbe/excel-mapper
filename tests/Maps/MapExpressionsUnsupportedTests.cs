@@ -53,6 +53,18 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
+    public void Map_MultidimensionalArrayElementCantBeMapped_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<NonConstructibleArrayElementClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map(p => p.Value));
+    }
+
+    private class NonConstructibleMultidimensionalArrayElementClass
+    {
+        public IDisposable[,] Value { get; set; } = default!;
+    }
+
+    [Fact]
     public void Map_ListCantBeConstructed_ThrowsExcelMappingException()
     {
         var map = new ExcelClassMap<NonConstructibleListClass>();
@@ -175,18 +187,6 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
-    public void Map_MultidimensionalArrayValue_ThrowsArgumentException()
-    {
-        var map = new ExcelClassMap<MultidimensionalArrayClass>();
-        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Values[0, 0]));
-    }
-
-    private class MultidimensionalArrayClass
-    {
-        public string[,] Values { get; set; } = default!;
-    }
-
-    [Fact]
     public void Map_NonConstantArrayParent_ThrowsArgumentException()
     {
         var map = new ExcelClassMap<ArrayClass>();
@@ -223,6 +223,14 @@ public class MapExpressionsUnsupportedTests
         Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[p.IntValue]));
     }
 
+    [Fact]
+    public void Map_ArrayIndexDifferently_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<ArrayClass>();
+        map.Map(o => o.Value);
+        Assert.Throws<InvalidOperationException>(() => map.Map(o => o.Value[0]));
+    }
+
     private class ArrayClass
     {
         public string[] Value { get; set; } = default!;
@@ -230,11 +238,263 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
-    public void ReadRow_ArrayIndexDifferently_ThrowsInvalidOperationException()
+    public void Map_NonConstantMiltidimensionalIndexFirst_ThrowsArgumentException()
     {
-        var map = new ExcelClassMap<ArrayClass>();
+        var map = new ExcelClassMap<MultidimensionalArrayClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[int.Parse("0"), 0]));
+    }
+
+    [Fact]
+    public void Map_NonConstantMiltidimensionalIndexSecond_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<MultidimensionalArrayClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[0, int.Parse("0")]));
+    }
+
+    [Fact]
+    public void Map_NegativeMultidimensionalIndexFirst_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<MultidimensionalArrayClass>();
+#pragma warning disable CS0251 // Indexing an array with a negative index
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[-1, 0]));
+#pragma warning restore CS0251 // Indexing an array with a negative index
+    }
+
+    [Fact]
+    public void Map_NegativeMultidimensionalIndexSecond_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<MultidimensionalArrayClass>();
+#pragma warning disable CS0251 // Indexing an array with a negative index
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[0, -1]));
+#pragma warning restore CS0251 // Indexing an array with a negative index
+    }
+
+    [Fact]
+    public void Map_MultidimensionalIndexerChainedWithoutMember_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<ChainedMultidimensionalArrayClass>();
+        // Chained array access starting with a method call
+        Assert.Throws<ArgumentException>(() => map.Map(o => o.GetNestedArray()[0][1]));
+    }
+
+    private class ChainedMultidimensionalArrayClass
+    {
+        public int[][] GetNestedArray() => [[1, 2], [3, 4]];
+    }
+
+    [Fact]
+    public void Map_MultidimensionalWithVariableIndexFirst_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<MultidimensionalArrayClass>();
+        var index = 0;
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[index, 0]));
+    }
+
+    [Fact]
+    public void Map_MultidimensionalWithVariableIndexSecond_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<MultidimensionalArrayClass>();
+        var index = 0;
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[0, index]));
+    }
+
+    [Fact]
+    public void Map_MultidimensionalWithMemberIndexFirst_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<MultidimensionalArrayClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[p.IntValue, 0]));
+    }
+
+    [Fact]
+    public void Map_MultidimensionalWithMemberIndexSecond_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<MultidimensionalArrayClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[0, p.IntValue]));
+    }
+
+    private class MultidimensionalArrayClass
+    {
+        public string[,] Value { get; set; } = default!;
+        public int IntValue { get; set; }
+    }
+
+    [Fact]
+    public void Map_MultidimensionalClassHasGetNoArguments_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<MultidimensionalClassHasGetNoArgumentsClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => o.Value.Get()));
+    }
+
+
+    private class MultidimensionalClassHasGetNoArgumentsClass
+    {
+        public MultidimensionalClassHasGetNoArguments Value { get; set; } = default!;
+    }
+
+    private class MultidimensionalClassHasGetNoArguments
+    {
+        public int Get() => 0;
+    }
+
+    [Fact]
+    public void Map_MultidimensionalClassHasGetOneArgument_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<MultidimensionalClassHasGetOneArgumentClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => o.Value.Get(0)));
+    }
+
+    private class MultidimensionalClassHasGetOneArgumentClass
+    {
+        public MultidimensionalClassHasGetOneArgument Value { get; set; } = default!;
+    }
+
+    private class MultidimensionalClassHasGetOneArgument
+    {
+        public int Get(int i) => 0;
+    }
+
+    [Fact]
+    public void Map_MultidimensionalClassHasGetTwoArguments_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<MultidimensionalClassHasGetTwoArgumentsClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => o.Value.Get(0, 1)));
+    }
+
+    private class MultidimensionalClassHasGetTwoArgumentsClass
+    {
+        public MultidimensionalClassHasGetTwoArguments Value { get; set; } = default!;
+    }
+
+    private class MultidimensionalClassHasGetTwoArguments
+    {
+        public int Get(int i, int j) => 0;
+    }
+
+    [Fact]
+    public void Map_MultidimensionalClassHasGetNonIntegerArgumentFirst_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<MultidimensionalClassHasGetTwoArgumentsNonIntegerFirstClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => o.Value.Get("0", 1)));
+    }
+
+    private class MultidimensionalClassHasGetTwoArgumentsNonIntegerFirstClass
+    {
+        public MultidimensionalClassHasGetTwoArgumentsNonIntegerFirst Value { get; set; } = default!;
+    }
+
+    private class MultidimensionalClassHasGetTwoArgumentsNonIntegerFirst
+    {
+        public int Get(string i, int j) => 0;
+    }
+
+    [Fact]
+    public void Map_MultidimensionalClassHasGetNonIntegerArgumentSecond_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<MultidimensionalClassHasGetTwoArgumentsNonIntegerSecondClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => o.Value.Get(0, "0")));
+    }
+
+    private class MultidimensionalClassHasGetTwoArgumentsNonIntegerSecondClass
+    {
+        public MultidimensionalClassHasGetTwoArgumentsNonIntegerSecond Value { get; set; } = default!;
+    }
+
+    private class MultidimensionalClassHasGetTwoArgumentsNonIntegerSecond
+    {
+        public int Get(int i, string j) => 0;
+    }
+
+    [Fact]
+    public void Map_MultidimensionalClassHasGetNonConstantArgumentFirst_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<MultidimensionalClassHasGetTwoArgumentsNonConstantFirstClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => o.Value.Get(int.Parse("0"), 0)));
+    }
+
+    private class MultidimensionalClassHasGetTwoArgumentsNonConstantFirstClass
+    {
+        public MultidimensionalClassHasGetTwoArgumentsNonConstantFirst Value { get; set; } = default!;
+    }
+
+    private class MultidimensionalClassHasGetTwoArgumentsNonConstantFirst
+    {
+        public int Get(int i, int j) => 0;
+    }
+
+    [Fact]
+    public void Map_MultidimensionalClassHasGetNonConstantArgumentSecond_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<MultidimensionalClassHasGetTwoArgumentsNonConstantSecondClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => o.Value.Get(0, int.Parse("0"))));
+    }
+
+    private class MultidimensionalClassHasGetTwoArgumentsNonConstantSecondClass
+    {
+        public MultidimensionalClassHasGetTwoArgumentsNonConstantSecond Value { get; set; } = default!;
+    }
+
+    private class MultidimensionalClassHasGetTwoArgumentsNonConstantSecond
+    {
+        public int Get(int i, int j) => 0;
+    }
+
+    [Fact]
+    public void Map_MultidimensionalClassHasGetVoidReturnType_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<MultidimensionalClassHasGetTwoArgumentsNonConstantSecondClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => o.Value.Get(0, int.Parse("0"))));
+    }
+
+    private class MultidimensionalClassHasGetVoidReturnTypeClass
+    {
+        public MultidimensionalClassHasGetVoidReturnType Value { get; set; } = default!;
+    }
+
+    private class MultidimensionalClassHasGetVoidReturnType
+    {
+        public void Get(int i, int j) { }
+    }
+
+    [Fact]
+    public void Map_MultidimensionalClassHasGetInvalidReturnType_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<MultidimensionalClassHasGetInvalidReturnTypeClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => o.Value.Get(0, int.Parse("0"))));
+    }
+
+    private class MultidimensionalClassHasGetInvalidReturnTypeClass
+    {
+        public MultidimensionalClassHasGetInvalidReturnType Value { get; set; } = default!;
+    }
+
+    private class MultidimensionalClassHasGetInvalidReturnType
+    {
+        public string Get(int i, int j) => string.Empty;
+    }
+
+    [Fact]
+    public void Map_MultidimensionalClassHasGetStatic_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<MultidimensionalClassHasGetStaticClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => MultidimensionalClassHasGetStatic.Get(0, 0)));
+    }
+
+    private class MultidimensionalClassHasGetStaticClass
+    {
+        public MultidimensionalClassHasGetStatic Value { get; set; } = default!;
+    }
+
+    private class MultidimensionalClassHasGetStatic
+    {
+        public static int Get(int i, int j) => 0;
+    }
+
+    [Fact]
+    public void Map_MultidimensionalIndexDifferently_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<MultidimensionalArrayClass>();
         map.Map(o => o.Value);
-        Assert.Throws<InvalidOperationException>(() => map.Map(o => o.Value[0]));
+        Assert.Throws<InvalidOperationException>(() => map.Map(o => o.Value[0, 0]));
     }
 
     [Fact]
@@ -292,7 +552,7 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
-    public void ReadRow_ListIndexDifferently_ThrowsInvalidOperationException()
+    public void Map_ListIndexDifferently_ThrowsExcelMappingException()
     {
         var map = new ExcelClassMap<ListClass>();
         map.Map(o => o.Value);
@@ -356,7 +616,6 @@ public class MapExpressionsUnsupportedTests
         public string StringValue { get; set; } = default!;
     }
 
-
     [Fact]
     public void Map_DictionaryIndexerCantBeConstructed_ThrowsExcelMappingException()
     {
@@ -365,7 +624,7 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
-    public void ReadRow_DictionaryIndexDifferently_ThrowsInvalidOperationException()
+    public void Map_DictionaryIndexDifferently_ThrowsExcelMappingException()
     {
         var map = new ExcelClassMap<DictionaryClass>();
         map.Map(o => o.Value);
