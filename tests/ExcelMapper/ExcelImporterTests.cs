@@ -10,6 +10,107 @@ namespace ExcelMapper.Tests;
 public class ExcelImporterTests
 {
     [Fact]
+    public void Ctor_String_Xlsx()
+    {
+        var filePath = Helpers.GetResourcePath("Primitives.xlsx");
+        using var importer = new ExcelImporter(filePath);
+        Assert.Equal("Primitives", importer.ReadSheet().Name);
+        Assert.Equal(3, importer.NumberOfSheets);
+    }
+
+    [Fact]
+    public void Ctor_String_Xlsm()
+    {
+        var filePath = Helpers.GetResourcePath("Primitives.xlsm");
+        using var importer = new ExcelImporter(filePath);
+        Assert.Equal("Primitives", importer.ReadSheet().Name);
+        Assert.Equal(3, importer.NumberOfSheets);
+    }
+
+    [Fact]
+    public void Ctor_String_Xls()
+    {
+        var filePath = Helpers.GetResourcePath("Primitives.xls");
+        using var importer = new ExcelImporter(filePath);
+        Assert.Equal("Primitives", importer.ReadSheet().Name);
+        Assert.Equal(3, importer.NumberOfSheets);
+    }
+
+    [Fact]
+    public void Ctor_String_Xlsb()
+    {
+        var filePath = Helpers.GetResourcePath("Primitives.xlsb");
+        using var importer = new ExcelImporter(filePath);
+        Assert.Equal("Primitives", importer.ReadSheet().Name);
+        Assert.Equal(3, importer.NumberOfSheets);
+    }
+
+    [Fact]
+    public void Ctor_String_OpenXml()
+    {
+        var filePath = Helpers.GetResourcePath("OpenXML.xlsx");
+        using var importer = new ExcelImporter(filePath);
+        Assert.Equal("Primitives", importer.ReadSheet().Name);
+        Assert.Equal(3, importer.NumberOfSheets);
+    }
+
+    [Fact]
+    public void Ctor_String_ExcelImporterFileType_Excel()
+    {
+        var filePath = Helpers.GetResourcePath("Primitives.xlsx");
+        using var importer = new ExcelImporter(filePath, ExcelImporterFileType.Excel);
+        Assert.Equal("Primitives", importer.ReadSheet().Name);
+        Assert.Equal(3, importer.NumberOfSheets);
+    }
+    
+    [Fact]
+    public void Ctor_String_ExcelImporterFileType_Csv()
+    {
+        var filePath = Helpers.GetResourcePath("Primitives.csv");
+        using var importer = new ExcelImporter(filePath, ExcelImporterFileType.Csv);
+        Assert.Equal(string.Empty, importer.ReadSheet().Name);
+        Assert.Equal(1, importer.NumberOfSheets);
+    }
+
+    [Fact]
+    public void Ctor_NullPath_ThrowsArgumentNullException()
+    {
+        Assert.Throws<ArgumentNullException>("path", () => new ExcelImporter((string)null!));
+        Assert.Throws<ArgumentNullException>("path", () => new ExcelImporter((string)null!, ExcelImporterFileType.Csv));
+    }
+
+    [Fact]
+    public void Ctor_EmptyPath_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>("path", () => new ExcelImporter(string.Empty));
+        Assert.Throws<ArgumentException>("path", () => new ExcelImporter(string.Empty, ExcelImporterFileType.Csv));
+    }
+
+    [Fact]
+    public void Ctor_NoSuchFile_ThrowsFileNotFoundException()
+    {
+        var filePath = Helpers.GetResourcePath("NoSuchFile.xlsx");
+        Assert.Throws<FileNotFoundException>(() => new ExcelImporter(filePath));
+        Assert.Throws<FileNotFoundException>(() => new ExcelImporter(filePath, ExcelImporterFileType.Csv));
+    }
+
+    [Fact]
+    public void Ctor_CsvFile_ThrowsHeaderException()
+    {
+        var filePath = Helpers.GetResourcePath("Primitives.csv");
+        Assert.Throws<HeaderException>(() => new ExcelImporter(filePath));
+        Assert.Throws<HeaderException>(() => new ExcelImporter(filePath, ExcelImporterFileType.Excel));
+    }
+
+    [Fact]
+    public void Ctor_OdsFile_ThrowsHeaderException()
+    {
+        var filePath = Helpers.GetResourcePath("Primitives.ods");
+        Assert.Throws<HeaderException>(() => new ExcelImporter(filePath));
+        Assert.Throws<HeaderException>(() => new ExcelImporter(filePath, ExcelImporterFileType.Excel));
+    }
+
+    [Fact]
     public void Ctor_Stream_Xlsx()
     {
         using var stream = Helpers.GetResource("Primitives.xlsx");
@@ -68,7 +169,7 @@ public class ExcelImporterTests
     {
         using var stream = Helpers.GetResource("Primitives.csv");
         using var importer = new ExcelImporter(stream, ExcelImporterFileType.Csv);
-        Assert.Equal("", importer.ReadSheet().Name);
+        Assert.Equal(string.Empty, importer.ReadSheet().Name);
         Assert.Equal(1, importer.NumberOfSheets);
     }
 
@@ -89,9 +190,10 @@ public class ExcelImporterTests
     [Theory]
     [InlineData(ExcelImporterFileType.Excel - 1)]
     [InlineData(ExcelImporterFileType.Csv + 1)]
-    public void CtorInvalidFileType_ThrowsArgumentException(ExcelImporterFileType fileType)
+    public void Ctor_InvalidFileType_ThrowsArgumentException(ExcelImporterFileType fileType)
     {
         using var stream = Helpers.GetResource("Strings.xlsx");
+        Assert.Throws<ArgumentException>("fileType", () => new ExcelImporter(Helpers.GetResourcePath("Strings.xlsx"), fileType));
         Assert.Throws<ArgumentException>("fileType", () => new ExcelImporter(stream, fileType));
     }
 

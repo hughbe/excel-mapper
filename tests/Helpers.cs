@@ -14,6 +14,8 @@ public static class Helpers
 
     public static ExcelImporter GetImporter(string name) => new(GetResource(name));
 
+    public static string GetResourcePath(string name) => Path.GetFullPath(Path.Combine("Resources", name));
+
     public static Stream GetResource(string name)
     {
         if (!Initialized)
@@ -22,8 +24,7 @@ public static class Helpers
             Initialized = true;
         }
 
-        string filePath = Path.GetFullPath(Path.Combine("Resources", name));
-        return File.OpenRead(filePath);
+        return File.OpenRead(GetResourcePath(name));
     }
 
     public class TestClass

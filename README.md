@@ -12,11 +12,17 @@ To read a workbook, construct an `ExcelImporter` object.
 ```cs
 using ExcelMapping;
 
-// Excel.
-using var stream = File.OpenRead("File.xlsx");
-using var importer = new ExcelImporter(stream)
+// Excel file.
+using var importer = new ExcelImporter("File.xlsx");
 
-// Csv.
+// Excel stream.
+using var stream = File.OpenRead("File.xlsx");
+using var importer = new ExcelImporter(stream);
+
+// Csv file.
+using var importer = new ExcelImporter("File.csv", ExcelImporterFileType.Csv);
+
+// Csv stream.
 using var stream = File.OpenRead("File.csv");
 using var importer = new ExcelImporter(stream, ExcelImporterFileType.Csv);
 

@@ -30,6 +30,18 @@ public class ExcelImporter : IDisposable
     private int SheetIndex { get; set; } = -1;
 
     /// <summary>
+    /// Constructs an importer that reads an Excel file from a path.
+    /// </summary>
+    /// <param name="path"></param>
+    public ExcelImporter(string path) : this(File.OpenRead(path), ExcelImporterFileType.Excel)
+    {
+    }
+
+    public ExcelImporter(string path, ExcelImporterFileType fileType) : this(File.OpenRead(path), fileType)
+    {
+    }
+
+    /// <summary>
     /// Constructs an importer that reads an Excel file from a stream.
     /// </summary>
     /// <param name="stream">A stream containing the Excel file bytes.</param>
