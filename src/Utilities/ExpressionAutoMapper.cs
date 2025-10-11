@@ -59,10 +59,19 @@ internal static class ExpressionAutoMapper
             && methodCallExpression.Method.DeclaringType!.IsArray;
 
     private static bool IsListIndexerExpression(Expression expression)
-        => expression is MethodCallExpression methodCallExpression && methodCallExpression.Method.Name == "get_Item" && methodCallExpression.Arguments.Count == 1 && methodCallExpression.Arguments[0] is ConstantExpression && methodCallExpression.Arguments[0].Type == typeof(int);
+        => expression is MethodCallExpression methodCallExpression &&
+            methodCallExpression.Method.Name == "get_Item" &&
+            methodCallExpression.Arguments.Count == 1 &&
+            methodCallExpression.Arguments[0] is ConstantExpression &&
+            methodCallExpression.Arguments[0].Type == typeof(int) &&
+            methodCallExpression.Method.DeclaringType!.GetElementTypeOrEnumerableType(out var _);
 
     private static bool IsDictionaryIndexerExpression(Expression expression)
-        => expression is MethodCallExpression methodCallExpression && methodCallExpression.Method.Name == "get_Item" && methodCallExpression.Arguments.Count == 1 && methodCallExpression.Arguments[0] is ConstantExpression && methodCallExpression.Arguments[0].Type == typeof(string);
+        => expression is MethodCallExpression methodCallExpression
+            && methodCallExpression.Method.Name == "get_Item"
+            && methodCallExpression.Arguments.Count == 1
+            && methodCallExpression.Arguments[0] is ConstantExpression
+            && methodCallExpression.Arguments[0].Type == typeof(string);
 
     private static int ParseArrayIndexExpression(Expression expression)
     {
@@ -281,6 +290,7 @@ internal static class ExpressionAutoMapper
         }
         else if (IsArrayIndexerExpression(nextExpression))
         {
+            // This must be an array.
             var nextValueType = currentValueType.GetElementType()!;
             if (member != null)
             {
@@ -293,6 +303,7 @@ internal static class ExpressionAutoMapper
         }
         else if (IsMultidimensionalArrayIndexerExpression(nextExpression))
         {
+            // This must be a multidimensional array.
             var nextValueType = currentValueType.GetElementType()!;
             if (member != null)
             {
@@ -305,14 +316,16 @@ internal static class ExpressionAutoMapper
         }
         else if (IsListIndexerExpression(nextExpression))
         {
-            var nextValueType = currentValueType.GenericTypeArguments[0];
+            // This must be implement IEnumerable or Inumerable<T>.
+            currentValueType.GetElementTypeOrEnumerableType(out var nextValueType);
+
             if (member != null)
             {
-                return AutoMapper.GetOrCreateArrayIndexerMap(currentMap, member, member.MemberType(), null, nextValueType);
+                return AutoMapper.GetOrCreateArrayIndexerMap(currentMap, member, member.MemberType(), null, nextValueType!);
             }
             else
             {
-                return AutoMapper.GetOrCreateArrayIndexerMap(currentMap, null, currentValueType, index ?? key, nextValueType);
+                return AutoMapper.GetOrCreateArrayIndexerMap(currentMap, null, currentValueType, index ?? key, nextValueType!);
             }
         }
         else

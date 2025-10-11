@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Xunit;
 
 namespace ExcelMapper.Tests;
@@ -1414,6 +1416,129 @@ public class MapExpressionsTests
     }
 
     [Fact]
+    public void ReadRows_DefaultMappedArrayListIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<ArrayListClass>();
+        map.Map(o => o.Values[0]);
+        map.Map(o => o.Values[1]);
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("1", row.Values[0]);
+        Assert.Equal("2", row.Values[1]);
+    }
+
+    private class ArrayListClass
+    {
+        public ArrayList Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedArrayListIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<ArrayListClass>();
+        map.Map(o => o.Values[0]).WithColumnName("Column2");
+        map.Map(o => o.Values[1]).WithColumnName("Column3");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("2", row.Values[0]);
+        Assert.Equal("3", row.Values[1]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedIntImmutableArrayIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<IntImmutableArrayClass>();
+        map.Map(o => o.Values[0]);
+        map.Map(o => o.Values[1]);
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<IntImmutableArrayClass>();
+        Assert.Equal(2, row.Values.Length);
+        Assert.Equal(1, row.Values[0]);
+        Assert.Equal(2, row.Values[1]);
+    }
+
+    private class IntImmutableArrayClass
+    {
+        public ImmutableArray<int> Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedIntImmutableArrayIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<IntImmutableArrayClass>();
+        map.Map(o => o.Values[0]).WithColumnName("Column2");
+        map.Map(o => o.Values[1]).WithColumnName("Column3");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<IntImmutableArrayClass>();
+        Assert.Equal(2, row.Values.Length);
+        Assert.Equal(2, row.Values[0]);
+        Assert.Equal(3, row.Values[1]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedIntImmutableListIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<IntImmutableListClass>();
+        map.Map(o => o.Values[0]);
+        map.Map(o => o.Values[1]);
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<IntImmutableListClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal(1, row.Values[0]);
+        Assert.Equal(2, row.Values[1]);
+    }
+
+    private class IntImmutableListClass
+    {
+        public ImmutableList<int> Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedIntImmutableListIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<IntImmutableListClass>();
+        map.Map(o => o.Values[0]).WithColumnName("Column2");
+        map.Map(o => o.Values[1]).WithColumnName("Column3");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<IntImmutableListClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal(2, row.Values[0]);
+        Assert.Equal(3, row.Values[1]);
+    }
+
+    [Fact]
     public void ReadRows_DefaultMappedObjectMemberListIndexDictionaryIndex_Success()
     {
         using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
@@ -2454,6 +2579,88 @@ public class MapExpressionsTests
             Map(o => o.Values["key5"]["key6"]["key7"])
                 .WithColumnName("Column3");
         }
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedHashtableIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        var map = new ExcelClassMap<HashtableClass>();
+        map.Map(o => o.Values["Column2"]);
+        map.Map(o => o.Values["Column3"]);
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<HashtableClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("1", row.Values["Column2"]);
+        Assert.Equal("2", row.Values["Column3"]);
+    }
+
+    private class HashtableClass
+    {
+        public Hashtable Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedHashtableIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<HashtableClass>();
+        map.Map(o => o.Values["Column2"]).WithColumnName("Column3");
+        map.Map(o => o.Values["Column3"]).WithColumnName("Column4");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<HashtableClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("3", row.Values["Column2"]);
+        Assert.Equal("4", row.Values["Column3"]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedIntImmutableDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        var map = new ExcelClassMap<IntImmutableDictionaryClass>();
+        map.Map(o => o.Values["Column2"]);
+        map.Map(o => o.Values["Column3"]);
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<IntImmutableDictionaryClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal(1, row.Values["Column2"]);
+        Assert.Equal(2, row.Values["Column3"]);
+    }
+
+    private class IntImmutableDictionaryClass
+    {
+        public ImmutableDictionary<string, int> Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedIntImmutableDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<IntImmutableDictionaryClass>();
+        map.Map(o => o.Values["Column2"]).WithColumnName("Column3");
+        map.Map(o => o.Values["Column3"]).WithColumnName("Column4");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<IntImmutableDictionaryClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal(3, row.Values["Column2"]);
+        Assert.Equal(4, row.Values["Column3"]);
     }
 
     [Fact]

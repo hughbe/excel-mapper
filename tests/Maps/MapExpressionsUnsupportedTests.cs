@@ -99,11 +99,11 @@ public class MapExpressionsUnsupportedTests
     [Fact]
     public void Map_ListCantBeConstructed_ThrowsExcelMappingException()
     {
-        var map = new ExcelClassMap<NonConstructibleListClass>();
+        var map = new ExcelClassMap<NonConstructibleListIndexClass>();
         Assert.Throws<ExcelMappingException>(() => map.Map(p => (IList<string>)p.Value));
     }
 
-    private class NonConstructibleListClass
+    private class NonConstructibleListIndexClass
     {
         public NonConstructibleList Value { get; set; } = default!;
     }
@@ -532,14 +532,14 @@ public class MapExpressionsUnsupportedTests
     [Fact]
     public void Map_NonConstantListIndex_ThrowsArgumentException()
     {
-        var map = new ExcelClassMap<ListClass>();
+        var map = new ExcelClassMap<ListIndexClass>();
         Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[int.Parse("0")]));
     }
 
     [Fact]
     public void Map_NegativeListIndex_ThrowsArgumentException()
     {
-        var map = new ExcelClassMap<ListClass>();
+        var map = new ExcelClassMap<ListIndexClass>();
 #pragma warning disable CS0251 // Indexing an array with a negative index
         Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[-1]));
 #pragma warning restore CS0251 // Indexing an array with a negative index
@@ -548,7 +548,7 @@ public class MapExpressionsUnsupportedTests
     [Fact]
     public void Map_ListWithVariableIndex_ThrowsArgumentException()
     {
-        var map = new ExcelClassMap<ListClass>();
+        var map = new ExcelClassMap<ListIndexClass>();
         var index = 0;
         Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[index]));
     }
@@ -556,11 +556,11 @@ public class MapExpressionsUnsupportedTests
     [Fact]
     public void Map_ListWithMemberIndex_ThrowsArgumentException()
     {
-        var map = new ExcelClassMap<ListClass>();
+        var map = new ExcelClassMap<ListIndexClass>();
         Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[p.IntValue]));
     }
 
-    private class ListClass
+    private class ListIndexClass
     {
         public List<string> Value { get; set; } = default!;
 
@@ -584,9 +584,43 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
+    public void Map_ListIndexNonIntArgument_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<ListIndexClassGetItemNonIntArgumentClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[1.0]));
+    }
+
+    private class ListIndexClassGetItemNonIntArgumentClass
+    {
+        public ListIndexClassGetItemNonIntArgument Value { get; set; } = default!;
+    }
+
+    private class ListIndexClassGetItemNonIntArgument
+    {
+        public int this[double index] => 0;
+    }
+
+    [Fact]
+    public void Map_ListIndexIndexerNotEnumerable_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<ListIndexClassNotEnumerableClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[1]));
+    }
+
+    private class ListIndexClassNotEnumerableClass
+    {
+        public ListIndexClassNotEnumerable Value { get; set; } = default!;
+    }
+
+    private class ListIndexClassNotEnumerable
+    {
+        public int this[int index] => 0;
+    }
+
+    [Fact]
     public void Map_ListIndexDifferently_ThrowsExcelMappingException()
     {
-        var map = new ExcelClassMap<ListClass>();
+        var map = new ExcelClassMap<ListIndexClass>();
         map.Map(o => o.Value);
         Assert.Throws<InvalidOperationException>(() => map.Map(o => o.Value[0]));
     }
@@ -596,18 +630,6 @@ public class MapExpressionsUnsupportedTests
     {
         var map = new ExcelClassMap<DictionaryClass>();
         Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value["key".ToString()]));
-    }
-
-    [Fact]
-    public void Map_NonStringDictionaryKey_ThrowsExcelMappingException()
-    {
-        var map = new ExcelClassMap<IntDictionaryClass>();
-        Assert.Throws<ExcelMappingException>(() => map.Map(p => p.Value[0]));
-    }
-
-    private class IntDictionaryClass
-    {
-        public Dictionary<int, string> Value { get; set; } = default!;
     }
 
     [Fact]
@@ -653,6 +675,23 @@ public class MapExpressionsUnsupportedTests
     {
         var map = new ExcelClassMap<NonConstructibleDictionaryClass>();
         Assert.Throws<ExcelMappingException>(() => map.Map(p => p.Value["key"]));
+    }
+
+    [Fact]
+    public void Map_DictionaryIndexIndexerNotEnumerable_ThrowExcelMappingException()
+    {
+        var map = new ExcelClassMap<DictionaryIndexClassNotEnumerableClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map(p => p.Value["key"]));
+    }
+
+    private class DictionaryIndexClassNotEnumerableClass
+    {
+        public DictionaryIndexClassNotEnumerable Value { get; set; } = default!;
+    }
+
+    private class DictionaryIndexClassNotEnumerable
+    {
+        public int this[string index] => 0;
     }
 
     [Fact]

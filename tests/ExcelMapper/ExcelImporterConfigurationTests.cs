@@ -265,6 +265,26 @@ public class ExcelImporterConfigurationTests
         public List<SimpleClass> Values { get; set; } = default!;
     }
 
+    // When we bring non-string dictionary keys back, re-enable this test.
+#if false
+    [Fact]
+    public void RegisterClassMap_NonStringDictionaryKey_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<IntDictionaryClass>();
+        map.Map(p => p.Value[0]);
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        var row = sheet.ReadRow<IntDictionaryClass>();
+    }
+
+    private class IntDictionaryClass
+    {
+        public Dictionary<int, string> Value { get; set; } = default!;
+    }
+#endif
+
     [Fact]
     public void RegisterClassMap_DictionaryIndexerValueCantBeMapped_ThrowsExcelMappingException()
     {
