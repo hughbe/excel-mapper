@@ -30,6 +30,7 @@ public class ImmutableSortedDictionaryFactoryTests
         factory.Begin(1);
         Assert.Throws<ExcelMappingException>(() => factory.Begin(1));
     }
+
     [Fact]
     public void Add_End_Success()
     {
@@ -39,13 +40,13 @@ public class ImmutableSortedDictionaryFactoryTests
         factory.Begin(1);
         factory.Add("key", 1);
         var value = Assert.IsType<ImmutableSortedDictionary<string, int>>(factory.End());
-        Assert.Equal(ImmutableSortedDictionary.CreateRange<string, int>(new Dictionary<string, int> { ["key"] = 1 }), value);
+        Assert.Equal(ImmutableSortedDictionary.CreateRange(new Dictionary<string, int> { ["key"] = 1 }), value);
 
         // Begin again.
         factory.Begin(1);
         factory.Add("key", 2);
         value = Assert.IsType<ImmutableSortedDictionary<string, int>>(factory.End());
-        Assert.Equal(ImmutableSortedDictionary.CreateRange<string, int>(new Dictionary<string, int> { ["key"] = 2 }), value);
+        Assert.Equal(ImmutableSortedDictionary.CreateRange(new Dictionary<string, int> { ["key"] = 2 }), value);
     }
 
     [Fact]
@@ -58,7 +59,7 @@ public class ImmutableSortedDictionaryFactoryTests
         factory.Add("key2", 3);
         
         var value = Assert.IsType<ImmutableSortedDictionary<string, int>>(factory.End());
-        Assert.Equal(ImmutableSortedDictionary.CreateRange<string, int>(new Dictionary<string, int> { ["key1"] = 2, ["key2"] = 3 }), value);
+        Assert.Equal(ImmutableSortedDictionary.CreateRange(new Dictionary<string, int> { ["key1"] = 2, ["key2"] = 3 }), value);
     }
 
     [Fact]
@@ -66,6 +67,52 @@ public class ImmutableSortedDictionaryFactoryTests
     {
         var factory = new ImmutableSortedDictionaryFactory<int>();
         Assert.Throws<ExcelMappingException>(() => factory.Add("key", 1));
+    }
+
+    [Fact]
+    public void Set_Invoke_Success()
+    {
+        var factory = new ImmutableSortedDictionaryFactory<int>();
+        factory.Begin(1);
+        factory.Add("key1", 1);
+
+        Assert.Equal(ImmutableSortedDictionary.CreateRange(new Dictionary<string, int> { ["key1"] = 1 }), Assert.IsType<ImmutableSortedDictionary<string, int>>(factory.End()));
+    }
+
+    [Fact]
+    public void Set_InvokeOutOfRange_Success()
+    {
+        var factory = new ImmutableSortedDictionaryFactory<int>();
+        factory.Begin(1);
+        factory.Add("key1", 1);
+        factory.Add("key2", 2);
+
+        Assert.Equal(ImmutableSortedDictionary.CreateRange(new Dictionary<string, int> { ["key1"] = 1, ["key2"] = 2 }), Assert.IsType<ImmutableSortedDictionary<string, int>>(factory.End()));
+    }
+
+    [Fact]
+    public void Set_NotBegan_ThrowsExcelMappingException()
+    {
+        var factory = new ImmutableSortedDictionaryFactory<int>();
+        Assert.Throws<ExcelMappingException>(() => factory.Add("key", 1));
+    }
+
+    [Fact]
+    public void Set_NullKey_ThrowsArgumentNullException()
+    {
+        var factory = new ImmutableSortedDictionaryFactory<int>();
+        factory.Begin(1);
+        Assert.Throws<ArgumentNullException>("key", () => factory.Add(null!, 1));
+    }
+
+    [Fact]
+    public void Set_MultipleTimes_ThrowsArgumentException()
+    {
+        var factory = new ImmutableSortedDictionaryFactory<int>();
+        factory.Begin(1);
+        factory.Add("key", 1);
+
+        Assert.Throws<ArgumentException>(null, () => factory.Add("key", 2));
     }
 
     [Fact]

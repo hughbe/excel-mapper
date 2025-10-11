@@ -464,7 +464,7 @@ public class ExcelSheetTests
         Assert.Equal(8, sheet.CurrentRowIndex);
 
         var row5 = sheet.ReadRow<BlankLinesClass>();
-        Assert.Equal("25/10/2025 00:00:00", row5.StringValue);
+        Assert.Equal(new DateTime(2025, 10, 25, 0, 0, 0).ToString(), row5.StringValue);
         Assert.Equal(4, row5.IntValue);
         Assert.Equal(998, sheet.CurrentRowIndex);
 

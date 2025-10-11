@@ -9,14 +9,14 @@ public class ArrayEnumerableFactory<T> : IEnumerableFactory<T>
     private int _currentIndex = -1;
     private T?[]? _items;
 
-    public void Begin(int capacity)
+    public void Begin(int count)
     {
         if (_items is not null)
         {
             throw new ExcelMappingException("Cannot begin mapping until End() was called.");
         }
 
-        _items = new T[capacity];
+        _items = new T[count];
         _currentIndex = 0;
     }
 
@@ -24,6 +24,12 @@ public class ArrayEnumerableFactory<T> : IEnumerableFactory<T>
     {
         EnsureMapping();
         _items[_currentIndex++] = item;
+    }
+
+    public void Set(int index, T? item)
+    {
+        EnsureMapping();
+        _items[index] = item;
     }
 
     public object End()

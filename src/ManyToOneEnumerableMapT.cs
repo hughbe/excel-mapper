@@ -15,6 +15,17 @@ namespace ExcelMapper;
 /// </summary>
 public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
 {
+    /// <summary>
+    /// Constructs a map that reads one or more values from one or more cells and maps these values to one
+    /// property and field of the type of the property or field.
+    /// </summary>
+    public ManyToOneEnumerableMap(ICellsReaderFactory readerFactory, IValuePipeline<TElement> elementPipeline, IEnumerableFactory<TElement> enumerableFactory)
+    {
+        _readerFactory = readerFactory ?? throw new ArgumentNullException(nameof(readerFactory));
+        ElementPipeline = elementPipeline ?? throw new ArgumentNullException(nameof(elementPipeline));
+        EnumerableFactory = enumerableFactory ?? throw new ArgumentNullException(nameof(enumerableFactory));
+    }
+
     private ICellsReaderFactory _readerFactory;
 
     /// <inheritdoc />
@@ -39,17 +50,6 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// The factory for creating and adding elements to the list.
     /// </summary>
     public IEnumerableFactory<TElement> EnumerableFactory { get; }
-
-    /// <summary>
-    /// Constructs a map that reads one or more values from one or more cells and maps these values to one
-    /// property and field of the type of the property or field.
-    /// </summary>
-    public ManyToOneEnumerableMap(ICellsReaderFactory readerFactory, IValuePipeline<TElement> elementPipeline, IEnumerableFactory<TElement> enumerableFactory)
-    {
-        _readerFactory = readerFactory ?? throw new ArgumentNullException(nameof(readerFactory));
-        ElementPipeline = elementPipeline ?? throw new ArgumentNullException(nameof(elementPipeline));
-        EnumerableFactory = enumerableFactory ?? throw new ArgumentNullException(nameof(enumerableFactory));
-    }
 
     private readonly Dictionary<ExcelSheet, ICellsReader?> _factoryCache = [];
 

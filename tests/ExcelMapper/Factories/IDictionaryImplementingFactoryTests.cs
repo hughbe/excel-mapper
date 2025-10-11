@@ -114,6 +114,62 @@ public class IDictionaryImplementingFactoryTests
     }
 
     [Fact]
+    public void Set_Invoke_Success()
+    {
+        var factory = new IDictionaryImplementingFactory<int>(typeof(Hashtable));
+        factory.Begin(1);
+        factory.Add("key1", 1);
+
+        Assert.Equal(new Hashtable { ["key1"] = 1 }, Assert.IsType<Hashtable>(factory.End()));
+    }
+
+    [Fact]
+    public void Set_InvokeOutOfRange_Success()
+    {
+        var factory = new IDictionaryImplementingFactory<int>(typeof(Hashtable));
+        factory.Begin(1);
+        factory.Add("key1", 1);
+        factory.Add("key2", 2);
+
+        Assert.Equal(new Hashtable { ["key1"] = 1, ["key2"] = 2 }, Assert.IsType<Hashtable>(factory.End()));
+    }
+
+    [Fact]
+    public void Set_NotBegan_ThrowsExcelMappingException()
+    {
+        var factory = new IDictionaryImplementingFactory<int>(typeof(Hashtable));
+        Assert.Throws<ExcelMappingException>(() => factory.Add("key", 1));
+    }
+
+    [Fact]
+    public void Set_NullKey_ThrowsArgumentNullException()
+    {
+        var factory = new IDictionaryImplementingFactory<int>(typeof(Hashtable));
+        factory.Begin(1);
+        Assert.Throws<ArgumentNullException>("key", () => factory.Add(null!, 1));
+    }
+
+    [Fact]
+    public void Set_MultipleTimes_ThrowsArgumentException()
+    {
+        var factory = new IDictionaryImplementingFactory<int>(typeof(Hashtable));
+        factory.Begin(1);
+        factory.Add("key", 1);
+
+        Assert.Throws<ArgumentException>(null, () => factory.Add("key", 2));
+    }
+
+    [Fact]
+    public void Set_InvalidType_ThrowsArgumentException()
+    {
+        var factory = new IDictionaryImplementingFactory<string>(typeof(Dictionary<string, int>));
+        factory.Begin(1);
+        Assert.Throws<ArgumentException>("value", () => factory.Add("key", "value"));
+        var value = Assert.IsType<Dictionary<string, int>>(factory.End());
+        Assert.Equal([], value);
+    }
+
+    [Fact]
     public void End_NotBegan_ThrowsExcelMappingException()
     {
         var factory = new IDictionaryImplementingFactory<int>(typeof(Hashtable));

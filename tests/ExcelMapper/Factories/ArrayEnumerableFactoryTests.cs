@@ -28,6 +28,7 @@ public class ArrayEnumerableFactoryTests
         factory.Begin(1);
         Assert.Throws<ExcelMappingException>(() => factory.Begin(1));
     }
+
     [Fact]
     public void Add_End_Success()
     {
@@ -64,6 +65,41 @@ public class ArrayEnumerableFactoryTests
     {
         var factory = new ArrayEnumerableFactory<int>();
         Assert.Throws<ExcelMappingException>(() => factory.Add(1));
+    }
+
+    [Fact]
+    public void Set_Invoke_Success()
+    {
+        var factory = new ArrayEnumerableFactory<int>();
+        factory.Begin(1);
+
+        factory.Set(0, 1);
+        Assert.Equal([1], Assert.IsType<int[]>(factory.End()));
+    }
+
+    [Fact]
+    public void Set_InvokeOutOfRange_Success()
+    {
+        var factory = new ArrayEnumerableFactory<int>();
+        factory.Begin(1);
+
+        factory.Set(0, 1);
+        Assert.Throws<IndexOutOfRangeException>(() => factory.Set(1, 1));
+    }
+
+    [Fact]
+    public void Set_NotBegan_ThrowsExcelMappingException()
+    {
+        var factory = new ArrayEnumerableFactory<int>();
+        Assert.Throws<ExcelMappingException>(() => factory.Set(0, 1));
+    }
+
+    [Fact]
+    public void Set_NegativeIndex_ThrowsIndexOutOfRangeException()
+    {
+        var factory = new ArrayEnumerableFactory<int>();
+        factory.Begin(1);
+        Assert.Throws<IndexOutOfRangeException>(() => factory.Set(-1, 1));
     }
 
     [Fact]

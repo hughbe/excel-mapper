@@ -5,22 +5,21 @@ using Xunit;
 
 namespace ExcelMapper.Factories;
 
-public class ICollectionTImplementingEnumerableFactoryTests
+public class IListTImplementingEnumerableFactoryTests
 {
     [Theory]
     [InlineData(typeof(List<int>))]
-    [InlineData(typeof(ICollectionGeneric<int>))]
     [InlineData(typeof(IListGeneric<int>))]
     public void Ctor_Type(Type collectionType)
     {
-        var factory = new ICollectionTImplementingEnumerableFactory<int>(collectionType);
+        var factory = new IListTImplementingEnumerableFactory<int>(collectionType);
         Assert.Equal(collectionType, factory.CollectionType);
     }
 
     [Fact]
     public void Ctor_NullCollectionType_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>("collectionType", () => new ICollectionTImplementingEnumerableFactory<int>(null!));
+        Assert.Throws<ArgumentNullException>("collectionType", () => new IListTImplementingEnumerableFactory<int>(null!));
     }
 
     [Theory]
@@ -36,17 +35,18 @@ public class ICollectionTImplementingEnumerableFactoryTests
     [InlineData(typeof(ArrayList))]
     [InlineData(typeof(IListNonGeneric))]
     [InlineData(typeof(ICollectionNonGeneric))]
+    [InlineData(typeof(ICollectionGeneric<int>))]
     [InlineData(typeof(List<string>))]
     [InlineData(typeof(AbstractClass))]
     public void Ctor_InvalidCollectionType_ThrowsArgumentException(Type collectionType)
     {
-        Assert.Throws<ArgumentException>("collectionType", () => new ICollectionTImplementingEnumerableFactory<int>(collectionType));
+        Assert.Throws<ArgumentException>("collectionType", () => new IListTImplementingEnumerableFactory<int>(collectionType));
     }
 
     [Fact]
     public void Begin_End_Success()
     {
-        var factory = new ICollectionTImplementingEnumerableFactory<int>(typeof(List<int>));
+        var factory = new IListTImplementingEnumerableFactory<int>(typeof(List<int>));
 
         // Begin.
         factory.Begin(1);
@@ -62,7 +62,7 @@ public class ICollectionTImplementingEnumerableFactoryTests
     [Fact]
     public void Begin_AlreadyBegan_ThrowsExcelMappingException()
     {
-        var factory = new ICollectionTImplementingEnumerableFactory<int>(typeof(List<int>));
+        var factory = new IListTImplementingEnumerableFactory<int>(typeof(List<int>));
         factory.Begin(1);
         Assert.Throws<ExcelMappingException>(() => factory.Begin(1));
     }
@@ -70,7 +70,7 @@ public class ICollectionTImplementingEnumerableFactoryTests
     [Fact]
     public void Add_End_Success()
     {
-        var factory = new ICollectionTImplementingEnumerableFactory<int>(typeof(List<int>));
+        var factory = new IListTImplementingEnumerableFactory<int>(typeof(List<int>));
 
         // Begin.
         factory.Begin(1);
@@ -88,7 +88,7 @@ public class ICollectionTImplementingEnumerableFactoryTests
     [Fact]
     public void Add_OutOfRange_Success()
     {
-        var factory = new ICollectionTImplementingEnumerableFactory<int>(typeof(List<int>));
+        var factory = new IListTImplementingEnumerableFactory<int>(typeof(List<int>));
         factory.Begin(1);
         factory.Add(2);
 
@@ -101,44 +101,57 @@ public class ICollectionTImplementingEnumerableFactoryTests
     [Fact]
     public void Add_NotBegan_ThrowsExcelMappingException()
     {
-        var factory = new ICollectionTImplementingEnumerableFactory<int>(typeof(List<int>));
+        var factory = new IListTImplementingEnumerableFactory<int>(typeof(List<int>));
         Assert.Throws<ExcelMappingException>(() => factory.Add(1));
     }
 
     [Fact]
-    public void Set_Invoke_ThrowsNotSupportedException()
+    public void Set_Invoke_Success()
     {
-        var factory = new ICollectionTImplementingEnumerableFactory<int>(typeof(List<int>));
+        var factory = new IListTImplementingEnumerableFactory<int>(typeof(List<int>));
         factory.Begin(1);
-        Assert.Throws<NotSupportedException>(() => factory.Set(0, 1));
+
+        factory.Set(0, 1);
+        Assert.Equal([1], Assert.IsType<List<int>>(factory.End()));
+    }
+
+    [Fact]
+    public void Set_InvokeOutOfRange_Success()
+    {
+        var factory = new IListTImplementingEnumerableFactory<int>(typeof(List<int>));
+        factory.Begin(1);
+
+        factory.Set(0, 1);
+        factory.Set(5, 2);
+        Assert.Equal([1, 0, 0, 0, 0, 2], Assert.IsType<List<int>>(factory.End()));
     }
 
     [Fact]
     public void Set_NotBegan_ThrowsExcelMappingException()
     {
-        var factory = new ICollectionTImplementingEnumerableFactory<int>(typeof(List<int>));
+        var factory = new IListTImplementingEnumerableFactory<int>(typeof(List<int>));
         Assert.Throws<ExcelMappingException>(() => factory.Set(0, 1));
     }
 
     [Fact]
-    public void Set_NegativeIndex_ThrowsNotSupportedException()
+    public void Set_NegativeIndex_ThrowsArgumentOutOfRangeException()
     {
-        var factory = new ICollectionTImplementingEnumerableFactory<int>(typeof(List<int>));
+        var factory = new IListTImplementingEnumerableFactory<int>(typeof(List<int>));
         factory.Begin(1);
-        Assert.Throws<NotSupportedException>(() => factory.Set(-1, 1));
+        Assert.Throws<ArgumentOutOfRangeException>("index", () => factory.Set(-1, 1));
     }
 
     [Fact]
     public void End_NotBegan_ThrowsExcelMappingException()
     {
-        var factory = new ICollectionTImplementingEnumerableFactory<int>(typeof(List<int>));
+        var factory = new IListTImplementingEnumerableFactory<int>(typeof(List<int>));
         Assert.Throws<ExcelMappingException>(() => factory.End());
     }
 
     [Fact]
     public void End_AlreadyEnded_ThrowsExcelMappingException()
     {
-        var factory = new ICollectionTImplementingEnumerableFactory<int>(typeof(List<int>));
+        var factory = new IListTImplementingEnumerableFactory<int>(typeof(List<int>));
         factory.Begin(1);
         factory.End();
 
@@ -148,7 +161,7 @@ public class ICollectionTImplementingEnumerableFactoryTests
     [Fact]
     public void Reset_Invoke_Success()
     {
-        var factory = new ICollectionTImplementingEnumerableFactory<int>(typeof(List<int>));
+        var factory = new IListTImplementingEnumerableFactory<int>(typeof(List<int>));
         factory.Begin(1);
         factory.End();
 
@@ -163,7 +176,7 @@ public class ICollectionTImplementingEnumerableFactoryTests
     [Fact]
     public void Reset_NotBegan_Success()
     {
-        var factory = new ICollectionTImplementingEnumerableFactory<int>(typeof(List<int>));
+        var factory = new IListTImplementingEnumerableFactory<int>(typeof(List<int>));
         factory.Reset();
 
         // Make sure we can begin.

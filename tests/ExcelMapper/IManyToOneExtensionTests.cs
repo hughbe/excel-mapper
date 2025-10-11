@@ -13,7 +13,6 @@ namespace ExcelMapper.Tests;
 
 public class IManyToOneMapExtensionsTests
 {
-
     [Fact]
     public void WithColumnNames_ParamsString_Success()
     {
@@ -178,6 +177,7 @@ public class IManyToOneMapExtensionsTests
     
     private class CustomManyToOneMap : IManyToOneMap
     {
+        public Type Type => typeof(int);
         public bool Optional { get; set; }
         public bool PreserveFormatting { get; set; }
         public ICellsReaderFactory ReaderFactory { get; set; } = default!;

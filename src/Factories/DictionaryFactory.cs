@@ -10,14 +10,14 @@ public class DictionaryFactory<TValue> : IDictionaryFactory<TValue>
     private int _currentIndex = -1;
     private Dictionary<string, TValue?>? _items;
 
-    public void Begin(int capacity)
+    public void Begin(int count)
     {
         if (_currentIndex != -1)
         {
             throw new ExcelMappingException("Cannot begin mapping until End() was called.");
         }
 
-        _items = new Dictionary<string, TValue?>(capacity);
+        _items = new Dictionary<string, TValue?>(count);
         _currentIndex = 0;
     }
 

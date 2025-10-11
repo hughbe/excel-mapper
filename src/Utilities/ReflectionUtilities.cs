@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 
 namespace ExcelMapper.Utilities;
 
@@ -96,7 +97,7 @@ internal static class ReflectionUtilities
         // Array type.
         if (type.IsArray)
         {
-            elementType = type.GetElementType();
+            elementType = type.GetElementType()!;
             return true;
         }
 
@@ -105,7 +106,7 @@ internal static class ReflectionUtilities
         {
             return true;
         }
-        
+
         // Non-generic interfaces use type object.
         if (type == typeof(IEnumerable) || type.ImplementsInterface(typeof(IEnumerable)))
         {
@@ -114,5 +115,19 @@ internal static class ReflectionUtilities
         }
 
         return false;
+    }
+    
+    [ExcludeFromCodeCoverage]
+    public static object InvokeUnwrapped(this MethodInfo method, object? obj, params object?[] parameters)
+    {
+        try
+        {
+            return method.Invoke(obj, parameters)!;
+        }
+        catch (TargetInvocationException ex)
+        {
+            ExceptionDispatchInfo.Capture(ex.InnerException!).Throw();
+            throw; // Will never be hit, but compiler doesn't know that.
+        }
     }
 }

@@ -8,7 +8,7 @@ public class ImmutableDictionaryFactory<TValue> : IDictionaryFactory<TValue>
 {
     private ImmutableDictionary<string, TValue?>.Builder? _builder;
 
-    public void Begin(int capacity)
+    public void Begin(int count)
     {
         if (_builder is not null)
         {

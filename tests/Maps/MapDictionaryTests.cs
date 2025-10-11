@@ -134,19 +134,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IEnumerableKeyValuePairStringIntClass>();
-        Assert.Equal(2, ((Dictionary<string, int>)row1.Value).Count);
+        Assert.Equal(4, ((Dictionary<string, int>)row1.Value).Count);
         Assert.Equal(1, ((Dictionary<string, int>)row1.Value)["Column1"]);
         Assert.Equal(2, ((Dictionary<string, int>)row1.Value)["Column2"]);
+        Assert.Equal(3, ((Dictionary<string, int>)row1.Value)["Column3"]);
+        Assert.Equal(4, ((Dictionary<string, int>)row1.Value)["Column4"]);
 
         var row2 = sheet.ReadRow<IEnumerableKeyValuePairStringIntClass>();
-        Assert.Equal(2, ((Dictionary<string, int>)row2.Value).Count);
+        Assert.Equal(4, ((Dictionary<string, int>)row2.Value).Count);
         Assert.Equal(0, ((Dictionary<string, int>)row2.Value)["Column1"]);
         Assert.Equal(0, ((Dictionary<string, int>)row2.Value)["Column2"]);
+        Assert.Equal(0, ((Dictionary<string, int>)row2.Value)["Column3"]);
+        Assert.Equal(0, ((Dictionary<string, int>)row2.Value)["Column4"]);
 
         var row3 = sheet.ReadRow<IEnumerableKeyValuePairStringIntClass>();
-        Assert.Equal(2, ((Dictionary<string, int>)row3.Value).Count);
+        Assert.Equal(4, ((Dictionary<string, int>)row3.Value).Count);
         Assert.Equal(-2, ((Dictionary<string, int>)row3.Value)["Column1"]);
         Assert.Equal(-1, ((Dictionary<string, int>)row3.Value)["Column2"]);
+        Assert.Equal(-1, ((Dictionary<string, int>)row3.Value)["Column3"]);
+        Assert.Equal(-1, ((Dictionary<string, int>)row3.Value)["Column4"]);
     }
 
     private class IEnumerableKeyValuePairStringIntClass
@@ -309,19 +315,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ICollectionKeyValuePairStringIntClass>();
-        Assert.Equal(2, ((Dictionary<string, int>)row1.Value).Count);
+        Assert.Equal(4, ((Dictionary<string, int>)row1.Value).Count);
         Assert.Equal(1, ((Dictionary<string, int>)row1.Value)["Column1"]);
         Assert.Equal(2, ((Dictionary<string, int>)row1.Value)["Column2"]);
+        Assert.Equal(3, ((Dictionary<string, int>)row1.Value)["Column3"]);
+        Assert.Equal(4, ((Dictionary<string, int>)row1.Value)["Column4"]);
 
         var row2 = sheet.ReadRow<ICollectionKeyValuePairStringIntClass>();
-        Assert.Equal(2, ((Dictionary<string, int>)row2.Value).Count);
+        Assert.Equal(4, ((Dictionary<string, int>)row2.Value).Count);
         Assert.Equal(0, ((Dictionary<string, int>)row2.Value)["Column1"]);
         Assert.Equal(0, ((Dictionary<string, int>)row2.Value)["Column2"]);
+        Assert.Equal(0, ((Dictionary<string, int>)row2.Value)["Column3"]);
+        Assert.Equal(0, ((Dictionary<string, int>)row2.Value)["Column4"]);
 
         var row3 = sheet.ReadRow<ICollectionKeyValuePairStringIntClass>();
-        Assert.Equal(2, ((Dictionary<string, int>)row3.Value).Count);
+        Assert.Equal(4, ((Dictionary<string, int>)row3.Value).Count);
         Assert.Equal(-2, ((Dictionary<string, int>)row3.Value)["Column1"]);
         Assert.Equal(-1, ((Dictionary<string, int>)row3.Value)["Column2"]);
+        Assert.Equal(-1, ((Dictionary<string, int>)row3.Value)["Column3"]);
+        Assert.Equal(-1, ((Dictionary<string, int>)row3.Value)["Column4"]);
     }
 
     private class ICollectionKeyValuePairStringIntClass
@@ -484,19 +496,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyCollectionKeyValuePairStringIntClass>();
-        Assert.Equal(2, ((Dictionary<string, int>)row1.Value).Count);
+        Assert.Equal(4, ((Dictionary<string, int>)row1.Value).Count);
         Assert.Equal(1, ((Dictionary<string, int>)row1.Value)["Column1"]);
         Assert.Equal(2, ((Dictionary<string, int>)row1.Value)["Column2"]);
+        Assert.Equal(3, ((Dictionary<string, int>)row1.Value)["Column3"]);
+        Assert.Equal(4, ((Dictionary<string, int>)row1.Value)["Column4"]);
 
         var row2 = sheet.ReadRow<IReadOnlyCollectionKeyValuePairStringIntClass>();
-        Assert.Equal(2, ((Dictionary<string, int>)row2.Value).Count);
+        Assert.Equal(4, ((Dictionary<string, int>)row2.Value).Count);
         Assert.Equal(0, ((Dictionary<string, int>)row2.Value)["Column1"]);
         Assert.Equal(0, ((Dictionary<string, int>)row2.Value)["Column2"]);
+        Assert.Equal(0, ((Dictionary<string, int>)row2.Value)["Column3"]);
+        Assert.Equal(0, ((Dictionary<string, int>)row2.Value)["Column4"]);
 
         var row3 = sheet.ReadRow<IReadOnlyCollectionKeyValuePairStringIntClass>();
-        Assert.Equal(2, ((Dictionary<string, int>)row3.Value).Count);
+        Assert.Equal(4, ((Dictionary<string, int>)row3.Value).Count);
         Assert.Equal(-2, ((Dictionary<string, int>)row3.Value)["Column1"]);
         Assert.Equal(-1, ((Dictionary<string, int>)row3.Value)["Column2"]);
+        Assert.Equal(-1, ((Dictionary<string, int>)row3.Value)["Column3"]);
+        Assert.Equal(-1, ((Dictionary<string, int>)row3.Value)["Column4"]);
     }
 
     private class IReadOnlyCollectionKeyValuePairStringIntClass
@@ -1098,19 +1116,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IDictionaryStringIntClass>();
-        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal(4, row1.Value.Count);
         Assert.Equal(1, row1.Value["Column1"]);
         Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<IDictionaryStringIntClass>();
-        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal(4, row2.Value.Count);
         Assert.Equal(0, row2.Value["Column1"]);
         Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<IDictionaryStringIntClass>();
-        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal(4, row3.Value.Count);
         Assert.Equal(-2, row3.Value["Column1"]);
         Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
     }
 
     private class IDictionaryStringIntClass
@@ -1128,19 +1152,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IDictionaryStringIntClass>();
-        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal(4, row1.Value.Count);
         Assert.Equal(1, row1.Value["Column1"]);
         Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<IDictionaryStringIntClass>();
-        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal(4, row2.Value.Count);
         Assert.Equal(0, row2.Value["Column1"]);
         Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<IDictionaryStringIntClass>();
-        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal(4, row3.Value.Count);
         Assert.Equal(-2, row3.Value["Column1"]);
         Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
     }
 
     private class DefaultIDictionaryStringIntClassMap : ExcelClassMap<IDictionaryStringIntClass>
@@ -1347,19 +1377,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyDictionaryStringIntClass>();
-        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal(4, row1.Value.Count);
         Assert.Equal(1, row1.Value["Column1"]);
         Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<IReadOnlyDictionaryStringIntClass>();
-        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal(4, row2.Value.Count);
         Assert.Equal(0, row2.Value["Column1"]);
         Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<IReadOnlyDictionaryStringIntClass>();
-        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal(4, row3.Value.Count);
         Assert.Equal(-2, row3.Value["Column1"]);
         Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
     }
 
     private class IReadOnlyDictionaryStringIntClass
@@ -1377,19 +1413,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyDictionaryStringIntClass>();
-        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal(4, row1.Value.Count);
         Assert.Equal(1, row1.Value["Column1"]);
         Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<IReadOnlyDictionaryStringIntClass>();
-        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal(4, row2.Value.Count);
         Assert.Equal(0, row2.Value["Column1"]);
         Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<IReadOnlyDictionaryStringIntClass>();
-        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal(4, row3.Value.Count);
         Assert.Equal(-2, row3.Value["Column1"]);
         Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
     }
 
     private class DefaultIReadOnlyDictionaryStringIntClassMap : ExcelClassMap<IReadOnlyDictionaryStringIntClass>
@@ -1817,19 +1859,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<DictionaryStringIntClass>();
-        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal(4, row1.Value.Count);
         Assert.Equal(1, row1.Value["Column1"]);
         Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<DictionaryStringIntClass>();
-        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal(4, row2.Value.Count);
         Assert.Equal(0, row2.Value["Column1"]);
         Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<DictionaryStringIntClass>();
-        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal(4, row3.Value.Count);
         Assert.Equal(-2, row3.Value["Column1"]);
         Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
     }
 
     private class DictionaryStringIntClass
@@ -1847,19 +1895,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<DictionaryStringIntClass>();
-        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal(4, row1.Value.Count);
         Assert.Equal(1, row1.Value["Column1"]);
         Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<DictionaryStringIntClass>();
-        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal(4, row2.Value.Count);
         Assert.Equal(0, row2.Value["Column1"]);
         Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<DictionaryStringIntClass>();
-        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal(4, row3.Value.Count);
         Assert.Equal(-2, row3.Value["Column1"]);
         Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
     }
 
     private class DefaultDictionaryStringIntClassMap : ExcelClassMap<DictionaryStringIntClass>
@@ -2101,19 +2155,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
-        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal(4, row1.Value.Count);
         Assert.Equal(1, row1.Value["Column1"]);
         Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
-        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal(4, row2.Value.Count);
         Assert.Equal(0, row2.Value["Column1"]);
         Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
-        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal(4, row3.Value.Count);
         Assert.Equal(-2, row3.Value["Column1"]);
         Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
     }
 
     private class ConcurrentDictionaryStringIntClass
@@ -2131,19 +2191,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
-        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal(4, row1.Value.Count);
         Assert.Equal(1, row1.Value["Column1"]);
         Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
-        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal(4, row2.Value.Count);
         Assert.Equal(0, row2.Value["Column1"]);
         Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
-        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal(4, row3.Value.Count);
         Assert.Equal(-2, row3.Value["Column1"]);
         Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
     }
 
     private class DefaultConcurrentDictionaryStringIntClassMap : ExcelClassMap<ConcurrentDictionaryStringIntClass>
@@ -2385,19 +2451,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedDictionaryStringIntClass>();
-        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal(4, row1.Value.Count);
         Assert.Equal(1, row1.Value["Column1"]);
         Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<SortedDictionaryStringIntClass>();
-        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal(4, row2.Value.Count);
         Assert.Equal(0, row2.Value["Column1"]);
         Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<SortedDictionaryStringIntClass>();
-        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal(4, row3.Value.Count);
         Assert.Equal(-2, row3.Value["Column1"]);
         Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
     }
 
     private class SortedDictionaryStringIntClass
@@ -2415,19 +2487,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedDictionaryStringIntClass>();
-        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal(4, row1.Value.Count);
         Assert.Equal(1, row1.Value["Column1"]);
         Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<SortedDictionaryStringIntClass>();
-        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal(4, row2.Value.Count);
         Assert.Equal(0, row2.Value["Column1"]);
         Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<SortedDictionaryStringIntClass>();
-        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal(4, row3.Value.Count);
         Assert.Equal(-2, row3.Value["Column1"]);
         Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
     }
 
     private class DefaultSortedDictionaryStringIntClassMap : ExcelClassMap<SortedDictionaryStringIntClass>
@@ -2635,19 +2713,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
-        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal(4, row1.Value.Count);
         Assert.Equal(1, row1.Value["Column1"]);
         Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
-        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal(4, row2.Value.Count);
         Assert.Equal(0, row2.Value["Column1"]);
         Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
-        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal(4, row3.Value.Count);
         Assert.Equal(-2, row3.Value["Column1"]);
         Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
     }
 
     private class ImmutableDictionaryStringIntClass
@@ -2665,19 +2749,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
-        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal(4, row1.Value.Count);
         Assert.Equal(1, row1.Value["Column1"]);
         Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
-        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal(4, row2.Value.Count);
         Assert.Equal(0, row2.Value["Column1"]);
         Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
-        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal(4, row3.Value.Count);
         Assert.Equal(-2, row3.Value["Column1"]);
         Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
     }
 
     private class DefaultImmutableDictionaryStringIntClassMap : ExcelClassMap<ImmutableDictionaryStringIntClass>
@@ -2885,19 +2975,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
-        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal(4, row1.Value.Count);
         Assert.Equal(1, row1.Value["Column1"]);
         Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
-        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal(4, row2.Value.Count);
         Assert.Equal(0, row2.Value["Column1"]);
         Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
-        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal(4, row3.Value.Count);
         Assert.Equal(-2, row3.Value["Column1"]);
         Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
     }
 
     private class ImmutableSortedDictionaryStringIntClass
@@ -2915,19 +3011,25 @@ public class MapDictionaryTest
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
-        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal(4, row1.Value.Count);
         Assert.Equal(1, row1.Value["Column1"]);
         Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
-        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal(4, row2.Value.Count);
         Assert.Equal(0, row2.Value["Column1"]);
         Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
-        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal(4, row3.Value.Count);
         Assert.Equal(-2, row3.Value["Column1"]);
         Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
     }
 
     private class DefaultImmutableSortedDictionaryStringIntClassMap : ExcelClassMap<ImmutableSortedDictionaryStringIntClass>

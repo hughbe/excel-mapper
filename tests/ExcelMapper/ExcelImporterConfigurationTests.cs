@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelDataReader;
@@ -110,6 +111,23 @@ public class ExcelImporterConfigurationTests
         Assert.Same(map, classMap);
     }
 
+    public record Id(int Value);
+
+    public class RecordClass
+    {
+        public Id? Id { get; private set; }
+    }
+
+    public class ValidMapperClassMap : ExcelClassMap<RecordClass>
+    {
+        public ValidMapperClassMap()
+        {
+            Map(data => data.Id)
+                .WithConverter(v => new Id(int.Parse(v!)))
+                .WithColumnName("Value");
+        }
+    }
+
     [Fact]
     public void RegisterClassMap_ContainsPropertyWithoutMappers_ThrowsExcelMappingException()
     {
@@ -117,6 +135,134 @@ public class ExcelImporterConfigurationTests
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<NoMapperClassMap>());
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new NoMapperClassMap()));
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(RecordClass), new NoMapperClassMap()));
+    }
+
+    public class NoMapperClassMap : ExcelClassMap<RecordClass>
+    {
+        public NoMapperClassMap()
+        {
+            Map(data => data.Id)
+                .WithColumnName("Value");
+        }
+    }
+
+    [Fact]
+    public void RegisterClassMap_ArrayIndexerValueCantBeMapped_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<IDisposableArrayClass>();
+        map.Map(p => p.Value[0]);
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectArrayClass), map));
+    }
+
+    private class IDisposableArrayClass
+    {
+        public IDisposable[] Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void RegisterClassMap_ContainsArrayIndexerPropertyWithoutMappers_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<DefaultObjectArrayIndexClassMap>());
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new DefaultObjectArrayIndexClassMap()));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectArrayClass), new DefaultObjectArrayIndexClassMap()));
+    }
+
+    private class DefaultObjectArrayIndexClassMap : ExcelClassMap<ObjectArrayClass>
+    {
+        public DefaultObjectArrayIndexClassMap()
+        {
+            Map(o => o.Values[0]);
+            Map(o => o.Values[1]);
+        }
+    }
+
+    private class ObjectArrayClass
+    {
+        public SimpleClass[] Values { get; set; } = default!;
+    }
+
+    private class SimpleClass
+    {
+        public int Value { get; set; }
+    }
+
+    [Fact]
+    public void RegisterClassMap_ContainsListIndexerElementCantBeMapped_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<IDisposableListClass>();
+        map.Map(p => p.Value[0]);
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectListClass), map));
+    }
+
+    private class IDisposableListClass
+    {
+        public List<IDisposable> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void RegisterClassMap_ContainsListIndexerPropertyWithoutMappers_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<DefaultObjectListIndexClassMap>());
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new DefaultObjectListIndexClassMap()));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectListClass), new DefaultObjectListIndexClassMap()));
+    }
+
+    private class DefaultObjectListIndexClassMap : ExcelClassMap<ObjectListClass>
+    {
+        public DefaultObjectListIndexClassMap()
+        {
+            Map(o => o.Values[0]);
+            Map(o => o.Values[1]);
+        }
+    }
+
+    private class ObjectListClass
+    {
+        public List<SimpleClass> Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void RegisterClassMap_DictionaryIndexerValueCantBeMapped_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<IDisposableDictionaryClass>();
+        map.Map(p => p.Value["key"]);
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectDictionaryClass), map));
+    }
+
+    private class IDisposableDictionaryClass
+    {
+        public Dictionary<string, IDisposable> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void RegisterClassMap_ContainsDictionaryIndexerPropertyWithoutMappers_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<DefaultObjectDictionaryIndexClassMap>());
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new DefaultObjectDictionaryIndexClassMap()));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectDictionaryClass), new DefaultObjectDictionaryIndexClassMap()));
+    }
+
+    private class DefaultObjectDictionaryIndexClassMap : ExcelClassMap<ObjectDictionaryClass>
+    {
+        public DefaultObjectDictionaryIndexClassMap()
+        {
+            Map(o => o.Values["Key1"]);
+            Map(o => o.Values["Key2"]);
+        }
+    }
+
+    private class ObjectDictionaryClass
+    {
+        public Dictionary<string, SimpleClass> Values { get; set; } = default!;
     }
 
     [Fact]
@@ -154,6 +300,8 @@ public class ExcelImporterConfigurationTests
 
     private class CustomIMap : IMap
     {
+        public Type Type => typeof(int);
+
         public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
             => throw new NotImplementedException();
     }
@@ -164,31 +312,5 @@ public class ExcelImporterConfigurationTests
 
     private class OtherTestMap : ExcelClassMap<int>
     {
-    }
-
-    public record Id(int Value);
-
-    public class RecordClass
-    {
-        public Id? Id { get; private set; }
-    }
-
-    public class ValidMapperClassMap : ExcelClassMap<RecordClass>
-    {
-        public ValidMapperClassMap()
-        {
-            Map(data => data.Id)
-                .WithConverter(v => new Id(int.Parse(v!)))
-                .WithColumnName("Value");
-        }
-    }
-
-    public class NoMapperClassMap : ExcelClassMap<RecordClass>
-    {
-        public NoMapperClassMap()
-        {
-            Map(data => data.Id)
-                .WithColumnName("Value");
-        }
     }
 }

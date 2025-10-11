@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using Xunit;
 
 namespace ExcelMapper.Factories;
@@ -16,12 +14,12 @@ public class ImmutableArrayEnumerableFactoryTests
         // Begin.
         factory.Begin(1);
         var value = Assert.IsType<ImmutableArray<int>>(factory.End());
-        Assert.Equal([], value.ToArray());
+        Assert.Equal([0], [.. value]);
 
         // Begin again.
         factory.Begin(1);
         value = Assert.IsType<ImmutableArray<int>>(factory.End());
-        Assert.Equal([], value.ToArray());
+        Assert.Equal([0], [.. value]);
     }
 
     [Fact]
@@ -31,6 +29,7 @@ public class ImmutableArrayEnumerableFactoryTests
         factory.Begin(1);
         Assert.Throws<ExcelMappingException>(() => factory.Begin(1));
     }
+
     [Fact]
     public void Add_End_Success()
     {
@@ -39,14 +38,12 @@ public class ImmutableArrayEnumerableFactoryTests
         // Begin.
         factory.Begin(1);
         factory.Add(1);
-        var value = Assert.IsType<ImmutableArray<int>>(factory.End());
-        Assert.Equal([1], [.. value]);
+        Assert.Equal([1], [.. Assert.IsType<ImmutableArray<int>>(factory.End())]);
 
         // Begin again.
         factory.Begin(1);
         factory.Add(2);
-        value = Assert.IsType<ImmutableArray<int>>(factory.End());
-        Assert.Equal([2], [.. value]);
+        Assert.Equal([2], [.. Assert.IsType<ImmutableArray<int>>(factory.End())]);
     }
 
     [Fact]
@@ -56,10 +53,8 @@ public class ImmutableArrayEnumerableFactoryTests
         factory.Begin(1);
         factory.Add(2);
 
-        factory.Add(3);
-        
-        var value = Assert.IsType<ImmutableArray<int>>(factory.End());
-        Assert.Equal([2, 3], [.. value]);
+        Assert.Throws<IndexOutOfRangeException>(() => factory.Add(3));
+        Assert.Equal([2], [.. Assert.IsType<ImmutableArray<int>>(factory.End())]);
     }
 
     [Fact]
@@ -67,6 +62,41 @@ public class ImmutableArrayEnumerableFactoryTests
     {
         var factory = new ImmutableArrayEnumerableFactory<int>();
         Assert.Throws<ExcelMappingException>(() => factory.Add(1));
+    }
+
+    [Fact]
+    public void Set_Invoke_Success()
+    {
+        var factory = new ImmutableArrayEnumerableFactory<int>();
+        factory.Begin(1);
+
+        factory.Set(0, 1);
+        Assert.Equal([1], [.. Assert.IsType<ImmutableArray<int>>(factory.End())]);
+    }
+
+    [Fact]
+    public void Set_InvokeOutOfRange_Success()
+    {
+        var factory = new ImmutableArrayEnumerableFactory<int>();
+        factory.Begin(1);
+
+        factory.Set(0, 1);
+        Assert.Throws<IndexOutOfRangeException>(() => factory.Set(1, 1));
+    }
+
+    [Fact]
+    public void Set_NotBegan_ThrowsExcelMappingException()
+    {
+        var factory = new ImmutableArrayEnumerableFactory<int>();
+        Assert.Throws<ExcelMappingException>(() => factory.Set(0, 1));
+    }
+
+    [Fact]
+    public void Set_NegativeIndex_ThrowsIndexOutOfRangeException()
+    {
+        var factory = new ImmutableArrayEnumerableFactory<int>();
+        factory.Begin(1);
+        Assert.Throws<IndexOutOfRangeException>(() => factory.Set(-1, 1));
     }
 
     [Fact]
@@ -98,7 +128,7 @@ public class ImmutableArrayEnumerableFactoryTests
         // Make sure we can begin.
         factory.Begin(1);
         var value = Assert.IsType<ImmutableArray<int>>(factory.End());
-        Assert.Equal([], value.ToArray());
+        Assert.Equal([0], [.. value]);
     }
 
     [Fact]
@@ -110,6 +140,6 @@ public class ImmutableArrayEnumerableFactoryTests
         // Make sure we can begin.
         factory.Begin(1);
         var value = Assert.IsType<ImmutableArray<int>>(factory.End());
-        Assert.Equal([], value.ToArray());
+        Assert.Equal([0], [.. value]);
     }
 }

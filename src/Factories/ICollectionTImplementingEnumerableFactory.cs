@@ -37,20 +37,26 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
         CollectionType = collectionType;
     }
 
-    public void Begin(int capacity)
+    public void Begin(int count)
     {
         if (_items is not null)
         {
             throw new ExcelMappingException("Cannot begin mapping until End() was called.");
         }
 
-        _items = (ICollection<T?>)Activator.CreateInstance(CollectionType);
+        _items = (ICollection<T?>)Activator.CreateInstance(CollectionType)!;
     }
 
     public void Add(T? item)
     {
         EnsureMapping();
         _items.Add(item);
+    }
+
+    public void Set(int index, T? item)
+    {
+        EnsureMapping();
+        throw new NotSupportedException("Set is not supported for ICollection<T> implementing collection types.");
     }
 
     public object End()
