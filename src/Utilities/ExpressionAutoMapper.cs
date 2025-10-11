@@ -146,7 +146,12 @@ internal static class ExpressionAutoMapper
     {
         if (parentMap is ExcelClassMap classMap)
         {
-            var member = ((MemberExpression)expression).Member;
+            if (expression is not MemberExpression memberExpression)
+            {
+                throw new ArgumentException($"Expected a member expression when adding to an object map. Received: {expression}", nameof(expression));
+            }
+
+            var member = memberExpression.Member;
             var existingPropertyMap = classMap.Properties.FirstOrDefault(m => m.Member.Equals(member));
             if (existingPropertyMap is not null)
             {

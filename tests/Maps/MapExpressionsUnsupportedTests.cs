@@ -41,6 +41,38 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
+    public void Map_RootDefaultMappedIntArrayIndex_ThrowsArgumentException()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<int[]>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => o[0]));
+    }
+
+    [Fact]
+    public void Map_RootDefaultMappedIntListIndex_ThrowsArgumentException()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<List<int>>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => o[0]));
+    }
+
+    [Fact]
+    public void Map_RootDefaultMappedIntMultidimensionalIndex_ThrowsArgumentException()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<int[,]>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => o[0, 0]));
+    }
+
+    [Fact]
+    public void Map_RootDefaultMappedIntDictionaryIndex_ThrowsArgumentException()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<Dictionary<string, int>>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => o["key"]));
+    }
+
+    [Fact]
     public void Map_ArrayElementCantBeMapped_ThrowsExcelMappingException()
     {
         var map = new ExcelClassMap<NonConstructibleArrayElementClass>();
