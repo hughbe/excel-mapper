@@ -190,6 +190,44 @@ public class ExcelImporterConfigurationTests
     }
 
     [Fact]
+    public void RegisterClassMap_ContainsMultidimensionalIndexerElementCantBeMapped_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<IDisposableMultidimensionalClass>();
+        map.Map(p => p.Value[0, 0]);
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectMultidimensionalClass), map));
+    }
+
+    private class IDisposableMultidimensionalClass
+    {
+        public IDisposable[,] Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void RegisterClassMap_ContainsMultidimensionalIndexerPropertyWithoutMappers_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<DefaultObjectMultidimensionalIndexClassMap>());
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new DefaultObjectMultidimensionalIndexClassMap()));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectMultidimensionalClass), new DefaultObjectMultidimensionalIndexClassMap()));
+    }
+
+    private class DefaultObjectMultidimensionalIndexClassMap : ExcelClassMap<ObjectMultidimensionalClass>
+    {
+        public DefaultObjectMultidimensionalIndexClassMap()
+        {
+            Map(o => o.Values[0, 0]);
+            Map(o => o.Values[1, 0]);
+        }
+    }
+
+    private class ObjectMultidimensionalClass
+    {
+        public SimpleClass[,] Values { get; set; } = default!;
+    }
+
+    [Fact]
     public void RegisterClassMap_ContainsListIndexerElementCantBeMapped_ThrowsExcelMappingException()
     {
         var map = new ExcelClassMap<IDisposableListClass>();

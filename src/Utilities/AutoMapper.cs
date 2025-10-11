@@ -535,6 +535,34 @@ public static class AutoMapper
         map = new ManyToOneEnumerableIndexerMapT<TElement>(factory);
         return true;
     }
+    private static MethodInfo? s_getOrCreateMultidimensionalIndexerMapGenericMethod;
+    private static MethodInfo GetOrCreateMultidimensionalIndexerMapGenericMethod => s_getOrCreateMultidimensionalIndexerMapGenericMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(GetOrCreateMultidimensionalIndexerMapGeneric))!;
+
+    internal static IMap GetOrCreateMultidimensionalIndexerMap(IMap parentMap, MemberInfo? member, Type arrayType, object? index, Type elementType)
+    {
+        var method = GetOrCreateMultidimensionalIndexerMapGenericMethod.MakeGenericMethod([elementType]);
+        var parameters = new object?[] { parentMap, member, arrayType, index };
+        return (IMap)method.InvokeUnwrapped(null, parameters)!;
+    }
+
+    private static ManyToOneMultidimensionalIndexerMapT<TElement> GetOrCreateMultidimensionalIndexerMapGeneric<TElement>(IMap parentMap, MemberInfo? member, Type arrayType, object? index)
+    {
+        if (GetExistingMap(parentMap, member, index) is { } existingMap)
+        {
+            if (existingMap is not ManyToOneMultidimensionalIndexerMapT<TElement> multidimensionalMap)
+            {
+                throw new InvalidOperationException($"Expression is already mapped differently as {existingMap.GetType()}.");
+            }
+
+            return multidimensionalMap;
+        }
+
+        // Create a new array indexer map.
+        var factory = new MultidimensionalArrayFactory<TElement>();
+        var map = new ManyToOneMultidimensionalIndexerMapT<TElement>(factory);
+        AddExistingMap(parentMap, member, index, map);
+        return map;
+    }
 
     private static MethodInfo? s_getOrCreateDictionaryIndexerMapGenericMethod;
     private static MethodInfo GetOrCreateDictionaryIndexerMapGenericMethod => s_getOrCreateDictionaryIndexerMapGenericMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(GetOrCreateDictionaryIndexerMapGeneric))!;
@@ -852,6 +880,21 @@ public static class AutoMapper
         {
             return enumerableIndexerMap.Values.TryGetValue((int)index!, out var map) ? map : null;
         }
+        else if (parentMap is IMultidimensionalIndexerMap multidimensionalIndexerMap)
+        {
+            // Need to find the key that matches the indices.
+            // Cannot use TryGetValue as arrays do not implement equality.
+            var indices = (int[])index!;
+            foreach (var kvp in multidimensionalIndexerMap.Values)
+            {
+                if (kvp.Key.SequenceEqual(indices))
+                {
+                    return kvp.Value;
+                }
+            }
+
+            return null;
+        }
         else
         {
             var dictionaryIndexerMap = (IDictionaryIndexerMap)parentMap;
@@ -868,6 +911,10 @@ public static class AutoMapper
         else if (parentMap is IEnumerableIndexerMap enumerableIndexerMap)
         {
             enumerableIndexerMap.Values[(int)index!] = map;
+        }
+        else if (parentMap is IMultidimensionalIndexerMap multidimensionalIndexerMap)
+        {
+            multidimensionalIndexerMap.Values[(int[])index!] = map;
         }
         else
         {

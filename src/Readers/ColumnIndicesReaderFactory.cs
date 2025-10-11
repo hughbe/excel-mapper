@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Utilities;
 

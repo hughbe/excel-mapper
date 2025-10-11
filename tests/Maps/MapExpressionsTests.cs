@@ -106,6 +106,29 @@ public class MapExpressionsTests
     }
 
     [Fact]
+    public void ReadRow_TwiceMappedObject_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        importer.Configuration.RegisterClassMap<TwiceMappedClassMap>();
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<SimpleClass>();
+        Assert.Equal(2, row.Value);
+    }
+
+    private class TwiceMappedObjectClassMap : ExcelClassMap<NestedClassParent>
+    {
+        public TwiceMappedObjectClassMap()
+        {
+            Map(o => o.Child.Value)
+                .WithColumnName("NoSuchColumn");
+            Map(o => o.Child.Value)
+                .WithColumnName("Column2");
+        }
+    }
+
+    [Fact]
     public void ReadRow_DefaultMappedMultiplePropertiesNestedChildClass_Success()
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
@@ -362,6 +385,71 @@ public class MapExpressionsTests
     }
 
     [Fact]
+    public void ReadRows_DefaultMappedObjectMemberArrayIndexMultipleFields_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultObjectArrayMultipleFieldsClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ObjectArrayMultipleFieldsClass>();
+        Assert.Equal(2, row.Values.Length);
+        Assert.Equal(0, row.Values[0].Column1);
+        Assert.Equal(1, row.Values[0].Column2);
+        Assert.Equal(0, row.Values[1].Column1);
+        Assert.Equal(1, row.Values[1].Column2);
+    }
+
+    private class DefaultObjectArrayMultipleFieldsClassMap : ExcelClassMap<ObjectArrayMultipleFieldsClass>
+    {
+        public DefaultObjectArrayMultipleFieldsClassMap()
+        {
+            Map(o => o.Values[0].Column1);
+            Map(o => o.Values[0].Column2);
+            Map(o => o.Values[1].Column1);
+            Map(o => o.Values[1].Column2);
+        }
+    }
+
+    private class ObjectArrayMultipleFieldsClass
+    {
+        public MultipleFieldsClass[] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedObjectArrayIndexMultipleFields_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<CustomObjectArrayIndexMultipleFieldsClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ObjectArrayMultipleFieldsClass>();
+        Assert.Equal(2, row.Values.Length);
+        Assert.Equal(1, row.Values[0].Column1);
+        Assert.Equal(2, row.Values[0].Column2);
+        Assert.Equal(3, row.Values[1].Column1);
+        Assert.Equal(4, row.Values[1].Column2);
+    }
+
+    private class CustomObjectArrayIndexMultipleFieldsClassMap : ExcelClassMap<ObjectArrayMultipleFieldsClass>
+    {
+        public CustomObjectArrayIndexMultipleFieldsClassMap()
+        {
+            Map(o => o.Values[0].Column1)
+                .WithColumnName("Column2");
+            Map(o => o.Values[0].Column2)
+                .WithColumnName("Column3");
+            Map(o => o.Values[1].Column1)
+                .WithColumnName("Column4");
+            Map(o => o.Values[1].Column2)
+                .WithColumnName("Column5");
+        }
+    }
+
+    [Fact]
     public void ReadRows_DefaultMappedObjectMemberArrayIndexLargeMax_Success()
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
@@ -441,6 +529,65 @@ public class MapExpressionsTests
         {
             Map(o => o.Values[0][0]);
             Map(o => o.Values[0][1]);
+        }
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedIntArrayIndexMultidimensionalIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultIntArrayIndexMultidimensionalIndexClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<IntArrayMultidimensionalArrayClass>();
+        Assert.Equal(1, row.Values.Length);
+        Assert.Equal(2, row.Values[0].Length);
+        Assert.Equal(1, row.Values[0].GetLength(0));
+        Assert.Equal(2, row.Values[0].GetLength(1));
+        Assert.Equal(1, row.Values[0][0, 0]);
+        Assert.Equal(1, row.Values[0][0, 1]);
+    }
+
+    private class IntArrayMultidimensionalArrayClass
+    {
+        public int[][,] Values { get; set; } = default!;
+    }
+
+    private class DefaultIntArrayIndexMultidimensionalIndexClassMap : ExcelClassMap<IntArrayMultidimensionalArrayClass>
+    {
+        public DefaultIntArrayIndexMultidimensionalIndexClassMap()
+        {
+            Map(o => o.Values[0][0, 0]);
+            Map(o => o.Values[0][0, 1]);
+        }
+    }
+
+    [Fact]
+    public void ReadRows_TwiceMappedIntArrayIndexMultidimensionalIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        importer.Configuration.RegisterClassMap<TwiceIntArrayIndexMultidimensionalIndexClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<IntArrayMultidimensionalArrayClass>();
+        Assert.Equal(1, row.Values.Length);
+        Assert.Equal(1, row.Values[0].GetLength(0));
+        Assert.Equal(1, row.Values[0].GetLength(1));
+        Assert.Equal(3, row.Values[0][0, 0]);
+    }
+
+    private class TwiceIntArrayIndexMultidimensionalIndexClassMap : ExcelClassMap<IntArrayMultidimensionalArrayClass>
+    {
+        public TwiceIntArrayIndexMultidimensionalIndexClassMap()
+        {
+            Map(o => o.Values[0][0, 0])
+                .WithColumnName("NoSuchColumn");
+            Map(o => o.Values[0][0, 0])
+                .WithColumnName("Column3");
         }
     }
 
@@ -713,6 +860,264 @@ public class MapExpressionsTests
     }
 
     [Fact]
+    public void Map_DefaultMappedIntMultidimensionalArrayValue_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultIntMultidimensionalArrayClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalArrayClass>();
+        Assert.Equal(1, row.Values.GetLength(0));
+        Assert.Equal(2, row.Values.GetLength(1));
+        Assert.Equal(0, row.Values[0, 0]);
+        Assert.Equal(0, row.Values[0, 1]);
+    }
+
+    private class MultidimensionalArrayClass
+    {
+        public int[,] Values { get; set; } = default!;
+    }
+
+    private class DefaultIntMultidimensionalArrayClassMap : ExcelClassMap<MultidimensionalArrayClass>
+    {
+        public DefaultIntMultidimensionalArrayClassMap()
+        {
+            Map(p => p.Values[0, 0]);
+            Map(p => p.Values[0, 1]);
+        }
+    }
+
+    [Fact]
+    public void ReadRows_TwiceMappedIntMultidimensionalIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        importer.Configuration.RegisterClassMap<TwiceIntMultidimensionalIndexClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalArrayClass>();
+        Assert.Equal(1, row.Values.GetLength(0));
+        Assert.Equal(1, row.Values.GetLength(1));
+        Assert.Equal(3, row.Values[0, 0]);
+    }
+
+    private class TwiceIntMultidimensionalIndexClassMap : ExcelClassMap<MultidimensionalArrayClass>
+    {
+        public TwiceIntMultidimensionalIndexClassMap()
+        {
+            Map(o => o.Values[0, 0])
+                .WithColumnName("NoSuchColumn");
+            Map(o => o.Values[0, 0])
+                .WithColumnName("Column3");
+        }
+    }
+
+    [Fact]
+    public void ReadRows_TwiceMappedObjectMultidimensionalIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        importer.Configuration.RegisterClassMap<TwiceObjectMultidimensionalIndexClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ObjectMultidimensionalArrayClass>();
+        Assert.Equal(1, row.Values.GetLength(0));
+        Assert.Equal(1, row.Values.GetLength(1));
+        Assert.Equal(3, row.Values[0, 0].Value);
+    }
+
+    private class TwiceObjectMultidimensionalIndexClassMap : ExcelClassMap<ObjectMultidimensionalArrayClass>
+    {
+        public TwiceObjectMultidimensionalIndexClassMap()
+        {
+            Map(o => o.Values[0, 0].Value)
+                .WithColumnName("NoSuchColumn");
+            Map(o => o.Values[0, 0].Value)
+                .WithColumnName("Column3");
+        }
+    }
+
+    [Fact]
+    public void Map_CustomMappedIntMultidimensionalArrayValue_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<CustomIntMultidimensionalArrayClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalArrayClass>();
+        Assert.Equal(3, row.Values.GetLength(0));
+        Assert.Equal(4, row.Values.GetLength(1));
+        Assert.Equal(1, row.Values[0, 0]);
+        Assert.Equal(2, row.Values[0, 1]);
+        Assert.Equal(3, row.Values[2, 3]);
+    }
+
+    private class CustomIntMultidimensionalArrayClassMap : ExcelClassMap<MultidimensionalArrayClass>
+    {
+        public CustomIntMultidimensionalArrayClassMap()
+        {
+            Map(p => p.Values[0, 0])
+                .WithColumnName("Column2");
+            Map(p => p.Values[0, 1])
+                .WithColumnName("Column3");
+            Map(p => p.Values[2, 3])
+                .WithColumnName("Column4");
+
+        }
+    }
+
+    [Fact]
+    public void Map_DefaultMappedObjectMultidimensionalArrayValue_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultObjectMultidimensionalArrayClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ObjectMultidimensionalArrayClass>();
+        Assert.Equal(1, row.Values.GetLength(0));
+        Assert.Equal(2, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Value);
+        Assert.Equal(2, row.Values[0, 1].Value);
+    }
+
+    private class ObjectMultidimensionalArrayClass
+    {
+        public ArrayValueClass[,] Values { get; set; } = default!;
+    }
+
+    private class DefaultObjectMultidimensionalArrayClassMap : ExcelClassMap<ObjectMultidimensionalArrayClass>
+    {
+        public DefaultObjectMultidimensionalArrayClassMap()
+        {
+            Map(p => p.Values[0, 0].Value);
+            Map(p => p.Values[0, 1].Value);
+        }
+    }
+
+    [Fact]
+    public void Map_CustomMappedObjectMultidimensionalArrayValue_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<CustomObjectMultidimensionalArrayClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ObjectMultidimensionalArrayClass>();
+        Assert.Equal(3, row.Values.GetLength(0));
+        Assert.Equal(4, row.Values.GetLength(1));
+        Assert.Equal(1, row.Values[0, 0].Value);
+        Assert.Equal(2, row.Values[0, 1].Value);
+        Assert.Equal(3, row.Values[2, 3].Value);
+    }
+
+    private class CustomObjectMultidimensionalArrayClassMap : ExcelClassMap<ObjectMultidimensionalArrayClass>
+    {
+        public CustomObjectMultidimensionalArrayClassMap()
+        {
+            Map(p => p.Values[0, 0].Value)
+                .WithColumnName("Column2");
+            Map(p => p.Values[0, 1].Value)
+                .WithColumnName("Column3");
+            Map(p => p.Values[2, 3].Value)
+                .WithColumnName("Column4");
+        }
+    }
+
+
+    [Fact]
+    public void Map_DefaultMappedObjectMultidimensionalArrayValueMultipleFields_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultObjectMultidimensionalArrayMultipleFieldsClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ObjectMultidimensionalArrayMultipleFieldsClass>();
+        Assert.Equal(1, row.Values.GetLength(0));
+        Assert.Equal(2, row.Values.GetLength(1));
+        Assert.Equal(0, row.Values[0, 0].Column1);
+        Assert.Equal(1, row.Values[0, 0].Column2);
+        Assert.Equal(0, row.Values[0, 1].Column1);
+        Assert.Equal(1, row.Values[0, 1].Column2);
+    }
+
+    private class ObjectMultidimensionalArrayMultipleFieldsClass
+    {
+        public MultipleFieldsClass[,] Values { get; set; } = default!;
+    }
+
+    private class DefaultObjectMultidimensionalArrayMultipleFieldsClassMap : ExcelClassMap<ObjectMultidimensionalArrayMultipleFieldsClass>
+    {
+        public DefaultObjectMultidimensionalArrayMultipleFieldsClassMap()
+        {
+            Map(p => p.Values[0, 0].Column1);
+            Map(p => p.Values[0, 0].Column2);
+            Map(p => p.Values[0, 1].Column1);
+            Map(p => p.Values[0, 1].Column2);
+        }
+    }
+
+    [Fact]
+    public void Map_CustomMappedObjectMultidimensionalArrayValueMultipleFields_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<CustomObjectMultidimensionalArrayMultipleFieldsClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ObjectMultidimensionalArrayMultipleFieldsClass>();
+        Assert.Equal(3, row.Values.GetLength(0));
+        Assert.Equal(4, row.Values.GetLength(1));
+        Assert.Equal(1, row.Values[0, 0].Column1);
+        Assert.Equal(2, row.Values[0, 0].Column2);
+        Assert.Equal(3, row.Values[0, 1].Column1);
+        Assert.Equal(4, row.Values[0, 1].Column2);
+        Assert.Equal(5, row.Values[2, 3].Column1);
+        Assert.Equal(6, row.Values[2, 3].Column2);
+    }
+
+    private class CustomObjectMultidimensionalArrayMultipleFieldsClassMap : ExcelClassMap<ObjectMultidimensionalArrayMultipleFieldsClass>
+    {
+        public CustomObjectMultidimensionalArrayMultipleFieldsClassMap()
+        {
+            Map(p => p.Values[0, 0].Column1)
+                .WithColumnName("Column2");
+            Map(p => p.Values[0, 0].Column2)
+                .WithColumnName("Column3");
+            Map(p => p.Values[0, 1].Column1)
+                .WithColumnName("Column4");
+            Map(p => p.Values[0, 1].Column2)
+                .WithColumnName("Column5");
+            Map(p => p.Values[2, 3].Column1)
+                .WithColumnName("Column6");
+            Map(p => p.Values[2, 3].Column2)
+                .WithColumnName("Column7");
+        }
+    }
+
+    private class MultidimensionalArrayMultipleFieldsClass
+    {
+        public MultipleFieldsClass[,] Values { get; set; } = default!;
+    }
+
+    private class MultipleFieldsClass
+    {
+        public int Column1 { get; set; }
+        public int Column2 { get; set; }
+    }
+
+    [Fact]
     public void ReadRows_DefaultMappedIntListIndex_Success()
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
@@ -825,6 +1230,71 @@ public class MapExpressionsTests
                 .WithColumnName("Column2");
             Map(o => o.Values[1].Value)
                 .WithColumnName("Column3");
+        }
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedObjectMemberListIndexMultipleFields_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultObjectListMultipleFieldsClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ObjectListMultipleFieldsClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal(0, row.Values[0].Column1);
+        Assert.Equal(1, row.Values[0].Column2);
+        Assert.Equal(0, row.Values[1].Column1);
+        Assert.Equal(1, row.Values[1].Column2);
+    }
+
+    private class DefaultObjectListMultipleFieldsClassMap : ExcelClassMap<ObjectListMultipleFieldsClass>
+    {
+        public DefaultObjectListMultipleFieldsClassMap()
+        {
+            Map(o => o.Values[0].Column1);
+            Map(o => o.Values[0].Column2);
+            Map(o => o.Values[1].Column1);
+            Map(o => o.Values[1].Column2);
+        }
+    }
+
+    private class ObjectListMultipleFieldsClass
+    {
+        public List<MultipleFieldsClass> Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedObjectListIndexMultipleFields_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<CustomObjectListIndexMultipleFieldsClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ObjectListMultipleFieldsClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal(1, row.Values[0].Column1);
+        Assert.Equal(2, row.Values[0].Column2);
+        Assert.Equal(3, row.Values[1].Column1);
+        Assert.Equal(4, row.Values[1].Column2);
+    }
+
+    private class CustomObjectListIndexMultipleFieldsClassMap : ExcelClassMap<ObjectListMultipleFieldsClass>
+    {
+        public CustomObjectListIndexMultipleFieldsClassMap()
+        {
+            Map(o => o.Values[0].Column1)
+                .WithColumnName("Column2");
+            Map(o => o.Values[0].Column2)
+                .WithColumnName("Column3");
+            Map(o => o.Values[1].Column1)
+                .WithColumnName("Column4");
+            Map(o => o.Values[1].Column2)
+                .WithColumnName("Column5");
         }
     }
 
@@ -1111,6 +1581,71 @@ public class MapExpressionsTests
     }
 
     [Fact]
+    public void ReadRows_DefaultMappedObjectMemberDictionaryIndexMultipleFields_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultObjectDictionaryMultipleFieldsClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ObjectDictionaryMultipleFieldsClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal(0, row.Values["key1"].Column1);
+        Assert.Equal(1, row.Values["key1"].Column2);
+        Assert.Equal(0, row.Values["key2"].Column1);
+        Assert.Equal(1, row.Values["key2"].Column2);
+    }
+
+    private class DefaultObjectDictionaryMultipleFieldsClassMap : ExcelClassMap<ObjectDictionaryMultipleFieldsClass>
+    {
+        public DefaultObjectDictionaryMultipleFieldsClassMap()
+        {
+            Map(o => o.Values["key1"].Column1);
+            Map(o => o.Values["key1"].Column2);
+            Map(o => o.Values["key2"].Column1);
+            Map(o => o.Values["key2"].Column2);
+        }
+    }
+
+    private class ObjectDictionaryMultipleFieldsClass
+    {
+        public Dictionary<string, MultipleFieldsClass> Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedObjectDictionaryIndexMultipleFields_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<CustomObjectDictionaryIndexMultipleFieldsClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ObjectDictionaryMultipleFieldsClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal(1, row.Values["key1"].Column1);
+        Assert.Equal(2, row.Values["key1"].Column2);
+        Assert.Equal(3, row.Values["key2"].Column1);
+        Assert.Equal(4, row.Values["key2"].Column2);
+    }
+
+    private class CustomObjectDictionaryIndexMultipleFieldsClassMap : ExcelClassMap<ObjectDictionaryMultipleFieldsClass>
+    {
+        public CustomObjectDictionaryIndexMultipleFieldsClassMap()
+        {
+            Map(o => o.Values["key1"].Column1)
+                .WithColumnName("Column2");
+            Map(o => o.Values["key1"].Column2)
+                .WithColumnName("Column3");
+            Map(o => o.Values["key2"].Column1)
+                .WithColumnName("Column4");
+            Map(o => o.Values["key2"].Column2)
+                .WithColumnName("Column5");
+        }
+    }
+
+    [Fact]
     public void ReadRows_DefaultMappedDictionaryIndexArrayIndex_Success()
     {
         using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
@@ -1166,6 +1701,70 @@ public class MapExpressionsTests
             Map(o => o.Values["key2"][0])
                 .WithColumnName("Column2");
             Map(o => o.Values["key3"][1])
+                .WithColumnName("Column3");
+        }
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedDictionaryIndexMultidimensionalIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultDictionaryIndexMultidimensionalIndexClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<DictionaryIndexMultidimensionalIndexClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal(1, row.Values["Column2"].GetLength(0));
+        Assert.Equal(2, row.Values["Column2"].GetLength(1));
+        Assert.Equal(0, row.Values["Column2"][0, 1]);
+        Assert.Equal(3, row.Values["Column3"].GetLength(0));
+        Assert.Equal(4, row.Values["Column3"].GetLength(1));
+        Assert.Equal(0, row.Values["Column3"][2, 3]);
+    }
+
+
+    private class DictionaryIndexMultidimensionalIndexClass
+    {
+        public Dictionary<string, int[,]> Values { get; set; } = default!;
+    }
+
+    private class DefaultDictionaryIndexMultidimensionalIndexClassMap : ExcelClassMap<DictionaryIndexMultidimensionalIndexClass>
+    {
+        public DefaultDictionaryIndexMultidimensionalIndexClassMap()
+        {
+            Map(o => o.Values["Column2"][0, 1]);
+            Map(o => o.Values["Column3"][2, 3]);
+        }
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedDictionaryIndexMultidimensionalIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<CustomDictionaryIndexMultidimensionalIndexClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<DictionaryIndexMultidimensionalIndexClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal(1, row.Values["key2"].GetLength(0));
+        Assert.Equal(2, row.Values["key2"].GetLength(1));
+        Assert.Equal(1, row.Values["key2"][0, 1]);
+        Assert.Equal(3, row.Values["key3"].GetLength(0));
+        Assert.Equal(4, row.Values["key3"].GetLength(1));
+        Assert.Equal(2, row.Values["key3"][2, 3]);
+    }
+
+    private class CustomDictionaryIndexMultidimensionalIndexClassMap : ExcelClassMap<DictionaryIndexMultidimensionalIndexClass>
+    {
+        public CustomDictionaryIndexMultidimensionalIndexClassMap()
+        {
+            Map(o => o.Values["key2"][0, 1])
+                .WithColumnName("Column2");
+            Map(o => o.Values["key3"][2, 3])
                 .WithColumnName("Column3");
         }
     }
@@ -1862,20 +2461,20 @@ public class MapExpressionsTests
     {
         using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
         importer.Configuration.RegisterClassMap<ComplexChainClassMap>();
-        
+
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row = sheet.ReadRow<ComplexChainClass1>();
         Assert.Equal(2, row.Value.Values.Length);
-        Assert.Equal(0, row.Value.Values[0].Value.Values[0].Value.Values["key1"].Value.Value);
-        Assert.Equal(1, row.Value.Values[0].Value.Values[0].Value.Values["key2"].Value.Value);
-        Assert.Equal(2, row.Value.Values[0].Value.Values[1].Value.Values["key1"].Value.Value);
-        Assert.Equal(3, row.Value.Values[0].Value.Values[1].Value.Values["key2"].Value.Value);
-        Assert.Equal(4, row.Value.Values[1].Value.Values[0].Value.Values["key1"].Value.Value);
-        Assert.Equal(5, row.Value.Values[1].Value.Values[0].Value.Values["key2"].Value.Value);
-        Assert.Equal(6, row.Value.Values[1].Value.Values[1].Value.Values["key1"].Value.Value);
-        Assert.Equal(7, row.Value.Values[1].Value.Values[1].Value.Values["key2"].Value.Value);
+        Assert.Equal(0, row.Value.Values[0].Value.Values[0].Value.Values["key1"].Value.Value[0, 0].Value);
+        Assert.Equal(1, row.Value.Values[0].Value.Values[0].Value.Values["key2"].Value.Value[0, 1].Value);
+        Assert.Equal(2, row.Value.Values[0].Value.Values[1].Value.Values["key1"].Value.Value[1, 0].Value);
+        Assert.Equal(3, row.Value.Values[0].Value.Values[1].Value.Values["key2"].Value.Value[1, 1].Value);
+        Assert.Equal(4, row.Value.Values[1].Value.Values[0].Value.Values["key1"].Value.Value[0, 0].Value);
+        Assert.Equal(5, row.Value.Values[1].Value.Values[0].Value.Values["key2"].Value.Value[0, 1].Value);
+        Assert.Equal(6, row.Value.Values[1].Value.Values[1].Value.Values["key1"].Value.Value[1, 0].Value);
+        Assert.Equal(7, row.Value.Values[1].Value.Values[1].Value.Values["key2"].Value.Value[1, 1].Value);
     }
 
     private class ComplexChainClass1
@@ -1915,6 +2514,11 @@ public class MapExpressionsTests
 
     private class ComplexChainClass8
     {
+        public ComplexChainClass9[,] Value { get; set; } = default!;
+    }
+
+    private class ComplexChainClass9
+    {
         public int Value { get; set; }
     }
 
@@ -1922,21 +2526,21 @@ public class MapExpressionsTests
     {
         public ComplexChainClassMap()
         {
-            Map(o => o.Value.Values[0].Value.Values[0].Value.Values["key1"].Value.Value)
+            Map(o => o.Value.Values[0].Value.Values[0].Value.Values["key1"].Value.Value[0, 0].Value)
                 .WithColumnName("Column1");
-            Map(o => o.Value.Values[0].Value.Values[0].Value.Values["key2"].Value.Value)
+            Map(o => o.Value.Values[0].Value.Values[0].Value.Values["key2"].Value.Value[0, 1].Value)
                 .WithColumnName("Column2");
-            Map(o => o.Value.Values[0].Value.Values[1].Value.Values["key1"].Value.Value)
+            Map(o => o.Value.Values[0].Value.Values[1].Value.Values["key1"].Value.Value[1, 0].Value)
                 .WithColumnName("Column3");
-            Map(o => o.Value.Values[0].Value.Values[1].Value.Values["key2"].Value.Value)
+            Map(o => o.Value.Values[0].Value.Values[1].Value.Values["key2"].Value.Value[1, 1].Value)
                 .WithColumnName("Column4");
-            Map(o => o.Value.Values[1].Value.Values[0].Value.Values["key1"].Value.Value)
+            Map(o => o.Value.Values[1].Value.Values[0].Value.Values["key1"].Value.Value[0, 0].Value)
                 .WithColumnName("Column5");
-            Map(o => o.Value.Values[1].Value.Values[0].Value.Values["key2"].Value.Value)
+            Map(o => o.Value.Values[1].Value.Values[0].Value.Values["key2"].Value.Value[0, 1].Value)
                 .WithColumnName("Column6");
-            Map(o => o.Value.Values[1].Value.Values[1].Value.Values["key1"].Value.Value)
+            Map(o => o.Value.Values[1].Value.Values[1].Value.Values["key1"].Value.Value[1, 0].Value)
                 .WithColumnName("Column7");
-            Map(o => o.Value.Values[1].Value.Values[1].Value.Values["key2"].Value.Value)
+            Map(o => o.Value.Values[1].Value.Values[1].Value.Values["key2"].Value.Value[1, 1].Value)
                 .WithColumnName("Column8");
         }
     }

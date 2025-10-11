@@ -7,7 +7,7 @@ fi
 if [ -d "coverage" ]; then
     rm -rf coverage
 fi
-dotnet test --settings coverage.runsettings
+dotnet test --collect:"XPlat Code Coverage" --settings coverage.runsettings
 if [ $? -ne 0 ]; then
     exit $?
 fi

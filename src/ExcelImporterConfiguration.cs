@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using ExcelMapper.Abstractions;
-using ExcelMapper.Utilities;
 
 namespace ExcelMapper;
 
@@ -84,6 +83,13 @@ public class ExcelImporterConfiguration
         else if (map is IEnumerableIndexerMap enumerableIndexerMap)
         {
             foreach (var itemMap in enumerableIndexerMap.Values)
+            {
+                ValidateMap(itemMap.Value);
+            }
+        }
+        else if (map is IMultidimensionalIndexerMap multidimensionalIndexerMap)
+        {
+            foreach (var itemMap in multidimensionalIndexerMap.Values)
             {
                 ValidateMap(itemMap.Value);
             }
