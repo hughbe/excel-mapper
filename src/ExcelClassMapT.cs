@@ -68,7 +68,7 @@ public class ExcelClassMap<T> : ExcelClassMap
         var enumType = typeof(TProperty).GetNullableTypeOrThis(out _);
         if (!enumType.IsEnum)
         {
-            throw new ArgumentException($"The type ${enumType} must be an Enum.", nameof(TProperty));
+            throw new ArgumentException($"The type {enumType} must be an Enum.", nameof(TProperty));
         }
 
         var mapper = new EnumMapper(enumType, ignoreCase);

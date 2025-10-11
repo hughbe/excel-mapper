@@ -26,7 +26,7 @@ public class IDictionaryTImplementingFactory<T> : Abstractions.IDictionaryFactor
         }
         if (!dictionaryType.ImplementsInterface(typeof(IDictionary<string, T?>)))
         {
-            throw new ArgumentException($"Dictionary type ${dictionaryType} must implement IDictionary<string, {typeof(T)}>.", nameof(dictionaryType));
+            throw new ArgumentException($"Dictionary type {dictionaryType} must implement IDictionary<string, {typeof(T)}>.", nameof(dictionaryType));
         }
 
         DictionaryType = dictionaryType;

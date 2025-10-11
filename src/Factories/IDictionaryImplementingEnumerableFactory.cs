@@ -27,7 +27,7 @@ public class IDictionaryImplementingFactory<T> : IDictionaryFactory<T>
         }
         if (!dictionaryType.ImplementsInterface(typeof(IDictionary)))
         {
-            throw new ArgumentException($"Dictionary type ${dictionaryType} must implement IDictionary.", nameof(dictionaryType));
+            throw new ArgumentException($"Dictionary type {dictionaryType} must implement IDictionary.", nameof(dictionaryType));
         }
 
         DictionaryType = dictionaryType;

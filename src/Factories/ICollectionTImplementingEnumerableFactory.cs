@@ -31,7 +31,7 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
         }
         if (!collectionType.ImplementsInterface(typeof(ICollection<T?>)))
         {
-            throw new ArgumentException($"Collection type ${collectionType} must implement ICollection<{typeof(T)}>.", nameof(collectionType));
+            throw new ArgumentException($"Collection type {collectionType} must implement ICollection<{typeof(T)}>.", nameof(collectionType));
         }
 
         CollectionType = collectionType;
