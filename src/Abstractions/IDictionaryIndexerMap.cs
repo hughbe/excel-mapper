@@ -7,5 +7,5 @@ public interface IDictionaryIndexerMap : IMap
     /// <summary>
     /// The list of maps.
     /// </summary>
-    Dictionary<string, IMap> Values { get; }
+    Dictionary<object, IMap> Values { get; }
 }

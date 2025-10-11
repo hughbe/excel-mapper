@@ -10,7 +10,7 @@ public class ImmutableDictionaryFactoryTests
     [Fact]
     public void Begin_End_Success()
     {
-        var factory = new ImmutableDictionaryFactory<int>();
+        var factory = new ImmutableDictionaryFactory<string, int>();
 
         // Begin.
         factory.Begin(1);
@@ -26,7 +26,7 @@ public class ImmutableDictionaryFactoryTests
     [Fact]
     public void Begin_AlreadyBegan_ThrowsExcelMappingException()
     {
-        var factory = new ImmutableDictionaryFactory<int>();
+        var factory = new ImmutableDictionaryFactory<string, int>();
         factory.Begin(1);
         Assert.Throws<ExcelMappingException>(() => factory.Begin(1));
     }
@@ -34,7 +34,7 @@ public class ImmutableDictionaryFactoryTests
     [Fact]
     public void Add_End_Success()
     {
-        var factory = new ImmutableDictionaryFactory<int>();
+        var factory = new ImmutableDictionaryFactory<string, int>();
 
         // Begin.
         factory.Begin(1);
@@ -52,7 +52,7 @@ public class ImmutableDictionaryFactoryTests
     [Fact]
     public void Add_OutOfRange_Success()
     {
-        var factory = new ImmutableDictionaryFactory<int>();
+        var factory = new ImmutableDictionaryFactory<string, int>();
         factory.Begin(1);
         factory.Add("key1", 2);
 
@@ -65,14 +65,14 @@ public class ImmutableDictionaryFactoryTests
     [Fact]
     public void Add_NotBegan_ThrowsExcelMappingException()
     {
-        var factory = new ImmutableDictionaryFactory<int>();
+        var factory = new ImmutableDictionaryFactory<string, int>();
         Assert.Throws<ExcelMappingException>(() => factory.Add("key", 1));
     }
 
     [Fact]
     public void Set_Invoke_Success()
     {
-        var factory = new ImmutableDictionaryFactory<int>();
+        var factory = new ImmutableDictionaryFactory<string, int>();
         factory.Begin(1);
         factory.Add("key1", 1);
 
@@ -82,7 +82,7 @@ public class ImmutableDictionaryFactoryTests
     [Fact]
     public void Set_InvokeOutOfRange_Success()
     {
-        var factory = new ImmutableDictionaryFactory<int>();
+        var factory = new ImmutableDictionaryFactory<string, int>();
         factory.Begin(1);
         factory.Add("key1", 1);
         factory.Add("key2", 2);
@@ -93,14 +93,14 @@ public class ImmutableDictionaryFactoryTests
     [Fact]
     public void Set_NotBegan_ThrowsExcelMappingException()
     {
-        var factory = new ImmutableDictionaryFactory<int>();
+        var factory = new ImmutableDictionaryFactory<string, int>();
         Assert.Throws<ExcelMappingException>(() => factory.Add("key", 1));
     }
 
     [Fact]
     public void Set_NullKey_ThrowsArgumentNullException()
     {
-        var factory = new ImmutableDictionaryFactory<int>();
+        var factory = new ImmutableDictionaryFactory<string, int>();
         factory.Begin(1);
         Assert.Throws<ArgumentNullException>("key", () => factory.Add(null!, 1));
     }
@@ -108,7 +108,7 @@ public class ImmutableDictionaryFactoryTests
     [Fact]
     public void Set_MultipleTimes_ThrowsArgumentException()
     {
-        var factory = new ImmutableDictionaryFactory<int>();
+        var factory = new ImmutableDictionaryFactory<string, int>();
         factory.Begin(1);
         factory.Add("key", 1);
 
@@ -118,14 +118,14 @@ public class ImmutableDictionaryFactoryTests
     [Fact]
     public void End_NotBegan_ThrowsExcelMappingException()
     {
-        var factory = new ImmutableDictionaryFactory<int>();
+        var factory = new ImmutableDictionaryFactory<string, int>();
         Assert.Throws<ExcelMappingException>(() => factory.End());
     }
 
     [Fact]
     public void End_AlreadyEnded_ThrowsExcelMappingException()
     {
-        var factory = new ImmutableDictionaryFactory<int>();
+        var factory = new ImmutableDictionaryFactory<string, int>();
         factory.Begin(1);
         factory.End();
 
@@ -135,7 +135,7 @@ public class ImmutableDictionaryFactoryTests
     [Fact]
     public void Reset_Invoke_Success()
     {
-        var factory = new ImmutableDictionaryFactory<int>();
+        var factory = new ImmutableDictionaryFactory<string, int>();
         factory.Begin(1);
         factory.End();
 
@@ -150,7 +150,7 @@ public class ImmutableDictionaryFactoryTests
     [Fact]
     public void Reset_NotBegan_Success()
     {
-        var factory = new ImmutableDictionaryFactory<int>();
+        var factory = new ImmutableDictionaryFactory<string, int>();
         factory.Reset();
 
         // Make sure we can begin.

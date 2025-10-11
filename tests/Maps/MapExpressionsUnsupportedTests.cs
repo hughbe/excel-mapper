@@ -678,10 +678,10 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
-    public void Map_DictionaryIndexIndexerNotEnumerable_ThrowExcelMappingException()
+    public void Map_DictionaryIndexIndexerNotEnumerable_ThrowArgumentException()
     {
         var map = new ExcelClassMap<DictionaryIndexClassNotEnumerableClass>();
-        Assert.Throws<ExcelMappingException>(() => map.Map(p => p.Value["key"]));
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value["key"]));
     }
 
     private class DictionaryIndexClassNotEnumerableClass

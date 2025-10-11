@@ -6,27 +6,24 @@ using ExcelMapper.Abstractions;
 
 namespace ExcelMapper.Factories;
 
-public class FrozenDictionaryFactory<TValue> : IDictionaryFactory<TValue>
+public class FrozenDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> where TKey : notnull
 {
-    private int _currentIndex = -1;
-    private Dictionary<string, TValue?>? _items;
+    private Dictionary<TKey, TValue?>? _items;
 
     public void Begin(int count)
     {
-        if (_currentIndex != -1)
+        if (_items is not null)
         {
             throw new ExcelMappingException("Cannot begin mapping until End() was called.");
         }
 
-        _items = new Dictionary<string, TValue?>(count);
-        _currentIndex = 0;
+        _items = new Dictionary<TKey, TValue?>(count);
     }
 
-    public void Add(string key, TValue? value)
+    public void Add(TKey key, TValue? value)
     {
         EnsureMapping();
         _items.Add(key, value);
-        _currentIndex++;
     }
 
     public object End()
@@ -41,7 +38,6 @@ public class FrozenDictionaryFactory<TValue> : IDictionaryFactory<TValue>
     public void Reset()
     {
         _items = null;
-        _currentIndex = -1;
     }
 
     [MemberNotNull(nameof(_items))]
@@ -51,7 +47,5 @@ public class FrozenDictionaryFactory<TValue> : IDictionaryFactory<TValue>
         {
             throw new ExcelMappingException("Has not started mapping.");
         }
-
-        Debug.Assert(_currentIndex >= 0);
     }
 }

@@ -70,8 +70,8 @@ internal static class ExpressionAutoMapper
         => expression is MethodCallExpression methodCallExpression
             && methodCallExpression.Method.Name == "get_Item"
             && methodCallExpression.Arguments.Count == 1
-            && methodCallExpression.Arguments[0] is ConstantExpression
-            && methodCallExpression.Arguments[0].Type == typeof(string);
+            && methodCallExpression.Arguments[0] is ConstantExpression &&
+            AutoMapper.TryGetDictionaryKeyValueType(methodCallExpression.Method.DeclaringType!, out var _, out var _);
 
     private static int ParseArrayIndexExpression(Expression expression)
     {
@@ -137,16 +137,11 @@ internal static class ExpressionAutoMapper
         return (indices, valueType);
     }
 
-    private static (string key, Type valueType) ParseDictionaryIndexer(Expression expression)
+    private static (object key, Type valueType) ParseDictionaryIndexer(Expression expression)
     {
         var methodCallExpression = (MethodCallExpression)expression;
         var constantExpression = (ConstantExpression)methodCallExpression.Arguments[0];
-        var key = (string)constantExpression.Value!;
-        if (key is null)
-        {
-            throw new ArgumentException($"Dictionary indexer key cannot be null. Received: {constantExpression.Value!}", nameof(expression));
-        }
-
+        var key = constantExpression.Value! ?? throw new ArgumentException($"Dictionary indexer key cannot be null. Received: {constantExpression.Value!}", nameof(expression));
         var valueType = methodCallExpression.Method.ReturnType;
         return (key, valueType);
     }
@@ -205,7 +200,7 @@ internal static class ExpressionAutoMapper
         return map;
     }
 
-    private static IMap CreateAndAddElementMap<TProperty>(ExcelClassMap classMap, IMap currentMap, Expression expression, string key, Type valueType)
+    private static IMap CreateAndAddElementMap<TProperty>(ExcelClassMap classMap, IMap currentMap, Expression expression, object key, Type valueType)
     {
         var map = AutoMapper.CreateDictionaryIndexerElementMap(key, valueType, classMap.EmptyValueStrategy);
         AddMap(currentMap, expression, map);
@@ -217,10 +212,10 @@ internal static class ExpressionAutoMapper
         return currentExpression switch
         {
             MemberExpression memberExpression => ProcessMemberExpression<T, TProperty>(classMap, stack, currentMap, memberExpression, memberMapCreator),
+            Expression when IsDictionaryIndexerExpression(currentExpression) => ProcessDictionaryIndexerExpression<T, TProperty>(classMap, stack, currentMap, currentExpression, memberMapCreator),
             Expression when IsArrayIndexerExpression(currentExpression) => ProcessArrayOrListIndexerExpression<T, TProperty>(classMap, stack, currentMap, currentExpression, memberMapCreator),
             Expression when IsMultidimensionalArrayIndexerExpression(currentExpression) => ProcessMultidimensionalArrayIndexerExpression<T, TProperty>(classMap, stack, currentMap, currentExpression, memberMapCreator),
-            Expression when IsListIndexerExpression(currentExpression) => ProcessArrayOrListIndexerExpression<T, TProperty>(classMap, stack, currentMap, currentExpression, memberMapCreator),
-            _ => ProcessDictionaryIndexerExpression<T, TProperty>(classMap, stack, currentMap, currentExpression, memberMapCreator),
+            _ => ProcessArrayOrListIndexerExpression<T, TProperty>(classMap, stack, currentMap, currentExpression, memberMapCreator),
         };
     }
 
@@ -288,6 +283,20 @@ internal static class ExpressionAutoMapper
         {
             return AutoMapper.GetOrCreateNestedMap(currentMap, member, currentValueType, index ?? key);
         }
+        else if (IsDictionaryIndexerExpression(nextExpression))
+        {
+            var methodCallExpression = (MethodCallExpression)nextExpression;
+            var keyType = methodCallExpression.Arguments[0].Type;
+            var nextValueType = methodCallExpression.Method.ReturnType;
+            if (member != null)
+            {
+                return AutoMapper.GetOrCreateDictionaryIndexerMap(currentMap, member, member.MemberType(), null, keyType, nextValueType);
+            }
+            else
+            {
+                return AutoMapper.GetOrCreateDictionaryIndexerMap(currentMap, null, currentValueType, index ?? key, keyType, nextValueType);
+            }
+        }
         else if (IsArrayIndexerExpression(nextExpression))
         {
             // This must be an array.
@@ -314,8 +323,9 @@ internal static class ExpressionAutoMapper
                 return AutoMapper.GetOrCreateMultidimensionalIndexerMap(currentMap, null, currentValueType, index ?? key, nextValueType);
             }
         }
-        else if (IsListIndexerExpression(nextExpression))
+        else
         {
+            // if (IsListIndexerExpression(nextExpression))
             // This must be implement IEnumerable or Inumerable<T>.
             currentValueType.GetElementTypeOrEnumerableType(out var nextValueType);
 
@@ -326,20 +336,6 @@ internal static class ExpressionAutoMapper
             else
             {
                 return AutoMapper.GetOrCreateArrayIndexerMap(currentMap, null, currentValueType, index ?? key, nextValueType!);
-            }
-        }
-        else
-        {
-            var methodCallExpression = (MethodCallExpression)nextExpression;
-            var keyType = methodCallExpression.Arguments[0].Type;
-            var nextValueType = methodCallExpression.Method.ReturnType;
-            if (member != null)
-            {
-                return AutoMapper.GetOrCreateDictionaryIndexerMap(currentMap, member, member.MemberType(), null, keyType, nextValueType);
-            }
-            else
-            {
-                return AutoMapper.GetOrCreateDictionaryIndexerMap(currentMap, null, currentValueType, index ?? key, keyType, nextValueType);
             }
         }
     }
@@ -379,7 +375,7 @@ internal static class ExpressionAutoMapper
         return (ManyToOneEnumerableMap<TElement>)GetOrCreateMap<T, TElement>(classMap, expression, memberMapCreator);
     }
 
-    public static ManyToOneDictionaryMap<TValue> GetOrCreateManyToOneDictionaryMap<T, TKey, TValue>(ExcelClassMap<T> classMap, Expression expression) where TKey : notnull
+    public static ManyToOneDictionaryMap<TKey, TValue> GetOrCreateManyToOneDictionaryMap<T, TKey, TValue>(ExcelClassMap<T> classMap, Expression expression) where TKey : notnull
     {
         static IMap memberMapCreator(MemberInfo member, FallbackStrategy emptyValueStrategy)
         {
@@ -390,7 +386,7 @@ internal static class ExpressionAutoMapper
 
             return map;
         }
-        return (ManyToOneDictionaryMap<TValue>)GetOrCreateMap<T, TValue>(classMap, expression, memberMapCreator);
+        return (ManyToOneDictionaryMap<TKey, TValue>)GetOrCreateMap<T, TValue>(classMap, expression, memberMapCreator);
     }
 
     public static ExcelClassMap<TElement> GetOrCreateObjectMap<T, TElement>(ExcelClassMap<T> classMap, Expression expression)

@@ -170,7 +170,6 @@ public class MapNestedObjectTests
 
     private class BusinessHoursMap : IMap
     {
-        public Type Type => typeof(int);
         private int _previousRowIndex = -1;
         private int _currentIndex = 0;
 

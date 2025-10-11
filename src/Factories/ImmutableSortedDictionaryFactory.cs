@@ -4,9 +4,9 @@ using ExcelMapper.Abstractions;
 
 namespace ExcelMapper.Factories;
 
-public class ImmutableSortedDictionaryFactory<TValue> : IDictionaryFactory<TValue>
+public class ImmutableSortedDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> where TKey : notnull
 {
-    private ImmutableSortedDictionary<string, TValue?>.Builder? _builder;
+    private ImmutableSortedDictionary<TKey, TValue?>.Builder? _builder;
 
     public void Begin(int count)
     {
@@ -15,10 +15,10 @@ public class ImmutableSortedDictionaryFactory<TValue> : IDictionaryFactory<TValu
             throw new ExcelMappingException("Cannot begin mapping until End() was called.");
         }
 
-        _builder = ImmutableSortedDictionary.CreateBuilder<string, TValue?>();
+        _builder = ImmutableSortedDictionary.CreateBuilder<TKey, TValue?>();
     }
 
-    public void Add(string key, TValue? value)
+    public void Add(TKey key, TValue? value)
     {
         EnsureMapping();
         _builder.Add(key, value);

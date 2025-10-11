@@ -11,9 +11,9 @@ namespace ExcelMapper;
 /// A map that reads multiple cells of an excel sheet and maps the values of the cells to
 /// a dictionary property or field by their keys.
 /// </summary>
-public class ManyToOneDictionaryIndexerMapT<TValue> : IDictionaryIndexerMap
+public class ManyToOneDictionaryIndexerMapT<TKey, TValue> : IDictionaryIndexerMap where TKey : notnull
 {
-    public ManyToOneDictionaryIndexerMapT(IDictionaryFactory<TValue> dictionaryFactory)
+    public ManyToOneDictionaryIndexerMapT(IDictionaryFactory<TKey, TValue> dictionaryFactory)
     {
         DictionaryFactory = dictionaryFactory ?? throw new ArgumentNullException(nameof(dictionaryFactory));
     }
@@ -21,10 +21,10 @@ public class ManyToOneDictionaryIndexerMapT<TValue> : IDictionaryIndexerMap
     /// <summary>
     /// The factory for creating and adding elements to the list.
     /// </summary>
-    public IDictionaryFactory<TValue> DictionaryFactory { get; }
+    public IDictionaryFactory<TKey, TValue> DictionaryFactory { get; }
 
     /// <inheritdoc/>
-    public Dictionary<string, IMap> Values { get; } = [];
+    public Dictionary<object, IMap> Values { get; } = [];
 
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
@@ -40,7 +40,7 @@ public class ManyToOneDictionaryIndexerMapT<TValue> : IDictionaryIndexerMap
             {
                 if (map.Value.TryGetValue(sheet, rowIndex, reader, member, out var elementValue))
                 {
-                    DictionaryFactory.Add(map.Key, (TValue)elementValue);
+                    DictionaryFactory.Add((TKey)map.Key, (TValue?)elementValue);
                 }
             }
 

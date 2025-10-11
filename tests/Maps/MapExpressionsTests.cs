@@ -2664,6 +2664,75 @@ public class MapExpressionsTests
     }
 
     [Fact]
+    public void ReadRows_DefaultMappedIntDictionaryKey_Success()
+    {
+        var map = new ExcelClassMap<IntDictionaryClass>();
+        map.Map(p => p.Value[0]);
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<IntDictionaryClass>();
+        Assert.Equal("2", row.Value[0]);
+    }
+
+    private class IntDictionaryClass
+    {
+        public Dictionary<int, string> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedIntDictionaryKey_Success()
+    {
+        var map = new ExcelClassMap<IntDictionaryClass>();
+        map.Map(p => p.Value[0]).WithColumnName("Column2");
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<IntDictionaryClass>();
+        Assert.Equal("2", row.Value[0]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedCustomDictionaryKey_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<CustomKeyDictionaryClass>();
+        map.Map(p => p.Value[0.0]);
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomKeyDictionaryClass>());
+    }
+
+    private class CustomKeyDictionaryClass
+    {
+        public Dictionary<double, string> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedCustomDictionaryKey_Success()
+    {
+        var map = new ExcelClassMap<CustomKeyDictionaryClass>();
+        map.Map(p => p.Value[0.0]).WithColumnName("Column2");
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<CustomKeyDictionaryClass>();
+        Assert.Equal("2", row.Value[0.0]);
+    }
+
+    [Fact]
     public void ReadRow_ComplexChain_Success()
     {
         using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");

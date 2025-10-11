@@ -6,12 +6,12 @@ using ExcelMapper.Abstractions;
 
 namespace ExcelMapper.Factories;
 
-public class ConstructorDictionaryFactory<T> : IDictionaryFactory<T>
+public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> where TKey : notnull
 {
     public Type DictionaryType { get; }
     private readonly ConstructorInfo _constructor;
 
-    private Dictionary<string, T?>? _items;
+    private Dictionary<TKey, TValue?>? _items;
 
     public ConstructorDictionaryFactory(Type dictionaryType)
     {
@@ -28,8 +28,8 @@ public class ConstructorDictionaryFactory<T> : IDictionaryFactory<T>
             throw new ArgumentException("Abstract dictionary types cannot be created.", nameof(dictionaryType));
         }
 
-        _constructor = dictionaryType.GetConstructor([typeof(IDictionary<string, T>)])
-            ?? throw new ArgumentException($"Dictionary type {dictionaryType} does not have a constructor that takes IDictionary<{typeof(T)}>.", nameof(dictionaryType));
+        _constructor = dictionaryType.GetConstructor([typeof(IDictionary<TKey, TValue>)])
+            ?? throw new ArgumentException($"Dictionary type {dictionaryType} does not have a constructor that takes IDictionary<{typeof(TKey)}, {typeof(TValue)}>.", nameof(dictionaryType));
         DictionaryType = dictionaryType;
     }
 
@@ -40,10 +40,10 @@ public class ConstructorDictionaryFactory<T> : IDictionaryFactory<T>
             throw new ExcelMappingException("Cannot begin mapping until End() was called.");
         }
 
-        _items = new Dictionary<string, T?>(count);
+        _items = new Dictionary<TKey, TValue?>(count);
     }
 
-    public void Add(string key, T? value)
+    public void Add(TKey key, TValue? value)
     {
         EnsureMapping();
         _items!.Add(key, value);

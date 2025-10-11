@@ -574,11 +574,11 @@ public static class AutoMapper
         return (IDictionaryIndexerMap)method.InvokeUnwrapped(null, parameters)!;
     }
 
-    private static ManyToOneDictionaryIndexerMapT<TValue> GetOrCreateDictionaryIndexerMapGeneric<TKey, TValue>(IMap parentMap, MemberInfo? member, Type dictionaryType, object? index) where TKey : notnull
+    private static ManyToOneDictionaryIndexerMapT<TKey, TValue> GetOrCreateDictionaryIndexerMapGeneric<TKey, TValue>(IMap parentMap, MemberInfo? member, Type dictionaryType, object? index) where TKey : notnull
     {
         if (GetExistingMap(parentMap, member, index) is { } existingMap)
         {
-            if (existingMap is not ManyToOneDictionaryIndexerMapT<TValue> dictionaryIndexerMap)
+            if (existingMap is not ManyToOneDictionaryIndexerMapT<TKey, TValue> dictionaryIndexerMap)
             {
                 throw new InvalidOperationException($"Expression is already mapped differently as {existingMap.GetType()}.");
             }
@@ -596,7 +596,7 @@ public static class AutoMapper
         return mapObj;
     }
 
-    private static bool TryCreateDictionaryIndexerMapGeneric<TKey, TValue>(MemberInfo? member, Type dictionaryType, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneDictionaryIndexerMapT<TValue>? map) where TKey : notnull
+    private static bool TryCreateDictionaryIndexerMapGeneric<TKey, TValue>(MemberInfo? member, Type dictionaryType, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneDictionaryIndexerMapT<TKey, TValue>? map) where TKey : notnull
     {
         if (!TryGetCreateDictionaryFactory<TKey, TValue>(dictionaryType, out var factory))
         {
@@ -604,15 +604,23 @@ public static class AutoMapper
             return false;
         }
 
-        map = new ManyToOneDictionaryIndexerMapT<TValue>(factory);
+        map = new ManyToOneDictionaryIndexerMapT<TKey, TValue>(factory);
         return true;
     }
 
     internal static IMap CreateArrayIndexerElementMap(int index, Type valueType, FallbackStrategy emptyValueStrategy)
         => CreateIndexerElementMap(new ColumnIndexReaderFactory(index), valueType, emptyValueStrategy);
 
-    internal static IMap CreateDictionaryIndexerElementMap(string key, Type valueType, FallbackStrategy emptyValueStrategy)
-        => CreateIndexerElementMap(new ColumnNameReaderFactory(key), valueType, emptyValueStrategy);
+    private static ICellReaderFactory CreateDefaultDictionaryKeyReaderFactory(object key)
+        => key switch
+        {
+            string keyString => new ColumnNameReaderFactory(keyString),
+            int keyIndex => new ColumnIndexReaderFactory(keyIndex),
+            _ => new ColumnNameReaderFactory(key.ToString()!)
+        };
+
+    internal static IMap CreateDictionaryIndexerElementMap(object key, Type valueType, FallbackStrategy emptyValueStrategy)
+        => CreateIndexerElementMap(CreateDefaultDictionaryKeyReaderFactory(key), valueType, emptyValueStrategy);
 
     private static MethodInfo? s_tryCreateIndexerElementMapGenericMethod;
     private static MethodInfo CreateIndexerElementMapGenericMethod => s_tryCreateIndexerElementMapGenericMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(CreateIndexerElementMapGeneric))!;
@@ -670,7 +678,7 @@ public static class AutoMapper
         return false;
     }
 
-    private static bool TryGetDictionaryKeyValueType(Type dictionaryType, [NotNullWhen(true)] out Type? keyType, [NotNullWhen(true)] out Type? valueType)
+    internal static bool TryGetDictionaryKeyValueType(Type dictionaryType, [NotNullWhen(true)] out Type? keyType, [NotNullWhen(true)] out Type? valueType)
     {
         // We should be able to parse anything that implements IEnumerable<KeyValuePair<TKey, TValue>>
         if (dictionaryType.ImplementsGenericInterface(typeof(IEnumerable<>), out Type? keyValuePairType))
@@ -697,7 +705,7 @@ public static class AutoMapper
         return false;
     }
 
-    internal static bool TryCreateGenericDictionaryMap<TKey, TValue>(MemberInfo? member, Type dictionaryType, FallbackStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out ManyToOneDictionaryMap<TValue>? map) where TKey : notnull
+    internal static bool TryCreateGenericDictionaryMap<TKey, TValue>(MemberInfo? member, Type dictionaryType, FallbackStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out ManyToOneDictionaryMap<TKey, TValue>? map) where TKey : notnull
     {
         if (!TryCreatePrimitivePipeline<TValue>(emptyValueStrategy, isAutoMapping, out var valuePipeline))
         {
@@ -713,33 +721,33 @@ public static class AutoMapper
 
         // Default to all columns.
         var defaultReaderFactory = GetDefaultCellsReaderFactory(member) ?? new AllColumnNamesReaderFactory();
-        map = new ManyToOneDictionaryMap<TValue>(defaultReaderFactory, valuePipeline, factory);
+        map = new ManyToOneDictionaryMap<TKey, TValue>(defaultReaderFactory, valuePipeline, factory);
         ApplyMemberAttributesToMap(member, map);
         return true;
     }
 
-    private static bool TryGetCreateDictionaryFactory<TKey, TValue>(Type dictionaryType, [NotNullWhen(true)] out IDictionaryFactory<TValue>? result) where TKey : notnull
+    private static bool TryGetCreateDictionaryFactory<TKey, TValue>(Type dictionaryType, [NotNullWhen(true)] out IDictionaryFactory<TKey, TValue>? result) where TKey : notnull
     {
         if (dictionaryType == typeof(ImmutableDictionary<TKey, TValue>) || dictionaryType == typeof(IImmutableDictionary<TKey, TValue>))
         {
-            result = new ImmutableDictionaryFactory<TValue>();
+            result = new ImmutableDictionaryFactory<TKey, TValue>();
             return true;
         }
         else if (dictionaryType == typeof(ImmutableSortedDictionary<TKey, TValue>))
         {
-            result = new ImmutableSortedDictionaryFactory<TValue>();
+            result = new ImmutableSortedDictionaryFactory<TKey, TValue>();
             return true;
         }
         else if (dictionaryType == typeof(FrozenDictionary<TKey, TValue>))
         {
-            result = new FrozenDictionaryFactory<TValue>();
+            result = new FrozenDictionaryFactory<TKey, TValue>();
             return true;
         }
         else if (dictionaryType.GetTypeInfo().IsInterface)
         {
             if (dictionaryType.GetTypeInfo().IsAssignableFrom(typeof(Dictionary<TKey, TValue>).GetTypeInfo()))
             {
-                result = new DictionaryFactory<TValue>();
+                result = new DictionaryFactory<TKey, TValue>();
                 return true;
             }
         }
@@ -747,22 +755,22 @@ public static class AutoMapper
         {
             if (dictionaryType.ImplementsInterface(typeof(IDictionary<TKey, TValue>)))
             {
-                result = new IDictionaryTImplementingFactory<TValue>(dictionaryType);
+                result = new IDictionaryTImplementingFactory<TKey, TValue>(dictionaryType);
                 return true;
             }
             else if (dictionaryType.ImplementsInterface(typeof(IDictionary)))
             {
-                result = new IDictionaryImplementingFactory<TValue>(dictionaryType);
+                result = new IDictionaryImplementingFactory<TKey, TValue>(dictionaryType);
                 return true;
             }
         }
         else
         {
-            // Check if the type has .ctor(IDictionary<TKey, TValue>) such as Dictionary<TKey, TValue>.
+            // Check if the type has .ctor(IDictionary<TKey, TValue>) such as ReadOnlyDictionary<TKey, TValue>.
             var ctor = dictionaryType.GetConstructor([typeof(IDictionary<TKey, TValue>)]);
             if (ctor != null)
             {
-                result = new ConstructorDictionaryFactory<TValue>(dictionaryType);
+                result = new ConstructorDictionaryFactory<TKey, TValue>(dictionaryType);
                 return true;
             }
         }

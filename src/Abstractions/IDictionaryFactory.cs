@@ -1,9 +1,9 @@
 namespace ExcelMapper.Abstractions;
 
-public interface IDictionaryFactory<TValue>
+public interface IDictionaryFactory<TKey, TValue>
 {
     void Begin(int count);
-    void Add(string key, TValue? value);
+    void Add(TKey key, TValue? value);
     object End();
     void Reset();
 }

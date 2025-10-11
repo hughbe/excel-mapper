@@ -12,15 +12,16 @@ namespace ExcelMapper;
 /// A map that reads one or more values from one or more cells and maps these values to the type of the
 /// property or field. This is used to map IDictionary properties and fields.
 /// </summary>
+/// <typeparam name="TKey">The key type of the IDictionary property or field.</typeparam>
 /// <typeparam name="TValue">The value type of the IDictionary property or field.</typeparam>
-public class ManyToOneDictionaryMap<TValue> : IManyToOneMap
+public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : notnull
 {
     /// <summary>
     /// Constructs a map reads one or more values from one or more cells and maps these values as element
     /// contained by the property or field.
     /// </summary>
     /// <param name="valuePipeline">The map that maps the value of a single cell to an object of the element type of the property or field.</param>
-    public ManyToOneDictionaryMap(ICellsReaderFactory readerFactory, IValuePipeline<TValue> valuePipeline, IDictionaryFactory<TValue> dictionaryFactory)
+    public ManyToOneDictionaryMap(ICellsReaderFactory readerFactory, IValuePipeline<TValue> valuePipeline, IDictionaryFactory<TKey, TValue> dictionaryFactory)
     {
         _readerFactory = readerFactory ?? throw new ArgumentNullException(nameof(readerFactory));
         ValuePipeline = valuePipeline ?? throw new ArgumentNullException(nameof(valuePipeline));
@@ -51,7 +52,7 @@ public class ManyToOneDictionaryMap<TValue> : IManyToOneMap
     /// <summary>
     /// The factory for creating and adding elements to the list.
     /// </summary>
-    public IDictionaryFactory<TValue> DictionaryFactory { get; }
+    public IDictionaryFactory<TKey, TValue> DictionaryFactory { get; }
     
     private readonly Dictionary<ExcelSheet, ICellsReader?> _factoryCache = [];
 
@@ -88,8 +89,13 @@ public class ManyToOneDictionaryMap<TValue> : IManyToOneMap
             foreach (var valueResult in valueResults)
             {
                 var elementKey = sheet.Heading.GetColumnName(valueResult.ColumnIndex);
-                var elementValue = (TValue)ExcelMapper.ValuePipeline.GetPropertyValue(ValuePipeline, sheet, rowIndex, valueResult, PreserveFormatting, member)!;
-                DictionaryFactory.Add(elementKey, elementValue);
+                // Convert the string key to TKey
+                TKey? convertedKey = (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
+                if (convertedKey != null)
+                {
+                    var elementValue = (TValue)ExcelMapper.ValuePipeline.GetPropertyValue(ValuePipeline, sheet, rowIndex, valueResult, PreserveFormatting, member)!;
+                    DictionaryFactory.Add(convertedKey, elementValue);
+                }
             }
 
             value = DictionaryFactory.End();
@@ -108,7 +114,7 @@ public class ManyToOneDictionaryMap<TValue> : IManyToOneMap
     /// <param name="valueMap">The pipeline that maps the value of a single cell to an object of the element type of the property
     /// or field.</param>
     /// <returns>The map that invoked this method.</returns>
-    public ManyToOneDictionaryMap<TValue> WithValueMap(Func<IValuePipeline<TValue>, IValuePipeline<TValue>> valueMap)
+    public ManyToOneDictionaryMap<TKey, TValue> WithValueMap(Func<IValuePipeline<TValue>, IValuePipeline<TValue>> valueMap)
     {
         if (valueMap == null)
         {

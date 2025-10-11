@@ -7,7 +7,6 @@ namespace ExcelMapper.Factories;
 
 public class MultidimensionalArrayFactory<T> : IMultidimensionalArrayFactory<T>
 {
-    private int _currentIndex = -1;
     private Array? _items;
 
     public void Begin(int[] lengths)
@@ -18,7 +17,6 @@ public class MultidimensionalArrayFactory<T> : IMultidimensionalArrayFactory<T>
         }
 
         _items = Array.CreateInstance(typeof(T), lengths);
-        _currentIndex = 0;
     }
 
     public void Set(int[] indices, T? item)
@@ -39,7 +37,6 @@ public class MultidimensionalArrayFactory<T> : IMultidimensionalArrayFactory<T>
     public void Reset()
     {
         _items = null;
-        _currentIndex = -1;
     }
 
     [MemberNotNull(nameof(_items))]
@@ -49,7 +46,5 @@ public class MultidimensionalArrayFactory<T> : IMultidimensionalArrayFactory<T>
         {
             throw new ExcelMappingException("Has not started mapping.");
         }
-
-        Debug.Assert(_currentIndex >= 0);
     }
 }

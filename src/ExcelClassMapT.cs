@@ -192,41 +192,41 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map IDictionarys.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TValue">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneDictionaryMap<TElement> Map<TElement>(Expression<Func<T, IDictionary>> expression)
-        => GetOrCreateManyToOneDictionaryMap<string, TElement>(expression.Body);
+    public ManyToOneDictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, IDictionary>> expression)
+        => GetOrCreateManyToOneDictionaryMap<string, TValue>(expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map IDictionarys.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TValue">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneDictionaryMap<TElement> Map<TElement>(Expression<Func<T, IDictionary<string, TElement>>> expression)
-        => GetOrCreateManyToOneDictionaryMap<string, TElement>(expression.Body);
+    public ManyToOneDictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, IDictionary<string, TValue>>> expression)
+        => GetOrCreateManyToOneDictionaryMap<string, TValue>(expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map IReadOnlyDictionarys.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TValue">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneDictionaryMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlyDictionary<string, TElement>>> expression)
-        => GetOrCreateManyToOneDictionaryMap<string, TElement>(expression.Body);
+    public ManyToOneDictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, IReadOnlyDictionary<string, TValue>>> expression)
+        => GetOrCreateManyToOneDictionaryMap<string, TValue>(expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map IDictionarys.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
+    /// <typeparam name="TValue">The element type of property or field to map.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneDictionaryMap<TElement> Map<TElement>(Expression<Func<T, Dictionary<string, TElement>>> expression)
-        => GetOrCreateManyToOneDictionaryMap<string, TElement>(expression.Body);
+    public ManyToOneDictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, Dictionary<string, TValue>>> expression)
+        => GetOrCreateManyToOneDictionaryMap<string, TValue>(expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -234,7 +234,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// </summary>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
-    public ManyToOneDictionaryMap<object> Map(Expression<Func<T, ExpandoObject>> expression)
+    public ManyToOneDictionaryMap<string, object> Map(Expression<Func<T, ExpandoObject>> expression)
         => GetOrCreateManyToOneDictionaryMap<string, object>(expression.Body);
 
     // Mapping methods now use ExpressionAutoMapper static methods
@@ -247,7 +247,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     private ExcelClassMap<TElement> GetOrCreateObjectMap<TElement>(Expression expression)
         => ExpressionAutoMapper.GetOrCreateObjectMap<T, TElement>(this, expression);
 
-    private ManyToOneDictionaryMap<TValue> GetOrCreateManyToOneDictionaryMap<TKey, TValue>(Expression expression) where TKey : notnull
+    private ManyToOneDictionaryMap<TKey, TValue> GetOrCreateManyToOneDictionaryMap<TKey, TValue>(Expression expression) where TKey : notnull
         => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, TKey, TValue>(this, expression);
 
     /// <summary>

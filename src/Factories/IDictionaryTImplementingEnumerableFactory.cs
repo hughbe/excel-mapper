@@ -5,10 +5,10 @@ using ExcelMapper.Utilities;
 
 namespace ExcelMapper.Factories;
 
-public class IDictionaryTImplementingFactory<T> : Abstractions.IDictionaryFactory<T>
+public class IDictionaryTImplementingFactory<TKey, TValue> : Abstractions.IDictionaryFactory<TKey, TValue> where TKey : notnull
 {
     public Type DictionaryType { get; }
-    private IDictionary<string, T?>? _items;
+    private IDictionary<TKey, TValue?>? _items;
 
     public IDictionaryTImplementingFactory(Type dictionaryType)
     {
@@ -24,9 +24,9 @@ public class IDictionaryTImplementingFactory<T> : Abstractions.IDictionaryFactor
         {
             throw new ArgumentException("Abstract dictionary types cannot be created.", nameof(dictionaryType));
         }
-        if (!dictionaryType.ImplementsInterface(typeof(IDictionary<string, T?>)))
+        if (!dictionaryType.ImplementsInterface(typeof(IDictionary<TKey, TValue?>)))
         {
-            throw new ArgumentException($"Dictionary type {dictionaryType} must implement IDictionary<string, {typeof(T)}>.", nameof(dictionaryType));
+            throw new ArgumentException($"Dictionary type {dictionaryType} must implement IDictionary<{typeof(TKey)}, {typeof(TValue)}>.", nameof(dictionaryType));
         }
 
         DictionaryType = dictionaryType;
@@ -39,10 +39,10 @@ public class IDictionaryTImplementingFactory<T> : Abstractions.IDictionaryFactor
             throw new ExcelMappingException("Cannot begin mapping until End() was called.");
         }
 
-        _items = (IDictionary<string, T?>)Activator.CreateInstance(DictionaryType)!;
+        _items = (IDictionary<TKey, TValue?>)Activator.CreateInstance(DictionaryType)!;
     }
 
-    public void Add(string key, T? value)
+    public void Add(TKey key, TValue? value)
     {
         EnsureMapping();
         _items.Add(key, value);

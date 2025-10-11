@@ -17,8 +17,8 @@ public class ManyToOneDictionaryMapTests
     {
         var factory = new ColumnNamesReaderFactory("Column");
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
         Assert.False(map.Optional);
         Assert.False(map.PreserveFormatting);
         Assert.NotNull(map.ValuePipeline);
@@ -28,16 +28,16 @@ public class ManyToOneDictionaryMapTests
     public void Ctor_NullCellValuesReader_ThrowsArgumentNullException()
     {
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        Assert.Throws<ArgumentNullException>("readerFactory", () => new ManyToOneDictionaryMap<string>(null!, valuePipeline, dictionaryFactory));
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        Assert.Throws<ArgumentNullException>("readerFactory", () => new ManyToOneDictionaryMap<string, string>(null!, valuePipeline, dictionaryFactory));
     }
 
     [Fact]
     public void Ctor_NullPipeline_ThrowsArgumentNullException()
     {
         var factory = new ColumnNamesReaderFactory("Column");
-        var dictionaryFactory = new DictionaryFactory<string>();
-        Assert.Throws<ArgumentNullException>("valuePipeline", () => new ManyToOneDictionaryMap<string>(factory, null!, dictionaryFactory));
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        Assert.Throws<ArgumentNullException>("valuePipeline", () => new ManyToOneDictionaryMap<string, string>(factory, null!, dictionaryFactory));
     }
 
     [Fact]
@@ -45,7 +45,7 @@ public class ManyToOneDictionaryMapTests
     {
         var factory = new ColumnNamesReaderFactory("Column");
         var valuePipeline = new ValuePipeline<string>();
-        Assert.Throws<ArgumentNullException>("dictionaryFactory", () => new ManyToOneDictionaryMap<string>(factory, valuePipeline, null!));
+        Assert.Throws<ArgumentNullException>("dictionaryFactory", () => new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, null!));
     }
 
     [Theory]
@@ -55,8 +55,8 @@ public class ManyToOneDictionaryMapTests
     {
         var factory = new ColumnNamesReaderFactory("Column");
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory)
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory)
         {
             Optional = value
         };
@@ -78,8 +78,8 @@ public class ManyToOneDictionaryMapTests
     {
         var factory = new ColumnNamesReaderFactory("Column");
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory)
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory)
         {
             PreserveFormatting = value
         };
@@ -105,8 +105,8 @@ public class ManyToOneDictionaryMapTests
     {
         var factory = new ColumnNamesReaderFactory("Column");
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory)
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory)
         {
             ReaderFactory = value
         };
@@ -122,8 +122,8 @@ public class ManyToOneDictionaryMapTests
     {
         var factory = new ColumnNamesReaderFactory("Column");
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
         Assert.Throws<ArgumentNullException>("value", () => map.ReaderFactory = null!);
     }
 
@@ -132,8 +132,8 @@ public class ManyToOneDictionaryMapTests
     {
         var factory = new ColumnNamesReaderFactory("Column");
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
 
         var newValuePipeline = new ValuePipeline<string>();
         Assert.Same(map, map.WithValueMap(e =>
@@ -149,8 +149,8 @@ public class ManyToOneDictionaryMapTests
     {
         var factory = new ColumnNamesReaderFactory("Column");
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
 
         Assert.Throws<ArgumentNullException>("valueMap", () => map.WithValueMap(null!));
     }
@@ -160,8 +160,8 @@ public class ManyToOneDictionaryMapTests
     {
         var factory = new ColumnNamesReaderFactory("Column");
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
 
         Assert.Throws<ArgumentNullException>("valueMap", () => map.WithValueMap(_ => null!));
     }
@@ -175,8 +175,8 @@ public class ManyToOneDictionaryMapTests
 
         var factory = new MockReaderFactory(new MockReader(() => (true, [])));
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
         object? result = null;
         Assert.True(map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Empty(Assert.IsType<Dictionary<string, string>>(result));
@@ -188,8 +188,8 @@ public class ManyToOneDictionaryMapTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
         MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
         object? result = null;
         Assert.Throws<ArgumentNullException>("sheet", () => map.TryGetValue(null!, 0, importer.Reader, member, out result));
@@ -204,8 +204,8 @@ public class ManyToOneDictionaryMapTests
 
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
         MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
@@ -221,8 +221,8 @@ public class ManyToOneDictionaryMapTests
 
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
         MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
@@ -238,8 +238,8 @@ public class ManyToOneDictionaryMapTests
 
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
         MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
@@ -255,8 +255,8 @@ public class ManyToOneDictionaryMapTests
 
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
         MemberInfo member = typeof(TestClass).GetField(nameof(TestClass._field))!;
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
@@ -272,8 +272,8 @@ public class ManyToOneDictionaryMapTests
 
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
         MemberInfo member = typeof(TestClass).GetEvent(nameof(TestClass.Event))!;
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
@@ -289,8 +289,8 @@ public class ManyToOneDictionaryMapTests
 
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Null(result);
@@ -305,8 +305,8 @@ public class ManyToOneDictionaryMapTests
 
         var factory = new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(s => false));
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Null(result);
@@ -321,8 +321,8 @@ public class ManyToOneDictionaryMapTests
 
         var factory = new ColumnNamesReaderFactory("NoSuchColumn");
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Null(result);
@@ -337,8 +337,8 @@ public class ManyToOneDictionaryMapTests
 
         var factory = new ColumnNamesReaderFactory("NoSuchColumn1", "NoSuchColumn2");
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Null(result);
@@ -353,8 +353,8 @@ public class ManyToOneDictionaryMapTests
 
         var factory = new EmptyColumnIndicesReaderFactory();
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Null(result);
@@ -369,8 +369,8 @@ public class ManyToOneDictionaryMapTests
 
         var factory = new ColumnIndicesReaderFactory(10);
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Null(result);
@@ -385,8 +385,8 @@ public class ManyToOneDictionaryMapTests
 
         var factory = new ColumnIndicesReaderFactory(0, 1);
         var valuePipeline = new ValuePipeline<string>();
-        var dictionaryFactory = new DictionaryFactory<string>();
-        var map = new ManyToOneDictionaryMap<string>(factory, valuePipeline, dictionaryFactory);
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory);
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Null(result);

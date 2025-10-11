@@ -6,7 +6,7 @@ using ExcelMapper.Utilities;
 
 namespace ExcelMapper.Factories;
 
-public class IDictionaryImplementingFactory<T> : IDictionaryFactory<T>
+public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> where TKey : notnull
 {
     public Type DictionaryType { get; }
     private IDictionary? _items;
@@ -43,7 +43,7 @@ public class IDictionaryImplementingFactory<T> : IDictionaryFactory<T>
         _items = (IDictionary)Activator.CreateInstance(DictionaryType)!;
     }
 
-    public void Add(string key, T? value)
+    public void Add(TKey key, TValue? value)
     {
         EnsureMapping();
         _items.Add(key, value);
