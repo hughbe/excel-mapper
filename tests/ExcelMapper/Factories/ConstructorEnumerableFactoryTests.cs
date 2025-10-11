@@ -30,12 +30,18 @@ public class ConstructorEnumerableFactoryTests
     [InlineData(typeof(IEnumerable<int>))]
     [InlineData(typeof(ICollection))]
     [InlineData(typeof(ICollection<int>))]
+    [InlineData(typeof(IList))]
+    [InlineData(typeof(IList<int>))]
     [InlineData(typeof(int[]))]
+    [InlineData(typeof(KeyValuePair<string, int>[]))]
     [InlineData(typeof(NoConstructor))]
     [InlineData(typeof(List<string>))]
+    [InlineData(typeof(ConstructorIList))]
     [InlineData(typeof(ConstructorIEnumerableT<string>))]
     [InlineData(typeof(ConstructorICollectionT<int>))]
     [InlineData(typeof(ConstructorICollectionT<string>))]
+    [InlineData(typeof(ConstructorIListT<int>))]
+    [InlineData(typeof(ConstructorIListT<string>))]
     [InlineData(typeof(AbstractClass))]
     public void Ctor_InvalidCollectionType_ThrowsArgumentException(Type collectionType)
     {
@@ -256,5 +262,19 @@ public class ConstructorEnumerableFactoryTests
         public ICollection<T> Value { get; }
 
         public ConstructorICollectionT(ICollection<T> value) => Value = value;
+    }
+
+    private class ConstructorIList
+    {
+        public IList Value { get; }
+
+        public ConstructorIList(IList value) => Value = value;
+    }
+
+    private class ConstructorIListT<T>
+    {
+        public IList<T> Value { get; }
+
+        public ConstructorIListT(IList<T> value) => Value = value;
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
@@ -779,6 +780,28 @@ public class MapSplitEnumerableTests
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableHashSetIntClass>());
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedFrozenSetInt_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<FrozenSetIntClass>();
+        Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FrozenSetIntClass>());
+
+        var row3 = sheet.ReadRow<FrozenSetIntClass>();
+        Assert.Equal(new int[] { 1 }, row3.Value);
+
+        var row4 = sheet.ReadRow<FrozenSetIntClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FrozenSetIntClass>());
     }
 
     [Fact]
@@ -1720,6 +1743,29 @@ public class MapSplitEnumerableTests
     }
 
     [Fact]
+    public void ReadRow_DefaultMappedFrozenSetInt_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultFrozenSetIntClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<FrozenSetIntClass>();
+        Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FrozenSetIntClass>());
+
+        var row3 = sheet.ReadRow<FrozenSetIntClass>();
+        Assert.Equal(new int[] { 1 }, row3.Value);
+
+        var row4 = sheet.ReadRow<FrozenSetIntClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FrozenSetIntClass>());
+    }
+
+    [Fact]
     public void ReadRow_DefaultMappedConcurrentQueueInt_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
@@ -2379,6 +2425,31 @@ public class MapSplitEnumerableTests
         Assert.Empty(row4.Value);
 
         var row5 = sheet.ReadRow<ImmutableHashSetIntClass>();
+        Assert.Equal(new int[] { -2 }, row5.Value);
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedFrozenSetInt_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<CustomFrozenSetIntClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<FrozenSetIntClass>();
+        Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+
+        var row2 = sheet.ReadRow<FrozenSetIntClass>();
+        Assert.Equal(new int[] { -1, 1, 2 }, row2.Value);
+
+        var row3 = sheet.ReadRow<FrozenSetIntClass>();
+        Assert.Equal(new int[] { 1 }, row3.Value);
+
+        var row4 = sheet.ReadRow<FrozenSetIntClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<FrozenSetIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
 
@@ -3229,6 +3300,31 @@ public class MapSplitEnumerableTests
     public class CustomImmutableHashSetIntClassMap : ExcelClassMap<ImmutableHashSetIntClass>
     {
         public CustomImmutableHashSetIntClassMap()
+        {
+            Map(p => (ICollection<int>)p.Value)
+                .WithElementMap(p => p
+                    .WithEmptyFallback(-1)
+                    .WithInvalidFallback(-2)
+                );
+        }
+    }
+
+    public class FrozenSetIntClass
+    {
+        public FrozenSet<int> Value { get; set; } = default!;
+    }
+
+    public class DefaultFrozenSetIntClassMap : ExcelClassMap<FrozenSetIntClass>
+    {
+        public DefaultFrozenSetIntClassMap()
+        {
+            Map(p => (ICollection<int>)p.Value);
+        }
+    }
+
+    public class CustomFrozenSetIntClassMap : ExcelClassMap<FrozenSetIntClass>
+    {
+        public CustomFrozenSetIntClassMap()
         {
             Map(p => (ICollection<int>)p.Value)
                 .WithElementMap(p => p

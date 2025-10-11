@@ -312,10 +312,10 @@ public class AutoMapperTests
     }
 
     [Fact]
-    public void TryCreateClass_Map_FrozenSetStringType_ReturnsFalse()
+    public void TryCreateClass_Map_FrozenSetStringType_ReturnsTrue()
     {
-        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<FrozenSet<string>>? classMap));
-        Assert.Null(classMap);
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<FrozenSet<string>>? classMap));
+        Assert.NotNull(classMap);
     }
 
     [Fact]
@@ -454,15 +454,15 @@ public class AutoMapperTests
     [Fact]
     public void TryCreateClass_Map_FrozenDictionaryStringObjectType_ReturnsTrue()
     {
-        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<FrozenDictionary<string, object>>? classMap));
-        Assert.Null(classMap);
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<FrozenDictionary<string, object>>? classMap));
+        Assert.NotNull(classMap);
     }
 
     [Fact]
     public void TryCreateClass_Map_ReadOnlyDictionaryStringObjectType_ReturnsTrue()
     {
-        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ReadOnlyDictionary<string, object>>? classMap));
-        Assert.Null(classMap);
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ReadOnlyDictionary<string, object>>? classMap));
+        Assert.NotNull(classMap);
     }
 
     [Fact]

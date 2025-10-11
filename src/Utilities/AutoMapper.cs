@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -431,6 +432,11 @@ public static class AutoMapper
             result = new ImmutableHashSetEnumerableFactory<TElement>();
             return true;
         }
+        else if (listType == typeof(FrozenSet<TElement>))
+        {
+            result = new FrozenSetEnumerableFactory<TElement>();
+            return true;
+        }
         else if (listType.IsInterface)
         {
             // Add values by creating a list and assigning to the property.
@@ -461,7 +467,7 @@ public static class AutoMapper
                 }
             }
 
-            // Check if the type has .ctor(IEnumerable<T>) such as Queue or Stack.
+            // Check if the type has .ctor(ICollection) or .ctor(IEnumerable<T>) such as Queue or Stack.
             var ctor = listType.GetConstructor([typeof(ICollection)]) ?? listType.GetConstructor([typeof(IEnumerable<TElement>)]);
             if (ctor != null)
             {
@@ -696,6 +702,11 @@ public static class AutoMapper
             result = new ImmutableSortedDictionaryFactory<TValue>();
             return true;
         }
+        else if (dictionaryType == typeof(FrozenDictionary<TKey, TValue>))
+        {
+            result = new FrozenDictionaryFactory<TValue>();
+            return true;
+        }
         else if (dictionaryType.GetTypeInfo().IsInterface)
         {
             if (dictionaryType.GetTypeInfo().IsAssignableFrom(typeof(Dictionary<TKey, TValue>).GetTypeInfo()))
@@ -714,6 +725,16 @@ public static class AutoMapper
             else if (dictionaryType.ImplementsInterface(typeof(IDictionary)))
             {
                 result = new IDictionaryImplementingFactory<TValue>(dictionaryType);
+                return true;
+            }
+        }
+        else
+        {
+            // Check if the type has .ctor(IDictionary<TKey, TValue>) such as Dictionary<TKey, TValue>.
+            var ctor = dictionaryType.GetConstructor([typeof(IDictionary<TKey, TValue>)]);
+            if (ctor != null)
+            {
+                result = new ConstructorDictionaryFactory<TValue>(dictionaryType);
                 return true;
             }
         }

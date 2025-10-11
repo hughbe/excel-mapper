@@ -223,26 +223,4 @@ public class AutoMapTests
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BitArray>());
     }
-
-    [Fact]
-    public void ReadRow_AutoMappedFrozenSet_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-
-        ExcelSheet sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FrozenSet<string>>());
-    }
-
-    [Fact]
-    public void ReadRow_AutoMappedFrozenDictionary_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-
-        ExcelSheet sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FrozenDictionary<string, string>>());
-    }
 }
