@@ -678,6 +678,23 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
+    public void Map_ListIndexerClassHasGetStatic_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<ListIndexerClassHasGetStaticClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => ListIndexerClassHasGetStatic.get_Item(0)));
+    }
+
+    private class ListIndexerClassHasGetStaticClass
+    {
+        public ListIndexerClassHasGetStatic Value { get; set; } = default!;
+    }
+
+    private class ListIndexerClassHasGetStatic
+    {
+        public static int get_Item(int i) => 0;
+    }
+
+    [Fact]
     public void Map_ListIndexDifferently_ThrowsExcelMappingException()
     {
         var map = new ExcelClassMap<ListIndexClass>();
@@ -738,10 +755,31 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
+    public void Map_CastDictionaryIndexerCantBeConstructed_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<ObjectClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map(p => ((NonConstructibleDictionary)p.Value)["key"]));
+    }
+
+    [Fact]
+    public void Map_CastInvalidDictionaryIndexerCantBeConstructed_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<DictionaryClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map(o => ((NonConstructibleDictionary)o.Value)["key"]));
+    }
+
+    [Fact]
     public void Map_DictionaryIndexIndexerNotEnumerable_ThrowArgumentException()
     {
         var map = new ExcelClassMap<DictionaryIndexClassNotEnumerableClass>();
         Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value["key"]));
+    }
+
+    [Fact]
+    public void Map_CastDictionaryIndexerNotEnumerable_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<ObjectClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => ((DictionaryIndexClassNotEnumerable)p.Value)["key"]));
     }
 
     private class DictionaryIndexClassNotEnumerableClass
@@ -755,10 +793,32 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
+    public void Map_DictionaryIndexerClassHasGetStatic_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<DictionaryIndexerClassHasGetStaticClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => DictionaryIndexerClassHasGetStatic.get_Item("key")));
+    }
+
+    private class DictionaryIndexerClassHasGetStaticClass
+    {
+        public DictionaryIndexerClassHasGetStatic Value { get; set; } = default!;
+    }
+
+    private class DictionaryIndexerClassHasGetStatic
+    {
+        public static int get_Item(string key) => 0;
+    }
+
+    [Fact]
     public void Map_DictionaryIndexDifferently_ThrowsExcelMappingException()
     {
         var map = new ExcelClassMap<DictionaryClass>();
         map.Map(o => o.Value);
         Assert.Throws<InvalidOperationException>(() => map.Map(o => o.Value["key"]));
+    }
+
+    private class ObjectClass
+    {
+        public object Value { get; set; } = default!;
     }
 }
