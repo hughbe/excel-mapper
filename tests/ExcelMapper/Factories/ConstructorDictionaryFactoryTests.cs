@@ -49,6 +49,8 @@ public class ConstructorDictionaryFactoryTests
     [InlineData(typeof(ConstructorIList))]
     [InlineData(typeof(ConstructorIDictionary))]
     [InlineData(typeof(ArrayList))]
+    [InlineData(typeof(Stack))]
+    [InlineData(typeof(Queue))]
     [InlineData(typeof(ConstructorIEnumerableT<KeyValuePair<int, int>>))]
     [InlineData(typeof(ConstructorIEnumerableT<KeyValuePair<string, string>>))]
     [InlineData(typeof(ConstructorICollectionT<KeyValuePair<int, int>>))]

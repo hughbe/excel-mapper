@@ -34,6 +34,8 @@ public class IDictionaryImplementingFactoryTests
     [InlineData(typeof(ICollection<KeyValuePair<string, int>>))]
     [InlineData(typeof(int[]))]
     [InlineData(typeof(ArrayList))]
+    [InlineData(typeof(Stack))]
+    [InlineData(typeof(Queue))]
     [InlineData(typeof(IDictionaryGeneric<string, int>))]
     [InlineData(typeof(IDictionaryGeneric<int, string>))]
     [InlineData(typeof(AbstractClass))]

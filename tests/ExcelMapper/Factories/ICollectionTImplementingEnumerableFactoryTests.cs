@@ -41,6 +41,8 @@ public class ICollectionTImplementingEnumerableFactoryTests
     [InlineData(typeof(IReadOnlyList<int>))]
     [InlineData(typeof(int[]))]
     [InlineData(typeof(ArrayList))]
+    [InlineData(typeof(Stack))]
+    [InlineData(typeof(Queue))]
     [InlineData(typeof(IListNonGeneric))]
     [InlineData(typeof(ICollectionNonGeneric))]
     [InlineData(typeof(List<string>))]
@@ -51,6 +53,7 @@ public class ICollectionTImplementingEnumerableFactoryTests
     [InlineData(typeof(ReadOnlyObservableCollection<string>))]
     [InlineData(typeof(HashSet<string>))]
     [InlineData(typeof(ReadOnlySet<string>))]
+    [InlineData(typeof(SubCollectionBase))]
     public void Ctor_InvalidCollectionType_ThrowsArgumentException(Type collectionType)
     {
         Assert.Throws<ArgumentException>("collectionType", () => new ICollectionTImplementingEnumerableFactory<int>(collectionType));
@@ -307,5 +310,9 @@ public class ICollectionTImplementingEnumerableFactoryTests
         public void RemoveAt(int index) => throw new NotImplementedException();
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => throw new NotImplementedException();
+    }
+
+    private class SubCollectionBase : CollectionBase
+    {
     }
 }

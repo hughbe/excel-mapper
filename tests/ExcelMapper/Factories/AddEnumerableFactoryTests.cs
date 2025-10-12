@@ -39,6 +39,8 @@ public class AddEnumerableFactoryTests
     [InlineData(typeof(ICollection<int>))]
     [InlineData(typeof(ICollectionNonGeneric))]
     [InlineData(typeof(int[]))]
+    [InlineData(typeof(Stack))]
+    [InlineData(typeof(Queue))]
     [InlineData(typeof(List<string>))]
     [InlineData(typeof(AddClass<string>))]
     [InlineData(typeof(AddClass<string, int>))]
@@ -51,6 +53,7 @@ public class AddEnumerableFactoryTests
     [InlineData(typeof(FrozenSet<int>))]
     [InlineData(typeof(ReadOnlySet<int>))]
     [InlineData(typeof(NonEnumerableAddClass<int>))]
+    [InlineData(typeof(SubCollectionBase))]
     public void Ctor_InvalidCollectionType_ThrowsArgumentException(Type collectionType)
     {
         Assert.Throws<ArgumentException>("collectionType", () => new AddEnumerableFactory<int>(collectionType));
@@ -247,6 +250,10 @@ public class AddEnumerableFactoryTests
         public bool Remove(T item) => throw new NotImplementedException();
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => throw new NotImplementedException();
+    }
+
+    private class SubCollectionBase : CollectionBase
+    {
     }
 
     private class NonEnumerableAddClass<T>

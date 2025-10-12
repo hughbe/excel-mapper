@@ -17,6 +17,8 @@ public class ConstructorEnumerableFactoryTests
     [InlineData(typeof(ConstructorICollectionT<int>))]
     [InlineData(typeof(ConstructorIListT<int>))]
     [InlineData(typeof(ArrayList))]
+    [InlineData(typeof(Stack))]
+    [InlineData(typeof(Queue))]
     [InlineData(typeof(Collection<int>))]
     [InlineData(typeof(ObservableCollection<int>))]
     [InlineData(typeof(ReadOnlyCollection<int>))]

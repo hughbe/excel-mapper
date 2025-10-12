@@ -5,6 +5,7 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Xunit;
 
 namespace ExcelMapper.Tests;
@@ -470,6 +471,279 @@ public class MapSplitEnumerableTests
 
         var row5 = sheet.ReadRow<ArrayListClass>();
         Assert.Equal([-2], row5.Value);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSubCollectionBaseClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CollectionBaseClass>();
+        Assert.Equal(new string[] { "1", "2", "3" }, row1.Value.Cast<string>());
+
+        var row2 = sheet.ReadRow<CollectionBaseClass>();
+        Assert.Equal(new string?[] { "1", null, "2" }, row2.Value.Cast<string>());
+
+        var row3 = sheet.ReadRow<CollectionBaseClass>();
+        Assert.Equal(new string[] { "1" }, row3.Value.Cast<string>());
+
+        var row4 = sheet.ReadRow<CollectionBaseClass>();
+        Assert.Empty(row4.Value.Cast<string>());
+
+        var row5 = sheet.ReadRow<CollectionBaseClass>();
+        Assert.Equal(new string[] { "Invalid" }, row5.Value.Cast<string>());
+    }
+
+    public class CollectionBaseClass
+    {
+        public SubCollectionBase Value { get; set; } = default!;
+    }
+
+    public class SubCollectionBase : CollectionBase
+    {
+        protected override void OnValidate(object value) { }
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedSubCollectionBaseClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<CollectionBaseClass>(c =>
+        {
+            c.MapList<string>(p => p.Value);
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CollectionBaseClass>();
+        Assert.Equal(new string[] { "1", "2", "3" }, row1.Value.Cast<string>());
+
+        var row2 = sheet.ReadRow<CollectionBaseClass>();
+        Assert.Equal(new string?[] { "1", null, "2" }, row2.Value.Cast<string?>());
+
+        var row3 = sheet.ReadRow<CollectionBaseClass>();
+        Assert.Equal(new string[] { "1" }, row3.Value.Cast<string>());
+
+        var row4 = sheet.ReadRow<CollectionBaseClass>();
+        Assert.Empty(row4.Value.Cast<string>());
+
+        var row5 = sheet.ReadRow<CollectionBaseClass>();
+        Assert.Equal(new string[] { "Invalid" }, row5.Value.Cast<string>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedSubCollectionBaseClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<CollectionBaseClass>(c =>
+        {
+            c.MapList<int>(p => p.Value)
+                .WithElementMap(p => p
+                    .WithEmptyFallback(-1)
+                    .WithInvalidFallback(-2)
+                );
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CollectionBaseClass>();
+        Assert.Equal([1, 2, 3], row1.Value.Cast<int>());
+
+        var row2 = sheet.ReadRow<CollectionBaseClass>();
+        Assert.Equal([1, -1, 2], row2.Value.Cast<int>());
+
+        var row3 = sheet.ReadRow<CollectionBaseClass>();
+        Assert.Equal([1], row3.Value.Cast<int>());
+
+        var row4 = sheet.ReadRow<CollectionBaseClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<CollectionBaseClass>();
+        Assert.Equal([-2], row5.Value.Cast<int>());
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedStackClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<StackClass>();
+        Assert.Equal(new Stack(new string[] { "1", "2", "3" }), row1.Value);
+
+        var row2 = sheet.ReadRow<StackClass>();
+        Assert.Equal(3, row2.Value.Count);
+        Assert.Equal(new Stack(new string?[] { "1", null, "2" }), row2.Value);
+
+        var row3 = sheet.ReadRow<StackClass>();
+        Assert.Equal(new Stack(new string[] { "1" }), row3.Value);
+
+        var row4 = sheet.ReadRow<StackClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<StackClass>();
+        Assert.Equal(new Stack(new string[] { "Invalid" }), row5.Value);
+    }
+
+    public class StackClass
+    {
+        public Stack Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedStackClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<StackClass>(c =>
+        {
+            c.MapList<string>(p => p.Value);
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<StackClass>();
+        Assert.Equal(new Stack(new string[] { "1", "2", "3" }), row1.Value);
+
+        var row2 = sheet.ReadRow<StackClass>();
+        Assert.Equal(new Stack(new string?[] { "1", null, "2" }), row2.Value);
+
+        var row3 = sheet.ReadRow<StackClass>();
+        Assert.Equal(new Stack(new string[] { "1" }), row3.Value);
+
+        var row4 = sheet.ReadRow<StackClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<StackClass>();
+        Assert.Equal(new Stack(new string[] { "Invalid" }), row5.Value);
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedStackClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<StackClass>(c =>
+        {
+            c.MapList<int>(p => p.Value)
+                .WithElementMap(p => p
+                    .WithEmptyFallback(-1)
+                    .WithInvalidFallback(-2)
+                );
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<StackClass>();
+        Assert.Equal(new Stack(new int[] { 1, 2, 3 }), row1.Value);
+
+        var row2 = sheet.ReadRow<StackClass>();
+        Assert.Equal(new Stack(new int[] { 1, -1, 2 }), row2.Value);
+
+        var row3 = sheet.ReadRow<StackClass>();
+        Assert.Equal(new Stack(new int[] { 1 }), row3.Value);
+
+        var row4 = sheet.ReadRow<StackClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<StackClass>();
+        Assert.Equal(new Stack(new int[] { -2 }), row5.Value);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedQueueClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<QueueClass>();
+        Assert.Equal(new Queue(new string[] { "1", "2", "3" }), row1.Value);
+
+        var row2 = sheet.ReadRow<QueueClass>();
+        Assert.Equal(new Queue(new string?[] { "1", null, "2" }), row2.Value);
+
+        var row3 = sheet.ReadRow<QueueClass>();
+        Assert.Equal(new Queue(new string[] { "1" }), row3.Value);
+
+        var row4 = sheet.ReadRow<QueueClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<QueueClass>();
+        Assert.Equal(new Queue(new string[] { "Invalid" }), row5.Value);
+    }
+
+    public class QueueClass
+    {
+        public Queue Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedQueueClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<QueueClass>(c =>
+        {
+            c.MapList<string>(p => p.Value);
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<QueueClass>();
+        Assert.Equal(new Queue(new string[] { "1", "2", "3" }), row1.Value);
+
+        var row2 = sheet.ReadRow<QueueClass>();
+        Assert.Equal(new Queue(new string?[] { "1", null, "2" }), row2.Value);
+
+        var row3 = sheet.ReadRow<QueueClass>();
+        Assert.Equal(new Queue(new string[] { "1" }), row3.Value);
+
+        var row4 = sheet.ReadRow<QueueClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<QueueClass>();
+        Assert.Equal(new Queue(new string[] { "Invalid" }), row5.Value);
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedQueueClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<QueueClass>(c =>
+        {
+            c.MapList<int>(p => p.Value)
+                .WithElementMap(p => p
+                    .WithEmptyFallback(-1)
+                    .WithInvalidFallback(-2)
+                );
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<QueueClass>();
+        Assert.Equal(new Queue(new int[] { 1, 2, 3 }), row1.Value);
+
+        var row2 = sheet.ReadRow<QueueClass>();
+        Assert.Equal(new Queue(new int[] { 1, -1, 2 }), row2.Value);
+
+        var row3 = sheet.ReadRow<QueueClass>();
+        Assert.Equal(new Queue(new int[] { 1 }), row3.Value);
+
+        var row4 = sheet.ReadRow<QueueClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<QueueClass>();
+        Assert.Equal(new Queue(new int[] { -2 }), row5.Value);
     }
 
     [Fact]

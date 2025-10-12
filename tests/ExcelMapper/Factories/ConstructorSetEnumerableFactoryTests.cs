@@ -51,6 +51,8 @@ public class ConstructorSetEnumerableFactory2Tests
     [InlineData(typeof(ConstructorIReadOnlySetT<int>))]
     [InlineData(typeof(ConstructorIReadOnlySetT<string>))]
     [InlineData(typeof(ArrayList))]
+    [InlineData(typeof(Queue))]
+    [InlineData(typeof(Stack))]
     [InlineData(typeof(AbstractClass))]
     [InlineData(typeof(Collection<int>))]
     [InlineData(typeof(ReadOnlyObservableCollection<int>))]

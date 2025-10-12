@@ -285,6 +285,24 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_CollectionBaseType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<CollectionBase>? classMap));
+        Assert.Null(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubCollectionBaseType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubCollectionBase>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubCollectionBase : CollectionBase
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_StackType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Stack>? classMap));
@@ -499,6 +517,24 @@ public class AutoMapperTests
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Hashtable>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_DictionaryBaseType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<DictionaryBase>? classMap));
+        Assert.Null(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubDictionaryBaseType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubDictionaryBase>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubDictionaryBase : DictionaryBase
+    {
     }
 
     [Fact]

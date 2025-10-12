@@ -486,6 +486,13 @@ public static class AutoMapper
                     result = new ICollectionTImplementingEnumerableFactory<TElement>(listType);
                     return true;
                 }
+
+                // Add values with through IList.Add(TElement item).
+                if (listType.ImplementsInterface(typeof(IList)))
+                {
+                    result = new IListImplementingEnumerableFactory<TElement>(listType);
+                    return true;
+                }
             }
 
             // Check if the type has .ctor(ISet<T>) such as ReadOnlySet.

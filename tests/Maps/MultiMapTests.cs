@@ -4,6 +4,7 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Xunit;
 
 namespace ExcelMapper.Tests;
@@ -119,6 +120,58 @@ public class MultiMapTests
     }
     
     [Fact]
+    public void ReadRow_DefaultArrayList_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("MultiMap.xlsx");
+        
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ArrayList>();
+        Assert.Equal(["1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" ], row1);
+    }
+    
+    [Fact]
+    public void ReadRow_DefaultQueue_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("MultiMap.xlsx");
+        
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<Queue>();
+        Assert.Equal(["1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" ], row1.Cast<string>());
+    }
+    
+    [Fact]
+    public void ReadRow_DefaultCollectionBase_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("MultiMap.xlsx");
+        
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SubCollectionBase>();
+        Assert.Equal(["1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" ], row1.Cast<string>());
+    }
+
+    private class SubCollectionBase : CollectionBase
+    {
+    }
+    
+    [Fact]
+    public void ReadRow_DefaultStack_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("MultiMap.xlsx");
+        
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<Stack>();
+        Assert.Equal(new string[] { "1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" }.Reverse(), row1.Cast<string>());
+    }
+
+    [Fact]
     public void ReadRow_DefaultListString_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
@@ -127,7 +180,7 @@ public class MultiMapTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<List<string>>();
-        Assert.Equal(["1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" ], row1);
+        Assert.Equal(["1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3"], row1);
     }
     
     [Fact]
@@ -287,8 +340,8 @@ public class MultiMapTests
         Assert.Equal(["a", "b"], row1.IListObject);
         Assert.Equal(["a", "b"], row1.IReadOnlyListString);
         Assert.Equal(new ArrayList { "1", "2" }, row1.ArrayList);
-        Assert.Equal(new Queue(new string[] { "1", "2" }), row1.QueueNonGeneric);
         Assert.Equal(new Stack(new string[] { "1", "2" }), row1.StackNonGeneric);
+        Assert.Equal(new Queue(new string[] { "1", "2" }), row1.QueueNonGeneric);
         Assert.Equal(new string[] { "1", "2" }, row1.ListString);
         Assert.Equal(new string[] { "1", "2" }, row1._concreteICollection);
         Assert.Equal(new string[] { "1", "2" }, row1.CollectionString);
@@ -322,8 +375,8 @@ public class MultiMapTests
         Assert.Equal(["c", "d"], row2.IListObject);
         Assert.Equal(["c", "d"], row2.IReadOnlyListString);
         Assert.Equal(new ArrayList { "3", "4" }, row2.ArrayList);
-        Assert.Equal(new Queue(new string[] { "3", "4" }), row2.QueueNonGeneric);
         Assert.Equal(new Stack(new string[] { "3", "4" }), row2.StackNonGeneric);
+        Assert.Equal(new Queue(new string[] { "3", "4" }), row2.QueueNonGeneric);
         Assert.Equal(new string[] { "3", "4" }, row2.ListString);
         Assert.Equal(new string[] { "3", "4" }, row2._concreteICollection);
         Assert.Equal(new string[] { "3", "4" }, row2.CollectionString);
@@ -357,8 +410,8 @@ public class MultiMapTests
         Assert.Equal(["e", "f"], row3.IListObject);
         Assert.Equal(["e", "f"], row3.IReadOnlyListString);
         Assert.Equal(new ArrayList { "5", "6" }, row3.ArrayList);
-        Assert.Equal(new Queue(new string[] { "5", "6" }), row3.QueueNonGeneric);
         Assert.Equal(new Stack(new string[] { "5", "6" }), row3.StackNonGeneric);
+        Assert.Equal(new Queue(new string[] { "5", "6" }), row3.QueueNonGeneric);
         Assert.Equal(new string[] { "5", "6" }, row3.ListString);
         Assert.Equal(new string[] { "5", "6" }, row3._concreteICollection);
         Assert.Equal(new string[] { "5", "6" }, row3.CollectionString);
@@ -392,8 +445,8 @@ public class MultiMapTests
         Assert.Equal(["g", "h"], row4.IListObject);
         Assert.Equal(["g", "h"], row4.IReadOnlyListString);
         Assert.Equal(new ArrayList { "7", "8" }, row4.ArrayList);
-        Assert.Equal(new Queue(new string[] { "7", "8" }), row4.QueueNonGeneric);
         Assert.Equal(new Stack(new string[] { "7", "8" }), row4.StackNonGeneric);
+        Assert.Equal(new Queue(new string[] { "7", "8" }), row4.QueueNonGeneric);
         Assert.Equal(new string[] { "7", "8" }, row4.ListString);
         Assert.Equal(new string[] { "7", "8" }, row4._concreteICollection);
         Assert.Equal(new string[] { "7", "8" }, row4.CollectionString);
@@ -429,8 +482,8 @@ public class MultiMapTests
         public IList<object> IListObject { get; set; } = default!;
         public IReadOnlyList<string> IReadOnlyListString { get; set; } = default!;
         public ArrayList ArrayList { get; set; } = default!;
-        public Queue QueueNonGeneric { get; set; } = default!;
         public Stack StackNonGeneric { get; set; } = default!;
+        public Queue QueueNonGeneric { get; set; } = default!;
         public List<string> ListString { get; set; } = default!;
         public SortedSet<string> _concreteICollection = default!;
         public Collection<string> CollectionString { get; set; } = default!;
@@ -508,10 +561,10 @@ public class MultiMapTests
             MapList<string>(p => p.ArrayList)
                 .WithColumnNames("ListString1", "ListString2");
 
-            MapList<string>(p => p.QueueNonGeneric)
+            MapList<string>(p => p.StackNonGeneric)
                 .WithColumnNames("ListString1", "ListString2");
 
-            MapList<string>(p => p.StackNonGeneric)
+            MapList<string>(p => p.QueueNonGeneric)
                 .WithColumnNames("ListString1", "ListString2");
 
             Map(p => p.ListString)

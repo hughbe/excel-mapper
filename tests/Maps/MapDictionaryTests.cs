@@ -1682,6 +1682,148 @@ public class MapDictionaryTest
     }
 
     [Fact]
+    public void ReadRow_AutoMappedDictionaryBase_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SubDictionaryBase>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", ((IDictionary)row1)["Column1"]);
+        Assert.Equal("1", ((IDictionary)row1)["Column2"]);
+        Assert.Equal("2", ((IDictionary)row1)["Column3"]);
+        Assert.Null(((IDictionary)row1)["Column4"]);
+
+        var row2 = sheet.ReadRow<SubDictionaryBase>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", ((IDictionary)row2)["Column1"]);
+        Assert.Equal("0", ((IDictionary)row2)["Column2"]);
+        Assert.Equal("0", ((IDictionary)row2)["Column3"]);
+        Assert.Null(((IDictionary)row2)["Column4"]);
+
+        var row3 = sheet.ReadRow<SubDictionaryBase>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", ((IDictionary)row3)["Column1"]);
+        Assert.Equal("-2", ((IDictionary)row3)["Column2"]);
+        Assert.Equal("-1", ((IDictionary)row3)["Column3"]);
+        Assert.Null(((IDictionary)row3)["Column4"]);
+    }
+
+    private class SubDictionaryBase : DictionaryBase
+    {
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedDictionaryBaseClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<DictionaryBaseClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", ((IDictionary)row1.Value)["Column1"]);
+        Assert.Equal("1", ((IDictionary)row1.Value)["Column2"]);
+        Assert.Equal("2", ((IDictionary)row1.Value)["Column3"]);
+        Assert.Null(((IDictionary)row1.Value)["Column4"]);
+
+        var row2 = sheet.ReadRow<DictionaryBaseClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", ((IDictionary)row2.Value)["Column1"]);
+        Assert.Equal("0", ((IDictionary)row2.Value)["Column2"]);
+        Assert.Equal("0", ((IDictionary)row2.Value)["Column3"]);
+        Assert.Null(((IDictionary)row2.Value)["Column4"]);
+
+        var row3 = sheet.ReadRow<DictionaryBaseClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", ((IDictionary)row3.Value)["Column1"]);
+        Assert.Equal("-2", ((IDictionary)row3.Value)["Column2"]);
+        Assert.Equal("-1", ((IDictionary)row3.Value)["Column3"]);
+        Assert.Null(((IDictionary)row3.Value)["Column4"]);
+    }
+
+    private class DictionaryBaseClass
+    {
+        public SubDictionaryBase Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedDictionaryBase_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultDictionaryBaseClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<DictionaryBaseClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", ((IDictionary)row1.Value)["Column1"]);
+        Assert.Equal("1", ((IDictionary)row1.Value)["Column2"]);
+        Assert.Equal("2", ((IDictionary)row1.Value)["Column3"]);
+        Assert.Null(((IDictionary)row1.Value)["Column4"]);
+
+        var row2 = sheet.ReadRow<DictionaryBaseClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", ((IDictionary)row2.Value)["Column1"]);
+        Assert.Equal("0", ((IDictionary)row2.Value)["Column2"]);
+        Assert.Equal("0", ((IDictionary)row2.Value)["Column3"]);
+        Assert.Null(((IDictionary)row2.Value)["Column4"]);
+
+        var row3 = sheet.ReadRow<DictionaryBaseClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", ((IDictionary)row3.Value)["Column1"]);
+        Assert.Equal("-2", ((IDictionary)row3.Value)["Column2"]);
+        Assert.Equal("-1", ((IDictionary)row3.Value)["Column3"]);
+        Assert.Null(((IDictionary)row3.Value)["Column4"]);
+    }
+
+    private class DefaultDictionaryBaseClassMap : ExcelClassMap<DictionaryBaseClass>
+    {
+        public DefaultDictionaryBaseClassMap()
+        {
+            Map<object>(p => p.Value);
+        }
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedDictionaryBase_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap(new CustomDictionaryBaseClassMap());
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<DictionaryBaseClass>();
+        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal("1", ((IDictionary)row1.Value)["Column2"]);
+        Assert.Equal("2", ((IDictionary)row1.Value)["Column3"]);
+
+        var row2 = sheet.ReadRow<DictionaryBaseClass>();
+        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal("0", ((IDictionary)row2.Value)["Column2"]);
+        Assert.Equal("0", ((IDictionary)row2.Value)["Column3"]);
+
+        var row3 = sheet.ReadRow<DictionaryBaseClass>();
+        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal("-2", ((IDictionary)row3.Value)["Column2"]);
+        Assert.Equal("-1", ((IDictionary)row3.Value)["Column3"]);
+    }
+
+    private class CustomDictionaryBaseClassMap : ExcelClassMap<DictionaryBaseClass>
+    {
+        public CustomDictionaryBaseClassMap()
+        {
+            Map<object>(p => p.Value)
+                .WithColumnNames("Column2", "Column3");
+        }
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedStringDictionary_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");

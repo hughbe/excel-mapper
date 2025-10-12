@@ -36,6 +36,8 @@ public class ISetTImplementingEnumerableFactoryTests
     [InlineData(typeof(IReadOnlyList<int>))]
     [InlineData(typeof(int[]))]
     [InlineData(typeof(ArrayList))]
+    [InlineData(typeof(Stack))]
+    [InlineData(typeof(Queue))]
     [InlineData(typeof(IListNonGeneric))]
     [InlineData(typeof(ICollectionNonGeneric))]
     [InlineData(typeof(ICollectionGeneric<int>))]
