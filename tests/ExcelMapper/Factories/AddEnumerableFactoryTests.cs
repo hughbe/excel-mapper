@@ -115,6 +115,19 @@ public class AddEnumerableFactoryTests
     }
 
     [Fact]
+    public void Add_Throws_Rethrows()
+    {
+        var factory = new AddEnumerableFactory<int>(typeof(AddThrowsClass<int>));
+        factory.Begin(1);
+        Assert.Throws<InvalidOperationException>(() => factory.Add(1));
+    }
+
+    private class AddThrowsClass<T>
+    {
+        public void Add(T item) => throw new InvalidOperationException();
+    }
+
+    [Fact]
     public void Set_Invoke_ThrowsNotSupportedException()
     {
         var factory = new AddEnumerableFactory<int>(typeof(List<int>));

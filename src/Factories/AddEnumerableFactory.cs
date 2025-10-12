@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelMapper.Abstractions;
+using ExcelMapper.Utilities;
 
 namespace ExcelMapper.Factories;
 
@@ -43,7 +44,7 @@ public class AddEnumerableFactory<T> : IEnumerableFactory<T>
     public void Add(T? item)
     {
         EnsureMapping();
-        _addMethod.Invoke(_items, [item]);
+        _addMethod.InvokeUnwrapped(_items, [item]);
     }
 
     public void Set(int index, T? item)

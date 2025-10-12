@@ -4,6 +4,7 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -722,6 +723,15 @@ public static class AutoMapper
             }
         }
 
+        // Special case for StringDictionary.
+        // The class implements Add(string, string) and IEnumerable.
+        if (dictionaryType.IsEqualOrSubclassOf(typeof(StringDictionary)))
+        {
+            keyType = typeof(string);
+            valueType = typeof(string);
+            return true;
+        }
+
         // Otherwise we can parse regular IDictionary.
         if (dictionaryType == typeof(IDictionary) || dictionaryType.ImplementsInterface(typeof(IDictionary)))
         {
@@ -791,6 +801,14 @@ public static class AutoMapper
             else if (dictionaryType.ImplementsInterface(typeof(IDictionary)))
             {
                 result = new IDictionaryImplementingFactory<TKey, TValue>(dictionaryType);
+                return true;
+            }
+
+            // Check if the type has Add(TKey, TValue) such as StringDictionary.
+            var addMethod = dictionaryType.GetMethod("Add", [typeof(TKey), typeof(TValue)]);
+            if (addMethod != null)
+            {
+                result = new AddDictionaryFactory<TKey, TValue>(dictionaryType);
                 return true;
             }
         }

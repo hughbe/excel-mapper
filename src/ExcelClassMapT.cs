@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Dynamic;
 using System.Linq.Expressions;
 using ExcelMapper.Utilities;
@@ -240,6 +241,16 @@ public class ExcelClassMap<T> : ExcelClassMap
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
+    /// This is used for map enumerables.
+    /// </summary>
+    /// <typeparam name="TValue">The element type of property or field to map.</typeparam>
+    /// <param name="expression">A MemberExpression reading the property or field.</param>
+    /// <returns>The map for the given property or field.</returns>
+    public ManyToOneDictionaryMap<string, TValue> MapDictionary<TValue>(Expression<Func<T, IEnumerable>> expression)
+        => GetOrCreateManyToOneDictionaryMap<string, TValue>(expression.Body);
+
+    /// <summary>
+    /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map IDictionarys.
     /// </summary>
     /// <typeparam name="TValue">The element type of property or field to map.</typeparam>
@@ -277,6 +288,15 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneDictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, Dictionary<string, TValue>>> expression)
         => GetOrCreateManyToOneDictionaryMap<string, TValue>(expression.Body);
+
+    /// <summary>
+    /// Creates a map for a property or field given a MemberExpression reading the property or field.
+    /// This is used for map StringDictionary.
+    /// </summary>
+    /// <param name="expression">A MemberExpression reading the property or field.</param>
+    /// <returns>The map for the given property or field.</returns>
+    public ManyToOneDictionaryMap<string, string> Map(Expression<Func<T, StringDictionary>> expression)
+        => GetOrCreateManyToOneDictionaryMap<string, string>(expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.

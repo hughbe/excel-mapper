@@ -1682,6 +1682,178 @@ public class MapDictionaryTest
     }
 
     [Fact]
+    public void ReadRow_AutoMappedStringDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<StringDictionary>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = sheet.ReadRow<StringDictionary>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = sheet.ReadRow<StringDictionary>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSubStringDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SubStringDictionary>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = sheet.ReadRow<SubStringDictionary>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = sheet.ReadRow<SubStringDictionary>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    private class SubStringDictionary : StringDictionary
+    {
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedStringDictionaryClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<StringDictionaryClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<StringDictionaryClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<StringDictionaryClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
+    }
+
+    private class StringDictionaryClass
+    {
+        public StringDictionary Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedStringDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultStringDictionaryClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<StringDictionaryClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<StringDictionaryClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<StringDictionaryClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
+    }
+
+    private class DefaultStringDictionaryClassMap : ExcelClassMap<StringDictionaryClass>
+    {
+        public DefaultStringDictionaryClassMap()
+        {
+            Map(p => p.Value);
+        }
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedStringDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap(new CustomStringDictionaryClassMap());
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<StringDictionaryClass>();
+        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+
+        var row2 = sheet.ReadRow<StringDictionaryClass>();
+        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+
+        var row3 = sheet.ReadRow<StringDictionaryClass>();
+        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+    }
+
+    private class CustomStringDictionaryClassMap : ExcelClassMap<StringDictionaryClass>
+    {
+        public CustomStringDictionaryClassMap()
+        {
+            MapDictionary<string>(p => p.Value)
+                .WithColumnNames("Column2", "Column3");
+        }
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedOrderedDictionary_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");

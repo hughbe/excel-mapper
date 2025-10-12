@@ -502,6 +502,13 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_StringDictionaryType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<StringDictionary>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
     public void TryCreateClass_Map_OrderedDictionaryType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<OrderedDictionary>? classMap));
