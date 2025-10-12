@@ -300,6 +300,15 @@ public class ExcelClassMap<T> : ExcelClassMap
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
+    /// This is used for map NameValueCollection.
+    /// </summary>
+    /// <param name="expression">A MemberExpression reading the property or field.</param>
+    /// <returns>The map for the given property or field.</returns>
+    public ManyToOneDictionaryMap<string, string> Map(Expression<Func<T, NameValueCollection>> expression)
+        => GetOrCreateManyToOneDictionaryMap<string, string>(expression.Body);
+
+    /// <summary>
+    /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map ExpandoObjects.
     /// </summary>
     /// <param name="expression">A MemberExpression reading the property or field.</param>

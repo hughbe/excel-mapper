@@ -4,6 +4,7 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using Xunit;
 
@@ -144,7 +145,18 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultCollectionBase_ReturnsExpected()
+    public void ReadRow_DefaultCollectionBase_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("MultiMap.xlsx");
+        
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CollectionBase>());
+    }
+    
+    [Fact]
+    public void ReadRow_DefaultSubCollectionBase_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -160,6 +172,33 @@ public class MultiMapTests
     }
     
     [Fact]
+    public void ReadRow_DefaultReadOnlyCollectionBase_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("MultiMap.xlsx");
+        
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ReadOnlyCollectionBase>());
+    }    
+
+    [Fact]
+    public void ReadRow_DefaultSubReadOnlyCollectionBase_Success()
+    {
+        using var importer = Helpers.GetImporter("MultiMap.xlsx");
+        
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SubReadOnlyCollectionBase>();
+        Assert.Empty(row1);
+    }
+
+    private class SubReadOnlyCollectionBase : ReadOnlyCollectionBase
+    {
+    }
+    
+    [Fact]
     public void ReadRow_DefaultStack_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
@@ -169,6 +208,18 @@ public class MultiMapTests
 
         var row1 = sheet.ReadRow<Stack>();
         Assert.Equal(new string[] { "1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" }.Reverse(), row1.Cast<string>());
+    }
+    
+    [Fact]
+    public void ReadRow_DefaultStringCollection_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("MultiMap.xlsx");
+        
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<StringCollection>();
+        Assert.Equal(["1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3"], row1);
     }
 
     [Fact]
@@ -204,6 +255,18 @@ public class MultiMapTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<Collection<string>>();
+        Assert.Equal(["1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" ], row1);
+    }
+    
+    [Fact]
+    public void ReadRow_DefaultReadOnlyCollectionString_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("MultiMap.xlsx");
+        
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ReadOnlyCollection<string>>();
         Assert.Equal(["1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" ], row1);
     }
     

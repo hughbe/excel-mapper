@@ -1824,6 +1824,178 @@ public class MapDictionaryTest
     }
 
     [Fact]
+    public void ReadRow_AutoMappedNameValueCollection_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<NameValueCollection>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = sheet.ReadRow<NameValueCollection>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = sheet.ReadRow<NameValueCollection>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSubNameValueCollection_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SubNameValueCollection>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = sheet.ReadRow<SubNameValueCollection>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = sheet.ReadRow<SubNameValueCollection>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    private class SubNameValueCollection : NameValueCollection
+    {
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedNameValueCollectionClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<NameValueCollectionClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<NameValueCollectionClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<NameValueCollectionClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
+    }
+
+    private class NameValueCollectionClass
+    {
+        public NameValueCollection Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedNameValueCollection_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultNameValueCollectionClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<NameValueCollectionClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<NameValueCollectionClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<NameValueCollectionClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
+    }
+
+    private class DefaultNameValueCollectionClassMap : ExcelClassMap<NameValueCollectionClass>
+    {
+        public DefaultNameValueCollectionClassMap()
+        {
+            Map(p => p.Value);
+        }
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedNameValueCollection_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap(new CustomNameValueCollectionClassMap());
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<NameValueCollectionClass>();
+        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+
+        var row2 = sheet.ReadRow<NameValueCollectionClass>();
+        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+
+        var row3 = sheet.ReadRow<NameValueCollectionClass>();
+        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+    }
+
+    private class CustomNameValueCollectionClassMap : ExcelClassMap<NameValueCollectionClass>
+    {
+        public CustomNameValueCollectionClassMap()
+        {
+            MapDictionary<string>(p => p.Value)
+                .WithColumnNames("Column2", "Column3");
+        }
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedStringDictionary_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
@@ -1991,6 +2163,522 @@ public class MapDictionaryTest
         public CustomStringDictionaryClassMap()
         {
             MapDictionary<string>(p => p.Value)
+                .WithColumnNames("Column2", "Column3");
+        }
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSortedList_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SortedList>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = sheet.ReadRow<SortedList>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = sheet.ReadRow<SortedList>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSubSortedList_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SubSortedList>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = sheet.ReadRow<SubSortedList>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = sheet.ReadRow<SubSortedList>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    private class SubSortedList : SortedList
+    {
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSortedListClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SortedListClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<SortedListClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<SortedListClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
+    }
+
+    private class SortedListClass
+    {
+        public SortedList Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedSortedList_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultSortedListClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SortedListClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<SortedListClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<SortedListClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
+    }
+
+    private class DefaultSortedListClassMap : ExcelClassMap<SortedListClass>
+    {
+        public DefaultSortedListClassMap()
+        {
+            Map<object>(p => p.Value);
+        }
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedSortedList_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap(new CustomSortedListClassMap());
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SortedListClass>();
+        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+
+        var row2 = sheet.ReadRow<SortedListClass>();
+        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+
+        var row3 = sheet.ReadRow<SortedListClass>();
+        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+    }
+
+    private class CustomSortedListClassMap : ExcelClassMap<SortedListClass>
+    {
+        public CustomSortedListClassMap()
+        {
+            Map<object>(p => p.Value)
+                .WithColumnNames("Column2", "Column3");
+        }
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedHybridDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<HybridDictionary>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = sheet.ReadRow<HybridDictionary>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = sheet.ReadRow<HybridDictionary>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSubHybridDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SubHybridDictionary>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = sheet.ReadRow<SubHybridDictionary>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = sheet.ReadRow<SubHybridDictionary>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    private class SubHybridDictionary : HybridDictionary
+    {
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedHybridDictionaryClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<HybridDictionaryClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<HybridDictionaryClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<HybridDictionaryClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
+    }
+
+    private class HybridDictionaryClass
+    {
+        public HybridDictionary Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedHybridDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultHybridDictionaryClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<HybridDictionaryClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<HybridDictionaryClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<HybridDictionaryClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
+    }
+
+    private class DefaultHybridDictionaryClassMap : ExcelClassMap<HybridDictionaryClass>
+    {
+        public DefaultHybridDictionaryClassMap()
+        {
+            Map<object>(p => p.Value);
+        }
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedHybridDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap(new CustomHybridDictionaryClassMap());
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<HybridDictionaryClass>();
+        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+
+        var row2 = sheet.ReadRow<HybridDictionaryClass>();
+        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+
+        var row3 = sheet.ReadRow<HybridDictionaryClass>();
+        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+    }
+
+    private class CustomHybridDictionaryClassMap : ExcelClassMap<HybridDictionaryClass>
+    {
+        public CustomHybridDictionaryClassMap()
+        {
+            Map<object>(p => p.Value)
+                .WithColumnNames("Column2", "Column3");
+        }
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedListDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ListDictionary>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = sheet.ReadRow<ListDictionary>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = sheet.ReadRow<ListDictionary>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSubListDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SubListDictionary>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = sheet.ReadRow<SubListDictionary>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = sheet.ReadRow<SubListDictionary>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    private class SubListDictionary : ListDictionary
+    {
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedListDictionaryClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ListDictionaryClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<ListDictionaryClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<ListDictionaryClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
+    }
+
+    private class ListDictionaryClass
+    {
+        public ListDictionary Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedListDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultListDictionaryClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ListDictionaryClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<ListDictionaryClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<ListDictionaryClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
+    }
+
+    private class DefaultListDictionaryClassMap : ExcelClassMap<ListDictionaryClass>
+    {
+        public DefaultListDictionaryClassMap()
+        {
+            Map<object>(p => p.Value);
+        }
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedListDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap(new CustomListDictionaryClassMap());
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ListDictionaryClass>();
+        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+
+        var row2 = sheet.ReadRow<ListDictionaryClass>();
+        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+
+        var row3 = sheet.ReadRow<ListDictionaryClass>();
+        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+    }
+
+    private class CustomListDictionaryClassMap : ExcelClassMap<ListDictionaryClass>
+    {
+        public CustomListDictionaryClassMap()
+        {
+            Map<object>(p => p.Value)
                 .WithColumnNames("Column2", "Column3");
         }
     }
@@ -2757,6 +3445,302 @@ public class MapDictionaryTest
     private class ConcurrentDictionaryStringInvalidClass
     {
         public ConcurrentDictionary<string, ExcelSheet> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSortedListStringObject_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SortedList<string, object>>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = sheet.ReadRow<SortedList<string, object>>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = sheet.ReadRow<SortedList<string, object>>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSubSortedListStringObject_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SubSortedList<string, object>>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = sheet.ReadRow<SubSortedList<string, object>>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = sheet.ReadRow<SubSortedList<string, object>>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    private class SubSortedList<TKey, TValue> : SortedList<TKey, TValue> where TKey : notnull
+    {
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSortedListStringObjectClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SortedListStringObjectClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<SortedListStringObjectClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<SortedListStringObjectClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
+    }
+
+    private class SortedListStringObjectClass
+    {
+        public SortedList<string, object> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedSortedListStringObject_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultSortedListStringObjectClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SortedListStringObjectClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<SortedListStringObjectClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<SortedListStringObjectClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
+    }
+
+    private class DefaultSortedListStringObjectClassMap : ExcelClassMap<SortedListStringObjectClass>
+    {
+        public DefaultSortedListStringObjectClassMap()
+        {
+            Map(p => (IDictionary<string, object>)p.Value);
+        }
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedSortedListStringObject_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap(new CustomSortedListStringObjectClassMap());
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SortedListStringObjectClass>();
+        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+
+        var row2 = sheet.ReadRow<SortedListStringObjectClass>();
+        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+
+        var row3 = sheet.ReadRow<SortedListStringObjectClass>();
+        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+    }
+
+    private class CustomSortedListStringObjectClassMap : ExcelClassMap<SortedListStringObjectClass>
+    {
+        public CustomSortedListStringObjectClassMap()
+        {
+            Map(p => (IDictionary<string, object>)p.Value)
+                .WithColumnNames("Column2", "Column3");
+        }
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSortedListStringInt_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SortedListStringIntClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal(1, row1.Value["Column1"]);
+        Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<SortedListStringIntClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal(0, row2.Value["Column1"]);
+        Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<SortedListStringIntClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal(-2, row3.Value["Column1"]);
+        Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
+    }
+
+    private class SortedListStringIntClass
+    {
+        public SortedList<string, int> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedSortedListStringInt_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultSortedListStringIntClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SortedListStringIntClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal(1, row1.Value["Column1"]);
+        Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<SortedListStringIntClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal(0, row2.Value["Column1"]);
+        Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<SortedListStringIntClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal(-2, row3.Value["Column1"]);
+        Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
+    }
+
+    private class DefaultSortedListStringIntClassMap : ExcelClassMap<SortedListStringIntClass>
+    {
+        public DefaultSortedListStringIntClassMap()
+        {
+            Map(p => (IDictionary<string, int>)p.Value);
+        }
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedSortedListStringInt_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap(new CustomSortedListStringIntClassMap());
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SortedListStringIntClass>();
+        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal(1, row1.Value["Column2"]);
+        Assert.Equal(2, row1.Value["Column3"]);
+
+        var row2 = sheet.ReadRow<SortedListStringIntClass>();
+        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+
+        var row3 = sheet.ReadRow<SortedListStringIntClass>();
+        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal(-2, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+    }
+
+    private class CustomSortedListStringIntClassMap : ExcelClassMap<SortedListStringIntClass>
+    {
+        public CustomSortedListStringIntClassMap()
+        {
+            Map(p => (IDictionary<string, int>)p.Value)
+                .WithColumnNames("Column2", "Column3");
+        }
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSortedListStringInvalidObject_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SortedListStringInvalidClass>());
+    }
+
+    private class SortedListStringInvalidClass
+    {
+        public SortedList<string, ExcelSheet> Value { get; set; } = default!;
     }
 
     [Fact]

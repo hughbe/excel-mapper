@@ -2704,6 +2704,129 @@ public class MapExpressionsTests
     }
 
     [Fact]
+    public void ReadRows_DefaultMappedHybridDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        var map = new ExcelClassMap<HybridDictionaryClass>();
+        map.Map(o => o.Values["Column2"]);
+        map.Map(o => o.Values["Column3"]);
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<HybridDictionaryClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("1", row.Values["Column2"]);
+        Assert.Equal("2", row.Values["Column3"]);
+    }
+
+    private class HybridDictionaryClass
+    {
+        public HybridDictionary Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedHybridDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<HybridDictionaryClass>();
+        map.Map(o => o.Values["Column2"]).WithColumnName("Column3");
+        map.Map(o => o.Values["Column3"]).WithColumnName("Column4");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<HybridDictionaryClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("3", row.Values["Column2"]);
+        Assert.Equal("4", row.Values["Column3"]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedListDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        var map = new ExcelClassMap<ListDictionaryClass>();
+        map.Map(o => o.Values["Column2"]);
+        map.Map(o => o.Values["Column3"]);
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ListDictionaryClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("1", row.Values["Column2"]);
+        Assert.Equal("2", row.Values["Column3"]);
+    }
+
+    private class ListDictionaryClass
+    {
+        public ListDictionary Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedListDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<ListDictionaryClass>();
+        map.Map(o => o.Values["Column2"]).WithColumnName("Column3");
+        map.Map(o => o.Values["Column3"]).WithColumnName("Column4");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ListDictionaryClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("3", row.Values["Column2"]);
+        Assert.Equal("4", row.Values["Column3"]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedNameValueCollectionIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        var map = new ExcelClassMap<NameValueCollectionClass>();
+        map.Map(o => o.Values["Column2"]);
+        map.Map(o => o.Values["Column3"]);
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<NameValueCollectionClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("1", row.Values["Column2"]);
+        Assert.Equal("2", row.Values["Column3"]);
+    }
+
+    private class NameValueCollectionClass
+    {
+        public NameValueCollection Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedNameValueCollectionIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<NameValueCollectionClass>();
+        map.Map(o => o.Values["Column2"]).WithColumnName("Column3");
+        map.Map(o => o.Values["Column3"]).WithColumnName("Column4");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<NameValueCollectionClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("3", row.Values["Column2"]);
+        Assert.Equal("4", row.Values["Column3"]);
+    }
+
+    [Fact]
     public void ReadRows_DefaultMappedStringDictionaryIndex_Success()
     {
         using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");

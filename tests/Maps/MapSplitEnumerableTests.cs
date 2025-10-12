@@ -5,6 +5,7 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using Xunit;
 
@@ -744,6 +745,95 @@ public class MapSplitEnumerableTests
 
         var row5 = sheet.ReadRow<QueueClass>();
         Assert.Equal(new Queue(new int[] { -2 }), row5.Value);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedStringCollectionClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<StringCollectionClass>();
+        Assert.Equal(new StringCollection { "1", "2", "3" }, row1.Value);
+
+        var row2 = sheet.ReadRow<StringCollectionClass>();
+        Assert.Equal(new StringCollection { "1", null, "2" }, row2.Value);
+
+        var row3 = sheet.ReadRow<StringCollectionClass>();
+        Assert.Equal(new StringCollection { "1" }, row3.Value);
+
+        var row4 = sheet.ReadRow<StringCollectionClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<StringCollectionClass>();
+        Assert.Equal(new StringCollection { "Invalid" }, row5.Value);
+    }
+
+    public class StringCollectionClass
+    {
+        public StringCollection Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedStringCollectionClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<StringCollectionClass>(c =>
+        {
+            c.MapList<string>(p => p.Value);
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<StringCollectionClass>();
+        Assert.Equal(new StringCollection { "1", "2", "3" }, row1.Value);
+
+        var row2 = sheet.ReadRow<StringCollectionClass>();
+        Assert.Equal(new StringCollection { "1", null, "2" }, row2.Value);
+
+        var row3 = sheet.ReadRow<StringCollectionClass>();
+        Assert.Equal(new StringCollection { "1" }, row3.Value);
+
+        var row4 = sheet.ReadRow<StringCollectionClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<StringCollectionClass>();
+        Assert.Equal(new StringCollection { "Invalid" }, row5.Value);
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedStringCollectionClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<StringCollectionClass>(c =>
+        {
+            c.MapList<string>(p => p.Value)
+                .WithElementMap(p => p
+                    .WithEmptyFallback("-1")
+                    .WithInvalidFallback("-2")
+                );
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<StringCollectionClass>();
+        Assert.Equal(new string[] { "1", "2", "3" }, row1.Value.Cast<string>());
+
+        var row2 = sheet.ReadRow<StringCollectionClass>();
+        Assert.Equal(new string[] { "1", "-1", "2" }, row2.Value.Cast<string>());
+
+        var row3 = sheet.ReadRow<StringCollectionClass>();
+        Assert.Equal(new string[] { "1" }, row3.Value.Cast<string>());
+
+        var row4 = sheet.ReadRow<StringCollectionClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<StringCollectionClass>();
+        Assert.Equal(new string[] { "Invalid" }, row5.Value.Cast<string>());
     }
 
     [Fact]

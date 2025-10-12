@@ -303,6 +303,24 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_ReadOnlyCollectionBaseType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ReadOnlyCollectionBase>? classMap));
+        Assert.Null(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubReadOnlyCollectionBaseType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubReadOnlyCollectionBase>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubReadOnlyCollectionBase : ReadOnlyCollectionBase
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_StackType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Stack>? classMap));
@@ -324,9 +342,9 @@ public class AutoMapperTests
     }
 
     [Fact]
-    public void TryCreateClass_Map_SortedListType_ReturnsTrue()
+    public void TryCreateClass_Map_StringCollectionType_ReturnsTrue()
     {
-        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SortedList>? classMap));
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<StringCollection>? classMap));
         Assert.NotNull(classMap);
     }
 
@@ -535,6 +553,34 @@ public class AutoMapperTests
 
     private class SubDictionaryBase : DictionaryBase
     {
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_HybridDictionaryType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<HybridDictionary>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_NameValueCollectionType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<NameValueCollection>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_ListDictionaryType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ListDictionary>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SortedListType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SortedList>? classMap));
+        Assert.NotNull(classMap);
     }
 
     [Fact]
