@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using Xunit;
 
 namespace ExcelMapper.Tests;
@@ -1446,6 +1447,88 @@ public class MapExpressionsTests
         sheet.ReadHeading();
 
         var row = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("2", row.Values[0]);
+        Assert.Equal("3", row.Values[1]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedCollectionIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<CollectionClass>();
+        map.Map(o => o.Values[0]);
+        map.Map(o => o.Values[1]);
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<CollectionClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("1", row.Values[0]);
+        Assert.Equal("2", row.Values[1]);
+    }
+
+    private class CollectionClass
+    {
+        public Collection<string> Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedCollectionIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<CollectionClass>();
+        map.Map(o => o.Values[0]).WithColumnName("Column2");
+        map.Map(o => o.Values[1]).WithColumnName("Column3");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<CollectionClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("2", row.Values[0]);
+        Assert.Equal("3", row.Values[1]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedReadOnlyCollectionIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<ReadOnlyCollectionClass>();
+        map.Map(o => o.Values[0]);
+        map.Map(o => o.Values[1]);
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ReadOnlyCollectionClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("1", row.Values[0]);
+        Assert.Equal("2", row.Values[1]);
+    }
+
+    private class ReadOnlyCollectionClass
+    {
+        public ReadOnlyCollection<string> Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedReadOnlyCollectionIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<ReadOnlyCollectionClass>();
+        map.Map(o => o.Values[0]).WithColumnName("Column2");
+        map.Map(o => o.Values[1]).WithColumnName("Column3");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ReadOnlyCollectionClass>();
         Assert.Equal(2, row.Values.Count);
         Assert.Equal("2", row.Values[0]);
         Assert.Equal("3", row.Values[1]);

@@ -291,6 +291,27 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_CollectionType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Collection<string>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_ReadOnlyCollectionType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ReadOnlyCollection<string>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_LinkedListType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<LinkedList<string>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
     public void TryCreateClass_Map_ListStringType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<List<string>>? classMap));
@@ -470,6 +491,25 @@ public class AutoMapperTests
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ConcurrentDictionary<string, object>>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SortedListTType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SortedList<string, int>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_KeyedCollectionType_ReturnsTrue()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<KeyedCollection<string, object>>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private class SubKeyedCollection<TKey, TValue> : KeyedCollection<TKey, TValue> where TKey : notnull
+    {
+        protected override TKey GetKeyForItem(TValue item) => throw new NotImplementedException();
     }
 
     [Fact]

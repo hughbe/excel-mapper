@@ -29,7 +29,8 @@ public class ConstructorEnumerableFactory<T> : IEnumerableFactory<T>
             throw new ArgumentException("Abstract collection types cannot be created.", nameof(collectionType));
         }
 
-        _constructor = collectionType.GetConstructor([typeof(IEnumerable<T>)])
+        _constructor = collectionType.GetConstructor([typeof(IList<T>)])
+            ?? collectionType.GetConstructor([typeof(IEnumerable<T>)])
             ?? collectionType.GetConstructor([typeof(ICollection)])
             ?? throw new ArgumentException($"Collection type {collectionType} does not have a constructor that takes IEnumerable<{typeof(T)}>.", nameof(collectionType));
 

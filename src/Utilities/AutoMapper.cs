@@ -470,7 +470,9 @@ public static class AutoMapper
             }
 
             // Check if the type has .ctor(ICollection) or .ctor(IEnumerable<T>) such as Queue or Stack.
-            var ctor = listType.GetConstructor([typeof(ICollection)]) ?? listType.GetConstructor([typeof(IEnumerable<TElement>)]);
+            var ctor = listType.GetConstructor([typeof(IList<TElement>)])
+                ?? listType.GetConstructor([typeof(IEnumerable<TElement>)])
+                ?? listType.GetConstructor([typeof(ICollection)]);
             if (ctor != null)
             {
                 result = new ConstructorEnumerableFactory<TElement>(listType);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Xunit;
 
 namespace ExcelMapper.Factories;
@@ -12,7 +13,12 @@ public class ConstructorEnumerableFactoryTests
     [InlineData(typeof(ConstructorIEnumerable))]
     [InlineData(typeof(ConstructorIEnumerableT<int>))]
     [InlineData(typeof(ConstructorICollection))]
+    [InlineData(typeof(ConstructorICollectionT<int>))]
+    [InlineData(typeof(ConstructorIListT<int>))]
     [InlineData(typeof(ArrayList))]
+    [InlineData(typeof(Collection<int>))]
+    [InlineData(typeof(ObservableCollection<int>))]
+    [InlineData(typeof(ReadOnlyCollection<int>))]
     public void Ctor_Type(Type collectionType)
     {
         var factory = new ConstructorEnumerableFactory<int>(collectionType);
@@ -38,11 +44,12 @@ public class ConstructorEnumerableFactoryTests
     [InlineData(typeof(List<string>))]
     [InlineData(typeof(ConstructorIList))]
     [InlineData(typeof(ConstructorIEnumerableT<string>))]
-    [InlineData(typeof(ConstructorICollectionT<int>))]
     [InlineData(typeof(ConstructorICollectionT<string>))]
-    [InlineData(typeof(ConstructorIListT<int>))]
     [InlineData(typeof(ConstructorIListT<string>))]
     [InlineData(typeof(AbstractClass))]
+    [InlineData(typeof(Collection<string>))]
+    [InlineData(typeof(ObservableCollection<string>))]
+    [InlineData(typeof(ReadOnlyCollection<string>))]
     public void Ctor_InvalidCollectionType_ThrowsArgumentException(Type collectionType)
     {
         Assert.Throws<ArgumentException>("collectionType", () => new ConstructorEnumerableFactory<int>(collectionType));

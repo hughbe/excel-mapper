@@ -406,6 +406,71 @@ public class MapSplitEnumerableTests
         Assert.Equal(new ArrayList { "Invalid" }, row5.Value);
     }
 
+    public class ArrayListClass
+    {
+        public ArrayList Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedArrayListClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<ArrayListClass>(c =>
+        {
+            c.MapList<string>(p => p.Value);
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal(new ArrayList { "1", "2", "3" }, row1.Value);
+
+        var row2 = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal(new ArrayList { "1", null, "2" }, row2.Value);
+
+        var row3 = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal(new ArrayList { "1" }, row3.Value);
+
+        var row4 = sheet.ReadRow<ArrayListClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal(new ArrayList { "Invalid" }, row5.Value);
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedArrayListClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<ArrayListClass>(c =>
+        {
+            c.MapList<int>(p => p.Value)
+                .WithElementMap(p => p
+                    .WithEmptyFallback(-1)
+                    .WithInvalidFallback(-2)
+                );
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        var row2 = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal([1, -1, 2], row2.Value);
+
+        var row3 = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<ArrayListClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<ArrayListClass>();
+        Assert.Equal([-2], row5.Value);
+    }
+
     [Fact]
     public void ReadRow_AutoMappedListObject_ReturnsExpected()
     {
@@ -453,25 +518,343 @@ public class MapSplitEnumerableTests
     }
 
     [Fact]
-    public void ReadRow_AutoMappedObservableCollectionInt_ReturnsExpected()
+    public void ReadRow_AutoMappedCollectionClass_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        var row1 = sheet.ReadRow<ObservableCollectionIntClass>();
-        Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
+        var row1 = sheet.ReadRow<CollectionClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
 
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ObservableCollectionIntClass>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CollectionClass>());
 
-        var row3 = sheet.ReadRow<ObservableCollectionIntClass>();
-        Assert.Equal(new int[] { 1 }, row3.Value);
+        var row3 = sheet.ReadRow<CollectionClass>();
+        Assert.Equal([1], row3.Value);
 
-        var row4 = sheet.ReadRow<ObservableCollectionIntClass>();
+        var row4 = sheet.ReadRow<CollectionClass>();
         Assert.Empty(row4.Value);
 
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ObservableCollectionIntClass>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CollectionClass>());
+    }
+
+    public class CollectionClass
+    {
+        public Collection<int> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedCollectionClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<CollectionClass>(c =>
+        {
+            c.Map(p => p.Value);
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CollectionClass>();
+        Assert.Equal(new Collection<int> { 1, 2, 3 }, row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CollectionClass>());
+
+        var row3 = sheet.ReadRow<CollectionClass>();
+        Assert.Equal(new Collection<int> { 1 }, row3.Value);
+
+        var row4 = sheet.ReadRow<CollectionClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CollectionClass>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedCollectionClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<CollectionClass>(c =>
+        {
+            c.MapList<int>(p => p.Value)
+                .WithElementMap(p => p
+                    .WithEmptyFallback(-1)
+                    .WithInvalidFallback(-2)
+                );
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<CollectionClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        var row2 = sheet.ReadRow<CollectionClass>();
+        Assert.Equal([1, -1, 2], row2.Value);
+
+        var row3 = sheet.ReadRow<CollectionClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<CollectionClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<CollectionClass>();
+        Assert.Equal([-2], row5.Value);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedReadOnlyCollectionClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ReadOnlyCollectionClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ReadOnlyCollectionClass>());
+
+        var row3 = sheet.ReadRow<ReadOnlyCollectionClass>();
+        Assert.Equal(new ReadOnlyCollection<int>([1]), row3.Value);
+
+        var row4 = sheet.ReadRow<ReadOnlyCollectionClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ReadOnlyCollectionClass>());
+    }
+
+    public class ReadOnlyCollectionClass
+    {
+        public ReadOnlyCollection<int> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedReadOnlyCollectionClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<ReadOnlyCollectionClass>(c =>
+        {
+            c.Map(p => p.Value);
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ReadOnlyCollectionClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ReadOnlyCollectionClass>());
+
+        var row3 = sheet.ReadRow<ReadOnlyCollectionClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<ReadOnlyCollectionClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ReadOnlyCollectionClass>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedReadOnlyCollectionClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<ReadOnlyCollectionClass>(c =>
+        {
+            c.MapList<int>(p => p.Value)
+                .WithElementMap(p => p
+                    .WithEmptyFallback(-1)
+                    .WithInvalidFallback(-2)
+                );
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ReadOnlyCollectionClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        var row2 = sheet.ReadRow<ReadOnlyCollectionClass>();
+        Assert.Equal([1, -1, 2], row2.Value);
+
+        var row3 = sheet.ReadRow<ReadOnlyCollectionClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<ReadOnlyCollectionClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<ReadOnlyCollectionClass>();
+        Assert.Equal([-2], row5.Value);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedObservableCollectionClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ObservableCollectionClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ObservableCollectionClass>());
+
+        var row3 = sheet.ReadRow<ObservableCollectionClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<ObservableCollectionClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ObservableCollectionClass>());
+    }
+
+    public class ObservableCollectionClass
+    {
+        public ObservableCollection<int> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedObservableCollectionClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<ObservableCollectionClass>(c =>
+        {
+            c.Map(p => p.Value);
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ObservableCollectionClass>();
+        Assert.Equal(new ObservableCollection<int> { 1, 2, 3 }, row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ObservableCollectionClass>());
+
+        var row3 = sheet.ReadRow<ObservableCollectionClass>();
+        Assert.Equal(new ObservableCollection<int> { 1 }, row3.Value);
+
+        var row4 = sheet.ReadRow<ObservableCollectionClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ObservableCollectionClass>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedObservableCollectionClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<ObservableCollectionClass>(c =>
+        {
+            c.MapList<int>(p => p.Value)
+                .WithElementMap(p => p
+                    .WithEmptyFallback(-1)
+                    .WithInvalidFallback(-2)
+                );
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ObservableCollectionClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        var row2 = sheet.ReadRow<ObservableCollectionClass>();
+        Assert.Equal([1, -1, 2], row2.Value);
+
+        var row3 = sheet.ReadRow<ObservableCollectionClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<ObservableCollectionClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<ObservableCollectionClass>();
+        Assert.Equal([-2], row5.Value);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedLinkedListClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<LinkedListClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<LinkedListClass>());
+
+        var row3 = sheet.ReadRow<LinkedListClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<LinkedListClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<LinkedListClass>());
+    }
+
+    public class LinkedListClass
+    {
+        public LinkedList<int> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedLinkedListClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<LinkedListClass>(c =>
+        {
+            c.MapList<int>(p => p.Value);
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<LinkedListClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<LinkedListClass>());
+
+        var row3 = sheet.ReadRow<LinkedListClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<LinkedListClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<LinkedListClass>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedLinkedListClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<LinkedListClass>(c =>
+        {
+            c.MapList<int>(p => p.Value)
+                .WithElementMap(p => p
+                    .WithEmptyFallback(-1)
+                    .WithInvalidFallback(-2)
+                );
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<LinkedListClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        var row2 = sheet.ReadRow<LinkedListClass>();
+        Assert.Equal([1, -1, 2], row2.Value);
+
+        var row3 = sheet.ReadRow<LinkedListClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<LinkedListClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<LinkedListClass>();
+        Assert.Equal([-2], row5.Value);
     }
 
     [Fact]
@@ -1325,31 +1708,6 @@ public class MapSplitEnumerableTests
     }
 
     [Fact]
-    public void ReadRow_DefaultMappedArrayListClass_ReturnsExpected()
-    {
-        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
-        importer.Configuration.RegisterClassMap<DefaultArrayListClassMap>();
-
-        ExcelSheet sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        var row1 = sheet.ReadRow<ArrayListClass>();
-        Assert.Equal(new ArrayList { "1", "2", "3" }, row1.Value);
-
-        var row2 = sheet.ReadRow<ArrayListClass>();
-        Assert.Equal(new ArrayList { "1", null, "2" }, row2.Value);
-
-        var row3 = sheet.ReadRow<ArrayListClass>();
-        Assert.Equal(new ArrayList { "1" }, row3.Value);
-
-        var row4 = sheet.ReadRow<ArrayListClass>();
-        Assert.Empty(row4.Value);
-
-        var row5 = sheet.ReadRow<ArrayListClass>();
-        Assert.Equal(new ArrayList { "Invalid" }, row5.Value);
-    }
-
-    [Fact]
     public void ReadRow_DefaultMappedListObjectClass_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
@@ -1395,29 +1753,6 @@ public class MapSplitEnumerableTests
         Assert.Empty(row4.Value);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ListIntClass>());
-    }
-
-    [Fact]
-    public void ReadRow_DefaultMappedObservableCollectionInt_ReturnsExpected()
-    {
-        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
-        importer.Configuration.RegisterClassMap<DefaultObservableCollectionIntClassMap>();
-
-        ExcelSheet sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        var row1 = sheet.ReadRow<ObservableCollectionIntClass>();
-        Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
-
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ObservableCollectionIntClass>());
-
-        var row3 = sheet.ReadRow<ObservableCollectionIntClass>();
-        Assert.Equal(new int[] { 1 }, row3.Value);
-
-        var row4 = sheet.ReadRow<ObservableCollectionIntClass>();
-        Assert.Empty(row4.Value);
-
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ObservableCollectionIntClass>());
     }
 
     [Fact]
@@ -2052,32 +2387,7 @@ public class MapSplitEnumerableTests
         var row5 = sheet.ReadRow<ListIntClass>();
         Assert.Equal(new int[] { -2 }, row5.Value);
     }
-
-    [Fact]
-    public void ReadRow_CustomMappedObservableCollectionInt_ReturnsExpected()
-    {
-        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
-        importer.Configuration.RegisterClassMap<CustomObservableCollectionIntClassMap>();
-
-        ExcelSheet sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        var row1 = sheet.ReadRow<ObservableCollectionIntClass>();
-        Assert.Equal(new int[] { 1, 2, 3 }, row1.Value);
-
-        var row2 = sheet.ReadRow<ObservableCollectionIntClass>();
-        Assert.Equal(new int[] { 1, -1, 2 }, row2.Value);
-
-        var row3 = sheet.ReadRow<ObservableCollectionIntClass>();
-        Assert.Equal(new int[] { 1 }, row3.Value);
-
-        var row4 = sheet.ReadRow<ObservableCollectionIntClass>();
-        Assert.Empty(row4.Value);
-
-        var row5 = sheet.ReadRow<ObservableCollectionIntClass>();
-        Assert.Equal(new int[] { -2 }, row5.Value);
-    }
-
+    
     [Fact]
     public void ReadRow_CustomMappedQueueInt_ReturnsExpected()
     {
@@ -2883,19 +3193,6 @@ public class MapSplitEnumerableTests
         }
     }
 
-    public class ArrayListClass
-    {
-        public ArrayList Value { get; set; } = default!;
-    }
-
-    public class DefaultArrayListClassMap : ExcelClassMap<ArrayListClass>
-    {
-        public DefaultArrayListClassMap()
-        {
-            MapList<string>(p => p.Value);
-        }
-    }
-
     public class ListObjectClass
     {
         public List<object?> Value { get; set; } = default!;
@@ -2925,31 +3222,6 @@ public class MapSplitEnumerableTests
     public class CustomListIntClassMap : ExcelClassMap<ListIntClass>
     {
         public CustomListIntClassMap()
-        {
-            Map(p => p.Value)
-                .WithElementMap(p => p
-                    .WithEmptyFallback(-1)
-                    .WithInvalidFallback(-2)
-                );
-        }
-    }
-
-    public class ObservableCollectionIntClass
-    {
-        public ObservableCollection<int> Value { get; set; } = default!;
-    }
-
-    public class DefaultObservableCollectionIntClassMap : ExcelClassMap<ObservableCollectionIntClass>
-    {
-        public DefaultObservableCollectionIntClassMap()
-        {
-            Map(p => p.Value);
-        }
-    }
-
-    public class CustomObservableCollectionIntClassMap : ExcelClassMap<ObservableCollectionIntClass>
-    {
-        public CustomObservableCollectionIntClassMap()
         {
             Map(p => p.Value)
                 .WithElementMap(p => p

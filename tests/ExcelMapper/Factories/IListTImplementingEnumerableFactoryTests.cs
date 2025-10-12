@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
+using System.Collections.Frozen;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Xunit;
 
 namespace ExcelMapper.Factories;
@@ -10,6 +12,8 @@ public class IListTImplementingEnumerableFactoryTests
     [Theory]
     [InlineData(typeof(List<int>))]
     [InlineData(typeof(IListGeneric<int>))]
+    [InlineData(typeof(Collection<int>))]
+    [InlineData(typeof(ReadOnlyCollection<int>))]
     public void Ctor_Type(Type collectionType)
     {
         var factory = new IListTImplementingEnumerableFactory<int>(collectionType);
@@ -37,7 +41,10 @@ public class IListTImplementingEnumerableFactoryTests
     [InlineData(typeof(ICollectionNonGeneric))]
     [InlineData(typeof(ICollectionGeneric<int>))]
     [InlineData(typeof(List<string>))]
+    [InlineData(typeof(Collection<string>))]
+    [InlineData(typeof(ReadOnlyCollection<string>))]
     [InlineData(typeof(AbstractClass))]
+    [InlineData(typeof(FrozenSet<int>))]
     public void Ctor_InvalidCollectionType_ThrowsArgumentException(Type collectionType)
     {
         Assert.Throws<ArgumentException>("collectionType", () => new IListTImplementingEnumerableFactory<int>(collectionType));
