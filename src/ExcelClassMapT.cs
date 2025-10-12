@@ -130,6 +130,36 @@ public class ExcelClassMap<T> : ExcelClassMap
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
+    /// This is used for map Collection.
+    /// </summary>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
+    /// <param name="expression">A MemberExpression reading the property or field.</param>
+    /// <returns>The map for the given property or field.</returns>
+    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ISet<TElement>>> expression)
+        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+
+    /// <summary>
+    /// Creates a map for a property or field given a MemberExpression reading the property or field.
+    /// This is used for map Collection.
+    /// </summary>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
+    /// <param name="expression">A MemberExpression reading the property or field.</param>
+    /// <returns>The map for the given property or field.</returns>
+    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlySet<TElement>>> expression)
+        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+
+    /// <summary>
+    /// Creates a map for a property or field given a MemberExpression reading the property or field.
+    /// This is used for map Collection.
+    /// </summary>
+    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
+    /// <param name="expression">A MemberExpression reading the property or field.</param>
+    /// <returns>The map for the given property or field.</returns>
+    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ReadOnlySet<TElement>>> expression)
+        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+
+    /// <summary>
+    /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map ObservableCollection.
     /// </summary>
     /// <typeparam name="TElement">The element type of property or field to map.</typeparam>

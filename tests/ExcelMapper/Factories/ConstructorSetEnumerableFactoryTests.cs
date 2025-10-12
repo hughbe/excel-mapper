@@ -7,30 +7,27 @@ using Xunit;
 
 namespace ExcelMapper.Factories;
 
-public class ConstructorEnumerableFactoryTests
+public class ConstructorSetEnumerableFactory2Tests
 {
     [Theory]
     [InlineData(typeof(List<int>))]
     [InlineData(typeof(ConstructorIEnumerable))]
     [InlineData(typeof(ConstructorIEnumerableT<int>))]
-    [InlineData(typeof(ConstructorICollection))]
     [InlineData(typeof(ConstructorICollectionT<int>))]
-    [InlineData(typeof(ConstructorIListT<int>))]
-    [InlineData(typeof(ArrayList))]
-    [InlineData(typeof(Collection<int>))]
+    [InlineData(typeof(ConstructorISetT<int>))]
     [InlineData(typeof(ObservableCollection<int>))]
-    [InlineData(typeof(ReadOnlyCollection<int>))]
     [InlineData(typeof(HashSet<int>))]
-    public void Ctor_Type(Type collectionType)
+    [InlineData(typeof(ReadOnlySet<int>))]
+    public void Ctor_Type(Type setType)
     {
-        var factory = new ConstructorEnumerableFactory<int>(collectionType);
-        Assert.Equal(collectionType, factory.CollectionType);
+        var factory = new ConstructorSetEnumerableFactory<int>(setType);
+        Assert.Equal(setType, factory.SetType);
     }
 
     [Fact]
-    public void Ctor_NullCollectionType_ThrowsArgumentNullException()
+    public void Ctor_NullSetType_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>("collectionType", () => new ConstructorEnumerableFactory<int>(null!));
+        Assert.Throws<ArgumentNullException>("setType", () => new ConstructorSetEnumerableFactory<int>(null!));
     }
 
     [Theory]
@@ -46,165 +43,115 @@ public class ConstructorEnumerableFactoryTests
     [InlineData(typeof(List<string>))]
     [InlineData(typeof(ConstructorIList))]
     [InlineData(typeof(ConstructorIEnumerableT<string>))]
+    [InlineData(typeof(ConstructorICollection))]
     [InlineData(typeof(ConstructorICollectionT<string>))]
+    [InlineData(typeof(ConstructorIListT<int>))]
     [InlineData(typeof(ConstructorIListT<string>))]
-    [InlineData(typeof(ConstructorISetT<int>))]
     [InlineData(typeof(ConstructorISetT<string>))]
     [InlineData(typeof(ConstructorIReadOnlySetT<int>))]
     [InlineData(typeof(ConstructorIReadOnlySetT<string>))]
+    [InlineData(typeof(ArrayList))]
     [InlineData(typeof(AbstractClass))]
+    [InlineData(typeof(Collection<int>))]
     [InlineData(typeof(Collection<string>))]
     [InlineData(typeof(ObservableCollection<string>))]
+    [InlineData(typeof(ReadOnlyCollection<int>))]
     [InlineData(typeof(ReadOnlyCollection<string>))]
     [InlineData(typeof(FrozenSet<string>))]
     [InlineData(typeof(HashSet<string>))]
-    [InlineData(typeof(ReadOnlySet<int>))]
-    public void Ctor_InvalidCollectionType_ThrowsArgumentException(Type collectionType)
+    [InlineData(typeof(ReadOnlySet<string>))]
+    public void Ctor_InvalidSetType_ThrowsArgumentException(Type setType)
     {
-        Assert.Throws<ArgumentException>("collectionType", () => new ConstructorEnumerableFactory<int>(collectionType));
+        Assert.Throws<ArgumentException>("setType", () => new ConstructorSetEnumerableFactory<int>(setType));
     }
 
     [Fact]
     public void Begin_End_Success()
     {
-        var factory = new ConstructorEnumerableFactory<int>(typeof(List<int>));
+        var factory = new ConstructorSetEnumerableFactory<int>(typeof(ReadOnlySet<int>));
 
         // Begin.
         factory.Begin(1);
-        var value = Assert.IsType<List<int>>(factory.End());
+        var value = Assert.IsType<ReadOnlySet<int>>(factory.End());
         Assert.Equal([], value);
 
         // Begin again.
         factory.Begin(1);
-        value = Assert.IsType<List<int>>(factory.End());
+        value = Assert.IsType<ReadOnlySet<int>>(factory.End());
         Assert.Equal([], value);
-    }
-
-    [Fact]
-    public void Begin_EndIEnumerableInt_Success()
-    {
-        var factory = new ConstructorEnumerableFactory<int>(typeof(ConstructorIEnumerableT<int>));
-
-        // Begin.
-        factory.Begin(1);
-        var value = Assert.IsType<ConstructorIEnumerableT<int>>(factory.End());
-        Assert.Equal([], value.Value);
-
-        // Begin again.
-        factory.Begin(1);
-        value = Assert.IsType<ConstructorIEnumerableT<int>>(factory.End());
-        Assert.Equal([], value.Value);
-    }
-
-    [Fact]
-    public void Begin_EndICollection_Success()
-    {
-        var factory = new ConstructorEnumerableFactory<int>(typeof(ConstructorICollection));
-
-        // Begin.
-        factory.Begin(1);
-        var value = Assert.IsType<ConstructorICollection>(factory.End());
-        Assert.Empty(value.Value);
-
-        // Begin again.
-        factory.Begin(1);
-        value = Assert.IsType<ConstructorICollection>(factory.End());
-        Assert.Empty(value.Value);
     }
 
     [Fact]
     public void Begin_AlreadyBegan_ThrowsExcelMappingException()
     {
-        var factory = new ConstructorEnumerableFactory<int>(typeof(List<int>));
+        var factory = new ConstructorSetEnumerableFactory<int>(typeof(ReadOnlySet<int>));
         factory.Begin(1);
         Assert.Throws<ExcelMappingException>(() => factory.Begin(1));
     }
-
     [Fact]
     public void Add_End_Success()
     {
-        var factory = new ConstructorEnumerableFactory<int>(typeof(List<int>));
+        var factory = new ConstructorSetEnumerableFactory<int>(typeof(ReadOnlySet<int>));
 
         // Begin.
         factory.Begin(1);
         factory.Add(1);
-        var value = Assert.IsType<List<int>>(factory.End());
+        var value = Assert.IsType<ReadOnlySet<int>>(factory.End());
         Assert.Equal([1], value);
 
         // Begin again.
         factory.Begin(1);
         factory.Add(2);
-        value = Assert.IsType<List<int>>(factory.End());
+        value = Assert.IsType<ReadOnlySet<int>>(factory.End());
         Assert.Equal([2], value);
     }
 
     [Fact]
     public void Add_OutOfRange_Success()
     {
-        var factory = new ConstructorEnumerableFactory<int>(typeof(List<int>));
+        var factory = new ConstructorSetEnumerableFactory<int>(typeof(ReadOnlySet<int>));
         factory.Begin(1);
         factory.Add(2);
 
         factory.Add(3);
-
-        var value = Assert.IsType<List<int>>(factory.End());
+        
+        var value = Assert.IsType<ReadOnlySet<int>>(factory.End());
         Assert.Equal([2, 3], value);
     }
 
     [Fact]
     public void Add_NotBegan_ThrowsExcelMappingException()
     {
-        var factory = new ConstructorEnumerableFactory<int>(typeof(List<int>));
+        var factory = new ConstructorSetEnumerableFactory<int>(typeof(ReadOnlySet<int>));
         Assert.Throws<ExcelMappingException>(() => factory.Add(1));
     }
 
     [Fact]
-    public void Set_Invoke_Success()
+    public void Set_Invoke_ThrowsNotSupportedException()
     {
-        var factory = new ConstructorEnumerableFactory<int>(typeof(List<int>));
+        var factory = new ConstructorSetEnumerableFactory<int>(typeof(ReadOnlySet<int>));
         factory.Begin(1);
-
-        factory.Set(0, 1);
-        Assert.Equal([1], Assert.IsType<List<int>>(factory.End()));
-    }
-
-    [Fact]
-    public void Set_InvokeOutOfRange_Success()
-    {
-        var factory = new ConstructorEnumerableFactory<int>(typeof(List<int>));
-        factory.Begin(1);
-
-        factory.Set(0, 1);
-        factory.Set(5, 2);
-        Assert.Equal([1, 0, 0, 0, 0, 2], Assert.IsType<List<int>>(factory.End()));
+        Assert.Throws<NotSupportedException>(() => factory.Set(0, 1));
     }
 
     [Fact]
     public void Set_NotBegan_ThrowsExcelMappingException()
     {
-        var factory = new ConstructorEnumerableFactory<int>(typeof(List<int>));
+        var factory = new ConstructorSetEnumerableFactory<int>(typeof(ReadOnlySet<int>));
         Assert.Throws<ExcelMappingException>(() => factory.Set(0, 1));
-    }
-
-    [Fact]
-    public void Set_NegativeIndex_ThrowsArgumentOutOfRangeException()
-    {
-        var factory = new ConstructorEnumerableFactory<int>(typeof(List<int>));
-        factory.Begin(1);
-        Assert.Throws<ArgumentOutOfRangeException>("index", () => factory.Set(-1, 1));
     }
 
     [Fact]
     public void End_NotBegan_ThrowsExcelMappingException()
     {
-        var factory = new ConstructorEnumerableFactory<int>(typeof(List<int>));
+        var factory = new ConstructorSetEnumerableFactory<int>(typeof(ReadOnlySet<int>));
         Assert.Throws<ExcelMappingException>(() => factory.End());
     }
 
     [Fact]
     public void End_AlreadyEnded_ThrowsExcelMappingException()
     {
-        var factory = new ConstructorEnumerableFactory<int>(typeof(List<int>));
+        var factory = new ConstructorSetEnumerableFactory<int>(typeof(ReadOnlySet<int>));
         factory.Begin(1);
         factory.End();
 
@@ -214,7 +161,7 @@ public class ConstructorEnumerableFactoryTests
     [Fact]
     public void Reset_Invoke_Success()
     {
-        var factory = new ConstructorEnumerableFactory<int>(typeof(List<int>));
+        var factory = new ConstructorSetEnumerableFactory<int>(typeof(ReadOnlySet<int>));
         factory.Begin(1);
         factory.End();
 
@@ -222,27 +169,28 @@ public class ConstructorEnumerableFactoryTests
 
         // Make sure we can begin.
         factory.Begin(1);
-        var value = Assert.IsType<List<int>>(factory.End());
+        var value = Assert.IsType<ReadOnlySet<int>>(factory.End());
         Assert.Equal([], value);
     }
 
     [Fact]
     public void Reset_NotBegan_Success()
     {
-        var factory = new ConstructorEnumerableFactory<int>(typeof(List<int>));
+        var factory = new ConstructorSetEnumerableFactory<int>(typeof(ReadOnlySet<int>));
         factory.Reset();
 
         // Make sure we can begin.
         factory.Begin(1);
-        var value = Assert.IsType<List<int>>(factory.End());
+        var value = Assert.IsType<ReadOnlySet<int>>(factory.End());
         Assert.Equal([], value);
     }
 
+
     private abstract class AbstractClass
     {
-        public IEnumerable<int> Values { get; } = default!;
+        public ISet<int> Values { get; } = default!;
 
-        public AbstractClass(IEnumerable<int> values)
+        public AbstractClass(ISet<int> values)
         {
             Values = values;
         }

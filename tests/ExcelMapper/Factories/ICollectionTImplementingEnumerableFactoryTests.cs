@@ -13,7 +13,10 @@ public class ICollectionTImplementingEnumerableFactoryTests
     [InlineData(typeof(List<int>))]
     [InlineData(typeof(ICollectionGeneric<int>))]
     [InlineData(typeof(IListGeneric<int>))]
+    [InlineData(typeof(Collection<int>))]
     [InlineData(typeof(ReadOnlyCollection<int>))]
+    [InlineData(typeof(HashSet<int>))]
+    [InlineData(typeof(ReadOnlySet<int>))]
     public void Ctor_Type(Type collectionType)
     {
         var factory = new ICollectionTImplementingEnumerableFactory<int>(collectionType);
@@ -42,6 +45,10 @@ public class ICollectionTImplementingEnumerableFactoryTests
     [InlineData(typeof(List<string>))]
     [InlineData(typeof(AbstractClass))]
     [InlineData(typeof(FrozenSet<int>))]
+    [InlineData(typeof(Collection<string>))]
+    [InlineData(typeof(ReadOnlyCollection<string>))]
+    [InlineData(typeof(HashSet<string>))]
+    [InlineData(typeof(ReadOnlySet<string>))]
     public void Ctor_InvalidCollectionType_ThrowsArgumentException(Type collectionType)
     {
         Assert.Throws<ArgumentException>("collectionType", () => new ICollectionTImplementingEnumerableFactory<int>(collectionType));

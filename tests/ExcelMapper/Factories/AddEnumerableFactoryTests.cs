@@ -14,6 +14,7 @@ public class AddEnumerableFactoryTests
     [InlineData(typeof(ICollectionGeneric<int>))]
     [InlineData(typeof(AddClass<int>))]
     [InlineData(typeof(ArrayList))]
+    [InlineData(typeof(HashSet<int>))]
     [InlineData(typeof(Collection<int>))]
     public void Ctor_Type(Type collectionType)
     {
@@ -41,6 +42,7 @@ public class AddEnumerableFactoryTests
     [InlineData(typeof(ReadOnlyCollection<int>))]
     [InlineData(typeof(AbstractClass))]
     [InlineData(typeof(FrozenSet<int>))]
+    [InlineData(typeof(ReadOnlySet<int>))]
     public void Ctor_InvalidCollectionType_ThrowsArgumentException(Type collectionType)
     {
         Assert.Throws<ArgumentException>("collectionType", () => new AddEnumerableFactory<int>(collectionType));

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
@@ -854,6 +855,385 @@ public class MapSplitEnumerableTests
         Assert.Empty(row4.Value);
 
         var row5 = sheet.ReadRow<LinkedListClass>();
+        Assert.Equal([-2], row5.Value);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedISetIntClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ISetIntClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ISetIntClass>());
+
+        var row3 = sheet.ReadRow<ISetIntClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<ISetIntClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ISetIntClass>());
+    }
+
+    public class ISetIntClass
+    {
+        public ISet<int> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedISetIntClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<ISetIntClass>(c =>
+        {
+            c.MapList<int>(p => p.Value);
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ISetIntClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ISetIntClass>());
+
+        var row3 = sheet.ReadRow<ISetIntClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<ISetIntClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ISetIntClass>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedISetIntClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<ISetIntClass>(c =>
+        {
+            c.MapList<int>(p => p.Value)
+                .WithElementMap(p => p
+                    .WithEmptyFallback(-1)
+                    .WithInvalidFallback(-2)
+                );
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ISetIntClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        var row2 = sheet.ReadRow<ISetIntClass>();
+        Assert.Equal([1, -1, 2], row2.Value);
+
+        var row3 = sheet.ReadRow<ISetIntClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<ISetIntClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<ISetIntClass>();
+        Assert.Equal([-2], row5.Value);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedIReadOnlySetIntClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<IReadOnlySetIntClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlySetIntClass>());
+
+        var row3 = sheet.ReadRow<IReadOnlySetIntClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<IReadOnlySetIntClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlySetIntClass>());
+    }
+
+    public class IReadOnlySetIntClass
+    {
+        public IReadOnlySet<int> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedIReadOnlySetIntClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<IReadOnlySetIntClass>(c =>
+        {
+            c.MapList<int>(p => p.Value);
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<IReadOnlySetIntClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlySetIntClass>());
+
+        var row3 = sheet.ReadRow<IReadOnlySetIntClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<IReadOnlySetIntClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlySetIntClass>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedIReadOnlySetIntClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<IReadOnlySetIntClass>(c =>
+        {
+            c.MapList<int>(p => p.Value)
+                .WithElementMap(p => p
+                    .WithEmptyFallback(-1)
+                    .WithInvalidFallback(-2)
+                );
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<IReadOnlySetIntClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        var row2 = sheet.ReadRow<IReadOnlySetIntClass>();
+        Assert.Equal([1, -1, 2], row2.Value);
+
+        var row3 = sheet.ReadRow<IReadOnlySetIntClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<IReadOnlySetIntClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<IReadOnlySetIntClass>();
+        Assert.Equal([-2], row5.Value);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSetIntClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SetIntClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SetIntClass>());
+
+        var row3 = sheet.ReadRow<SetIntClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<SetIntClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SetIntClass>());
+    }
+
+    public class SetIntClass
+    {
+        public Set<int> Value { get; set; } = default!;
+    }
+
+    public class Set<T> : ISet<T>
+    {
+        private readonly HashSet<T> _set = new();
+
+        public bool Add(T item) => _set.Add(item);
+        public bool Remove(T item) => throw new NotImplementedException();
+        public bool Contains(T item) => _set.Contains(item);
+        public void Clear() => throw new NotImplementedException();
+        public int Count => _set.Count;
+        public bool IsReadOnly => throw new NotImplementedException();
+
+        public IEnumerator<T> GetEnumerator() => _set.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public void ExceptWith(IEnumerable<T> other) => throw new NotImplementedException();
+
+        public void IntersectWith(IEnumerable<T> other) => throw new NotImplementedException();
+
+        public bool IsProperSubsetOf(IEnumerable<T> other) => throw new NotImplementedException();
+
+        public bool IsProperSupersetOf(IEnumerable<T> other) => throw new NotImplementedException();
+
+        public bool IsSubsetOf(IEnumerable<T> other) => throw new NotImplementedException();
+
+        public bool IsSupersetOf(IEnumerable<T> other) => throw new NotImplementedException();
+
+        public bool Overlaps(IEnumerable<T> other) => throw new NotImplementedException();
+
+        public bool SetEquals(IEnumerable<T> other) => _set.SetEquals(other);
+
+        public void SymmetricExceptWith(IEnumerable<T> other) => throw new NotImplementedException();
+
+        public void UnionWith(IEnumerable<T> other) => throw new NotImplementedException();
+
+        void ICollection<T>.Add(T item) => throw new NotImplementedException();
+
+        public void CopyTo(T[] array, int arrayIndex) => throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedSetIntClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<SetIntClass>(c =>
+        {
+            c.MapList<int>(p => p.Value);
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SetIntClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SetIntClass>());
+
+        var row3 = sheet.ReadRow<SetIntClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<SetIntClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SetIntClass>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedSetIntClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<SetIntClass>(c =>
+        {
+            c.MapList<int>(p => p.Value)
+                .WithElementMap(p => p
+                    .WithEmptyFallback(-1)
+                    .WithInvalidFallback(-2)
+                );
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SetIntClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        var row2 = sheet.ReadRow<SetIntClass>();
+        Assert.Equal([1, -1, 2], row2.Value);
+
+        var row3 = sheet.ReadRow<SetIntClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<SetIntClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<SetIntClass>();
+        Assert.Equal([-2], row5.Value);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedReadOnlySetIntClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ReadOnlySetIntClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ReadOnlySetIntClass>());
+
+        var row3 = sheet.ReadRow<ReadOnlySetIntClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<ReadOnlySetIntClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ReadOnlySetIntClass>());
+    }
+
+    public class ReadOnlySetIntClass
+    {
+        public ReadOnlySet<int> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedReadOnlySetIntClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<ReadOnlySetIntClass>(c =>
+        {
+            c.MapList<int>(p => p.Value);
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ReadOnlySetIntClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ReadOnlySetIntClass>());
+
+        var row3 = sheet.ReadRow<ReadOnlySetIntClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<ReadOnlySetIntClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ReadOnlySetIntClass>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedReadOnlySetIntClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<ReadOnlySetIntClass>(c =>
+        {
+            c.MapList<int>(p => p.Value)
+                .WithElementMap(p => p
+                    .WithEmptyFallback(-1)
+                    .WithInvalidFallback(-2)
+                );
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ReadOnlySetIntClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        var row2 = sheet.ReadRow<ReadOnlySetIntClass>();
+        Assert.Equal([1, -1, 2], row2.Value);
+
+        var row3 = sheet.ReadRow<ReadOnlySetIntClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<ReadOnlySetIntClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<ReadOnlySetIntClass>();
         Assert.Equal([-2], row5.Value);
     }
 

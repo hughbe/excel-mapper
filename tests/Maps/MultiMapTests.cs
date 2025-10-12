@@ -280,6 +280,8 @@ public class MultiMapTests
         Assert.Equal(new string[] { "a", "b" }, row1.ICollectionString);
         Assert.Equal([true, false], row1.ICollectionBool);
         Assert.Equal(new string[] { "a", "b" }, row1.IReadOnlyCollectionString);
+        Assert.Equal(new string[] { "a", "b" }, row1.ISetString);
+        Assert.Equal(new string[] { "a", "b" }, row1.IReadOnlySetString);
         Assert.Equal(new string[] { "a", "b" }, row1.IListNonGeneric);
         Assert.Equal(["a", "b"], row1.IListString);
         Assert.Equal(["a", "b"], row1.IListObject);
@@ -291,6 +293,7 @@ public class MultiMapTests
         Assert.Equal(new string[] { "1", "2" }, row1._concreteICollection);
         Assert.Equal(new string[] { "1", "2" }, row1.CollectionString);
         Assert.Equal(new string[] { "1", "2" }, row1.ReadOnlyCollectionString);
+        Assert.Equal(new string[] { "1", "2" }, row1.ReadOnlySetString);
         Assert.Equal(new string[] { "1", "2" }, row1.ImmutableArrayString);
         Assert.Equal(new string[] { "1", "2" }, row1.ImmutableListString);
         Assert.Equal(new string[] { "1", "2" }, row1.ImmutableStackString);
@@ -311,6 +314,8 @@ public class MultiMapTests
         Assert.Equal(new string[] { "c", "d" }, row2.ICollectionString);
         Assert.Equal([false, true], row2.ICollectionBool);
         Assert.Equal(new string[] { "c", "d" }, row2.IReadOnlyCollectionString);
+        Assert.Equal(new string[] { "c", "d" }, row2.ISetString);
+        Assert.Equal(new string[] { "c", "d" }, row2.IReadOnlySetString);
         Assert.Equal(new string[] { "c", "d" }, row2.IListNonGeneric);
         Assert.Equal(["c", "d"], row2.IListString);
         Assert.Equal(["c", "d"], row2.IListObject);
@@ -322,6 +327,7 @@ public class MultiMapTests
         Assert.Equal(new string[] { "3", "4" }, row2._concreteICollection);
         Assert.Equal(new string[] { "3", "4" }, row2.CollectionString);
         Assert.Equal(new string[] { "3", "4" }, row2.ReadOnlyCollectionString);
+        Assert.Equal(new string[] { "3", "4" }, row2.ReadOnlySetString);
         Assert.Equal(new string[] { "3", "4" }, row2.ImmutableArrayString);
         Assert.Equal(new string[] { "3", "4" }, row2.ImmutableListString);
         Assert.Equal(new string[] { "3", "4" }, row2.ImmutableStackString);
@@ -342,6 +348,8 @@ public class MultiMapTests
         Assert.Equal(new string[] { "e", "f" }, row3.ICollectionString);
         Assert.Equal([false, false], row3.ICollectionBool);
         Assert.Equal(new string[] { "e", "f" }, row3.IReadOnlyCollectionString);
+        Assert.Equal(new string[] { "e", "f" }, row3.ISetString);
+        Assert.Equal(new string[] { "e", "f" }, row3.IReadOnlySetString);
         Assert.Equal(new string[] { "e", "f" }, row3.IListNonGeneric);
         Assert.Equal(["e", "f"], row3.IListString);
         Assert.Equal(["e", "f"], row3.IListObject);
@@ -353,6 +361,7 @@ public class MultiMapTests
         Assert.Equal(new string[] { "5", "6" }, row3._concreteICollection);
         Assert.Equal(new string[] { "5", "6" }, row3.CollectionString);
         Assert.Equal(new string[] { "5", "6" }, row3.ReadOnlyCollectionString);
+        Assert.Equal(new string[] { "5", "6" }, row3.ReadOnlySetString);
         Assert.Equal(new string[] { "5", "6" }, row3.ImmutableArrayString);
         Assert.Equal(new string[] { "5", "6" }, row3.ImmutableListString);
         Assert.Equal(new string[] { "5", "6" }, row3.ImmutableStackString);
@@ -373,6 +382,8 @@ public class MultiMapTests
         Assert.Equal(new string[] { "g", "h" }, row4.ICollectionString);
         Assert.Equal([false, true], row4.ICollectionBool);
         Assert.Equal(new string[] { "g", "h" }, row4.IReadOnlyCollectionString);
+        Assert.Equal(new string[] { "g", "h" }, row4.ISetString);
+        Assert.Equal(new string[] { "g", "h" }, row4.IReadOnlySetString);
         Assert.Equal(new string[] { "g", "h" }, row4.IListNonGeneric);
         Assert.Equal(["g", "h"], row4.IListString);
         Assert.Equal(["g", "h"], row4.IListObject);
@@ -384,6 +395,7 @@ public class MultiMapTests
         Assert.Equal(new string[] { "7", "8" }, row4._concreteICollection);
         Assert.Equal(new string[] { "7", "8" }, row4.CollectionString);
         Assert.Equal(new string[] { "7", "8" }, row4.ReadOnlyCollectionString);
+        Assert.Equal(new string[] { "7", "8" }, row4.ReadOnlySetString);
         Assert.Equal(new string[] { "7", "8" }, row4.ImmutableArrayString);
         Assert.Equal(new string[] { "7", "8" }, row4.ImmutableListString);
         Assert.Equal(new string[] { "7", "8" }, row4.ImmutableStackString);
@@ -406,6 +418,8 @@ public class MultiMapTests
         public ICollection<string> ICollectionString { get; set; } = default!;
         public ICollection<bool> ICollectionBool { get; set; } = default!;
         public IReadOnlyCollection<string> IReadOnlyCollectionString { get; set; } = default!;
+        public ISet<string> ISetString { get; set; } = default!;
+        public IReadOnlySet<string> IReadOnlySetString { get; set; } = default!;
         public IList IListNonGeneric { get; set; } = default!;
         public IList<string> IListString { get; set; } = default!;
         public IList<object> IListObject { get; set; } = default!;
@@ -417,6 +431,7 @@ public class MultiMapTests
         public SortedSet<string> _concreteICollection = default!;
         public Collection<string> CollectionString { get; set; } = default!;
         public ReadOnlyCollection<string> ReadOnlyCollectionString { get; set; } = default!;
+        public ReadOnlySet<string> ReadOnlySetString { get; set; } = default!;
         public ImmutableArray<string> ImmutableArrayString { get; set; } = default!;
         public ImmutableList<string> ImmutableListString { get; set; } = default!;
         public ImmutableList<string> ImmutableStackString { get; set; } = default!;
@@ -479,6 +494,12 @@ public class MultiMapTests
             Map(p => p.IReadOnlyListString)
                 .WithColumnNames("IListString1", "IListString2");
 
+            Map(p => p.ISetString)
+                .WithColumnNames("IListString1", "IListString2");
+
+            Map(p => p.IReadOnlySetString)
+                .WithColumnNames("IListString1", "IListString2");
+
             MapList<string>(p => p.ArrayList)
                 .WithColumnNames("ListString1", "ListString2");
 
@@ -498,6 +519,9 @@ public class MultiMapTests
                 .WithColumnNames("ListString1", "ListString2");
 
             Map(p => p.ReadOnlyCollectionString)
+                .WithColumnNames("ListString1", "ListString2");
+
+            Map(p => p.ReadOnlySetString)
                 .WithColumnNames("ListString1", "ListString2");
                 
             MapList<string>(p => p.ImmutableArrayString)
