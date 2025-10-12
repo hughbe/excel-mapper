@@ -16,6 +16,7 @@ public class AddEnumerableFactoryTests
     [InlineData(typeof(ArrayList))]
     [InlineData(typeof(HashSet<int>))]
     [InlineData(typeof(Collection<int>))]
+    [InlineData(typeof(ObservableCollection<int>))]
     public void Ctor_Type(Type collectionType)
     {
         var factory = new AddEnumerableFactory<int>(collectionType);
@@ -39,7 +40,10 @@ public class AddEnumerableFactoryTests
     [InlineData(typeof(List<string>))]
     [InlineData(typeof(AddClass<string>))]
     [InlineData(typeof(Collection<string>))]
+    [InlineData(typeof(ObservableCollection<string>))]
     [InlineData(typeof(ReadOnlyCollection<int>))]
+    [InlineData(typeof(ReadOnlyObservableCollection<int>))]
+    [InlineData(typeof(ReadOnlyObservableCollection<string>))]
     [InlineData(typeof(AbstractClass))]
     [InlineData(typeof(FrozenSet<int>))]
     [InlineData(typeof(ReadOnlySet<int>))]

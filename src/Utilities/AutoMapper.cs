@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -437,6 +438,11 @@ public static class AutoMapper
         else if (listType == typeof(FrozenSet<TElement>))
         {
             result = new FrozenSetEnumerableFactory<TElement>();
+            return true;
+        }
+        else if (listType == typeof(ReadOnlyObservableCollection<TElement>))
+        {
+            result = new ReadOnlyObservableCollectionEnumerableFactory<TElement>();
             return true;
         }
         else if (listType.IsInterface)

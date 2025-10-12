@@ -55,6 +55,8 @@ public class ConstructorEnumerableFactoryTests
     [InlineData(typeof(AbstractClass))]
     [InlineData(typeof(Collection<string>))]
     [InlineData(typeof(ObservableCollection<string>))]
+    [InlineData(typeof(ReadOnlyObservableCollection<int>))]
+    [InlineData(typeof(ReadOnlyObservableCollection<string>))]
     [InlineData(typeof(ReadOnlyCollection<string>))]
     [InlineData(typeof(FrozenSet<string>))]
     [InlineData(typeof(HashSet<string>))]

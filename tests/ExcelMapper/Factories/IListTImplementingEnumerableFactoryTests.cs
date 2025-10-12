@@ -14,6 +14,7 @@ public class IListTImplementingEnumerableFactoryTests
     [InlineData(typeof(IListGeneric<int>))]
     [InlineData(typeof(Collection<int>))]
     [InlineData(typeof(ReadOnlyCollection<int>))]
+    [InlineData(typeof(ReadOnlyObservableCollection<int>))]
     public void Ctor_Type(Type collectionType)
     {
         var factory = new IListTImplementingEnumerableFactory<int>(collectionType);
@@ -43,6 +44,7 @@ public class IListTImplementingEnumerableFactoryTests
     [InlineData(typeof(List<string>))]
     [InlineData(typeof(Collection<string>))]
     [InlineData(typeof(ReadOnlyCollection<string>))]
+    [InlineData(typeof(ReadOnlyObservableCollection<string>))]
     [InlineData(typeof(AbstractClass))]
     [InlineData(typeof(FrozenSet<int>))]
     [InlineData(typeof(ReadOnlySet<int>))]

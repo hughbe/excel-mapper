@@ -5,6 +5,7 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
@@ -1681,6 +1682,178 @@ public class MapDictionaryTest
     }
 
     [Fact]
+    public void ReadRow_AutoMappedOrderedDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<OrderedDictionary>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = sheet.ReadRow<OrderedDictionary>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = sheet.ReadRow<OrderedDictionary>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSubOrderedDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SubOrderedDictionary>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = sheet.ReadRow<SubOrderedDictionary>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = sheet.ReadRow<SubOrderedDictionary>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    private class SubOrderedDictionary : OrderedDictionary
+    {
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedOrderedDictionaryClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<OrderedDictionaryClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<OrderedDictionaryClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<OrderedDictionaryClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
+    }
+
+    private class OrderedDictionaryClass
+    {
+        public OrderedDictionary Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedOrderedDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultOrderedDictionaryClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<OrderedDictionaryClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<OrderedDictionaryClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<OrderedDictionaryClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
+    }
+
+    private class DefaultOrderedDictionaryClassMap : ExcelClassMap<OrderedDictionaryClass>
+    {
+        public DefaultOrderedDictionaryClassMap()
+        {
+            Map<object>(p => p.Value);
+        }
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedOrderedDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap(new CustomOrderedDictionaryClassMap());
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<OrderedDictionaryClass>();
+        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+
+        var row2 = sheet.ReadRow<OrderedDictionaryClass>();
+        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+
+        var row3 = sheet.ReadRow<OrderedDictionaryClass>();
+        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+    }
+
+    private class CustomOrderedDictionaryClassMap : ExcelClassMap<OrderedDictionaryClass>
+    {
+        public CustomOrderedDictionaryClassMap()
+        {
+            Map<object>(p => p.Value)
+                .WithColumnNames("Column2", "Column3");
+        }
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedDictionaryStringObject_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
@@ -2270,6 +2443,302 @@ public class MapDictionaryTest
     private class ConcurrentDictionaryStringInvalidClass
     {
         public ConcurrentDictionary<string, ExcelSheet> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedOrderedDictionaryStringObject_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<OrderedDictionary<string, object>>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = sheet.ReadRow<OrderedDictionary<string, object>>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = sheet.ReadRow<OrderedDictionary<string, object>>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSubOrderedDictionaryStringObject_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SubOrderedDictionary<string, object>>();
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = sheet.ReadRow<SubOrderedDictionary<string, object>>();
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = sheet.ReadRow<SubOrderedDictionary<string, object>>();
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    private class SubOrderedDictionary<TKey, TValue> : OrderedDictionary<TKey, TValue> where TKey : notnull
+    {
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedOrderedDictionaryStringObjectClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<OrderedDictionaryStringObjectClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<OrderedDictionaryStringObjectClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<OrderedDictionaryStringObjectClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
+    }
+
+    private class OrderedDictionaryStringObjectClass
+    {
+        public OrderedDictionary<string, object> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedOrderedDictionaryStringObject_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultOrderedDictionaryStringObjectClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<OrderedDictionaryStringObjectClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<OrderedDictionaryStringObjectClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<OrderedDictionaryStringObjectClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
+    }
+
+    private class DefaultOrderedDictionaryStringObjectClassMap : ExcelClassMap<OrderedDictionaryStringObjectClass>
+    {
+        public DefaultOrderedDictionaryStringObjectClassMap()
+        {
+            Map(p => (IDictionary<string, object>)p.Value);
+        }
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedOrderedDictionaryStringObject_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap(new CustomOrderedDictionaryStringObjectClassMap());
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<OrderedDictionaryStringObjectClass>();
+        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+
+        var row2 = sheet.ReadRow<OrderedDictionaryStringObjectClass>();
+        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+
+        var row3 = sheet.ReadRow<OrderedDictionaryStringObjectClass>();
+        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+    }
+
+    private class CustomOrderedDictionaryStringObjectClassMap : ExcelClassMap<OrderedDictionaryStringObjectClass>
+    {
+        public CustomOrderedDictionaryStringObjectClassMap()
+        {
+            Map(p => (IDictionary<string, object>)p.Value)
+                .WithColumnNames("Column2", "Column3");
+        }
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedOrderedDictionaryStringInt_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<OrderedDictionaryStringIntClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal(1, row1.Value["Column1"]);
+        Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<OrderedDictionaryStringIntClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal(0, row2.Value["Column1"]);
+        Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<OrderedDictionaryStringIntClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal(-2, row3.Value["Column1"]);
+        Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
+    }
+
+    private class OrderedDictionaryStringIntClass
+    {
+        public OrderedDictionary<string, int> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedOrderedDictionaryStringInt_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        importer.Configuration.RegisterClassMap<DefaultOrderedDictionaryStringIntClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<OrderedDictionaryStringIntClass>();
+        Assert.Equal(4, row1.Value.Count);
+        Assert.Equal(1, row1.Value["Column1"]);
+        Assert.Equal(2, row1.Value["Column2"]);
+        Assert.Equal(3, row1.Value["Column3"]);
+        Assert.Equal(4, row1.Value["Column4"]);
+
+        var row2 = sheet.ReadRow<OrderedDictionaryStringIntClass>();
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal(0, row2.Value["Column1"]);
+        Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+        Assert.Equal(0, row2.Value["Column4"]);
+
+        var row3 = sheet.ReadRow<OrderedDictionaryStringIntClass>();
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal(-2, row3.Value["Column1"]);
+        Assert.Equal(-1, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+        Assert.Equal(-1, row3.Value["Column4"]);
+    }
+
+    private class DefaultOrderedDictionaryStringIntClassMap : ExcelClassMap<OrderedDictionaryStringIntClass>
+    {
+        public DefaultOrderedDictionaryStringIntClassMap()
+        {
+            Map(p => (IDictionary<string, int>)p.Value);
+        }
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedOrderedDictionaryStringInt_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap(new CustomOrderedDictionaryStringIntClassMap());
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<OrderedDictionaryStringIntClass>();
+        Assert.Equal(2, row1.Value.Count);
+        Assert.Equal(1, row1.Value["Column2"]);
+        Assert.Equal(2, row1.Value["Column3"]);
+
+        var row2 = sheet.ReadRow<OrderedDictionaryStringIntClass>();
+        Assert.Equal(2, row2.Value.Count);
+        Assert.Equal(0, row2.Value["Column2"]);
+        Assert.Equal(0, row2.Value["Column3"]);
+
+        var row3 = sheet.ReadRow<OrderedDictionaryStringIntClass>();
+        Assert.Equal(2, row3.Value.Count);
+        Assert.Equal(-2, row3.Value["Column2"]);
+        Assert.Equal(-1, row3.Value["Column3"]);
+    }
+
+    private class CustomOrderedDictionaryStringIntClassMap : ExcelClassMap<OrderedDictionaryStringIntClass>
+    {
+        public CustomOrderedDictionaryStringIntClassMap()
+        {
+            Map(p => (IDictionary<string, int>)p.Value)
+                .WithColumnNames("Column2", "Column3");
+        }
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedOrderedDictionaryStringInvalidObject_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.IsType<OrderedDictionaryStringInvalidClass>(sheet.ReadRow<OrderedDictionaryStringInvalidClass>());
+    }
+
+    private class OrderedDictionaryStringInvalidClass
+    {
+        public OrderedDictionary<string, ExcelSheet> Value { get; set; } = default!;
     }
 
     [Fact]

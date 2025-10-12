@@ -302,6 +302,7 @@ public class MultiMapTests
         Assert.Equal(new string[] { "1", "2" }, row1.ImmutableHashSetString);
         Assert.Equal(new string[] { "1", "2" }, row1.FrozenSetString);
         Assert.Equal(new string[] { "1", "2" }, row1.ObservableCollectionString);
+        Assert.Equal(new string[] { "1", "2" }, row1.ReadOnlyObservableCollectionString);
         Assert.Equal(new string[] { "1", "2" }, row1.CustomObservableCollectionString);
         Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.a, ObservableCollectionEnum.b }, row1.CustomObservableCollectionEnum);
 
@@ -336,6 +337,7 @@ public class MultiMapTests
         Assert.Equal(new string[] { "3", "4" }, row2.ImmutableHashSetString);
         Assert.Equal(new string[] { "3", "4" }, row2.FrozenSetString);
         Assert.Equal(new string[] { "3", "4" }, row2.ObservableCollectionString);
+        Assert.Equal(new string[] { "3", "4" }, row2.ReadOnlyObservableCollectionString);
         Assert.Equal(new string[] { "3", "4" }, row2.CustomObservableCollectionString);
         Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.custom, ObservableCollectionEnum.custom }, row2.CustomObservableCollectionEnum);
 
@@ -370,6 +372,7 @@ public class MultiMapTests
         Assert.Equal(new string[] { "5", "6" }, row3.ImmutableHashSetString);
         Assert.Equal(new string[] { "5", "6" }, row3.FrozenSetString);
         Assert.Equal(new string[] { "5", "6" }, row3.ObservableCollectionString);
+        Assert.Equal(new string[] { "5", "6" }, row3.ReadOnlyObservableCollectionString);
         Assert.Equal(new string[] { "5", "6" }, row3.CustomObservableCollectionString);
         Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.custom, ObservableCollectionEnum.custom }, row3.CustomObservableCollectionEnum);
 
@@ -404,6 +407,7 @@ public class MultiMapTests
         Assert.Equal(new string[] { "7", "8" }, row4.ImmutableHashSetString);
         Assert.Equal(new string[] { "7", "8" }, row4.FrozenSetString);
         Assert.Equal(new string[] { "7", "8" }, row4.ObservableCollectionString);
+        Assert.Equal(new string[] { "7", "8" }, row4.ReadOnlyObservableCollectionString);
         Assert.Equal(new string[] { "7", "8" }, row4.CustomObservableCollectionString);
         Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.custom, ObservableCollectionEnum.custom }, row4.CustomObservableCollectionEnum);
     }
@@ -440,6 +444,7 @@ public class MultiMapTests
         public ImmutableList<string> ImmutableHashSetString { get; set; } = default!;
         public FrozenSet<string> FrozenSetString { get; set; } = default!;
         public ObservableCollection<string> ObservableCollectionString { get; set; } = default!;
+        public ReadOnlyObservableCollection<string> ReadOnlyObservableCollectionString { get; set; } = default!;
         public CustomObservableCollection CustomObservableCollectionString { get; set; } = default!;
         public CustomEnumObservableCollection CustomObservableCollectionEnum { get; set; } = default!;
     }
@@ -546,6 +551,9 @@ public class MultiMapTests
                 .WithColumnNames("ListString1", "ListString2");
 
             Map(p => p.ObservableCollectionString)
+                .WithColumnNames("ListString1", "ListString2");
+
+            Map<string>(p => p.ReadOnlyObservableCollectionString)
                 .WithColumnNames("ListString1", "ListString2");
 
             Map<string>(p => p.CustomObservableCollectionString)

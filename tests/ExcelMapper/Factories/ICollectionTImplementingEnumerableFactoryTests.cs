@@ -15,6 +15,7 @@ public class ICollectionTImplementingEnumerableFactoryTests
     [InlineData(typeof(IListGeneric<int>))]
     [InlineData(typeof(Collection<int>))]
     [InlineData(typeof(ReadOnlyCollection<int>))]
+    [InlineData(typeof(ReadOnlyObservableCollection<int>))]
     [InlineData(typeof(HashSet<int>))]
     [InlineData(typeof(ReadOnlySet<int>))]
     public void Ctor_Type(Type collectionType)
@@ -47,6 +48,7 @@ public class ICollectionTImplementingEnumerableFactoryTests
     [InlineData(typeof(FrozenSet<int>))]
     [InlineData(typeof(Collection<string>))]
     [InlineData(typeof(ReadOnlyCollection<string>))]
+    [InlineData(typeof(ReadOnlyObservableCollection<string>))]
     [InlineData(typeof(HashSet<string>))]
     [InlineData(typeof(ReadOnlySet<string>))]
     public void Ctor_InvalidCollectionType_ThrowsArgumentException(Type collectionType)

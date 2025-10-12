@@ -774,6 +774,91 @@ public class MapSplitEnumerableTests
     }
 
     [Fact]
+    public void ReadRow_AutoMappedReadOnlyObservableCollectionClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ReadOnlyObservableCollectionClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ReadOnlyObservableCollectionClass>());
+
+        var row3 = sheet.ReadRow<ReadOnlyObservableCollectionClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<ReadOnlyObservableCollectionClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ReadOnlyObservableCollectionClass>());
+    }
+
+    public class ReadOnlyObservableCollectionClass
+    {
+        public ReadOnlyObservableCollection<int> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedReadOnlyObservableCollectionClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<ReadOnlyObservableCollectionClass>(c =>
+        {
+            c.Map(p => p.Value);
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ReadOnlyObservableCollectionClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ReadOnlyObservableCollectionClass>());
+
+        var row3 = sheet.ReadRow<ReadOnlyObservableCollectionClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<ReadOnlyObservableCollectionClass>();
+        Assert.Empty(row4.Value);
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ReadOnlyObservableCollectionClass>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedReadOnlyObservableCollectionClass_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        importer.Configuration.RegisterClassMap<ReadOnlyObservableCollectionClass>(c =>
+        {
+            c.MapList<int>(p => p.Value)
+                .WithElementMap(p => p
+                    .WithEmptyFallback(-1)
+                    .WithInvalidFallback(-2)
+                );
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ReadOnlyObservableCollectionClass>();
+        Assert.Equal([1, 2, 3], row1.Value);
+
+        var row2 = sheet.ReadRow<ReadOnlyObservableCollectionClass>();
+        Assert.Equal([1, -1, 2], row2.Value);
+
+        var row3 = sheet.ReadRow<ReadOnlyObservableCollectionClass>();
+        Assert.Equal([1], row3.Value);
+
+        var row4 = sheet.ReadRow<ReadOnlyObservableCollectionClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<ReadOnlyObservableCollectionClass>();
+        Assert.Equal([-2], row5.Value);
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedLinkedListClass_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");

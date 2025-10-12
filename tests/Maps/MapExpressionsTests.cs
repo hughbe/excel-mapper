@@ -1,7 +1,10 @@
 using System.Collections;
+using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using Xunit;
 
 namespace ExcelMapper.Tests;
@@ -2701,6 +2704,151 @@ public class MapExpressionsTests
     }
 
     [Fact]
+    public void ReadRows_DefaultMappedOrderedDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        var map = new ExcelClassMap<OrderedDictionaryClass>();
+        map.Map(o => o.Values["Column2"]);
+        map.Map(o => o.Values["Column3"]);
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<OrderedDictionaryClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("1", row.Values["Column2"]);
+        Assert.Equal("2", row.Values["Column3"]);
+    }
+
+    private class OrderedDictionaryClass
+    {
+        public OrderedDictionary Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedOrderedDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<OrderedDictionaryClass>();
+        map.Map(o => o.Values["Column2"]).WithColumnName("Column3");
+        map.Map(o => o.Values["Column3"]).WithColumnName("Column4");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<OrderedDictionaryClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("3", row.Values["Column2"]);
+        Assert.Equal("4", row.Values["Column3"]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedReadOnlyDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<ReadOnlyDictionaryClass>();
+        map.Map(o => o.Values["Column2"]);
+        map.Map(o => o.Values["Column3"]);
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ReadOnlyDictionaryClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("2", row.Values["Column2"]);
+        Assert.Equal("3", row.Values["Column3"]);
+    }
+
+    private class ReadOnlyDictionaryClass
+    {
+        public ReadOnlyDictionary<string, string> Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedReadOnlyDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<ReadOnlyDictionaryClass>();
+        map.Map(o => o.Values["Column2"]).WithColumnName("Column3");
+        map.Map(o => o.Values["Column3"]).WithColumnName("Column4");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ReadOnlyDictionaryClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("3", row.Values["Column2"]);
+        Assert.Equal("4", row.Values["Column3"]);
+    }
+    [Fact]
+    public void ReadRows_DefaultMappedConcurrentDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<ConcurrentDictionaryClass>();
+        map.Map(o => o.Values["Column2"]);
+        map.Map(o => o.Values["Column3"]);
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ConcurrentDictionaryClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("2", row.Values["Column2"]);
+        Assert.Equal("3", row.Values["Column3"]);
+    }
+
+    private class ConcurrentDictionaryClass
+    {
+        public ConcurrentDictionary<string, string> Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedConcurrentDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<ConcurrentDictionaryClass>();
+        map.Map(o => o.Values["Column2"]).WithColumnName("Column3");
+        map.Map(o => o.Values["Column3"]).WithColumnName("Column4");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ConcurrentDictionaryClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("3", row.Values["Column2"]);
+        Assert.Equal("4", row.Values["Column3"]);
+    }
+
+    private class SortedDictionaryClass
+    {
+        public SortedDictionary<string, string> Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedSortedDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<SortedDictionaryClass>();
+        map.Map(o => o.Values["Column2"]).WithColumnName("Column3");
+        map.Map(o => o.Values["Column3"]).WithColumnName("Column4");
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<SortedDictionaryClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("3", row.Values["Column2"]);
+        Assert.Equal("4", row.Values["Column3"]);
+    }
+
+    [Fact]
     public void ReadRows_DefaultMappedIntImmutableDictionaryIndex_Success()
     {
         using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
@@ -2739,6 +2887,24 @@ public class MapExpressionsTests
         Assert.Equal(2, row.Values.Count);
         Assert.Equal(3, row.Values["Column2"]);
         Assert.Equal(4, row.Values["Column3"]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedSortedDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        var map = new ExcelClassMap<SortedDictionaryClass>();
+        map.Map(o => o.Values["Column2"]);
+        map.Map(o => o.Values["Column3"]);
+        importer.Configuration.RegisterClassMap(map);
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<SortedDictionaryClass>();
+        Assert.Equal(2, row.Values.Count);
+        Assert.Equal("2", row.Values["Column2"]);
+        Assert.Equal("3", row.Values["Column3"]);
     }
 
     [Fact]
