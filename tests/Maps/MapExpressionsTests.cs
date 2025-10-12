@@ -81,7 +81,10 @@ public class MapExpressionsTests
     public void ReadRow_DefaultMappedMemberNestedChildClass_Success()
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
-        importer.Configuration.RegisterClassMap<DefaultNestedMemberClassParentMap>();
+        importer.Configuration.RegisterClassMap<NestedClassParent>(c =>
+        {
+            c.Map(o => o.Child.Value);
+        });
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
@@ -97,14 +100,6 @@ public class MapExpressionsTests
     private class NestedClassChild
     {
         public int Value { get; set; }
-    }
-
-    private class DefaultNestedMemberClassParentMap : ExcelClassMap<NestedClassParent>
-    {
-        public DefaultNestedMemberClassParentMap()
-        {
-            Map(o => o.Child.Value);
-        }
     }
 
     [Fact]
@@ -2822,10 +2817,15 @@ public class MapExpressionsTests
     }
 
     [Fact]
-    public void ReadRow_ForcedMappedInt32_Success()
+    public void ReadRow_CastExpressionValid_Success()
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
-        importer.Configuration.RegisterClassMap<CastIntValueMap>();
+        importer.Configuration.RegisterClassMap<ObjectValue>(c =>
+        {
+            c.Map(o => (int)o.Value)
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
 
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
@@ -2848,14 +2848,36 @@ public class MapExpressionsTests
         public object Value { get; set; } = default!;
     }
 
-    private class CastIntValueMap : ExcelClassMap<ObjectValue>
+    [Fact]
+    public void ReadRow_ConvertNestedExpressionResultValid_Success()
     {
-        public CastIntValueMap()
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<NestedObjectValue>(c =>
         {
-            Map(o => (int)o.Value)
+            c.Map(o => (int)o.Value.Value)
                 .WithEmptyFallback(-10)
                 .WithInvalidFallback(10);
-        }
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<NestedObjectValue>();
+        Assert.Equal(2, row1.Value.Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<NestedObjectValue>();
+        Assert.Equal(-10, row2.Value.Value);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<NestedObjectValue>();
+        Assert.Equal(10, row3.Value.Value);
+    }
+
+    private class NestedObjectValue
+    {
+        public ObjectValue Value { get; set; } = default!;
     }
 #pragma warning restore xUnit2013 // Do not use equality check to check for collection size.
 }

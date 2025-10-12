@@ -122,6 +122,50 @@ public class MapNestedObjectTests
     }
 
     [Fact]
+    public void ReadRow_MapNestedListIndexer_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("NestedList.xlsx");
+        importer.Configuration.RegisterClassMap<NestedListParentIndexerClassMap>();
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<NestedListParentClass>();
+        Assert.Equal("TheName", row1.Name);
+        Assert.Equal("TheAddress", row1.Address);
+        Assert.Equal(2, row1.BusinessHours.Count);
+        Assert.Equal("TheMondayLabel", row1.BusinessHours[0].DayLabel);
+        Assert.Equal("TheMondayOpen", row1.BusinessHours[0].StartTime);
+        Assert.Equal("TheMondayClose", row1.BusinessHours[0].EndTime);
+        Assert.Equal("TheTuesdayLabel", row1.BusinessHours[1].DayLabel);
+        Assert.Equal("TheTuesdayOpen", row1.BusinessHours[1].StartTime);
+        Assert.Equal("TheTuesdayClose", row1.BusinessHours[1].EndTime);
+    }
+
+    private class NestedListParentIndexerClassMap : ExcelClassMap<NestedListParentClass>
+    {
+        public NestedListParentIndexerClassMap()
+        {
+            Map(v => v.Name);
+            Map(v => v.Address);
+
+            Map(v => v.BusinessHours[0].DayLabel)
+                .WithColumnName("MondayLabel");
+            Map(v => v.BusinessHours[0].StartTime)
+                .WithColumnName("MondayOpen");
+            Map(v => v.BusinessHours[0].EndTime)
+                .WithColumnName("MondayClose");
+            Map(v => v.BusinessHours[1].DayLabel)
+                .WithColumnName("TuesdayLabel");
+            Map(v => v.BusinessHours[1].StartTime)
+                .WithColumnName("TuesdayOpen");
+            Map(v => v.BusinessHours[1].EndTime)
+                .WithColumnName("TuesdayClose");
+            // Note: only works for 2 days (Monday, Tuesday) as written, but easy to extend.
+        }
+    }
+
+    [Fact]
     public void ReadRow_MapNestedList_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("NestedList.xlsx");

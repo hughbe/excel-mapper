@@ -10,34 +10,94 @@ public class MapExpressionsUnsupportedTests
     [Fact]
     public void Map_NoExpression_ThrowsArgumentException()
     {
-        var map = new ExcelClassMap<SimpleClass>();
+        var map = new ExcelClassMap<StringClass>();
         Assert.Throws<ArgumentException>("expression", () => map.Map(p => p));
     }
 
     [Fact]
     public void Map_CastNoExpression_ThrowsArgumentException()
     {
-        var map = new ExcelClassMap<SimpleClass>();
+        var map = new ExcelClassMap<StringClass>();
         Assert.Throws<ArgumentException>("expression", () => map.Map(p => (object)p));
     }
 
     [Fact]
     public void Map_NewExpression_ThrowsArgumentException()
     {
-        var map = new ExcelClassMap<SimpleClass>();
+        var map = new ExcelClassMap<StringClass>();
         Assert.Throws<ArgumentException>("expression", () => map.Map(p => new List<string>()));
     }
 
     [Fact]
     public void Map_MethodCallExpression_ThrowsArgumentException()
     {
-        var map = new ExcelClassMap<SimpleClass>();
+        var map = new ExcelClassMap<StringClass>();
         Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value.ToString()));
     }
 
-    private class SimpleClass
+    [Fact]
+    public void Map_MemberVariable_ThrowsArgumentException()
+    {
+        var otherType = new StringClass();
+        var map = new ExcelClassMap<StringClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => otherType));
+    }
+
+    [Fact]
+    public void Map_MemberInvalidTargetType_ThrowsArgumentException()
+    {
+        var otherType = new StringClass();
+        var map = new ExcelClassMap<StringClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => otherType.Value));
+    }
+
+    [Fact]
+    public void Map_InvalidUnaryExpression_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<IntClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => -p.Value));
+    }
+
+    [Fact]
+    public void Map_InvalidBinaryExpressionFirst_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<IntClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => 1 + p.Value));
+    }
+
+    [Fact]
+    public void Map_InvalidBinaryExpressionSecond_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<IntClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value + 1));
+    }
+
+    private class StringClass
     {
         public string Value { get; set; } = default!;
+    }
+
+    private class IntClass
+    {
+        public int Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void Map_NestedClassDifferently_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<NestedClassParent>();
+        map.Map(o => o.Value);
+        Assert.Throws<InvalidOperationException>(() => map.Map(o => o.Value.Value));
+    }
+
+    private class NestedClassParent
+    {
+        public NestedClassChild Value { get; set; } = default!;
+    }
+
+    private class NestedClassChild
+    {
+        public int Value { get; set; }
     }
 
     [Fact]

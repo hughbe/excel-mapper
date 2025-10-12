@@ -3,7 +3,7 @@ using Xunit;
 
 namespace ExcelMapper.Tests;
 
-public class ExcelClassMapTests : ExcelClassMap<Helpers.TestClass>
+public class ExcelClassMapTests
 {
     [Fact]
     public void Ctor_Type()

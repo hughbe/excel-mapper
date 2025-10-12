@@ -34,7 +34,7 @@ public class ExcelImporterConfigurationTests
         importer.Configuration.RegisterClassMap<TestMap>();
 
         Assert.True(importer.Configuration.TryGetClassMap<int>(out var classMap));
-        TestMap map = Assert.IsType<TestMap>(classMap);
+        var map = Assert.IsType<TestMap>(classMap);
         Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
         Assert.Equal(typeof(int), map.Type);
         Assert.Empty(map.Properties);
@@ -44,6 +44,63 @@ public class ExcelImporterConfigurationTests
         Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
         Assert.Equal(typeof(int), map.Type);
         Assert.Empty(map.Properties);
+    }
+
+    [Fact]
+    public void RegisterClassMap_InvokeAction_Success()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<IntClass>(c =>
+        {
+            c.Map(o => o.Value1);
+            c.Map(o => o.Value2);
+        });
+
+        Assert.True(importer.Configuration.TryGetClassMap<IntClass>(out var classMap));
+        var map = Assert.IsType<ExcelClassMap<IntClass>>(classMap);
+        Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
+        Assert.Equal(typeof(IntClass), map.Type);
+        Assert.Equal(2, map.Properties.Count);
+
+        Assert.True(importer.Configuration.TryGetClassMap(typeof(IntClass), out classMap));
+        map = Assert.IsType<ExcelClassMap<IntClass>>(classMap);
+        Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
+        Assert.Equal(typeof(IntClass), map.Type);
+        Assert.Equal(2, map.Properties.Count);
+    }
+
+    [Fact]
+    public void RegisterClassMap_InvokeActionEmpty_Success()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<IntClass>(c =>
+        {
+        });
+
+        Assert.True(importer.Configuration.TryGetClassMap<IntClass>(out var classMap));
+        var map = Assert.IsType<ExcelClassMap<IntClass>>(classMap);
+        Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
+        Assert.Equal(typeof(IntClass), map.Type);
+        Assert.Empty(map.Properties);
+
+        Assert.True(importer.Configuration.TryGetClassMap(typeof(IntClass), out classMap));
+        map = Assert.IsType<ExcelClassMap<IntClass>>(classMap);
+        Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
+        Assert.Equal(typeof(IntClass), map.Type);
+        Assert.Empty(map.Properties);
+    }
+
+    private class IntClass
+    {
+        public int Value1 { get; set; }
+        public int Value2 { get; set; }
+    }
+
+    [Fact]
+    public void RegisterClassMap_NullClassMapFactory_ThrowsArgumentNullException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        Assert.Throws<ArgumentNullException>("classMapFactory", () => importer.Configuration.RegisterClassMap<int>(null!));
     }
 
     [Fact]

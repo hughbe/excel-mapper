@@ -58,6 +58,23 @@ public class ExcelImporterConfiguration
     }
 
     /// <summary>
+    /// Registers a class map of the given type to be used when mapping a row to an
+    /// object.
+    /// </summary> <typeparam name="T">The type of the class to map.</typeparam>
+    /// <param name="classMapFactory">A factory that configures and returns the class map to use.</param>
+    public void RegisterClassMap<T>(Action<ExcelClassMap<T>> classMapFactory) where T : new()
+    {
+        if (classMapFactory == null)
+        {
+            throw new ArgumentNullException(nameof(classMapFactory));
+        }
+
+        var classMapInstance = new ExcelClassMap<T>();
+        classMapFactory(classMapInstance);
+        RegisterClassMap(typeof(T), classMapInstance);
+    }
+
+    /// <summary>
     /// Registers the given class map to be used when mapping a row to an object.
     /// </summary>
     /// <param name="classMap">The class map to use.</param>

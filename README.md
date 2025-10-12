@@ -374,12 +374,33 @@ ExcelMapper allows you to customize the class map used when mapping Excel sheet 
 
 Custom class maps let you change which column maps to a property, make columns optional, or add custom conversions to the default class map.
 
-To define a class map, create an `ExcelClassMap<T>` and call `Map(t => t.PropertyOrField)` in the constructor for each property or field you want to map.
+To define a class map, create an `ExcelClassMap<T>` and call `Map(t => t.PropertyOrField)` in the constructor for each property or field you want to map. Properties or fields not mapped with `Map` will be ignored.
 
-By default, ExcelMapper maps each property or field to a column with the same name. You can use the following helpers on the result of `Map` to customize the column mapping:
+```cs
+
+
+public class PubMap : ExcelClassMap<PubMap>
+{
+    public PubMap()
+    {
+        Map(p => p.Name);
+        Map(p => p.Address);
+    }
+}
+
+public class Pub
+{
+    public string Name { get ; set; }
+    public string Address { get ; set; }
+    public Pub Neighbour { get; set; }
+}
+```
+
+By default, ExcelMapper maps each property or field using the same rules for auto and attribute mapping. You can use the following helpers on the result of `Map` to customize the column mapping:
 
 * `WithColumnName(string columnName)` - Read from a specific column name
 * `WithColumnIndex(int columnIndex)` - Read from a specific column index
+* `WithColumnNames(string columnName)` - Read from the first column in a list of column names
 * `WithColumnNameMatching(params string[] columnNames)` - Read from the first matching column in a list of column names
 * `WithColumnNameMatching(Func<string, bool> predicate)` - Read from the first column matching a predicate
 * `WithColumnMatching(IExcelColumnMatcher matcher)` - Read from the first column matching the result of `IExcelColumnMatcher.ColumnMatches(ExcelSheet sheet, int columnIndex)`

@@ -1,225 +1,19 @@
-﻿using System;
+﻿using ExcelMapper.Mappers;
+using System;
 using Xunit;
 
 namespace ExcelMapper.Tests;
 
-public class ExcelClassMapTTests : ExcelClassMap<Helpers.TestClass>
+public class ExcelClassMapTTests
 {
     [Fact]
     public void Ctor_Default()
     {
         var map = new ExcelClassMap<string>();
         Assert.Equal(typeof(string), map.Type);
+        Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
         Assert.Empty(map.Properties);
         Assert.Same(map.Properties, map.Properties);
-    }
-
-    [Fact]
-    public void Map_SingleExpression_Success()
-    {
-        Map(p => p.Value);
-    }
-
-    [Fact]
-    public void Map_NestedExpression_Success()
-    {
-        Map(p => p.NestedValue.IntValue);
-    }
-
-    [Fact]
-    public void Map_CastExpression_Success()
-    {
-        Map(p => (string)p.Value);
-    }
-
-    [Fact]
-    public void Map_NestedCastExpression_Success()
-    {
-        Map(p => (int)p.NestedValue.IntValue);
-    }
-
-    [Fact]
-    public void Map_NotEnum_ThrowsArgumentException()
-    {
-        Assert.Throws<ArgumentException>("TProperty", () => Map(p => p.DateValue, ignoreCase: true));
-        Assert.Throws<ArgumentException>("TProperty", () => Map(p => p.NullableDateValue, ignoreCase: true));
-    }
-
-    [Fact]
-    public void Map_IEnumerable_ThrowsExcelMappingException()
-    {
-        using var stream = Helpers.GetResource("Primitives.xlsx");
-        using var importer = new ExcelImporter(stream);
-
-        Map(p => p.ConcreteIEnumerable);
-        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(this));
-    }
-
-    [Fact]
-    public void Map_IDictionary_ThrowsExcelMappingException()
-    {
-        using var stream = Helpers.GetResource("Primitives.xlsx");
-        using var importer = new ExcelImporter(stream);
-
-        Map(p => p.ConcreteIDictionary);
-        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(this));
-    }
-
-    [Fact]
-    public void Map_IDictionaryNoConstructor_ThrowsExcelMappingException()
-    {
-        using var stream = Helpers.GetResource("Primitives.xlsx");
-        using var importer = new ExcelImporter(stream);
-
-        Map(p => p.IDictionaryNoConstructor);
-        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(this));
-    }
-
-    [Fact]
-    public void MultiMap_UnknownInterface_ThrowsExcelMappingException()
-    {
-        Assert.Throws<ExcelMappingException>(() => Map<string>(p => p.UnknownInterfaceValue));
-    }
-
-    [Fact]
-    public void MultiMap_ConcreteIEnumerable_ThrowsExcelMappingException()
-    {
-        Assert.Throws<ExcelMappingException>(() => Map<string>(p => p.ConcreteIEnumerable));
-    }
-
-    [Fact]
-    public void MultiMap_CantMapIEnumerableElementType_ThrowsExcelMappingException()
-    {
-        Assert.Throws<ExcelMappingException>(() => Map(p => p.CantMapElementType));
-    }
-
-/*
-    TODO: throw on creation like we do elsewhere
-    [Fact]
-    public void MultiMap_CantMapIDictionaryValueType_ThrowsExcelMappingException()
-    {
-        Assert.Throws<ExcelMappingException>(() => Map(p => p.CantMapDictionaryValueType));
-    }
-*/
-
-    [Fact]
-    public void MapObject_String_ThrowsExcelMappingException()
-    {
-        Assert.Throws<ExcelMappingException>(() => MapObject(p => p.Value));
-    }
-
-    [Fact]
-    public void MapObject_Interface_ThrowsExcelMappingException()
-    {
-        Assert.Throws<ExcelMappingException>(() => MapObject(p => p.UnknownInterfaceValue));
-    }
-
-    [Fact]
-    public void MapObject_InvalidIListMemberType_ThrowsExcelMappingException()
-    {
-        Assert.Throws<ExcelMappingException>(() => MapObject(p => p.InvalidIListMemberType));
-    }
-
-    [Fact]
-    public void MapObject_InvalidIDictionaryMemberType_ThrowsExcelMappingException()
-    {
-        Assert.Throws<ExcelMappingException>(() => MapObject(p => p.InvalidIDictionaryMemberType));
-    }
-
-    [Fact]
-    public void Map_InvalidTargetType_ThrowsArgumentException()
-    {
-        var otherType = new OtherType();
-        Assert.Throws<ArgumentException>("expression", () => Map(p => otherType.Value));
-    }
-
-    [Fact]
-    public void Map_InvalidUnaryExpression_ThrowsArgumentException()
-    {
-        var otherType = new OtherType();
-        Assert.Throws<ArgumentException>("expression", () => Map(p => -otherType.Value));
-    }
-
-    [Fact]
-    public void Map_InvalidBinaryExpression_ThrowsArgumentException()
-    {
-        var otherType = new OtherType();
-        Assert.Throws<ArgumentException>("expression", () => Map(p => otherType.Value + 1));
-    }
-
-    [Fact]
-    public void Map_InvalidMethodExpression_ThrowsArgumentException()
-    {
-        var otherType = new OtherType();
-        Assert.Throws<ArgumentException>("expression", () => Map(p => otherType.Value.ToString()));
-    }
-
-    [Fact]
-    public void Map_InvalidCastExpression_ThrowsExcelMappingException()
-    {
-        using var stream = Helpers.GetResource("Primitives.xlsx");
-        using var importer = new ExcelImporter(stream);
-
-        Map(p => (CollectionAttribute)p.ObjectValue);
-        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(this));
-    }
-
-    [Fact]
-    public void Map_MultipleMemberAccessTypeAlreadyMapped_ThrowsInvalidOperationException()
-    {
-        var classMap = new ExcelClassMap<IConvertibleValue>();
-        classMap.Map(p => p.IConvertibleType);
-
-        Assert.Throws<InvalidOperationException>(() => classMap.Map(p => p.IConvertibleType.Value));
-    }
-
-    public class IConvertibleValue
-    {
-        public IConvertibleType IConvertibleType { get; set; } = default!;
-    }
-
-    public class IConvertibleType : IConvertible
-    {
-        public string Value { get; set; } = default!;
-
-        public TypeCode GetTypeCode() => throw new NotImplementedException();
-
-        public bool ToBoolean(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public byte ToByte(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public char ToChar(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public DateTime ToDateTime(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public decimal ToDecimal(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public double ToDouble(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public short ToInt16(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public int ToInt32(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public long ToInt64(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public sbyte ToSByte(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public float ToSingle(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public string ToString(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public object ToType(Type conversionType, IFormatProvider? provider) => throw new NotImplementedException();
-
-        public ushort ToUInt16(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public uint ToUInt32(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public ulong ToUInt64(IFormatProvider? provider) => throw new NotImplementedException();
-    }
-
-    public class OtherType
-    {
-        public int Value { get; set; }
     }
 
     [Theory]
@@ -227,10 +21,11 @@ public class ExcelClassMapTTests : ExcelClassMap<Helpers.TestClass>
     [InlineData(FallbackStrategy.SetToDefaultValue)]
     public void Ctor_EmptyValueStrategy(FallbackStrategy emptyValueStrategy)
     {
-        var map = new TestClassMap(emptyValueStrategy);
+        var map = new ExcelClassMap<string>(emptyValueStrategy);
         Assert.Equal(emptyValueStrategy, map.EmptyValueStrategy);
-        Assert.Equal(typeof(Helpers.TestClass), map.Type);
+        Assert.Equal(typeof(string), map.Type);
         Assert.Empty(map.Properties);
+        Assert.Same(map.Properties, map.Properties);
     }
 
     [Theory]
@@ -239,6 +34,207 @@ public class ExcelClassMapTTests : ExcelClassMap<Helpers.TestClass>
     public void Ctor_InvalidEmptyValueStrategy_ThrowsArgumentException(FallbackStrategy emptyValueStrategy)
     {
         Assert.Throws<ArgumentException>("emptyValueStrategy", () => new TestClassMap(emptyValueStrategy));
+    }
+
+    [Fact]
+    public void Map_FuncExpressionT_Success()
+    {
+        var map = new ExcelClassMap<TestClass>();
+        var result = map.Map(p => p.StringValue);
+        Assert.Single(map.Properties);
+        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.StringValue)), map.Properties[0].Member);
+        Assert.Same(result, map.Properties[0].Map);
+
+        // Map again.
+        var result2 = map.Map(p => p.StringValue);
+        Assert.NotSame(result, result2);
+        Assert.Single(map.Properties);
+        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.StringValue)), map.Properties[0].Member);
+        Assert.Same(result2, map.Properties[0].Map);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Map_FuncExpressionTEnumBool_Success(bool ignoreCase)
+    {
+        var map = new ExcelClassMap<TestClass>();
+        var result = map.Map(p => p.EnumValue, ignoreCase);
+        Assert.Single(map.Properties);
+        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.EnumValue)), map.Properties[0].Member);
+        Assert.Same(result, map.Properties[0].Map);
+        var mapper = Assert.IsType<EnumMapper>(Assert.Single(result.CellValueMappers));
+        Assert.Equal(typeof(TestEnum), mapper.EnumType);
+        Assert.Equal(ignoreCase, mapper.IgnoreCase);
+
+        // Map again.
+        var result2 = map.Map(p => p.EnumValue, ignoreCase);
+        Assert.NotSame(result, result2);
+        Assert.Single(map.Properties);
+        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.EnumValue)), map.Properties[0].Member);
+        Assert.Same(result2, map.Properties[0].Map);
+        mapper = Assert.IsType<EnumMapper>(Assert.Single(result2.CellValueMappers));
+        Assert.Equal(typeof(TestEnum), mapper.EnumType);
+        Assert.Equal(ignoreCase, mapper.IgnoreCase);
+
+        // Map opposite.
+        var result3 = map.Map(p => p.EnumValue, !ignoreCase);
+        Assert.NotSame(result2, result3);
+        Assert.Single(map.Properties);
+        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.EnumValue)), map.Properties[0].Member);
+        Assert.Same(result3, map.Properties[0].Map);
+        mapper = Assert.IsType<EnumMapper>(Assert.Single(result3.CellValueMappers));
+        Assert.Equal(typeof(TestEnum), mapper.EnumType);
+        Assert.Equal(!ignoreCase, mapper.IgnoreCase);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Map_FuncExpressionNullableTEnumBool_Success(bool ignoreCase)
+    {
+        var map = new ExcelClassMap<TestClass>();
+        var result = map.Map(p => p.NullableEnumValue, ignoreCase);
+        Assert.Single(map.Properties);
+        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.NullableEnumValue)), map.Properties[0].Member);
+        Assert.Same(result, map.Properties[0].Map);
+        var mapper = Assert.IsType<EnumMapper>(Assert.Single(result.CellValueMappers));
+        Assert.Equal(typeof(TestEnum), mapper.EnumType);
+        Assert.Equal(ignoreCase, mapper.IgnoreCase);
+
+        // Map again.
+        var result2 = map.Map(p => p.NullableEnumValue, ignoreCase);
+        Assert.NotSame(result, result2);
+        Assert.Single(map.Properties);
+        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.NullableEnumValue)), map.Properties[0].Member);
+        Assert.Same(result2, map.Properties[0].Map);
+        mapper = Assert.IsType<EnumMapper>(Assert.Single(result2.CellValueMappers));
+        Assert.Equal(typeof(TestEnum), mapper.EnumType);
+        Assert.Equal(ignoreCase, mapper.IgnoreCase);
+
+        // Map opposite.
+        var result3 = map.Map(p => p.NullableEnumValue, !ignoreCase);
+        Assert.NotSame(result2, result3);
+        Assert.Single(map.Properties);
+        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.NullableEnumValue)), map.Properties[0].Member);
+        Assert.Same(result3, map.Properties[0].Map);
+        mapper = Assert.IsType<EnumMapper>(Assert.Single(result3.CellValueMappers));
+        Assert.Equal(typeof(TestEnum), mapper.EnumType);
+        Assert.Equal(!ignoreCase, mapper.IgnoreCase);
+    }
+
+    [Fact]
+    public void Map_EnumIgnoreCaseNotEnum_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<TestClass>();
+        Assert.Throws<ArgumentException>("TProperty", () => map.Map(p => p.DateValue, ignoreCase: true));
+        Assert.Throws<ArgumentException>("TProperty", () => map.Map(p => p.NullableDateValue, ignoreCase: true));
+    }
+
+    [Fact]
+    public void Map_IEnumerable_ThrowsExcelMappingException()
+    {
+        using var stream = Helpers.GetResource("Primitives.xlsx");
+        using var importer = new ExcelImporter(stream);
+
+        var map = new ExcelClassMap<Helpers.TestClass>();
+        map.Map(p => p.ConcreteIEnumerable);
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
+    }
+
+    [Fact]
+    public void Map_IDictionary_ThrowsExcelMappingException()
+    {
+        using var stream = Helpers.GetResource("Primitives.xlsx");
+        using var importer = new ExcelImporter(stream);
+
+        var map = new ExcelClassMap<Helpers.TestClass>();
+        map.Map(p => p.ConcreteIDictionary);
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
+    }
+
+    [Fact]
+    public void Map_IDictionaryNoConstructor_ThrowsExcelMappingException()
+    {
+        using var stream = Helpers.GetResource("Primitives.xlsx");
+        using var importer = new ExcelImporter(stream);
+
+        var map = new ExcelClassMap<Helpers.TestClass>();
+        map.Map(p => p.IDictionaryNoConstructor);
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
+    }
+
+    [Fact]
+    public void MultiMap_UnknownInterface_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<Helpers.TestClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map<string>(p => p.UnknownInterfaceValue));
+    }
+
+    [Fact]
+    public void MultiMap_ConcreteIEnumerable_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<Helpers.TestClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map<string>(p => p.ConcreteIEnumerable));
+    }
+
+    [Fact]
+    public void MultiMap_CantMapIEnumerableElementType_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<Helpers.TestClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map(p => p.CantMapElementType));
+    }
+
+    [Fact]
+    public void MapObject_String_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<Helpers.TestClass>();
+        Assert.Throws<ExcelMappingException>(() => map.MapObject(p => p.Value));
+    }
+
+    [Fact]
+    public void MapObject_Interface_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<Helpers.TestClass>();
+        Assert.Throws<ExcelMappingException>(() => map.MapObject(p => p.UnknownInterfaceValue));
+    }
+
+    [Fact]
+    public void MapObject_InvalidIListMemberType_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<Helpers.TestClass>();
+        Assert.Throws<ExcelMappingException>(() => map.MapObject(p => p.InvalidIListMemberType));
+    }
+
+    [Fact]
+    public void MapObject_InvalidIDictionaryMemberType_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<Helpers.TestClass>();
+        Assert.Throws<ExcelMappingException>(() => map.MapObject(p => p.InvalidIDictionaryMemberType));
+    }
+
+    [Fact]
+    public void Map_InvalidMethodExpression_ThrowsArgumentException()
+    {
+        var otherType = new OtherType();
+        var map = new ExcelClassMap<OtherType>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => otherType.Value.ToString()));
+    }
+
+    [Fact]
+    public void Map_InvalidCastExpression_ThrowsExcelMappingException()
+    {
+        using var stream = Helpers.GetResource("Primitives.xlsx");
+        using var importer = new ExcelImporter(stream);
+
+        var map = new ExcelClassMap<Helpers.TestClass>();
+        map.Map(p => (CollectionAttribute)p.ObjectValue);
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
+    }
+
+    public class OtherType
+    {
+        public int Value { get; set; }
     }
 
     [Fact]
@@ -252,29 +248,78 @@ public class ExcelClassMapTTests : ExcelClassMap<Helpers.TestClass>
     [Fact]
     public void WithClassMap_InvokeClassMapFactory_Success()
     {
-        Assert.Same(this, WithClassMap(c =>
+        var map = new ExcelClassMap<TestClass>();
+        Assert.Same(map, map.WithClassMap(c =>
         {
-            Assert.Same(this, c);
+            Assert.Same(map, c);
         }));
     }
 
     [Fact]
     public void WithClassMap_NullClassMapFactory_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>("classMapFactory", () => WithClassMap((Action<ExcelClassMap<Helpers.TestClass>>)null!));
+        var map = new ExcelClassMap<TestClass>();
+        Assert.Throws<ArgumentNullException>("classMapFactory", () => map.WithClassMap((Action<ExcelClassMap<TestClass>>)null!));
     }
 
     [Fact]
     public void WithClassMap_InvokeClassMap_Success()
     {
-        var map = new ExcelClassMap<Helpers.TestClass>();
-        Assert.Same(this, WithClassMap(map));
+        var map = new ExcelClassMap<TestClass>();
+        map.Map(p => p.EnumValue);
+        var otherMap = new ExcelClassMap<TestClass>();
+        otherMap.Map(p => p.IntValue);
+        otherMap.Map(p => p.StringValue);
+        Assert.Same(map, map.WithClassMap(otherMap));
+        Assert.Equal(2, map.Properties.Count);
+        Assert.Equal(nameof(TestClass.IntValue), map.Properties[0].Member.Name);
+        Assert.Equal(nameof(TestClass.StringValue), map.Properties[1].Member.Name);
+    }
+
+    [Fact]
+    public void WithClassMap_InvokeClassMapEmpty_Success()
+    {
+        var map = new ExcelClassMap<TestClass>();
+        map.Map(p => p.EnumValue);
+        var otherMap = new ExcelClassMap<TestClass>();
+        Assert.Same(map, map.WithClassMap(otherMap));
+        Assert.Empty(map.Properties);
+    }
+
+    [Fact]
+    public void WithClassMap_InvokeSameClassMap_Success()
+    {
+        var map = new ExcelClassMap<TestClass>();
+        Assert.Same(map, map.WithClassMap(map));
     }
 
     [Fact]
     public void WithClassMap_NullClassMap_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>("classMap", () => WithClassMap((ExcelClassMap<Helpers.TestClass>)null!));
+        var map = new ExcelClassMap<TestClass>();
+        Assert.Throws<ArgumentNullException>("classMap", () => map.WithClassMap((ExcelClassMap<TestClass>)null!));
+    }
+
+    private class TestClass
+    {
+        public int IntValue { get; set; }
+        public string StringValue { get; set; } = default!;
+        public TestEnum EnumValue { get; set; }
+        public TestEnum? NullableEnumValue { get; set; }
+        public DateTime DateValue { get; set; }
+        public DateTime? NullableDateValue { get; set; }
+        public ChildClass? ObjectValue { get; set; }
+    }
+
+    private enum TestEnum
+    {
+        Value1,
+        Value2
+    }
+
+    private class ChildClass
+    {
+        public int Value { get; set; }
     }
 
     private class TestClassMap : ExcelClassMap<Helpers.TestClass>

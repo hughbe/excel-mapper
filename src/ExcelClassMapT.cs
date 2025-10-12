@@ -279,6 +279,10 @@ public class ExcelClassMap<T> : ExcelClassMap
         {
             throw new ArgumentNullException(nameof(classMap));
         }
+        if (classMap == this)
+        {
+            return this;
+        }
 
         Properties.Clear();
         foreach (var propertyMap in classMap.Properties)
