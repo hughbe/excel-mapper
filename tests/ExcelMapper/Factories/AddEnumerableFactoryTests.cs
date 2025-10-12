@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Frozen;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using Xunit;
 
@@ -17,6 +18,7 @@ public class AddEnumerableFactoryTests
     [InlineData(typeof(HashSet<int>))]
     [InlineData(typeof(Collection<int>))]
     [InlineData(typeof(ObservableCollection<int>))]
+    [InlineData(typeof(ImmutableArray<int>))]
     public void Ctor_Type(Type collectionType)
     {
         var factory = new AddEnumerableFactory<int>(collectionType);
@@ -39,6 +41,7 @@ public class AddEnumerableFactoryTests
     [InlineData(typeof(int[]))]
     [InlineData(typeof(List<string>))]
     [InlineData(typeof(AddClass<string>))]
+    [InlineData(typeof(AddClass<string, int>))]
     [InlineData(typeof(Collection<string>))]
     [InlineData(typeof(ObservableCollection<string>))]
     [InlineData(typeof(ReadOnlyCollection<int>))]
@@ -47,6 +50,7 @@ public class AddEnumerableFactoryTests
     [InlineData(typeof(AbstractClass))]
     [InlineData(typeof(FrozenSet<int>))]
     [InlineData(typeof(ReadOnlySet<int>))]
+    [InlineData(typeof(NonEnumerableAddClass<int>))]
     public void Ctor_InvalidCollectionType_ThrowsArgumentException(Type collectionType)
     {
         Assert.Throws<ArgumentException>("collectionType", () => new AddEnumerableFactory<int>(collectionType));
@@ -122,9 +126,11 @@ public class AddEnumerableFactoryTests
         Assert.Throws<InvalidOperationException>(() => factory.Add(1));
     }
 
-    private class AddThrowsClass<T>
+    private class AddThrowsClass<T> : IEnumerable
     {
         public void Add(T item) => throw new InvalidOperationException();
+
+        public IEnumerator GetEnumerator() => throw new NotImplementedException();
     }
 
     [Fact]
@@ -243,8 +249,24 @@ public class AddEnumerableFactoryTests
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => throw new NotImplementedException();
     }
 
-    private class AddClass<T>
+    private class NonEnumerableAddClass<T>
     {
         public void Add(T item) => throw new NotImplementedException();
+    }
+
+    private class AddClass<T> : IEnumerable
+    {
+        public void Add(T item) => throw new NotImplementedException();
+
+        public IEnumerator GetEnumerator() => throw new NotImplementedException();
+    }
+
+    private class AddClass<TKey, TValue> : IEnumerable where TKey : notnull
+    {
+        public void Add(TKey key, TValue value)
+        {
+        }
+
+        public IEnumerator GetEnumerator() => throw new NotImplementedException();
     }
 }

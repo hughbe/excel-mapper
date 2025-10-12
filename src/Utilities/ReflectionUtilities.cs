@@ -10,11 +10,6 @@ namespace ExcelMapper.Utilities;
 
 internal static class ReflectionUtilities
 {
-    public static bool IsEqualOrSubclassOf(this Type type, Type baseType)
-    {
-        return type == baseType || type.GetTypeInfo().IsSubclassOf(baseType);
-    }
-
     public static bool ImplementsInterface(this Type type, Type interfaceType)
     {
         return type.GetTypeInfo().ImplementedInterfaces.Any(t => t == interfaceType);

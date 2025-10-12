@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelMapper.Abstractions;
@@ -25,6 +26,10 @@ public class AddEnumerableFactory<T> : IEnumerableFactory<T>
         if (collectionType.IsAbstract)
         {
             throw new ArgumentException("Abstract collection types cannot be created.", nameof(collectionType));
+        }
+        if (!collectionType.ImplementsInterface(typeof(IEnumerable)))
+        {
+            throw new ArgumentException($"Collection type {collectionType} must implement IEnumerable.", nameof(collectionType));
         }
 
         CollectionType = collectionType;

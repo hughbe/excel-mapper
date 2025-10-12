@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -27,6 +28,10 @@ public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValu
         if (dictionaryType.IsAbstract)
         {
             throw new ArgumentException("Abstract dictionary types cannot be created.", nameof(dictionaryType));
+        }
+        if (!dictionaryType.ImplementsInterface(typeof(IEnumerable)))
+        {
+            throw new ArgumentException($"Dictionary type {dictionaryType} must implement IEnumerable.", nameof(dictionaryType));
         }
 
         DictionaryType = dictionaryType;

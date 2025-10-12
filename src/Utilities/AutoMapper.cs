@@ -723,21 +723,30 @@ public static class AutoMapper
             }
         }
 
-        // Special case for StringDictionary.
-        // The class implements Add(string, string) and IEnumerable.
-        if (dictionaryType.IsEqualOrSubclassOf(typeof(StringDictionary)))
-        {
-            keyType = typeof(string);
-            valueType = typeof(string);
-            return true;
-        }
-
-        // Otherwise we can parse regular IDictionary.
+        // Parse regular IDictionary before checking for Add methods.
+        // IDictionary also has Add(object, object) but we want to use string keys by convention.
         if (dictionaryType == typeof(IDictionary) || dictionaryType.ImplementsInterface(typeof(IDictionary)))
         {
             keyType = typeof(string);
             valueType = typeof(object);
             return true;
+        }
+
+        // Check for types like StringDictionary that have Add(TKey, TValue) method and implement IEnumerable.
+        // This handles dictionary-like types that don't implement IDictionary<TKey, TValue> or IDictionary.
+        if (dictionaryType.ImplementsInterface(typeof(IEnumerable)))
+        {
+            var addMethods = dictionaryType.GetMethods()
+                .Where(m => m.Name == "Add" && m.GetParameters().Length == 2)
+                .ToArray();
+            
+            if (addMethods.Length == 1)
+            {
+                var parameters = addMethods[0].GetParameters();
+                keyType = parameters[0].ParameterType;
+                valueType = parameters[1].ParameterType;
+                return true;
+            }
         }
         
         keyType = null;

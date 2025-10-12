@@ -44,6 +44,9 @@ public class AddDictionaryFactoryTests
     [InlineData(typeof(Dictionary<string, int>))]
     [InlineData(typeof(AddClass<int, string>))]
     [InlineData(typeof(AddClass<string, int>))]
+    [InlineData(typeof(AddOneClass))]
+    [InlineData(typeof(AddThreeClass))]
+    [InlineData(typeof(NonEnumerableAddClass<string, string>))]
     [InlineData(typeof(FrozenDictionary<string, string>))]
     public void Ctor_InvalidDictionaryType_ThrowsArgumentException(Type dictionaryType)
     {
@@ -211,10 +214,35 @@ public class AddDictionaryFactoryTests
         Assert.Equal([], value);
     }
 
-    private class AddClass<TKey, TValue> where TKey : notnull
+    private class AddOneClass : IEnumerable
+    {
+        public void Add(string item)
+        {
+        }
+
+        public IEnumerator GetEnumerator() => throw new NotImplementedException();
+    }
+
+    private class AddClass<TKey, TValue> : IEnumerable where TKey : notnull
     {
         public void Add(TKey key, TValue value)
         {
         }
+
+        public IEnumerator GetEnumerator() => throw new NotImplementedException();
+    }
+
+    private class NonEnumerableAddClass<TKey, TValue> where TKey : notnull
+    {
+        public void Add(TKey key, TValue value) => throw new NotImplementedException();
+    }
+
+    private class AddThreeClass : IEnumerable
+    {
+        public void Add(string item, string item2, string item3)
+        {
+        }
+
+        public IEnumerator GetEnumerator() => throw new NotImplementedException();
     }
 }
