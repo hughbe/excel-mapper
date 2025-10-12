@@ -281,7 +281,8 @@ public static class AutoMapper
     internal static bool TryCreateSplitMap(MemberInfo member, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
     {
         var listType = member.MemberType();
-        if (!listType.GetElementTypeOrEnumerableType(out var elementType))
+        var elementType = listType.GetElementTypeOrEnumerableType();
+        if (elementType == null)
         {
             map = null;
             return false;
@@ -289,7 +290,7 @@ public static class AutoMapper
 
         var method = TryCreateSplitGenericMapMethod.MakeGenericMethod([elementType]);
         var parameters = new object?[] { member, listType, emptyValueStrategy, null };
-        var result = (bool)method.Invoke(null, parameters)!;
+        var result = (bool)method.InvokeUnwrapped(null, parameters)!;
         if (result)
         {
             map = (IMap)parameters[^1]!;
@@ -318,7 +319,8 @@ public static class AutoMapper
     internal static bool TryCreateEnumerableMap<T>(FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
     {
         Type listType = typeof(T);
-        if (!listType.GetElementTypeOrEnumerableType(out var elementType))
+        var elementType = listType.GetElementTypeOrEnumerableType();
+        if (elementType == null)
         {
             map = null;
             return false;
@@ -812,14 +814,14 @@ public static class AutoMapper
 
             // Infer the mapping for each member (property/field) belonging to the type.
             Type memberType = member.MemberType();
-            var method = TryAutoMapMemberMethod.MakeGenericMethod(memberType);
             if (memberType == type)
             {
                 throw new ExcelMappingException($"Cannot map recursive property \"{member.Name}\" of type {memberType}. Consider applying the ExcelIgnore attribute.");
             }
 
+            var method = TryAutoMapMemberMethod.MakeGenericMethod(memberType);
             var parameters = new object?[] { member, emptyValueStrategy, null };
-            var result = (bool)method.Invoke(null, parameters)!;
+            var result = (bool)method.InvokeUnwrapped(null, parameters)!;
             if (!result)
             {
                 classMap = null;

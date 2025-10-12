@@ -91,30 +91,27 @@ internal static class ReflectionUtilities
     /// </summary>
     /// <param name="type">The type to get the element type of.</param>
     /// <param name="elementType">The element type or IEnumerable&lt;T&gt; of the given type.</param>
-    /// <returns>True if the type has an element type, else false.</returns>
-    public static bool GetElementTypeOrEnumerableType(this Type type, [NotNullWhen(true)] out Type? elementType)
+    public static Type? GetElementTypeOrEnumerableType(this Type type)
     {
         // Array type.
         if (type.IsArray)
         {
-            elementType = type.GetElementType()!;
-            return true;
+            return type.GetElementType()!;
         }
 
         // Generic lists use type object.
-        if (type.ImplementsGenericInterface(typeof(IEnumerable<>), out elementType))
+        if (type.ImplementsGenericInterface(typeof(IEnumerable<>), out var elementType))
         {
-            return true;
+            return elementType;
         }
 
         // Non-generic interfaces use type object.
         if (type == typeof(IEnumerable) || type.ImplementsInterface(typeof(IEnumerable)))
         {
-            elementType = typeof(object);
-            return true;
+            return typeof(object);
         }
 
-        return false;
+        return null;
     }
     
     [ExcludeFromCodeCoverage]

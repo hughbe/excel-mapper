@@ -193,19 +193,19 @@ public class MapExpressionsTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        var row1 = sheet.ReadRow<ObjectValue>();
+        var row1 = sheet.ReadRow<ObjectClass>();
         Assert.Equal("2", row1.Value);
 
         // Empty cell value.
-        var row2 = sheet.ReadRow<ObjectValue>();
+        var row2 = sheet.ReadRow<ObjectClass>();
         Assert.Equal("0", row2.Value);
 
         // Invalid cell value.
-        var row3 = sheet.ReadRow<ObjectValue>();
+        var row3 = sheet.ReadRow<ObjectClass>();
         Assert.Equal("-1", row3.Value);
     }
 
-    private class MultipleMapValueMap : ExcelClassMap<ObjectValue>
+    private class MultipleMapValueMap : ExcelClassMap<ObjectClass>
     {
         public MultipleMapValueMap()
         {
@@ -2820,7 +2820,7 @@ public class MapExpressionsTests
     public void ReadRow_CastExpressionValid_Success()
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
-        importer.Configuration.RegisterClassMap<ObjectValue>(c =>
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
         {
             c.Map(o => (int)o.Value)
                 .WithEmptyFallback(-10)
@@ -2831,28 +2831,28 @@ public class MapExpressionsTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        var row1 = sheet.ReadRow<ObjectValue>();
+        var row1 = sheet.ReadRow<ObjectClass>();
         Assert.Equal(2, row1.Value);
 
         // Empty cell value.
-        var row2 = sheet.ReadRow<ObjectValue>();
+        var row2 = sheet.ReadRow<ObjectClass>();
         Assert.Equal(-10, row2.Value);
 
         // Invalid cell value.
-        var row3 = sheet.ReadRow<ObjectValue>();
+        var row3 = sheet.ReadRow<ObjectClass>();
         Assert.Equal(10, row3.Value);
     }
 
-    private class ObjectValue
+    private class ObjectClass
     {
         public object Value { get; set; } = default!;
     }
 
     [Fact]
-    public void ReadRow_ConvertNestedExpressionResultValid_Success()
+    public void ReadRow_ConvertNestedExpressionMemberResult_Success()
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
-        importer.Configuration.RegisterClassMap<NestedObjectValue>(c =>
+        importer.Configuration.RegisterClassMap<NestedObjectClass>(c =>
         {
             c.Map(o => (int)o.Value.Value)
                 .WithEmptyFallback(-10)
@@ -2863,21 +2863,668 @@ public class MapExpressionsTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        var row1 = sheet.ReadRow<NestedObjectValue>();
+        var row1 = sheet.ReadRow<NestedObjectClass>();
         Assert.Equal(2, row1.Value.Value);
 
         // Empty cell value.
-        var row2 = sheet.ReadRow<NestedObjectValue>();
+        var row2 = sheet.ReadRow<NestedObjectClass>();
         Assert.Equal(-10, row2.Value.Value);
 
         // Invalid cell value.
-        var row3 = sheet.ReadRow<NestedObjectValue>();
+        var row3 = sheet.ReadRow<NestedObjectClass>();
         Assert.Equal(10, row3.Value.Value);
     }
 
-    private class NestedObjectValue
+    private class NestedObjectClass
     {
-        public ObjectValue Value { get; set; } = default!;
+        public ObjectClass Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_ConvertNestedExpressionMemberParent_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => ((SimpleClass)o.Value).Value)
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((SimpleClass)row1.Value).Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((SimpleClass)row2.Value).Value);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((SimpleClass)row3.Value).Value);
+    }
+
+    [Fact]
+    public void ReadRow_ConvertNestedExpressionMemberParentAndResult_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => (int)((ObjectClass)o.Value).Value)
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((ObjectClass)row1.Value).Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((ObjectClass)row2.Value).Value);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((ObjectClass)row3.Value).Value);
+    }
+
+    [Fact]
+    public void ReadRow_ArrayIndexerConvertResult_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ArrayObjectClass>(c =>
+        {
+            c.Map(o => (int)o.Value[0])
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ArrayObjectClass>();
+        Assert.Equal(2, row1.Value[0]);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ArrayObjectClass>();
+        Assert.Equal(-10, row2.Value[0]);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ArrayObjectClass>();
+        Assert.Equal(10, row3.Value[0]);
+    }
+
+    private class ArrayObjectClass
+    {
+        public object[] Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_ConvertToArrayIndexer_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => ((int[])o.Value)[0])
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((int[])row1.Value)[0]);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((int[])row2.Value)[0]);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((int[])row3.Value)[0]);
+    }
+
+    [Fact]
+    public void ReadRow_ConvertToArrayIndexerConvertResult_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => (int)(((List<object>)o.Value)[0]))
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((List<object>)row1.Value)[0]);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((List<object>)row2.Value)[0]);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((List<object>)row3.Value)[0]);
+    }
+
+    [Fact]
+    public void ReadRow_ConvertToArrayIndexerMember_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => ((SimpleClass[])o.Value)[0].Value)
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((SimpleClass[])row1.Value)[0].Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((SimpleClass[])row2.Value)[0].Value);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((SimpleClass[])row3.Value)[0].Value);
+    }
+
+    [Fact]
+    public void ReadRow_ConvertToArrayIndexerMemberConvertResult_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => (int)(((ObjectClass[])o.Value)[0]).Value)
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((ObjectClass[])row1.Value)[0].Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((ObjectClass[])row2.Value)[0].Value);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((ObjectClass[])row3.Value)[0].Value);
+    }
+
+    [Fact]
+    public void ReadRow_MultidimensionalIndexerConvertResult_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalObjectClass>(c =>
+        {
+            c.Map(o => (int)o.Value[0, 0])
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<MultidimensionalObjectClass>();
+        Assert.Equal(2, row1.Value[0, 0]);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<MultidimensionalObjectClass>();
+        Assert.Equal(-10, row2.Value[0, 0]);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<MultidimensionalObjectClass>();
+        Assert.Equal(10, row3.Value[0, 0]);
+    }
+
+    private class MultidimensionalObjectClass
+    {
+        public object[,] Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_ConvertToMultidimensionalIndexer_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => ((int[,])o.Value)[0, 0])
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((int[,])row1.Value)[0, 0]);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((int[,])row2.Value)[0, 0]);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((int[,])row3.Value)[0, 0]);
+    }
+
+    [Fact]
+    public void ReadRow_ConvertToMultidimensionalIndexerConvertResult_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => (int)((object[,])o.Value)[0, 0])
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((object[,])row1.Value)[0, 0]);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((object[,])row2.Value)[0, 0]);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((object[,])row3.Value)[0, 0]);
+    }
+
+    [Fact]
+    public void ReadRow_ConvertToMultidimensionalIndexerMember_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => ((SimpleClass[,])o.Value)[0, 0].Value)
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((SimpleClass[,])row1.Value)[0, 0].Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((SimpleClass[,])row2.Value)[0, 0].Value);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((SimpleClass[,])row3.Value)[0, 0].Value);
+    }
+
+    [Fact]
+    public void ReadRow_ConvertToMultidimensionalIndexerMemberConvertResult_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => (int)(((SimpleClass[,])o.Value)[0, 0]).Value)
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((SimpleClass[,])row1.Value)[0, 0].Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((SimpleClass[,])row2.Value)[0, 0].Value);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((SimpleClass[,])row3.Value)[0, 0].Value);
+    }
+
+    [Fact]
+    public void ReadRow_ListIndexerConvertResult_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ListObjectClass>(c =>
+        {
+            c.Map(o => (int)o.Value[0])
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ListObjectClass>();
+        Assert.Equal(2, row1.Value[0]);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ListObjectClass>();
+        Assert.Equal(-10, row2.Value[0]);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ListObjectClass>();
+        Assert.Equal(10, row3.Value[0]);
+    }
+
+    private class ListObjectClass
+    {
+        public List<object> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_ConvertToListIndexer_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => ((List<int>)o.Value)[0])
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((List<int>)row1.Value)[0]);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((List<int>)row2.Value)[0]);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((List<int>)row3.Value)[0]);
+    }
+
+    [Fact]
+    public void ReadRow_ConvertToListIndexerConvertResult_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => (int)(((List<object>)o.Value)[0]))
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((List<object>)row1.Value)[0]);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((List<object>)row2.Value)[0]);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((List<object>)row3.Value)[0]);
+    }
+
+    [Fact]
+    public void ReadRow_ConvertToListIndexerMember_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => ((List<SimpleClass>)o.Value)[0].Value)
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((List<SimpleClass>)row1.Value)[0].Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((List<SimpleClass>)row2.Value)[0].Value);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((List<SimpleClass>)row3.Value)[0].Value);
+    }
+
+    [Fact]
+    public void ReadRow_ConvertToListIndexerMemberConvertResult_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => (int)(((List<ObjectClass>)o.Value)[0]).Value)
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((List<ObjectClass>)row1.Value)[0].Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((List<ObjectClass>)row2.Value)[0].Value);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((List<ObjectClass>)row3.Value)[0].Value);
+    }
+    
+    [Fact]
+    public void ReadRow_DictionaryIndexerConvertResult_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<DictionaryObjectClass>(c =>
+        {
+            c.Map(o => (int)o.Value["Value"])
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<DictionaryObjectClass>();
+        Assert.Equal(2, row1.Value["Value"]);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<DictionaryObjectClass>();
+        Assert.Equal(-10, row2.Value["Value"]);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<DictionaryObjectClass>();
+        Assert.Equal(10, row3.Value["Value"]);
+    }
+
+    private class DictionaryObjectClass
+    {
+        public Dictionary<string, object> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_ConvertToDictionaryIndexer_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => ((Dictionary<string, int>)o.Value)["Value"])
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((Dictionary<string, int>)row1.Value)["Value"]);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((Dictionary<string, int>)row2.Value)["Value"]);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((Dictionary<string, int>)row3.Value)["Value"]);
+    }
+
+    [Fact]
+    public void ReadRow_ConvertToDictionaryIndexerConvertResult_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => (int)(((Dictionary<string, object>)o.Value)["Value"]))
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((Dictionary<string, object>)row1.Value)["Value"]);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((Dictionary<string, object>)row2.Value)["Value"]);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((Dictionary<string, object>)row3.Value)["Value"]);
+    }
+
+    [Fact]
+    public void ReadRow_ConvertToDictionaryIndexerMember_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => ((Dictionary<string, SimpleClass>)o.Value)["key"].Value)
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((Dictionary<string, SimpleClass>)row1.Value)["key"].Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((Dictionary<string, SimpleClass>)row2.Value)["key"].Value);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((Dictionary<string, SimpleClass>)row3.Value)["key"].Value);
+    }
+
+    [Fact]
+    public void ReadRow_ConvertToDictionaryIndexerMemberConvertResult_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => (int)(((Dictionary<string, ObjectClass>)o.Value)["key"]).Value)
+                .WithEmptyFallback(-10)
+                .WithInvalidFallback(10);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(2, ((Dictionary<string, ObjectClass>)row1.Value)["key"].Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(-10, ((Dictionary<string, ObjectClass>)row2.Value)["key"].Value);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<ObjectClass>();
+        Assert.Equal(10, ((Dictionary<string, ObjectClass>)row3.Value)["key"].Value);
+    }
+
+    [Fact]
+    public void Map_ConvertToDictionaryIndexerNested_Success()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => ((Dictionary<string, string>)(object)o.Value)["Value"]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ObjectClass>();
+        Assert.Equal("value", ((Dictionary<string, string>)row.Value)["Value"]);
+    }
+
+    [Fact]
+    public void Map_ConvertToDictionaryIndexerNestedInvalidCast_Success()
+    {
+        var map = new ExcelClassMap<ObjectClass>();
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        importer.Configuration.RegisterClassMap<ObjectClass>(c =>
+        {
+            c.Map(o => ((Dictionary<string, string>)(object)(string)(object)o.Value)["Value"]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<ObjectClass>();
+        Assert.Equal("value", ((Dictionary<string, string>)row.Value)["Value"]);
     }
 #pragma warning restore xUnit2013 // Do not use equality check to check for collection size.
 }
