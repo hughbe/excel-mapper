@@ -13,7 +13,8 @@ internal static class ExpressionAutoMapper
     internal static Expression SkipConvert(Expression expression, out Type convertedType)
     {
         convertedType = null!;
-        while (expression is UnaryExpression unaryExpression && unaryExpression.NodeType == ExpressionType.Convert)
+        while (expression is UnaryExpression unaryExpression && 
+               (unaryExpression.NodeType == ExpressionType.Convert || unaryExpression.NodeType == ExpressionType.ConvertChecked))
         {
             expression = unaryExpression.Operand;
             // If we have multiple converts, we want the innermost type
@@ -37,8 +38,8 @@ internal static class ExpressionAutoMapper
             currentExpression = SkipConvert(currentExpression, out var currentTargetType);
             if (currentExpression is MemberExpression memberExpression)
             {
-                expressions.Push(new MappedMemberExpression(memberExpression, currentTargetType));
                 currentExpression = memberExpression.Expression!;
+                expressions.Push(new MappedMemberExpression(memberExpression, currentTargetType));
             }
             else if (IsDictionaryIndexerExpression(currentExpression))
             {
@@ -321,6 +322,11 @@ internal class MappedMemberExpression : IMappedExpression
 
     public MappedMemberExpression(MemberExpression expression, Type memberType)
     {
+        if (expression.Expression is null)
+        {
+            throw new ArgumentException($"Static members are not supported. Received: {expression}", nameof(expression));
+        }
+
         Member = expression.Member;
         Type = memberType ?? expression.Type;
     }

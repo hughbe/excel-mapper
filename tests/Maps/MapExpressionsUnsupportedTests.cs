@@ -82,6 +82,44 @@ public class MapExpressionsUnsupportedTests
     {
         public int Value { get; set; } = default!;
     }
+    [Fact]
+    public void Map_StaticProperty_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<StaticMemberClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => StaticMemberClass.StaticValue));
+    }
+
+    [Fact]
+    public void Map_StaticField_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<StaticMemberClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => StaticMemberClass.StaticField));
+    }
+
+    [Fact]
+    public void Map_StaticPropertyInChain_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<ChainedStaticClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => ChainedStaticClass.Inner.Value));
+    }
+
+    private class StaticMemberClass
+    {
+        public static int StaticValue { get; set; }
+#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
+        public static int StaticField;
+#pragma warning restore CS0649 // Field is never assigned to, and will always have its default value
+    }
+
+    private class ChainedStaticClass
+    {
+        public static InnerStaticClass Inner { get; set; } = new InnerStaticClass();
+    }
+
+    private class InnerStaticClass
+    {
+        public int Value { get; set; }
+    }
 
     [Fact]
     public void Map_NestedClassDifferently_ThrowsExcelMappingException()
@@ -120,6 +158,14 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
+    public void Map_CastArrayElementCantBeConstructed_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<ObjectClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map(p => (NonConstructibleArrayElement[])p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapList<NonConstructibleArrayElement>(p => (NonConstructibleArrayElement[])p.Value));
+    }
+
+    [Fact]
     public void Map_ArrayElementCantBeMapped_ThrowsExcelMappingException()
     {
         var map = new ExcelClassMap<IDisposableArrayElementClass>();
@@ -130,6 +176,14 @@ public class MapExpressionsUnsupportedTests
     private class IDisposableArrayElementClass
     {
         public IDisposable[] Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void Map_CastArrayElementCantBeMapped_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<ObjectClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map(p => (IDisposable[])p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapList<IDisposable>(p => (IDisposable[])p.Value));
     }
 
     [Fact]
@@ -159,6 +213,13 @@ public class MapExpressionsUnsupportedTests
         Assert.Throws<ExcelMappingException>(() => map.MapList<string>(p => p.Value));
     }
 
+    [Fact]
+    public void Map_CastListCantBeConstructed_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<ObjectClass>();
+        Assert.Throws<ExcelMappingException>(() => map.MapList<string>(p => (NonConstructibleList)p.Value));
+    }
+
     private class NonConstructibleListIndexClass
     {
         public NonConstructibleList Value { get; set; } = default!;
@@ -185,6 +246,13 @@ public class MapExpressionsUnsupportedTests
     private class NonConstructibleListElement
     {
         private NonConstructibleListElement() { }
+    }
+
+    [Fact]
+    public void Map_CastListElementCantBeConstructed_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<ObjectClass>();
+        Assert.Throws<ExcelMappingException>(() => map.MapList<NonConstructibleListElement>(p => (List<NonConstructibleListElement>)p.Value));
     }
 
     [Fact]
@@ -225,6 +293,13 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
+    public void Map_CastListElementCantBeMapped_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<ObjectClass>();
+        Assert.Throws<ExcelMappingException>(() => map.MapList<IDisposable>(p => (List<IDisposable>)p.Value));
+    }
+
+    [Fact]
     public void Map_DictionaryCantBeConstructed_ThrowsExcelMappingException()
     {
         var map = new ExcelClassMap<NonConstructibleDictionaryClass>();
@@ -240,6 +315,13 @@ public class MapExpressionsUnsupportedTests
     private class NonConstructibleDictionary : Dictionary<string, string>
     {
         private NonConstructibleDictionary() { }
+    }
+
+    [Fact]
+    public void Map_CastDictionaryCantBeConstructed_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<ObjectClass>();
+        Assert.Throws<ExcelMappingException>(() => map.MapDictionary<string>(p => (NonConstructibleDictionary)p.Value));
     }
 
     [Fact]
@@ -314,6 +396,18 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
+    public void Map_StaticArrayIndex_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<StaticArrayClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => StaticArrayClass.Value[0]));
+    }
+
+    private class StaticArrayClass
+    {
+        public static string[] Value { get; set; } = default!;
+    }
+
+    [Fact]
     public void Map_NonConstantArrayIndex_ThrowsArgumentException()
     {
         var map = new ExcelClassMap<ArrayClass>();
@@ -343,7 +437,7 @@ public class MapExpressionsUnsupportedTests
     {
         var map = new ExcelClassMap<ChainedArrayClass>();
         // Chained array access starting with a method call
-        Assert.Throws<ArgumentException>(() => map.Map(o => o.GetNestedArray()[0][1]));
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => o.GetNestedArray()[0][1]));
     }
 
     private class ChainedArrayClass
@@ -378,6 +472,18 @@ public class MapExpressionsUnsupportedTests
     {
         public string[] Value { get; set; } = default!;
         public int IntValue { get; set; }
+    }
+
+    [Fact]
+    public void Map_StaticMultidimensionalIndex_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<StaticMultidimensionalArrayClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => StaticMultidimensionalArrayClass.Value[0, 0]));
+    }
+
+    private class StaticMultidimensionalArrayClass
+    {
+        public static string[,] Value { get; set; } = default!;
     }
 
     [Fact]
@@ -417,7 +523,7 @@ public class MapExpressionsUnsupportedTests
     {
         var map = new ExcelClassMap<ChainedMultidimensionalArrayClass>();
         // Chained array access starting with a method call
-        Assert.Throws<ArgumentException>(() => map.Map(o => o.GetNestedArray()[0][1]));
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => o.GetNestedArray()[0][1]));
     }
 
     private class ChainedMultidimensionalArrayClass
@@ -641,6 +747,18 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
+    public void Map_StaticListIndex_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<StaticListClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => StaticListClass.Value[0]));
+    }
+
+    private class StaticListClass
+    {
+        public static List<string> Value { get; set; } = default!;
+    }
+
+    [Fact]
     public void Map_NonConstantListIndex_ThrowsArgumentException()
     {
         var map = new ExcelClassMap<ListIndexClass>();
@@ -751,6 +869,18 @@ public class MapExpressionsUnsupportedTests
         var map = new ExcelClassMap<ListIndexClass>();
         map.Map(o => o.Value);
         Assert.Throws<InvalidOperationException>(() => map.Map(o => o.Value[0]));
+    }
+
+    [Fact]
+    public void Map_StaticDictionaryIndex_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<StaticDictionaryClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => StaticDictionaryClass.Value["key"]));
+    }
+
+    private class StaticDictionaryClass
+    {
+        public static Dictionary<string, string> Value { get; set; } = default!;
     }
 
     [Fact]
