@@ -3523,6 +3523,22 @@ public class MapExpressionsTests
     }
 
     [Fact]
+    public void Map_ConvertToArrayIndexerIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<IntArrayClass>(c =>
+        {
+            c.Map(o => o.Values[(int)(object)0]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<IntArrayClass>();
+        Assert.Equal(2, row.Values[0]);
+    }
+
+    [Fact]
     public void ReadRow_MultidimensionalIndexerConvertResult_Success()
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
@@ -3663,6 +3679,22 @@ public class MapExpressionsTests
     }
 
     [Fact]
+    public void Map_ConvertToMultidimensionalIndexerIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalArrayClass>(c =>
+        {
+            c.Map(o => o.Values[(int)(object)0, (int)(object)0]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalArrayClass>();
+        Assert.Equal(2, row.Values[0, 0]);
+    }
+
+    [Fact]
     public void ReadRow_ListIndexerConvertResult_Success()
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
@@ -3800,6 +3832,22 @@ public class MapExpressionsTests
         // Invalid cell value.
         var row3 = sheet.ReadRow<ObjectClass>();
         Assert.Equal(10, ((List<ObjectClass>)row3.Value)[0].Value);
+    }
+
+    [Fact]
+    public void Map_ConvertToListIndexerIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<IntListClass>(c =>
+        {
+            c.Map(o => o.Values[(int)(object)0]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<IntListClass>();
+        Assert.Equal(2, row.Values[0]);
     }
     
     [Fact]
@@ -3973,6 +4021,22 @@ public class MapExpressionsTests
 
         var row = sheet.ReadRow<ObjectClass>();
         Assert.Equal("value", ((Dictionary<string, string>)row.Value)["Value"]);
+    }
+
+    [Fact]
+    public void Map_ConvertToDictionaryIndexerKey_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        importer.Configuration.RegisterClassMap<DictionaryClass>(c =>
+        {
+            c.Map(o => o.Values[(string)(object)"Value"]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<DictionaryClass>();
+        Assert.Equal(2, row.Values["Value"]);
     }
 #pragma warning restore xUnit2013 // Do not use equality check to check for collection size.
 }

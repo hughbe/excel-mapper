@@ -10,7 +10,7 @@ namespace ExcelMapper.Utilities;
 
 internal static class ExpressionAutoMapper
 {
-    private static Expression SkipConvert(Expression expression, out Type convertedType)
+    internal static Expression SkipConvert(Expression expression, out Type convertedType)
     {
         convertedType = null!;
         while (expression is UnaryExpression unaryExpression && unaryExpression.NodeType == ExpressionType.Convert)
@@ -86,7 +86,7 @@ internal static class ExpressionAutoMapper
             methodCallExpression.Object is not null &&
             methodCallExpression.Object!.Type!.IsArray &&
             methodCallExpression.Arguments.Count > 1 &&
-            methodCallExpression.Arguments.All(arg => arg is ConstantExpression constantExpr && constantExpr.Type == typeof(int));
+            methodCallExpression.Arguments.All(arg => arg.Type == typeof(int));
 
     private static bool IsListIndexerExpression(Expression expression)
         => expression is MethodCallExpression methodCallExpression &&
@@ -94,7 +94,6 @@ internal static class ExpressionAutoMapper
             methodCallExpression.Object is not null &&
             methodCallExpression.Object!.Type!.GetElementTypeOrEnumerableType() != null &&
             methodCallExpression.Arguments.Count == 1 &&
-            methodCallExpression.Arguments[0] is ConstantExpression &&
             methodCallExpression.Arguments[0].Type == typeof(int);
 
     private static bool IsDictionaryIndexerExpression(Expression expression)
@@ -102,8 +101,7 @@ internal static class ExpressionAutoMapper
             methodCallExpression.Object is not null &&
             AutoMapper.TryGetDictionaryKeyValueType(methodCallExpression.Object!.Type!, out var _, out var _) &&
             methodCallExpression.Method.Name == "get_Item" &&
-            methodCallExpression.Arguments.Count == 1 &&
-            methodCallExpression.Arguments[0] is ConstantExpression;
+            methodCallExpression.Arguments.Count == 1;
 
     private static void AddMap(IMap parentMap, IMappedExpression expression, IMap map)
     {
@@ -341,7 +339,8 @@ internal class MappedEnumerableIndexerExpression : IMappedExpression
         ActualElementType = Type.GetElementType()!;
         MappedElementType = mappedElementType ?? ActualElementType;
 
-        if (expression.Right is not ConstantExpression constantExpression)
+        var indexExpression = ExpressionAutoMapper.SkipConvert(expression.Right, out var _);
+        if (indexExpression is not ConstantExpression constantExpression)
         {
             throw new ArgumentException($"The indexer must be a constant expression. Received {expression}.", nameof(expression));
         }
@@ -355,11 +354,16 @@ internal class MappedEnumerableIndexerExpression : IMappedExpression
 
     public MappedEnumerableIndexerExpression(MethodCallExpression expression, Type? mappedElementType)
     {
+        var indexExpression = ExpressionAutoMapper.SkipConvert(expression.Arguments[0], out var _);
+
         Type = expression.Object!.Type;
         ActualElementType = Type.GetElementTypeOrEnumerableType()!;
         MappedElementType = mappedElementType ?? ActualElementType;
 
-        var constantExpression = (ConstantExpression)expression.Arguments[0];
+        if (indexExpression is not ConstantExpression constantExpression)
+        {
+            throw new ArgumentException($"The indexer must be a constant expression. Received {expression}.", nameof(expression));
+        }
         if ((int)constantExpression.Value! < 0)
         {
             throw new ArgumentException($"Array and list indexers must be non-negative. Received: {constantExpression.Value!}", nameof(expression));
@@ -386,7 +390,11 @@ internal class MappedMultidimensionalArrayIndexerExpression : IMappedExpression
         Indices = new int[arguments.Count];
         for (int i = 0; i < arguments.Count; i++)
         {
-            var constantExpression = (ConstantExpression)arguments[i];
+            var indexExpression = ExpressionAutoMapper.SkipConvert(arguments[i], out var _);
+            if (indexExpression is not ConstantExpression constantExpression)
+            {
+                throw new ArgumentException($"Array indices must be constant expressions. Received: {indexExpression}.", nameof(expression));
+            }
             if ((int)constantExpression.Value! < 0)
             {
                 throw new ArgumentException($"Array indices must be non-negative. Received: {constantExpression.Value!}", nameof(expression));
@@ -407,6 +415,16 @@ internal class MappedDictionaryIndexerExpression : IMappedExpression
 
     public MappedDictionaryIndexerExpression(MethodCallExpression expression, Type valueType)
     {
+        var keyExpression = ExpressionAutoMapper.SkipConvert(expression.Arguments[0], out var _);
+        if (keyExpression is not ConstantExpression constantExpression)
+        {
+            throw new ArgumentException($"Dictionary indexer key must be a constant expression. Received: {expression}.", nameof(expression));
+        }
+        if (constantExpression.Value == null)
+        {
+            throw new ArgumentException($"Dictionary indexer key cannot be null. Received: {constantExpression.Value!}", nameof(expression));
+        }
+
         Type = expression.Object!.Type;
         AutoMapper.TryGetDictionaryKeyValueType(Type, out var actualKeyType, out var actualValueType);
 
@@ -414,12 +432,6 @@ internal class MappedDictionaryIndexerExpression : IMappedExpression
         ActualValueType = actualValueType!;
 
         ValueType = valueType ?? ActualValueType;
-
-        var constantExpression = (ConstantExpression)expression.Arguments[0];
-        if (constantExpression.Value == null)
-        {
-            throw new ArgumentException($"Dictionary indexer key cannot be null. Received: {constantExpression.Value!}", nameof(expression));
-        }
 
         Key = constantExpression.Value!;
     }
