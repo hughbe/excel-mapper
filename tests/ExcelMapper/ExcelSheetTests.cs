@@ -369,6 +369,17 @@ public class ExcelSheetTests
     }
 
     [Fact]
+    public void ReadRows_LargeCount_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>(1, 1000).ToArray());
+        Assert.Equal(5, sheet.CurrentRowIndex);
+    }
+
+    [Fact]
     public void ReadRow_BlankLinesNotSkipped_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("BlankLines.xlsx");

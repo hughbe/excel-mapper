@@ -201,12 +201,16 @@ public class ExcelSheet
         // Reset the reader as we need to seek to the specific row.
         Reader.Reset();
         Importer.MoveToSheet(this);
+        CurrentRowIndex = HeadingIndex;
         for (int i = HeadingIndex; i < startIndex; i++)
         {
-            Reader.Read();
-        }
+            if (!Reader.Read())
+            {
+                throw new ExcelMappingException($"Sheet \"{Name}\" does not have row {startIndex}.");
+            }
 
-        CurrentRowIndex = startIndex;
+            CurrentRowIndex++;
+        }
         
         for (int i = 0; i < count; i++)
         {
