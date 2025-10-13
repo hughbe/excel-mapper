@@ -69,6 +69,8 @@ public class ExcelHeading
     /// <returns>The zero-based index of the column with the given name.</returns>
     public int GetColumnIndex(string columnName)
     {
+        ArgumentNullException.ThrowIfNull(columnName);
+
         if (!NameMapping.TryGetValue(columnName, out int index))
         {
             string foundColumns = string.Join(", ", NameMapping.Keys.Select(c => $"\"{c}\""));
@@ -84,7 +86,11 @@ public class ExcelHeading
     /// <param name="columnName">The name of the column to get the zero-based index of.</param>
     /// <param name="index">The zero-based index of the column with the given name.</param>
     /// <returns>Whether or not the column exists.</returns>
-    public bool TryGetColumnIndex(string columnName, out int index) => NameMapping.TryGetValue(columnName, out index);
+    public bool TryGetColumnIndex(string columnName, out int index)
+    {
+        ArgumentNullException.ThrowIfNull(columnName);
+        return NameMapping.TryGetValue(columnName, out index);
+    }
 
     /// <summary>
     /// Gets the zero-based index of the column with the given name if it matches the supplied predicate.
@@ -94,6 +100,7 @@ public class ExcelHeading
     /// <returns>The zero-based index of the column with the given name.</returns>
     public int GetFirstColumnMatchingIndex(Func<string, bool> predicate)
     {
+        ArgumentNullException.ThrowIfNull(predicate);
         var key = NameMapping.Keys.FirstOrDefault(predicate);
 
         if (key == null)
@@ -113,6 +120,8 @@ public class ExcelHeading
     /// <returns>Whether or not the column exists.</returns>
     public bool TryGetFirstColumnMatchingIndex(Func<string, bool> predicate, out int index)
     {
+        ArgumentNullException.ThrowIfNull(predicate);
+
         string? key = NameMapping.Keys.FirstOrDefault(predicate);
         if (key == null)
         {

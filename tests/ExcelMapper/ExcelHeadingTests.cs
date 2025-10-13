@@ -50,7 +50,7 @@ public class ExcelHeadingTests
         var sheet = importer.ReadSheet();
         var heading = sheet.ReadHeading();
 
-        Assert.Throws<ArgumentNullException>("key", () => heading.GetColumnIndex(null!));
+        Assert.Throws<ArgumentNullException>("columnName", () => heading.GetColumnIndex(null!));
     }
 
     [Theory]
@@ -94,6 +94,16 @@ public class ExcelHeadingTests
     }
 
     [Fact]
+    public void GetColumnName_NullPredicate_ThrowsArgumentNullException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
+
+        Assert.Throws<ArgumentNullException>("predicate", () => heading.GetFirstColumnMatchingIndex(null!));
+    }
+
+    [Fact]
     public void GetColumnName_TryGetColumnIndex_Roundtrips()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
@@ -130,7 +140,7 @@ public class ExcelHeadingTests
         var sheet = importer.ReadSheet();
         var heading = sheet.ReadHeading();
 
-        Assert.Throws<ArgumentNullException>("key", () => heading.TryGetColumnIndex(null!, out _));
+        Assert.Throws<ArgumentNullException>("columnName", () => heading.TryGetColumnIndex(null!, out _));
     }
 
     [Theory]
@@ -161,6 +171,16 @@ public class ExcelHeadingTests
             Assert.Equal(i, index);
             Assert.Equal(columnNames[i], heading.GetColumnName(i));
         }
+    }
+
+    [Fact]
+    public void TryGetFirstColumnMatchingIndex_NullPredicate_ThrowsArgumentNullException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
+
+        Assert.Throws<ArgumentNullException>("predicate", () => heading.TryGetFirstColumnMatchingIndex(null!, out _));
     }
 
     [Theory]
