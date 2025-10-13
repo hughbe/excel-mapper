@@ -143,89 +143,29 @@ internal static class ExpressionAutoMapper
     }
 
     [ExcludeFromCodeCoverage]
-    private static IMap ProcessExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, IMappedExpression currentExpression, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator)
-    {
-        return currentExpression switch
-        {
-            MappedMemberExpression memberExpression => ProcessMemberExpression<T, TProperty>(classMap, stack, currentMap, memberExpression, memberMapCreator),
-            MappedDictionaryIndexerExpression dictionaryIndexerExpression => ProcessDictionaryIndexerExpression<T, TProperty>(classMap, stack, currentMap, dictionaryIndexerExpression, memberMapCreator),
-            MappedEnumerableIndexerExpression enumerableIndexerExpression => ProcessEnumerableIndexExpression<T, TProperty>(classMap, stack, currentMap, enumerableIndexerExpression, memberMapCreator),
-            MappedMultidimensionalArrayIndexerExpression multidimensionalArrayIndexerExpression => ProcessMultidimensionalArrayIndexerExpression<T, TProperty>(classMap, stack, currentMap, multidimensionalArrayIndexerExpression, memberMapCreator),
-            _ => throw new ArgumentException($"Unsupported expression type: {currentExpression.GetType()}", nameof(currentExpression)),
-        };
-    }
-
-    private static IMap ProcessMemberExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, MappedMemberExpression expression, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator)
+    private static IMap ProcessExpression<T, TProperty>(Stack<IMappedExpression> stack, IMap currentMap, IMappedExpression currentExpression, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator, FallbackStrategy emptyValueStrategy)
     {
         if (stack.Count == 0)
         {
-            var memberMap = memberMapCreator(expression, ((ExcelClassMap)currentMap).EmptyValueStrategy);
-            AddMap(currentMap, expression, memberMap);
+            var memberMap = memberMapCreator(currentExpression, emptyValueStrategy);
+            AddMap(currentMap, currentExpression, memberMap);
             return memberMap;
         }
 
-        var nextExpression = stack.Peek();
-        var nextMap = GetNextMap(classMap, currentMap, expression.MappedValueType, nextExpression, expression.Member);
-        return ProcessNextExpression<T, TProperty>(classMap, stack, nextMap, memberMapCreator);
-    }
-
-    private static IMap ProcessEnumerableIndexExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, MappedEnumerableIndexerExpression expression, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator)
-    {
-        if (stack.Count == 0)
-        {
-            var memberMap = memberMapCreator(expression, classMap.EmptyValueStrategy);
-            AddMap(currentMap, expression, memberMap);
-            return memberMap;
-        }
-
-        var nextExpression = stack.Peek();
-        var nextMap = GetNextMap(classMap, currentMap, expression.MappedElementType, nextExpression, null, expression.Index, null);
-        return ProcessNextExpression<T, TProperty>(classMap, stack, nextMap, memberMapCreator);
-    }
-
-    private static IMap ProcessMultidimensionalArrayIndexerExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, MappedMultidimensionalArrayIndexerExpression expression, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator)
-    {
-        if (stack.Count == 0)
-        {
-            var memberMap = memberMapCreator(expression, classMap.EmptyValueStrategy);
-            AddMap(currentMap, expression, memberMap);
-            return memberMap;
-        }
-
-        var nextExpression = stack.Peek();
-        var nextMap = GetNextMap(classMap, currentMap, expression.MappedElementType, nextExpression, null, null, expression.Indices);
-        return ProcessNextExpression<T, TProperty>(classMap, stack, nextMap, memberMapCreator);
-    }
-
-    private static IMap ProcessDictionaryIndexerExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, MappedDictionaryIndexerExpression expression, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator)
-    {
-        if (stack.Count == 0)
-        {
-            var memberMap = memberMapCreator(expression, classMap.EmptyValueStrategy);
-            AddMap(currentMap, expression, memberMap);
-            return memberMap;
-        }
-
-        var nextExpression = stack.Peek();
-        var nextMap = GetNextMap(classMap, currentMap, expression.ValueType, nextExpression, null, null, expression.Key);
-        return ProcessNextExpression<T, TProperty>(classMap, stack, nextMap, memberMapCreator);
-    }
-
-    private static IMap ProcessNextExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator)
-    {
         var nextExpression = stack.Pop();
-        return ProcessExpression<T, TProperty>(classMap, stack, currentMap, nextExpression, memberMapCreator);
+        var nextMap = GetNextMap(currentMap, currentExpression, nextExpression, emptyValueStrategy);
+        return ProcessExpression<T, TProperty>(stack, nextMap, nextExpression, memberMapCreator, emptyValueStrategy);
     }
 
     [ExcludeFromCodeCoverage]
-    private static IMap GetNextMap(ExcelClassMap classMap, IMap currentMap, Type currentValueType, IMappedExpression nextExpression, MemberInfo? member = null, int? index = null, object? key = null)
+    private static IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, IMappedExpression nextExpression, FallbackStrategy emptyValueStrategy)
     {
         return nextExpression switch
         {
-            MappedMemberExpression memberExpression => AutoMapper.GetOrCreateNestedMap(currentMap, member, currentValueType, index ?? key),
-            MappedDictionaryIndexerExpression dictionaryIndexerExpression => AutoMapper.GetOrCreateDictionaryIndexerMap(currentMap, member, dictionaryIndexerExpression.Type, index ?? key, dictionaryIndexerExpression.ActualKeyType, dictionaryIndexerExpression.ActualValueType),
-            MappedEnumerableIndexerExpression enumerableIndexerExpression => AutoMapper.GetOrCreateArrayIndexerMap(currentMap, member, enumerableIndexerExpression.Type, index ?? key, enumerableIndexerExpression.ActualElementType),
-            MappedMultidimensionalArrayIndexerExpression multidimensionalArrayIndexerExpression => AutoMapper.GetOrCreateMultidimensionalIndexerMap(currentMap, member, multidimensionalArrayIndexerExpression.Type, index ?? key, multidimensionalArrayIndexerExpression.ActualElementType),
+            MappedMemberExpression memberExpression => AutoMapper.GetOrCreateNestedMap(currentMap, currentExpression.MappedValueType, currentExpression.Context, emptyValueStrategy),
+            MappedDictionaryIndexerExpression dictionaryIndexerExpression => AutoMapper.GetOrCreateDictionaryIndexerMap(currentMap, dictionaryIndexerExpression.Type, currentExpression.Context, dictionaryIndexerExpression.ActualKeyType, dictionaryIndexerExpression.ActualValueType),
+            MappedEnumerableIndexerExpression enumerableIndexerExpression => AutoMapper.GetOrCreateArrayIndexerMap(currentMap, enumerableIndexerExpression.Type, currentExpression.Context, enumerableIndexerExpression.ActualElementType),
+            MappedMultidimensionalArrayIndexerExpression multidimensionalArrayIndexerExpression => AutoMapper.GetOrCreateMultidimensionalIndexerMap(currentMap, multidimensionalArrayIndexerExpression.Type, currentExpression.Context, multidimensionalArrayIndexerExpression.ActualElementType),
             _ => throw new ArgumentException($"GetNextMap called with unsupported expression type: {nextExpression.GetType()}", nameof(nextExpression)),
         };
     }
@@ -233,13 +173,12 @@ internal static class ExpressionAutoMapper
     private static IMap GetOrCreateMap<T, TProperty>(ExcelClassMap<T> classMap, Expression expression, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator)
     {
         var stack = BuildExpressionStack(expression);
-        IMap currentMap = classMap;
-        if (stack.TryPop(out var currentExpression))
+        if (stack.Count == 0)
         {
-            return ProcessExpression<T, TProperty>(classMap, stack, currentMap, currentExpression, memberMapCreator);
+            throw new ArgumentException($"Expression must contain a member access, indexer, or dictionary access.", nameof(expression));
         }
 
-        throw new ArgumentException($"Expression must contain a member access, indexer, or dictionary access. Received: {expression}", nameof(expression));
+        return ProcessExpression<T, TProperty>(stack, classMap, stack.Pop(), memberMapCreator, classMap.EmptyValueStrategy);
     }
 
     public static OneToOneMap<TProperty> GetOrCreateOneToOneMap<T, TProperty>(ExcelClassMap<T> classMap, Expression expression)
@@ -269,7 +208,7 @@ internal static class ExpressionAutoMapper
                 member = null;
                 type = finalExpression.MappedValueType;
             }
-            if (!AutoMapper.TryCreateSplitMap<TElement>(member, type, finalExpression.GetDefaultCellsReaderFactory() ?? AutoMapper.GetSplitCellReaderFactory(finalExpression.GetDefaultCellReaderFactory()), emptyValueStrategy, out var map))
+            if (!AutoMapper.TryCreateSplitMapGeneric<TElement>(member, type, finalExpression.GetDefaultCellsReaderFactory() ?? new CharSplitReaderFactory(finalExpression.GetDefaultCellReaderFactory()), emptyValueStrategy, out var map))
             {
                 throw new ExcelMappingException($"No known way to instantiate type \"{type}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
             }
@@ -327,6 +266,7 @@ internal interface IMappedExpression
 {
     Type Type { get; }
     Type MappedValueType { get; }
+    object Context { get; }
     ICellReaderFactory GetDefaultCellReaderFactory();
     ICellsReaderFactory? GetDefaultCellsReaderFactory();
 }
@@ -336,6 +276,7 @@ internal class MappedMemberExpression : IMappedExpression
     public Type Type { get; }
     public MemberInfo Member { get; }
     public Type MappedValueType { get; }
+    public object Context => Member;
 
     public MappedMemberExpression(MemberExpression expression, Type memberType)
     {
@@ -362,6 +303,7 @@ internal class MappedEnumerableIndexerExpression : IMappedExpression
     public Type MappedElementType { get; }
     public int Index { get; }
     public Type MappedValueType => MappedElementType;
+    public object Context => Index;
 
     public MappedEnumerableIndexerExpression(BinaryExpression expression, Type? mappedElementType)
     {
@@ -415,6 +357,7 @@ internal class MappedMultidimensionalArrayIndexerExpression : IMappedExpression
     public Type MappedElementType { get; }
     public int[] Indices { get; }
     public Type MappedValueType => MappedElementType;
+    public object Context => Indices;
 
     public MappedMultidimensionalArrayIndexerExpression(MethodCallExpression expression, Type? mappedElementType)
     {
@@ -454,6 +397,7 @@ internal class MappedDictionaryIndexerExpression : IMappedExpression
     public Type ActualValueType { get; }
     public object Key { get; }
     public Type MappedValueType => ValueType;
+    public object Context => Key;
 
     public MappedDictionaryIndexerExpression(MethodCallExpression expression, Type valueType)
     {

@@ -1119,6 +1119,1142 @@ public class MapExpressionsTests
     }
 
     [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexArrayIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexArrayIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0]);
+            c.Map(o => o.Values[0, 0][1]);
+            c.Map(o => o.Values[1, 2][3]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexArrayIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Length);
+        Assert.Equal(0, row.Values[0, 0][0]);
+        Assert.Equal(1, row.Values[0, 0][1]);
+        Assert.Equal(4, row.Values[1, 2].Length);
+        Assert.Equal(0, row.Values[1, 2][0]);
+        Assert.Equal(0, row.Values[1, 2][1]);
+        Assert.Equal(0, row.Values[1, 2][2]);
+        Assert.Equal(3, row.Values[1, 2][3]);
+    }
+
+    private class MultidimensionalIndexArrayIndexClass
+    {
+        public int[,][] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexArrayIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexArrayIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0][1])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2][3])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexArrayIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Length);
+        Assert.Equal(1, row.Values[0, 0][0]);
+        Assert.Equal(2, row.Values[0, 0][1]);
+        Assert.Equal(4, row.Values[1, 2].Length);
+        Assert.Equal(0, row.Values[1, 2][0]);
+        Assert.Equal(0, row.Values[1, 2][1]);
+        Assert.Equal(0, row.Values[1, 2][2]);
+        Assert.Equal(3, row.Values[1, 2][3]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexMultidimensionalIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexMultidimensionalIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0, 0]);
+            c.Map(o => o.Values[0, 0][1, 0]);
+            c.Map(o => o.Values[1, 2][3, 4]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexMultidimensionalIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].GetLength(0));
+        Assert.Equal(1, row.Values[0, 0].GetLength(1));
+        Assert.Equal(0, row.Values[0, 0][0, 0]);
+        Assert.Equal(0, row.Values[0, 0][1, 0]);
+        Assert.Equal(4, row.Values[1, 2].GetLength(0));
+        Assert.Equal(5, row.Values[1, 2].GetLength(1));
+        Assert.Equal(0, row.Values[1, 2][3, 4]);
+    }
+
+    private class MultidimensionalIndexMultidimensionalIndexClass
+    {
+        public int[,][,] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexMultidimensionalIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexMultidimensionalIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0, 0])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0][1, 0])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2][3, 4])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexMultidimensionalIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].GetLength(0));
+        Assert.Equal(1, row.Values[0, 0].GetLength(1));
+        Assert.Equal(1, row.Values[0, 0][0, 0]);
+        Assert.Equal(2, row.Values[0, 0][1, 0]);
+        Assert.Equal(4, row.Values[1, 2].GetLength(0));
+        Assert.Equal(5, row.Values[1, 2].GetLength(1));
+        Assert.Equal(3, row.Values[1, 2][3, 4]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexListIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexListIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0]);
+            c.Map(o => o.Values[0, 0][1]);
+            c.Map(o => o.Values[1, 2][3]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexListIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(0, row.Values[0, 0][0]);
+        Assert.Equal(1, row.Values[0, 0][1]);
+        Assert.Equal(4, row.Values[1, 2].Count);
+        Assert.Equal(0, row.Values[1, 2][0]);
+        Assert.Equal(0, row.Values[1, 2][1]);
+        Assert.Equal(0, row.Values[1, 2][2]);
+        Assert.Equal(3, row.Values[1, 2][3]);
+    }
+
+    private class MultidimensionalIndexListIndexClass
+    {
+        public List<int>[,] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexListIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexListIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0][1])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2][3])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexListIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(1, row.Values[0, 0][0]);
+        Assert.Equal(2, row.Values[0, 0][1]);
+        Assert.Equal(4, row.Values[1, 2].Count);
+        Assert.Equal(0, row.Values[1, 2][0]);
+        Assert.Equal(0, row.Values[1, 2][1]);
+        Assert.Equal(0, row.Values[1, 2][2]);
+        Assert.Equal(3, row.Values[1, 2][3]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexDictionaryIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0]["Column1"]);
+            c.Map(o => o.Values[0, 0]["Column2"]);
+            c.Map(o => o.Values[1, 2]["Column3"]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexDictionaryIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(0, row.Values[0, 0]["Column1"]);
+        Assert.Equal(1, row.Values[0, 0]["Column2"]);
+        Assert.Equal(1, row.Values[1, 2].Count);
+        Assert.Equal(2, row.Values[1, 2]["Column3"]);
+    }
+
+    private class MultidimensionalIndexDictionaryIndexClass
+    {
+        public Dictionary<string, int>[,] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexDictionaryIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0]["Column1"])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0]["Column2"])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2]["Column4"])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexDictionaryIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(1, row.Values[0, 0]["Column1"]);
+        Assert.Equal(2, row.Values[0, 0]["Column2"]);
+        Assert.Equal(1, row.Values[1, 2].Count);
+        Assert.Equal(3, row.Values[1, 2]["Column4"]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexArrayIndexArrayIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexArrayIndexArrayIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0][0]);
+            c.Map(o => o.Values[0, 0][1][2]);
+            c.Map(o => o.Values[1, 2][3][4]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexArrayIndexArrayIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Length);
+        Assert.Equal(0, row.Values[0, 0][0][0]);
+        Assert.Equal(2, row.Values[0, 0][1][2]);
+        Assert.Equal(4, row.Values[1, 2].Length);
+        Assert.Equal(4, row.Values[1, 2][3][4]);
+    }
+
+    private class MultidimensionalIndexArrayIndexArrayIndexClass
+    {
+        public int[,][][] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexArrayIndexArrayIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexArrayIndexArrayIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0][0])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0][1][0])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2][3][4])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexArrayIndexArrayIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Length);
+        Assert.Equal(1, row.Values[0, 0][0][0]);
+        Assert.Equal(2, row.Values[0, 0][1][0]);
+        Assert.Equal(4, row.Values[1, 2].Length);
+        Assert.Equal(3, row.Values[1, 2][3][4]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexArrayIndexListIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexArrayIndexListIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0][0]);
+            c.Map(o => o.Values[0, 0][1][2]);
+            c.Map(o => o.Values[1, 2][3][4]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexArrayIndexListIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Length);
+        Assert.Equal(0, row.Values[0, 0][0][0]);
+        Assert.Equal(2, row.Values[0, 0][1][2]);
+        Assert.Equal(4, row.Values[1, 2].Length);
+        Assert.Equal(4, row.Values[1, 2][3][4]);
+    }
+
+    private class MultidimensionalIndexArrayIndexListIndexClass
+    {
+        public List<int>[,][] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexArrayIndexListIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexArrayIndexArrayIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0][0])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0][1][0])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2][3][4])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexArrayIndexArrayIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Length);
+        Assert.Equal(1, row.Values[0, 0][0][0]);
+        Assert.Equal(2, row.Values[0, 0][1][0]);
+        Assert.Equal(4, row.Values[1, 2].Length);
+        Assert.Equal(3, row.Values[1, 2][3][4]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexArrayIndexMultidimensionalIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexArrayIndexMultidimensionalIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0][0, 0]);
+            c.Map(o => o.Values[0, 0][1][2, 0]);
+            c.Map(o => o.Values[1, 2][3][4, 5]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexArrayIndexMultidimensionalIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Length);
+        Assert.Equal(0, row.Values[0, 0][0][0, 0]);
+        Assert.Equal(0, row.Values[0, 0][1][2, 0]);
+        Assert.Equal(4, row.Values[1, 2].Length);
+        Assert.Equal(0, row.Values[1, 2][3][4, 5]);
+    }
+
+    private class MultidimensionalIndexArrayIndexMultidimensionalIndexClass
+    {
+        public int[,][][,] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexArrayIndexMultidimensionalIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexArrayIndexMultidimensionalIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0][0, 0])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0][1][0, 0])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2][3][4, 5])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexArrayIndexMultidimensionalIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Length);
+        Assert.Equal(1, row.Values[0, 0][0][0, 0]);
+        Assert.Equal(2, row.Values[0, 0][1][0, 0]);
+        Assert.Equal(4, row.Values[1, 2].Length);
+        Assert.Equal(3, row.Values[1, 2][3][4, 5]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexArrayIndexDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexArrayIndexDictionaryIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0]["Column1"]);
+            c.Map(o => o.Values[0, 0][1]["Column2"]);
+            c.Map(o => o.Values[1, 2][3]["Column3"]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexArrayIndexDictionaryIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Length);
+        Assert.Equal(0, row.Values[0, 0][0]["Column1"]);
+        Assert.Equal(1, row.Values[0, 0][1]["Column2"]);
+        Assert.Equal(4, row.Values[1, 2].Length);
+        Assert.Equal(2, row.Values[1, 2][3]["Column3"]);
+    }
+
+    private class MultidimensionalIndexArrayIndexDictionaryIndexClass
+    {
+        public Dictionary<string, int>[,][] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexArrayIndexDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexArrayIndexDictionaryIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0]["Column1"])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0][1]["Column2"])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2][3]["Column3"])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexArrayIndexDictionaryIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Length);
+        Assert.Equal(1, row.Values[0, 0][0]["Column1"]);
+        Assert.Equal(2, row.Values[0, 0][1]["Column2"]);
+        Assert.Equal(4, row.Values[1, 2].Length);
+        Assert.Equal(3, row.Values[1, 2][3]["Column3"]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexMultidimensionalIndexArrayIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexMultidimensionalIndexArrayIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0, 0][0]);
+            c.Map(o => o.Values[0, 0][1, 2][2]);
+            c.Map(o => o.Values[1, 2][3, 4][4]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexMultidimensionalIndexArrayIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(6, row.Values[0, 0].Length);
+        Assert.Equal(0, row.Values[0, 0][0, 0][0]);
+        Assert.Equal(2, row.Values[0, 0][1, 2][2]);
+        Assert.Equal(20, row.Values[1, 2].Length);
+        Assert.Equal(4, row.Values[1, 2][3, 4][4]);
+    }
+
+    private class MultidimensionalIndexMultidimensionalIndexArrayIndexClass
+    {
+        public int[,][,][] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexMultidimensionalIndexArrayIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexMultidimensionalIndexArrayIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0, 0][0])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0][1, 0][0])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2][3, 4][4])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexMultidimensionalIndexArrayIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Length);
+        Assert.Equal(1, row.Values[0, 0][0, 0][0]);
+        Assert.Equal(2, row.Values[0, 0][1, 0][0]);
+        Assert.Equal(20, row.Values[1, 2].Length);
+        Assert.Equal(3, row.Values[1, 2][3, 4][4]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexMultidimensionalIndexMultidimensionalIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexMultidimensionalIndexMultidimensionalIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0, 0][0, 0]);
+            c.Map(o => o.Values[0, 0][1, 2][2, 0]);
+            c.Map(o => o.Values[1, 2][3, 4][4, 5]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexMultidimensionalIndexMultidimensionalIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(6, row.Values[0, 0].Length);
+        Assert.Equal(0, row.Values[0, 0][0, 0][0, 0]);
+        Assert.Equal(0, row.Values[0, 0][1, 2][2, 0]);
+        Assert.Equal(20, row.Values[1, 2].Length);
+        Assert.Equal(0, row.Values[1, 2][3, 4][4, 5]);
+    }
+
+    private class MultidimensionalIndexMultidimensionalIndexMultidimensionalIndexClass
+    {
+        public int[,][,][,] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexMultidimensionalIndexMultidimensionalIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexMultidimensionalIndexMultidimensionalIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0, 0][0, 0])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0][1, 0][0, 0])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2][3, 4][4, 5])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexMultidimensionalIndexMultidimensionalIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Length);
+        Assert.Equal(1, row.Values[0, 0][0, 0][0, 0]);
+        Assert.Equal(2, row.Values[0, 0][1, 0][0, 0]);
+        Assert.Equal(20, row.Values[1, 2].Length);
+        Assert.Equal(3, row.Values[1, 2][3, 4][4, 5]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexMultidimensionalIndexListIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexMultidimensionalIndexListIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0, 0][0]);
+            c.Map(o => o.Values[0, 0][1, 2][2]);
+            c.Map(o => o.Values[1, 2][3, 4][4]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexMultidimensionalIndexListIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(6, row.Values[0, 0].Length);
+        Assert.Equal(0, row.Values[0, 0][0, 0][0]);
+        Assert.Equal(2, row.Values[0, 0][1, 2][2]);
+        Assert.Equal(20, row.Values[1, 2].Length);
+        Assert.Equal(4, row.Values[1, 2][3, 4][4]);
+    }
+
+    private class MultidimensionalIndexMultidimensionalIndexListIndexClass
+    {
+        public List<int>[,][,] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexMultidimensionalIndexListIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexMultidimensionalIndexListIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0, 0][0])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0][1, 0][0])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2][3, 4][4])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexMultidimensionalIndexListIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Length);
+        Assert.Equal(1, row.Values[0, 0][0, 0][0]);
+        Assert.Equal(2, row.Values[0, 0][1, 0][0]);
+        Assert.Equal(20, row.Values[1, 2].Length);
+        Assert.Equal(3, row.Values[1, 2][3, 4][4]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexMultidimensionalIndexDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexMultidimensionalIndexDictionaryIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0, 0]["Column1"]);
+            c.Map(o => o.Values[0, 0][1, 2]["Column2"]);
+            c.Map(o => o.Values[1, 2][3, 4]["Column3"]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexMultidimensionalIndexDictionaryIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(6, row.Values[0, 0].Length);
+        Assert.Equal(0, row.Values[0, 0][0, 0]["Column1"]);
+        Assert.Equal(1, row.Values[0, 0][1, 2]["Column2"]);
+        Assert.Equal(20, row.Values[1, 2].Length);
+        Assert.Equal(2, row.Values[1, 2][3, 4]["Column3"]);
+    }
+
+    private class MultidimensionalIndexMultidimensionalIndexDictionaryIndexClass
+    {
+        public Dictionary<string, int>[,][,] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexMultidimensionalIndexDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexMultidimensionalIndexDictionaryIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0, 0]["Column1"])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0][1, 0]["Column2"])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2][3, 4]["Column3"])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexMultidimensionalIndexDictionaryIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Length);
+        Assert.Equal(1, row.Values[0, 0][0, 0]["Column1"]);
+        Assert.Equal(2, row.Values[0, 0][1, 0]["Column2"]);
+        Assert.Equal(20, row.Values[1, 2].Length);
+        Assert.Equal(3, row.Values[1, 2][3, 4]["Column3"]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexListIndexArrayIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexListIndexArrayIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0][0]);
+            c.Map(o => o.Values[0, 0][1][2]);
+            c.Map(o => o.Values[1, 2][3][4]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexListIndexArrayIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(0, row.Values[0, 0][0][0]);
+        Assert.Equal(2, row.Values[0, 0][1][2]);
+        Assert.Equal(4, row.Values[1, 2].Count);
+        Assert.Equal(4, row.Values[1, 2][3][4]);
+    }
+
+    private class MultidimensionalIndexListIndexArrayIndexClass
+    {
+        public List<int[]>[,] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexListIndexArrayIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexListIndexArrayIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0][0])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0][1][0])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2][3][4])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexListIndexArrayIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(1, row.Values[0, 0][0][0]);
+        Assert.Equal(2, row.Values[0, 0][1][0]);
+        Assert.Equal(4, row.Values[1, 2].Count);
+        Assert.Equal(3, row.Values[1, 2][3][4]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexListIndexListIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexListIndexListIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0][0]);
+            c.Map(o => o.Values[0, 0][1][2]);
+            c.Map(o => o.Values[1, 2][3][4]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexListIndexListIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(0, row.Values[0, 0][0][0]);
+        Assert.Equal(2, row.Values[0, 0][1][2]);
+        Assert.Equal(4, row.Values[1, 2].Count);
+        Assert.Equal(4, row.Values[1, 2][3][4]);
+    }
+
+    private class MultidimensionalIndexListIndexListIndexClass
+    {
+        public List<List<int>>[,] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexListIndexListIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexListIndexArrayIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0][0])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0][1][0])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2][3][4])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexListIndexArrayIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(1, row.Values[0, 0][0][0]);
+        Assert.Equal(2, row.Values[0, 0][1][0]);
+        Assert.Equal(4, row.Values[1, 2].Count);
+        Assert.Equal(3, row.Values[1, 2][3][4]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexListIndexMultidimensionalIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexListIndexMultidimensionalIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0][0, 0]);
+            c.Map(o => o.Values[0, 0][1][2, 0]);
+            c.Map(o => o.Values[1, 2][3][4, 5]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexListIndexMultidimensionalIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(0, row.Values[0, 0][0][0, 0]);
+        Assert.Equal(0, row.Values[0, 0][1][2, 0]);
+        Assert.Equal(4, row.Values[1, 2].Count);
+        Assert.Equal(0, row.Values[1, 2][3][4, 5]);
+    }
+
+    private class MultidimensionalIndexListIndexMultidimensionalIndexClass
+    {
+        public List<int[,]>[,] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexListIndexMultidimensionalIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexListIndexMultidimensionalIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0][0, 0])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0][1][0, 0])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2][3][4, 5])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexListIndexMultidimensionalIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(1, row.Values[0, 0][0][0, 0]);
+        Assert.Equal(2, row.Values[0, 0][1][0, 0]);
+        Assert.Equal(4, row.Values[1, 2].Count);
+        Assert.Equal(3, row.Values[1, 2][3][4, 5]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexListIndexDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexListIndexDictionaryIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0]["Column1"]);
+            c.Map(o => o.Values[0, 0][1]["Column2"]);
+            c.Map(o => o.Values[1, 2][3]["Column3"]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexListIndexDictionaryIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(0, row.Values[0, 0][0]["Column1"]);
+        Assert.Equal(1, row.Values[0, 0][1]["Column2"]);
+        Assert.Equal(4, row.Values[1, 2].Count);
+        Assert.Equal(2, row.Values[1, 2][3]["Column3"]);
+    }
+
+    private class MultidimensionalIndexListIndexDictionaryIndexClass
+    {
+        public List<Dictionary<string, int>>[,] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexListIndexDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexListIndexDictionaryIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0][0]["Column1"])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0][1]["Column2"])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2][3]["Column3"])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexListIndexDictionaryIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(1, row.Values[0, 0][0]["Column1"]);
+        Assert.Equal(2, row.Values[0, 0][1]["Column2"]);
+        Assert.Equal(4, row.Values[1, 2].Count);
+        Assert.Equal(3, row.Values[1, 2][3]["Column3"]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexDictionaryIndexArrayIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexDictionaryIndexArrayIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0]["key1"][0]);
+            c.Map(o => o.Values[0, 0]["key2"][2]);
+            c.Map(o => o.Values[1, 2]["key3"][4]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexDictionaryIndexArrayIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(0, row.Values[0, 0]["key1"][0]);
+        Assert.Equal(2, row.Values[0, 0]["key2"][2]);
+        Assert.Equal(1, row.Values[1, 2].Count);
+        Assert.Equal(4, row.Values[1, 2]["key3"][4]);
+    }
+
+    private class MultidimensionalIndexDictionaryIndexArrayIndexClass
+    {
+        public Dictionary<string, int[]>[,] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexDictionaryIndexArrayIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexDictionaryIndexArrayIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0]["key1"][0])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0]["key2"][0])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2]["key3"][4])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexDictionaryIndexArrayIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(1, row.Values[0, 0]["key1"][0]);
+        Assert.Equal(2, row.Values[0, 0]["key2"][0]);
+        Assert.Equal(1, row.Values[1, 2].Count);
+        Assert.Equal(3, row.Values[1, 2]["key3"][4]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexDictionaryIndexListIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexDictionaryIndexListIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0]["key1"][0]);
+            c.Map(o => o.Values[0, 0]["key2"][2]);
+            c.Map(o => o.Values[1, 2]["key3"][4]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexDictionaryIndexListIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(0, row.Values[0, 0]["key1"][0]);
+        Assert.Equal(2, row.Values[0, 0]["key2"][2]);
+        Assert.Equal(1, row.Values[1, 2].Count);
+        Assert.Equal(4, row.Values[1, 2]["key3"][4]);
+    }
+
+    private class MultidimensionalIndexDictionaryIndexListIndexClass
+    {
+        public Dictionary<string, List<int>>[,] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexDictionaryIndexListIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexDictionaryIndexArrayIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0]["key1"][0])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0]["key2"][0])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2]["key3"][4])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexDictionaryIndexArrayIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(1, row.Values[0, 0]["key1"][0]);
+        Assert.Equal(2, row.Values[0, 0]["key2"][0]);
+        Assert.Equal(1, row.Values[1, 2].Count);
+        Assert.Equal(3, row.Values[1, 2]["key3"][4]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexDictionaryIndexMultidimensionalIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexDictionaryIndexMultidimensionalIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0]["key1"][0, 0]);
+            c.Map(o => o.Values[0, 0]["key2"][2, 0]);
+            c.Map(o => o.Values[1, 2]["key3"][4, 5]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexDictionaryIndexMultidimensionalIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(0, row.Values[0, 0]["key1"][0, 0]);
+        Assert.Equal(0, row.Values[0, 0]["key2"][2, 0]);
+        Assert.Equal(1, row.Values[1, 2].Count);
+        Assert.Equal(0, row.Values[1, 2]["key3"][4, 5]);
+    }
+
+    private class MultidimensionalIndexDictionaryIndexMultidimensionalIndexClass
+    {
+        public Dictionary<string, int[,]>[,] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexDictionaryIndexMultidimensionalIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexDictionaryIndexMultidimensionalIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0]["key1"][0, 0])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0]["key2"][0, 0])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2]["key3"][4, 5])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexDictionaryIndexMultidimensionalIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(1, row.Values[0, 0]["key1"][0, 0]);
+        Assert.Equal(2, row.Values[0, 0]["key2"][0, 0]);
+        Assert.Equal(1, row.Values[1, 2].Count);
+        Assert.Equal(3, row.Values[1, 2]["key3"][4, 5]);
+    }
+
+    [Fact]
+    public void ReadRows_DefaultMappedMultidimensionalIndexDictionaryIndexDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexDictionaryIndexDictionaryIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0]["key1"]["Column1"]);
+            c.Map(o => o.Values[0, 0]["key2"]["Column2"]);
+            c.Map(o => o.Values[1, 2]["key3"]["Column3"]);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexDictionaryIndexDictionaryIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(0, row.Values[0, 0]["key1"]["Column1"]);
+        Assert.Equal(1, row.Values[0, 0]["key2"]["Column2"]);
+        Assert.Equal(1, row.Values[1, 2].Count);
+        Assert.Equal(2, row.Values[1, 2]["key3"]["Column3"]);
+    }
+
+    private class MultidimensionalIndexDictionaryIndexDictionaryIndexClass
+    {
+        public Dictionary<string, Dictionary<string, int>>[,] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedMultidimensionalIndexDictionaryIndexDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("ExpressionsMap.xlsx");
+        importer.Configuration.RegisterClassMap<MultidimensionalIndexDictionaryIndexDictionaryIndexClass>(c =>
+        {
+            c.Map(o => o.Values[0, 0]["key1"]["Column1"])
+                .WithColumnName("Column2");
+            c.Map(o => o.Values[0, 0]["key2"]["Column2"])
+                .WithColumnName("Column3");
+            c.Map(o => o.Values[1, 2]["key3"]["Column3"])
+                .WithColumnName("Column4");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<MultidimensionalIndexDictionaryIndexDictionaryIndexClass>();
+        Assert.Equal(2, row.Values.GetLength(0));
+        Assert.Equal(3, row.Values.GetLength(1));
+        Assert.Equal(2, row.Values[0, 0].Count);
+        Assert.Equal(1, row.Values[0, 0]["key1"]["Column1"]);
+        Assert.Equal(2, row.Values[0, 0]["key2"]["Column2"]);
+        Assert.Equal(1, row.Values[1, 2].Count);
+        Assert.Equal(3, row.Values[1, 2]["key3"]["Column3"]);
+    }
+
+    [Fact]
     public void ReadRows_DefaultMappedIntListIndex_Success()
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
