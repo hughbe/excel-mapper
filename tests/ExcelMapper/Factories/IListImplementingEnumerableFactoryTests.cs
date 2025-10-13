@@ -160,7 +160,6 @@ public class IListImplementingEnumerableFactoryTests
     public void Set_NegativeIndex_ThrowsArgumentOutOfRangeException()
     {
         var factory = new IListImplementingEnumerableFactory<int>(typeof(SubCollectionBase));
-        factory.Begin(1);
         Assert.Throws<ArgumentOutOfRangeException>("index", () => factory.Set(-1, 1));
     }
 

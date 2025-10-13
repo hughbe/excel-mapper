@@ -166,7 +166,6 @@ public class ReadOnlyObservableCollectionEnumerableFactoryTests
     public void Set_NegativeIndex_ThrowsArgumentOutOfRangeException()
     {
         var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>(typeof(ReadOnlyObservableCollection<int>));
-        factory.Begin(1);
         Assert.Throws<ArgumentOutOfRangeException>("index", () => factory.Set(-1, 1));
     }
 

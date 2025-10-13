@@ -107,7 +107,6 @@ public class FrozenSetEnumerableFactoryTests
     public void Set_NegativeIndex_ThrowsArgumentOutOfRangeException()
     {
         var factory = new FrozenSetEnumerableFactory<int>();
-        factory.Begin(1);
         Assert.Throws<ArgumentOutOfRangeException>("index", () => factory.Set(-1, 1));
     }
 

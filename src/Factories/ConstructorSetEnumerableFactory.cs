@@ -30,7 +30,7 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
         }
 
         _constructor = setType.GetConstructor([typeof(ISet<T>)])
-            ?? throw new ArgumentException($"Set type {setType} does not have a constructor that takes IEnumerable<{typeof(T)}>.", nameof(setType));
+            ?? throw new ArgumentException($"Set type {setType} does not have a constructor that takes ISet<{typeof(T)}>.", nameof(setType));
 
         SetType = setType;
     }

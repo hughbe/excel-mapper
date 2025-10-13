@@ -37,6 +37,22 @@ public class MultidimensionalArrayFactory<T> : IMultidimensionalArrayFactory<T>
 
     public void Set(int[] indices, T? item)
     {
+        if (indices == null)
+        {
+            throw new ArgumentNullException(nameof(indices));
+        }
+        if (indices.Length == 0)
+        {
+            throw new ArgumentException("Indices cannot be empty.", nameof(indices));
+        }
+        foreach (var index in indices)
+        {
+            if (index < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(indices), indices, "Indices cannot be negative.");
+            }
+        }
+
         EnsureMapping();
         _items.SetValue(item, indices);
     }

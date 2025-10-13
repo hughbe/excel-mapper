@@ -33,6 +33,11 @@ public class FrozenSetEnumerableFactory<T> : IEnumerableFactory<T>
 
     public void Set(int index, T? item)
     {
+        if (index < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(index), index, "Index cannot be negative.");
+        }
+
         EnsureMapping();
 
         // Grow the list if necessary.

@@ -102,11 +102,10 @@ public class ArrayEnumerableFactoryTests
     }
 
     [Fact]
-    public void Set_NegativeIndex_ThrowsIndexOutOfRangeException()
+    public void Set_NegativeIndex_ThrowsArgumentOutOfRangeException()
     {
         var factory = new ArrayEnumerableFactory<int>();
-        factory.Begin(1);
-        Assert.Throws<IndexOutOfRangeException>(() => factory.Set(-1, 1));
+        Assert.Throws<ArgumentOutOfRangeException>("index", () => factory.Set(-1, 1));
     }
 
     [Fact]

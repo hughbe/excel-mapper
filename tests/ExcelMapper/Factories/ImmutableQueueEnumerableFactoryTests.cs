@@ -107,7 +107,6 @@ public class ImmutableQueueEnumerableFactoryTests
     public void Set_NegativeIndex_ThrowsArgumentOutOfRangeException()
     {
         var factory = new ImmutableQueueEnumerableFactory<int>();
-        factory.Begin(1);
         Assert.Throws<ArgumentOutOfRangeException>("index", () => factory.Set(-1, 1));
     }
 

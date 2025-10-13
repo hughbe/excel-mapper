@@ -90,7 +90,7 @@ public class MultidimensionalArrayFactoryTests
     {
         var factory = new MultidimensionalArrayFactory<int>();
         factory.Begin([1]);
-        Assert.Throws<ArgumentException>(null, () => factory.Set([], 1));
+        Assert.Throws<ArgumentException>("indices", () => factory.Set([], 1));
     }
 
     [Fact]
@@ -102,11 +102,10 @@ public class MultidimensionalArrayFactoryTests
     }
 
     [Fact]
-    public void Set_NegativeIndex_ThrowsIndexOutOfRangeException()
+    public void Set_NegativeIndex_ThrowsArgumentOutOfRangeException()
     {
         var factory = new MultidimensionalArrayFactory<int>();
-        factory.Begin([1]);
-        Assert.Throws<IndexOutOfRangeException>(() => factory.Set([-1], 1));
+        Assert.Throws<ArgumentOutOfRangeException>("indices", () => factory.Set([-1], 1));
     }
 
     [Fact]

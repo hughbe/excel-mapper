@@ -13,7 +13,7 @@ public class ImmutableListEnumerableFactory<T> : IEnumerableFactory<T>
     {
         if (count < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(count), count, "Capacity cannot be negative.");
+            throw new ArgumentOutOfRangeException(nameof(count), count, "Count cannot be negative.");
         }
 
         if (_builder is not null)
@@ -32,6 +32,11 @@ public class ImmutableListEnumerableFactory<T> : IEnumerableFactory<T>
 
     public void Set(int index, T? item)
     {
+        if (index < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(index), index, "Index cannot be negative.");
+        }
+
         EnsureMapping();
 
         // Grow the list if necessary.

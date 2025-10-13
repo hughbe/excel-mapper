@@ -201,7 +201,6 @@ public class ConstructorEnumerableFactoryTests
     public void Set_NegativeIndex_ThrowsArgumentOutOfRangeException()
     {
         var factory = new ConstructorEnumerableFactory<int>(typeof(List<int>));
-        factory.Begin(1);
         Assert.Throws<ArgumentOutOfRangeException>("index", () => factory.Set(-1, 1));
     }
 

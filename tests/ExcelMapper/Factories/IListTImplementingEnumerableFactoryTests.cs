@@ -158,7 +158,6 @@ public class IListTImplementingEnumerableFactoryTests
     public void Set_NegativeIndex_ThrowsArgumentOutOfRangeException()
     {
         var factory = new IListTImplementingEnumerableFactory<int>(typeof(List<int>));
-        factory.Begin(1);
         Assert.Throws<ArgumentOutOfRangeException>("index", () => factory.Set(-1, 1));
     }
 
