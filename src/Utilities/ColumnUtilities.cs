@@ -10,7 +10,7 @@ internal static class ColumnUtilities
     {
         if (columnIndex < 0)
         {
-            throw new ArgumentOutOfRangeException(paramName, columnIndex, $"Column columnIndex {columnIndex} must be greater or equal to zero.");
+            throw new ArgumentOutOfRangeException(paramName, columnIndex, $"Column {columnIndex} must be greater or equal to zero.");
         }
     }
 
@@ -31,7 +31,7 @@ internal static class ColumnUtilities
         {
             if (columnIndex < 0)
             {
-                throw new ArgumentOutOfRangeException(paramName, columnIndex, $"Column columnIndex {columnIndex} must be greater or equal to zero.");
+                throw new ArgumentOutOfRangeException(paramName, columnIndex, $"Column {columnIndex} must be greater or equal to zero.");
             }
         }
     }
