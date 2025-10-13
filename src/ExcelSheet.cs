@@ -152,12 +152,21 @@ public class ExcelSheet
             throw new ExcelMappingException($"The underlying reader is closed.");
         }
 
-        // Read the heading if we haven't already.
+        // Read the heading if we haven't already - this validates the sheet structure
         if (HasHeading && Heading == null)
         {
             ReadHeading();
         }
 
+        // Now delegate to iterator method for lazy evaluation
+        return ReadRowsIterator<T>();
+    }
+
+    /// <summary>
+    /// Iterator method for reading rows. Separated from ReadRows to enable eager validation.
+    /// </summary>
+    private IEnumerable<T> ReadRowsIterator<T>()
+    {
         while (TryReadRow(out T? row))
         {
             yield return row;
@@ -192,12 +201,21 @@ public class ExcelSheet
             throw new ArgumentOutOfRangeException(nameof(count), count, "The number of rows cannot be negative.");
         }
         
-        // Read the heading if we haven't already.
+        // Read the heading if we haven't already - this validates the sheet structure
         if (HasHeading && Heading == null)
         {
             ReadHeading();
         }
 
+        // Now delegate to iterator method for lazy evaluation
+        return ReadRowsRangeIterator<T>(startIndex, count);
+    }
+
+    /// <summary>
+    /// Iterator method for reading a range of rows. Separated from ReadRows to enable eager validation.
+    /// </summary>
+    private IEnumerable<T> ReadRowsRangeIterator<T>(int startIndex, int count)
+    {
         // Reset the reader as we need to seek to the specific row.
         Reader.Reset();
         Importer.MoveToSheet(this);
@@ -206,7 +224,7 @@ public class ExcelSheet
         {
             if (!Reader.Read())
             {
-                throw new ExcelMappingException($"Sheet \"{Name}\" does not have row {startIndex}.");
+                throw new ExcelMappingException($"Sheet \"{Name}\" does not have row {i}.");
             }
 
             CurrentRowIndex++;
