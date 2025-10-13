@@ -206,6 +206,30 @@ importer.Configuration.SkipBlankLines = true;
 var rows = sheet.ReadRows<Product>();
 ```
 
+### Security: Column Count Limits
+
+To protect against denial-of-service attacks from malicious Excel files with excessive columns, ExcelMapper enforces a maximum column limit per sheet:
+
+```csharp
+using var importer = new ExcelImporter("data.xlsx");
+
+// Default limit is 10,000 columns (sufficient for most use cases)
+Console.WriteLine(importer.Configuration.MaxColumnsPerSheet);  // 10000
+
+// Adjust the limit if needed for legitimate large files
+importer.Configuration.MaxColumnsPerSheet = 20000;
+
+// Or disable the limit entirely (not recommended for untrusted files)
+importer.Configuration.MaxColumnsPerSheet = int.MaxValue;
+```
+
+**Note:** Excel .xlsx files support up to 16,384 columns (XFD). If a sheet exceeds `MaxColumnsPerSheet`, an `ExcelMappingException` is thrown with a clear error message.
+
+**Security Best Practices:**
+- Keep the default limit (10,000) for untrusted/user-uploaded files
+- Only increase the limit when you control the file source
+- Files exceeding the limit will fail immediately before allocating excessive memory
+
 ## Mapping Strategies
 
 ### Automatic Mapping

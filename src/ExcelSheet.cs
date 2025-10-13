@@ -133,7 +133,7 @@ public class ExcelSheet
         Importer.MoveToSheet(this);
         ReadPastHeading();
 
-        var heading = new ExcelHeading(Reader);
+        var heading = new ExcelHeading(Reader, Importer.Configuration);
         Heading = heading;
         return heading;
     }

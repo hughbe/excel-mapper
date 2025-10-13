@@ -746,4 +746,27 @@ public class ExcelSheetTests
         Assert.Equal(3, rows.Count());
         Assert.Equal(4, rows[0].RawRow.Count());
     }
+
+    [Fact]
+    public void ReadRows_ExceedsMaxColumns_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.MaxColumnsPerSheet = 3; // Primitives.xlsx has 8 columns
+        var sheet = importer.ReadSheet();
+
+        // Exception should be thrown when ReadHeading is called (during ReadRows if HasHeading is true)
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>().ToList());
+        Assert.Contains("exceeds the maximum", ex.Message);
+    }
+
+    [Fact]
+    public void ReadRows_WithinMaxColumns_Success()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        importer.Configuration.MaxColumnsPerSheet = 100; // Strings.xlsx has 1 column, well within limit
+        var sheet = importer.ReadSheet();
+
+        var rows = sheet.ReadRows<StringValue>().ToList();
+        Assert.NotEmpty(rows);
+    }
 }

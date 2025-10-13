@@ -12,8 +12,15 @@ public class ExcelHeading
 {
     private readonly string[] _columnNames;
 
-    internal ExcelHeading(IDataRecord reader)
+    internal ExcelHeading(IDataRecord reader, ExcelImporterConfiguration configuration)
     {
+        if (reader.FieldCount > configuration.MaxColumnsPerSheet)
+        {
+            throw new ExcelMappingException(
+                $"Sheet has {reader.FieldCount} columns which exceeds the maximum allowed " +
+                $"({configuration.MaxColumnsPerSheet}). Increase MaxColumnsPerSheet in the configuration if this is a legitimate file.");
+        }
+
         var nameMapping = new SortedList<string, int>(reader.FieldCount, StringComparer.OrdinalIgnoreCase);
         var columnNames = new string[reader.FieldCount];
 

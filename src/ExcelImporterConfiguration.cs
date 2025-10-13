@@ -14,6 +14,27 @@ public class ExcelImporterConfiguration
 {
     private ConcurrentDictionary<Type, IMap> ClassMaps { get; } = new();
 
+    private int _maxColumnsPerSheet = 10000;
+
+    /// <summary>
+    /// Gets or sets the maximum number of columns allowed per sheet. Default is 10000.
+    /// This limit prevents denial of service attacks from malicious Excel files with excessive columns.
+    /// Set to int.MaxValue to disable the limit (not recommended for untrusted files).
+    /// Excel .xlsx files support up to 16,384 columns (XFD).
+    /// </summary>
+    public int MaxColumnsPerSheet
+    {
+        get => _maxColumnsPerSheet;
+        set
+        {
+            if (value < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value, "Value must be greater than zero.");
+            }
+
+            _maxColumnsPerSheet = value;
+        }
+    }
 
     /// <summary>
     ///  Gets or sets whether blank lines should be skipped during reading.

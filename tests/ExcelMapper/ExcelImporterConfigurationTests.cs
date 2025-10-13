@@ -28,6 +28,39 @@ public class ExcelImporterConfigurationTests
     }
 
     [Fact]
+    public void MaxColumnsPerSheet_DefaultValue_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        Assert.Equal(10000, importer.Configuration.MaxColumnsPerSheet);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(100)]
+    [InlineData(1000)]
+    [InlineData(16384)] // Excel maximum
+    [InlineData(int.MaxValue)]
+    public void MaxColumnsPerSheet_Set_GetReturnsExpected(int value)
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.MaxColumnsPerSheet = value;
+        Assert.Equal(value, importer.Configuration.MaxColumnsPerSheet);
+
+        // Set same.
+        importer.Configuration.MaxColumnsPerSheet = value;
+        Assert.Equal(value, importer.Configuration.MaxColumnsPerSheet);
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(0)]
+    public void MaxColumnsPerSheet_SetInvalid_ThrowsArgumentOutOfRangeException(int value)
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        Assert.Throws<ArgumentOutOfRangeException>("value", () => importer.Configuration.MaxColumnsPerSheet = value);
+    }
+
+    [Fact]
     public void RegisterClassMap_InvokeDefault_Success()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
