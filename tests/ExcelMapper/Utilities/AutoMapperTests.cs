@@ -166,10 +166,24 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_ArrayType_ReturnsFalse()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Array>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
     public void TryCreateClass_Map_ArrayStringType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<string[]>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_MultidimensionalArrayStringType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<string[,]>? classMap));
+        Assert.Null(classMap);
     }
 
     [Fact]

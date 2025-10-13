@@ -401,7 +401,7 @@ public static class AutoMapper
 
     private static bool TryGetCreateEnumerableFactory<TElement>(Type listType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
     {
-        if (listType.IsArray)
+        if (listType == typeof(Array) || (listType.IsArray && listType.GetArrayRank() == 1))
         {
             result = new ArrayEnumerableFactory<TElement>();
             return true;
