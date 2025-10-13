@@ -23,6 +23,11 @@ public class ExcelImporter : IDisposable
     public ExcelImporterConfiguration Configuration { get; } = new ExcelImporterConfiguration();
 
     /// <summary>
+    /// The stream that was opened by the constructor, if any. This needs to be disposed.
+    /// </summary>
+    private Stream? _ownedStream = null;
+
+    /// <summary>
     /// Gets the number of sheets in the document.
     /// </summary>
     public int NumberOfSheets => Reader.ResultsCount;
@@ -33,12 +38,35 @@ public class ExcelImporter : IDisposable
     /// Constructs an importer that reads an Excel file from a path.
     /// </summary>
     /// <param name="path"></param>
-    public ExcelImporter(string path) : this(File.OpenRead(path), ExcelImporterFileType.Excel)
+    public ExcelImporter(string path) : this(path, ExcelImporterFileType.Excel)
     {
     }
 
-    public ExcelImporter(string path, ExcelImporterFileType fileType) : this(File.OpenRead(path), fileType)
+    public ExcelImporter(string path, ExcelImporterFileType fileType)
     {
+        if (path == null)
+        {
+            throw new ArgumentNullException(nameof(path));
+        }
+
+        Stream? stream = null;
+        try
+        {
+            stream = File.OpenRead(path);
+            Reader = fileType switch
+            {
+                ExcelImporterFileType.Excel => ExcelReaderFactory.CreateReader(stream),
+                ExcelImporterFileType.Csv => ExcelReaderFactory.CreateCsvReader(stream),
+                _ => throw new ArgumentException($"Invalid value \"{fileType}\".", nameof(fileType))
+            };
+            _ownedStream = stream;
+            stream = null; // Transfer ownership - prevent disposal in catch block
+        }
+        catch
+        {
+            stream?.Dispose();
+            throw;
+        }
     }
 
     /// <summary>
@@ -81,9 +109,14 @@ public class ExcelImporter : IDisposable
 
     /// <summary>
     /// Cleans up resources associated with this class. This primarily involves disposing of
-    /// the inner reader.
+    /// the inner reader and any owned stream.
     /// </summary>
-    public void Dispose() => Reader.Dispose();
+    public void Dispose()
+    {
+        Reader.Dispose();
+        _ownedStream?.Dispose();
+        _ownedStream = null;
+    }
 
     /// <summary>
     /// Reads each sheet in the document. Reading is reset at the end of enumeration.
