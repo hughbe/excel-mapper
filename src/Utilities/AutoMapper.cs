@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Factories;
@@ -153,8 +154,10 @@ public static class AutoMapper
         return true;
     }
     
-    private static MethodInfo? s_tryCreateSplitGenericMapMethod;
-    private static MethodInfo TryCreateSplitGenericMapMethod => s_tryCreateSplitGenericMapMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateSplitMapGeneric))!;
+    private static readonly Lazy<MethodInfo> s_tryCreateSplitGenericMapMethod = new(
+        () => typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateSplitMapGeneric))!,
+        LazyThreadSafetyMode.PublicationOnly);
+    private static MethodInfo TryCreateSplitGenericMapMethod => s_tryCreateSplitGenericMapMethod.Value;
 
     private static bool TryCreateSplitMap(MemberInfo? member, Type listType, ICellsReaderFactory defaultCellsReaderFactory, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
     {
@@ -358,8 +361,10 @@ public static class AutoMapper
         return classMap;
     }
 
-    private static MethodInfo? s_getOrCreateArrayIndexerMapGenericMethod;
-    private static MethodInfo GetOrCreateArrayIndexerMapGenericMethod => s_getOrCreateArrayIndexerMapGenericMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(GetOrCreateArrayIndexerMapGeneric))!;
+    private static readonly Lazy<MethodInfo> s_getOrCreateArrayIndexerMapGenericMethod = new(
+        () => typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(GetOrCreateArrayIndexerMapGeneric))!,
+        LazyThreadSafetyMode.PublicationOnly);
+    private static MethodInfo GetOrCreateArrayIndexerMapGenericMethod => s_getOrCreateArrayIndexerMapGenericMethod.Value;
 
     internal static IMap GetOrCreateArrayIndexerMap(IMap parentMap, Type arrayType, object? context, Type elementType)
     {
@@ -402,8 +407,10 @@ public static class AutoMapper
         return true;
     }
 
-    private static MethodInfo? s_getOrCreateMultidimensionalIndexerMapGenericMethod;
-    private static MethodInfo GetOrCreateMultidimensionalIndexerMapGenericMethod => s_getOrCreateMultidimensionalIndexerMapGenericMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(GetOrCreateMultidimensionalIndexerMapGeneric))!;
+    private static readonly Lazy<MethodInfo> s_getOrCreateMultidimensionalIndexerMapGenericMethod = new(
+        () => typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(GetOrCreateMultidimensionalIndexerMapGeneric))!,
+        LazyThreadSafetyMode.PublicationOnly);
+    private static MethodInfo GetOrCreateMultidimensionalIndexerMapGenericMethod => s_getOrCreateMultidimensionalIndexerMapGenericMethod.Value;
 
     internal static IMap GetOrCreateMultidimensionalIndexerMap(IMap parentMap, Type arrayType, Type elementType, object? context)
     {
@@ -431,8 +438,10 @@ public static class AutoMapper
         return map;
     }
 
-    private static MethodInfo? s_getOrCreateDictionaryIndexerMapGenericMethod;
-    private static MethodInfo GetOrCreateDictionaryIndexerMapGenericMethod => s_getOrCreateDictionaryIndexerMapGenericMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(GetOrCreateDictionaryIndexerMapGeneric))!;
+    private static readonly Lazy<MethodInfo> s_getOrCreateDictionaryIndexerMapGenericMethod = new(
+        () => typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(GetOrCreateDictionaryIndexerMapGeneric))!,
+        LazyThreadSafetyMode.PublicationOnly);
+    private static MethodInfo GetOrCreateDictionaryIndexerMapGenericMethod => s_getOrCreateDictionaryIndexerMapGenericMethod.Value;
 
     internal static IDictionaryIndexerMap GetOrCreateDictionaryIndexerMap(IMap parentMap, Type dictionaryType, Type keyType, Type valueType, object? context)
     {
@@ -475,8 +484,10 @@ public static class AutoMapper
         return true;
     }
 
-    private static MethodInfo? s_tryCreateDictionaryMapGeneric;
-    private static MethodInfo TryCreateDictionaryMapGeneric => s_tryCreateDictionaryMapGeneric ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateGenericDictionaryMap))!;
+    private static readonly Lazy<MethodInfo> s_tryCreateDictionaryMapGeneric = new(
+        () => typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateGenericDictionaryMap))!,
+        LazyThreadSafetyMode.PublicationOnly);
+    private static MethodInfo TryCreateDictionaryMapGeneric => s_tryCreateDictionaryMapGeneric.Value;
 
     private static bool TryCreateDictionaryMap<TMember>(MemberInfo? member, FallbackStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out IMap? map)
     {
@@ -781,8 +792,10 @@ public static class AutoMapper
         return map;
     }
 
-    private static MethodInfo? s_getOrCreateNestedMapGenericMethod;
-    private static MethodInfo GetOrCreateNestedMapGenericMethod => s_getOrCreateNestedMapGenericMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(GetOrCreateNestedMapGeneric))!;
+    private static readonly Lazy<MethodInfo> s_getOrCreateNestedMapGenericMethod = new(
+        () => typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(GetOrCreateNestedMapGeneric))!,
+        LazyThreadSafetyMode.PublicationOnly);
+    private static MethodInfo GetOrCreateNestedMapGenericMethod => s_getOrCreateNestedMapGenericMethod.Value;
 
     /// <summary>
     /// Creates a class map for the given type using the given strategy.
@@ -814,8 +827,10 @@ public static class AutoMapper
         return true;
     }
 
-    private static MethodInfo? s_tryAutoMapMemberMethod;
-    private static MethodInfo TryAutoMapMemberMethod => s_tryAutoMapMemberMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryAutoMapMember))!;
+    private static readonly Lazy<MethodInfo> s_tryAutoMapMemberMethod = new(
+        () => typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryAutoMapMember))!,
+        LazyThreadSafetyMode.PublicationOnly);
+    private static MethodInfo TryAutoMapMemberMethod => s_tryAutoMapMemberMethod.Value;
 
     /// <summary>
     /// Creates a map to assign a value to a specific member.

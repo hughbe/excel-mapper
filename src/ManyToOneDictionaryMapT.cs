@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -54,7 +54,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
     /// </summary>
     public IDictionaryFactory<TKey, TValue> DictionaryFactory { get; }
     
-    private readonly Dictionary<ExcelSheet, ICellsReader?> _factoryCache = [];
+    private readonly ConcurrentDictionary<ExcelSheet, ICellsReader?> _factoryCache = new();
 
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
@@ -66,11 +66,8 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
         {
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
         }
-        if (!_factoryCache.TryGetValue(sheet, out var cellsReader))
-        {
-            cellsReader = _readerFactory.GetCellsReader(sheet);
-            _factoryCache.Add(sheet, cellsReader);
-        }
+        
+        var cellsReader = _factoryCache.GetOrAdd(sheet, s => _readerFactory.GetCellsReader(s));
 
         if (cellsReader == null || !cellsReader.TryGetValues(reader, PreserveFormatting, out var valueResults))
         {

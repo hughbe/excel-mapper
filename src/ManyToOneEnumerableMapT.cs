@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -51,7 +52,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// </summary>
     public IEnumerableFactory<TElement> EnumerableFactory { get; }
 
-    private readonly Dictionary<ExcelSheet, ICellsReader?> _factoryCache = [];
+    private readonly ConcurrentDictionary<ExcelSheet, ICellsReader?> _factoryCache = new();
 
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
@@ -59,11 +60,8 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
         {
             throw new ArgumentNullException(nameof(sheet));
         }
-        if (!_factoryCache.TryGetValue(sheet, out var cellsReader))
-        {
-            cellsReader = _readerFactory.GetCellsReader(sheet);
-            _factoryCache.Add(sheet, cellsReader);
-        }
+        
+        var cellsReader = _factoryCache.GetOrAdd(sheet, s => _readerFactory.GetCellsReader(s));
 
         if (cellsReader == null || !cellsReader.TryGetValues(reader, PreserveFormatting, out var results))
         {

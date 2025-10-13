@@ -76,8 +76,6 @@ public class ValuePipeline : IValuePipeline
     /// </summary>
     public IFallbackItem? InvalidFallback { get; set; }
 
-    private static readonly Exception s_couldNotMapException = new ExcelMappingException("Could not map successfully.");
-
     internal static object? GetPropertyValue(
         IValuePipeline pipeline,
         ExcelSheet sheet,
@@ -96,7 +94,7 @@ public class ValuePipeline : IValuePipeline
             return pipeline.EmptyFallback.PerformFallback(sheet, rowIndex, readResult, null, member);
         }
 
-        CellMapperResult finalResult = CellMapperResult.Invalid(s_couldNotMapException);
+        CellMapperResult? finalResult = null;
         foreach (ICellMapper mapper in pipeline.CellValueMappers)
         {
             CellMapperResult result = mapper.MapCellValue(readResult);
@@ -111,11 +109,12 @@ public class ValuePipeline : IValuePipeline
             }
         }
 
-        if (!finalResult.Succeeded && pipeline.InvalidFallback != null)
+        finalResult ??= CellMapperResult.Invalid(new ExcelMappingException("Could not map successfully."));
+        if (!finalResult.Value.Succeeded && pipeline.InvalidFallback != null)
         {
-            return pipeline.InvalidFallback.PerformFallback(sheet, rowIndex, readResult, finalResult.Exception, member);
+            return pipeline.InvalidFallback.PerformFallback(sheet, rowIndex, readResult, finalResult.Value.Exception, member);
         }
 
-        return finalResult.Value;
+        return finalResult.Value.Value;
     }
 }

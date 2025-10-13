@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using ExcelMapper.Abstractions;
@@ -11,7 +12,7 @@ namespace ExcelMapper;
 /// </summary>
 public class ExcelImporterConfiguration
 {
-    private Dictionary<Type, IMap> ClassMaps { get; } = [];
+    private ConcurrentDictionary<Type, IMap> ClassMaps { get; } = new();
 
 
     /// <summary>
@@ -142,12 +143,12 @@ public class ExcelImporterConfiguration
         {
             throw new ArgumentNullException(nameof(classMap));
         }
-        if (ClassMaps.ContainsKey(classType))
+
+        ValidateMap(classMap);
+        
+        if (!ClassMaps.TryAdd(classType, classMap))
         {
             throw new ExcelMappingException($"Class map already exists for type \"{classType.FullName}\"");
         }
-
-        ValidateMap(classMap);
-        ClassMaps.Add(classType, classMap);
     }
 }

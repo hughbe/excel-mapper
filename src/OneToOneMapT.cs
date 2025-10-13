@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -31,15 +32,11 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>
 
     public ValuePipeline<T> Pipeline { get; } = new ValuePipeline<T>();
 
-    private readonly Dictionary<ExcelSheet, ICellReader?> _factoryCache = [];
+    private readonly ConcurrentDictionary<ExcelSheet, ICellReader?> _factoryCache = new();
 
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
     {
-        if (!_factoryCache.TryGetValue(sheet, out var cellReader))
-        {
-            cellReader = _readerFactory.GetCellReader(sheet);
-            _factoryCache.Add(sheet, cellReader);
-        }
+        var cellReader = _factoryCache.GetOrAdd(sheet, s => _readerFactory.GetCellReader(s));
 
         if (cellReader == null || !cellReader.TryGetValue(reader, PreserveFormatting, out var readResult))
         {
