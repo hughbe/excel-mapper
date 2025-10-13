@@ -12,7 +12,7 @@ public class DateTimeMapperTests
     public void Ctor_Default()
     {
         var item = new DateTimeMapper();
-        Assert.Equal(new string[] { "G" }, item.Formats);
+        Assert.Equal(["G"], item.Formats);
         Assert.Null(item.Provider);
         Assert.Equal(DateTimeStyles.None, item.Style);
     }
@@ -20,8 +20,15 @@ public class DateTimeMapperTests
     [Fact]
     public void Formats_SetValid_GetReturnsExpected()
     {
-        var formats = new string[] { null!, "", "abc" };
-        var item = new DateTimeMapper { Formats = formats };
+        var formats = new string[] { "abc" };
+        var item = new DateTimeMapper
+        {
+            Formats = formats
+        };
+        Assert.Same(formats, item.Formats);
+
+        // Set same.
+        item.Formats = formats;
         Assert.Same(formats, item.Formats);
     }
 
@@ -40,11 +47,36 @@ public class DateTimeMapperTests
     }
 
     [Fact]
+    public void Formats_SetNullValueInValue_ThrowsArgumentException()
+    {
+        var item = new DateTimeMapper();
+        Assert.Throws<ArgumentException>("value", () => item.Formats = [null!]);
+    }
+
+    [Fact]
+    public void Formats_SetEmptyValueInValue_ThrowsArgumentException()
+    {
+        var item = new DateTimeMapper();
+        Assert.Throws<ArgumentException>("value", () => item.Formats = [""]);
+    }
+
+    [Fact]
     public void Provider_Set_GetReturnsExpected()
     {
-        IFormatProvider provider = CultureInfo.CurrentCulture;
-        var item = new DateTimeMapper { Provider = provider};
+        var provider = CultureInfo.CurrentCulture;
+        var item = new DateTimeMapper
+        {
+            Provider = provider
+        };
         Assert.Same(provider, item.Provider);
+
+        // Set same.
+        item.Provider = provider;
+        Assert.Same(provider, item.Provider);
+
+        // Set null.
+        item.Provider = null;
+        Assert.Null(item.Provider);
     }
 
     [Theory]
@@ -52,7 +84,14 @@ public class DateTimeMapperTests
     [InlineData((DateTimeStyles)int.MaxValue)]
     public void Styles_Set_GetReturnsExpected(DateTimeStyles style)
     {
-        var item = new DateTimeMapper { Style = style };
+        var item = new DateTimeMapper
+        {
+            Style = style
+        };
+        Assert.Equal(style, item.Style);
+
+        // Set same.
+        item.Style = style;
         Assert.Equal(style, item.Style);
     }
 

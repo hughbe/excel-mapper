@@ -143,10 +143,16 @@ public static class IValuePipelineExtensions
         {
             throw new ArgumentNullException(nameof(formats));
         }
-
         if (formats.Length == 0)
         {
             throw new ArgumentException("Formats cannot be empty.", nameof(formats));
+        }
+        foreach (var format in formats)
+        {
+            if (string.IsNullOrEmpty(format))
+            {
+                throw new ArgumentException("Formats cannot contain null or empty values.", nameof(formats));
+            }
         }
 
         var dateTimeItem = map.CellValueMappers

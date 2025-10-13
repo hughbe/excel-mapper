@@ -149,6 +149,24 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats(new List<string>()));
     }
 
+    [Fact]
+    public void WithDateFormats_NullValueInFormats_ThrowsArgumentException()
+    {
+        OneToOneMap<DateTime> map = Map(t => t.DateValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats([null!]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats(new List<string> { null! }));
+    }
+
+    [Fact]
+    public void WithDateFormats_EmptyValueInFormats_ThrowsArgumentException()
+    {
+        OneToOneMap<DateTime> map = Map(t => t.DateValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats([string.Empty]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats(new List<string> { string.Empty }));
+    }
+
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithDateFormats_NullableAutoMappedStringArray_Success(IEnumerable<string> formats)
@@ -217,6 +235,24 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 
         Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats([]));
         Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats(new List<string>()));
+    }
+
+    [Fact]
+    public void WithDateFormats_NullableNullValueInFormats_ThrowsArgumentException()
+    {
+        OneToOneMap<DateTime?> map = Map(t => t.NullableDateValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats([null!]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats(new List<string> { null! }));
+    }
+
+    [Fact]
+    public void WithDateFormats_NullableEmptyValueInFormats_ThrowsArgumentException()
+    {
+        OneToOneMap<DateTime?> map = Map(t => t.NullableDateValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats([string.Empty]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats(new List<string> { string.Empty }));
     }
 
     [Fact]
@@ -294,7 +330,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.Value);
 
         Assert.Throws<ArgumentNullException>("converter", () => map.WithConverter((ConvertUsingSimpleMapperDelegate<string>)null!));
-        Assert.Throws<ArgumentNullException>("converter", () => map.WithConverter((ConvertUsingMapperDelegate)null!));
+        Assert.Throws<ArgumentNullException>("converter", () => map.WithConverter(null!));
     }
 
     [Theory]
