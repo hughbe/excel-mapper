@@ -1,118 +1,225 @@
 # ExcelMapper
 
-ExcelMapper is a library that reads a row of an Excel sheet and maps it to an object. A flexible and extensible fluent mapping system allows you to customize the way the row is mapped to an object.
+A powerful, flexible .NET library for mapping Excel spreadsheet data to strongly-typed C# objects. ExcelMapper provides an intuitive fluent API with extensive customization options, robust type conversion, and comprehensive error handling.
 
 ![.NET Core](https://github.com/hughbe/excel-mapper/workflows/.NET%20Core/badge.svg)
 [![Nuget](https://img.shields.io/nuget/v/ExcelDataReader.Mapping)](https://www.nuget.org/packages/ExcelDataReader.Mapping/)
 
-The library is based on [ExcelDataReader](https://github.com/ExcelDataReader/ExcelDataReader).
+Built on top of [ExcelDataReader](https://github.com/ExcelDataReader/ExcelDataReader) for reliable Excel file parsing.
 
-## Reading a workbook
-To read a workbook, construct an `ExcelImporter` object.
-```cs
-using ExcelMapping;
+## Features
 
-// Excel file.
-using var importer = new ExcelImporter("File.xlsx");
+- ✨ **Automatic mapping** - Maps properties by convention with zero configuration
+- 🎯 **Type-safe fluent API** - Strongly-typed mapping configuration using expressions
+- 🔧 **Extensive customization** - Custom converters, transformers, and fallback strategies
+- 📊 **Multiple mapping strategies** - One-to-one, many-to-one, collections, dictionaries
+- 🏷️ **Attribute-based mapping** - Simple declarative mapping with attributes
+- 🔄 **Flexible column selection** - By name, index, regex pattern, or custom predicate
+- 🛡️ **Robust error handling** - Optional properties, default values, and custom fallbacks
+- 🚀 **High performance** - Streaming API with lazy evaluation and caching
+- 📦 **Rich type support** - Primitives, enums, DateTime, collections, nested objects, and more
 
-// Excel stream.
-using var stream = File.OpenRead("File.xlsx");
+## Quick Start
+
+```csharp
+using ExcelMapper;
+
+// Define your model
+public class Product
+{
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+    public int Stock { get; set; }
+}
+
+// Read Excel data
+using var importer = new ExcelImporter("products.xlsx");
+var sheet = importer.ReadSheet();
+var products = sheet.ReadRows<Product>().ToArray();
+```
+
+That's it! ExcelMapper automatically maps columns to properties by name.
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Basic Usage](#basic-usage)
+- [Reading Workbooks](#reading-workbooks)
+- [Reading Sheets](#reading-sheets)
+- [Reading Rows](#reading-rows)
+- [Mapping Strategies](#mapping-strategies)
+  - [Automatic Mapping](#automatic-mapping)
+  - [Attribute-Based Mapping](#attribute-based-mapping)
+  - [Fluent API Mapping](#fluent-api-mapping)
+- [Advanced Features](#advanced-features)
+  - [Collections and Arrays](#collections-and-arrays)
+  - [Dictionaries](#dictionaries)
+  - [Nested Objects](#nested-objects)
+  - [Enums](#enums)
+  - [Custom Converters](#custom-converters)
+- [Error Handling](#error-handling)
+- [Performance Tips](#performance-tips)
+
+## Installation
+
+```bash
+dotnet add package ExcelDataReader.Mapping
+```
+
+## Basic Usage
+
+### Simple Example
+
+| Name          | Email              | Age |
+|---------------|--------------------|-----|
+| John Smith    | john@example.com   | 32  |
+| Jane Doe      | jane@example.com   | 28  |
+
+```csharp
+using ExcelMapper;
+
+public class Person
+{
+    public string Name { get; set; }
+    public string Email { get; set; }
+    public int Age { get; set; }
+}
+
+using var importer = new ExcelImporter("people.xlsx");
+var sheet = importer.ReadSheet();
+var people = sheet.ReadRows<Person>().ToArray();
+
+Console.WriteLine(people[0].Name);  // John Smith
+Console.WriteLine(people[1].Age);   // 28
+```
+
+## Reading Workbooks
+
+Create an `ExcelImporter` to read Excel or CSV files:
+
+```csharp
+// From file path
+using var importer = new ExcelImporter("data.xlsx");
+
+// From stream
+using var stream = File.OpenRead("data.xlsx");
 using var importer = new ExcelImporter(stream);
 
-// Csv file.
-using var importer = new ExcelImporter("File.csv", ExcelImporterFileType.Csv);
+// CSV file
+using var importer = new ExcelImporter("data.csv", ExcelImporterFileType.Csv);
 
-// Csv stream.
-using var stream = File.OpenRead("File.csv");
-using var importer = new ExcelImporter(stream, ExcelImporterFileType.Csv);
-
-// Custom reader.
-using var stream = File.OpenRead("File.xlsx");
-using var excelReader = ExcelReaderFactory.CreateReader(stream);
-using var importer = new ExcelImporter(excelReader);
+// From existing IExcelDataReader
+using var reader = ExcelReaderFactory.CreateReader(stream);
+using var importer = new ExcelImporter(reader);
 ```
 
-### Reading Sheets
-To read all sheets, invoke `ExcelImporter.ReadSheets()`.
-```cs
-var sheets = importer.ReadSheets();
+## Reading Sheets
 
-var name = sheets[0].Name;
-var visibility = sheets[0].Visibility;
-var index = sheets[0].Index;
-var numberOfColumns = sheets[0].NumberOfColumns;
+### Read All Sheets
+
+```csharp
+foreach (var sheet in importer.ReadSheets())
+{
+    Console.WriteLine($"Sheet: {sheet.Name}");
+    Console.WriteLine($"Visibility: {sheet.Visibility}");
+    Console.WriteLine($"Columns: {sheet.NumberOfColumns}");
+}
 ```
 
-To read sheet's in order, invoke `ExcelSheet ReadSheet()` or the `bool TryReadSheet(out ExcelSheet sheet)`.
-```cs
-// Throws an error if there are no more sheets.
+### Read Sheets Sequentially
+
+```csharp
+// Throws if no more sheets
 var sheet1 = importer.ReadSheet();
 
-// Returns false if there are no more sheets.
+// Returns false if no more sheets
 if (importer.TryReadSheet(out var sheet2))
 {
+    // Process sheet2
 }
 ```
 
-To read a sheet by name, invoke `ReadSheet(string sheetName)` or the `TryReadSheet(string sheetName, out ExcelSheet sheet)`.
-```cs
-// Throws an error if the sheet does not exist.
-var sheet = importer.ReadSheet("SheetName");
+### Read Sheet by Name
 
-// Returns false if the sheet does not exist.
-if (importer.TryReadSheet("SheetName", out var sheet2))
+```csharp
+// Throws if sheet doesn't exist
+var sheet = importer.ReadSheet("Sales Data");
+
+// Returns false if sheet doesn't exist
+if (importer.TryReadSheet("Sales Data", out var salesSheet))
 {
+    // Process sheet
 }
 ```
 
-To read a sheet by zero-based index, invoke `ReadSheet(int sheetIndex)` or the `TryReadSheet(int sheetIndex, out ExcelSheet sheet)`.
-```cs
-// Throws an error if the sheet does not exist.
-var sheet = importer.ReadSheet(1);
+### Read Sheet by Index
 
-// Returns false if the sheet does not exist.
-if (importer.TryReadSheet(1, out var sheet2))
+```csharp
+// Throws if index is invalid
+var sheet = importer.ReadSheet(0);  // First sheet
+
+// Returns false if index is invalid
+if (importer.TryReadSheet(1, out var secondSheet))
 {
+    // Process sheet
 }
 ```
 
 ## Reading Rows
-By default, ExcelMapper automatically maps each public property or field and attempt to map the value of the cell in the column with the name of the member. If the column cannot be found or mapped, an exception will be thrown.
 
-Invoke `ReadRows<T>()` to read all rows in a sheet.
-```cs
-var rows = sheet.ReadRows<T>();
+### Read All Rows
+
+```csharp
+// Lazy evaluation - rows are read as you iterate
+var rows = sheet.ReadRows<Product>();
+
+// Or materialize to array
+var products = sheet.ReadRows<Product>().ToArray();
 ```
 
-Invoke ReadRows<T>(int startIndex, int count)` to read rows in a specific range.
-```cs
-var rows = sheet.ReadRows<T>();
+### Read Specific Range
+
+```csharp
+// Read 10 rows starting from row index 5 (after header)
+var rows = sheet.ReadRows<Product>(startIndex: 5, count: 10);
 ```
 
-Invoke `ReadRow<T>()` or `TryReadRow<T>(out T row)` to read rows in order.
-```cs
-var row1 = sheet.ReadRow<T>();
-if (sheet.TryReadRow<T>(out var row2))
+### Read Rows Sequentially
+
+```csharp
+// Throws if no more rows
+var row1 = sheet.ReadRow<Product>();
+
+// Returns false if no more rows
+if (sheet.TryReadRow<Product>(out var row2))
 {
+    // Process row2
 }
 ```
 
-You can skip blank lines by setting `importer.Configuration.SkipBlankLines = true`. This is off by default for performance reasons.
+### Skip Blank Lines
 
-For example:
-| Name          | Location         | Attendance | Date       | Link                    | Revenue | Successful | Cause   |
-|---------------|------------------|------------|------------|-------------------------|---------|------------|---------|
-| Pub Quiz      | The Blue Anchor  | 20         | 18/07/2017 | http://eventbrite.com   | 100.2   | TRUE       | Charity |
-| Live Music    | The Raven        | 15         | 17/07/2017 | http://ticketmaster.com | 105.6   | FALSE      | Profit  |
-| Live Football | The Rutland Arms | 45         | 16/07/2017 | http://facebook.com     | 263.9   | TRUE       | Profit  |
+```csharp
+// Enable blank line skipping (off by default for performance)
+importer.Configuration.SkipBlankLines = true;
 
+var rows = sheet.ReadRows<Product>();
+```
 
-```cs
-public enum EventCause
-{
-    Profit,
-    Charity
-}
+## Mapping Strategies
+
+### Automatic Mapping
+
+ExcelMapper automatically maps public properties and fields by matching column names (case-insensitive by default).
+**Example:**
+
+| Name          | Location         | Attendance | Date       | Link                  | Revenue | Cause   |
+|---------------|------------------|------------|------------|-----------------------|---------|---------|
+| Pub Quiz      | The Blue Anchor  | 20         | 2017-07-18 | http://eventbrite.com | 100.2   | Charity |
+| Live Music    | The Raven        | 15         | 2017-07-17 | http://example.com    | 105.6   | Profit  |
+
+```csharp
+public enum EventCause { Profit, Charity }
 
 public class Event
 {
@@ -124,27 +231,29 @@ public class Event
     public EventCause Cause { get; set; }
 }
 
-// ...
+using var importer = new ExcelImporter("events.xlsx");
+var sheet = importer.ReadSheet();
+var events = sheet.ReadRows<Event>().ToArray();
 
-using var stream = File.OpenRead("Pub Events.xlsx");
-using var importer = new ExcelImporter(stream);
-
-ExcelSheet sheet = importer.ReadSheet();
-Event[] events = sheet.ReadRows<Event>().ToArray();
-Console.WriteLine(events[0].Name); // Pub Quiz
-Console.WriteLine(events[1].Name); // Live Music
-Console.WriteLine(events[2].Name); // Live Football
+Console.WriteLine(events[0].Name);     // Pub Quiz
+Console.WriteLine(events[0].Cause);    // Charity
+Console.WriteLine(events[1].Revenue);  // 105.6
 ```
 
-### Custom Column Names
-ExcelMapper supports specifying a custom column name with the `ExcelColumnName` attribute. This is useful for cases where we want to map a column name that is different from the property name in the data structure, for example the column name contains whitespace or the column name contains characters that can't be represented in C#.
+### Attribute-Based Mapping
+
+Use attributes to declaratively configure mapping behavior.
+
+#### Column Name Mapping
+
+Map properties to columns with different names:
 
 | Full Name      | #Age |
 |----------------|------|
 | Donald Trump   | 73   |
 | Barack Obama   | 58   |
 
-```cs
+```csharp
 public class President
 {
     [ExcelColumnName("Full Name")]
@@ -154,68 +263,56 @@ public class President
     public int Age { get; set; }
 }
 
-
-// ...
-
-using var stream = File.OpenRead("Presidents.xlsx");
-using var importer = new ExcelImporter(stream);
-
-ExcelSheet sheet = importer.ReadSheet();
-President[] president = sheet.ReadRows<President>().ToArray();
-Console.WriteLine(president[0].Name); // Donald Trump
-Console.WriteLine(president[0].Age); // 73
-Console.WriteLine(president[1].Name); // Barack Obama
-Console.WriteLine(president[1].Age); // 58
+var presidents = sheet.ReadRows<President>().ToArray();
+Console.WriteLine(presidents[0].Name);  // Donald Trump
+Console.WriteLine(presidents[1].Age);   // 58
 ```
 
-You can apply an `ExcelColumnNames` attribute or multiple `ExcelColumnName` attributes to support matching different variants of a column name.
+#### Multiple Column Name Variants
 
-In the example below, ExcelMapper will first try to read from the `Column1` column, then the `Column2` column, and then throw an exception if the property or field is not found.
+Try multiple column names in order of preference:
 
-```cs
+```csharp
 public class President
 {
-    [ExcelColumnName("Full Name")]
     public string Name { get; set; }
 
-    // Either.
-    [ExcelColumnNames("Age")]
+    // Try these column names in order
+    [ExcelColumnNames("Age", "#Age", "Years")]
     public int Age { get; set; }
 
-    // Or.
-    [ExcelColumnName("Age")]
-    [ExcelColumnName("#Age")]
-    public int Age { get; set; }
+    // Or use multiple attributes
+    [ExcelColumnName("Party")]
+    [ExcelColumnName("Political Party")]
+    public string PoliticalParty { get; set; }
 }
 ```
 
-### Matching Column Names
-ExcelMapper supports specifying a custom column name with the `ExcelColumnMatching` attribute. This is useful for cases where we want to map a column name that is different from the property name in the data structure, for example the column name contains whitespace or the column name contains characters that can't be represented in C#.
+#### Pattern Matching
 
-| Pub              | 2025 Projected Attendance |
-|------------------|---------------------------|
-| The Blue Anchor  | 1,000                     |
-| The Rutland Arms | 2,000                     |
+Match columns using regex patterns:
 
-```cs
-public class President
+```csharp
+public class Pub
 {
-    [ExcelColumnName("Name")]
     public string Name { get; set; }
 
-    [ExcelColumnMatching(@"\d* Attendance", RegexOptions.IgnoreCase)]
+    // Match columns like "2024 Attendance", "2025 Projected Attendance"
+    [ExcelColumnMatching(@"\d{4}.*Attendance", RegexOptions.IgnoreCase)]
     public int Attendance { get; set; }
 }
+```
 
-### Custom Column Indices
-ExcelMapper supports specifying a custom column index with the `ExcelColumnIndex` attribute. This is useful for cases where we want to map a column without a name.
+#### Column Index Mapping
 
-|                |      |
-|----------------|------|
-| Donald Trump   | 73   |
-| Barack Obama   | 58   |
+Map by zero-based column index (useful for sheets without headers):
 
-```cs
+|                |    |
+|----------------|----|
+| Donald Trump   | 73 |
+| Barack Obama   | 58 |
+
+```csharp
 public class President
 {
     [ExcelColumnIndex(0)]
@@ -225,720 +322,601 @@ public class President
     public int Age { get; set; }
 }
 
-
-// ...
-
-using var stream = File.OpenRead("Presidents.xlsx");
-using var importer = new ExcelImporter(stream);
-
-ExcelSheet sheet = importer.ReadSheet();
-President[] president = sheet.ReadRows<President>().ToArray();
-Console.WriteLine(president[0].Name); // Donald Trump
-Console.WriteLine(president[0].Age); // 73
-Console.WriteLine(president[1].Name); // Barack Obama
-Console.WriteLine(president[1].Age); // 58
+var sheet = importer.ReadSheet();
+sheet.HasHeading = false;  // No header row
+var presidents = sheet.ReadRows<President>().ToArray();
 ```
 
-You can apply an `ExcelColumnIndices` attribute or multiple `ExcelColumnIndex` attributes to support matching different variants of a column index.
+#### Multiple Index Variants
 
-In the example below, ExcelMapper will first try to read from the column at index 2, then the column at index 1, and then throw an exception if the property or field is not found.
-
-```cs
-public class President
+```csharp
+public class Data
 {
-    [ExcelColumnIndex("Full Name")]
-    public string Name { get; set; }
-
-    // Either.
-    [ExcelColumnIndices("Age")]
-    public int Age { get; set; }
-
-    // Or.
-    [ExcelColumnIndex("Age")]
-    [ExcelColumnIndex("#Age")]
-    public int Age { get; set; }
+    // Try column index 2, then 1, then 0
+    [ExcelColumnIndices(2, 1, 0)]
+    public string Value { get; set; }
 }
 ```
 
-### Default Values
-By default, ExcelMapper sets types that can be null to `null` if the value is empty. Otherwise, it throws an exception, for example for value types.
+#### Optional Properties
 
-You can change this behaviour by applying the `ExcelDefaultValueAttribute` to provide a default value.
-| Name           | Age |
-|----------------| --- |
-| Donald Trump   |     |
-| Barack Obama   | 2   |
+Skip properties if columns are missing:
 
-```cs
+```csharp
 public class President
 {
     public string Name { get; set; }
 
-    // Default to minus one - no exception thrown if column value is empty.
-    [ExcelDefaultValue(-1)]
-    public int Age { get; set; }
-}
-```
-
-### Optional Properties
-By default, ExcelMapper throws an exception if a property or field is not found in the Excel file. You can change this behavior by applying the `ExcelOptionalAttribute` to make a property optional. This is useful when a column may not always be included in the Excel file.
-
-In the example below, no exception will be thrown if the `Age` column is missing.
-| Name           |
-|----------------|
-| Donald Trump   |
-| Barack Obama   |
-
-```cs
-public class President
-{
-    public string Name { get; set; }
-
-    // Optional property - no exception thrown if column is missing
     [ExcelOptional]
-    public int Age { get; set; }
+    public int? Age { get; set; }  // Won't throw if column missing
 }
 ```
 
-### Ignoring Properties
-ExcelMapper supports ignoring properties when deserializing with the `ExcelIgnoreAttribute` attribute. This is useful for cases where the the data structure is recursive, or the property is missing data and you don't want to create a custom mapper and call `MakeOptional`.
+#### Default Values
 
-In the example below:
-* The `Age` column will never be read.
-* An exception will not be thrown for the missing `NoSuchColumn`.
-* The `President` object will not be recursively read.
+Provide default values for empty cells:
+| Name         | Age |
+|--------------|-----|
+| Donald Trump |     |
+| Barack Obama | 58  |
 
-| Name           | Age |
-|----------------|-----|
-| Donald Trump   | 73  |
-| Barack Obama   | 58  |
-
-```cs
+```csharp
 public class President
 {
     public string Name { get; set; }
 
-    // If you want to ignore a property that exists for any reason.
-    [ExcelIgnore]
-    public int Age { get; set; }
-
-    // If you want to ignore a property that doesn't exist for any reason.
-    [ExcelIgnore]
-    public object NoSuchColumn { get; set; }
-
-    // If the data structure is recursive
-    [ExcelIgnore]
-    public President PreviousPresident { get; set; }
+    [ExcelDefaultValue(-1)]
+    public int Age { get; set; }  // -1 if cell is empty
 }
-
-
-// ...
-
-using var stream = File.OpenRead("Presidents.xlsx");
-using var importer = new ExcelImporter(stream);
-
-ExcelSheet sheet = importer.ReadSheet();
-President[] president = sheet.ReadRows<President>().ToArray();
-Console.WriteLine(president[0].Name); // Donald Trump
-Console.WriteLine(president[0].Age); // 0
-Console.WriteLine(president[0].NoSuchColumn); // null
-Console.WriteLine(president[0].PreviousPresident); // null
-Console.WriteLine(president[1].Name); // Barack Obama
-Console.WriteLine(president[1].Age); // 0
-Console.WriteLine(president[1].NoSuchColumn); // null
-Console.WriteLine(president[1].PreviousPresident); // null
 ```
 
-### Preserve formatting
-By default, ExcelMapper reads string values without formatting. You can change this behavior by applying the `ExcelPreserveFormattingAttribute` to retain formatting when reading string values.
+#### Ignore Properties
 
-For example, the below will preserve number values with a leading zeroes number format.
-| Name           | Age  |
-|----------------|------|
-| Donald Trump   | 073  |
-| Barack Obama   | 058  |
+Exclude properties from mapping:
 
-```cs
+```csharp
 public class President
 {
     public string Name { get; set; }
 
-    // If you want to preserve formatting.
+    [ExcelIgnore]
+    public int Age { get; set; }  // Never mapped from Excel
+
+    [ExcelIgnore]
+    public DateTime CreatedAt { get; set; }  // Computed property
+}
+```
+
+#### Preserve Formatting
+
+Read formatted string values instead of raw values:
+
+| ID    | Price  |
+|-------|--------|
+| 00123 | $45.99 |
+| 00456 | $12.50 |
+
+```csharp
+public class Product
+{
     [ExcelPreserveFormatting]
-    public string Age { get; set; }
+    public string ID { get; set; }    // "00123" with leading zeros
+
+    [ExcelPreserveFormatting]
+    public string Price { get; set; }  // "$45.99" with currency symbol
 }
+```
 
-## Defining a custom mapping
+### Fluent API Mapping
 
-ExcelMapper allows you to customize the class map used when mapping Excel sheet rows to objects.
+For complex scenarios, use fluent mapping with `ExcelClassMap<T>`:
 
-Custom class maps let you change which column maps to a property, make columns optional, or add custom conversions to the default class map.
-
-To define a class map, create an `ExcelClassMap<T>` and call `Map(t => t.PropertyOrField)` in the constructor for each property or field you want to map. Properties or fields not mapped with `Map` will be ignored.
-
-```cs
-
-
-public class PubMap : ExcelClassMap<PubMap>
+```csharp
+public class ProductMap : ExcelClassMap<Product>
 {
-    public PubMap()
+    public ProductMap()
     {
-        Map(p => p.Name);
-        Map(p => p.Address);
+        Map(p => p.Name)
+            .WithColumnName("Product Name");
+
+        Map(p => p.Price)
+            .WithColumnIndex(2);
+
+        Map(p => p.Category)
+            .WithColumnNames("Category", "Type", "Classification")
+            .MakeOptional();
     }
 }
 
-public class Pub
-{
-    public string Name { get ; set; }
-    public string Address { get ; set; }
-    public Pub Neighbour { get; set; }
-}
+// Register the map
+importer.Configuration.RegisterClassMap<ProductMap>();
+
+var products = sheet.ReadRows<Product>();
 ```
 
-By default, ExcelMapper maps each property or field using the same rules for auto and attribute mapping. You can use the following helpers on the result of `Map` to customize the column mapping:
+#### Fluent Mapping Options
 
-* `WithColumnName(string columnName)` - Read from a specific column name
-* `WithColumnIndex(int columnIndex)` - Read from a specific column index
-* `WithColumnNames(string columnName)` - Read from the first column in a list of column names
-* `WithColumnNameMatching(params string[] columnNames)` - Read from the first matching column in a list of column names
-* `WithColumnNameMatching(Func<string, bool> predicate)` - Read from the first column matching a predicate
-* `WithColumnMatching(IExcelColumnMatcher matcher)` - Read from the first column matching the result of `IExcelColumnMatcher.ColumnMatches(ExcelSheet sheet, int columnIndex)`
+The fluent API provides extensive configuration options:
 
-For example:
-| Name           | Marrital Status | Number of Children | Approval Rating (%) | Date of Birth | Party      |
-|----------------|-----------------|--------------------|---------------------|---------------| ---------- |
-| Donald Trump   | Twice Married   | 5                  | 60%                 | 1946-06-14    | Republican |
-| Barack Obama   | Married         | 2                  | 50                  | 04/08/1961    | Democrat   |
-| Ronald Reagan  | Divorced        | 5                  | 75                  | 06/03/1911    | Republican |
-| James Buchanan | Single          | 0                  | 100                 | 1791-04-23    | Democrat   |
+**Column Selection:**
+- `.WithColumnName("Column Name")` - Map to specific column by name
+- `.WithColumnIndex(0)` - Map to specific column by zero-based index
+- `.WithColumnNames("Name1", "Name2")` - Try multiple column names in order
+- `.WithColumnIndices(0, 1, 2)` - Try multiple indices in order
+- `.WithColumnNameMatching(name => name.Contains("Total"))` - Use predicate
+- `.WithColumnMatching(matcher)` - Use custom `IExcelColumnMatcher`
 
+**Behavior:**
+- `.MakeOptional()` - Don't throw if column is missing
+- `.WithEmptyFallback(value)` - Use default value if cell is empty
+- `.WithInvalidFallback(value)` - Use default value if conversion fails
+- `.WithValueFallback(value)` - Use default value for both empty and invalid
 
-```cs
-public enum MaritalStatus
-{
-    Married,
-    Divorced,
-    Single
-}
+**Advanced:**
+- `.WithConverter(value => ...)` - Custom conversion delegate
+- `.WithDateFormats("yyyy-MM-dd", "dd/MM/yyyy")` - Parse dates with specific formats
+- `.WithMapping(dictionary)` - Map string values to enum/object values
+- `.WithElementMap(...)` - Configure element pipeline for collections
+
+#### Complete Fluent Example
+```csharp
+public enum MaritalStatus { Married, Divorced, Single }
 
 public class President
 {
     public string Name { get; set; }
-    public MaritalStatus MaritalStatus { get; set; }
-    public int NumberOfChildren { get; set; }
+    public MaritalStatus Status { get; set; }
+    public int Children { get; set; }
     public float ApprovalRating { get; set; }
     public DateTime DateOfBirth { get; set; }
-    public int NumberOfTerms { get; set; }
-    public string PoliticalParty { get; set; }
+    public string Party { get; set; }
 }
 
-public class PresidentClassMap : ExcelClassMap<President>
+public class PresidentMap : ExcelClassMap<President>
 {
-    public PresidentClassMap()
+    public PresidentMap()
     {
-        // Simple mapping.
-        Map(president => president.Name);
+        Map(p => p.Name);
 
-        // Map invalid unknown value to a known value.
-        Map(president => president.MaritalStatus)
+        // Map misspelled column and string values
+        Map(p => p.Status)
             .WithColumnName("Marrital Status")
             .WithMapping(new Dictionary<string, MaritalStatus>
             {
-                { "Twice Married", MaritalStatus.Married    }
+                { "Twice Married", MaritalStatus.Married }
             });
 
-        // Read from a column index.
-        Map(president => president.NumberOfChildren)
+        // Map by index
+        Map(p => p.Children)
             .WithColumnIndex(2);
 
-        // Read with a custom converter delegate.
-        Map(president => president.ApprovalRating)
-            .WithConverter(value => int.Parse(value) / 100f)
-            .WithColumnName("Approval Rating (%)");
+        // Custom converter
+        Map(p => p.ApprovalRating)
+            .WithColumnName("Approval Rating (%)")
+            .WithConverter(value => float.Parse(value.TrimEnd('%')) / 100f);
 
-        // Read a date with one or more formats.
-        Map(president => president.DateOfBirth)
-            .WithColumnName("Date of Birth")
-            .WithDateFormats("yyyy-MM-dd", "g");
+        // Date parsing with multiple formats
+        Map(p => p.DateOfBirth)
+            .WithDateFormats("yyyy-MM-dd", "dd/MM/yyyy");
 
-        // Read a missing column.
-        Map(president => president.NumberOfTerms)
-            .MakeOptional();
-
-        // Read from a list of column names.
-        Map(president => president.PoliticalParty)
-            .WithColumnNameMatching("Political Party", "Party", "Affiliation");
+        // Try multiple column names
+        Map(p => p.Party)
+            .WithColumnNames("Political Party", "Party", "Affiliation");
     }
 }
 
-// ...
-
-using (var stream = File.OpenRead("Presidents.xlsx"))
-using (var importer = new ExcelImporter(stream))
-{
-    // You can register class maps by type.
-    importer.Configuration.RegisterClassMap<PresidentClassMap>();
-
-    // Or by namespace.
-    importer.RegisterMapperClassesByNamespace("My.Namespace");
-
-    ExcelSheet sheet = importer.ReadSheet();
-    President[] president = sheet.ReadRows<President>().ToArray();
-    Console.WriteLine(president[0].Name); // Donald Trump
-    Console.WriteLine(president[1].Name); // Barack Obama
-    Console.WriteLine(president[2].Name); // Ronald Reagan
-    Console.WriteLine(president[2].Name); // James Buchanan
-}
+// Register and use
+importer.Configuration.RegisterClassMap<PresidentMap>();
+var presidents = sheet.ReadRows<President>();
 ```
 
-## Nullables and fallbacks
+## Error Handling
 
-ExcelMapper will set nullable values to `null` if the value of the cell is empty. By default an exception will be thrown if the value of the cell is invalid and cannot be mapped to the type of the property or field.
+### Nullable Types and Fallbacks
 
-You can customize the fallback to use a fixed value if the value of a cell is empty or the value of the cell cannot be mapped.
+By default:
+- Nullable types are set to `null` for empty cells
+- Non-nullable types throw `ExcelMappingException` for empty/invalid cells
 
-| Name           | Marrital Status | Number of Children | Date of Birth |
-|----------------|-----------------|--------------------|---------------|
-| Donald Trump   | Twice Married   | invalid            | invalid       |
-| Barack Obama   |                 |                    |               |
-| Ronald Reagan  | Divorced        | 5                  | 06/03/1911    |
-| James Buchanan | Single          | 0                  | 1791-04-23    |
+Configure fallback behavior:
 
+| Name         | Status  | Children | DateOfBirth |
+|--------------|---------|----------|-------------|
+| Donald Trump | invalid | invalid  | invalid     |
+| Barack Obama |         |          |             |
 
-```cs
-public enum MaritalStatus
-{
-    Married,
-    Single,
-    Invalid,
-    Unknown
-}
+```csharp
+public enum MaritalStatus { Married, Single, Invalid, Unknown }
 
 public class President
 {
     public string Name { get; set; }
-    public MaritalStatus MaritalStatus { get; set; }
-    public int? NumberOfChildren { get; set; }
+    public MaritalStatus Status { get; set; }
+    public int? Children { get; set; }
     public DateTime? DateOfBirth { get; set; }
 }
 
-public class PresidentClassMap : ExcelClassMap<President>
+public class PresidentMap : ExcelClassMap<President>
 {
-    public PresidentClassMap()
+    public PresidentMap()
     {
-        Map(president => president.Name);
+        Map(p => p.Name);
 
-        Map(president => president.MaritalStatus)
-            .WithColumnName("Marrital Status")
-            .WithEmptyFallback(MaritalStatus.Unknown)
-            .WithInvalidFallback(MaritalStatus.Invalid);
+        Map(p => p.Status)
+            .WithEmptyFallback(MaritalStatus.Unknown)     // Empty cells
+            .WithInvalidFallback(MaritalStatus.Invalid);  // Invalid values
 
-        Map(president => president.NumberOfChildren)
-            .WithColumnIndex(2)
-            .WithInvalidFallback(-1);
+        Map(p => p.Children)
+            .WithInvalidFallback(-1);  // Can't parse as int
 
-        Map(president => president.DateOfBirth)
-            .WithColumnName("Date of Birth")
-            .WithDateFormats("yyyy-MM-dd", "g")
-            .WithInvalidFallback(null);
+        Map(p => p.DateOfBirth)
+            .WithInvalidFallback(null);  // Can't parse as DateTime
     }
 }
 
-// ...
-
-
-using (var stream = File.OpenRead("Presidents.xlsx"))
-using (var importer = new ExcelImporter(stream))
-{
-    // You can register class maps by type.
-    importer.Configuration.RegisterClassMap<PresidentClassMap>();
-
-    // Or by namespace.
-    importer.RegisterMapperClassesByNamespace("My.Namespace");
-
-    ExcelSheet sheet = importer.ReadSheet();
-    President[] president = sheet.ReadRows<President>().ToArray();
-    Console.WriteLine(president[0].Name); // Donald Trump
-    Console.WriteLine(president[1].Name); // Barack Obama
-    Console.WriteLine(president[2].Name); // Ronald Reagan
-    Console.WriteLine(president[2].Name); // James Buchanan
-}
+importer.Configuration.RegisterClassMap<PresidentMap>();
+var presidents = sheet.ReadRows<President>();
 ```
 
-## Mapping enums
+## Advanced Features
 
-ExcelMapper supports mapping string values to an enum. By default this is case sensitive matching the behaviour of the .NET Framework, but this case be overriden in a custom map.
+### Enums
 
-| Name           | Marrital Status | Number of Children | Date of Birth |
-|----------------|-----------------|--------------------|---------------|
-| Donald Trump   | Married         | invalid            | invalid       |
-| Barack Obama   |                 |                    |               |
-| Ronald Reagan  | diVorCED        | 5                  | 06/03/1911    |
-| James Buchanan | Single          | 0                  | 1791-04-23    |
+Parse string values to enums (case-sensitive by default):
 
+| Name         | Status   |
+|--------------|----------|
+| Donald Trump | Married  |
+| Barack Obama | married  |
+| Joe Biden    | DIVORCED |
 
-```cs
-public enum MaritalStatus
-{
-    Married,
-    Single,
-    Invalid,
-    Unknown
-}
+```csharp
+public enum MaritalStatus { Married, Divorced, Single }
 
 public class President
 {
     public string Name { get; set; }
-    public MaritalStatus MaritalStatus { get; set; }
+    public MaritalStatus Status { get; set; }
 }
 
-public class PresidentClassMap : ExcelClassMap<President>
+// Case-insensitive enum parsing
+public class PresidentMap : ExcelClassMap<President>
 {
-    public PresidentClassMap()
+    public PresidentMap()
     {
-        Map(president => president.Name);
-
-        Map(president => president.MaritalStatus, ignoreCase: true)
-            .WithColumnName("Marrital Status")
-            .WithEmptyFallback(MaritalStatus.Unknown)
-            .WithInvalidFallback(MaritalStatus.Invalid);
+        Map(p => p.Name);
+        Map(p => p.Status, ignoreCase: true);  // Handles "married", "MARRIED", etc.
     }
 }
+```
 
-// ...
+### Collections and Arrays
 
+ExcelMapper supports multiple strategies for mapping collections.
 
-using (var stream = File.OpenRead("Presidents.xlsx"))
-using (var importer = new ExcelImporter(stream))
+#### Split Single Cell
+
+By default, splits cell value by comma:
+
+| Name         | Tags                     |
+|--------------|--------------------------|
+| Barack Obama | President,Democrat,2000s |
+
+```csharp
+public class Person
 {
-    // You can register class maps by type.
-    importer.Configuration.RegisterClassMap<PresidentClassMap>();
-
-    // Or by namespace.
-    importer.RegisterMapperClassesByNamespace("My.Namespace");
-
-    ExcelSheet sheet = importer.ReadSheet();
-    President[] president = sheet.ReadRows<President>().ToArray();
-    Console.WriteLine(president[0].Name); // Donald Trump
-    Console.WriteLine(president[1].Name); // Barack Obama
-    Console.WriteLine(president[2].Name); // Ronald Reagan
-    Console.WriteLine(president[2].Name); // James Buchanan
+    public string Name { get; set; }
+    public string[] Tags { get; set; }  // Auto-split by comma
 }
 ```
 
-## Mapping enumerables
+#### Multiple Columns by Name
 
-ExcelMapper supports mapping enumerables and lists. By default, if no column names or column indices are supplied then the value of the cell will be split with the `','` separator.
-
-ExcelMapper supports specifying multiple columns by name with the `ExcelColumnNames` attribute.
-
-| Pub              | Drink1  | Drink2  |
-|------------------|---------|---------|
-| The Blue Anchor  | Fosters | Carling |
-| The Rutland Arms | Amstel  | Stella  |
-
-```cs
-public class President
+```csharp
+public class Pub
 {
-    [ExcelColumnName("Pub")]
     public string Name { get; set; }
 
-    [ExcelColumnNames("Drink1", "Drink2")]
+    [ExcelColumnNames("Drink1", "Drink2", "Drink3")]
     public string[] Drinks { get; set; }
 }
 ```
 
-ExcelMapper supports specifying multiple columns by zero-based index with the `ExcelColumnIndices` attribute.
+#### Multiple Columns by Index
 
-| Pub              | Drink1  | Drink2  |
-|------------------|---------|---------|
-| The Blue Anchor  | Fosters | Carling |
-| The Rutland Arms | Amstel  | Stella  |
-
-```cs
-public class President
+```csharp
+public class Pub
 {
-    [ExcelColumnName("Pub")]
     public string Name { get; set; }
 
-    [ExcelColumnIndices(1, 2)]
+    [ExcelColumnIndices(1, 2, 3)]
     public string[] Drinks { get; set; }
 }
 ```
 
-ExcelMapper supports specifying multiple columns by regex with the `ExcelColumnsMatching` attribute.
+#### Multiple Columns by Pattern
 
-| Pub              | Drink1  | Drink2  |
-|------------------|---------|---------|
-| The Blue Anchor  | Fosters | Carling |
-| The Rutland Arms | Amstel  | Stella  |
-
-```cs
-public class President
+```csharp
+public class Pub
 {
-    [ExcelColumnName("Pub")]
     public string Name { get; set; }
 
-    [ExcelColumnsMatching(@"Drink\d", RegexOptions.IgnoreCase)]
+    [ExcelColumnsMatching(@"Drink\d+", RegexOptions.IgnoreCase)]
     public string[] Drinks { get; set; }
 }
 ```
 
-For more complex examples, define a class map:
+#### Fluent Collection Mapping
 
-| Name         | Children Names | First Election | Second Election | First Inauguration | Second Inauguration |
-|--------------|----------------|----------------|-----------------|--------------------|---------------------|
-| Barack Obama | Malia,Sasha    | 04/11/2008     | 06/11/2012      | 2009-01-20         | 20/01/2013          |
-
-```cs
+```csharp
 public class President
 {
     public string Name { get; set; }
-    public IEnumerable<string> ChildrenNames { get; set; }
-    public IEnumerable<DateTime> Elections { get; set; }
-    public IEnumerable<DateTime> Inaugurations { get; set; }
+    public string[] Children { get; set; }
+    public DateTime[] Elections { get; set; }
 }
 
-public class PresidentClassMap : ExcelClassMap<President>
+public class PresidentMap : ExcelClassMap<President>
 {
-    public PresidentClassMap()
+    public PresidentMap()
     {
-        Map(president => president.Name);
+        Map(p => p.Name);
 
-        // Default: splits with ",".
-        Map(president => president.ChildrenNames)
+        // Split by comma (default)
+        Map(p => p.Children)
             .WithColumnName("Children Names");
 
-        // Reads the values of multiple columns in order given.
-        Map(president => president.Elections)
-            .WithColumnNames("First Election", "Second Election");
-
-        // Reads the values of multiple columns in order given.
-        Map(president => president.Inaugurations)
-            .WithColumnIndices(4, 5)
+        // Read multiple columns
+        Map(p => p.Elections)
+            .WithColumnNames("First Election", "Second Election")
             .WithElementMap(m => m
-                .WithDateFormats("yyyy-MM-dd", "g")
+                .WithDateFormats("yyyy-MM-dd", "dd/MM/yyyy")
             );
     }
 }
+```
 
-// ...
+#### Supported Collection Types
 
+- `T[]` - Arrays
+- `List<T>`, `IList<T>`, `ICollection<T>`, `IEnumerable<T>`
+- `HashSet<T>`, `ISet<T>`
+- `FrozenSet<T>`, `ImmutableHashSet<T>`
+- And more...
 
-using (var stream = File.OpenRead("Presidents.xlsx"))
-using (var importer = new ExcelImporter(stream))
+### Dictionaries
+
+Map multiple columns to dictionary properties.
+
+#### All Columns to Dictionary
+
+```csharp
+// Maps ALL columns to dictionary
+var rows = sheet.ReadRows<Dictionary<string, string>>();
+Console.WriteLine(rows[0]["Name"]);
+Console.WriteLine(rows[0]["Age"]);
+```
+
+#### Dictionary Property
+
+```csharp
+public class Record
 {
-    // You can register class maps by type.
-    importer.Configuration.RegisterClassMap<PresidentClassMap>();
+    public Dictionary<string, string> Values { get; set; }
+}
 
-    // Or by namespace.
-    importer.RegisterMapperClassesByNamespace("My.Namespace");
+public class RecordMap : ExcelClassMap<Record>
+{
+    public RecordMap()
+    {
+        // Map all columns
+        Map(r => r.Values);
 
-    ExcelSheet sheet = importer.ReadSheet();
-    President[] president = sheet.ReadRows<President>().ToArray();
-    Console.WriteLine(president[0].Name); // Barack Obama
-    Console.WriteLine(president[0].ChildrenNames); // [Malia, Sasha]
-    Console.WriteLine(president[0].Elections); // [2008-11-04, 2012-11-06]
-    Console.WriteLine(president[0].Inaugurations); // [2009-01-20, 2013-01-20]
+        // Or specific columns
+        Map(r => r.Values)
+            .WithColumnNames("Column1", "Column2", "Column3");
+    }
 }
 ```
 
-## Mapping nested objects
+#### Supported Dictionary Types
 
-ExcelMapper supports mapping nested objects. If no column names or class map is supplied, then the nested object is automatically mapped based on the names of it's public properties and fields.
+- `Dictionary<TKey, TValue>`, `IDictionary<TKey, TValue>`
+- `FrozenDictionary<TKey, TValue>`
+- `ImmutableDictionary<TKey, TValue>`
+- Keys are derived from column names
+
+### Nested Objects
+
+Map nested properties to Excel columns:
 
 
-| Name         | First Elected | Electoral College Votes |
-|--------------|---------------|-------------------------|
-| Barack Obama | 04/11/2008    | 365                     |
+| Name         | Elected    | Votes |
+|--------------|------------|-------|
+| Barack Obama | 2008-11-04 | 365   |
 
-```cs
+```csharp
 public class Election
 {
     public DateTime Date { get; set; }
-    public int ElectoralCollegeVotes { get; set; }
+    public int Votes { get; set; }
 }
 
 public class President
 {
     public string Name { get; set; }
-    public Election ElectionInformation { get; set; }
+    public Election ElectionInfo { get; set; }
 }
 
-public class PresidentClassMap : ExcelClassMap<President>
+public class PresidentMap : ExcelClassMap<President>
 {
-    public PresidentClassMap()
+    public PresidentMap()
     {
-        Map(president => president.ElectionInformation.Date)
-            .WithColumnName("First Elected");
+        Map(p => p.Name);
 
-        Map(president => president.ElectionInformation.ElectoralCollegeVotes)
-            .WithColumnName("Electoral College Votes");
+        // Map nested properties
+        Map(p => p.ElectionInfo.Date)
+            .WithColumnName("Elected");
+
+        Map(p => p.ElectionInfo.Votes);
     }
 }
 
-// ...
-
-using (var stream = File.OpenRead("Presidents.xlsx"))
-using (var importer = new ExcelImporter(stream))
-{
-    // You can register class maps by type.
-    importer.Configuration.RegisterClassMap<PresidentClassMap>();
-
-    // Or by namespace.
-    importer.RegisterMapperClassesByNamespace("My.Namespace");
-
-    ExcelSheet sheet = importer.ReadSheet();
-    President[] president = sheet.ReadRows<President>().ToArray();
-    Console.WriteLine(president[0].Name); // Barack Obama
-    Console.WriteLine(president[0].ElectionInformation.Date) // 2008-11-04
-    Console.WriteLine(president[0].ElectionInformation.ElectoralCollegeVotes) // 365
-}
+importer.Configuration.RegisterClassMap<PresidentMap>();
+var presidents = sheet.ReadRows<President>();
 ```
 
-## Mapping Dictionaries and ExpandObject
+### Custom Converters
 
-ExcelMapper supports mapping dictionaries and Expando Object. If no column names are supplied, then the dictionary will contain all columns.
+Create custom type conversions:
 
-| Name           | Age
-|----------------|----|
-| Barack Obama   | 58 |
-| Michelle Obama | 56 |
-
-### Dictionaries
-
-Note that
-```cs
-using var stream = File.OpenRead("Presidents.xlsx");
-using var importer = new ExcelImporter(stream);
-
-ExcelSheet sheet = importer.ReadSheet();
-Dictionary<string, string>[] results = sheet.ReadRows<Dictionary<string, string>>().ToArray();
-Console.WriteLine(results[0].Count); // 2: { { name: "Barack Obama" }, { age: "58" } }
-Console.WriteLine(results[1].Count); // 2: { { name: "Michelle Obama" }, { age: "56" } }
-```
-
-### Field Dictionaries
-
-Note that
-```cs
-public class DataClass
+```csharp
+public class ProductMap : ExcelClassMap<Product>
 {
-    public Dictionary<string, string> Values { get; set; }
-    // Or
-    public ExpandoObject Values { get; set; }
-}
-
-public class DataClassMap : ExcelClassMap<DataClass>
-{
-    public DataClass()
+    public ProductMap()
     {
-        // Default: reads all column names.
-        Map(d => d.Values);
+        Map(p => p.Price)
+            .WithConverter(value => 
+            {
+                // Remove currency symbol and parse
+                var cleaned = value.Replace("$", "").Replace(",", "");
+                return decimal.Parse(cleaned);
+            });
 
-        // Read custom column names.
-        Map(d => d.Values)
-            .WithColumnNames("Name", "Age");
+        Map(p => p.Available)
+            .WithConverter(value => value.ToLower() switch
+            {
+                "yes" => true,
+                "y" => true,
+                "no" => false,
+                "n" => false,
+                _ => false
+            });
     }
 }
-
-// ...
-
-using var stream = File.OpenRead("Presidents.xlsx");
-using var importer = new ExcelImporter(stream);
-
-// You can register class maps by type.
-importer.Configuration.RegisterClassMap<DataClassMap>();
-
-// Or by namespace.
-importer.RegisterMapperClassesByNamespace("My.Namespace");
-
-ExcelSheet sheet = importer.ReadSheet();
-DataClass[] results = sheet.ReadRows<DataClass>().ToArray();
-Console.WriteLine(results[0].Values.Count); // 2: { { name: "Barack Obama" }, { age: "58" } }
-Console.WriteLine(results[1].Values.Count); // 2: { { name: "Michelle Obama" }, { age: "56" } }
 ```
 
-# Mapping sheets without headers
+## Special Scenarios
 
-By default, ExcelMapper will read the first row of a sheet as a file header. This can be controlled by setting the boolean property `ExcelSheet.HasHeading`.
-ExcelMapper will go through each public property or field and attempt to map the value of the cell in the column with the name of the member. If the column cannot be found or mapped, an exception will be thrown.
+### Sheets Without Headers
 
-|               |                  |
-|---------------|------------------|
-| Pub Quiz      | The Blue Anchor  |
-| Live Music    | The Raven        |
-| Live Football | The Rutland Arms |
+Disable header row and use column indices:
 
-```cs
+|           |                  |
+|-----------|------------------|
+| Pub Quiz  | The Blue Anchor  |
+| Live Music| The Raven        |
+
+```csharp
 public class Event
 {
     public string Name { get; set; }
     public string Location { get; set; }
 }
 
-public class EventClassMap : ExcelClassMap<Event>
+public class EventMap : ExcelClassMap<Event>
 {
-    public EventClassMap()
+    public EventMap()
     {
-        // Read from a column index.
-        Map(event => event.Name)
-            .WithColumnIndex(0);
-
-        Map(event => event.Location)
-            .WithColumnIndex(1);
+        Map(e => e.Name).WithColumnIndex(0);
+        Map(e => e.Location).WithColumnIndex(1);
     }
 }
 
-// ...
+using var importer = new ExcelImporter("events.xlsx");
+importer.Configuration.RegisterClassMap<EventMap>();
 
-using (var stream = File.OpenRead("Pub Events.xlsx"))
-using (var importer = new ExcelImporter(stream))
-{
-    importer.Configuration.RegisterClassMap<EventClassMap>();
+var sheet = importer.ReadSheet();
+sheet.HasHeading = false;  // Disable header row
 
-    ExcelSheet sheet = importer.ReadSheet();
-    sheet.HasHeading = false;
-
-    Event[] events = sheet.ReadRows<Event>().ToArray();
-    Console.WriteLine(events[0].Name); // Pub Quiz
-    Console.WriteLine(events[1].Name); // Live Music
-    Console.WriteLine(events[2].Name); // Live Football
-}
+var events = sheet.ReadRows<Event>();
 ```
 
-# Mapping sheets where the header is not the first row
+### Headers Not in First Row
 
-ExcelMapper supports reading headers which are not in the first row. Set the property `ExcelSheet.HeadingIndex` to the zero-based index of the header. All data preceding the header will be skipped and will not be mapped.
+Skip rows before the header:
 
-|               |                  |
-|---------------|------------------|
-|               |                  |
-|               |                  |
-| Name          | Location         |
-| Pub Quiz      | The Blue Anchor  |
-| Live Music    | The Raven        |
-| Live Football | The Rutland Arms |
+|               |          |
+|---------------|----------|
+| Report Title  |          |
+|               |          |
+| Name          | Location |
+| Pub Quiz      | Downtown |
+| Live Music    | Uptown   |
 
-```cs
+```csharp
 public class Event
 {
     public string Name { get; set; }
     public string Location { get; set; }
 }
 
-// ...
+using var importer = new ExcelImporter("events.xlsx");
+var sheet = importer.ReadSheet();
+sheet.HeadingIndex = 2;  // Header is on row 3 (zero-based index 2)
 
-using (var stream = File.OpenRead("Pub Events.xlsx"))
-using (var importer = new ExcelImporter(stream))
-{
-    ExcelSheet sheet = importer.ReadSheet();
-    sheet.HeadingIndex = 3;
-
-    Event[] events = sheet.ReadRows<Event>().ToArray();
-    Console.WriteLine(events[0].Name); // Pub Quiz
-    Console.WriteLine(events[1].Name); // Live Music
-    Console.WriteLine(events[2].Name); // Live Football
-}
+var events = sheet.ReadRows<Event>();
 ```
+
+## Performance Tips
+
+1. **Use streaming**: `ReadRows<T>()` uses lazy evaluation - don't materialize unnecessarily
+   ```csharp
+   // Good - processes one at a time
+   foreach (var product in sheet.ReadRows<Product>())
+   {
+       ProcessProduct(product);
+   }
+
+   // Avoid - loads everything into memory
+   var allProducts = sheet.ReadRows<Product>().ToList();
+   ```
+
+2. **Register maps once**: Class maps are cached per type
+   ```csharp
+   importer.Configuration.RegisterClassMap<ProductMap>();
+   ```
+
+3. **Disable blank line skipping**: Off by default for performance
+   ```csharp
+   importer.Configuration.SkipBlankLines = false;  // Default
+   ```
+
+4. **Use column indices for headerless sheets**: Faster than column name lookup
+   ```csharp
+   Map(p => p.Name).WithColumnIndex(0);  // Faster
+   Map(p => p.Name).WithColumnName("Name");  // Requires lookup
+   ```
+
+## Supported Types
+
+### Primitive Types
+- Numeric: `int`, `long`, `double`, `decimal`, `float`, `byte`, `short`, `uint`, `ulong`, `ushort`, `sbyte`
+- Text: `string`, `char`
+- Other: `bool`, `DateTime`, `Guid`, `Uri`
+- Enums (with optional case-insensitive parsing)
+- Nullable versions of all value types
+
+### Collection Types
+- `T[]`, `List<T>`, `IList<T>`, `ICollection<T>`, `IEnumerable<T>`
+- `HashSet<T>`, `ISet<T>`, `FrozenSet<T>`, `ImmutableHashSet<T>`
+- `Dictionary<TKey, TValue>`, `IDictionary<TKey, TValue>`
+- `FrozenDictionary<TKey, TValue>`, `ImmutableDictionary<TKey, TValue>`
+
+### Complex Types
+- Classes with public properties/fields
+- Record types
+- Nested objects
+- `ExpandoObject` for dynamic scenarios
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+Built on top of [ExcelDataReader](https://github.com/ExcelDataReader/ExcelDataReader) for robust Excel file parsing.
