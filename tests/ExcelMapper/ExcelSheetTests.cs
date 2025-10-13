@@ -44,6 +44,17 @@ public class ExcelSheetTests
     }
 
     [Fact]
+    public void ReadHeading_DuplicatedColumnName_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DuplicatedColumns.xlsx");
+        ExcelSheet sheet = importer.ReadSheet();
+        ExcelHeading heading = sheet.ReadHeading();
+        Assert.Same(heading, sheet.Heading);
+        Assert.Equal(["MyColumn", "MyColumn"], heading.ColumnNames);
+        Assert.Equal(-1, sheet.CurrentRowIndex);
+    }
+
+    [Fact]
     public void ReadHeading_EmptyColumnName_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("EmptyColumns.xlsx");

@@ -14,33 +14,35 @@ public class ExcelHeading
 
     internal ExcelHeading(IDataRecord reader)
     {
-        var nameMapping = new Dictionary<string, int>(reader.FieldCount, StringComparer.OrdinalIgnoreCase);
+        var nameMapping = new SortedList<string, int>(reader.FieldCount, StringComparer.OrdinalIgnoreCase);
         var columnNames = new string[reader.FieldCount];
 
         for (int columnIndex = 0; columnIndex < reader.FieldCount; columnIndex++)
         {
-            var columnName = reader.GetValue(columnIndex)?.ToString();
-            if (columnName == null)
+            var columnName = reader.GetValue(columnIndex)?.ToString() ?? string.Empty;
+            columnNames[columnIndex] = columnName; // Store original name
+            
+            // For mapping, use unique key if duplicate
+            var mappingKey = columnName;
+            if (nameMapping.ContainsKey(mappingKey))
             {
-                columnNames[columnIndex] = string.Empty;
-
-            }
-            else
-            {
-                if (nameMapping.ContainsKey(columnName))
+                // Use incremental counter for deduplication to ensure uniqueness
+                int suffix = 2;
+                do
                 {
-                    columnName += "_" + Guid.NewGuid();
-                }
-                nameMapping.Add(columnName, columnIndex);
-                columnNames[columnIndex] = columnName;
+                    mappingKey = $"{columnName}_{suffix}";
+                    suffix++;
+                } while (nameMapping.ContainsKey(mappingKey));
             }
+
+            nameMapping.Add(mappingKey, columnIndex);
         }
 
         NameMapping = nameMapping;
         _columnNames = columnNames;
     }
 
-    private Dictionary<string, int> NameMapping { get; }
+    private SortedList<string, int> NameMapping { get; }
 
     /// <summary>
     /// Gets the name of the column at the given zero-based index.
@@ -136,5 +138,5 @@ public class ExcelHeading
     /// <summary>
     /// Gets the list of all column names in the heading.
     /// </summary>
-    public IEnumerable<string> ColumnNames => _columnNames;
+    public IReadOnlyList<string> ColumnNames => _columnNames;
 }
