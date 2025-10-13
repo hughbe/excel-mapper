@@ -247,6 +247,21 @@ public class ExcelImporterConfigurationTests
     }
 
     [Fact]
+    public void RegisterClassMap_ContainsMultidimensionalArrayValue_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<MultidimensionalClass>();
+        map.Map(p => p.Value);
+        using var importer = Helpers.GetImporter("Numbers.xlsx");
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectMultidimensionalClass), map));
+    }
+
+    private class MultidimensionalClass
+    {
+        public int[,] Value { get; set; } = default!;
+    }
+
+    [Fact]
     public void RegisterClassMap_ContainsMultidimensionalIndexerElementCantBeMapped_ThrowsExcelMappingException()
     {
         var map = new ExcelClassMap<IDisposableMultidimensionalClass>();

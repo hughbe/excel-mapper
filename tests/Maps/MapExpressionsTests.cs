@@ -1706,17 +1706,38 @@ public class MapExpressionsTests
     }
 
     [Fact]
-    public void ReadRows_TwiceMappedIntDictionaryIndex_Success()
+    public void ReadRows_EmptyStringDefaultMappedIntDictionaryIndex_Success()
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
-        importer.Configuration.RegisterClassMap<TwiceIntDictionaryIndexClassMap>();
+        importer.Configuration.RegisterClassMap<DictionaryClass>(c =>
+        {
+            c.Map(o => o.Values[""]);
+        });
 
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row = sheet.ReadRow<DictionaryClass>();
         Assert.Equal(1, row.Values.Count);
-        Assert.Equal(3, row.Values["key"]);
+        Assert.Equal(1, row.Values[""]);
+    }
+
+    [Fact]
+    public void ReadRows_EmptyStringCustomMappedIntDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        importer.Configuration.RegisterClassMap<DictionaryClass>(c =>
+        {
+            c.Map(o => o.Values[""])
+                .WithColumnName("Column2");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<DictionaryClass>();
+        Assert.Equal(1, row.Values.Count);
+        Assert.Equal(2, row.Values[""]);
     }
 
     private class TwiceIntDictionaryIndexClassMap : ExcelClassMap<DictionaryClass>
@@ -1728,6 +1749,20 @@ public class MapExpressionsTests
             Map(o => o.Values["key"])
                 .WithColumnName("Column3");
         }
+    }
+
+    [Fact]
+    public void ReadRows_TwiceMappedIntDictionaryIndex_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
+        importer.Configuration.RegisterClassMap<TwiceIntDictionaryIndexClassMap>();
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row = sheet.ReadRow<DictionaryClass>();
+        Assert.Equal(1, row.Values.Count);
+        Assert.Equal(3, row.Values["key"]);
     }
 
     [Fact]

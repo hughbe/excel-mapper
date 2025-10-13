@@ -652,6 +652,7 @@ public static class AutoMapper
     private static ICellReaderFactory CreateDefaultDictionaryKeyReaderFactory(object key)
         => key switch
         {
+            string keyString when keyString.Length == 0 => new ColumnIndexReaderFactory(0),
             string keyString => new ColumnNameReaderFactory(keyString),
             int keyIndex => new ColumnIndexReaderFactory(keyIndex),
             _ => new ColumnNameReaderFactory(key.ToString()!)
