@@ -11,6 +11,11 @@ public class ImmutableHashSetEnumerableFactory<T> : IEnumerableFactory<T>
 
     public void Begin(int count)
     {
+        if (count < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(count), count, "Count cannot be negative.");
+        }
+
         if (_builder is not null)
         {
             throw new ExcelMappingException("Cannot begin mapping until End() was called.");

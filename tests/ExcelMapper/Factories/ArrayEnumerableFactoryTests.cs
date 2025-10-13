@@ -30,6 +30,13 @@ public class ArrayEnumerableFactoryTests
     }
 
     [Fact]
+    public void Begin_NegativeCount_ThrowsArgumentOutOfRangeException()
+    {
+        var factory = new ArrayEnumerableFactory<int>();
+        Assert.Throws<ArgumentOutOfRangeException>("count", () => factory.Begin(-1));
+    }
+
+    [Fact]
     public void Add_End_Success()
     {
         var factory = new ArrayEnumerableFactory<int>();

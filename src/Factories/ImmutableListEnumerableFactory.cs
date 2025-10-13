@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using ExcelMapper.Abstractions;
@@ -8,8 +9,13 @@ public class ImmutableListEnumerableFactory<T> : IEnumerableFactory<T>
 {
     private ImmutableList<T?>.Builder? _builder;
 
-    public void Begin(int capacity)
+    public void Begin(int count)
     {
+        if (count < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(count), count, "Capacity cannot be negative.");
+        }
+
         if (_builder is not null)
         {
             throw new ExcelMappingException("Cannot begin mapping until End() was called.");

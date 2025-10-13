@@ -40,14 +40,14 @@ public class MultidimensionalArrayFactoryTests
     public void Begin_EmptyLengths_ThrowsArgumentException()
     {
         var factory = new MultidimensionalArrayFactory<int>();
-        Assert.Throws<ArgumentException>(null, () => factory.Begin([]));
+        Assert.Throws<ArgumentException>("lengths", () => factory.Begin([]));
     }
 
     [Fact]
     public void Begin_NegativeLength_ThrowsArgumentOutOfRangeException()
     {
         var factory = new MultidimensionalArrayFactory<int>();
-        Assert.Throws<ArgumentOutOfRangeException>("lengths[1]", () => factory.Begin([1, -1]));
+        Assert.Throws<ArgumentOutOfRangeException>("lengths", () => factory.Begin([1, -1]));
     }
 
     [Fact]

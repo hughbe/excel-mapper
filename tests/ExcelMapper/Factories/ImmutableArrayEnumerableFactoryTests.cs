@@ -31,6 +31,13 @@ public class ImmutableArrayEnumerableFactoryTests
     }
 
     [Fact]
+    public void Begin_NegativeCount_ThrowsArgumentOutOfRangeException()
+    {
+        var factory = new ImmutableArrayEnumerableFactory<int>();
+        Assert.Throws<ArgumentOutOfRangeException>("count", () => factory.Begin(-1));
+    }
+
+    [Fact]
     public void Add_End_Success()
     {
         var factory = new ImmutableArrayEnumerableFactory<int>();

@@ -89,6 +89,13 @@ public class ReadOnlyObservableCollectionEnumerableFactoryTests
         factory.Begin(1);
         Assert.Throws<ExcelMappingException>(() => factory.Begin(1));
     }
+
+    [Fact]
+    public void Begin_NegativeCount_ThrowsArgumentOutOfRangeException()
+    {
+        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>(typeof(ReadOnlyObservableCollection<int>));
+        Assert.Throws<ArgumentOutOfRangeException>("count", () => factory.Begin(-1));
+    }
     [Fact]
     public void Add_End_Success()
     {

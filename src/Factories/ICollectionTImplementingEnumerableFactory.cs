@@ -39,6 +39,11 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
 
     public void Begin(int count)
     {
+        if (count < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(count), count, "Count cannot be negative.");
+        }
+
         if (_items is not null)
         {
             throw new ExcelMappingException("Cannot begin mapping until End() was called.");

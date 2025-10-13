@@ -11,6 +11,22 @@ public class MultidimensionalArrayFactory<T> : IMultidimensionalArrayFactory<T>
 
     public void Begin(int[] lengths)
     {
+        if (lengths == null)
+        {
+            throw new ArgumentNullException(nameof(lengths));
+        }
+        if (lengths.Length == 0)
+        {
+            throw new ArgumentException("Lengths cannot be empty.", nameof(lengths));
+        }
+        foreach (var length in lengths)
+        {
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(lengths), lengths, "Lengths cannot be negative.");
+            }
+        }
+
         if (_items is not null)
         {
             throw new ExcelMappingException("Cannot begin mapping until End() was called.");
