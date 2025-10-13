@@ -51,7 +51,7 @@ public static class AutoMapper
 
         // Thirdly, check if this is a collection (e.g. array, list).
         // This requires converting each value to the element type of the collection.
-        if (TryCreateSplitMap(member, emptyValueStrategy, out var multiMap))
+        if (TryCreateSplitMap(member, member.MemberType(), MemberMapper.GetDefaultCellsReaderFactory(member) ?? GetSplitCellReaderFactory(MemberMapper.GetDefaultCellReaderFactory(member)), emptyValueStrategy, out var multiMap))
         {
             map = multiMap;
             return true;
@@ -98,13 +98,13 @@ public static class AutoMapper
 
     private static bool TryCreatePrimitiveMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out OneToOneMap<T>? map)
     {
-        map = CreateMemberMap<T>(member, emptyValueStrategy, isAutoMapping);
+        map = CreateOneToOneMap<T>(member, MemberMapper.GetDefaultCellReaderFactory(member), emptyValueStrategy, isAutoMapping);
         return map != null;
     }
 
-    internal static OneToOneMap<T>? CreateMemberMap<T>(MemberInfo member, FallbackStrategy emptyValueStrategy, bool isAutoMapping)
+    internal static OneToOneMap<T>? CreateOneToOneMap<T>(MemberInfo? member, ICellReaderFactory defaultCellReaderFactory, FallbackStrategy emptyValueStrategy, bool isAutoMapping)
     {
-        if (!TryGetWellKnownMap<T>(emptyValueStrategy, out ICellMapper? mapper, out IFallbackItem? emptyFallback, out IFallbackItem? invalidFallback))
+        if (!TryGetWellKnownMap<T>(emptyValueStrategy, out var mapper, out var emptyFallback, out var invalidFallback))
         {
             // Cannot auto map an unsupported primitive.
             // But allow `Map(o => o.Value)` as the user can define a custom converter after
@@ -117,14 +117,16 @@ public static class AutoMapper
             }
         }
 
-        var defaultValueAttribute = member.GetCustomAttribute<ExcelDefaultValueAttribute>();
-        if (defaultValueAttribute != null)
+        if (member != null)
         {
-            emptyFallback = new FixedValueFallback(defaultValueAttribute.Value);
+            var defaultValueAttribute = member.GetCustomAttribute<ExcelDefaultValueAttribute>();
+            if (defaultValueAttribute != null)
+            {
+                emptyFallback = new FixedValueFallback(defaultValueAttribute.Value);
+            }
         }
 
-        var defaultReader = GetDefaultCellReaderFactory(member);
-        var map = new OneToOneMap<T>(defaultReader);
+        var map = new OneToOneMap<T>(defaultCellReaderFactory);
 
         if (mapper != null)
         {
@@ -143,56 +145,8 @@ public static class AutoMapper
         return map;
     }
 
-    private static ICellReaderFactory GetDefaultCellReaderFactory(MemberInfo member)
-    {
-        var columnNameAttributes = member.GetCustomAttributes<ExcelColumnNameAttribute>().ToArray();
-        // A single [ExcelColumnName] attribute represents one column.
-        if (columnNameAttributes.Length == 1)
-        {
-            return new ColumnNameReaderFactory(columnNameAttributes[0].Name);
-        }
-        // Multiple [ExcelColumnName] attributes still represents one column, but multiple options.
-        else if (columnNameAttributes.Length > 1)
-        {
-            return new ColumnNamesReaderFactory([.. columnNameAttributes.Select(c => c.Name)]);
-        }
-
-        // [ExcelColumnNames] attributes still represents one column, but multiple options.
-        var columnNamesAttribute = member.GetCustomAttribute<ExcelColumnNamesAttribute>();
-        if (columnNamesAttribute != null)
-        {
-            return new ColumnNamesReaderFactory(columnNamesAttribute.Names);
-        }
-        
-        // A single [ExcelColumnNameMatching] attributes still represents one column, but multiple options.
-        var columnNameMatchingAttribute = member.GetCustomAttribute<ExcelColumnMatchingAttribute>();
-        if (columnNameMatchingAttribute != null)
-        {
-            var matcher = (IExcelColumnMatcher)Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments)!;
-            return new ColumnsMatchingReaderFactory(matcher);
-        }
-
-        // A single [ExcelColumnIndex] attribute represents one column.
-        var colummnIndexAttributes = member.GetCustomAttributes<ExcelColumnIndexAttribute>().ToArray();
-        if (colummnIndexAttributes.Length == 1)
-        {
-            return new ColumnIndexReaderFactory(colummnIndexAttributes[0].Index);
-        }
-        // Multiple [ExcelColumnIndex] attributes still represents one column, but multiple options.
-        else if (colummnIndexAttributes.Length > 1)
-        {
-            return new ColumnIndicesReaderFactory([.. colummnIndexAttributes.Select(c => c.Index)]);
-        }
-
-        // [ExcelColumnIndices] attributes still represents one column, but multiple options.
-        var columnIndicesAttribute = member.GetCustomAttribute<ExcelColumnIndicesAttribute>();
-        if (columnIndicesAttribute != null)
-        {
-            return new ColumnIndicesReaderFactory(columnIndicesAttribute.Indices);
-        }
-
-        return new ColumnNameReaderFactory(member.Name);
-    }
+    internal static ICellsReaderFactory GetSplitCellReaderFactory(ICellReaderFactory cellReaderFactory)
+        => new CharSplitReaderFactory(cellReaderFactory);
 
     private static bool TryGetWellKnownMap<T>(
         FallbackStrategy emptyValueStrategy,
@@ -280,9 +234,8 @@ public static class AutoMapper
     private static MethodInfo? s_tryCreateSplitGenericMapMethod;
     private static MethodInfo TryCreateSplitGenericMapMethod => s_tryCreateSplitGenericMapMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateSplitMapGeneric))!;
 
-    internal static bool TryCreateSplitMap(MemberInfo member, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
+    private static bool TryCreateSplitMap(MemberInfo? member, Type listType, ICellsReaderFactory defaultCellsReaderFactory, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
     {
-        var listType = member.MemberType();
         var elementType = listType.GetElementTypeOrEnumerableType();
         if (elementType == null)
         {
@@ -291,7 +244,7 @@ public static class AutoMapper
         }
 
         var method = TryCreateSplitGenericMapMethod.MakeGenericMethod([elementType]);
-        var parameters = new object?[] { member, listType, emptyValueStrategy, null };
+        var parameters = new object?[] { member, listType, defaultCellsReaderFactory, emptyValueStrategy, null };
         var result = (bool)method.InvokeUnwrapped(null, parameters)!;
         if (result)
         {
@@ -303,10 +256,10 @@ public static class AutoMapper
         return false;
     }
 
-    internal static bool TryCreateSplitMap<TElement>(MemberInfo member, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
+    internal static bool TryCreateSplitMap<TElement>(MemberInfo? member, Type listType, ICellsReaderFactory defaultCellsReaderFactory, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
     {
         var method = TryCreateSplitGenericMapMethod.MakeGenericMethod([typeof(TElement)]);
-        var parameters = new object?[] { member, member.MemberType(), emptyValueStrategy, null };
+        var parameters = new object?[] { member, listType, defaultCellsReaderFactory, emptyValueStrategy, null };
         var result = (bool)method.InvokeUnwrapped(null, parameters)!;
         if (result)
         {
@@ -318,30 +271,7 @@ public static class AutoMapper
         return false;
     }
 
-    internal static bool TryCreateEnumerableMap<T>(FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
-    {
-        Type listType = typeof(T);
-        var elementType = listType.GetElementTypeOrEnumerableType();
-        if (elementType == null)
-        {
-            map = null;
-            return false;
-        }
-
-        var method = TryCreateSplitGenericMapMethod.MakeGenericMethod([elementType]);
-        var parameters = new object?[] { null, listType, emptyValueStrategy, null };
-        var result = (bool)method.InvokeUnwrapped(null, parameters)!;
-        if (result)
-        {
-            map = (IMap)parameters[^1]!;
-            return true;
-        }
-
-        map = null;
-        return false;
-    }
-
-    private static bool TryCreateSplitMapGeneric<TElement>(MemberInfo? member, Type listType, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneEnumerableMap<TElement>? map)
+    private static bool TryCreateSplitMapGeneric<TElement>(MemberInfo? member, Type listType, ICellsReaderFactory defaultCellsReaderFactory, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneEnumerableMap<TElement>? map)
     {
         // First, get the pipeline for the element. This is used to convert individual values
         // to be added to/included in the collection.
@@ -358,45 +288,9 @@ public static class AutoMapper
             return false;
         }
 
-        // Otherwise, fallback to splitting a single cell with the default comma separator.
-        var defaultReaderFactory = GetDefaultCellsReaderFactory(member) ??  new CharSplitReaderFactory(GetDefaultCellReaderFactory(member!));
-        map = new ManyToOneEnumerableMap<TElement>(defaultReaderFactory, elementMapping, factory);
+        map = new ManyToOneEnumerableMap<TElement>(defaultCellsReaderFactory, elementMapping, factory);
         ApplyMemberAttributesToMap(member, map);
-
         return true;
-    }
-
-    private static ICellsReaderFactory? GetDefaultCellsReaderFactory(MemberInfo? member)
-    {
-        // If no member was specified, read all the cells.
-        if (member == null)
-        {
-            return new AllColumnNamesReaderFactory();
-        }
-
-        // [ExcelColumnNames] attributes represent multiple columns.
-        var columnNamesAttribute = member.GetCustomAttribute<ExcelColumnNamesAttribute>();
-        if (columnNamesAttribute != null)
-        {
-            return new ColumnNamesReaderFactory(columnNamesAttribute.Names);
-        }
-        
-        // [ExcelColumnsMatchingAttribute] attributes represent multiple columns.
-        var columnNameMatchingAttribute = member.GetCustomAttribute<ExcelColumnsMatchingAttribute>();
-        if (columnNameMatchingAttribute != null)
-        {
-            var matcher = (IExcelColumnMatcher)Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments)!;
-            return new ColumnsMatchingReaderFactory(matcher);
-        }
-
-        // [ExcelColumnIndices] attributes represents multiple columns.
-        var columnIndicesAttribute = member.GetCustomAttribute<ExcelColumnIndicesAttribute>();
-        if (columnIndicesAttribute != null)
-        {
-            return new ColumnIndicesReaderFactory(columnIndicesAttribute.Indices);
-        }
-
-        return null;
     }
 
     private static bool TryGetCreateEnumerableFactory<TElement>(Type listType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
@@ -649,53 +543,6 @@ public static class AutoMapper
         return true;
     }
 
-    internal static IMap CreateArrayIndexerElementMap(int index, Type valueType, FallbackStrategy emptyValueStrategy)
-        => CreateIndexerElementMap(new ColumnIndexReaderFactory(index), valueType, emptyValueStrategy);
-
-    private static ICellReaderFactory CreateDefaultDictionaryKeyReaderFactory(object key)
-        => key switch
-        {
-            string keyString when keyString.Length == 0 => new ColumnIndexReaderFactory(0),
-            string keyString => new ColumnNameReaderFactory(keyString),
-            int keyIndex => new ColumnIndexReaderFactory(keyIndex),
-            _ => new ColumnNameReaderFactory(key.ToString()!)
-        };
-
-    internal static IMap CreateDictionaryIndexerElementMap(object key, Type valueType, FallbackStrategy emptyValueStrategy)
-        => CreateIndexerElementMap(CreateDefaultDictionaryKeyReaderFactory(key), valueType, emptyValueStrategy);
-
-    private static MethodInfo? s_tryCreateIndexerElementMapGenericMethod;
-    private static MethodInfo CreateIndexerElementMapGenericMethod => s_tryCreateIndexerElementMapGenericMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(CreateIndexerElementMapGeneric))!;
-
-    private static IMap CreateIndexerElementMap(ICellReaderFactory defaultReaderFactory, Type valueType, FallbackStrategy emptyValueStrategy)
-    {
-        var method = CreateIndexerElementMapGenericMethod.MakeGenericMethod(valueType);
-        var parameters = new object?[] { defaultReaderFactory, emptyValueStrategy };
-        return (IMap)method.InvokeUnwrapped(null, parameters)!;
-    }
-
-    private static IMap CreateIndexerElementMapGeneric<T>(ICellReaderFactory defaultReaderFactory, FallbackStrategy emptyValueStrategy)
-    {
-        // Try to create a primitive map for the value type.
-        _ = TryGetWellKnownMap<T>(emptyValueStrategy, out var mapper, out var emptyFallback, out var invalidFallback);
-
-        var map = new OneToOneMap<T>(defaultReaderFactory);
-        if (mapper != null)
-        {
-            map.AddCellValueMapper(mapper);
-        }
-        if (emptyFallback != null)
-        {
-            map.EmptyFallback = emptyFallback;
-        }
-        if (invalidFallback != null)
-        {
-            map.InvalidFallback = invalidFallback;
-        }
-        
-        return map;
-    }
-
     private static MethodInfo? s_tryCreateDictionaryMapGeneric;
     private static MethodInfo TryCreateDictionaryMapGeneric => s_tryCreateDictionaryMapGeneric ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(TryCreateGenericDictionaryMap))!;
 
@@ -780,7 +627,7 @@ public static class AutoMapper
         }
 
         // Default to all columns.
-        var defaultReaderFactory = GetDefaultCellsReaderFactory(member) ?? new AllColumnNamesReaderFactory();
+        var defaultReaderFactory = MemberMapper.GetDefaultCellsReaderFactory(member) ?? new AllColumnNamesReaderFactory();
         map = new ManyToOneDictionaryMap<TKey, TValue>(defaultReaderFactory, valuePipeline, factory);
         ApplyMemberAttributesToMap(member, map);
         return true;
@@ -1060,7 +907,7 @@ public static class AutoMapper
             return true;
         }
         // User may ask to map the row to a list.
-        else if (TryCreateEnumerableMap<T>(emptyValueStrategy, out var enumerableMap))
+        else if (TryCreateSplitMap(null, typeof(T), new AllColumnNamesReaderFactory(), emptyValueStrategy, out var enumerableMap))
         {
             result = new BuiltinClassMap<T>(enumerableMap);
             return true;

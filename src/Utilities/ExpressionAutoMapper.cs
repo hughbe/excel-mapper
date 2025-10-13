@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Linq;
 using System.Linq.Expressions;
 using ExcelMapper.Abstractions;
+using ExcelMapper.Readers;
 
 namespace ExcelMapper.Utilities;
 
@@ -19,10 +20,7 @@ internal static class ExpressionAutoMapper
             expression = unaryExpression.Operand;
             // If we have multiple converts, we want the innermost type
             // e.g. ((A)(B)x) should give us A, not B
-            if (convertedType is null)
-            {
-                convertedType = unaryExpression.Type;
-            }
+            convertedType ??= unaryExpression.Type;
         }
 
         return expression;
@@ -144,29 +142,8 @@ internal static class ExpressionAutoMapper
         }
     }
 
-    private static IMap CreateAndAddElementMap<TProperty>(ExcelClassMap classMap, IMap currentMap, IMappedExpression expression, int index, Type valueType)
-    {
-        var map = AutoMapper.CreateArrayIndexerElementMap(index, valueType, classMap.EmptyValueStrategy);
-        AddMap(currentMap, expression, map);
-        return map;
-    }
-
-    private static IMap CreateAndAddElementMap<TProperty>(ExcelClassMap classMap, IMap currentMap, IMappedExpression expression, int[] indices, Type valueType)
-    {
-        var map = AutoMapper.CreateArrayIndexerElementMap(0, valueType, classMap.EmptyValueStrategy);
-        AddMap(currentMap, expression, map);
-        return map;
-    }
-
-    private static IMap CreateAndAddElementMap<TProperty>(ExcelClassMap classMap, IMap currentMap, IMappedExpression expression, object key, Type valueType)
-    {
-        var map = AutoMapper.CreateDictionaryIndexerElementMap(key, valueType, classMap.EmptyValueStrategy);
-        AddMap(currentMap, expression, map);
-        return map;
-    }
-
     [ExcludeFromCodeCoverage]
-    private static IMap ProcessExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, IMappedExpression currentExpression, Func<MemberInfo, FallbackStrategy, IMap> memberMapCreator)
+    private static IMap ProcessExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, IMappedExpression currentExpression, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator)
     {
         return currentExpression switch
         {
@@ -178,25 +155,27 @@ internal static class ExpressionAutoMapper
         };
     }
 
-    private static IMap ProcessMemberExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, MappedMemberExpression memberExpression, Func<MemberInfo, FallbackStrategy, IMap> memberMapCreator)
+    private static IMap ProcessMemberExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, MappedMemberExpression expression, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator)
     {
         if (stack.Count == 0)
         {
-            var memberMap = memberMapCreator(memberExpression.Member, ((ExcelClassMap)currentMap).EmptyValueStrategy);
-            AddMap(currentMap, memberExpression, memberMap);
+            var memberMap = memberMapCreator(expression, ((ExcelClassMap)currentMap).EmptyValueStrategy);
+            AddMap(currentMap, expression, memberMap);
             return memberMap;
         }
 
         var nextExpression = stack.Peek();
-        var nextMap = GetNextMap(classMap, currentMap, memberExpression.Type, nextExpression, memberExpression.Member);
+        var nextMap = GetNextMap(classMap, currentMap, expression.MappedValueType, nextExpression, expression.Member);
         return ProcessNextExpression<T, TProperty>(classMap, stack, nextMap, memberMapCreator);
     }
 
-    private static IMap ProcessEnumerableIndexExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, MappedEnumerableIndexerExpression expression, Func<MemberInfo, FallbackStrategy, IMap> memberMapCreator)
+    private static IMap ProcessEnumerableIndexExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, MappedEnumerableIndexerExpression expression, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator)
     {
         if (stack.Count == 0)
         {
-            return CreateAndAddElementMap<TProperty>(classMap, currentMap, expression, expression.Index, expression.MappedElementType);
+            var memberMap = memberMapCreator(expression, classMap.EmptyValueStrategy);
+            AddMap(currentMap, expression, memberMap);
+            return memberMap;
         }
 
         var nextExpression = stack.Peek();
@@ -204,11 +183,13 @@ internal static class ExpressionAutoMapper
         return ProcessNextExpression<T, TProperty>(classMap, stack, nextMap, memberMapCreator);
     }
 
-    private static IMap ProcessMultidimensionalArrayIndexerExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, MappedMultidimensionalArrayIndexerExpression expression, Func<MemberInfo, FallbackStrategy, IMap> memberMapCreator)
+    private static IMap ProcessMultidimensionalArrayIndexerExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, MappedMultidimensionalArrayIndexerExpression expression, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator)
     {
         if (stack.Count == 0)
         {
-            return CreateAndAddElementMap<TProperty>(classMap, currentMap, expression, expression.Indices, expression.MappedElementType);
+            var memberMap = memberMapCreator(expression, classMap.EmptyValueStrategy);
+            AddMap(currentMap, expression, memberMap);
+            return memberMap;
         }
 
         var nextExpression = stack.Peek();
@@ -216,18 +197,21 @@ internal static class ExpressionAutoMapper
         return ProcessNextExpression<T, TProperty>(classMap, stack, nextMap, memberMapCreator);
     }
 
-    private static IMap ProcessDictionaryIndexerExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, MappedDictionaryIndexerExpression expression, Func<MemberInfo, FallbackStrategy, IMap> memberMapCreator)
+    private static IMap ProcessDictionaryIndexerExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, MappedDictionaryIndexerExpression expression, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator)
     {
         if (stack.Count == 0)
         {
-            return CreateAndAddElementMap<TProperty>(classMap, currentMap, expression, expression.Key, expression.ValueType);
+            var memberMap = memberMapCreator(expression, classMap.EmptyValueStrategy);
+            AddMap(currentMap, expression, memberMap);
+            return memberMap;
         }
+
         var nextExpression = stack.Peek();
         var nextMap = GetNextMap(classMap, currentMap, expression.ValueType, nextExpression, null, null, expression.Key);
         return ProcessNextExpression<T, TProperty>(classMap, stack, nextMap, memberMapCreator);
     }
 
-    private static IMap ProcessNextExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, Func<MemberInfo, FallbackStrategy, IMap> memberMapCreator)
+    private static IMap ProcessNextExpression<T, TProperty>(ExcelClassMap<T> classMap, Stack<IMappedExpression> stack, IMap currentMap, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator)
     {
         var nextExpression = stack.Pop();
         return ProcessExpression<T, TProperty>(classMap, stack, currentMap, nextExpression, memberMapCreator);
@@ -246,7 +230,7 @@ internal static class ExpressionAutoMapper
         };
     }
 
-    private static IMap GetOrCreateMap<T, TProperty>(ExcelClassMap<T> classMap, Expression expression, Func<MemberInfo, FallbackStrategy, IMap> memberMapCreator)
+    private static IMap GetOrCreateMap<T, TProperty>(ExcelClassMap<T> classMap, Expression expression, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator)
     {
         var stack = BuildExpressionStack(expression);
         IMap currentMap = classMap;
@@ -260,44 +244,72 @@ internal static class ExpressionAutoMapper
 
     public static OneToOneMap<TProperty> GetOrCreateOneToOneMap<T, TProperty>(ExcelClassMap<T> classMap, Expression expression)
     {
-        static IMap memberMapCreator(MemberInfo member, FallbackStrategy emptyValueStrategy)
+        static IMap memberMapCreator(IMappedExpression finalExpression, FallbackStrategy emptyValueStrategy)
         {
-            return AutoMapper.CreateMemberMap<TProperty>(member, emptyValueStrategy, isAutoMapping: false)!;
+            var member = finalExpression is MappedMemberExpression memberExpression ? memberExpression.Member : null;
+            return AutoMapper.CreateOneToOneMap<TProperty>(member, finalExpression.GetDefaultCellReaderFactory(), emptyValueStrategy, isAutoMapping: false)!;
         }
+
         return (OneToOneMap<TProperty>)GetOrCreateMap<T, TProperty>(classMap, expression, memberMapCreator);
     }
 
     public static ManyToOneEnumerableMap<TElement> GetOrCreateManyToOneEnumerableMap<T, TElement>(ExcelClassMap<T> classMap, Expression expression)
     {
-        static IMap memberMapCreator(MemberInfo member, FallbackStrategy emptyValueStrategy)
+        static IMap memberMapCreator(IMappedExpression finalExpression, FallbackStrategy emptyValueStrategy)
         {
-            if (!AutoMapper.TryCreateSplitMap<TElement>(member, emptyValueStrategy, out var map))
+            MemberInfo? member;
+            Type type;
+            if (finalExpression is MappedMemberExpression memberExpression)
             {
-                throw new ExcelMappingException($"No known way to instantiate type \"{member.MemberType()}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
+                member = memberExpression.Member;
+                type = memberExpression.Type;
+            }
+            else
+            {
+                member = null;
+                type = finalExpression.MappedValueType;
+            }
+            if (!AutoMapper.TryCreateSplitMap<TElement>(member, type, finalExpression.GetDefaultCellsReaderFactory() ?? AutoMapper.GetSplitCellReaderFactory(finalExpression.GetDefaultCellReaderFactory()), emptyValueStrategy, out var map))
+            {
+                throw new ExcelMappingException($"No known way to instantiate type \"{type}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
             }
 
             return map;
         }
+        
         return (ManyToOneEnumerableMap<TElement>)GetOrCreateMap<T, TElement>(classMap, expression, memberMapCreator);
     }
 
     public static ManyToOneDictionaryMap<TKey, TValue> GetOrCreateManyToOneDictionaryMap<T, TKey, TValue>(ExcelClassMap<T> classMap, Expression expression) where TKey : notnull
     {
-        static IMap memberMapCreator(MemberInfo member, FallbackStrategy emptyValueStrategy)
+        static IMap memberMapCreator(IMappedExpression finalExpression, FallbackStrategy emptyValueStrategy)
         {
-            if (!AutoMapper.TryCreateGenericDictionaryMap<TKey, TValue>(member, member.MemberType(), emptyValueStrategy, isAutoMapping: false, out var map))
+            MemberInfo? member;
+            Type type;
+            if (finalExpression is MappedMemberExpression memberExpression)
             {
-                throw new ExcelMappingException($"No known way to instantiate type \"{member.MemberType()}\".");
+                member = memberExpression.Member;
+                type = memberExpression.Type;
+            }
+            else
+            {
+                member = null;
+                type = finalExpression.MappedValueType;
+            }
+            if (!AutoMapper.TryCreateGenericDictionaryMap<TKey, TValue>(member, type, emptyValueStrategy, isAutoMapping: false, out var map))
+            {
+                throw new ExcelMappingException($"No known way to instantiate type \"{type}\".");
             }
 
             return map;
         }
+
         return (ManyToOneDictionaryMap<TKey, TValue>)GetOrCreateMap<T, TValue>(classMap, expression, memberMapCreator);
     }
 
     public static ExcelClassMap<TElement> GetOrCreateObjectMap<T, TElement>(ExcelClassMap<T> classMap, Expression expression)
     {
-        static IMap memberMapCreator(MemberInfo member, FallbackStrategy emptyValueStrategy)
+        static IMap memberMapCreator(IMappedExpression finalExpression, FallbackStrategy emptyValueStrategy)
         {
             if (!AutoMapper.TryCreateObjectMap<TElement>(emptyValueStrategy, out var map))
             {
@@ -306,6 +318,7 @@ internal static class ExpressionAutoMapper
 
             return map;
         }
+
         return (ExcelClassMap<TElement>)GetOrCreateMap<T, TElement>(classMap, expression, memberMapCreator);
     }
 }
@@ -313,12 +326,16 @@ internal static class ExpressionAutoMapper
 internal interface IMappedExpression
 {
     Type Type { get; }
+    Type MappedValueType { get; }
+    ICellReaderFactory GetDefaultCellReaderFactory();
+    ICellsReaderFactory? GetDefaultCellsReaderFactory();
 }
 
 internal class MappedMemberExpression : IMappedExpression
 {
-    public Type Type { get; set; }
+    public Type Type { get; }
     public MemberInfo Member { get; }
+    public Type MappedValueType { get; }
 
     public MappedMemberExpression(MemberExpression expression, Type memberType)
     {
@@ -328,8 +345,14 @@ internal class MappedMemberExpression : IMappedExpression
         }
 
         Member = expression.Member;
-        Type = memberType ?? expression.Type;
+        Type = Member.MemberType();
+        MappedValueType = memberType ?? expression.Type;
     }
+
+    public ICellReaderFactory GetDefaultCellReaderFactory()
+        => MemberMapper.GetDefaultCellReaderFactory(Member);
+
+    public ICellsReaderFactory? GetDefaultCellsReaderFactory() => MemberMapper.GetDefaultCellsReaderFactory(Member);
 }
 
 internal class MappedEnumerableIndexerExpression : IMappedExpression
@@ -338,6 +361,7 @@ internal class MappedEnumerableIndexerExpression : IMappedExpression
     public Type ActualElementType { get; }
     public Type MappedElementType { get; }
     public int Index { get; }
+    public Type MappedValueType => MappedElementType;
 
     public MappedEnumerableIndexerExpression(BinaryExpression expression, Type? mappedElementType)
     {
@@ -377,6 +401,11 @@ internal class MappedEnumerableIndexerExpression : IMappedExpression
 
         Index = (int)constantExpression.Value!;
     }
+
+    public ICellReaderFactory GetDefaultCellReaderFactory()
+        => new ColumnIndexReaderFactory(Index);
+
+    public ICellsReaderFactory? GetDefaultCellsReaderFactory() => null;
 }
 
 internal class MappedMultidimensionalArrayIndexerExpression : IMappedExpression
@@ -385,6 +414,7 @@ internal class MappedMultidimensionalArrayIndexerExpression : IMappedExpression
     public Type ActualElementType { get; }
     public Type MappedElementType { get; }
     public int[] Indices { get; }
+    public Type MappedValueType => MappedElementType;
 
     public MappedMultidimensionalArrayIndexerExpression(MethodCallExpression expression, Type? mappedElementType)
     {
@@ -409,6 +439,11 @@ internal class MappedMultidimensionalArrayIndexerExpression : IMappedExpression
             Indices[i] = (int)constantExpression.Value!;
         }
     }
+
+    public ICellReaderFactory GetDefaultCellReaderFactory()
+        => new ColumnIndexReaderFactory(0);
+
+    public ICellsReaderFactory? GetDefaultCellsReaderFactory() => null;
 }
 
 internal class MappedDictionaryIndexerExpression : IMappedExpression
@@ -418,6 +453,7 @@ internal class MappedDictionaryIndexerExpression : IMappedExpression
     public Type ActualKeyType { get; }
     public Type ActualValueType { get; }
     public object Key { get; }
+    public Type MappedValueType => ValueType;
 
     public MappedDictionaryIndexerExpression(MethodCallExpression expression, Type valueType)
     {
@@ -441,4 +477,25 @@ internal class MappedDictionaryIndexerExpression : IMappedExpression
 
         Key = constantExpression.Value!;
     }
+
+    public ICellReaderFactory GetDefaultCellReaderFactory()
+    {
+        if (Key is string keyString)
+        {
+            if (keyString.Length == 0)
+            {
+                return new ColumnIndexReaderFactory(0);
+            }
+
+            return new ColumnNameReaderFactory(keyString);
+        }
+        else if (Key is int keyInt)
+        {
+            return new ColumnIndexReaderFactory(keyInt);
+        }
+
+        return new ColumnNameReaderFactory(Key.ToString()!);
+    }
+
+    public ICellsReaderFactory? GetDefaultCellsReaderFactory() => null;
 }

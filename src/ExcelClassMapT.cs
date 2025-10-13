@@ -40,7 +40,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public OneToOneMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
-        => GetOrCreateOneToOneMap<TProperty>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateOneToOneMap<T, TProperty>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -87,7 +87,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> MapList<TElement>(Expression<Func<T, IEnumerable>> expression)
-        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -97,7 +97,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IEnumerable<TElement>>> expression)
-        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -107,7 +107,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ICollection<TElement>>> expression)
-        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -117,7 +117,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, Collection<TElement>>> expression)
-        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -127,7 +127,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ReadOnlyCollection<TElement>>> expression)
-        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -137,7 +137,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ObservableCollection<TElement>>> expression)
-        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -147,7 +147,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ReadOnlyObservableCollection<TElement>>> expression)
-        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -157,7 +157,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ISet<TElement>>> expression)
-        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -167,7 +167,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlySet<TElement>>> expression)
-        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -177,7 +177,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ReadOnlySet<TElement>>> expression)
-        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -187,7 +187,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IList<TElement>>> expression)
-        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -197,7 +197,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlyCollection<TElement>>> expression)
-        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -207,7 +207,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlyList<TElement>>> expression)
-        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -217,7 +217,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, List<TElement>>> expression)
-        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -227,7 +227,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, Array>> expression)
-        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -237,7 +237,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, TElement[]>> expression)
-        => GetOrCreateManyToOneEnumerableMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -247,7 +247,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ExcelClassMap<TElement> MapObject<TElement>(Expression<Func<T, TElement>> expression)
-        => GetOrCreateObjectMap<TElement>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateObjectMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -257,7 +257,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneDictionaryMap<string, TValue> MapDictionary<TValue>(Expression<Func<T, IEnumerable>> expression)
-        => GetOrCreateManyToOneDictionaryMap<string, TValue>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, string, TValue>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -267,7 +267,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneDictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, IDictionary>> expression)
-        => GetOrCreateManyToOneDictionaryMap<string, TValue>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, string, TValue>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -277,7 +277,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneDictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, IDictionary<string, TValue>>> expression)
-        => GetOrCreateManyToOneDictionaryMap<string, TValue>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, string, TValue>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -287,7 +287,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneDictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, IReadOnlyDictionary<string, TValue>>> expression)
-        => GetOrCreateManyToOneDictionaryMap<string, TValue>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, string, TValue>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -297,7 +297,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneDictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, Dictionary<string, TValue>>> expression)
-        => GetOrCreateManyToOneDictionaryMap<string, TValue>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, string, TValue>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -306,7 +306,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneDictionaryMap<string, string> Map(Expression<Func<T, StringDictionary>> expression)
-        => GetOrCreateManyToOneDictionaryMap<string, string>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, string, string>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -315,7 +315,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneDictionaryMap<string, string> Map(Expression<Func<T, NameValueCollection>> expression)
-        => GetOrCreateManyToOneDictionaryMap<string, string>(expression.Body);
+        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, string, string>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -324,20 +324,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="expression">A MemberExpression reading the property or field.</param>
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneDictionaryMap<string, object> Map(Expression<Func<T, ExpandoObject>> expression)
-        => GetOrCreateManyToOneDictionaryMap<string, object>(expression.Body);
-
-    // Mapping methods now use ExpressionAutoMapper static methods
-    private OneToOneMap<TProperty> GetOrCreateOneToOneMap<TProperty>(Expression expression)
-        => ExpressionAutoMapper.GetOrCreateOneToOneMap<T, TProperty>(this, expression);
-
-    private ManyToOneEnumerableMap<TElement> GetOrCreateManyToOneEnumerableMap<TElement>(Expression expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression);
-
-    private ExcelClassMap<TElement> GetOrCreateObjectMap<TElement>(Expression expression)
-        => ExpressionAutoMapper.GetOrCreateObjectMap<T, TElement>(this, expression);
-
-    private ManyToOneDictionaryMap<TKey, TValue> GetOrCreateManyToOneDictionaryMap<TKey, TValue>(Expression expression) where TKey : notnull
-        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, TKey, TValue>(this, expression);
+        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, string, object>(this, expression.Body);
 
     /// <summary>
     /// Configures the existing class map used to map multiple cells in a row to the properties and fields
