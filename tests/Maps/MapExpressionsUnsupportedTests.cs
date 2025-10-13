@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Xunit;
@@ -101,6 +102,186 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
+    public void Map_ArrayElementCantBeConstructed_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<NonDisposableArrayElementClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map(p => p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapList<NonConstructibleArrayElement>(p => p.Value));
+    }
+
+    private class NonDisposableArrayElementClass
+    {
+        public NonConstructibleArrayElement[] Value { get; set; } = default!;
+    }
+
+    private class NonConstructibleArrayElement
+    {
+        private NonConstructibleArrayElement() { }
+    }
+
+    [Fact]
+    public void Map_ArrayElementCantBeMapped_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<IDisposableArrayElementClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map(p => p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapList<IDisposable>(p => p.Value));
+    }
+
+    private class IDisposableArrayElementClass
+    {
+        public IDisposable[] Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void Map_MultidimensionalArrayValue_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<MultidimensionalArrayClass>();
+        Assert.Throws<ExcelMappingException>(() => map.MapList<string>(p => p.Value));
+    }
+
+    [Fact]
+    public void Map_MultidimensionalArrayElementCantBeMapped_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<IDisposableMultidimensionalArrayClass>();
+        Assert.Throws<ExcelMappingException>(() => map.MapList<IDisposable>(p => p.Value));
+    }
+
+    private class IDisposableMultidimensionalArrayClass
+    {
+        public IDisposable[,] Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void Map_ListCantBeConstructed_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<NonConstructibleListIndexClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map(p => (IList<string>)p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapList<string>(p => p.Value));
+    }
+
+    private class NonConstructibleListIndexClass
+    {
+        public NonConstructibleList Value { get; set; } = default!;
+    }
+
+    private class NonConstructibleList : List<string>
+    {
+        private NonConstructibleList() { }
+    }
+
+    [Fact]
+    public void Map_ListElementCantBeConstructed_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<NonConstructibleListElementClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map(p => (IList<NonConstructibleListElement>)p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapList<NonConstructibleListElement>(p => p.Value));
+    }
+
+    private class NonConstructibleListElementClass
+    {
+        public List<NonConstructibleListElement> Value { get; set; } = default!;
+    }
+
+    private class NonConstructibleListElement
+    {
+        private NonConstructibleListElement() { }
+    }
+
+    [Fact]
+    public void Map_ImmutableArrayBuilder_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<ImmutableArrayBuilderIntClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map(p => (IList<int>)p.Value));
+    }
+
+    public class ImmutableArrayBuilderIntClass
+    {
+        public ImmutableArray<int>.Builder Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void Map_ImmutableListBuilder_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<ImmutableListBuilderIntClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map(p => (IList<int>)p.Value));
+    }
+
+    public class ImmutableListBuilderIntClass
+    {
+        public ImmutableList<int>.Builder Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void Map_ListElementCantBeMapped_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<IDisposableListElementClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map(p => (IList<IDisposable>)p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapList<IDisposable>(p => p.Value));
+    }
+
+    private class IDisposableListElementClass
+    {
+        public List<IDisposable> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void Map_DictionaryCantBeConstructed_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<NonConstructibleDictionaryClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map(p => (IDictionary<string, string>)p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapDictionary<string>(p => p.Value));
+    }
+
+    private class NonConstructibleDictionaryClass
+    {
+        public NonConstructibleDictionary Value { get; set; } = default!;
+    }
+
+    private class NonConstructibleDictionary : Dictionary<string, string>
+    {
+        private NonConstructibleDictionary() { }
+    }
+
+    [Fact]
+    public void Map_ImmutableDictionaryBuilder_ThrowsExcelMappingException()
+    {
+        var map = new ExcelClassMap<ImmutableDictionaryBuilderIntClass>();
+        Assert.Throws<ExcelMappingException>(() => map.Map(p => (IDictionary<string, int>)p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapDictionary<int>(p => p.Value));
+    }
+
+    public class ImmutableDictionaryBuilderIntClass
+    {
+        public ImmutableDictionary<string, int>.Builder Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void Map_DictionaryKeyCantBeConstructed_Success()
+    {
+        var map = new ExcelClassMap<NonConstructibleDictionaryKeyClass>();
+        map.Map(p => p.Value);
+        map.MapDictionary<string>(p => p.Value);
+    }
+
+    private class NonConstructibleDictionaryKeyClass
+    {
+        public Dictionary<IDisposable, string> Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void Map_DictionaryValueCantBeConstructed_Success()
+    {
+        var map = new ExcelClassMap<NonConstructibleDictionaryValueClass>();
+        map.Map(p => p.Value);
+        map.MapDictionary<IDisposable>(p => p.Value);
+    }
+
+    private class NonConstructibleDictionaryValueClass
+    {
+        public Dictionary<string, IDisposable> Value { get; set; } = default!;
+    }
+
+    [Fact]
     public void Map_RootDefaultMappedIntArrayIndex_ThrowsArgumentException()
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
@@ -130,136 +311,6 @@ public class MapExpressionsUnsupportedTests
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
         var map = new ExcelClassMap<Dictionary<string, int>>();
         Assert.Throws<ArgumentException>("expression", () => map.Map(o => o["key"]));
-    }
-
-    [Fact]
-    public void Map_ArrayElementCantBeMapped_ThrowsExcelMappingException()
-    {
-        var map = new ExcelClassMap<NonConstructibleArrayElementClass>();
-        Assert.Throws<ExcelMappingException>(() => map.Map(p => p.Value));
-    }
-
-    private class NonConstructibleArrayElementClass
-    {
-        public IDisposable[] Value { get; set; } = default!;
-    }
-
-    [Fact]
-    public void Map_MultidimensionalArrayElementCantBeMapped_ThrowsExcelMappingException()
-    {
-        var map = new ExcelClassMap<NonConstructibleArrayElementClass>();
-        Assert.Throws<ExcelMappingException>(() => map.Map(p => p.Value));
-    }
-
-    private class NonConstructibleMultidimensionalArrayElementClass
-    {
-        public IDisposable[,] Value { get; set; } = default!;
-    }
-
-    [Fact]
-    public void Map_ListCantBeConstructed_ThrowsExcelMappingException()
-    {
-        var map = new ExcelClassMap<NonConstructibleListIndexClass>();
-        Assert.Throws<ExcelMappingException>(() => map.Map(p => (IList<string>)p.Value));
-    }
-
-    private class NonConstructibleListIndexClass
-    {
-        public NonConstructibleList Value { get; set; } = default!;
-    }
-
-    private class NonConstructibleList : List<string>
-    {
-        private NonConstructibleList() { }
-    }
-
-    [Fact]
-    public void Map_ImmutableArrayBuilder_ThrowsExcelMappingException()
-    {
-        var map = new ExcelClassMap<ImmutableArrayBuilderIntClass>();
-        Assert.Throws<ExcelMappingException>(() => map.Map(p => (IList<int>)p.Value));
-    }
-
-    public class ImmutableArrayBuilderIntClass
-    {
-        public ImmutableArray<int>.Builder Value { get; set; } = default!;
-    }
-
-    [Fact]
-    public void Map_ListElementCantBeConstructed_ThrowsExcelMappingException()
-    {
-        var map = new ExcelClassMap<NonConstructibleListElementClass>();
-        Assert.Throws<ExcelMappingException>(() => map.Map(p => p.Value));
-    }
-
-    private class NonConstructibleListElementClass
-    {
-        public List<IDisposable> Value { get; set; } = default!;
-    }
-
-    [Fact]
-    public void Map_ImmutableListBuilder_ThrowsExcelMappingException()
-    {
-        var map = new ExcelClassMap<ImmutableListBuilderIntClass>();
-        Assert.Throws<ExcelMappingException>(() => map.Map(p => (IList<int>)p.Value));
-    }
-
-    public class ImmutableListBuilderIntClass
-    {
-        public ImmutableList<int>.Builder Value { get; set; } = default!;
-    }
-
-    [Fact]
-    public void Map_DictionaryCantBeConstructed_ThrowsExcelMappingException()
-    {
-        var map = new ExcelClassMap<NonConstructibleDictionaryClass>();
-        Assert.Throws<ExcelMappingException>(() => map.Map(p => (IDictionary<string, string>)p.Value));
-    }
-
-    private class NonConstructibleDictionaryClass
-    {
-        public NonConstructibleDictionary Value { get; set; } = default!;
-    }
-
-    private class NonConstructibleDictionary : Dictionary<string, string>
-    {
-        private NonConstructibleDictionary() { }
-    }
-
-    [Fact]
-    public void Map_ImmutableDictionaryBuilder_ThrowsExcelMappingException()
-    {
-        var map = new ExcelClassMap<ImmutableDictionaryBuilderIntClass>();
-        Assert.Throws<ExcelMappingException>(() => map.Map(p => (IDictionary<string, int>)p.Value));
-    }
-
-    public class ImmutableDictionaryBuilderIntClass
-    {
-        public ImmutableDictionary<string, int>.Builder Value { get; set; } = default!;
-    }
-
-    [Fact]
-    public void Map_DictionaryKeyCantBeConstructed_Success()
-    {
-        var map = new ExcelClassMap<NonConstructibleDictionaryKeyClass>();
-        map.Map(p => p.Value);
-    }
-
-    private class NonConstructibleDictionaryKeyClass
-    {
-        public Dictionary<IDisposable, string> Value { get; set; } = default!;
-    }
-
-    [Fact]
-    public void Map_DictionaryValueCantBeConstructed_Success()
-    {
-        var map = new ExcelClassMap<NonConstructibleDictionaryValueClass>();
-        map.Map(p => p.Value);
-    }
-
-    private class NonConstructibleDictionaryValueClass
-    {
-        public Dictionary<string, IDisposable> Value { get; set; } = default!;
     }
 
     [Fact]

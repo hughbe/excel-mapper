@@ -441,11 +441,6 @@ public static class AutoMapper
             result = new FrozenSetEnumerableFactory<TElement>();
             return true;
         }
-        else if (listType == typeof(ReadOnlyObservableCollection<TElement>))
-        {
-            result = new ReadOnlyObservableCollectionEnumerableFactory<TElement>();
-            return true;
-        }
         else if (listType.IsInterface)
         {
             // Add values by creating a list and assigning to the property.
@@ -522,6 +517,14 @@ public static class AutoMapper
                     result = new AddEnumerableFactory<TElement>(listType);
                     return true;
                 }
+            }
+
+            // Check if the type has a .ctor(ObservableCollection<T>) such as ReadOnlyObservableCollection.
+            ctor = listType.GetConstructor([typeof(ObservableCollection<TElement>)]);
+            if (ctor != null)
+            {
+                result = new ReadOnlyObservableCollectionEnumerableFactory<TElement>(listType);
+                return true;
             }
         }
 

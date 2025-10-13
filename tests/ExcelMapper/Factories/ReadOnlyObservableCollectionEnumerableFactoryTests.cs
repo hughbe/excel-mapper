@@ -1,16 +1,75 @@
 using System;
+using System.Collections;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using Xunit;
 
 namespace ExcelMapper.Factories;
 
 public class ReadOnlyObservableCollectionEnumerableFactoryTests
 {
+    [Theory]
+    [InlineData(typeof(List<int>))]
+    [InlineData(typeof(HashSet<int>))]
+    [InlineData(typeof(ArrayList))]
+    [InlineData(typeof(Queue))]
+    [InlineData(typeof(Stack))]
+    [InlineData(typeof(Collection<int>))]
+    [InlineData(typeof(ReadOnlyCollection<int>))]
+    [InlineData(typeof(ObservableCollection<int>))]
+    [InlineData(typeof(ReadOnlyObservableCollection<int>))]
+    [InlineData(typeof(SubReadOnlyObservableCollection<int>))]
+    [InlineData(typeof(ObservableCollectionConstructor<int>))]
+    public void Ctor_Type(Type collectionType)
+    {
+        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>(collectionType);
+        Assert.Equal(collectionType, factory.CollectionType);
+    }
+
+    [Fact]
+    public void Ctor_NullCollectionType_ThrowsArgumentNullException()
+    {
+        Assert.Throws<ArgumentNullException>("collectionType", () => new ReadOnlyObservableCollectionEnumerableFactory<int>(null!));
+    }
+
+    [Theory]
+    [InlineData(typeof(IEnumerable))]
+    [InlineData(typeof(IEnumerable<int>))]
+    [InlineData(typeof(ICollection))]
+    [InlineData(typeof(ICollection<int>))]
+    [InlineData(typeof(IReadOnlyCollection<int>))]
+    [InlineData(typeof(IList))]
+    [InlineData(typeof(IList<int>))]
+    [InlineData(typeof(IReadOnlyList<int>))]
+    [InlineData(typeof(int[]))]
+    [InlineData(typeof(IListNonGeneric))]
+    [InlineData(typeof(ICollectionNonGeneric))]
+    [InlineData(typeof(List<string>))]
+    [InlineData(typeof(AbstractClass))]
+    [InlineData(typeof(FrozenSet<int>))]
+    [InlineData(typeof(Collection<string>))]
+    [InlineData(typeof(ReadOnlyCollection<string>))]
+    [InlineData(typeof(ObservableCollection<string>))]
+    [InlineData(typeof(ReadOnlyObservableCollection<string>))]
+    [InlineData(typeof(SubReadOnlyObservableCollection<string>))]
+    [InlineData(typeof(ObservableCollectionConstructor<string>))]
+    [InlineData(typeof(HashSet<string>))]
+    [InlineData(typeof(ReadOnlySet<string>))]
+    [InlineData(typeof(SubCollectionBase))]
+    [InlineData(typeof(ICollectionGeneric<int>))]
+    [InlineData(typeof(IListGeneric<int>))]
+    [InlineData(typeof(ReadOnlySet<int>))]
+    public void Ctor_InvalidCollectionType_ThrowsArgumentException(Type collectionType)
+    {
+        Assert.Throws<ArgumentException>("collectionType", () => new ReadOnlyObservableCollectionEnumerableFactory<int>(collectionType));
+    }
+
     [Fact]
     public void Begin_End_Success()
     {
-        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>();
+        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>(typeof(ReadOnlyObservableCollection<int>));
 
         // Begin.
         factory.Begin(1);
@@ -26,14 +85,14 @@ public class ReadOnlyObservableCollectionEnumerableFactoryTests
     [Fact]
     public void Begin_AlreadyBegan_ThrowsExcelMappingException()
     {
-        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>();
+        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>(typeof(ReadOnlyObservableCollection<int>));
         factory.Begin(1);
         Assert.Throws<ExcelMappingException>(() => factory.Begin(1));
     }
     [Fact]
     public void Add_End_Success()
     {
-        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>();
+        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>(typeof(ReadOnlyObservableCollection<int>));
 
         // Begin.
         factory.Begin(1);
@@ -51,7 +110,7 @@ public class ReadOnlyObservableCollectionEnumerableFactoryTests
     [Fact]
     public void Add_OutOfRange_Success()
     {
-        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>();
+        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>(typeof(ReadOnlyObservableCollection<int>));
         factory.Begin(1);
         factory.Add(2);
 
@@ -64,14 +123,14 @@ public class ReadOnlyObservableCollectionEnumerableFactoryTests
     [Fact]
     public void Add_NotBegan_ThrowsExcelMappingException()
     {
-        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>();
+        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>(typeof(ReadOnlyObservableCollection<int>));
         Assert.Throws<ExcelMappingException>(() => factory.Add(1));
     }
 
     [Fact]
     public void Set_Invoke_Success()
     {
-        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>();
+        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>(typeof(ReadOnlyObservableCollection<int>));
         factory.Begin(1);
 
         factory.Set(0, 1);
@@ -81,7 +140,7 @@ public class ReadOnlyObservableCollectionEnumerableFactoryTests
     [Fact]
     public void Set_InvokeOutOfRange_Success()
     {
-        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>();
+        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>(typeof(ReadOnlyObservableCollection<int>));
         factory.Begin(1);
 
         factory.Set(0, 1);
@@ -92,14 +151,14 @@ public class ReadOnlyObservableCollectionEnumerableFactoryTests
     [Fact]
     public void Set_NotBegan_ThrowsExcelMappingException()
     {
-        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>();
+        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>(typeof(ReadOnlyObservableCollection<int>));
         Assert.Throws<ExcelMappingException>(() => factory.Set(0, 1));
     }
 
     [Fact]
     public void Set_NegativeIndex_ThrowsArgumentOutOfRangeException()
     {
-        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>();
+        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>(typeof(ReadOnlyObservableCollection<int>));
         factory.Begin(1);
         Assert.Throws<ArgumentOutOfRangeException>("index", () => factory.Set(-1, 1));
     }
@@ -107,14 +166,14 @@ public class ReadOnlyObservableCollectionEnumerableFactoryTests
     [Fact]
     public void End_NotBegan_ThrowsExcelMappingException()
     {
-        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>();
+        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>(typeof(ReadOnlyObservableCollection<int>));
         Assert.Throws<ExcelMappingException>(() => factory.End());
     }
 
     [Fact]
     public void End_AlreadyEnded_ThrowsExcelMappingException()
     {
-        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>();
+        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>(typeof(ReadOnlyObservableCollection<int>));
         factory.Begin(1);
         factory.End();
 
@@ -124,7 +183,7 @@ public class ReadOnlyObservableCollectionEnumerableFactoryTests
     [Fact]
     public void Reset_Invoke_Success()
     {
-        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>();
+        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>(typeof(ReadOnlyObservableCollection<int>));
         factory.Begin(1);
         factory.End();
 
@@ -139,12 +198,157 @@ public class ReadOnlyObservableCollectionEnumerableFactoryTests
     [Fact]
     public void Reset_NotBegan_Success()
     {
-        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>();
+        var factory = new ReadOnlyObservableCollectionEnumerableFactory<int>(typeof(ReadOnlyObservableCollection<int>));
         factory.Reset();
 
         // Make sure we can begin.
         factory.Begin(1);
         var value = Assert.IsType<ReadOnlyObservableCollection<int>>(factory.End());
         Assert.Equal([], value);
+    }
+
+    private abstract class AbstractClass
+    {
+        public AbstractClass(ObservableCollection<int> list)
+        {
+        }
+    }
+
+    private class IEnumerableNonGeneric : IEnumerable
+    {
+        public IEnumerator GetEnumerator() => throw new NotImplementedException();
+    }
+
+    private class IEnumerableGeneric<T> : IEnumerable<T>
+    {
+        public IEnumerator GetEnumerator() => throw new NotImplementedException();
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => throw new NotImplementedException();
+    }
+
+    private class ICollectionNonGeneric : ICollection
+    {
+        public int Count => throw new NotImplementedException();
+
+        public bool IsSynchronized => throw new NotImplementedException();
+
+        public object SyncRoot => throw new NotImplementedException();
+
+        public void CopyTo(Array array, int index) => throw new NotImplementedException();
+
+        public IEnumerator GetEnumerator() => throw new NotImplementedException();
+    }
+
+    private class ICollectionGeneric<T> : ICollection<T>
+    {
+        public int Count => throw new NotImplementedException();
+
+        public bool IsSynchronized => throw new NotImplementedException();
+
+        public object SyncRoot => throw new NotImplementedException();
+
+        public bool IsReadOnly => throw new NotImplementedException();
+
+        public void Add(T item) => throw new NotImplementedException();
+
+        public void Clear() => throw new NotImplementedException();
+
+        public bool Contains(T item) => throw new NotImplementedException();
+
+        public void CopyTo(Array array, int index) => throw new NotImplementedException();
+
+        public void CopyTo(T[] array, int arrayIndex) => throw new NotImplementedException();
+
+        public IEnumerator GetEnumerator() => throw new NotImplementedException();
+
+        public bool Remove(T item) => throw new NotImplementedException();
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => throw new NotImplementedException();
+    }
+
+    private class IListNonGeneric : IList
+    {
+        public object? this[int index] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public int Count => throw new NotImplementedException();
+
+        public bool IsSynchronized => throw new NotImplementedException();
+
+        public object SyncRoot => throw new NotImplementedException();
+
+        public bool IsFixedSize => throw new NotImplementedException();
+
+        public bool IsReadOnly => throw new NotImplementedException();
+
+        public int Add(object? value) => throw new NotImplementedException();
+
+        public void Clear() => throw new NotImplementedException();
+
+        public bool Contains(object? value) => throw new NotImplementedException();
+
+        public void CopyTo(Array array, int index) => throw new NotImplementedException();
+
+        public IEnumerator GetEnumerator() => throw new NotImplementedException();
+
+        public int IndexOf(object? value) => throw new NotImplementedException();
+
+        public void Insert(int index, object? value) => throw new NotImplementedException();
+
+        public void Remove(object? value) => throw new NotImplementedException();
+
+        public void RemoveAt(int index) => throw new NotImplementedException();
+    }
+
+    private class IListGeneric<T> : IList<T>
+    {
+        public T this[int index] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public int Count => throw new NotImplementedException();
+
+        public bool IsSynchronized => throw new NotImplementedException();
+
+        public object SyncRoot => throw new NotImplementedException();
+
+        public bool IsReadOnly => throw new NotImplementedException();
+
+        public void Add(T item) => throw new NotImplementedException();
+
+        public void Clear() => throw new NotImplementedException();
+
+        public bool Contains(T item) => throw new NotImplementedException();
+
+        public void CopyTo(Array array, int index) => throw new NotImplementedException();
+
+        public void CopyTo(T[] array, int arrayIndex) => throw new NotImplementedException();
+
+        public IEnumerator GetEnumerator() => throw new NotImplementedException();
+
+        public int IndexOf(T item) => throw new NotImplementedException();
+
+        public void Insert(int index, T item) => throw new NotImplementedException();
+
+        public bool Remove(T item) => throw new NotImplementedException();
+
+        public void RemoveAt(int index) => throw new NotImplementedException();
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => throw new NotImplementedException();
+    }
+
+    private class SubCollectionBase : CollectionBase
+    {
+    }
+
+    private class SubReadOnlyObservableCollection<T> : ReadOnlyObservableCollection<T>
+    {
+        public SubReadOnlyObservableCollection(ObservableCollection<T> list) : base(list)
+        {
+        }
+    }
+
+    private class ObservableCollectionConstructor<T>
+    {
+        public ObservableCollectionConstructor(ObservableCollection<T> list)
+        {
+        }
     }
 }

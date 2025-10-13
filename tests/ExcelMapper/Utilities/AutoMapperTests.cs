@@ -194,10 +194,32 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubIEnumerableType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubIEnumerable>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubIEnumerable : IEnumerable
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_IEnumerableObjectType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IEnumerable<object>>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubIEnumerableObjectType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubIEnumerableObject>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubIEnumerableObject : IEnumerable<object>
+    {
     }
 
     [Fact]
@@ -222,10 +244,32 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubICollectionType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubICollection>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubICollection : ICollection
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_ICollectionObjectType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ICollection<object>>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubICollectionObjectType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubICollectionObject>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubICollectionObject : ICollection<object>
+    {
     }
 
     [Fact]
@@ -243,6 +287,17 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubIReadOnlyCollectionObjectType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubIReadOnlyCollectionObject>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubIReadOnlyCollectionObject : IReadOnlyCollection<object>
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_IListType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IList>? classMap));
@@ -250,10 +305,32 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubIListType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubIList>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubIList : IList
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_IListObjectType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IList<object>>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubIListObjectType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubIListObject>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubIListObject : IList<object>
+    {
     }
 
     [Fact]
@@ -278,6 +355,17 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubISetObjectType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubISetObject>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubISetObject : ISet<object>
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_ISetStringType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ISet<string>>? classMap));
@@ -292,10 +380,39 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubIReadOnlySetStringType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubIReadOnlySetString>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubIReadOnlySetString : IReadOnlySet<string>
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_ArrayListType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ArrayList>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubArrayListType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubArrayList>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubArrayList : ArrayList
+    {
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_BitArrayType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<BitArray>? classMap));
+        Assert.Null(classMap);
     }
 
     [Fact]
@@ -335,13 +452,6 @@ public class AutoMapperTests
     }
 
     [Fact]
-    public void TryCreateClass_Map_StackType_ReturnsTrue()
-    {
-        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Stack>? classMap));
-        Assert.NotNull(classMap);
-    }
-
-    [Fact]
     public void TryCreateClass_Map_QueueType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Queue>? classMap));
@@ -349,9 +459,56 @@ public class AutoMapperTests
     }
 
     [Fact]
-    public void TryCreateClass_Map_BitArrayType_ReturnsFalse()
+    public void TryCreateClass_Map_SubQueueType_ReturnsTrue()
     {
-        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<BitArray>? classMap));
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubQueue>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubQueue : Queue
+    {
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SortedListType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SortedList>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubSortedListType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubSortedList>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubSortedList : SortedList
+    {
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_StackType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Stack>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubStackType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubStack>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubStack : Stack
+    {
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_BitVector32Type_ReturnsTrue()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<BitVector32>? classMap));
         Assert.Null(classMap);
     }
 
@@ -363,10 +520,51 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubStringCollectionType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubStringCollection>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubStringCollection : StringCollection
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_CollectionType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Collection<string>>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubCollectionType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubCollection>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubCollection : Collection<string>
+    {
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_KeyedCollectionType_ReturnsTrue()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<KeyedCollection<string, object>>? classMap));
+        Assert.Null(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubKeyedCollectionType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubKeyedCollection<string, object>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubKeyedCollection<TKey, TValue> : KeyedCollection<TKey, TValue> where TKey : notnull
+    {
+        protected override TKey GetKeyForItem(TValue item) => throw new NotImplementedException();
     }
 
     [Fact]
@@ -377,10 +575,35 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubReadOnlyCollectionType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubReadOnlyCollection>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubReadOnlyCollection : ReadOnlyCollection<string>
+    {
+        public SubReadOnlyCollection(IList<string> list) : base(list)
+        {
+        }
+    }
+
+    [Fact]
     public void TryCreateClass_Map_ObservableCollectionType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ObservableCollection<string>>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubObservableCollectionType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubObservableCollection>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubObservableCollection : ObservableCollection<string>
+    {
     }
 
     [Fact]
@@ -391,10 +614,35 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubReadOnlyObservableCollectionType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubReadOnlyObservableCollection>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubReadOnlyObservableCollection : ReadOnlyObservableCollection<string>
+    {
+        public SubReadOnlyObservableCollection(ObservableCollection<string> list) : base(list)
+        {
+        }
+    }
+
+    [Fact]
     public void TryCreateClass_Map_LinkedListType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<LinkedList<string>>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubLinkedListType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubLinkedList>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubLinkedList : LinkedList<string>
+    {
     }
 
     [Fact]
@@ -405,10 +653,32 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubListStringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubList>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubList : List<string>
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_HashSetStringType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<HashSet<string>>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubHashSetStringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubHashSet>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubHashSet : HashSet<string>
+    {
     }
 
     [Fact]
@@ -419,6 +689,20 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubReadOnlySetStringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubReadOnlySet>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubReadOnlySet : ReadOnlySet<string>
+    {
+        public SubReadOnlySet(ISet<string> set) : base(set)
+        {
+        }
+    }
+
+    [Fact]
     public void TryCreateClass_Map_SortedSetStringType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SortedSet<string>>? classMap));
@@ -426,9 +710,56 @@ public class AutoMapperTests
     }
 
     [Fact]
-    public void TryCreateClass_Map_FrozenSetStringType_ReturnsTrue()
+    public void TryCreateClass_Map_SubSortedSetStringType_ReturnsTrue()
     {
-        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<FrozenSet<string>>? classMap));
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubSortedSet>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubSortedSet : SortedSet<string>
+    {
+        public SubSortedSet() : base()
+        {
+        }
+
+        public SubSortedSet(IComparer<string> comparer) : base(comparer)
+        {
+        }
+
+        public SubSortedSet(IEnumerable<string> collection) : base(collection)
+        {
+        }
+
+        public SubSortedSet(IEnumerable<string> collection, IComparer<string> comparer) : base(collection, comparer)
+        {
+        }
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_BlockingCollectionStringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<BlockingCollection<string>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_ConcurrentBagStringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ConcurrentBag<string>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_ConcurrentQueueStringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ConcurrentQueue<string>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_ConcurrentStackStringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ConcurrentStack<string>>? classMap));
         Assert.NotNull(classMap);
     }
 
@@ -454,6 +785,17 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubIImmutableListStringType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubIImmutableList>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubIImmutableList : IImmutableList<string>
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_ImmutableStackStringType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ImmutableStack<string>>? classMap));
@@ -468,6 +810,17 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubIImmutableStackStringType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubIImmutableStack>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubIImmutableStack : IImmutableStack<string>
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_ImmutableQueueStringType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ImmutableQueue<string>>? classMap));
@@ -479,6 +832,17 @@ public class AutoMapperTests
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IImmutableQueue<string>>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubIImmutableQueueStringType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubIImmutableQueue>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubIImmutableQueue : IImmutableQueue<string>
+    {
     }
 
     [Fact]
@@ -503,10 +867,39 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubIImmutableSetStringType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubIImmutableSet>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubIImmutableSet : IImmutableSet<string>
+    {
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_FrozenSetStringType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<FrozenSet<string>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
     public void TryCreateClass_Map_IEnumerableKeyValuePairStringObjectType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IEnumerable<KeyValuePair<string, object>>>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubIEnumerableKeyValuePairStringObjectType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubIEnumerableKeyValuePairStringObject>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubIEnumerableKeyValuePairStringObject : IEnumerable<KeyValuePair<string, object>>
+    {
     }
 
     [Fact]
@@ -517,10 +910,32 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubIEnumerableKeyValuePairType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubIEnumerableKeyValuePair>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubIEnumerableKeyValuePair : IEnumerable<KeyValuePair<string, string>>
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_ICollectionKeyValuePairType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ICollection<KeyValuePair<string, string>>>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubICollectionKeyValuePairType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubICollectionKeyValuePair>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubICollectionKeyValuePair : ICollection<KeyValuePair<string, string>>
+    {
     }
 
     [Fact]
@@ -531,10 +946,32 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubIListKeyValuePairType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubIListKeyValuePair>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubIListKeyValuePair : IList<KeyValuePair<string, string>>
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_IDictionaryType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<IDictionary>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubIDictionaryType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubIDictionary>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubIDictionary : IDictionary
+    {
     }
 
     [Fact]
@@ -545,10 +982,32 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubIDictionaryStringObjectType_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubIDictionaryStringObject>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private interface SubIDictionaryStringObject : IDictionary<string, object>
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_HashtableType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Hashtable>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubHashtableType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubHashtable>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubHashtable : Hashtable
+    {
     }
 
     [Fact]
@@ -577,10 +1036,14 @@ public class AutoMapperTests
     }
 
     [Fact]
-    public void TryCreateClass_Map_NameValueCollectionType_ReturnsTrue()
+    public void TryCreateClass_Map_SubHybridDictionaryType_ReturnsTrue()
     {
-        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<NameValueCollection>? classMap));
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubHybridDictionary>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    private class SubHybridDictionary : HybridDictionary
+    {
     }
 
     [Fact]
@@ -591,10 +1054,50 @@ public class AutoMapperTests
     }
 
     [Fact]
-    public void TryCreateClass_Map_SortedListType_ReturnsTrue()
+    public void TryCreateClass_Map_SubListDictionaryType_ReturnsTrue()
     {
-        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SortedList>? classMap));
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubListDictionary>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    private class SubListDictionary : ListDictionary
+    {
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_NameObjectCollectionBase_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<NameObjectCollectionBase>? classMap));
+        Assert.Null(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubNameObjectCollectionBase_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubNameObjectCollectionBase>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubNameObjectCollectionBase : NameObjectCollectionBase
+    {
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_NameValueCollectionType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<NameValueCollection>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubNameValueCollectionType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubNameValueCollection>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubNameValueCollection : NameValueCollection
+    {
     }
 
     [Fact]
@@ -605,6 +1108,17 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubStringDictionaryType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubStringDictionary>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubStringDictionary : StringDictionary
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_OrderedDictionaryType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<OrderedDictionary>? classMap));
@@ -612,10 +1126,32 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubOrderedDictionaryType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubOrderedDictionary>? classMap));
+        Assert.NotNull(classMap);
+    }
+    
+    private class SubOrderedDictionary : OrderedDictionary
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_DictionaryStringObjectType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Dictionary<string, object>>? classMap));
         Assert.NotNull(classMap);
+    }
+    
+    [Fact]
+    public void TryCreateClass_Map_SubDictionaryStringObjectType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubDictionaryStringObject>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubDictionaryStringObject : Dictionary<string, object>
+    {
     }
 
     [Fact]
@@ -626,6 +1162,17 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubOrderedDictionaryStringObjectType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubOrderedDictionaryStringObject>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubOrderedDictionaryStringObject : OrderedDictionary<string, object>
+    {
+    }
+
+    [Fact]
     public void TryCreateClass_Map_SortedDictionaryStringObjectType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SortedDictionary<string, object>>? classMap));
@@ -633,10 +1180,14 @@ public class AutoMapperTests
     }
 
     [Fact]
-    public void TryCreateClass_Map_FrozenDictionaryStringObjectType_ReturnsTrue()
+    public void TryCreateClass_Map_SubSortedDictionaryStringObjectType_ReturnsTrue()
     {
-        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<FrozenDictionary<string, object>>? classMap));
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubSortedDictionaryStringObject>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    private class SubSortedDictionaryStringObject : SortedDictionary<string, object>
+    {
     }
 
     [Fact]
@@ -647,10 +1198,35 @@ public class AutoMapperTests
     }
 
     [Fact]
+    public void TryCreateClass_Map_SubReadOnlyDictionaryStringObjectType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubReadOnlyDictionaryStringObject>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubReadOnlyDictionaryStringObject : ReadOnlyDictionary<string, object>
+    {
+        public SubReadOnlyDictionaryStringObject(IDictionary<string, object> dictionary) : base(dictionary)
+        {
+        }
+    }
+
+    [Fact]
     public void TryCreateClass_Map_ConcurrentDictionaryStringObjectType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ConcurrentDictionary<string, object>>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_SubConcurrentDictionaryStringObjectType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubConcurrentDictionaryStringObject>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class SubConcurrentDictionaryStringObject : ConcurrentDictionary<string, object>
+    {
     }
 
     [Fact]
@@ -661,15 +1237,14 @@ public class AutoMapperTests
     }
 
     [Fact]
-    public void TryCreateClass_Map_KeyedCollectionType_ReturnsTrue()
+    public void TryCreateClass_Map_SubSortedListTType_ReturnsTrue()
     {
-        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<KeyedCollection<string, object>>? classMap));
-        Assert.Null(classMap);
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<SubSortedListT>? classMap));
+        Assert.NotNull(classMap);
     }
 
-    private class SubKeyedCollection<TKey, TValue> : KeyedCollection<TKey, TValue> where TKey : notnull
+    private class SubSortedListT : SortedList<string, int>
     {
-        protected override TKey GetKeyForItem(TValue item) => throw new NotImplementedException();
     }
 
     [Fact]
@@ -690,6 +1265,13 @@ public class AutoMapperTests
     public void TryCreateClass_Map_ImmutableSortedDictionaryStringObjectType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ImmutableSortedDictionary<string, object>>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_FrozenDictionaryStringObjectType_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<FrozenDictionary<string, object>>? classMap));
         Assert.NotNull(classMap);
     }
 
