@@ -405,7 +405,7 @@ public static class AutoMapper
     private static MethodInfo? s_getOrCreateMultidimensionalIndexerMapGenericMethod;
     private static MethodInfo GetOrCreateMultidimensionalIndexerMapGenericMethod => s_getOrCreateMultidimensionalIndexerMapGenericMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(GetOrCreateMultidimensionalIndexerMapGeneric))!;
 
-    internal static IMap GetOrCreateMultidimensionalIndexerMap(IMap parentMap, Type arrayType, object? context, Type elementType)
+    internal static IMap GetOrCreateMultidimensionalIndexerMap(IMap parentMap, Type arrayType, Type elementType, object? context)
     {
         var method = GetOrCreateMultidimensionalIndexerMapGenericMethod.MakeGenericMethod([elementType]);
         var parameters = new object?[] { parentMap, arrayType, context };
@@ -434,7 +434,7 @@ public static class AutoMapper
     private static MethodInfo? s_getOrCreateDictionaryIndexerMapGenericMethod;
     private static MethodInfo GetOrCreateDictionaryIndexerMapGenericMethod => s_getOrCreateDictionaryIndexerMapGenericMethod ??= typeof(AutoMapper).GetTypeInfo().GetDeclaredMethod(nameof(GetOrCreateDictionaryIndexerMapGeneric))!;
 
-    internal static IDictionaryIndexerMap GetOrCreateDictionaryIndexerMap(IMap parentMap, Type dictionaryType, object? context, Type keyType, Type valueType)
+    internal static IDictionaryIndexerMap GetOrCreateDictionaryIndexerMap(IMap parentMap, Type dictionaryType, Type keyType, Type valueType, object? context)
     {
         var method = GetOrCreateDictionaryIndexerMapGenericMethod.MakeGenericMethod([keyType, valueType]);
         var parameters = new object?[] { parentMap, dictionaryType, context };
