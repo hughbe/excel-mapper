@@ -11,20 +11,14 @@ public class MultidimensionalArrayFactory<T> : IMultidimensionalArrayFactory<T>
 
     public void Begin(int[] lengths)
     {
-        if (lengths == null)
-        {
-            throw new ArgumentNullException(nameof(lengths));
-        }
+        ArgumentNullException.ThrowIfNull(lengths);
         if (lengths.Length == 0)
         {
             throw new ArgumentException("Lengths cannot be empty.", nameof(lengths));
         }
         foreach (var length in lengths)
         {
-            if (length < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(lengths), lengths, "Lengths cannot be negative.");
-            }
+            ArgumentOutOfRangeException.ThrowIfNegative(length, nameof(lengths));
         }
 
         if (_items is not null)
@@ -37,20 +31,14 @@ public class MultidimensionalArrayFactory<T> : IMultidimensionalArrayFactory<T>
 
     public void Set(int[] indices, T? item)
     {
-        if (indices == null)
-        {
-            throw new ArgumentNullException(nameof(indices));
-        }
+        ArgumentNullException.ThrowIfNull(indices);
         if (indices.Length == 0)
         {
             throw new ArgumentException("Indices cannot be empty.", nameof(indices));
         }
         foreach (var index in indices)
         {
-            if (index < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(indices), indices, "Indices cannot be negative.");
-            }
+            ArgumentOutOfRangeException.ThrowIfNegative(index, nameof(indices));
         }
 
         EnsureMapping();
@@ -61,9 +49,14 @@ public class MultidimensionalArrayFactory<T> : IMultidimensionalArrayFactory<T>
     {
         EnsureMapping();
 
-        var result = _items;
-        Reset();
-        return result;
+        try
+        {
+            return _items;
+        }
+        finally
+        {
+            Reset();
+        }
     }
 
     public void Reset()

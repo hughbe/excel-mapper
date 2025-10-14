@@ -22,9 +22,13 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// </summary>
     public ManyToOneEnumerableMap(ICellsReaderFactory readerFactory, IValuePipeline<TElement> elementPipeline, IEnumerableFactory<TElement> enumerableFactory)
     {
-        _readerFactory = readerFactory ?? throw new ArgumentNullException(nameof(readerFactory));
-        ElementPipeline = elementPipeline ?? throw new ArgumentNullException(nameof(elementPipeline));
-        EnumerableFactory = enumerableFactory ?? throw new ArgumentNullException(nameof(enumerableFactory));
+        ArgumentNullException.ThrowIfNull(readerFactory);
+        ArgumentNullException.ThrowIfNull(elementPipeline);
+        ArgumentNullException.ThrowIfNull(enumerableFactory);
+
+        _readerFactory = readerFactory;
+        ElementPipeline = elementPipeline;
+        EnumerableFactory = enumerableFactory;
     }
 
     private ICellsReaderFactory _readerFactory;
@@ -33,7 +37,11 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     public ICellsReaderFactory ReaderFactory
     {
         get => _readerFactory;
-        set => _readerFactory = value ?? throw new ArgumentNullException(nameof(value));
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            _readerFactory = value;
+        }
     }
 
     /// <inheritdoc />
@@ -56,11 +64,8 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
 
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
-        if (sheet == null)
-        {
-            throw new ArgumentNullException(nameof(sheet));
-        }
-        
+        ArgumentNullException.ThrowIfNull(sheet);
+
         var cellsReader = _factoryCache.GetOrAdd(sheet, s => _readerFactory.GetCellsReader(s));
 
         if (cellsReader == null || !cellsReader.TryGetValues(reader, PreserveFormatting, out var results))
@@ -101,12 +106,11 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithElementMap(Func<IValuePipeline<TElement>, IValuePipeline<TElement>> elementMap)
     {
-        if (elementMap == null)
-        {
-            throw new ArgumentNullException(nameof(elementMap));
-        }
+        ArgumentNullException.ThrowIfNull(elementMap);
 
-        ElementPipeline = elementMap(ElementPipeline) ?? throw new ArgumentNullException(nameof(elementMap));
+        var result = elementMap(ElementPipeline);
+        ArgumentNullException.ThrowIfNull(result, nameof(elementMap));
+        ElementPipeline = result;
         return this;
     }
 
@@ -160,10 +164,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithSeparators(params char[] separators)
     {
-        if (separators is null)
-        {
-            throw new ArgumentNullException(nameof(separators));
-        }
+        ArgumentNullException.ThrowIfNull(separators);
 
         if (ReaderFactory is not SplitReaderFactory splitColumnReader)
         {
@@ -186,10 +187,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithSeparators(IEnumerable<char> separators)
     {
-        if (separators == null)
-        {
-            throw new ArgumentNullException(nameof(separators));
-        }
+        ArgumentNullException.ThrowIfNull(separators);
 
         return WithSeparators(separators.ToArray());
     }
@@ -202,11 +200,8 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithSeparators(params string[] separators)
     {
-        if (separators is null)
-        {
-            throw new ArgumentNullException(nameof(separators));
-        }
-        
+        ArgumentNullException.ThrowIfNull(separators);
+
         if (ReaderFactory is not SplitReaderFactory splitColumnReader)
         {
             throw new ExcelMappingException("The mapping comes from multiple columns, so cannot be split.");
@@ -228,10 +223,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithSeparators(IEnumerable<string> separators)
     {
-        if (separators == null)
-        {
-            throw new ArgumentNullException(nameof(separators));
-        }
+        ArgumentNullException.ThrowIfNull(separators);
 
         return WithSeparators(separators.ToArray());
     }

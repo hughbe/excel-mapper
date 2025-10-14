@@ -10,20 +10,14 @@ public class ExcelPropertyMapCollection : Collection<ExcelPropertyMap>
 {
     protected override void InsertItem(int index, ExcelPropertyMap item)
     {
-        if (item == null)
-        {
-            throw new ArgumentNullException(nameof(item));
-        }
+        ArgumentNullException.ThrowIfNull(item);
 
         base.InsertItem(index, item);
     }
 
     protected override void SetItem(int index, ExcelPropertyMap item)
     {
-        if (item == null)
-        {
-            throw new ArgumentNullException(nameof(item));
-        }
+        ArgumentNullException.ThrowIfNull(item);
 
         base.SetItem(index, item);
     }

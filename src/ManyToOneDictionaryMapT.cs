@@ -23,9 +23,13 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
     /// <param name="valuePipeline">The map that maps the value of a single cell to an object of the element type of the property or field.</param>
     public ManyToOneDictionaryMap(ICellsReaderFactory readerFactory, IValuePipeline<TValue> valuePipeline, IDictionaryFactory<TKey, TValue> dictionaryFactory)
     {
-        _readerFactory = readerFactory ?? throw new ArgumentNullException(nameof(readerFactory));
-        ValuePipeline = valuePipeline ?? throw new ArgumentNullException(nameof(valuePipeline));
-        DictionaryFactory = dictionaryFactory ?? throw new ArgumentNullException(nameof(dictionaryFactory));
+        ArgumentNullException.ThrowIfNull(readerFactory);
+        ArgumentNullException.ThrowIfNull(valuePipeline);
+        ArgumentNullException.ThrowIfNull(dictionaryFactory);
+
+        _readerFactory = readerFactory;
+        ValuePipeline = valuePipeline;
+        DictionaryFactory = dictionaryFactory;
     }
 
     /// <summary>
@@ -46,7 +50,11 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
     public ICellsReaderFactory ReaderFactory
     {
         get => _readerFactory;
-        set => _readerFactory = value ?? throw new ArgumentNullException(nameof(value));
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            _readerFactory = value;
+        }
     }
 
     /// <summary>
@@ -58,10 +66,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
 
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
-        if (sheet == null)
-        {
-            throw new ArgumentNullException(nameof(sheet));
-        }
+        ArgumentNullException.ThrowIfNull(sheet);
         if (sheet.Heading == null)
         {
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
@@ -113,12 +118,12 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
     /// <returns>The map that invoked this method.</returns>
     public ManyToOneDictionaryMap<TKey, TValue> WithValueMap(Func<IValuePipeline<TValue>, IValuePipeline<TValue>> valueMap)
     {
-        if (valueMap == null)
-        {
-            throw new ArgumentNullException(nameof(valueMap));
-        }
+        ArgumentNullException.ThrowIfNull(valueMap);
 
-        ValuePipeline = valueMap(ValuePipeline) ?? throw new ArgumentNullException(nameof(valueMap));
+        var result = valueMap(ValuePipeline);
+        ArgumentNullException.ThrowIfNull(result, nameof(valueMap));
+        ValuePipeline = result;
+
         return this;
     }
 }

@@ -40,7 +40,12 @@ public class ColumnNamesReaderFactoryTests
     {
         Assert.Throws<ArgumentException>("columnNames", () => new ColumnNamesReaderFactory([null!]));
     }
-    
+
+    [Fact]
+    public void Ctor_EmptyValueInColumnNames_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>("columnNames", () => new ColumnNamesReaderFactory([""]));
+    }
 
     [Fact]
     public void GetCellReader_InvokeColumnNamesSheetWithHeadingMatch_ReturnsExpected()
@@ -70,7 +75,7 @@ public class ColumnNamesReaderFactoryTests
     public void GetCellReader_NullSheet_ThrowsArgumentNullException()
     {
         var factory = new ColumnNamesReaderFactory("Value");
-        Assert.Throws<ArgumentNullException>(() => factory.GetCellReader(null!));
+        Assert.Throws<ArgumentNullException>("sheet",   () => factory.GetCellReader(null!));
     }
 
     [Fact]
@@ -139,7 +144,7 @@ public class ColumnNamesReaderFactoryTests
     public void GetCellsReader_NullSheet_ThrowsArgumentNullException()
     {
         var factory = new ColumnNamesReaderFactory("Value");
-        Assert.Throws<ArgumentNullException>(() => factory.GetCellsReader(null!));
+        Assert.Throws<ArgumentNullException>("sheet", () => factory.GetCellsReader(null!));
     }
 
     [Fact]

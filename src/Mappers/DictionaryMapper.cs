@@ -27,11 +27,8 @@ public class DictionaryMapper<T> : ICellMapper
     /// <param name="required">Whether or not an error a failure to match is an error.</param>
     public DictionaryMapper(IDictionary<string, T> mappingDictionary, IEqualityComparer<string>? comparer, DictionaryMapperBehavior behavior)
     {
-        if (mappingDictionary == null)
-        {
-            throw new ArgumentNullException(nameof(mappingDictionary));
-        }
-        if (!Enum.IsDefined(typeof(DictionaryMapperBehavior), behavior))
+        ArgumentNullException.ThrowIfNull(mappingDictionary);
+        if (!Enum.IsDefined(behavior))
         {
             throw new ArgumentException($"Invalid value \"{behavior}\".", nameof(behavior));
         }

@@ -85,16 +85,6 @@ public class ArrayEnumerableFactoryTests
     }
 
     [Fact]
-    public void Set_InvokeOutOfRange_Success()
-    {
-        var factory = new ArrayEnumerableFactory<int>();
-        factory.Begin(1);
-
-        factory.Set(0, 1);
-        Assert.Throws<IndexOutOfRangeException>(() => factory.Set(1, 1));
-    }
-
-    [Fact]
     public void Set_NotBegan_ThrowsExcelMappingException()
     {
         var factory = new ArrayEnumerableFactory<int>();
@@ -106,6 +96,16 @@ public class ArrayEnumerableFactoryTests
     {
         var factory = new ArrayEnumerableFactory<int>();
         Assert.Throws<ArgumentOutOfRangeException>("index", () => factory.Set(-1, 1));
+    }
+
+    [Fact]
+    public void Set_InvokeOutOfRange_ThrowsArgumentOutOfRangeException()
+    {
+        var factory = new ArrayEnumerableFactory<int>();
+        factory.Begin(1);
+
+        factory.Set(0, 1);
+        Assert.Throws<ArgumentOutOfRangeException>("index", () => factory.Set(1, 1));
     }
 
     [Fact]

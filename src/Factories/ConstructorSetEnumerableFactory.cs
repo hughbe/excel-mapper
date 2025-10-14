@@ -16,10 +16,7 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
 
     public ConstructorSetEnumerableFactory(Type setType)
     {
-        if (setType == null)
-        {
-            throw new ArgumentNullException(nameof(setType));
-        }
+        ArgumentNullException.ThrowIfNull(setType);
         if (setType.IsInterface)
         {
             throw new ArgumentException("Interface set types cannot be created. Use HashSetEnumerableFactory instead.", nameof(setType));
@@ -29,18 +26,15 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
             throw new ArgumentException("Abstract set types cannot be created.", nameof(setType));
         }
 
-        _constructor = setType.GetConstructor([typeof(ISet<T>)])
-            ?? throw new ArgumentException($"Set type {setType} does not have a constructor that takes ISet<{typeof(T)}>.", nameof(setType));
+        _constructor = setType.GetConstructor(new[] { typeof(ISet<T>) })
+            ?? throw new ArgumentException($"Set type {setType} does not have a constructor that takes {nameof(ISet<T?>)}.", nameof(setType));
 
         SetType = setType;
     }
 
     public void Begin(int count)
     {
-        if (count < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count), count, "Count cannot be negative.");
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
 
         if (_items is not null)
         {
@@ -66,9 +60,14 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
     {
         EnsureMapping();
 
-        var result = _constructor.Invoke([_items]);
-        Reset();
-        return result;
+        try
+        {
+            return _constructor.Invoke([_items]);
+        }
+        finally
+        {
+            Reset();
+        }
     }
 
     public void Reset()

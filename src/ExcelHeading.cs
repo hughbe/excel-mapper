@@ -58,15 +58,8 @@ public class ExcelHeading
     /// <returns>The name of the column at the given zero-based index.</returns>
     public string GetColumnName(int columnIndex)
     {
-        if (columnIndex < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(columnIndex), columnIndex, "Column index cannot be negative.");
-        }
-        if (columnIndex >= _columnNames.Length)
-        {
-            throw new ArgumentOutOfRangeException(nameof(columnIndex), columnIndex, "Column index must be less than the number of columns.");
-        }
-
+        ArgumentOutOfRangeException.ThrowIfNegative(columnIndex);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(columnIndex, _columnNames.Length);
         return _columnNames[columnIndex];
     }
 

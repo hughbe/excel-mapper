@@ -12,10 +12,7 @@ public class DictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> 
 
     public void Begin(int count)
     {
-        if (count < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count), count, "Count cannot be negative.");
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
 
         if (_items is not null)
         {
@@ -27,6 +24,7 @@ public class DictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> 
 
     public void Add(TKey key, TValue? value)
     {
+        ArgumentNullException.ThrowIfNull(key);
         EnsureMapping();
         _items.Add(key, value);
     }
@@ -35,9 +33,14 @@ public class DictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> 
     {
         EnsureMapping();
 
-        var result = _items;
-        Reset();
-        return result;
+        try
+        {
+            return _items;
+        }
+        finally
+        {
+            Reset();
+        }
     }
 
     public void Reset()

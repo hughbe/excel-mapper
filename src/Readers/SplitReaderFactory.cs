@@ -27,7 +27,11 @@ public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesPr
     public ICellReaderFactory ReaderFactory
     {
         get => _readerFactory;
-        set => _readerFactory = value ?? throw new ArgumentNullException(nameof(value));
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            _readerFactory = value;
+        }
     }
 
     /// <summary>
@@ -37,7 +41,8 @@ public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesPr
     /// <param name="readerFactory">The ICellReaderFactory that reads the string value of the cell before it is split.</param>
     public SplitReaderFactory(ICellReaderFactory readerFactory)
     {
-        _readerFactory = readerFactory ?? throw new ArgumentNullException(nameof(readerFactory));
+        ArgumentNullException.ThrowIfNull(readerFactory);
+        _readerFactory = readerFactory;
     }
 
     protected abstract string[] GetValues(string value);

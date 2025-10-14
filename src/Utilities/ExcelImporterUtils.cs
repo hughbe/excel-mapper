@@ -14,15 +14,9 @@ public static class ExcelImporterUtils
 
     public static IEnumerable<ExcelClassMap> RegisterClassMapsInNamespace(this ExcelImporter importer, Assembly assembly, string namespaceString)
     {
-        if (assembly == null)
-        {
-            throw new ArgumentNullException(nameof(assembly));
-        }
+        ArgumentNullException.ThrowIfNull(assembly);
 
-        if (namespaceString == null)
-        {
-            throw new ArgumentNullException(nameof(namespaceString));
-        }
+        ArgumentNullException.ThrowIfNull(namespaceString);
 
         if (namespaceString.Length == 0)
         {

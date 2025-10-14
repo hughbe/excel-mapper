@@ -13,12 +13,13 @@ public class ExcelClassMap : IMap
 
     public ExcelClassMap(Type type, FallbackStrategy emptyValueStrategy)
     {
-        Type = type ?? throw new ArgumentNullException(nameof(type));
-
+        ArgumentNullException.ThrowIfNull(type);
         if (!Enum.IsDefined(emptyValueStrategy))
         {
             throw new ArgumentException($"Invalid value \"{emptyValueStrategy}\".", nameof(emptyValueStrategy));
         }
+
+        Type = type;
         EmptyValueStrategy = emptyValueStrategy;
     }
 

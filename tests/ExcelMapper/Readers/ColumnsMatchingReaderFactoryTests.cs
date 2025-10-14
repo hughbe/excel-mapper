@@ -66,7 +66,7 @@ public class ColumnsMatchingReaderFactoryTests
     {
         static bool Match(string columnName) => true;
         var factory = new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(Match));
-        Assert.Throws<ArgumentNullException>(() => factory.GetCellReader(null!));
+        Assert.Throws<ArgumentNullException>("sheet", () => factory.GetCellReader(null!));
     }
 
     [Fact]
@@ -147,7 +147,7 @@ public class ColumnsMatchingReaderFactoryTests
     {
         static bool Match(string columnName) => true;
         var factory = new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(Match));
-        Assert.Throws<ArgumentNullException>(() => factory.GetCellsReader(null!));
+        Assert.Throws<ArgumentNullException>("sheet", () => factory.GetCellsReader(null!));
     }
 
     [Fact]
@@ -247,7 +247,7 @@ public class ColumnsMatchingReaderFactoryTests
     {
         static bool Match(string columnName) => true;
         var factory = new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(Match));
-        Assert.Throws<ArgumentNullException>(() => factory.GetColumnNames(null!));
+        Assert.Throws<ArgumentNullException>("sheet", () => factory.GetColumnNames(null!));
     }
     [Fact]
     public void GetColumnIndices_Invoke_ReturnsExpected()
@@ -277,7 +277,7 @@ public class ColumnsMatchingReaderFactoryTests
     {
         static bool Match(string columnName) => true;
         var factory = new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(Match));
-        Assert.Throws<ArgumentNullException>(() => factory.GetColumnIndices(null!));
+        Assert.Throws<ArgumentNullException>("sheet", () => factory.GetColumnIndices(null!));
     }
 
     private class CustomColumnMatcher : IExcelColumnMatcher
@@ -286,7 +286,8 @@ public class ColumnsMatchingReaderFactoryTests
 
         public CustomColumnMatcher(Func<int, bool> match)
         {
-            _match = match ?? throw new ArgumentNullException(nameof(match));
+            ArgumentNullException.ThrowIfNull(match);
+            _match = match;
         }
 
         public bool ColumnMatches(ExcelSheet sheet, int columnIndex) => _match(columnIndex);

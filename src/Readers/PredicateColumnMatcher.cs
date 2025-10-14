@@ -9,15 +9,13 @@ public class PredicateColumnMatcher : IExcelColumnMatcher
 
     public PredicateColumnMatcher(Func<string, bool> predicate)
     {
-        Predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
+        ArgumentNullException.ThrowIfNull(predicate);
+        Predicate = predicate;
     }
 
     public bool ColumnMatches(ExcelSheet sheet, int columnIndex)
     {
-        if (sheet == null)
-        {
-            throw new ArgumentNullException(nameof(sheet));
-        }
+        ArgumentNullException.ThrowIfNull(sheet);
         if (sheet.Heading == null)
         {
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");

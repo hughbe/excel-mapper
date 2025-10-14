@@ -66,6 +66,13 @@ public class IOneToOneMapExtensionsTests
     }
 
     [Fact]
+    public void WithColumnNameMatching_EmptyValueInColumnNames_ThrowsArgumentException()
+    {
+        var map = new CustomOneToOneMap();
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNameMatching([string.Empty]));
+    }
+
+    [Fact]
     public void WithColumnNameMatching_Predicate_Success()
     {
         Func<string, bool> predicate1 = columnName => columnName == "ColumnName";

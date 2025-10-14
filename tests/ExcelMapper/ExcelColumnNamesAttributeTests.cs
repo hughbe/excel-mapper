@@ -39,6 +39,13 @@ public class ExcelColumnNamesAttributeTests
     {
         Assert.Throws<ArgumentException>("columnNames", () => new ExcelColumnNamesAttribute([null!]));
     }
+
+    [Fact]
+    public void Ctor_EmptyValueInColumnNames_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>("columnNames", () => new ExcelColumnNamesAttribute([""]));
+    }
+
     public static IEnumerable<object[]> Names_Set_TestData()
     {
         yield return new object[] { new string[] { "ColumnName1" } };
@@ -81,5 +88,12 @@ public class ExcelColumnNamesAttributeTests
     {
         var attribute = new ExcelColumnNamesAttribute(["ColumnName"]);
         Assert.Throws<ArgumentException>("value", () => attribute.Names = [null!]);
+    }
+
+    [Fact]
+    public void Names_SetEmptyValueInValue_ThrowsArgumentException()
+    {
+        var attribute = new ExcelColumnNamesAttribute(["ColumnName"]);
+        Assert.Throws<ArgumentException>("value", () => attribute.Names = [""]);
     }
 }

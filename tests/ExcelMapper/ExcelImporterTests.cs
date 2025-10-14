@@ -650,13 +650,20 @@ public class ExcelImporterTests
     }
 
     [Theory]
-    [InlineData(-1)]
     [InlineData(3)]
+    [InlineData(4)]
     public void TryReadSheet_InvalidSheetIndex_ReturnsFalse(int sheetIndex)
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         Assert.False(importer.TryReadSheet(sheetIndex, out var sheet));
         Assert.Null(sheet);
+    }
+
+    [Fact]
+    public void TryReadSheet_NegativeSheetIndex_ThrowsArgumentOutOfRangeException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        Assert.Throws<ArgumentOutOfRangeException>("sheetIndex", () => importer.TryReadSheet(-1, out var sheet));
     }
 
     [Fact]

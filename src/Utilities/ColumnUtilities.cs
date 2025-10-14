@@ -8,19 +8,12 @@ internal static class ColumnUtilities
 {
     public static void ValidateColumnIndex(int columnIndex, string paramName)
     {
-        if (columnIndex < 0)
-        {
-            throw new ArgumentOutOfRangeException(paramName, columnIndex, $"Column {columnIndex} must be greater or equal to zero.");
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(columnIndex, paramName);
     }
 
     public static void ValidateColumnIndices(IList<int> columnIndices, string paramName)
     {
-        if (columnIndices == null)
-        {
-            throw new ArgumentNullException(paramName);
-        }
-
+        ArgumentNullException.ThrowIfNull(columnIndices, paramName);
         if (columnIndices.Count == 0)
         {
             throw new ArgumentException("Column indices cannot be empty.", paramName);
@@ -29,32 +22,19 @@ internal static class ColumnUtilities
 
         foreach (var columnIndex in columnIndices)
         {
-            if (columnIndex < 0)
-            {
-                throw new ArgumentOutOfRangeException(paramName, columnIndex, $"Column {columnIndex} must be greater or equal to zero.");
-            }
+            ArgumentOutOfRangeException.ThrowIfNegative(columnIndex, paramName);
         }
     }
 
     public static void ValidateColumnName(string columnName, string paramName)
     {
-        if (columnName == null)
-        {
-            throw new ArgumentNullException(paramName);
-        }
-
-        if (columnName.Length == 0)
-        {
-            throw new ArgumentException("Column name cannot be empty.", paramName);
-        }
+        ArgumentNullException.ThrowIfNull(columnName, paramName);
+        ArgumentException.ThrowIfNullOrEmpty(columnName, paramName);
     }
 
     public static void ValidateColumnNames(IList<string> columnNames, string paramName)
     {
-        if (columnNames == null)
-        {
-            throw new ArgumentNullException(paramName);
-        }
+        ArgumentNullException.ThrowIfNull(columnNames, paramName);
         if (columnNames.Count == 0)
         {
             throw new ArgumentException("Column names cannot be empty.", paramName);
@@ -64,14 +44,10 @@ internal static class ColumnUtilities
         {
             if (columnName == null)
             {
-                throw new ArgumentException($"Null column name in {QuoteJoin(columnNames)}.", paramName);
+                throw new ArgumentException("Column names cannot contain null values.", paramName);
             }
-        }
-    }
 
-    private static string QuoteJoin(IEnumerable<string> values)
-    {
-        var quoted = values.Select(v => $"\"{v}\"");
-        return $"[{string.Join(", ", quoted)}]";
+            ArgumentException.ThrowIfNullOrEmpty(columnName, paramName);
+        }
     }
 }

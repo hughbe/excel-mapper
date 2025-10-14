@@ -9,8 +9,11 @@ public class ExcelPropertyMap
 {
     public ExcelPropertyMap(MemberInfo member, IMap map)
     {
-        Member = member ?? throw new ArgumentNullException(nameof(member));
-        Map = map ?? throw new ArgumentNullException(nameof(map));
+        ArgumentNullException.ThrowIfNull(member);
+        ArgumentNullException.ThrowIfNull(map);
+
+        Member = member;
+        Map = map;
 
         if (member is PropertyInfo property)
         {

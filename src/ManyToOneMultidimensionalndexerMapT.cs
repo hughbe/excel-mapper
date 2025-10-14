@@ -16,7 +16,8 @@ public class ManyToOneMultidimensionalIndexerMapT<TValue> : IMultidimensionalInd
 {
     public ManyToOneMultidimensionalIndexerMapT(IMultidimensionalArrayFactory<TValue> arrayFactory)
     {
-        ArrayFactory = arrayFactory ?? throw new ArgumentNullException(nameof(arrayFactory));
+        ArgumentNullException.ThrowIfNull(arrayFactory);
+        ArrayFactory = arrayFactory;
     }
 
     /// <summary>
@@ -52,10 +53,7 @@ public class ManyToOneMultidimensionalIndexerMapT<TValue> : IMultidimensionalInd
 
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
-        if (sheet == null)
-        {
-            throw new ArgumentNullException(nameof(sheet));
-        }
+        ArgumentNullException.ThrowIfNull(sheet);
 
         var lengths = GetLengths();
         if (lengths.Length == 0)

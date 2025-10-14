@@ -17,10 +17,7 @@ public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValu
 
     public AddDictionaryFactory(Type dictionaryType)
     {
-        if (dictionaryType is null)
-        {
-            throw new ArgumentNullException(nameof(dictionaryType));
-        }
+        ArgumentNullException.ThrowIfNull(dictionaryType);
         if (dictionaryType.IsInterface)
         {
             throw new ArgumentException("Interface dictionary types cannot be created. Use DictionaryEnumerableFactory instead.", nameof(dictionaryType));
@@ -40,10 +37,7 @@ public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValu
 
     public void Begin(int count)
     {
-        if (count < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count), count, "Count cannot be negative.");
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
 
         if (_items is not null)
         {
@@ -63,9 +57,14 @@ public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValu
     {
         EnsureMapping();
 
-        var result = _items;
-        Reset();
-        return result;
+        try
+        {
+            return _items;
+        }
+        finally
+        {
+            Reset();
+        }
     }
 
     public void Reset()

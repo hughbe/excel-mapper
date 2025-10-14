@@ -38,17 +38,11 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithCellValueMappers<TMap>(this TMap map, params ICellMapper[] mappers) where TMap : IValuePipeline
     {
-        if (mappers == null)
-        {
-            throw new ArgumentNullException(nameof(mappers));
-        }
+        ArgumentNullException.ThrowIfNull(mappers);
 
         foreach (ICellMapper mapper in mappers)
         {
-            if (mapper == null)
-            {
-                throw new ArgumentNullException(nameof(mappers));
-            }
+            ArgumentNullException.ThrowIfNull(mapper, nameof(mappers));
         }
 
         foreach (ICellMapper mapper in mappers)
@@ -99,11 +93,8 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static IValuePipeline<DateTime> WithDateFormats(this IValuePipeline<DateTime> map, IEnumerable<string> formats)
     {
-        if (formats == null)
-        {
-            throw new ArgumentNullException(nameof(formats));
-        }
-        
+        ArgumentNullException.ThrowIfNull(formats);
+
         return map.WithDateFormats([.. formats]);
     }
 
@@ -129,20 +120,14 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static IValuePipeline<DateTime?> WithDateFormats(this IValuePipeline<DateTime?> map, IEnumerable<string> formats)
     {
-        if (formats == null)
-        {
-            throw new ArgumentNullException(nameof(formats));
-        }
-        
+        ArgumentNullException.ThrowIfNull(formats);
+
         return map.WithDateFormats([.. formats]);
     }
 
     private static void AddFormats(this IValuePipeline map, string[] formats)
     {
-        if (formats == null)
-        {
-            throw new ArgumentNullException(nameof(formats));
-        }
+        ArgumentNullException.ThrowIfNull(formats);
         if (formats.Length == 0)
         {
             throw new ArgumentException("Formats cannot be empty.", nameof(formats));
@@ -182,10 +167,7 @@ public static class IValuePipelineExtensions
         ConvertUsingSimpleMapperDelegate<TValue?> converter)
         where TMap : IValuePipeline<TValue?>
     {
-        if (converter == null)
-        {
-            throw new ArgumentNullException(nameof(converter));
-        }
+        ArgumentNullException.ThrowIfNull(converter);
 
         CellMapperResult actualConverter(ReadCellResult readResult)
         {
@@ -205,10 +187,7 @@ public static class IValuePipelineExtensions
 
     public static TMap WithConverter<TMap>(this TMap map, ConvertUsingMapperDelegate converter) where TMap: IValuePipeline
     {
-        if (converter == null)
-        {
-            throw new ArgumentNullException(nameof(converter));
-        }
+        ArgumentNullException.ThrowIfNull(converter);
 
         var item = new ConvertUsingMapper(converter);
         map.AddCellValueMapper(item);
@@ -243,7 +222,8 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : IValuePipeline
     {
-        map.EmptyFallback = fallbackItem ?? throw new ArgumentNullException(nameof(fallbackItem));
+        ArgumentNullException.ThrowIfNull(fallbackItem);
+        map.EmptyFallback = fallbackItem;
         map.InvalidFallback = fallbackItem;
         return map;
     }
@@ -267,7 +247,8 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithEmptyFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : IValuePipeline
     {
-        map.EmptyFallback = fallbackItem ?? throw new ArgumentNullException(nameof(fallbackItem));
+        ArgumentNullException.ThrowIfNull(fallbackItem);
+        map.EmptyFallback = fallbackItem;
         return map;
     }
 
@@ -308,7 +289,8 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithInvalidFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : IValuePipeline
     {
-        map.InvalidFallback = fallbackItem ?? throw new ArgumentNullException(nameof(fallbackItem));
+        ArgumentNullException.ThrowIfNull(fallbackItem);
+        map.InvalidFallback = fallbackItem;
         return map;
     }
 }

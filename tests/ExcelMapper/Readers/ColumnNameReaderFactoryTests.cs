@@ -58,7 +58,7 @@ public class ColumnNameReaderFactoryTests
     public void GetReader_NullSheet_ThrowsArgumentNullException()
     {
         var factory = new ColumnNameReaderFactory("Value");
-        Assert.Throws<ArgumentNullException>(() => factory.GetCellReader(null!));
+        Assert.Throws<ArgumentNullException>("sheet", () => factory.GetCellReader(null!));
     }
 
     [Fact]

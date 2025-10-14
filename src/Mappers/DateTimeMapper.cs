@@ -20,10 +20,7 @@ public class DateTimeMapper : ICellMapper
         get => _formats;
         set
         {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
+            ArgumentNullException.ThrowIfNull(value);
 
             if (value.Length == 0)
             {

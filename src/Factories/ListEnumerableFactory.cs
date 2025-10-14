@@ -11,10 +11,7 @@ public class ListEnumerableFactory<T> : IEnumerableFactory<T>
 
     public void Begin(int count)
     {
-        if (count < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count), count, "Count cannot be negative.");
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
 
         if (_items is not null)
         {
@@ -32,11 +29,7 @@ public class ListEnumerableFactory<T> : IEnumerableFactory<T>
 
     public void Set(int index, T? item)
     {
-        if (index < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(index), index, "Index cannot be negative.");
-        }
-
+        ArgumentOutOfRangeException.ThrowIfNegative(index, nameof(index));
         EnsureMapping();
 
         // Grow the list if necessary.
@@ -52,9 +45,14 @@ public class ListEnumerableFactory<T> : IEnumerableFactory<T>
     {
         EnsureMapping();
 
-        var result = _items;
-        Reset();
-        return result;
+        try
+        {
+            return _items;
+        }
+        finally
+        {
+            Reset();
+        }
     }
 
     public void Reset()

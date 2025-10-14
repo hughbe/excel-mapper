@@ -11,10 +11,7 @@ public class ImmutableDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey,
 
     public void Begin(int count)
     {
-        if (count < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count), count, "Count cannot be negative.");
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
 
         if (_builder is not null)
         {
@@ -26,6 +23,7 @@ public class ImmutableDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey,
 
     public void Add(TKey key, TValue? value)
     {
+        ArgumentNullException.ThrowIfNull(key);
         EnsureMapping();
         _builder.Add(key, value);
     }
@@ -34,9 +32,14 @@ public class ImmutableDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey,
     {
         EnsureMapping();
 
-        var result = _builder.ToImmutable();
-        Reset();
-        return result;
+        try
+        {
+            return _builder.ToImmutable();
+        }
+        finally
+        {
+            Reset();
+        }
     }
 
     public void Reset()

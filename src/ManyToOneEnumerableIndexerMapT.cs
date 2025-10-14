@@ -16,7 +16,8 @@ public class ManyToOneEnumerableIndexerMapT<TValue> : IEnumerableIndexerMap
 {
     public ManyToOneEnumerableIndexerMapT(IEnumerableFactory<TValue> enumerableFactory)
     {
-        EnumerableFactory = enumerableFactory ?? throw new ArgumentNullException(nameof(enumerableFactory));
+        ArgumentNullException.ThrowIfNull(enumerableFactory);
+        EnumerableFactory = enumerableFactory;
     }
 
     /// <summary>
@@ -29,10 +30,7 @@ public class ManyToOneEnumerableIndexerMapT<TValue> : IEnumerableIndexerMap
 
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
-        if (sheet == null)
-        {
-            throw new ArgumentNullException(nameof(sheet));
-        }
+        ArgumentNullException.ThrowIfNull(sheet);
 
         EnumerableFactory.Begin(Math.Max(Values.Count > 0 ? Values.Max(x => x.Key + 1) : 0, Values.Count));
         try

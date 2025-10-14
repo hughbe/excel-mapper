@@ -9,6 +9,16 @@ namespace ExcelMapper;
 /// <summary>
 /// An object that represents a single sheet of an excel document.
 /// </summary>
+/// <remarks>
+/// <para>
+/// This class maintains mutable state (such as the current row index) and is not thread-safe.
+/// Each <see cref="ExcelSheet"/> instance should be used by only one thread at a time.
+/// </para>
+/// <para>
+/// If you need to process rows concurrently, read all rows into a collection first using
+/// <see cref="ReadRows{T}()"/> and then process the collection in parallel.
+/// </para>
+/// </remarks>
 public class ExcelSheet
 {
     private bool _hasHeading = true;
@@ -82,10 +92,7 @@ public class ExcelSheet
         get => _headingIndex;
         set
         {
-            if (value < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), value, "The index of the heading must be positive or zero.");
-            }
+            ArgumentOutOfRangeException.ThrowIfNegative(value);
             if (!HasHeading)
             {
                 throw new InvalidOperationException("The sheet has no heading.");
@@ -188,18 +195,12 @@ public class ExcelSheet
         {
             throw new ExcelMappingException($"The underlying reader is closed.");
         }
-        if (startIndex < 0)
+        ArgumentOutOfRangeException.ThrowIfNegative(startIndex);
+        if (HasHeading)
         {
-            throw new ArgumentOutOfRangeException(nameof(startIndex), startIndex, "Start index cannot be negative.");
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(startIndex, HeadingIndex, nameof(startIndex));
         }
-        if (HasHeading && startIndex <= HeadingIndex)
-        {
-            throw new ArgumentOutOfRangeException(nameof(startIndex), startIndex, "Start index must be greater than heading index");
-        }
-        if (count < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count), count, "The number of rows cannot be negative.");
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
         
         // Read the heading if we haven't already - this validates the sheet structure
         if (HasHeading && Heading == null)
@@ -232,7 +233,12 @@ public class ExcelSheet
         
         for (int i = 0; i < count; i++)
         {
-            yield return ReadRow<T>();
+            if (!TryReadRow(out T? row))
+            {
+                throw new ExcelMappingException($"Sheet \"{Name}\" does not have row {startIndex + i}.");
+            }
+
+            yield return row;
         }
     }
 

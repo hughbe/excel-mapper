@@ -13,10 +13,7 @@ public class ISetTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
 
     public ISetTImplementingEnumerableFactory(Type setType)
     {
-        if (setType is null)
-        {
-            throw new ArgumentNullException(nameof(setType));
-        }
+        ArgumentNullException.ThrowIfNull(setType);
         if (setType.IsInterface)
         {
             throw new ArgumentException("Interface set types cannot be created. Use HashSetEnumerableFactory instead.", nameof(setType));
@@ -27,7 +24,7 @@ public class ISetTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
         }
         if (!setType.ImplementsInterface(typeof(ISet<T?>)))
         {
-            throw new ArgumentException($"Set type {setType} must implement ISet<{typeof(T)}>.", nameof(setType));
+            throw new ArgumentException($"Set type {setType} must implement {nameof(ISet<T?>)}.", nameof(setType));
         }
 
         SetType = setType;
@@ -35,10 +32,7 @@ public class ISetTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
 
     public void Begin(int count)
     {
-        if (count < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count), count, "Count cannot be negative.");
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
 
         if (_items is not null)
         {
@@ -64,9 +58,14 @@ public class ISetTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
     {
         EnsureMapping();
 
-        var result = _items;
-        Reset();
-        return result;
+        try
+        {
+            return _items;
+        }
+        finally
+        {
+            Reset();
+        }
     }
 
     public void Reset()

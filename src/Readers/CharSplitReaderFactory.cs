@@ -19,10 +19,7 @@ public class CharSplitReaderFactory : SplitReaderFactory
         get => _separators;
         set
         {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
+            ArgumentNullException.ThrowIfNull(value);
 
             if (value.Length == 0)
             {

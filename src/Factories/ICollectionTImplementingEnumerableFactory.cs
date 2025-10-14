@@ -13,10 +13,7 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
 
     public ICollectionTImplementingEnumerableFactory(Type collectionType)
     {
-        if (collectionType is null)
-        {
-            throw new ArgumentNullException(nameof(collectionType));
-        }
+        ArgumentNullException.ThrowIfNull(collectionType);
         if (collectionType.IsInterface)
         {
             throw new ArgumentException("Interface collection types cannot be created. Use ListEnumerableFactory instead.", nameof(collectionType));
@@ -31,7 +28,7 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
         }
         if (!collectionType.ImplementsInterface(typeof(ICollection<T?>)))
         {
-            throw new ArgumentException($"Collection type {collectionType} must implement ICollection<{typeof(T)}>.", nameof(collectionType));
+            throw new ArgumentException($"Collection type {collectionType} must implement {nameof(ICollection<T?>)}.", nameof(collectionType));
         }
 
         CollectionType = collectionType;
@@ -39,10 +36,7 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
 
     public void Begin(int count)
     {
-        if (count < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count), count, "Count cannot be negative.");
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
 
         if (_items is not null)
         {
@@ -68,9 +62,14 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
     {
         EnsureMapping();
 
-        var result = _items;
-        Reset();
-        return result;
+        try
+        {
+            return _items;
+        }
+        finally
+        {
+            Reset();
+        }
     }
 
     public void Reset()

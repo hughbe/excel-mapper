@@ -537,6 +537,7 @@ public static class AutoMapper
         // This handles dictionary-like types that don't implement IDictionary<TKey, TValue> or IDictionary.
         if (dictionaryType.ImplementsInterface(typeof(IEnumerable)))
         {
+            // If there are multiple add methods, we can't determine the key/value types.
             var addMethods = dictionaryType.GetMethods()
                 .Where(m => m.Name == "Add" && m.GetParameters().Length == 2)
                 .ToArray();
@@ -805,7 +806,7 @@ public static class AutoMapper
     /// <returns>True if the class map could be created, else false.</returns>
     public static bool TryCreateClassMap<T>(FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ExcelClassMap<T>? result)
     {
-        if (!Enum.IsDefined(typeof(FallbackStrategy), emptyValueStrategy))
+        if (!Enum.IsDefined(emptyValueStrategy))
         {
             throw new ArgumentException($"Invalid value \"{emptyValueStrategy}\".", nameof(emptyValueStrategy));
         }

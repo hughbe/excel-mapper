@@ -75,6 +75,18 @@ public class IManyToOneMapExtensionsTests
     }
 
     [Fact]
+    public void WithColumnNames_EmptyValueInColumnNames_ThrowsArgumentException()
+    {
+        var factory = new ColumnNamesReaderFactory("Column");
+        var valuePipeline = new ValuePipeline<string>();
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory).WithColumnNames("ColumnNames");
+
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([""]));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string> { "" }));
+    }
+
+    [Fact]
     public void WithColumnsMatching_Invoke_Success()
     {
         var matcher = new NamesColumnMatcher("ColumnName1", "ColumnName2");

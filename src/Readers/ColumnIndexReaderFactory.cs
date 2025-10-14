@@ -19,20 +19,13 @@ public sealed class ColumnIndexReaderFactory : ICellReaderFactory, IColumnIndexP
     /// <param name="columnIndex">The zero-based index of the column to read.</param>
     public ColumnIndexReaderFactory(int columnIndex)
     {
-        if (columnIndex < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(columnIndex), columnIndex, $"Column index {columnIndex} must be greater or equal to zero.");
-        }
-
+        ArgumentOutOfRangeException.ThrowIfNegative(columnIndex);
         ColumnIndex = columnIndex;
     }
 
     public ICellReader? GetCellReader(ExcelSheet sheet)
     {
-        if (sheet == null)
-        {
-            throw new ArgumentNullException(nameof(sheet));
-        }
+        ArgumentNullException.ThrowIfNull(sheet);
         if (ColumnIndex >= sheet.NumberOfColumns)
         {
             return null;

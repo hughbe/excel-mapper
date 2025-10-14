@@ -11,10 +11,7 @@ public class ImmutableHashSetEnumerableFactory<T> : IEnumerableFactory<T>
 
     public void Begin(int count)
     {
-        if (count < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count), count, "Count cannot be negative.");
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
 
         if (_builder is not null)
         {
@@ -40,9 +37,14 @@ public class ImmutableHashSetEnumerableFactory<T> : IEnumerableFactory<T>
     {
         EnsureMapping();
 
-        var result = _builder.ToImmutable();
-        Reset();
-        return result;
+        try
+        {
+            return _builder.ToImmutable();
+        }
+        finally
+        {
+            Reset();
+        }
     }
 
     public void Reset()

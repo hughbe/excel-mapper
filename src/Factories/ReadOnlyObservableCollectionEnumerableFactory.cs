@@ -14,26 +14,20 @@ public class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFacto
 
     public ReadOnlyObservableCollectionEnumerableFactory(Type collectionType)
     {
-        if (collectionType == null)
-        {
-            throw new ArgumentNullException(nameof(collectionType));
-        }
+        ArgumentNullException.ThrowIfNull(collectionType);
         if (collectionType.IsAbstract)
         {
             throw new ArgumentException("Abstract collection types cannot be created.", nameof(collectionType));
         }
 
         _constructor = collectionType.GetConstructor([typeof(ObservableCollection<T>)])
-            ?? throw new ArgumentException($"Collection type {collectionType} does not have a constructor that takes ObservableCollection<{typeof(T)}>.", nameof(collectionType));
+            ?? throw new ArgumentException($"Collection type {collectionType} does not have a constructor that takes {nameof(ObservableCollection<T>)}.", nameof(collectionType));
         CollectionType = collectionType;
     }
 
     public void Begin(int count)
     {
-        if (count < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count), count, "Count cannot be negative.");
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
 
         if (_items is not null)
         {
@@ -51,11 +45,7 @@ public class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFacto
 
     public void Set(int index, T? item)
     {
-        if (index < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(index), index, "Index cannot be negative.");
-        }
-
+        ArgumentOutOfRangeException.ThrowIfNegative(index);
         EnsureMapping();
 
         // Grow the list if necessary.
@@ -71,9 +61,14 @@ public class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFacto
     {
         EnsureMapping();
 
-        var result = _items;
-        Reset();
-        return _constructor.Invoke([result]);
+        try
+        {
+            return _constructor.Invoke([_items]);
+        }
+        finally
+        {
+            Reset();
+        }
     }
 
     public void Reset()

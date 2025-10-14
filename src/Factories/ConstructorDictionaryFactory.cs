@@ -15,10 +15,7 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
 
     public ConstructorDictionaryFactory(Type dictionaryType)
     {
-        if (dictionaryType == null)
-        {
-            throw new ArgumentNullException(nameof(dictionaryType));
-        }
+        ArgumentNullException.ThrowIfNull(dictionaryType);
         if (dictionaryType.IsInterface)
         {
             throw new ArgumentException("Interface dictionary types cannot be created. Use IDictionaryTImplementingFactory instead.", nameof(dictionaryType));
@@ -29,16 +26,13 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
         }
 
         _constructor = dictionaryType.GetConstructor([typeof(IDictionary<TKey, TValue>)])
-            ?? throw new ArgumentException($"Dictionary type {dictionaryType} does not have a constructor that takes IDictionary<{typeof(TKey)}, {typeof(TValue)}>.", nameof(dictionaryType));
+            ?? throw new ArgumentException($"Dictionary type {dictionaryType} does not have a constructor that takes {nameof(IDictionary<TKey, TValue>)}.", nameof(dictionaryType));
         DictionaryType = dictionaryType;
     }
 
     public void Begin(int count)
     {
-        if (count < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count), count, "Count cannot be negative.");
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
 
         if (_items is not null)
         {
@@ -58,9 +52,14 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
     {
         EnsureMapping();
 
-        var result = _constructor.Invoke([_items]);
-        Reset();
-        return result;
+        try
+        {
+            return _constructor.Invoke([_items]);
+        }
+        finally
+        {
+            Reset();
+        }
     }
 
     public void Reset()

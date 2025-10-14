@@ -34,10 +34,7 @@ public class ValuePipeline : IValuePipeline
     /// <param name="mapper">The mapper to add.</param>
     public void AddCellValueMapper(ICellMapper mapper)
     {
-        if (mapper == null)
-        {
-            throw new ArgumentNullException(nameof(mapper));
-        }
+        ArgumentNullException.ThrowIfNull(mapper);
 
         _cellValueMappers.Add(mapper);
     }
@@ -54,10 +51,7 @@ public class ValuePipeline : IValuePipeline
     /// <param name="transformer">The tranformer to add.</param>
     public void AddCellValueTransformer(ICellTransformer transformer)
     {
-        if (transformer == null)
-        {
-            throw new ArgumentNullException(nameof(transformer));
-        }
+        ArgumentNullException.ThrowIfNull(transformer);
 
         _cellValueTransformers.Add(transformer);
     }

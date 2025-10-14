@@ -11,10 +11,7 @@ public class ImmutableListEnumerableFactory<T> : IEnumerableFactory<T>
 
     public void Begin(int count)
     {
-        if (count < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count), count, "Count cannot be negative.");
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
 
         if (_builder is not null)
         {
@@ -32,11 +29,7 @@ public class ImmutableListEnumerableFactory<T> : IEnumerableFactory<T>
 
     public void Set(int index, T? item)
     {
-        if (index < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(index), index, "Index cannot be negative.");
-        }
-
+        ArgumentOutOfRangeException.ThrowIfNegative(index);
         EnsureMapping();
 
         // Grow the list if necessary.
@@ -52,9 +45,14 @@ public class ImmutableListEnumerableFactory<T> : IEnumerableFactory<T>
     {
         EnsureMapping();
 
-        var result = _builder.ToImmutable();
-        Reset();
-        return result;
+        try
+        {
+            return _builder.ToImmutable();
+        }
+        finally
+        {
+            Reset();
+        }
     }
 
     public void Reset()

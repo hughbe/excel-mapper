@@ -334,10 +334,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map that invoked this method.</returns>
     public ExcelClassMap<T> WithClassMap(Action<ExcelClassMap<T>> classMapFactory)
     {
-        if (classMapFactory == null)
-        {
-            throw new ArgumentNullException(nameof(classMapFactory));
-        }
+        ArgumentNullException.ThrowIfNull(classMapFactory);
 
         classMapFactory(this);
         return this;
@@ -351,10 +348,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map that invoked this method.</returns>
     public ExcelClassMap<T> WithClassMap(ExcelClassMap<T> classMap)
     {
-        if (classMap == null)
-        {
-            throw new ArgumentNullException(nameof(classMap));
-        }
+        ArgumentNullException.ThrowIfNull(classMap);
         if (classMap == this)
         {
             return this;

@@ -21,7 +21,8 @@ public class ConvertUsingMapper : ICellMapper
     /// <param name="converter">The delegate used to map the value of a cell to an object</param>
     public ConvertUsingMapper(ConvertUsingMapperDelegate converter)
     {
-        Converter = converter ?? throw new ArgumentNullException(nameof(converter));
+        ArgumentNullException.ThrowIfNull(converter);
+        Converter = converter;
     }
 
     public CellMapperResult MapCellValue(ReadCellResult readResult)

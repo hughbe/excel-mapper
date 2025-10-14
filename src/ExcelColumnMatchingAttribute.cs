@@ -32,10 +32,7 @@ public class ExcelColumnMatchingAttribute : Attribute
     /// <param name="name">The name of the column.</param>
     public ExcelColumnMatchingAttribute(Type matcherType)
     {
-        if (matcherType == null)
-        {
-            throw new ArgumentNullException(nameof(matcherType));
-        }
+        ArgumentNullException.ThrowIfNull(matcherType);
         if (!matcherType.ImplementsInterface(typeof(IExcelColumnMatcher)))
         {
             throw new ArgumentException("Matcher type must implement IExcelColumnMatcher", nameof(matcherType));
@@ -51,16 +48,10 @@ public class ExcelColumnMatchingAttribute : Attribute
     /// <param name="options">A bitwise combination of the enumeration values that modify the regular expression.</param>
     public ExcelColumnMatchingAttribute(string pattern, RegexOptions options = RegexOptions.None)
     {
-        if (pattern == null)
-        {
-            throw new ArgumentNullException(nameof(pattern));
-        }
-        if (pattern.Length == 0)
-        {
-            throw new ArgumentException("Pattern cannot be empty", nameof(pattern));
-        }
+        ArgumentNullException.ThrowIfNull(pattern);
+        ArgumentException.ThrowIfNullOrEmpty(pattern);
 
         Type = typeof(RegexColumnMatcher);
-        ConstructorArguments = new object[] { new Regex(pattern, options) };
+        ConstructorArguments = [new Regex(pattern, options)];
     }
 }

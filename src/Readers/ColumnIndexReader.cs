@@ -1,6 +1,7 @@
 using System;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
+using ExcelMapper.Utilities;
 
 namespace ExcelMapper.Readers;
 
@@ -13,11 +14,7 @@ public class ColumnIndexReader : ICellReader
 
     public ColumnIndexReader(int columnIndex)
     {
-        if (columnIndex < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(columnIndex), columnIndex, $"Column index {columnIndex} must be greater or equal to zero.");
-        }
-
+        ColumnUtilities.ValidateColumnIndex(columnIndex, nameof(columnIndex));
         ColumnIndex = columnIndex;
     }
 

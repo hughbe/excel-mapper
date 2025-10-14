@@ -44,10 +44,7 @@ public class ExcelImporter : IDisposable
 
     public ExcelImporter(string path, ExcelImporterFileType fileType)
     {
-        if (path == null)
-        {
-            throw new ArgumentNullException(nameof(path));
-        }
+        ArgumentNullException.ThrowIfNull(path);
 
         Stream? stream = null;
         try
@@ -85,10 +82,7 @@ public class ExcelImporter : IDisposable
     /// <param name="fileType">The type of file.</param>
     public ExcelImporter(Stream stream, ExcelImporterFileType fileType)
     {
-        if (stream == null)
-        {
-            throw new ArgumentNullException(nameof(stream));
-        }
+        ArgumentNullException.ThrowIfNull(stream);
 
         Reader = fileType switch
         {
@@ -104,7 +98,8 @@ public class ExcelImporter : IDisposable
     /// <param name="reader">The existing data reader that wraps an Excel file.</param>
     public ExcelImporter(IExcelDataReader reader)
     {
-        Reader = reader ?? throw new ArgumentNullException(nameof(reader));
+        ArgumentNullException.ThrowIfNull(reader);
+        Reader = reader;
     }
 
     /// <summary>
@@ -155,10 +150,7 @@ public class ExcelImporter : IDisposable
     /// <returns>The sheet in the document with the given name.</returns>
     public ExcelSheet ReadSheet(string sheetName)
     {
-        if (sheetName == null)
-        {
-            throw new ArgumentNullException(nameof(sheetName));
-        }
+        ArgumentNullException.ThrowIfNull(sheetName);
 
         if (!TryReadSheet(sheetName, out ExcelSheet? sheet))
         {
@@ -254,9 +246,10 @@ public class ExcelImporter : IDisposable
             throw new ExcelMappingException($"The underlying reader is closed.");
         }
 
-        sheet = null;
+        ArgumentOutOfRangeException.ThrowIfNegative(sheetIndex);
 
-        if (sheetIndex < 0 || sheetIndex > NumberOfSheets - 1)
+        sheet = null;
+        if (sheetIndex > NumberOfSheets - 1)
         {
             return false;
         }

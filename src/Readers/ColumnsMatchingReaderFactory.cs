@@ -17,15 +17,13 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
     /// <param name="predicate">The predicate containing the column name to read.</param>
     public ColumnsMatchingReaderFactory(IExcelColumnMatcher matcher)
     {
-        Matcher = matcher ?? throw new ArgumentNullException(nameof(matcher));
+        ArgumentNullException.ThrowIfNull(matcher);
+        Matcher = matcher;
     }
 
     public ICellReader? GetCellReader(ExcelSheet sheet)
     {
-        if (sheet == null)
-        {
-            throw new ArgumentNullException(nameof(sheet));
-        }
+        ArgumentNullException.ThrowIfNull(sheet);
 
         for (var columnIndex = 0; columnIndex < sheet.NumberOfColumns; columnIndex++)
         {
@@ -40,10 +38,7 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
 
     public ICellsReader? GetCellsReader(ExcelSheet sheet)
     {
-        if (sheet == null)
-        {
-            throw new ArgumentNullException(nameof(sheet));
-        }
+        ArgumentNullException.ThrowIfNull(sheet);
 
         var indices = new List<int>();
         for (var columnIndex = 0; columnIndex < sheet.NumberOfColumns; columnIndex++)
@@ -64,10 +59,7 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
 
     public string[] GetColumnNames(ExcelSheet sheet)
     {
-        if (sheet == null)
-        {
-            throw new ArgumentNullException(nameof(sheet));
-        }
+        ArgumentNullException.ThrowIfNull(sheet);
         if (sheet.Heading == null)
         {
             return null!;
@@ -87,10 +79,7 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
 
     public int[] GetColumnIndices(ExcelSheet sheet)
     {
-        if (sheet == null)
-        {
-            throw new ArgumentNullException(nameof(sheet));
-        }
+        ArgumentNullException.ThrowIfNull(sheet);
 
         var indices = new List<int>();
         for (var columnIndex = 0; columnIndex < sheet.NumberOfColumns; columnIndex++)

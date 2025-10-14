@@ -27,11 +27,7 @@ public class ExcelImporterConfiguration
         get => _maxColumnsPerSheet;
         set
         {
-            if (value < 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), value, "Value must be greater than zero.");
-            }
-
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value);
             _maxColumnsPerSheet = value;
         }
     }
@@ -53,10 +49,7 @@ public class ExcelImporterConfiguration
     /// <returns>True if a class map exists for the given type, else false.</returns>
     public bool TryGetClassMap(Type classType, [NotNullWhen(true)] out IMap? classMap)
     {
-        if (classType == null)
-        {
-            throw new ArgumentNullException(nameof(classType));
-        }
+        ArgumentNullException.ThrowIfNull(classType);
 
         return ClassMaps.TryGetValue(classType, out classMap);
     }
@@ -86,10 +79,7 @@ public class ExcelImporterConfiguration
     /// <param name="classMapFactory">A factory that configures and returns the class map to use.</param>
     public void RegisterClassMap<T>(Action<ExcelClassMap<T>> classMapFactory) where T : new()
     {
-        if (classMapFactory == null)
-        {
-            throw new ArgumentNullException(nameof(classMapFactory));
-        }
+        ArgumentNullException.ThrowIfNull(classMapFactory);
 
         var classMapInstance = new ExcelClassMap<T>();
         classMapFactory(classMapInstance);
@@ -102,10 +92,7 @@ public class ExcelImporterConfiguration
     /// <param name="classMap">The class map to use.</param>
     public void RegisterClassMap(ExcelClassMap classMap)
     {
-        if (classMap == null)
-        {
-            throw new ArgumentNullException(nameof(classMap));
-        }
+        ArgumentNullException.ThrowIfNull(classMap);
 
         RegisterClassMap(classMap.Type, classMap);
     }
@@ -156,14 +143,8 @@ public class ExcelImporterConfiguration
     /// <param name="classMap">The class map to use.</param>
     public void RegisterClassMap(Type classType, IMap classMap)
     {
-        if (classType == null)
-        {
-            throw new ArgumentNullException(nameof(classType));
-        }
-        if (classMap == null)
-        {
-            throw new ArgumentNullException(nameof(classMap));
-        }
+        ArgumentNullException.ThrowIfNull(classType);
+        ArgumentNullException.ThrowIfNull(classMap);
 
         ValidateMap(classMap);
         

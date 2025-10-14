@@ -13,7 +13,8 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>
 {
     public OneToOneMap(ICellReaderFactory readerFactory)
     {
-        _readerFactory = readerFactory ?? throw new ArgumentNullException(nameof(readerFactory));
+        ArgumentNullException.ThrowIfNull(readerFactory);
+        _readerFactory = readerFactory;
     }
 
     private ICellReaderFactory _readerFactory;
@@ -21,7 +22,11 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>
     public ICellReaderFactory ReaderFactory
     {
         get => _readerFactory;
-        set => _readerFactory = value ?? throw new ArgumentNullException(nameof(value));
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            _readerFactory = value;
+        }
     }
 
     /// <inheritdoc />

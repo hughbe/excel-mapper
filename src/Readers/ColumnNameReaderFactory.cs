@@ -26,10 +26,7 @@ public sealed class ColumnNameReaderFactory : ICellReaderFactory, IColumnNamePro
 
     public ICellReader? GetCellReader(ExcelSheet sheet)
     {
-        if (sheet == null)
-        {
-            throw new ArgumentNullException(nameof(sheet));
-        }
+        ArgumentNullException.ThrowIfNull(sheet);
         if (sheet.Heading == null)
         {
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");

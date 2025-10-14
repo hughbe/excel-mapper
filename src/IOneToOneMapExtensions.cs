@@ -70,7 +70,8 @@ public static class IOneToOneMapExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithReaderFactory<TMap>(this TMap map, ICellReaderFactory readerFactory) where TMap : IOneToOneMap
     {
-        map.ReaderFactory = readerFactory ?? throw new ArgumentNullException(nameof(readerFactory));
+        ArgumentNullException.ThrowIfNull(readerFactory);
+        map.ReaderFactory = readerFactory;
         return map;
     }
 }
