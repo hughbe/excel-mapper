@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ExcelMapper.Abstractions;
 using Xunit;
 
 namespace ExcelMapper.Tests;
@@ -56,10 +57,27 @@ public class CantReadTests
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
+    [Fact]
+    public void CantRead_NoSuchColumnMatchingNoHeading_ThrowsCorrectException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchColumnMatchingClass>());
+        Assert.StartsWith($"Could not read value for member \"Member\" (no columns matching)", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(-1, ex.ColumnIndex);
+    }
+
     private class NoSuchColumnMatchingClass
     {
-        [ExcelColumnMatching("NoSuchColumn")]
+        [ExcelColumnMatching(typeof(NeverMatcher))]
         public string Member { get; set; } = default!;
+    }
+
+    private class NeverMatcher : IExcelColumnMatcher
+    {
+        public bool ColumnMatches(ExcelSheet sheet, int columnIndex) => false;
     }
 
     [Fact]

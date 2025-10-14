@@ -57,12 +57,12 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
         return new ColumnIndicesReader(indices);
     }
 
-    public string[] GetColumnNames(ExcelSheet sheet)
+    public string[]? GetColumnNames(ExcelSheet sheet)
     {
         ArgumentNullException.ThrowIfNull(sheet);
         if (sheet.Heading == null)
         {
-            return null!;
+            return null;
         }
 
         var names = new List<string>();

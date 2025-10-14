@@ -99,6 +99,10 @@ public class ExcelMappingException : Exception
         }
         if (readerFactory is IColumnIndicesProviderCellReaderFactory columnIndicesProvider && columnIndicesProvider.GetColumnIndices(sheet) is { } columnIndices)
         {
+            if (columnIndices.Length == 0)
+            {
+                return new ExcelMappingException($"Could not read value for member \"{member?.Name}\" (no columns matching)", sheet, rowIndex, -1);
+            }
             if (columnIndices.Length == 1)
             {
                 return new ExcelMappingException($"Could not read value for member \"{member?.Name}\" for column at index {columnIndices[0]}", sheet, rowIndex, -1);
