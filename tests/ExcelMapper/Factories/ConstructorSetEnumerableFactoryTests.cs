@@ -7,7 +7,7 @@ using Xunit;
 
 namespace ExcelMapper.Factories;
 
-public class ConstructorSetEnumerableFactory2Tests
+public class ConstructorSetEnumerableFactoryTests
 {
     [Theory]
     [InlineData(typeof(List<int>))]

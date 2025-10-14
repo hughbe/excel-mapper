@@ -97,7 +97,7 @@ public class ValuePipeline : IValuePipeline
         CellMapperResult? finalResult = null;
         foreach (ICellMapper mapper in pipeline.CellValueMappers)
         {
-            CellMapperResult result = mapper.MapCellValue(readResult);
+            var result = mapper.MapCellValue(readResult);
             if (result.Action != CellMapperResult.HandleAction.IgnoreResultAndContinueMapping)
             {
                 finalResult = result;

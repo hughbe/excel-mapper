@@ -13,7 +13,7 @@ public class StringMapperTests
     {
         var item = new StringMapper();
 
-        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, stringValue, preserveFormatting: false));
+        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(stringValue, result.Value);
         Assert.Null(result.Exception);

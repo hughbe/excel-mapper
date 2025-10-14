@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using ExcelDataReader;
 using ExcelNumberFormat;
 
@@ -9,6 +10,7 @@ namespace ExcelMapper.Abstractions;
 /// </summary>
 public struct ReadCellResult
 {
+    private object? _value;
     private string? _stringValue;
 
     /// <summary>
@@ -26,29 +28,31 @@ public struct ReadCellResult
     /// </summary>
     public string? GetString()
     {
-        if (Reader == null || (_stringValue != null && !PreserveFormatting))
+        if (Reader == null || _stringValue != null)
         {
             return _stringValue;
         }
 
+        var value = GetValue();
         if (PreserveFormatting)
         {
             var numberFormatString = Reader.GetNumberFormatString(ColumnIndex);
             var numberFormat = new NumberFormat(numberFormatString);
-            return numberFormat.Format(Reader[ColumnIndex], CultureInfo.CurrentCulture);
+            _stringValue = numberFormat.Format(value, CultureInfo.CurrentCulture);
         }
         else
         {
-            _stringValue = Reader[ColumnIndex]?.ToString();
-            return _stringValue;
+            _stringValue = value?.ToString();
         }
+        
+        return _stringValue;
     }
 
     public object? GetValue()
     {
-        if (Reader == null || _stringValue != null)
+        if (Reader == null || _value != null)
         {
-            return _stringValue;
+            return _value;
         }
 
         var value = Reader.GetValue(ColumnIndex);
@@ -58,16 +62,12 @@ public struct ReadCellResult
             _stringValue = stringValue;
         }
 
+        _value = value;
         return value;
     }
 
     public bool IsEmpty()
     {
-        if (Reader == null || _stringValue != null)
-        {
-            return string.IsNullOrEmpty(_stringValue);
-        }
-
         // If we preserve formatting, get the value as a string.
         if (PreserveFormatting)
         {
@@ -96,6 +96,15 @@ public struct ReadCellResult
     /// <param name="preserveFormatting">Whether or not to preserve formatting when reading string values.</param>
     public ReadCellResult(int columnIndex, IExcelDataReader reader, bool preserveFormatting)
     {
+        if (columnIndex < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(columnIndex), columnIndex, "Column index cannot be negative.");
+        }
+        if (reader == null)
+        {
+            throw new ArgumentNullException(nameof(reader));
+        }
+
         ColumnIndex = columnIndex;
         Reader = reader;
         PreserveFormatting = preserveFormatting;
@@ -108,8 +117,14 @@ public struct ReadCellResult
     /// <param name="stringValue">The string value of the cell.</param>
     public ReadCellResult(int columnIndex, string? stringValue, bool preserveFormatting)
     {
+        if (columnIndex < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(columnIndex), columnIndex, "Column index cannot be negative.");
+        }
+
         ColumnIndex = columnIndex;
         _stringValue = stringValue;
+        _value = stringValue;
         PreserveFormatting = preserveFormatting;
     }
 }

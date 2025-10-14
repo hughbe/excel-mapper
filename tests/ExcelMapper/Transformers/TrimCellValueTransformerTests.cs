@@ -12,6 +12,6 @@ public class TrimCellValueTransformerTests
     public void TransformStringValue_Invoke_ReturnsExpected(string? stringValue, string? expected)
     {
         var transformer = new TrimCellValueTransformer();
-        Assert.Equal(expected, transformer.TransformStringValue(null!, 0, new ReadCellResult(-1, stringValue, preserveFormatting: false)));
+        Assert.Equal(expected, transformer.TransformStringValue(null!, 0, new ReadCellResult(0, stringValue, preserveFormatting: false)));
     }
 }

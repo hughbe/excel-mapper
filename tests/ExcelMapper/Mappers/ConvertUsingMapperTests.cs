@@ -25,13 +25,13 @@ public class ConvertUsingMapperTests
     {
         ConvertUsingMapperDelegate converter = (ReadCellResult readResult) =>
         {
-            Assert.Equal(-1, readResult.ColumnIndex);
+            Assert.Equal(0, readResult.ColumnIndex);
             Assert.Equal("string", readResult.StringValue);
             return CellMapperResult.Success(10);
         };
         var item = new ConvertUsingMapper(converter);
         
-        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, "string", preserveFormatting: false));
+        var result = item.MapCellValue(new ReadCellResult(0, "string", preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(10, result.Value);
         Assert.Null(result.Exception);
@@ -42,13 +42,13 @@ public class ConvertUsingMapperTests
     {
         ConvertUsingMapperDelegate converter = (ReadCellResult readResult) =>
         {
-            Assert.Equal(-1, readResult.ColumnIndex);
+            Assert.Equal(0, readResult.ColumnIndex);
             Assert.Equal("string", readResult.StringValue);
             throw new DivideByZeroException();
         };
         var item = new ConvertUsingMapper(converter);
         
-        CellMapperResult result = item.MapCellValue(new ReadCellResult(-1, "string", preserveFormatting: false));
+        var result = item.MapCellValue(new ReadCellResult(0, "string", preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.IsType<DivideByZeroException>(result.Exception);
