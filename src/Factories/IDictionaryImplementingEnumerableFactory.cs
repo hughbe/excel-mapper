@@ -26,6 +26,10 @@ public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<T
         {
             throw new ArgumentException($"Dictionary type {dictionaryType} must implement IDictionary.", nameof(dictionaryType));
         }
+        if (dictionaryType.GetConstructor(Type.EmptyTypes) is null)
+        {
+            throw new ArgumentException($"Dictionary type {dictionaryType} must have a default constructor.", nameof(dictionaryType));
+        }
 
         DictionaryType = dictionaryType;
     }

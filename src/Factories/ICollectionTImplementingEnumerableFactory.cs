@@ -30,6 +30,10 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
         {
             throw new ArgumentException($"Collection type {collectionType} must implement {nameof(ICollection<T?>)}.", nameof(collectionType));
         }
+        if (collectionType.GetConstructor(Type.EmptyTypes) is null)
+        {
+            throw new ArgumentException($"Collection type {collectionType} must have a default constructor.", nameof(collectionType));
+        }
 
         CollectionType = collectionType;
     }

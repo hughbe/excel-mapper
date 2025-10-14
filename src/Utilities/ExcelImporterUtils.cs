@@ -17,20 +17,16 @@ public static class ExcelImporterUtils
         ArgumentNullException.ThrowIfNull(assembly);
 
         ArgumentNullException.ThrowIfNull(namespaceString);
+        ArgumentException.ThrowIfNullOrEmpty(namespaceString);
 
-        if (namespaceString.Length == 0)
-        {
-            throw new ArgumentException("The namespace cannot be empty.", nameof(namespaceString));
-        }
-
-        IEnumerable<Type> classMapTypes = assembly
+        var classMapTypes = assembly
             .GetTypes()
             .Where(type => typeof(ExcelClassMap).IsAssignableFrom(type) && type.Namespace == namespaceString);
 
-        ExcelClassMap[] classMaps = [.. classMapTypes.Select(Activator.CreateInstance).OfType<ExcelClassMap>()];
+        var classMaps = classMapTypes.Select(Activator.CreateInstance).OfType<ExcelClassMap>().ToArray();
         if (classMaps.Length == 0)
         {
-            throw new ArgumentException($"No classmaps found in the namespace \"{namespaceString}\" in the assembly \"{assembly}\".", nameof(namespaceString));
+            throw new ArgumentException($"No ExcelClassMap types found in the namespace \"{namespaceString}\" in the assembly \"{assembly}\".", nameof(namespaceString));
         }
 
         foreach (ExcelClassMap classMap in classMaps)

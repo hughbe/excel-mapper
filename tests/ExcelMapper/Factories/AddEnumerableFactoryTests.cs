@@ -18,7 +18,6 @@ public class AddEnumerableFactoryTests
     [InlineData(typeof(HashSet<int>))]
     [InlineData(typeof(Collection<int>))]
     [InlineData(typeof(ObservableCollection<int>))]
-    [InlineData(typeof(ImmutableArray<int>))]
     public void Ctor_Type(Type collectionType)
     {
         var factory = new AddEnumerableFactory<int>(collectionType);
@@ -54,6 +53,7 @@ public class AddEnumerableFactoryTests
     [InlineData(typeof(ReadOnlySet<int>))]
     [InlineData(typeof(NonEnumerableAddClass<int>))]
     [InlineData(typeof(SubCollectionBase))]
+    [InlineData(typeof(ImmutableArray<int>))]
     public void Ctor_InvalidCollectionType_ThrowsArgumentException(Type collectionType)
     {
         Assert.Throws<ArgumentException>("collectionType", () => new AddEnumerableFactory<int>(collectionType));

@@ -28,6 +28,10 @@ public class AddEnumerableFactory<T> : IEnumerableFactory<T>
         {
             throw new ArgumentException($"Collection type {collectionType} must implement IEnumerable.", nameof(collectionType));
         }
+        if (collectionType.GetConstructor(Type.EmptyTypes) is null)
+        {
+            throw new ArgumentException($"Collection type {collectionType} must have a default constructor.", nameof(collectionType));
+        }
 
         CollectionType = collectionType;
         _addMethod = collectionType.GetMethod("Add", [typeof(T)]) ?? throw new ArgumentException($"Type does not have an Add({typeof(T)}) method.", nameof(collectionType));

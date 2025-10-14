@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
 namespace ExcelMapper.Factories;
@@ -14,7 +15,6 @@ public class AddDictionaryFactoryTests
     [Theory]
     [InlineData(typeof(Dictionary<string, string>))]
     [InlineData(typeof(AddClass<string, string>))]
-    [InlineData(typeof(ImmutableDictionary<string, string>))]
     [InlineData(typeof(Hashtable))]
     [InlineData(typeof(StringDictionary))]
     public void Ctor_Type(Type dictionaryType)
@@ -48,6 +48,10 @@ public class AddDictionaryFactoryTests
     [InlineData(typeof(AddThreeClass))]
     [InlineData(typeof(NonEnumerableAddClass<string, string>))]
     [InlineData(typeof(FrozenDictionary<string, string>))]
+    [InlineData(typeof(ImmutableDictionary<string, string>))]
+    [InlineData(typeof(ReadOnlyDictionary<string, int>))]
+    [InlineData(typeof(NoConstructorClass))]
+    [InlineData(typeof(NoConstructorClass<string, int>))]
     public void Ctor_InvalidDictionaryType_ThrowsArgumentException(Type dictionaryType)
     {
         Assert.Throws<ArgumentException>("dictionaryType", () => new AddDictionaryFactory<string, string>(dictionaryType));
@@ -160,7 +164,7 @@ public class AddDictionaryFactoryTests
     }
 
     [Fact]
-    public void Set_NullKey_ThrowsArgumentNullException()
+    public void Add_NullKey_ThrowsArgumentNullException()
     {
         var factory = new AddDictionaryFactory<string, string>(typeof(StringDictionary));
         factory.Begin(1);
@@ -168,7 +172,7 @@ public class AddDictionaryFactoryTests
     }
 
     [Fact]
-    public void Set_MultipleTimes_ThrowsArgumentException()
+    public void Add_MultipleTimes_ThrowsArgumentException()
     {
         var factory = new AddDictionaryFactory<string, string>(typeof(StringDictionary));
         factory.Begin(1);
@@ -251,5 +255,82 @@ public class AddDictionaryFactoryTests
         }
 
         public IEnumerator GetEnumerator() => throw new NotImplementedException();
+    }
+
+
+    private class NoConstructorClass : IDictionary
+    {
+        private NoConstructorClass()
+        {
+        }
+
+        public object? this[object key] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public bool IsFixedSize => throw new NotImplementedException();
+
+        public bool IsReadOnly => throw new NotImplementedException();
+
+        public ICollection Keys => throw new NotImplementedException();
+
+        public ICollection Values => throw new NotImplementedException();
+
+        public int Count => throw new NotImplementedException();
+
+        public bool IsSynchronized => throw new NotImplementedException();
+
+        public object SyncRoot => throw new NotImplementedException();
+
+        public void Add(object key, object? value) => throw new NotImplementedException();
+
+        public void Clear() => throw new NotImplementedException();
+
+        public bool Contains(object key) => throw new NotImplementedException();
+
+        public void CopyTo(Array array, int index) => throw new NotImplementedException();
+
+        public IDictionaryEnumerator GetEnumerator() => throw new NotImplementedException();
+
+        public void Remove(object key) => throw new NotImplementedException();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    private class NoConstructorClass<TKey, TValue> : IDictionary<TKey, TValue> where TKey : notnull
+    {
+        private NoConstructorClass()
+        {
+        }
+
+        public TValue this[TKey key] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public ICollection<TKey> Keys => throw new NotImplementedException();
+
+        public ICollection<TValue> Values => throw new NotImplementedException();
+
+        public int Count => throw new NotImplementedException();
+
+        public bool IsReadOnly => throw new NotImplementedException();
+
+        public void Add(TKey key, TValue value) => throw new NotImplementedException();
+
+        public void Add(KeyValuePair<TKey, TValue> item) => throw new NotImplementedException();
+
+        public void Clear() => throw new NotImplementedException();
+
+        public bool Contains(KeyValuePair<TKey, TValue> item) => throw new NotImplementedException();
+
+        public bool ContainsKey(TKey key) => throw new NotImplementedException();
+
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => throw new NotImplementedException();
+
+        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => throw new NotImplementedException();
+
+        public bool Remove(TKey key) => throw new NotImplementedException();
+
+        public bool Remove(KeyValuePair<TKey, TValue> item) => throw new NotImplementedException();
+
+        public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value) => throw new NotImplementedException();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

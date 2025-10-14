@@ -21,7 +21,6 @@ public class DateTimeMapper : ICellMapper
         set
         {
             ArgumentNullException.ThrowIfNull(value);
-
             if (value.Length == 0)
             {
                 throw new ArgumentException("Formats cannot be empty.", nameof(value));

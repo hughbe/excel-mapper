@@ -105,7 +105,7 @@ public class ImmutableDictionaryFactoryTests
     }
 
     [Fact]
-    public void Set_NullKey_ThrowsArgumentNullException()
+    public void Add_NullKey_ThrowsArgumentNullException()
     {
         var factory = new ImmutableDictionaryFactory<string, int>();
         factory.Begin(1);
@@ -113,7 +113,7 @@ public class ImmutableDictionaryFactoryTests
     }
 
     [Fact]
-    public void Set_MultipleTimes_ThrowsArgumentException()
+    public void Add_MultipleTimes_ThrowsArgumentException()
     {
         var factory = new ImmutableDictionaryFactory<string, int>();
         factory.Begin(1);

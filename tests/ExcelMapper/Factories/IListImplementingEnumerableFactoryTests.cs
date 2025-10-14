@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Frozen;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Xunit;
@@ -16,10 +17,6 @@ public class IListImplementingEnumerableFactoryTests
     [InlineData(typeof(IListNonGeneric))]
     [InlineData(typeof(Collection<int>))]
     [InlineData(typeof(Collection<string>))]
-    [InlineData(typeof(ReadOnlyCollection<int>))]
-    [InlineData(typeof(ReadOnlyCollection<string>))]
-    [InlineData(typeof(ReadOnlyObservableCollection<int>))]
-    [InlineData(typeof(ReadOnlyObservableCollection<string>))]
     [InlineData(typeof(ArrayList))]
     [InlineData(typeof(SubCollectionBase))]
     public void Ctor_Type(Type listType)
@@ -50,10 +47,15 @@ public class IListImplementingEnumerableFactoryTests
     [InlineData(typeof(ICollectionNonGeneric))]
     [InlineData(typeof(ICollectionGeneric<int>))]
     [InlineData(typeof(AbstractClass))]
+    [InlineData(typeof(ImmutableList<int>))]
     [InlineData(typeof(FrozenSet<int>))]
     [InlineData(typeof(ReadOnlySet<int>))]
     [InlineData(typeof(HashSet<int>))]
     [InlineData(typeof(CollectionBase))]
+    [InlineData(typeof(ReadOnlyCollection<int>))]
+    [InlineData(typeof(ReadOnlyObservableCollection<int>))]
+    [InlineData(typeof(NoConstructorClass))]
+    [InlineData(typeof(NoConstructorClass<int>))]
     public void Ctor_InvalidListType_ThrowsArgumentException(Type listType)
     {
         Assert.Throws<ArgumentException>("listType", () => new IListImplementingEnumerableFactory<int>(listType));
@@ -334,5 +336,75 @@ public class IListImplementingEnumerableFactoryTests
     private class SubCollectionBase : CollectionBase
     {
         protected override void OnValidate(object value) { }
+    }
+
+    private class NoConstructorClass : IList
+    {
+        private NoConstructorClass()
+        {
+        }
+
+        public object? this[int index] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public bool IsFixedSize => throw new NotImplementedException();
+
+        public bool IsReadOnly => throw new NotImplementedException();
+
+        public int Count => throw new NotImplementedException();
+
+        public bool IsSynchronized => throw new NotImplementedException();
+
+        public object SyncRoot => throw new NotImplementedException();
+
+        public int Add(object? value) => throw new NotImplementedException();
+
+        public void Clear() => throw new NotImplementedException();
+
+        public bool Contains(object? value) => throw new NotImplementedException();
+
+        public void CopyTo(Array array, int index) => throw new NotImplementedException();
+
+        public IEnumerator GetEnumerator() => throw new NotImplementedException();
+
+        public int IndexOf(object? value) => throw new NotImplementedException();
+
+        public void Insert(int index, object? value) => throw new NotImplementedException();
+
+        public void Remove(object? value) => throw new NotImplementedException();
+
+        public void RemoveAt(int index) => throw new NotImplementedException();
+    }
+
+    private class NoConstructorClass<T> : IList<T>
+    {
+        private NoConstructorClass()
+        {
+        }
+
+        public T this[int index] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public int Count => throw new NotImplementedException();
+
+        public bool IsReadOnly => throw new NotImplementedException();
+
+        public void Add(T item) => throw new NotImplementedException();
+
+        public void Clear() => throw new NotImplementedException();
+
+        public bool Contains(T item) => throw new NotImplementedException();
+
+        public void CopyTo(T[] array, int arrayIndex) => throw new NotImplementedException();
+
+        public IEnumerator<T> GetEnumerator() => throw new NotImplementedException();
+
+        public int IndexOf(T item) => throw new NotImplementedException();
+
+        public void Insert(int index, T item) => throw new NotImplementedException();
+
+        public bool Remove(T item) => throw new NotImplementedException();
+
+        public void RemoveAt(int index) => throw new NotImplementedException();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

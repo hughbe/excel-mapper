@@ -30,6 +30,10 @@ public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValu
         {
             throw new ArgumentException($"Dictionary type {dictionaryType} must implement IEnumerable.", nameof(dictionaryType));
         }
+        if (dictionaryType.GetConstructor(Type.EmptyTypes) is null)
+        {
+            throw new ArgumentException($"Dictionary type {dictionaryType} must have a default constructor.", nameof(dictionaryType));
+        }
 
         DictionaryType = dictionaryType;
         _addMethod = dictionaryType.GetMethod("Add", [typeof(TKey), typeof(TValue)]) ?? throw new ArgumentException($"Type does not have an Add({typeof(TKey)}, {typeof(TValue)}) method.", nameof(dictionaryType));

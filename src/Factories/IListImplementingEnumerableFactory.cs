@@ -30,6 +30,10 @@ public class IListImplementingEnumerableFactory<T> : IEnumerableFactory<T>
         {
             throw new ArgumentException($"List type {listType} must implement IList.", nameof(listType));
         }
+        if (listType.GetConstructor(Type.EmptyTypes) is null)
+        {
+            throw new ArgumentException($"List type {listType} must have a default constructor.", nameof(listType));
+        }
 
         ListType = listType;
     }

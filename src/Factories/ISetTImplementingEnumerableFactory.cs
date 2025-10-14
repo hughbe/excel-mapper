@@ -26,6 +26,10 @@ public class ISetTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
         {
             throw new ArgumentException($"Set type {setType} must implement {nameof(ISet<T?>)}.", nameof(setType));
         }
+        if (setType.GetConstructor(Type.EmptyTypes) is null)
+        {
+            throw new ArgumentException($"Set type {setType} must have a default constructor.", nameof(setType));
+        }
 
         SetType = setType;
     }

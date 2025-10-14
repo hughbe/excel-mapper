@@ -14,10 +14,7 @@ public class ICollectionTImplementingEnumerableFactoryTests
     [InlineData(typeof(ICollectionGeneric<int>))]
     [InlineData(typeof(IListGeneric<int>))]
     [InlineData(typeof(Collection<int>))]
-    [InlineData(typeof(ReadOnlyCollection<int>))]
-    [InlineData(typeof(ReadOnlyObservableCollection<int>))]
     [InlineData(typeof(HashSet<int>))]
-    [InlineData(typeof(ReadOnlySet<int>))]
     public void Ctor_Type(Type collectionType)
     {
         var factory = new ICollectionTImplementingEnumerableFactory<int>(collectionType);
@@ -49,11 +46,16 @@ public class ICollectionTImplementingEnumerableFactoryTests
     [InlineData(typeof(AbstractClass))]
     [InlineData(typeof(FrozenSet<int>))]
     [InlineData(typeof(Collection<string>))]
+    [InlineData(typeof(ReadOnlyCollection<int>))]
     [InlineData(typeof(ReadOnlyCollection<string>))]
+    [InlineData(typeof(ReadOnlyObservableCollection<int>))]
     [InlineData(typeof(ReadOnlyObservableCollection<string>))]
     [InlineData(typeof(HashSet<string>))]
+    [InlineData(typeof(ReadOnlySet<int>))]
     [InlineData(typeof(ReadOnlySet<string>))]
     [InlineData(typeof(SubCollectionBase))]
+    [InlineData(typeof(NoConstructorClass))]
+    [InlineData(typeof(NoConstructorClass<int>))]
     public void Ctor_InvalidCollectionType_ThrowsArgumentException(Type collectionType)
     {
         Assert.Throws<ArgumentException>("collectionType", () => new ICollectionTImplementingEnumerableFactory<int>(collectionType));
@@ -321,5 +323,47 @@ public class ICollectionTImplementingEnumerableFactoryTests
 
     private class SubCollectionBase : CollectionBase
     {
+    }
+
+    private class NoConstructorClass : ICollection
+    {
+        private NoConstructorClass()
+        {
+        }
+
+        public int Count => throw new NotImplementedException();
+
+        public bool IsSynchronized => throw new NotImplementedException();
+
+        public object SyncRoot => throw new NotImplementedException();
+
+        public void CopyTo(Array array, int index) => throw new NotImplementedException();
+
+        public IEnumerator GetEnumerator() => throw new NotImplementedException();
+    }
+
+    private class NoConstructorClass<T> : ICollection<T>
+    {
+        private NoConstructorClass()
+        {
+        }
+
+        public int Count => throw new NotImplementedException();
+
+        public bool IsReadOnly => throw new NotImplementedException();
+
+        public void Add(T item) => throw new NotImplementedException();
+
+        public void Clear() => throw new NotImplementedException();
+
+        public bool Contains(T item) => throw new NotImplementedException();
+
+        public void CopyTo(T[] array, int arrayIndex) => throw new NotImplementedException();
+
+        public IEnumerator<T> GetEnumerator() => throw new NotImplementedException();
+
+        public bool Remove(T item) => throw new NotImplementedException();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

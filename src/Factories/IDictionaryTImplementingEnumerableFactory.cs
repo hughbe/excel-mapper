@@ -25,6 +25,10 @@ public class IDictionaryTImplementingFactory<TKey, TValue> : Abstractions.IDicti
         {
             throw new ArgumentException($"Dictionary type {dictionaryType} must implement {nameof(IDictionary<TKey, TValue?>)}.", nameof(dictionaryType));
         }
+        if (dictionaryType.GetConstructor(Type.EmptyTypes) is null)
+        {
+            throw new ArgumentException($"Dictionary type {dictionaryType} must have a default constructor.", nameof(dictionaryType));
+        }
 
         DictionaryType = dictionaryType;
     }

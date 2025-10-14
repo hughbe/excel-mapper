@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Reflection;
 using Xunit;
 
 namespace ExcelMapper.Factories;
@@ -129,6 +130,18 @@ public class ConstructorEnumerableFactoryTests
     {
         var factory = new ConstructorEnumerableFactory<int>(typeof(List<int>));
         Assert.Throws<ArgumentOutOfRangeException>("count", () => factory.Begin(-1));
+    }
+
+    [Fact]
+    public void Begin_ThrowingConstructorISetT_Success()
+    {
+        var factory = new ConstructorEnumerableFactory<int>(typeof(ThrowingConstructorIEnumerableT<int>));
+        factory.Begin(1);
+        Assert.Throws<TargetInvocationException>(() => factory.End());
+
+        // Ensure we can begin again.
+        factory.Begin(1);
+        Assert.Throws<TargetInvocationException>(() => factory.End());
     }
 
     [Fact]
@@ -274,6 +287,11 @@ public class ConstructorEnumerableFactoryTests
         public IEnumerable<T> Value { get; }
 
         public ConstructorIEnumerableT(IEnumerable<T> value) => Value = value;
+    }
+
+    private class ThrowingConstructorIEnumerableT<T>
+    {
+        public ThrowingConstructorIEnumerableT(IEnumerable<T> value) => throw new NotImplementedException();
     }
 
     private class ConstructorICollection

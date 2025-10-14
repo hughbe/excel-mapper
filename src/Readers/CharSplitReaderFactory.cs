@@ -20,7 +20,6 @@ public class CharSplitReaderFactory : SplitReaderFactory
         set
         {
             ArgumentNullException.ThrowIfNull(value);
-
             if (value.Length == 0)
             {
                 throw new ArgumentException("Separators cannot be empty.", nameof(value));
