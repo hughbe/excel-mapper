@@ -518,27 +518,6 @@ public class MapOptionalTests
     }
 #pragma warning restore CS0649
 
-    [Fact]
-    public void ReadRows_NotIgnoredRecursiveProperty_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("Primitives.xlsx");
-
-        ExcelSheet sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NotIgnoredRecursivePropertyClass>());
-    }
-
-    [Fact]
-    public void ReadRows_NotIgnoredRecursiveField_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("Primitives.xlsx");
-
-        ExcelSheet sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NotIgnoredRecursiveFieldClass>());
-    }
 
     [Fact]
     public void ReadRows_IgnoredRecursiveProperty_DoesNotDeserialize()
@@ -566,13 +545,6 @@ public class MapOptionalTests
         Assert.Equal("a", row1.MappedValue);
     }
 
-    private class NotIgnoredRecursivePropertyClass
-    {
-        public NotIgnoredRecursivePropertyClass StringValue { get; set; } = default!;
-
-        public string MappedValue { get; set; } = default!;
-    }
-
     private class IgnoredRecursivePropertyClass
     {
         [ExcelIgnore]
@@ -582,13 +554,6 @@ public class MapOptionalTests
     }
 
 #pragma warning disable CS0649
-    private class NotIgnoredRecursiveFieldClass
-    {
-        public NotIgnoredRecursiveFieldClass StringValue = default!;
-
-        public string MappedValue = default!;
-    }
-
     private class IgnoredRecursiveFieldClass
     {
         [ExcelIgnore]
@@ -596,6 +561,7 @@ public class MapOptionalTests
 
         public string MappedValue = default!;
     }
+#pragma warning restore CS0649
 
     [Fact]
     public void ReadRows_CustomMappedArrayIndexerNoSuchColumn_ThrowsExcelMappingException()

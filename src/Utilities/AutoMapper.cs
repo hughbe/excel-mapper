@@ -640,6 +640,9 @@ public static class AutoMapper
     }
 
     internal static bool TryCreateObjectMap<T>(FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ExcelClassMap<T>? classMap)
+        => TryCreateObjectMap(emptyValueStrategy, out classMap, null);
+
+    private static bool TryCreateObjectMap<T>(FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ExcelClassMap<T>? classMap, HashSet<Type>? typeStack)
     {
         Type type = typeof(T);
         if (type.GetTypeInfo().IsInterface)
@@ -658,40 +661,52 @@ public static class AutoMapper
             return false;
         }
 
-        var map = new ExcelClassMap<T>(emptyValueStrategy);
-        IEnumerable<MemberInfo> properties = type.GetRuntimeProperties().Where(ShouldAutoMapProperty);
-        IEnumerable<MemberInfo> fields = type.GetRuntimeFields().Where(ShouldAutoMapField);
-
-        foreach (MemberInfo member in properties.Concat(fields))
+        // Initialize the type stack on first call
+        typeStack ??= [];
+        
+        // Check for circular reference
+        if (!typeStack.Add(type))
         {
-            // Ignore this property/field.
-            if (Attribute.IsDefined(member, typeof(ExcelIgnoreAttribute)))
-            {
-                continue;
-            }
-
-            // Infer the mapping for each member (property/field) belonging to the type.
-            Type memberType = member.MemberType();
-            if (memberType == type)
-            {
-                throw new ExcelMappingException($"Cannot map recursive property \"{member.Name}\" of type {memberType}. Consider applying the ExcelIgnore attribute.");
-            }
-
-            var method = TryAutoMapMemberMethod.MakeGenericMethod(memberType);
-            var parameters = new object?[] { member, emptyValueStrategy, null };
-            var result = (bool)method.InvokeUnwrapped(null, parameters)!;
-            if (!result)
-            {
-                classMap = null;
-                return false;
-            }
-
-            // Get the out parameter representing the map for the member.
-            map.Properties.Add(new ExcelPropertyMap(member, (IMap)parameters[2]!));
+            throw new ExcelMappingException($"Circular reference detected: type \"{type.Name}\" references itself through its members. Consider applying the ExcelIgnore attribute to break the cycle.");
         }
 
-        classMap = map;
-        return true;
+        try
+        {
+            var map = new ExcelClassMap<T>(emptyValueStrategy);
+            IEnumerable<MemberInfo> properties = type.GetRuntimeProperties().Where(ShouldAutoMapProperty);
+            IEnumerable<MemberInfo> fields = type.GetRuntimeFields().Where(ShouldAutoMapField);
+
+            foreach (MemberInfo member in properties.Concat(fields))
+            {
+                // Ignore this property/field.
+                if (Attribute.IsDefined(member, typeof(ExcelIgnoreAttribute)))
+                {
+                    continue;
+                }
+
+                // Infer the mapping for each member (property/field) belonging to the type.
+                var memberType = member.MemberType();
+                var method = TryAutoMapMemberMethod.MakeGenericMethod(memberType);
+                var parameters = new object?[] { member, emptyValueStrategy, typeStack, null };
+                var result = (bool)method.InvokeUnwrapped(null, parameters)!;
+                if (!result)
+                {
+                    classMap = null;
+                    return false;
+                }
+
+                // Get the out parameter representing the map for the member.
+                map.Properties.Add(new ExcelPropertyMap(member, (IMap)parameters[3]!));
+            }
+
+            classMap = map;
+            return true;
+        }
+        finally
+        {
+            // Remove the type from the stack as we exit
+            typeStack.Remove(type);
+        }
     }
 
     private static bool ShouldAutoMapProperty(PropertyInfo property)
@@ -811,7 +826,7 @@ public static class AutoMapper
             throw new ArgumentException($"Invalid value \"{emptyValueStrategy}\".", nameof(emptyValueStrategy));
         }
 
-        if (!TryCreateMap<T>(null, typeof(T), new ColumnIndexReaderFactory(0), new AllColumnNamesReaderFactory(), emptyValueStrategy, isAutoMapping: true, out var classMap))
+        if (!TryCreateMap<T>(null, typeof(T), new ColumnIndexReaderFactory(0), new AllColumnNamesReaderFactory(), emptyValueStrategy, isAutoMapping: true, typeStack: null, out var classMap))
         {
             result = null;
             return false;
@@ -839,9 +854,10 @@ public static class AutoMapper
     /// <typeparam name="TMember">The target type.</typeparam>
     /// <param name="member"></param>
     /// <param name="emptyValueStrategy">The behaviour if the value is empty.</param>
+    /// <param name="typeStack">Stack of types being processed to detect circular references.</param>
     /// <param name="map">The pipeline.</param>
     /// <returns>True if the member is able to be mapped.</returns>
-    private static bool TryAutoMapMember<TMember>(MemberInfo member, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
+    private static bool TryAutoMapMember<TMember>(MemberInfo member, FallbackStrategy emptyValueStrategy, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map)
     {
         return TryCreateMap<TMember>(
             member,
@@ -850,10 +866,11 @@ public static class AutoMapper
             MemberMapper.GetDefaultCellsReaderFactory(member) ?? new CharSplitReaderFactory(MemberMapper.GetDefaultCellReaderFactory(member)),
             emptyValueStrategy,
             isAutoMapping: true,
+            typeStack,
             out map);
     }
 
-    private static bool TryCreateMap<T>(MemberInfo? member, Type memberType, ICellReaderFactory defaultCellReaderFactory, ICellsReaderFactory defaultCellsReaderFactory, FallbackStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out IMap? map)
+    private static bool TryCreateMap<T>(MemberInfo? member, Type memberType, ICellReaderFactory defaultCellReaderFactory, ICellsReaderFactory defaultCellsReaderFactory, FallbackStrategy emptyValueStrategy, bool isAutoMapping, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map)
     {
         // Mapping a known type (e.g., string, object, etc.) is supported and simply
         // reads the first column into that value.
@@ -875,7 +892,7 @@ public static class AutoMapper
             return true;
         }
         // Otherwise, create the default class map for this type.
-        else if (TryCreateObjectMap<T>(emptyValueStrategy, out var classMap))
+        else if (TryCreateObjectMap<T>(emptyValueStrategy, out var classMap, typeStack))
         {
             map = classMap;
             return true;
