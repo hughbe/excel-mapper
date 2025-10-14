@@ -249,7 +249,7 @@ public class ExcelImporter : IDisposable
         ArgumentOutOfRangeException.ThrowIfNegative(sheetIndex);
 
         sheet = null;
-        if (sheetIndex > NumberOfSheets - 1)
+        if (sheetIndex >= NumberOfSheets)
         {
             return false;
         }
