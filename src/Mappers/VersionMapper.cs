@@ -4,9 +4,9 @@ using ExcelMapper.Abstractions;
 namespace ExcelMapper.Mappers;
 
 /// <summary>
-/// A mapper that tries to map the value of a cell to a <see cref="Guid"/>.
+/// Tries to map the value of a cell to <see cref="Version"/>.
 /// </summary>
-public class GuidMapper : ICellMapper
+public class VersionMapper : ICellMapper
 {
     public CellMapperResult Map(ReadCellResult readResult)
     {
@@ -14,8 +14,8 @@ public class GuidMapper : ICellMapper
 
         try
         {
-            var result = Guid.Parse(stringValue!);
-            return CellMapperResult.Success(result);
+            var version = new Version(stringValue!);
+            return CellMapperResult.Success(version);
         }
         catch (Exception exception)
         {

@@ -11,9 +11,9 @@ public class EnumMapperTests
     [InlineData(typeof(ConsoleColor))]
     public void Ctor_Type(Type enumType)
     {
-        var item = new EnumMapper(enumType);
-        Assert.Same(enumType, item.EnumType);
-        Assert.False(item.IgnoreCase);
+        var mapper = new EnumMapper(enumType);
+        Assert.Same(enumType, mapper.EnumType);
+        Assert.False(mapper.IgnoreCase);
     }
 
     [Theory]
@@ -21,9 +21,9 @@ public class EnumMapperTests
     [InlineData(typeof(ConsoleColor), false)]
     public void Ctor_Type_Bool(Type enumType, bool ignoreCase)
     {
-        var item = new EnumMapper(enumType, ignoreCase);
-        Assert.Same(enumType, item.EnumType);
-        Assert.Equal(ignoreCase, item.IgnoreCase);
+        var mapper = new EnumMapper(enumType, ignoreCase);
+        Assert.Same(enumType, mapper.EnumType);
+        Assert.Equal(ignoreCase, mapper.IgnoreCase);
     }
 
     [Fact]
@@ -49,10 +49,9 @@ public class EnumMapperTests
 
     [Theory]
     [MemberData(nameof(Map_ValidStringValue_TestData))]
-    public void Map_ValidStringValue_ReturnsSuccess(EnumMapper item, string stringValue, Enum expected)
+    public void Map_ValidStringValue_ReturnsSuccess(EnumMapper mapper, string stringValue, Enum expected)
     {
-        
-        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = mapper.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(expected, result.Value);
         Assert.Null(result.Exception);
@@ -68,9 +67,9 @@ public class EnumMapperTests
 
     [Theory]
     [MemberData(nameof(Map_InvalidStringValue_TestData))]
-    public void Map_InvalidStringValue_ReturnsInvalid(EnumMapper item, string? stringValue)
+    public void Map_InvalidStringValue_ReturnsInvalid(EnumMapper mapper, string? stringValue)
     {
-        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = mapper.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);

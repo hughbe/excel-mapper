@@ -4,7 +4,7 @@ using ExcelMapper.Abstractions;
 namespace ExcelMapper.Mappers;
 
 /// <summary>
-/// Tries to map the value of a cell to an absolute Uri.
+/// Tries to map the value of a cell to an absolute <see cref="Uri"/>.
 /// </summary>
 public class UriMapper : ICellMapper
 {
@@ -13,15 +13,13 @@ public class UriMapper : ICellMapper
         var stringValue = readResult.GetString();
 
         try
-            {
-                // Discarding readResult.StringValue nullability warning.
-                // If null - CellMapperResult.Invalid with ArgumentNullException will be returned
-                var uri = new Uri(stringValue!, UriKind.Absolute);
-                return CellMapperResult.Success(uri);
-            }
-            catch (Exception exception)
-            {
-                return CellMapperResult.Invalid(exception);
-            }
+        {
+            var uri = new Uri(stringValue!, UriKind.Absolute);
+            return CellMapperResult.Success(uri);
+        }
+        catch (Exception exception)
+        {
+            return CellMapperResult.Invalid(exception);
+        }
     }
 }

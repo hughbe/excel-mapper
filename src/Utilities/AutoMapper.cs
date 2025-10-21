@@ -81,6 +81,7 @@ public static class AutoMapper
     private static readonly ICellMapper s_boolMapper = new BoolMapper();
     private static readonly ICellMapper s_stringMapper = new StringMapper();
     private static readonly ICellMapper s_uriMapper = new UriMapper();
+    private static readonly ICellMapper s_versionMapper = new VersionMapper();
     private static readonly AllColumnNamesReaderFactory s_allColumnNamesReaderFactory = new();
     private static readonly IFallbackItem s_throwFallback = new ThrowFallback();
     private static readonly IFallbackItem s_nullFallback = new FixedValueFallback(null);
@@ -98,6 +99,7 @@ public static class AutoMapper
         [typeof(object)] = s_stringMapper,
         [typeof(IConvertible)] = s_stringMapper,
         [typeof(Uri)] = s_uriMapper,
+        [typeof(Version)] = s_versionMapper,
     }.ToFrozenDictionary();
 
     private static bool TryGetWellKnownMap<T>(

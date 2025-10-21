@@ -9,6 +9,7 @@ public class GuidMapperTests
 {
     public static IEnumerable<object[]> Map_ValidStringValue_TestData()
     {
+        yield return new object[] { "00000000-0000-0000-0000-000000000000", Guid.Empty };
         yield return new object[] { "a8a110d5fc4943c5bf46802db8f843ff", new Guid("a8a110d5fc4943c5bf46802db8f843ff") };
         yield return new object[] { "a8a110d5-fc49-43c5-bf46-802db8f843ff", new Guid("a8a110d5fc4943c5bf46802db8f843ff") };
         yield return new object[] { "{a8a110d5-fc49-43c5-bf46-802db8f843ff}", new Guid("a8a110d5fc4943c5bf46802db8f843ff") };
@@ -20,9 +21,8 @@ public class GuidMapperTests
     [MemberData(nameof(Map_ValidStringValue_TestData))]
     public void Map_ValidStringValue_ReturnsSuccess(string stringValue, Guid expected)
     {
-        var item = new GuidMapper();
-
-        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var mapper = new GuidMapper();
+        var result = mapper.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(expected, result.Value);
         Assert.Null(result.Exception);
@@ -34,9 +34,8 @@ public class GuidMapperTests
     [InlineData("invalid")]
     public void Map_InvalidStringValue_ReturnsInvalid(string? stringValue)
     {
-        var item = new GuidMapper();
-
-        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var mapper = new GuidMapper();
+        var result = mapper.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);

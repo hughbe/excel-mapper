@@ -17,9 +17,8 @@ public class UriMapperTests
     [MemberData(nameof(Map_TestData))]
     public void Map_ValidStringValue_ReturnsSuccess(string stringValue, Uri expected)
     {
-        var item = new UriMapper();
-        
-        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var map = new UriMapper();
+        var result = map.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(expected, result.Value);
         Assert.Null(result.Exception);
@@ -31,8 +30,8 @@ public class UriMapperTests
     [InlineData("invalid")]
     public void Map_InvalidStringValue_ReturnsInvalid(string? stringValue)
     {
-        var item = new UriMapper();
-        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var map = new UriMapper();
+        var result = map.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);

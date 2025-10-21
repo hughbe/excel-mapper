@@ -51,9 +51,7 @@ public class EnumMapper : ICellMapper
 
         try
         {
-            // Discarding readResult.StringValue nullability warning.
-            // If null - CellMapperResult.Invalid with ArgumentNullException will be returned
-            object result = Enum.Parse(EnumType, stringValue!, IgnoreCase);
+            var result = Enum.Parse(EnumType, stringValue!, IgnoreCase);
             return CellMapperResult.Success(result);
         }
         catch (Exception exception)
