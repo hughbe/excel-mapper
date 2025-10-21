@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection.Metadata;
 
 namespace ExcelMapper.Abstractions;
 
@@ -12,7 +13,7 @@ public readonly struct CellMapperResult
     public Exception? Exception { get; }
     public HandleAction Action { get; }
 
-    public bool Succeeded => Exception == null && Action != HandleAction.IgnoreResultAndContinueMapping;
+    public bool Succeeded => Action != HandleAction.ErrorAndContinueMapping && Action != HandleAction.IgnoreResultAndContinueMapping;
 
     internal CellMapperResult(object? value, Exception? exception, HandleAction action)
     {
@@ -43,7 +44,7 @@ public readonly struct CellMapperResult
     /// The value was invalid. The InvalidFallback will be invoked if no other value mappers are
     /// successful.
     /// </summary>
-    public static CellMapperResult Invalid(Exception exception) => new(null, exception, HandleAction.UseResultAndContinueMapping);
+    public static CellMapperResult Invalid(Exception exception) => new(null, exception, HandleAction.ErrorAndContinueMapping);
 
     public enum HandleAction
     {
@@ -52,6 +53,12 @@ public readonly struct CellMapperResult
         /// finished only if there are no more subsequent used success or error results.
         /// </summary>
         UseResultAndContinueMapping,
+
+        /// <summary>
+        /// Use the result of mapping as an error. Continue down the pipeline. Handle the error when the mapping is
+        /// finished only if there are no more subsequent used success or error results.
+        /// </summary>
+        ErrorAndContinueMapping,
 
         /// <summary>
         /// Use the result of the mapping. Stop mapping and handle the success or error immediately.

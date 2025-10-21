@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using ExcelMapper.Abstractions;
 using Xunit;
@@ -154,5 +155,89 @@ public class CantReadTests
     {
         [ExcelColumnNames("Value", "NoSuchColumn")]
         public IEnumerable<string> Member { get; set; } = default!;
+    }
+
+    [Fact]
+    public void CantRead_ExceptionThrown_ThrowsCorrectException()
+    {
+        var exception = new InvalidOperationException("Test exception");
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<IntClass>(c =>
+        {
+            var map = c.Map(m => m.Member)
+                .WithColumnName("Int Value");
+            map.RemoveCellValueMapper(0);
+            map.AddCellValueMapper(new ExceptionThrowingMapper(exception));
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IntClass>());
+        Assert.Same(exception, ex.InnerException);
+        Assert.StartsWith("Cannot assign \"1\" to member \"Member\" of type \"System.Int32\" in column \"Int Value\" on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(0, ex.ColumnIndex);
+    }
+
+    [Fact]
+    public void CantRead_NullException_ThrowsCorrectException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<IntClass>(c =>
+        {
+            var map = c.Map(m => m.Member)
+                .WithColumnName("Int Value");
+            map.RemoveCellValueMapper(0);
+            map.AddCellValueMapper(new ExceptionThrowingMapper(null!));
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IntClass>());
+        Assert.Null(ex.InnerException);
+        Assert.StartsWith("Cannot assign \"1\" to member \"Member\" of type \"System.Int32\" in column \"Int Value\" on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(0, ex.ColumnIndex);
+    }
+
+    private class IntClass
+    {
+        public int Member { get; set; } = default!;
+    }
+
+    private class ExceptionThrowingMapper(Exception exception) : ICellMapper
+    {
+        private readonly Exception _exception = exception;
+
+        public CellMapperResult MapCellValue(ReadCellResult readResult) => CellMapperResult.Invalid(_exception);
+    }
+
+    [Fact]
+    public void CantRead_NoValidMappers_ThrowsCorrectException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<IntClass>(c =>
+        {
+            var map = c.Map(m => m.Member)
+                .WithColumnName("Int Value");
+            map.RemoveCellValueMapper(0);
+            map.AddCellValueMapper(new IgnoreCellMapper());
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IntClass>());
+        Assert.Null(ex.InnerException);
+        Assert.StartsWith("Cannot assign \"1\" to member \"Member\" of type \"System.Int32\" in column \"Int Value\" on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(0, ex.ColumnIndex);
+    }
+
+    private class IgnoreCellMapper : ICellMapper
+    {
+        public CellMapperResult MapCellValue(ReadCellResult readResult) => CellMapperResult.Ignore();
     }
 }

@@ -103,12 +103,12 @@ public class ValuePipeline : IValuePipeline
             }
         }
 
-        finalResult ??= CellMapperResult.Invalid(new ExcelMappingException("Could not map successfully."));
-        if (!finalResult.Value.Succeeded && pipeline.InvalidFallback != null)
+
+        if ((finalResult == null || !finalResult.Value.Succeeded) && pipeline.InvalidFallback != null)
         {
-            return pipeline.InvalidFallback.PerformFallback(sheet, rowIndex, readResult, finalResult.Value.Exception, member);
+            return pipeline.InvalidFallback.PerformFallback(sheet, rowIndex, readResult, finalResult?.Exception, member);
         }
 
-        return finalResult.Value.Value;
+        return finalResult?.Value;
     }
 }
