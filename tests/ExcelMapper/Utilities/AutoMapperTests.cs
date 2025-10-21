@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using System.Linq;
 using System.Numerics;
@@ -38,6 +39,17 @@ public class AutoMapperTests
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<object>? classMap));
         Assert.NotNull(classMap);
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_AbstractClassType_ReturnsTrue()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<AbstractClass>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private abstract class AbstractClass
+    {
     }
 
     [Fact]
@@ -223,10 +235,10 @@ public class AutoMapperTests
     }
 
     [Fact]
-    public void TryCreateClass_MapEnumType_ReturnsTrue()
+    public void TryCreateClass_MapEnumType_ReturnsFalse()
     {
-        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Enum>? classMap));
-        Assert.NotNull(classMap);
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Enum>? classMap));
+        Assert.Null(classMap);
     }
 
     [Fact]
@@ -239,7 +251,7 @@ public class AutoMapperTests
     [Fact]
     public void TryCreateClass_MapUri_ReturnsTrue()
     {
-        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<MyEnum>? classMap));
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Uri>? classMap));
         Assert.NotNull(classMap);
     }
 
@@ -257,8 +269,183 @@ public class AutoMapperTests
         Assert.NotNull(classMap);
     }
 
+    private class ConvertibleClass : IConvertible
+    {
+        public TypeCode GetTypeCode() => throw new NotImplementedException();
+
+        public bool ToBoolean(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public byte ToByte(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public char ToChar(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public DateTime ToDateTime(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public decimal ToDecimal(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public double ToDouble(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public short ToInt16(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public int ToInt32(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public long ToInt64(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public sbyte ToSByte(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public float ToSingle(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public string ToString(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public object ToType(Type conversionType, IFormatProvider? provider) => throw new NotImplementedException();
+
+        public ushort ToUInt16(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public uint ToUInt32(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public ulong ToUInt64(IFormatProvider? provider) => throw new NotImplementedException();
+    }
+
     [Fact]
-    public void TryCreateClass_Map_ArrayType_ReturnsFalse()
+    public void TryCreateClass_Map_AbstractIConvertibleImplementer_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<AbstractConvertibleClass>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private abstract class AbstractConvertibleClass : IConvertible
+    {
+        public TypeCode GetTypeCode() => throw new NotImplementedException();
+
+        public bool ToBoolean(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public byte ToByte(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public char ToChar(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public DateTime ToDateTime(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public decimal ToDecimal(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public double ToDouble(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public short ToInt16(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public int ToInt32(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public long ToInt64(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public sbyte ToSByte(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public float ToSingle(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public string ToString(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public object ToType(Type conversionType, IFormatProvider? provider) => throw new NotImplementedException();
+
+        public ushort ToUInt16(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public uint ToUInt32(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public ulong ToUInt64(IFormatProvider? provider) => throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_NoConstructorIConvertibleImplementer_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<NoConstructorConvertibleClass>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private class NoConstructorConvertibleClass : IConvertible
+    {
+        private NoConstructorConvertibleClass()
+        {
+        }
+
+        public TypeCode GetTypeCode() => throw new NotImplementedException();
+
+        public bool ToBoolean(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public byte ToByte(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public char ToChar(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public DateTime ToDateTime(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public decimal ToDecimal(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public double ToDouble(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public short ToInt16(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public int ToInt32(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public long ToInt64(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public sbyte ToSByte(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public float ToSingle(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public string ToString(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public object ToType(Type conversionType, IFormatProvider? provider) => throw new NotImplementedException();
+
+        public ushort ToUInt16(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public uint ToUInt32(IFormatProvider? provider) => throw new NotImplementedException();
+
+        public ulong ToUInt64(IFormatProvider? provider) => throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_IParsableImplementer_ReturnsTrue()
+    {
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<ParsableClass>? classMap));
+        Assert.NotNull(classMap);
+    }
+
+    private class ParsableClass : IParsable<ParsableClass>
+    {
+        public static ParsableClass Parse(string s, IFormatProvider? provider) => throw new NotImplementedException();
+
+        public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out ParsableClass result) => throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_AbstractIParsableImplementer_ReturnsTrue()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<AbstractParsableClass>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private abstract class AbstractParsableClass : IParsable<AbstractParsableClass>
+    {
+        public static AbstractParsableClass Parse(string s, IFormatProvider? provider) => throw new NotImplementedException();
+
+        public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out AbstractParsableClass result) => throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_NoConstructorIParsableImplementer_ReturnsTrue()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<NoConstructorParsableClass>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private class NoConstructorParsableClass : IParsable<NoConstructorParsableClass>
+    {
+        private NoConstructorParsableClass()
+        {
+        }
+
+        public static NoConstructorParsableClass Parse(string s, IFormatProvider? provider) => throw new NotImplementedException();
+
+        public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out NoConstructorParsableClass result) => throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_ArrayType_ReturnsTrue()
     {
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<Array>? classMap));
         Assert.NotNull(classMap);
@@ -600,8 +787,8 @@ public class AutoMapperTests
     [Fact]
     public void TryCreateClass_Map_BitVector32Type_ReturnsTrue()
     {
-        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<BitVector32>? classMap));
-        Assert.Null(classMap);
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<BitVector32>? classMap));
+        Assert.NotNull(classMap);
     }
 
     [Fact]
@@ -1429,43 +1616,6 @@ public class AutoMapperTests
 
     private enum MyEnum
     {
-    }
-
-    private class ConvertibleClass : IConvertible
-    {
-        public TypeCode GetTypeCode() => throw new NotImplementedException();
-
-        public bool ToBoolean(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public byte ToByte(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public char ToChar(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public DateTime ToDateTime(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public decimal ToDecimal(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public double ToDouble(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public short ToInt16(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public int ToInt32(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public long ToInt64(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public sbyte ToSByte(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public float ToSingle(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public string ToString(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public object ToType(Type conversionType, IFormatProvider? provider) => throw new NotImplementedException();
-
-        public ushort ToUInt16(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public uint ToUInt32(IFormatProvider? provider) => throw new NotImplementedException();
-
-        public ulong ToUInt64(IFormatProvider? provider) => throw new NotImplementedException();
     }
 
 #pragma warning disable 0649, 0169

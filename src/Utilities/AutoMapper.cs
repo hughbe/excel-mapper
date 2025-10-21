@@ -110,33 +110,43 @@ public static class AutoMapper
     {
         var type = typeof(T).GetNullableTypeOrThis(out var isNullable);
 
+        ICellMapper? knownMapper = null;
+
         // Fast path: Check dictionary for well-known types.
         if (s_wellKnownTypeMappers.TryGetValue(type, out var cachedMapper))
         {
-            mapper = cachedMapper;
+            knownMapper = cachedMapper;
         }
         // Check for enum types.
         else if (type.IsEnum)
         {
-            mapper = new EnumMapper(type);
+            knownMapper = new EnumMapper(type);
         }
-        // Check for types implementing IConvertible.
-        else if (type.ImplementsInterface(typeof(IConvertible)))
+        // Check for types implementing interfaces.
+        else if (CanConstructObject(type))
         {
-            mapper = new ChangeTypeMapper(type);
+            // Check for types implementing IConvertible.
+            if (type.ImplementsInterface(typeof(IConvertible)))
+            {
+                knownMapper = new ChangeTypeMapper(type);
+            }
+            // Check for types implementing IParsable<T>.
+            else if (type.ImplementsGenericInterface(typeof(IParsable<>), out var parsableInterfaceType))
+            {
+                knownMapper = (ICellMapper)Activator.CreateInstance(typeof(ParsableMapper<>).MakeGenericType(parsableInterfaceType))!;
+            }
         }
-        // Check for types implementing IParsable<T>.
-        else if (type.ImplementsGenericInterface(typeof(IParsable<>), out var parsableInterfaceType))
-        {
-            mapper = (ICellMapper)Activator.CreateInstance(typeof(ParsableMapper<>).MakeGenericType(parsableInterfaceType))!;
-        }
-        else
+
+        // No mapper found.
+        if (knownMapper == null)
         {
             mapper = null;
             emptyFallback = null;
             invalidFallback = null;
             return false;
         }
+        
+        mapper = knownMapper;
 
         // Set up the empty fallback.
         IFallbackItem CreateEmptyFallback()
@@ -800,6 +810,13 @@ public static class AutoMapper
 
     private static bool CanConstructObject(Type type)
     {
+        // Value types can always be constructed.
+        if (type.IsValueType)
+        {
+            return true;
+        }
+
+        // Interface and abstract types cannot be constructed.
         if (type.IsInterface)
         {
             return false;
@@ -808,6 +825,8 @@ public static class AutoMapper
         {
             return false;
         }
+
+        // Must have a public parameterless constructor.
         if (type.GetConstructor([]) is null)
         {
             return false;
