@@ -35,7 +35,7 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>
     /// <inheritdoc />
     public bool PreserveFormatting { get; set; }
 
-    public ValuePipeline<T> Pipeline { get; } = new ValuePipeline<T>();
+    public IValuePipeline Pipeline { get; } = new ValuePipeline<T>();
 
     private readonly ConcurrentDictionary<ExcelSheet, ICellReader?> _factoryCache = new();
 

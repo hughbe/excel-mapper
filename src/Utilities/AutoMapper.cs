@@ -22,48 +22,56 @@ public static class AutoMapper
     internal static OneToOneMap<T>? CreateOneToOneMap<T>(MemberInfo? member, ICellReaderFactory defaultCellReaderFactory, FallbackStrategy emptyValueStrategy, bool isAutoMapping)
     {
         var map = new OneToOneMap<T>(defaultCellReaderFactory);
-        if (!TrySetupValuePipeline(member, map.Pipeline, emptyValueStrategy, isAutoMapping))
+        if (!TrySetupMap<T>(member, map, emptyValueStrategy, isAutoMapping))
         {
             return null;
-        }
-
-        if (member != null)
-        {
-            ApplyMemberAttributesToMap(member, map);
         }
 
         return map;
     }
 
-    private static bool TrySetupValuePipeline<T>(MemberInfo? member, IValuePipeline<T> pipeline, FallbackStrategy emptyValueStrategy, bool isAutoMapping)
+    private static bool TrySetupMap<T>(MemberInfo? member, IToOneMap map, FallbackStrategy emptyValueStrategy, bool isAutoMapping)
     {
-        if (!TryGetWellKnownMapper<T>(out var mapper))
+        // Try to get a well-known mapper for the type.
+        // If we are auto mapping and no well-known mapper is found, fail the auto mapping.
+        // But, allow `Map(o => o.Value)` as the user can define a custom converter after
+        // creating the map.
+        // If the user doesn't add any mappers to the property, an ExcelMappingException
+        // will be thrown at the point of registering the class map.
+        if (TryGetWellKnownMapper<T>(out var mapper))
         {
-            // Cannot auto map an unsupported primitive.
-            // But allow `Map(o => o.Value)` as the user can define a custom converter after
-            // creating the map.
-            // If the user doesn't add any mappers to the property, an ExcelMappingException
-            // will be thrown at the point of registering the class map.
-            if (isAutoMapping)
-            {
-                return false;
-            }
+            map.Pipeline.Mappers.Add(mapper);
+        }
+        else if (isAutoMapping)
+        {
+            return false;
         }
 
-        if (mapper != null)
-        {
-            pipeline.Mappers.Add(mapper);
-        }
-
+        // Setup the fallbacks.
         if (member != null && member.GetCustomAttribute<ExcelDefaultValueAttribute>() is { } defaultValueAttribute)
         {
-            pipeline.EmptyFallback = new FixedValueFallback(defaultValueAttribute.Value);
+            map.Pipeline.EmptyFallback = new FixedValueFallback(defaultValueAttribute.Value);
         }
         else
         {
-            pipeline.EmptyFallback = CreateEmptyFallback<T>(emptyValueStrategy);
+            map.Pipeline.EmptyFallback = CreateEmptyFallback<T>(emptyValueStrategy);
         }
-        pipeline.InvalidFallback = s_throwFallback;
+
+        map.Pipeline.InvalidFallback = s_throwFallback;
+
+        // Apply member attributes.
+        if (member != null)
+        {
+            if (Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)))
+            {
+                map.Optional = true;
+            }
+            if (Attribute.IsDefined(member, typeof(ExcelPreserveFormattingAttribute)))
+            {
+                map.PreserveFormatting = true;
+            }
+        }
+
         return true;
     }
 
@@ -182,26 +190,20 @@ public static class AutoMapper
 
     internal static bool TryCreateSplitMapGeneric<TElement>(MemberInfo? member, Type listType, ICellsReaderFactory defaultCellsReaderFactory, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneEnumerableMap<TElement>? map)
     {
-        // First, get the pipeline for the element. This is used to convert individual values
-        // to be added to/included in the collection.
-        var elementPipeline = new ValuePipeline<TElement>();
-        if (!TrySetupValuePipeline(member, elementPipeline, emptyValueStrategy, isAutoMapping: true))
-        {
-            map = null;
-            return false;
-        }
-
-        // Secondly, find the right way of adding the converted value to the collection.
+        // Find the right way of creating the collection and adding items to it.
         if (!TryGetCreateEnumerableFactory<TElement>(listType, out var factory))
         {
             map = null;
             return false;
         }
 
-        map = new ManyToOneEnumerableMap<TElement>(defaultCellsReaderFactory, elementPipeline, factory);
-        if (member != null)
+        // First, get the pipeline for the element. This is used to convert individual values
+        // to be added to/included in the collection.
+        map = new ManyToOneEnumerableMap<TElement>(defaultCellsReaderFactory, factory);
+        if (!TrySetupMap<TElement>(member, map, emptyValueStrategy, isAutoMapping: true))
         {
-            ApplyMemberAttributesToMap(member, map);
+            map = null;
+            return false;
         }
 
         return true;
@@ -615,13 +617,7 @@ public static class AutoMapper
 
     internal static bool TryCreateGenericDictionaryMap<TKey, TValue>(MemberInfo? member, Type dictionaryType, FallbackStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out ManyToOneDictionaryMap<TKey, TValue>? map) where TKey : notnull
     {
-        var valuePipeline = new ValuePipeline<TValue>();
-        if (!TrySetupValuePipeline(member, valuePipeline, emptyValueStrategy, isAutoMapping))
-        {
-            map = null;
-            return false;
-        }
-
+        // Find the right way of creating the dictionary and adding items to it.
         if (!TryGetCreateDictionaryFactory<TKey, TValue>(dictionaryType, out var factory))
         {
             map = null;
@@ -630,10 +626,11 @@ public static class AutoMapper
 
         // Default to all columns.
         var defaultReaderFactory = MemberMapper.GetDefaultCellsReaderFactory(member) ?? s_allColumnNamesReaderFactory;
-        map = new ManyToOneDictionaryMap<TKey, TValue>(defaultReaderFactory, valuePipeline, factory);
-        if (member != null)
+        map = new ManyToOneDictionaryMap<TKey, TValue>(defaultReaderFactory, factory);
+        if (!TrySetupMap<TValue>(member, map, emptyValueStrategy, isAutoMapping))
         {
-            ApplyMemberAttributesToMap(member, map);
+            map = null;
+            return false;
         }
 
         return true;
@@ -995,18 +992,6 @@ public static class AutoMapper
 
         map = null;
         return false;
-    }
-
-    private static void ApplyMemberAttributesToMap(MemberInfo member, IToOneMap map)
-    {
-        if (Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)))
-        {
-            map.Optional = true;
-        }
-        if (Attribute.IsDefined(member, typeof(ExcelPreserveFormattingAttribute)))
-        {
-            map.PreserveFormatting = true;
-        }
     }
 
     private class BuiltinClassMap<T> : ExcelClassMap<T>

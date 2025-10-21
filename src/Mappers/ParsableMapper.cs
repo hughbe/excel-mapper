@@ -1,6 +1,5 @@
 ﻿using System;
 using ExcelMapper.Abstractions;
-using ExcelMapper.Utilities;
 
 namespace ExcelMapper.Mappers;
 

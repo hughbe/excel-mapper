@@ -21,14 +21,12 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
     /// contained by the property or field.
     /// </summary>
     /// <param name="valuePipeline">The map that maps the value of a single cell to an object of the element type of the property or field.</param>
-    public ManyToOneDictionaryMap(ICellsReaderFactory readerFactory, IValuePipeline<TValue> valuePipeline, IDictionaryFactory<TKey, TValue> dictionaryFactory)
+    public ManyToOneDictionaryMap(ICellsReaderFactory readerFactory, IDictionaryFactory<TKey, TValue> dictionaryFactory)
     {
         ArgumentNullException.ThrowIfNull(readerFactory);
-        ArgumentNullException.ThrowIfNull(valuePipeline);
         ArgumentNullException.ThrowIfNull(dictionaryFactory);
 
         _readerFactory = readerFactory;
-        ValuePipeline = valuePipeline;
         DictionaryFactory = dictionaryFactory;
     }
 
@@ -36,7 +34,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
     /// Gets the map that maps the value of a single cell to an object of the element type of the property
     /// or field.
     /// </summary>
-    public IValuePipeline<TValue> ValuePipeline { get; private set; }
+    public IValuePipeline Pipeline { get; private set; } = new ValuePipeline<TValue>();
     
     /// <inheritdoc />
     public bool Optional { get; set; }
@@ -95,7 +93,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
                 TKey? convertedKey = (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
                 if (convertedKey != null)
                 {
-                    var elementValue = (TValue)ExcelMapper.ValuePipeline.GetPropertyValue(ValuePipeline, sheet, rowIndex, valueResult, PreserveFormatting, member)!;
+                    var elementValue = (TValue)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, valueResult, PreserveFormatting, member)!;
                     DictionaryFactory.Add(convertedKey, elementValue);
                 }
             }
@@ -120,9 +118,9 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
     {
         ArgumentNullException.ThrowIfNull(valueMap);
 
-        var result = valueMap(ValuePipeline);
+        var result = valueMap((IValuePipeline<TValue>)Pipeline);
         ArgumentNullException.ThrowIfNull(result, nameof(valueMap));
-        ValuePipeline = result;
+        Pipeline = result;
 
         return this;
     }

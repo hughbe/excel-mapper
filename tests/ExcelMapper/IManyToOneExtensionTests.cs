@@ -18,9 +18,8 @@ public class IManyToOneMapExtensionsTests
     {
         var columnNames = new string[] { "ColumnName1", "ColumnName2" };
         var factory = new ColumnNamesReaderFactory("Column");
-        var valuePipeline = new ValuePipeline<string>();
         var dictionaryFactory = new DictionaryFactory<string, string>();
-        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory).WithColumnNames("ColumnNames");
+        var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory).WithColumnNames("ColumnNames");
         Assert.Same(map, map.WithColumnNames(columnNames));
 
         var valueReader = Assert.IsType<ColumnNamesReaderFactory>(map.ReaderFactory);
@@ -42,9 +41,8 @@ public class IManyToOneMapExtensionsTests
     public void WithColumnNames_NullColumnNames_ThrowsArgumentNullException()
     {
         var factory = new ColumnNamesReaderFactory("Column");
-        var valuePipeline = new ValuePipeline<string>();
         var dictionaryFactory = new DictionaryFactory<string, string>();
-        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory).WithColumnNames("ColumnNames");
+        var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory).WithColumnNames("ColumnNames");
 
         Assert.Throws<ArgumentNullException>("columnNames", () => map.WithColumnNames(null!));
         Assert.Throws<ArgumentNullException>("columnNames", () => map.WithColumnNames((IEnumerable<string>)null!));
@@ -54,9 +52,8 @@ public class IManyToOneMapExtensionsTests
     public void WithColumnNames_EmptyColumnNames_ThrowsArgumentException()
     {
         var factory = new ColumnNamesReaderFactory("Column");
-        var valuePipeline = new ValuePipeline<string>();
         var dictionaryFactory = new DictionaryFactory<string, string>();
-        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory).WithColumnNames("ColumnNames");
+        var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory).WithColumnNames("ColumnNames");
 
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([]));
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string>()));
@@ -66,9 +63,8 @@ public class IManyToOneMapExtensionsTests
     public void WithColumnNames_NullValueInColumnNames_ThrowsArgumentException()
     {
         var factory = new ColumnNamesReaderFactory("Column");
-        var valuePipeline = new ValuePipeline<string>();
         var dictionaryFactory = new DictionaryFactory<string, string>();
-        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory).WithColumnNames("ColumnNames");
+        var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory).WithColumnNames("ColumnNames");
 
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([null!]));
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string> { null! }));
@@ -78,9 +74,8 @@ public class IManyToOneMapExtensionsTests
     public void WithColumnNames_EmptyValueInColumnNames_ThrowsArgumentException()
     {
         var factory = new ColumnNamesReaderFactory("Column");
-        var valuePipeline = new ValuePipeline<string>();
         var dictionaryFactory = new DictionaryFactory<string, string>();
-        var map = new ManyToOneDictionaryMap<string, string>(factory, valuePipeline, dictionaryFactory).WithColumnNames("ColumnNames");
+        var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory).WithColumnNames("ColumnNames");
 
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([""]));
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string> { "" }));
@@ -189,10 +184,10 @@ public class IManyToOneMapExtensionsTests
     
     private class CustomManyToOneMap : IManyToOneMap
     {
-        public Type Type => typeof(int);
         public bool Optional { get; set; }
         public bool PreserveFormatting { get; set; }
         public ICellsReaderFactory ReaderFactory { get; set; } = default!;
+        public IValuePipeline Pipeline { get; } = default!;
 
         public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
             => throw new NotImplementedException();

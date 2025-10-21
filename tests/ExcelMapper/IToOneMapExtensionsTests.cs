@@ -49,11 +49,12 @@ public class IToOneMapExtensionsTests
 
     private class CustomToOneMap : IToOneMap
     {
-        public Type Type => typeof(int);
         public bool Optional { get; set; }
         public bool PreserveFormatting { get; set; }
 
+        public IValuePipeline Pipeline => default!;
+
         public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
-            => throw new System.NotImplementedException();
+            => throw new NotImplementedException();
     }
 }

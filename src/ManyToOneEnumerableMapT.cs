@@ -20,14 +20,12 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// Constructs a map that reads one or more values from one or more cells and maps these values to one
     /// property and field of the type of the property or field.
     /// </summary>
-    public ManyToOneEnumerableMap(ICellsReaderFactory readerFactory, IValuePipeline<TElement> elementPipeline, IEnumerableFactory<TElement> enumerableFactory)
+    public ManyToOneEnumerableMap(ICellsReaderFactory readerFactory, IEnumerableFactory<TElement> enumerableFactory)
     {
         ArgumentNullException.ThrowIfNull(readerFactory);
-        ArgumentNullException.ThrowIfNull(elementPipeline);
         ArgumentNullException.ThrowIfNull(enumerableFactory);
 
         _readerFactory = readerFactory;
-        ElementPipeline = elementPipeline;
         EnumerableFactory = enumerableFactory;
     }
 
@@ -53,7 +51,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// <summary>
     /// The mapping pipeline for each element in the list.
     /// </summary>
-    public IValuePipeline<TElement> ElementPipeline { get; private set; }
+    public IValuePipeline Pipeline { get; private set; } = new ValuePipeline<TElement>();
 
     /// <summary>
     /// The factory for creating and adding elements to the list.
@@ -84,7 +82,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
         {
             foreach (var result in results)
             {
-                var elementValue = (TElement?)ValuePipeline.GetPropertyValue(ElementPipeline, sheet, rowIndex, result, PreserveFormatting, member);
+                var elementValue = (TElement?)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, result, PreserveFormatting, member);
                 EnumerableFactory.Add(elementValue);
             }
 
@@ -108,9 +106,9 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     {
         ArgumentNullException.ThrowIfNull(elementMap);
 
-        var result = elementMap(ElementPipeline);
+        var result = elementMap((IValuePipeline<TElement>)Pipeline);
         ArgumentNullException.ThrowIfNull(result, nameof(elementMap));
-        ElementPipeline = result;
+        Pipeline = result;
         return this;
     }
 

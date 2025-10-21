@@ -11,4 +11,9 @@ public interface IToOneMap : IMap
     /// Gets or sets whether the map peserves formatting when reading string values.
     /// </summary>
     public bool PreserveFormatting { get; set; }
+
+    /// <summary>
+    /// The mapping pipeline for the value.
+    /// </summary>
+    public IValuePipeline Pipeline { get; }
 }
