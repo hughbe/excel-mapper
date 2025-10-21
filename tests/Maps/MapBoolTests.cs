@@ -9,7 +9,7 @@ public class MapBoolTests
     {
         using var importer = Helpers.GetImporter("Bools.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -37,7 +37,7 @@ public class MapBoolTests
     {
         using var importer = Helpers.GetImporter("Bools.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -66,7 +66,7 @@ public class MapBoolTests
     {
         using var importer = Helpers.GetImporter("Bools.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -94,7 +94,7 @@ public class MapBoolTests
     {
         using var importer = Helpers.GetImporter("Bools.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -124,7 +124,7 @@ public class MapBoolTests
         using var importer = Helpers.GetImporter("Bools.xlsx");
         importer.Configuration.RegisterClassMap<DefaultBoolClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -153,7 +153,7 @@ public class MapBoolTests
         using var importer = Helpers.GetImporter("Bools.xlsx");
         importer.Configuration.RegisterClassMap<DefaultNullableBoolMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -183,7 +183,7 @@ public class MapBoolTests
         using var importer = Helpers.GetImporter("Bools.xlsx");
         importer.Configuration.RegisterClassMap<CustomBoolClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -214,7 +214,7 @@ public class MapBoolTests
         using var importer = Helpers.GetImporter("Bools.xlsx");
         importer.Configuration.RegisterClassMap<CustomNullableBoolMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.

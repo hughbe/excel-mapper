@@ -18,7 +18,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IEnumerable<KeyValuePair<String, object>>>());
@@ -48,7 +48,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SubIEnumerableKeyValuePairStringObject>());
@@ -63,7 +63,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.IsType<SubIEnumerableKeyValuePairStringObjectClass>(sheet.ReadRow<SubIEnumerableKeyValuePairStringObjectClass>());
@@ -81,7 +81,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IEnumerableKeyValuePairStringObjectClass>();
@@ -133,7 +133,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IEnumerableKeyValuePairStringIntClass>();
@@ -185,7 +185,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<ICollection<KeyValuePair<String, object>>>());
@@ -215,7 +215,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SubICollectionKeyValuePairStringObject>());
@@ -230,7 +230,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.IsType<SubICollectionKeyValuePairStringObjectClass>(sheet.ReadRow<SubICollectionKeyValuePairStringObjectClass>());
@@ -262,7 +262,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ICollectionKeyValuePairStringObjectClass>();
@@ -314,7 +314,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ICollectionKeyValuePairStringIntClass>();
@@ -366,7 +366,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IReadOnlyCollection<KeyValuePair<String, object>>>());
@@ -396,7 +396,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SubIReadOnlyCollectionKeyValuePairStringObject>());
@@ -411,7 +411,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.IsType<SubIReadOnlyCollectionKeyValuePairStringObjectClass>(sheet.ReadRow<SubIReadOnlyCollectionKeyValuePairStringObjectClass>());
@@ -443,7 +443,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyCollectionKeyValuePairStringObjectClass>();
@@ -495,7 +495,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyCollectionKeyValuePairStringIntClass>();
@@ -547,7 +547,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IList<KeyValuePair<String, object>>>());
@@ -558,7 +558,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SubIListKeyValuePairStringObject>());
@@ -573,7 +573,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.IsType<SubIListKeyValuePairStringObjectClass>(sheet.ReadRow<SubIListKeyValuePairStringObjectClass>());
@@ -613,7 +613,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyList<KeyValuePair<String, object>>>());
@@ -624,7 +624,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SubIReadOnlyListKeyValuePairStringObject>());
@@ -639,7 +639,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.IsType<SubIReadOnlyListKeyValuePairStringObjectClass>(sheet.ReadRow<SubIReadOnlyListKeyValuePairStringObjectClass>());
@@ -679,7 +679,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary>());
@@ -709,7 +709,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SubIDictionary>());
@@ -724,7 +724,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = Assert.IsType<SubIDictionaryClass>(sheet.ReadRow<SubIDictionaryClass>());      Assert.Equal("a", row1.Value["Column1"]);
@@ -787,7 +787,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IDictionaryClass>();
@@ -823,7 +823,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIDictionaryClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IDictionaryClass>();
@@ -862,7 +862,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomIDictionaryClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IDictionaryClass>();
@@ -895,7 +895,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary<string, object>>());
@@ -925,7 +925,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SubIDictionaryStringObject>());
@@ -940,7 +940,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
 
@@ -1007,7 +1007,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IDictionaryStringObjectClass>();
@@ -1043,7 +1043,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIDictionaryStringObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IDictionaryStringObjectClass>();
@@ -1082,7 +1082,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomIDictionaryStringObjectClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IDictionaryStringObjectClass>();
@@ -1115,7 +1115,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IDictionaryStringIntClass>();
@@ -1151,7 +1151,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIDictionaryStringIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IDictionaryStringIntClass>();
@@ -1190,7 +1190,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomIDictionaryStringIntClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IDictionaryStringIntClass>();
@@ -1223,7 +1223,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SubIReadOnlyDictionaryStringObject>());
@@ -1238,7 +1238,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.IsType<SubIReadOnlyDictionaryStringObjectClass>(sheet.ReadRow<SubIReadOnlyDictionaryStringObjectClass>());
@@ -1268,7 +1268,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyDictionaryStringObjectClass>();
@@ -1304,7 +1304,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIReadOnlyDictionaryStringObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyDictionaryStringObjectClass>();
@@ -1343,7 +1343,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomIReadOnlyDictionaryStringObjectClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyDictionaryStringObjectClass>();
@@ -1376,7 +1376,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyDictionaryStringIntClass>();
@@ -1412,7 +1412,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIReadOnlyDictionaryStringIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyDictionaryStringIntClass>();
@@ -1451,7 +1451,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomIReadOnlyDictionaryStringIntClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyDictionaryStringIntClass>();
@@ -1484,7 +1484,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IReadOnlyDictionary<string, object>>());
@@ -1514,7 +1514,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<Hashtable>();
@@ -1544,7 +1544,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubHashtable>();
@@ -1578,7 +1578,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<HashtableClass>();
@@ -1614,7 +1614,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultHashtableClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<HashtableClass>();
@@ -1653,7 +1653,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomHashtableClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<HashtableClass>();
@@ -1686,7 +1686,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubDictionaryBase>();
@@ -1720,7 +1720,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<DictionaryBaseClass>();
@@ -1756,7 +1756,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultDictionaryBaseClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<DictionaryBaseClass>();
@@ -1795,7 +1795,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomDictionaryBaseClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<DictionaryBaseClass>();
@@ -1828,7 +1828,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedList>();
@@ -1858,7 +1858,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubSortedList>();
@@ -1892,7 +1892,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedListClass>();
@@ -1928,7 +1928,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultSortedListClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedListClass>();
@@ -1967,7 +1967,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomSortedListClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedListClass>();
@@ -2000,7 +2000,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<HybridDictionary>();
@@ -2030,7 +2030,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubHybridDictionary>();
@@ -2064,7 +2064,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<HybridDictionaryClass>();
@@ -2100,7 +2100,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultHybridDictionaryClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<HybridDictionaryClass>();
@@ -2139,7 +2139,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomHybridDictionaryClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<HybridDictionaryClass>();
@@ -2172,7 +2172,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ListDictionary>();
@@ -2202,7 +2202,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubListDictionary>();
@@ -2236,7 +2236,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ListDictionaryClass>();
@@ -2272,7 +2272,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultListDictionaryClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ListDictionaryClass>();
@@ -2311,7 +2311,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomListDictionaryClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ListDictionaryClass>();
@@ -2344,7 +2344,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EmptyNameObjectCollectionBase>();
@@ -2366,7 +2366,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubNameObjectCollectionBase>();
@@ -2406,7 +2406,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NameObjectCollectionBaseClass>();
@@ -2442,7 +2442,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultNameObjectCollectionBaseClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NameObjectCollectionBaseClass>();
@@ -2481,7 +2481,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomNameObjectCollectionBaseClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NameObjectCollectionBaseClass>();
@@ -2514,7 +2514,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NameValueCollection>();
@@ -2544,7 +2544,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubNameValueCollection>();
@@ -2578,7 +2578,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NameValueCollectionClass>();
@@ -2614,7 +2614,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultNameValueCollectionClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NameValueCollectionClass>();
@@ -2653,7 +2653,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomNameValueCollectionClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NameValueCollectionClass>();
@@ -2686,7 +2686,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<OrderedDictionary>();
@@ -2716,7 +2716,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubOrderedDictionary>();
@@ -2750,7 +2750,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<OrderedDictionaryClass>();
@@ -2786,7 +2786,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultOrderedDictionaryClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<OrderedDictionaryClass>();
@@ -2825,7 +2825,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomOrderedDictionaryClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<OrderedDictionaryClass>();
@@ -2858,7 +2858,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StringDictionary>();
@@ -2888,7 +2888,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubStringDictionary>();
@@ -2922,7 +2922,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StringDictionaryClass>();
@@ -2958,7 +2958,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultStringDictionaryClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StringDictionaryClass>();
@@ -2997,7 +2997,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomStringDictionaryClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StringDictionaryClass>();
@@ -3030,7 +3030,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<Dictionary<string, object>>();
@@ -3060,7 +3060,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubDictionary<string, object>>();
@@ -3094,7 +3094,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<DictionaryStringObjectClass>();
@@ -3130,7 +3130,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultDictionaryStringObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<DictionaryStringObjectClass>();
@@ -3169,7 +3169,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomDictionaryStringObjectClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<DictionaryStringObjectClass>();
@@ -3202,7 +3202,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<DictionaryStringIntClass>();
@@ -3238,7 +3238,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultDictionaryStringIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<DictionaryStringIntClass>();
@@ -3277,7 +3277,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomDictionaryStringIntClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<DictionaryStringIntClass>();
@@ -3310,7 +3310,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.IsType<DictionaryStringInvalidClass>(sheet.ReadRow<DictionaryStringInvalidClass>());
@@ -3326,7 +3326,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentDictionary<string, object>>();
@@ -3356,7 +3356,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubConcurrentDictionary<string, object>>();
@@ -3390,7 +3390,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentDictionaryStringObjectClass>();
@@ -3426,7 +3426,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultConcurrentDictionaryStringObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentDictionaryStringObjectClass>();
@@ -3465,7 +3465,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomConcurrentDictionaryStringObjectClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentDictionaryStringObjectClass>();
@@ -3498,7 +3498,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
@@ -3534,7 +3534,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultConcurrentDictionaryStringIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
@@ -3573,7 +3573,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomConcurrentDictionaryStringIntClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentDictionaryStringIntClass>();
@@ -3606,7 +3606,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.IsType<ConcurrentDictionaryStringInvalidClass>(sheet.ReadRow<ConcurrentDictionaryStringInvalidClass>());
@@ -3622,7 +3622,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedList<string, object>>();
@@ -3652,7 +3652,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubSortedList<string, object>>();
@@ -3686,7 +3686,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedListStringObjectClass>();
@@ -3722,7 +3722,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultSortedListStringObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedListStringObjectClass>();
@@ -3761,7 +3761,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomSortedListStringObjectClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedListStringObjectClass>();
@@ -3794,7 +3794,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedListStringIntClass>();
@@ -3830,7 +3830,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultSortedListStringIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedListStringIntClass>();
@@ -3869,7 +3869,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomSortedListStringIntClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedListStringIntClass>();
@@ -3902,7 +3902,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SortedListStringInvalidClass>());
@@ -3918,7 +3918,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<OrderedDictionary<string, object>>();
@@ -3948,7 +3948,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubOrderedDictionary<string, object>>();
@@ -3982,7 +3982,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<OrderedDictionaryStringObjectClass>();
@@ -4018,7 +4018,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultOrderedDictionaryStringObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<OrderedDictionaryStringObjectClass>();
@@ -4057,7 +4057,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomOrderedDictionaryStringObjectClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<OrderedDictionaryStringObjectClass>();
@@ -4090,7 +4090,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<OrderedDictionaryStringIntClass>();
@@ -4126,7 +4126,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultOrderedDictionaryStringIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<OrderedDictionaryStringIntClass>();
@@ -4165,7 +4165,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomOrderedDictionaryStringIntClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<OrderedDictionaryStringIntClass>();
@@ -4198,7 +4198,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.IsType<OrderedDictionaryStringInvalidClass>(sheet.ReadRow<OrderedDictionaryStringInvalidClass>());
@@ -4214,7 +4214,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedDictionary<string, object>>();
@@ -4244,7 +4244,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubSortedDictionary<string, object>>();
@@ -4278,7 +4278,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedDictionaryStringObjectClass>();
@@ -4314,7 +4314,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultSortedDictionaryStringObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedDictionaryStringObjectClass>();
@@ -4353,7 +4353,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomSortedDictionaryStringObjectClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedDictionaryStringObjectClass>();
@@ -4386,7 +4386,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedDictionaryStringIntClass>();
@@ -4422,7 +4422,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultSortedDictionaryStringIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedDictionaryStringIntClass>();
@@ -4461,7 +4461,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomSortedDictionaryStringIntClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedDictionaryStringIntClass>();
@@ -4494,7 +4494,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.IsType<SortedDictionaryStringInvalidClass>(sheet.ReadRow<SortedDictionaryStringInvalidClass>());
@@ -4510,7 +4510,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableDictionary<string, object>>();
@@ -4540,7 +4540,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableDictionaryStringObjectClass>();
@@ -4576,7 +4576,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultImmutableDictionaryStringObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableDictionaryStringObjectClass>();
@@ -4615,7 +4615,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomImmutableDictionaryStringObjectClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableDictionaryStringObjectClass>();
@@ -4648,7 +4648,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
@@ -4684,7 +4684,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultImmutableDictionaryStringIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
@@ -4723,7 +4723,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomImmutableDictionaryStringIntClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableDictionaryStringIntClass>();
@@ -4756,7 +4756,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableDictionaryStringInvalidClass>());
@@ -4772,7 +4772,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableSortedDictionary<string, object>>();
@@ -4802,7 +4802,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableSortedDictionaryStringObjectClass>();
@@ -4838,7 +4838,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultImmutableSortedDictionaryStringObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableSortedDictionaryStringObjectClass>();
@@ -4877,7 +4877,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomImmutableSortedDictionaryStringObjectClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableSortedDictionaryStringObjectClass>();
@@ -4910,7 +4910,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
@@ -4946,7 +4946,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultImmutableSortedDictionaryStringIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
@@ -4985,7 +4985,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomImmutableSortedDictionaryStringIntClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableSortedDictionaryStringIntClass>();
@@ -5018,7 +5018,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableSortedDictionaryStringInvalidClass>());
@@ -5034,7 +5034,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<FrozenDictionary<string, object>>();
@@ -5064,7 +5064,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<FrozenDictionaryStringObjectClass>();
@@ -5100,7 +5100,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultFrozenDictionaryStringObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<FrozenDictionaryStringObjectClass>();
@@ -5139,7 +5139,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomFrozenDictionaryStringObjectClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<FrozenDictionaryStringObjectClass>();
@@ -5172,7 +5172,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<FrozenDictionaryStringIntClass>();
@@ -5208,7 +5208,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultFrozenDictionaryStringIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<FrozenDictionaryStringIntClass>();
@@ -5247,7 +5247,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomFrozenDictionaryStringIntClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<FrozenDictionaryStringIntClass>();
@@ -5280,7 +5280,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FrozenDictionaryStringInvalidClass>());
@@ -5296,7 +5296,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlyDictionary<string, object>>();
@@ -5326,7 +5326,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlyDictionaryStringObjectClass>();
@@ -5362,7 +5362,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultReadOnlyDictionaryStringObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlyDictionaryStringObjectClass>();
@@ -5401,7 +5401,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomReadOnlyDictionaryStringObjectClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlyDictionaryStringObjectClass>();
@@ -5434,7 +5434,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlyDictionaryStringIntClass>();
@@ -5470,7 +5470,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryIntMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultReadOnlyDictionaryStringIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlyDictionaryStringIntClass>();
@@ -5509,7 +5509,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomReadOnlyDictionaryStringIntClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlyDictionaryStringIntClass>();
@@ -5542,7 +5542,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ReadOnlyDictionaryStringInvalidClass>());
@@ -5558,7 +5558,7 @@ public class MapDictionaryTest
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DictionaryStringObjectClass>());
@@ -5570,7 +5570,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultDictionaryStringObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DictionaryStringObjectClass>());
@@ -5582,7 +5582,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<MissingColumnClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IDictionaryStringObjectClass>());
@@ -5603,7 +5603,7 @@ public class MapDictionaryTest
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<MissingColumnOptionalClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row = sheet.ReadRow<IDictionaryStringObjectClass>();

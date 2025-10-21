@@ -16,7 +16,7 @@ public class MapNestedObjectTests
     {
         using var importer = Helpers.GetImporter("NestedObjects.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NestedObjectValue>();
@@ -57,7 +57,7 @@ public class MapNestedObjectTests
         using var importer = Helpers.GetImporter("NestedObjects.xlsx");
         importer.Configuration.RegisterClassMap<ObjectValueCustomClassMapMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NestedObjectValue>();
@@ -98,7 +98,7 @@ public class MapNestedObjectTests
         using var importer = Helpers.GetImporter("NestedObjects.xlsx");
         importer.Configuration.RegisterClassMap<ObjectValueInnerMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NestedObjectValue>();
@@ -127,7 +127,7 @@ public class MapNestedObjectTests
         using var importer = Helpers.GetImporter("NestedList.xlsx");
         importer.Configuration.RegisterClassMap<NestedListParentIndexerClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NestedListParentClass>();
@@ -171,7 +171,7 @@ public class MapNestedObjectTests
         using var importer = Helpers.GetImporter("NestedList.xlsx");
         importer.Configuration.RegisterClassMap<NestedListParentClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NestedListParentClass>();

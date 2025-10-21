@@ -10,7 +10,7 @@ public class OptionalMapTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<OptionalValueMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<OptionalValue>();

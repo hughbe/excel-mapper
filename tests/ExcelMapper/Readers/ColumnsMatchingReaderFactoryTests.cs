@@ -27,7 +27,7 @@ public class ColumnsMatchingReaderFactoryTests
     public void GetCellReader_InvokePredicateSheetWithHeadingMatch_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultipleStrings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         List<string> calls = [];
@@ -47,7 +47,7 @@ public class ColumnsMatchingReaderFactoryTests
     public void GetCellReader_InvokePredicateNoMatch_ReturnsNull()
     {
         using var importer = Helpers.GetImporter("MultipleStrings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         List<string> calls = [];
@@ -73,7 +73,7 @@ public class ColumnsMatchingReaderFactoryTests
     public void GetCellReader_InvokePredicateSheetNoHeadingHasHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("MultipleStrings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         List<string> calls = [];
         bool Match(string columnName)
@@ -90,7 +90,7 @@ public class ColumnsMatchingReaderFactoryTests
     public void GetCellReader_InvokePredicateSheetNoHeadingHasNoHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("MultipleStrings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         List<string> calls = [];
@@ -108,7 +108,7 @@ public class ColumnsMatchingReaderFactoryTests
     public void GetCellsReader_InvokePredicateSheetWithHeadingMatch_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultipleStrings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         List<string> calls = [];
@@ -128,7 +128,7 @@ public class ColumnsMatchingReaderFactoryTests
     public void GetCellsReader_InvokePredicateNoMatch_ReturnsNull()
     {
         using var importer = Helpers.GetImporter("MultipleStrings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         List<string> calls = [];
@@ -154,7 +154,7 @@ public class ColumnsMatchingReaderFactoryTests
     public void GetCellsReader_InvokePredicateSheetNoHeadingHasHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("MultipleStrings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         List<string> calls = [];
         bool Match(string columnName)
@@ -171,7 +171,7 @@ public class ColumnsMatchingReaderFactoryTests
     public void GetCellsReader_InvokePredicateSheetNoHeadingHasNoHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("MultipleStrings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         List<string> calls = [];
@@ -223,7 +223,7 @@ public class ColumnsMatchingReaderFactoryTests
     public void GetColumnNames_Invoke_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultipleStrings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         static bool Match(string columnName) => columnName.StartsWith("Value");
@@ -235,7 +235,7 @@ public class ColumnsMatchingReaderFactoryTests
     public void GetColumnNames_InvokeNoHeading_ReturnsNull()
     {
         using var importer = Helpers.GetImporter("MultipleStrings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         static bool Match(int columnIndex) => columnIndex == 0 || columnIndex == 1;
         var factory = new ColumnsMatchingReaderFactory(new CustomColumnMatcher(Match));
@@ -253,7 +253,7 @@ public class ColumnsMatchingReaderFactoryTests
     public void GetColumnIndices_Invoke_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultipleStrings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         static bool Match(string columnName) => columnName.StartsWith("Value");
@@ -265,7 +265,7 @@ public class ColumnsMatchingReaderFactoryTests
     public void GetColumnIndices_InvokeNoHeading_ReturnsExpeced()
     {
         using var importer = Helpers.GetImporter("MultipleStrings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         static bool Match(int columnIndex) => columnIndex == 0 || columnIndex == 1;
         var factory = new ColumnsMatchingReaderFactory(new CustomColumnMatcher(Match));

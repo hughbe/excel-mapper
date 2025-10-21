@@ -13,7 +13,7 @@ public class DateTimes
         using var original = Helpers.GetResource("ManyDates.xlsx");
         var importer = new ExcelImporter(original);
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         foreach (object value in sheet.ReadRows<DataClass>())
         {
         }

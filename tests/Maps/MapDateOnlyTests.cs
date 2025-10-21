@@ -11,7 +11,7 @@ public class MapDateOnlyTests
     {
         using var importer = Helpers.GetImporter("DateOnly.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -30,7 +30,7 @@ public class MapDateOnlyTests
     {
         using var importer = Helpers.GetImporter("DateOnly.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -50,7 +50,7 @@ public class MapDateOnlyTests
     {
         using var importer = Helpers.GetImporter("DateOnly.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -69,7 +69,7 @@ public class MapDateOnlyTests
     {
         using var importer = Helpers.GetImporter("DateOnly.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -90,7 +90,7 @@ public class MapDateOnlyTests
         using var importer = Helpers.GetImporter("DateOnly.xlsx");
         importer.Configuration.RegisterClassMap<DefaultDateOnlyClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -110,7 +110,7 @@ public class MapDateOnlyTests
         using var importer = Helpers.GetImporter("DateOnly.xlsx");
         importer.Configuration.RegisterClassMap<DefaultNullableDateOnlyClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -131,7 +131,7 @@ public class MapDateOnlyTests
         using var importer = Helpers.GetImporter("DateOnly.xlsx");
         importer.Configuration.RegisterClassMap<CustomDateOnlyClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -153,7 +153,7 @@ public class MapDateOnlyTests
         using var importer = Helpers.GetImporter("DateOnly.xlsx");
         importer.Configuration.RegisterClassMap<DateOnlyFormatsArrayMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -176,7 +176,7 @@ public class MapDateOnlyTests
         using var importer = Helpers.GetImporter("DateOnly.xlsx");
         importer.Configuration.RegisterClassMap<DateOnlyEnumerableFormatsMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -199,7 +199,7 @@ public class MapDateOnlyTests
         using var importer = Helpers.GetImporter("DateOnly.xlsx");
         importer.Configuration.RegisterClassMap<CustomNullableDateOnlyClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.

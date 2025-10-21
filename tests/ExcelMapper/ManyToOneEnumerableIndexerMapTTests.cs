@@ -27,7 +27,7 @@ public class ArrayIndexerMapTests
     public void TryGetValue_InvokeCanRead_Success()
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var enumerableFactory = new ListEnumerableFactory<string>();
@@ -41,7 +41,7 @@ public class ArrayIndexerMapTests
     public void TryGetValue_InvokeCanReadMultiple_Success()
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var enumerableFactory = new ListEnumerableFactory<string>();

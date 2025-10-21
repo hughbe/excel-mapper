@@ -11,7 +11,7 @@ public class MapBigIntegerTests
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -30,7 +30,7 @@ public class MapBigIntegerTests
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -50,7 +50,7 @@ public class MapBigIntegerTests
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -69,7 +69,7 @@ public class MapBigIntegerTests
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -90,7 +90,7 @@ public class MapBigIntegerTests
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         importer.Configuration.RegisterClassMap<DefaultBigIntegerValueMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -110,7 +110,7 @@ public class MapBigIntegerTests
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         importer.Configuration.RegisterClassMap<DefaultNullableBigIntegerClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -131,7 +131,7 @@ public class MapBigIntegerTests
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         importer.Configuration.RegisterClassMap<CustomBigIntegerValueMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -153,7 +153,7 @@ public class MapBigIntegerTests
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         importer.Configuration.RegisterClassMap<CustomNullableBigIntegerClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -174,7 +174,7 @@ public class MapBigIntegerTests
     {
         using var importer = Helpers.GetImporter("Overflow_Signed.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BigInteger>());

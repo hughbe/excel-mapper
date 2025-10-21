@@ -13,7 +13,7 @@ public class ReadRows
         var importer = new ExcelImporter(original);
         importer.Configuration.RegisterClassMap<DataClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         foreach (object value in sheet.ReadRows<DataClass>())
         {
         }
@@ -27,7 +27,7 @@ public class ReadRows
         importer.Configuration.SkipBlankLines = true;
         importer.Configuration.RegisterClassMap<DataClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         foreach (object value in sheet.ReadRows<DataClass>())
         {
         }
@@ -40,7 +40,7 @@ public class ReadRows
         var importer = new ExcelImporter(original);
         importer.Configuration.RegisterClassMap<OptionalDataClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         foreach (object value in sheet.ReadRows<DataClass>())
         {
         }
@@ -53,7 +53,7 @@ public class ReadRows
         var importer = new ExcelImporter(original);
         importer.Configuration.RegisterClassMap<OptionalDataWithMissingValueClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         foreach (object value in sheet.ReadRows<DataClassWithMissingValue>())
         {
         }

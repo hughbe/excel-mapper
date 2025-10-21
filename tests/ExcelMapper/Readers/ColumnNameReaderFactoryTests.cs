@@ -34,7 +34,7 @@ public class ColumnNameReaderFactoryTests
     public void GetReader_InvokeSheetWithHeading_ReturnsExpected(string columnName)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new ColumnNameReaderFactory(columnName);
@@ -47,7 +47,7 @@ public class ColumnNameReaderFactoryTests
     public void GetReader_InvokeNoMatch_ReturnsNull()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new ColumnNameReaderFactory("NoSuchColumn");
@@ -65,7 +65,7 @@ public class ColumnNameReaderFactoryTests
     public void GetReader_InvokeSheetNoHeadingHasHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var factory = new ColumnNameReaderFactory("Value");
         Assert.Throws<ExcelMappingException>(() => factory.GetCellReader(sheet));
@@ -76,7 +76,7 @@ public class ColumnNameReaderFactoryTests
     public void GetReader_InvokeSheetNoHeadingHasNoHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         var factory = new ColumnNameReaderFactory("Value");

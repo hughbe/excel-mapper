@@ -10,7 +10,7 @@ public class EmptyValueStrategyTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -38,7 +38,7 @@ public class EmptyValueStrategyTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -66,7 +66,7 @@ public class EmptyValueStrategyTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -94,7 +94,7 @@ public class EmptyValueStrategyTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         importer.Configuration.RegisterClassMap<EmptyValueStringClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -123,7 +123,7 @@ public class EmptyValueStrategyTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         importer.Configuration.RegisterClassMap<EmptyValueStringNullClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -152,7 +152,7 @@ public class EmptyValueStrategyTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         importer.Configuration.RegisterClassMap<EmptyValueStringInvalidClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -179,7 +179,7 @@ public class EmptyValueStrategyTests
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -199,7 +199,7 @@ public class EmptyValueStrategyTests
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -218,7 +218,7 @@ public class EmptyValueStrategyTests
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -238,7 +238,7 @@ public class EmptyValueStrategyTests
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         importer.Configuration.RegisterClassMap<EmptyValueIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -259,7 +259,7 @@ public class EmptyValueStrategyTests
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         importer.Configuration.RegisterClassMap<EmptyValueIntNullClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -279,7 +279,7 @@ public class EmptyValueStrategyTests
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         importer.Configuration.RegisterClassMap<EmptyValueIntInvalidClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -299,7 +299,7 @@ public class EmptyValueStrategyTests
         using var importer = Helpers.GetImporter("EmptyValues.xlsx");
         importer.Configuration.RegisterClassMap(new EmptyValueStrategyMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EmptyValues>();

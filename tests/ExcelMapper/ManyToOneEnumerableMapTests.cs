@@ -380,7 +380,7 @@ public class ManyToOneEnumerableMapTests
     public void TryGetValue_InvokeCanRead_Success()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new MockReaderFactory(new MockReader(() => (true, [])));
@@ -396,7 +396,7 @@ public class ManyToOneEnumerableMapTests
     public void TryGetValue_InvokeCanReadMultiple_Success()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new MockReaderFactory(new MockReader(() => (true, [new ReadCellResult(0, "Value1", false),new ReadCellResult(0, "Value1", false)])));
@@ -458,7 +458,7 @@ public class ManyToOneEnumerableMapTests
     public void TryGetValue_InvokeCantReadPropertyInfo_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
         var elementPipeline = new ValuePipeline<string>();
@@ -474,7 +474,7 @@ public class ManyToOneEnumerableMapTests
     public void TryGetValue_InvokeCantReadFieldInfo_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
         var elementPipeline = new ValuePipeline<string>();
@@ -490,7 +490,7 @@ public class ManyToOneEnumerableMapTests
     public void TryGetValue_InvokeCantReadEventInfo_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
         var elementPipeline = new ValuePipeline<string>();
@@ -506,7 +506,7 @@ public class ManyToOneEnumerableMapTests
     public void TryGetValue_InvokeCantReadNullMember_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
         var elementPipeline = new ValuePipeline<string>();
@@ -521,7 +521,7 @@ public class ManyToOneEnumerableMapTests
     public void TryGetValue_InvokeCantReadNullMemberIColumnNamesProviderCellReaderFactoryEmpty_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new ColumnsMatchingReaderFactory(new NamesColumnMatcher("NoSuchColumn"));
@@ -537,7 +537,7 @@ public class ManyToOneEnumerableMapTests
     public void TryGetValue_InvokeCantReadNullMemberIColumnNamesProviderCellReaderFactorySingle_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new ColumnNamesReaderFactory("NoSuchColumn");
@@ -553,7 +553,7 @@ public class ManyToOneEnumerableMapTests
     public void TryGetValue_InvokeCantReadNullMemberIColumnNamesProviderCellReaderFactoryMultiple_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new ColumnNamesReaderFactory("NoSuchColumn1", "NoSuchColumn2");
@@ -569,7 +569,7 @@ public class ManyToOneEnumerableMapTests
     public void TryGetValue_InvokeCantReadNullMemberIColumnIndicesProviderCellReaderFactoryEmpty_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         importer.Reader.Read();
 
         var factory = new EmptyColumnIndicesReaderFactory();
@@ -585,7 +585,7 @@ public class ManyToOneEnumerableMapTests
     public void TryGetValue_InvokeCantReadNullMemberIColumnIndicesProviderCellReaderFactorySingle_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         importer.Reader.Read();
 
         var factory = new ColumnIndicesReaderFactory(int.MaxValue);
@@ -601,7 +601,7 @@ public class ManyToOneEnumerableMapTests
     public void TryGetValue_InvokeCantReadNullMemberIColumnIndicesProviderCellReaderFactoryMultiple_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         importer.Reader.Read();
 
         var factory = new ColumnIndicesReaderFactory(1, int.MaxValue);

@@ -10,7 +10,7 @@ public class PreserveFormattingTests
     {
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -29,7 +29,7 @@ public class PreserveFormattingTests
     {
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -50,7 +50,7 @@ public class PreserveFormattingTests
     {
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -72,7 +72,7 @@ public class PreserveFormattingTests
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
         importer.Configuration.RegisterClassMap<CustomStringValueClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -93,7 +93,7 @@ public class PreserveFormattingTests
     {
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -115,7 +115,7 @@ public class PreserveFormattingTests
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
         importer.Configuration.RegisterClassMap<CustomStringValueClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -136,7 +136,7 @@ public class PreserveFormattingTests
     {
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -155,7 +155,7 @@ public class PreserveFormattingTests
     {
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -176,7 +176,7 @@ public class PreserveFormattingTests
     {
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -198,7 +198,7 @@ public class PreserveFormattingTests
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
         importer.Configuration.RegisterClassMap<CustomStringsValueClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -219,7 +219,7 @@ public class PreserveFormattingTests
     {
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -241,7 +241,7 @@ public class PreserveFormattingTests
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
         importer.Configuration.RegisterClassMap<CustomStringsValueClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -262,7 +262,7 @@ public class PreserveFormattingTests
     {
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -281,7 +281,7 @@ public class PreserveFormattingTests
     {
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -302,7 +302,7 @@ public class PreserveFormattingTests
     {
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -324,7 +324,7 @@ public class PreserveFormattingTests
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
         importer.Configuration.RegisterClassMap<CustomDictionaryValueClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -346,7 +346,7 @@ public class PreserveFormattingTests
     {
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -368,7 +368,7 @@ public class PreserveFormattingTests
         using var importer = Helpers.GetImporter("Numbers_LeadingZeroes.xlsx");
         importer.Configuration.RegisterClassMap<CustomDictionaryValueClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.

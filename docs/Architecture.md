@@ -48,7 +48,7 @@ The importer is responsible for reading Excel files and providing access to shee
 
 ```csharp
 using var importer = new ExcelImporter("data.xlsx");
-ExcelSheet sheet = importer.ReadSheet();
+var sheet = importer.ReadSheet();
 var records = sheet.ReadRows<Person>();
 ```
 

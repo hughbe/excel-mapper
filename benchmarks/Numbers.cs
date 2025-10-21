@@ -12,7 +12,7 @@ public class Numbers
         using var original = Helpers.GetResource("ManyNumbers.xlsx");
         var importer = new ExcelImporter(original);
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         foreach (object value in sheet.ReadRows<DataClass>())
         {
         }

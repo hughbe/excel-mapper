@@ -9,7 +9,7 @@ public class MapExpandoObjectTests
     public void ReadRow_ExpandoObject_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         dynamic row1 = sheet.ReadRow<ExpandoObject>();
@@ -36,7 +36,7 @@ public class MapExpandoObjectTests
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ExpandoObjectClass>());
@@ -47,7 +47,7 @@ public class MapExpandoObjectTests
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         dynamic row1 = sheet.ReadRow<ExpandoObjectClass>().Value;
@@ -75,7 +75,7 @@ public class MapExpandoObjectTests
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultExpandoObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         dynamic row1 = sheet.ReadRow<ExpandoObjectClass>().Value;
@@ -103,7 +103,7 @@ public class MapExpandoObjectTests
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         importer.Configuration.RegisterClassMap(new CustomExpandoObjectClassMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         dynamic row1 = sheet.ReadRow<ExpandoObjectClass>().Value;

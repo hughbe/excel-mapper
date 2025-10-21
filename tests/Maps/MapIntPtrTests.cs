@@ -9,7 +9,7 @@ public class MapIntPtrTests
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -28,7 +28,7 @@ public class MapIntPtrTests
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -48,7 +48,7 @@ public class MapIntPtrTests
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -67,7 +67,7 @@ public class MapIntPtrTests
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -88,7 +88,7 @@ public class MapIntPtrTests
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIntPtrValueMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -108,7 +108,7 @@ public class MapIntPtrTests
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         importer.Configuration.RegisterClassMap<DefaultNullableIntPtrClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -129,7 +129,7 @@ public class MapIntPtrTests
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         importer.Configuration.RegisterClassMap<CustomIntPtrValueMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -151,7 +151,7 @@ public class MapIntPtrTests
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         importer.Configuration.RegisterClassMap<CustomNullableIntPtrClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -172,7 +172,7 @@ public class MapIntPtrTests
     {
         using var importer = Helpers.GetImporter("Overflow_Signed.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<nint>());

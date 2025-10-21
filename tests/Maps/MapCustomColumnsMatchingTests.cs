@@ -12,7 +12,7 @@ public class MapCustomColumnMatchingTests
     {
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomNamesEnumerablePropertyClass>();
@@ -25,7 +25,7 @@ public class MapCustomColumnMatchingTests
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultCustomNamesEnumerablePropertyClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomNamesEnumerablePropertyClass>();
@@ -38,7 +38,7 @@ public class MapCustomColumnMatchingTests
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
         importer.Configuration.RegisterClassMap<CustomEnumerablePropertyClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EnumerablePropertyClass>();
@@ -78,7 +78,7 @@ public class MapCustomColumnMatchingTests
     {
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomNamesEnumerableFieldClass>();
@@ -91,7 +91,7 @@ public class MapCustomColumnMatchingTests
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultCustomNamesEnumerableFieldClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomNamesEnumerableFieldClass>();
@@ -104,7 +104,7 @@ public class MapCustomColumnMatchingTests
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
         importer.Configuration.RegisterClassMap<CustomEnumerableFieldClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EnumerableFieldClass>();
@@ -144,7 +144,7 @@ public class MapCustomColumnMatchingTests
     {
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoMatchingCustomNamesEnumerablePropertyClass>();
@@ -156,7 +156,7 @@ public class MapCustomColumnMatchingTests
     {
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         importer.Configuration.RegisterClassMap<DefaultNoMatchingCustomNamesEnumerablePropertyClassMap>();
         sheet.ReadHeading();
 
@@ -169,7 +169,7 @@ public class MapCustomColumnMatchingTests
     {
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         importer.Configuration.RegisterClassMap<CustomNoMatchingEnumerablePropertyClassMap>();
         sheet.ReadHeading();
 
@@ -205,7 +205,7 @@ public class MapCustomColumnMatchingTests
     {
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoMatchingCustomNamesEnumerableFieldClass>();
@@ -218,7 +218,7 @@ public class MapCustomColumnMatchingTests
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultNoMatchingCustomNamesEnumerableFieldClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoMatchingCustomNamesEnumerableFieldClass>();
@@ -231,7 +231,7 @@ public class MapCustomColumnMatchingTests
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
         importer.Configuration.RegisterClassMap<CustomNoMatchingEnumerableFieldClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EnumerableFieldClass>();
@@ -266,7 +266,7 @@ public class MapCustomColumnMatchingTests
     {
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoneMatchingCustomNamesEnumerablePropertyClass>());
@@ -277,7 +277,7 @@ public class MapCustomColumnMatchingTests
     {
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         importer.Configuration.RegisterClassMap<DefaultNoneMatchingCustomNamesEnumerablePropertyClassMap>();
         sheet.ReadHeading();
 
@@ -290,7 +290,7 @@ public class MapCustomColumnMatchingTests
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
         importer.Configuration.RegisterClassMap<CustomNoneMatchingEnumerablePropertyClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerablePropertyClass>());
@@ -324,7 +324,7 @@ public class MapCustomColumnMatchingTests
     {
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoneMatchingCustomNamesEnumerableFieldClass>());
@@ -336,7 +336,7 @@ public class MapCustomColumnMatchingTests
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultNoneMatchingCustomNamesEnumerableFieldClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoneMatchingCustomNamesEnumerableFieldClass>());
@@ -348,7 +348,7 @@ public class MapCustomColumnMatchingTests
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
         importer.Configuration.RegisterClassMap<CustomNoneMatchingEnumerableFieldClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
@@ -382,7 +382,7 @@ public class MapCustomColumnMatchingTests
     {
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoMatchingOptionalCustomNamesEnumerablePropertyClass>();
@@ -395,7 +395,7 @@ public class MapCustomColumnMatchingTests
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultNoMatchingOptionalCustomNamesEnumerablePropertyClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoMatchingOptionalCustomNamesEnumerablePropertyClass>();
@@ -408,7 +408,7 @@ public class MapCustomColumnMatchingTests
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
         importer.Configuration.RegisterClassMap<CustomNoMatchingOptionalEnumerablePropertyClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EnumerablePropertyClass>();
@@ -445,7 +445,7 @@ public class MapCustomColumnMatchingTests
     {
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoMatchingOptionalCustomNamesEnumerableFieldClass>();
@@ -457,7 +457,7 @@ public class MapCustomColumnMatchingTests
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultNoMatchingOptionalCustomNamesEnumerableFieldClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoMatchingOptionalCustomNamesEnumerableFieldClass>();
@@ -470,7 +470,7 @@ public class MapCustomColumnMatchingTests
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
         importer.Configuration.RegisterClassMap<CustomNoMatchingOptionalEnumerableFieldClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EnumerableFieldClass>();
@@ -507,7 +507,7 @@ public class MapCustomColumnMatchingTests
     {
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoneMatchingOptionalCustomNamesEnumerablePropertyClass>();
@@ -519,7 +519,7 @@ public class MapCustomColumnMatchingTests
     {
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         importer.Configuration.RegisterClassMap<DefaultNoneMatchingOptionalCustomNamesEnumerablePropertyClassMap>();
         sheet.ReadHeading();
 
@@ -533,7 +533,7 @@ public class MapCustomColumnMatchingTests
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
         importer.Configuration.RegisterClassMap<CustomNoneMatchingOptionalEnumerablePropertyClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EnumerablePropertyClass>();
@@ -570,7 +570,7 @@ public class MapCustomColumnMatchingTests
     {
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoneMatchingOptionalCustomNamesEnumerableFieldClass>();
@@ -583,7 +583,7 @@ public class MapCustomColumnMatchingTests
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
         importer.Configuration.RegisterClassMap<DefaultNoneMatchingOptionalCustomNamesEnumerableFieldClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoneMatchingOptionalCustomNamesEnumerableFieldClass>();
@@ -596,7 +596,7 @@ public class MapCustomColumnMatchingTests
         using var importer = Helpers.GetImporter("RegexMap.xlsx");
         importer.Configuration.RegisterClassMap<CustomNoneMatchingOptionalEnumerableFieldClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EnumerableFieldClass>();

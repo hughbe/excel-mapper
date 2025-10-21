@@ -13,7 +13,7 @@ public class AllColumnNamesValueReaderTests
     public void GetReader_InvokeCanRead_Success()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new AllColumnNamesReaderFactory();
@@ -38,7 +38,7 @@ public class AllColumnNamesValueReaderTests
     public void GetReader_InvokeSheetWithoutHeadingHasHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var factory = new AllColumnNamesReaderFactory();
         IEnumerable<ReadCellResult>? result = null;
@@ -50,7 +50,7 @@ public class AllColumnNamesValueReaderTests
     public void GetReader_InvokeSheetWithoutHeadingHasNoHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         var factory = new AllColumnNamesReaderFactory();

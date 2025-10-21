@@ -9,7 +9,7 @@ public class MapObjectTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -36,7 +36,7 @@ public class MapObjectTests
     public void ReadRow_AutoMappedObject_Success()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -65,7 +65,7 @@ public class MapObjectTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         importer.Configuration.RegisterClassMap<ObjectValueFallbackMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -94,7 +94,7 @@ public class MapObjectTests
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         importer.Configuration.RegisterClassMap<RecordClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<RecordClass>();

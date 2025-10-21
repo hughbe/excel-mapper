@@ -13,7 +13,7 @@ public class MapWithMappingTests
         using var importer = Helpers.GetImporter("WithMappings.xlsx");
         importer.Configuration.RegisterClassMap<WithMappingValueMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<WithMappingValue>();
@@ -38,7 +38,7 @@ public class MapWithMappingTests
         using var importer = Helpers.GetImporter("WithMappings.xlsx");
         importer.Configuration.RegisterClassMap<WithMappingValueRequiredMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<WithMappingValue>();

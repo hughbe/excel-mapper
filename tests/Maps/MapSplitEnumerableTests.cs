@@ -18,7 +18,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ObjectArrayClass>();
@@ -52,7 +52,7 @@ public class MapSplitEnumerableTests
             c.Map(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ObjectArrayClass>();
@@ -76,7 +76,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StringArrayClass>();
@@ -110,7 +110,7 @@ public class MapSplitEnumerableTests
             c.Map(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StringArrayClass>();
@@ -134,7 +134,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ArrayClass>();
@@ -168,7 +168,7 @@ public class MapSplitEnumerableTests
             c.Map<string>(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ArrayClass>();
@@ -192,7 +192,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IntArrayClass>();
@@ -224,7 +224,7 @@ public class MapSplitEnumerableTests
             c.Map(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IntArrayClass>();
@@ -254,7 +254,7 @@ public class MapSplitEnumerableTests
                 );
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IntArrayClass>();
@@ -278,7 +278,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IEnumerableClass>();
@@ -302,7 +302,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IEnumerableObjectClass>();
@@ -326,7 +326,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IEnumerableIntClass>();
@@ -348,7 +348,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ICollectionClass>();
@@ -372,7 +372,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ICollectionObjectClass>();
@@ -396,7 +396,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ICollectionIntClass>();
@@ -418,7 +418,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IListClass>();
@@ -442,7 +442,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IListObjectClass>();
@@ -466,7 +466,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IListIntClass>();
@@ -488,7 +488,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
@@ -512,7 +512,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
@@ -534,7 +534,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyListObjectClass>();
@@ -558,7 +558,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyListIntClass>();
@@ -580,7 +580,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ArrayListClass>();
@@ -613,7 +613,7 @@ public class MapSplitEnumerableTests
             c.MapList<string>(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ArrayListClass>();
@@ -645,7 +645,7 @@ public class MapSplitEnumerableTests
                 );
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ArrayListClass>();
@@ -669,7 +669,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CollectionBaseClass>();
@@ -707,7 +707,7 @@ public class MapSplitEnumerableTests
             c.MapList<string>(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CollectionBaseClass>();
@@ -739,7 +739,7 @@ public class MapSplitEnumerableTests
                 );
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CollectionBaseClass>();
@@ -763,7 +763,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StackClass>();
@@ -797,7 +797,7 @@ public class MapSplitEnumerableTests
             c.MapList<string>(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StackClass>();
@@ -829,7 +829,7 @@ public class MapSplitEnumerableTests
                 );
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StackClass>();
@@ -853,7 +853,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<QueueClass>();
@@ -886,7 +886,7 @@ public class MapSplitEnumerableTests
             c.MapList<string>(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<QueueClass>();
@@ -918,7 +918,7 @@ public class MapSplitEnumerableTests
                 );
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<QueueClass>();
@@ -942,7 +942,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StringCollectionClass>();
@@ -975,7 +975,7 @@ public class MapSplitEnumerableTests
             c.MapList<string>(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StringCollectionClass>();
@@ -1007,7 +1007,7 @@ public class MapSplitEnumerableTests
                 );
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StringCollectionClass>();
@@ -1031,7 +1031,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ListObjectClass>();
@@ -1055,7 +1055,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ListIntClass>();
@@ -1077,7 +1077,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CollectionClass>();
@@ -1108,7 +1108,7 @@ public class MapSplitEnumerableTests
             c.Map(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CollectionClass>();
@@ -1138,7 +1138,7 @@ public class MapSplitEnumerableTests
                 );
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CollectionClass>();
@@ -1162,7 +1162,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<KeyedCollectionClass>();
@@ -1198,7 +1198,7 @@ public class MapSplitEnumerableTests
             c.MapList<int>(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<KeyedCollectionClass>();
@@ -1228,7 +1228,7 @@ public class MapSplitEnumerableTests
                 );
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<KeyedCollectionClass>();
@@ -1252,7 +1252,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlyCollectionClass>();
@@ -1283,7 +1283,7 @@ public class MapSplitEnumerableTests
             c.Map(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlyCollectionClass>();
@@ -1313,7 +1313,7 @@ public class MapSplitEnumerableTests
                 );
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlyCollectionClass>();
@@ -1337,7 +1337,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ObservableCollectionClass>();
@@ -1368,7 +1368,7 @@ public class MapSplitEnumerableTests
             c.Map(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ObservableCollectionClass>();
@@ -1398,7 +1398,7 @@ public class MapSplitEnumerableTests
                 );
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ObservableCollectionClass>();
@@ -1422,7 +1422,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlyObservableCollectionClass>();
@@ -1453,7 +1453,7 @@ public class MapSplitEnumerableTests
             c.Map(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlyObservableCollectionClass>();
@@ -1483,7 +1483,7 @@ public class MapSplitEnumerableTests
                 );
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlyObservableCollectionClass>();
@@ -1507,7 +1507,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<LinkedListClass>();
@@ -1538,7 +1538,7 @@ public class MapSplitEnumerableTests
             c.MapList<int>(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<LinkedListClass>();
@@ -1568,7 +1568,7 @@ public class MapSplitEnumerableTests
                 );
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<LinkedListClass>();
@@ -1592,7 +1592,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ISetIntClass>();
@@ -1623,7 +1623,7 @@ public class MapSplitEnumerableTests
             c.MapList<int>(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ISetIntClass>();
@@ -1653,7 +1653,7 @@ public class MapSplitEnumerableTests
                 );
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ISetIntClass>();
@@ -1677,7 +1677,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlySetIntClass>();
@@ -1708,7 +1708,7 @@ public class MapSplitEnumerableTests
             c.MapList<int>(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlySetIntClass>();
@@ -1738,7 +1738,7 @@ public class MapSplitEnumerableTests
                 );
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlySetIntClass>();
@@ -1762,7 +1762,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SetIntClass>();
@@ -1832,7 +1832,7 @@ public class MapSplitEnumerableTests
             c.MapList<int>(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SetIntClass>();
@@ -1862,7 +1862,7 @@ public class MapSplitEnumerableTests
                 );
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SetIntClass>();
@@ -1886,7 +1886,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlySetIntClass>();
@@ -1917,7 +1917,7 @@ public class MapSplitEnumerableTests
             c.MapList<int>(p => p.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlySetIntClass>();
@@ -1947,7 +1947,7 @@ public class MapSplitEnumerableTests
                 );
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlySetIntClass>();
@@ -1971,7 +1971,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<QueueIntClass>();
@@ -1993,7 +1993,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StackIntClass>();
@@ -2015,7 +2015,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedSetIntClass>();
@@ -2037,7 +2037,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<HashSetIntClass>();
@@ -2059,7 +2059,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IImmutableListIntClass>();
@@ -2081,7 +2081,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IImmutableStackIntClass>();
@@ -2103,7 +2103,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IImmutableQueueIntClass>();
@@ -2125,7 +2125,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IImmutableSetIntClass>();
@@ -2147,7 +2147,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableArrayIntClass>();
@@ -2169,7 +2169,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableListIntClass>();
@@ -2191,7 +2191,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableStackIntClass>();
@@ -2213,7 +2213,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableQueueIntClass>();
@@ -2235,7 +2235,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableSortedSetIntClass>();
@@ -2257,7 +2257,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableHashSetIntClass>();
@@ -2279,7 +2279,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<FrozenSetIntClass>();
@@ -2301,7 +2301,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<BlockingCollectionIntClass>();
@@ -2329,7 +2329,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultBlockingCollectionIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<BlockingCollectionIntClass>();
@@ -2360,7 +2360,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomBlockingCollectionIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<BlockingCollectionIntClass>();
@@ -2396,7 +2396,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentBagIntClass>();
@@ -2424,7 +2424,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultConcurrentBagIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentBagIntClass>();
@@ -2455,7 +2455,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomConcurrentBagIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentBagIntClass>();
@@ -2491,7 +2491,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentQueueIntClass>();
@@ -2519,7 +2519,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultConcurrentQueueIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentQueueIntClass>();
@@ -2550,7 +2550,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomConcurrentQueueIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentQueueIntClass>();
@@ -2586,7 +2586,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentStackIntClass>();
@@ -2614,7 +2614,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultConcurrentStackIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentStackIntClass>();
@@ -2645,7 +2645,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomConcurrentStackIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ConcurrentStackIntClass>();
@@ -2681,7 +2681,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
@@ -2703,7 +2703,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
@@ -2726,7 +2726,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIEnumerableClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IEnumerableClass>();
@@ -2751,7 +2751,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIEnumerableObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IEnumerableObjectClass>();
@@ -2776,7 +2776,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIEnumerableIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IEnumerableIntClass>();
@@ -2799,7 +2799,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultICollectionObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ICollectionClass>();
@@ -2824,7 +2824,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultICollectionObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ICollectionObjectClass>();
@@ -2849,7 +2849,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultICollectionIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ICollectionIntClass>();
@@ -2872,7 +2872,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIListClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IListClass>();
@@ -2897,7 +2897,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIListObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IListObjectClass>();
@@ -2922,7 +2922,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIListIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IListIntClass>();
@@ -2945,7 +2945,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIReadOnlyCollectionObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyCollectionObjectClass>();
@@ -2970,7 +2970,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIReadOnlyCollectionIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
@@ -2993,7 +2993,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIReadOnlyListObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyListObjectClass>();
@@ -3018,7 +3018,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIReadOnlyListIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyListIntClass>();
@@ -3041,7 +3041,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultListObjectClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ListObjectClass>();
@@ -3066,7 +3066,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultListIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ListIntClass>();
@@ -3089,7 +3089,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultQueueIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<QueueIntClass>();
@@ -3112,7 +3112,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultSortedSetIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedSetIntClass>();
@@ -3135,7 +3135,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultHashSetIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<HashSetIntClass>();
@@ -3158,7 +3158,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultStackIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StackIntClass>();
@@ -3181,7 +3181,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIImmutableListIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IImmutableListIntClass>();
@@ -3204,7 +3204,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIImmutableStackIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IImmutableStackIntClass>();
@@ -3227,7 +3227,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIImmutableQueueIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IImmutableQueueIntClass>();
@@ -3250,7 +3250,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultIImmutableSetIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IImmutableSetIntClass>();
@@ -3273,7 +3273,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultImmutableArrayIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableArrayIntClass>();
@@ -3296,7 +3296,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultImmutableListIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableListIntClass>();
@@ -3319,7 +3319,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultImmutableStackIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableStackIntClass>();
@@ -3342,7 +3342,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultImmutableQueueIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableQueueIntClass>();
@@ -3365,7 +3365,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultImmutableSortedSetIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableSortedSetIntClass>();
@@ -3388,7 +3388,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultImmutableHashSetIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableHashSetIntClass>();
@@ -3411,7 +3411,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultFrozenSetIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<FrozenSetIntClass>();
@@ -3434,7 +3434,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultCustomConstructorIEnumerableIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
@@ -3457,7 +3457,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<DefaultCustomAddIEnumerableIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
@@ -3480,7 +3480,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomICollectionIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ICollectionIntClass>();
@@ -3505,7 +3505,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomIListIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IListIntClass>();
@@ -3530,7 +3530,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomIReadOnlyCollectionIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyCollectionIntClass>();
@@ -3555,7 +3555,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomIReadOnlyListIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyListIntClass>();
@@ -3580,7 +3580,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomListIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ListIntClass>();
@@ -3605,7 +3605,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomQueueIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<QueueIntClass>();
@@ -3630,7 +3630,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomSortedSetIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedSetIntClass>();
@@ -3655,7 +3655,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomHashSetIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<HashSetIntClass>();
@@ -3680,7 +3680,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomStackIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StackIntClass>();
@@ -3705,7 +3705,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomIImmutableListIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IImmutableListIntClass>();
@@ -3730,7 +3730,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomIImmutableStackIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IImmutableStackIntClass>();
@@ -3755,7 +3755,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomIImmutableQueueIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IImmutableQueueIntClass>();
@@ -3780,7 +3780,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomIImmutableSetIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IImmutableSetIntClass>();
@@ -3805,7 +3805,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomImmutableArrayIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableArrayIntClass>();
@@ -3830,7 +3830,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomImmutableListIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableListIntClass>();
@@ -3855,7 +3855,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomImmutableStackIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableStackIntClass>();
@@ -3880,7 +3880,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomImmutableQueueIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableQueueIntClass>();
@@ -3905,7 +3905,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomImmutableSortedSetIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableSortedSetIntClass>();
@@ -3930,7 +3930,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomImmutableHashSetIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableHashSetIntClass>();
@@ -3955,7 +3955,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomFrozenSetIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<FrozenSetIntClass>();
@@ -3980,7 +3980,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomCustomConstructorIEnumerableIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomConstructorIEnumerableIntClass>();
@@ -4005,7 +4005,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CustomCustomAddIEnumerableIntClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomAddIEnumerableIntClass>();
@@ -4747,7 +4747,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
         importer.Configuration.RegisterClassMap<DefaultMissingColumnClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<MissingColumnClass>());
@@ -4759,7 +4759,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
         importer.Configuration.RegisterClassMap<OptionalMissingColumnClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row = sheet.ReadRow<MissingColumnClass>();
@@ -4793,7 +4793,7 @@ public class MapSplitEnumerableTests
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ImmutableArrayBuilderIntClass>());

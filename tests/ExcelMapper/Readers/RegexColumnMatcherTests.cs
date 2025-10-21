@@ -27,7 +27,7 @@ public class RegexColumnMatcherTests
     public void ColumnMatches_Invoke_ReturnsExpected(string regexString, bool result)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var regex = new Regex(regexString);
@@ -47,7 +47,7 @@ public class RegexColumnMatcherTests
     public void ColumnMatches_SheetWithNoHeadingHasHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var regex = new Regex("Regex");
         var matcher = new RegexColumnMatcher(regex);
@@ -59,7 +59,7 @@ public class RegexColumnMatcherTests
     public void ColumnMatches_SheetWithNoHeadingHasNoHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         var regex = new Regex("Regex");
@@ -74,7 +74,7 @@ public class RegexColumnMatcherTests
     public void ColumnMatches_InvalidColumnIndex_ThrowsArgumentOutOfRangeException(int columnIndex)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var regex = new Regex("Regex");

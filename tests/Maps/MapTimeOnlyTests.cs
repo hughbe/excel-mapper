@@ -11,7 +11,7 @@ public class MapTimeOnlyTests
     {
         using var importer = Helpers.GetImporter("TimeOnly.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid time.
@@ -56,7 +56,7 @@ public class MapTimeOnlyTests
     {
         using var importer = Helpers.GetImporter("TimeOnly.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid time.
@@ -105,7 +105,7 @@ public class MapTimeOnlyTests
             c.Map(o => o.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid time.
@@ -156,7 +156,7 @@ public class MapTimeOnlyTests
                 .WithInvalidFallback(new TimeOnly(03, 04, 05));
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid time.
@@ -210,7 +210,7 @@ public class MapTimeOnlyTests
     {
         using var importer = Helpers.GetImporter("TimeOnly.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid time.
@@ -261,7 +261,7 @@ public class MapTimeOnlyTests
                 .WithFormats("yyyy-MM-dd", "o");
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid time.
@@ -315,7 +315,7 @@ public class MapTimeOnlyTests
                 .WithFormats((IEnumerable<string>)["yyyy-MM-dd", "o"]);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid time.
@@ -369,7 +369,7 @@ public class MapTimeOnlyTests
     {
         using var importer = Helpers.GetImporter("TimeOnly.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid time.
@@ -419,7 +419,7 @@ public class MapTimeOnlyTests
             c.Map(o => o.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid time.
@@ -471,7 +471,7 @@ public class MapTimeOnlyTests
                 .WithInvalidFallback(new TimeOnly(03, 04, 05));
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid time.

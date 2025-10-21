@@ -11,7 +11,7 @@ public class AutoMapTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -43,7 +43,7 @@ public class AutoMapTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -76,7 +76,7 @@ public class AutoMapTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -109,7 +109,7 @@ public class AutoMapTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -142,7 +142,7 @@ public class AutoMapTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -175,7 +175,7 @@ public class AutoMapTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -208,7 +208,7 @@ public class AutoMapTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -247,7 +247,7 @@ public class AutoMapTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InterfacePropertyClass>());
@@ -263,7 +263,7 @@ public class AutoMapTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InterfaceFieldClass>());
@@ -279,7 +279,7 @@ public class AutoMapTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<AbstractClass>());
@@ -294,7 +294,7 @@ public class AutoMapTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ClassWithConstructor>());
@@ -314,7 +314,7 @@ public class AutoMapTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BitArray>());

@@ -10,7 +10,7 @@ public class TrimValueTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         importer.Configuration.RegisterClassMap<TrimStringValueMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StringValue>();

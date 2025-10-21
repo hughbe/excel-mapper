@@ -12,7 +12,7 @@ public class CharSplitValueTests
         using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
         importer.Configuration.RegisterClassMap<SplitWithSeparatorsArrayMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
@@ -28,7 +28,7 @@ public class CharSplitValueTests
         using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
         importer.Configuration.RegisterClassMap<SplitWithEnumerableSeparatorsMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
@@ -77,7 +77,7 @@ public class CharSplitValueTests
         using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
         importer.Configuration.RegisterClassMap<MissingColumnRowMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<MissingColumnRow>());
@@ -89,7 +89,7 @@ public class CharSplitValueTests
         using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
         importer.Configuration.RegisterClassMap<OptionalMissingColumnRowMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         MissingColumnRow row = sheet.ReadRow<MissingColumnRow>();

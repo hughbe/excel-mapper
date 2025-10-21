@@ -11,7 +11,7 @@ public class MapIParsableTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -45,7 +45,7 @@ public class MapIParsableTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -78,7 +78,7 @@ public class MapIParsableTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -99,7 +99,7 @@ public class MapIParsableTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -129,7 +129,7 @@ public class MapIParsableTests
             c.Map(o => o.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -156,7 +156,7 @@ public class MapIParsableTests
                 .WithInvalidFallback(new ParsableClass { ParsedMember = "invalid" });
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -177,7 +177,7 @@ public class MapIParsableTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -210,7 +210,7 @@ public class MapIParsableTests
             c.Map(o => o.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -236,7 +236,7 @@ public class MapIParsableTests
                 .WithInvalidFallback(new ParsableStruct { ParsedMember = "invalid" });
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -257,7 +257,7 @@ public class MapIParsableTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -291,7 +291,7 @@ public class MapIParsableTests
             c.Map(o => o.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -318,7 +318,7 @@ public class MapIParsableTests
                 .WithInvalidFallback(new ParsableStruct { ParsedMember = "invalid" });
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value

@@ -53,7 +53,7 @@ public class ColumnIndicesReaderFactoryTests
     public void GetCellReader_InvokeSheetWithHeading_ReturnsExpected(int[] columnIndices, int expectedColumnIndex)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new ColumnIndicesReaderFactory(columnIndices);
@@ -73,7 +73,7 @@ public class ColumnIndicesReaderFactoryTests
     public void GetCellReader_InvokeNoMatch_ReturnsNull(int[] columnIndices)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new ColumnIndicesReaderFactory(columnIndices);
@@ -85,7 +85,7 @@ public class ColumnIndicesReaderFactoryTests
     public void GetCellReader_InvokeSheetWithNoHeadingHasHeading_ReturnsExpected(int[] columnIndices, int expectedColumnIndex)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var factory = new ColumnIndicesReaderFactory(columnIndices);
         var reader = Assert.IsType<ColumnIndexReader>(factory.GetCellReader(sheet));
@@ -99,7 +99,7 @@ public class ColumnIndicesReaderFactoryTests
     public void GetCellReader_InvokeSheetWithNoHeadingHasNoHeading_ReturnsExpected(int[] columnIndices, int expectedColumnIndex)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         var factory = new ColumnIndicesReaderFactory(columnIndices);
@@ -127,7 +127,7 @@ public class ColumnIndicesReaderFactoryTests
     public void GetCellsReader_InvokeSheetWithHeading_ReturnsExpected(int[] columnIndices)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new ColumnIndicesReaderFactory(columnIndices);
@@ -147,7 +147,7 @@ public class ColumnIndicesReaderFactoryTests
     public void GetCellsReader_InvokeNoMatch_ReturnsNull(int[] columnIndices)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new ColumnIndicesReaderFactory(columnIndices);
@@ -159,7 +159,7 @@ public class ColumnIndicesReaderFactoryTests
     public void GetCellsReader_InvokeSheetWithNoHeadingHasHeading_ReturnsExpected(int[] columnIndices)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var factory = new ColumnIndicesReaderFactory(columnIndices);
         var reader = Assert.IsType<ColumnIndicesReader>(factory.GetCellsReader(sheet));
@@ -173,7 +173,7 @@ public class ColumnIndicesReaderFactoryTests
     public void GetCellsReader_InvokeSheetWithNoHeadingHasNoHeading_ReturnsExpected(int[] columnIndices)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         var factory = new ColumnIndicesReaderFactory(columnIndices);

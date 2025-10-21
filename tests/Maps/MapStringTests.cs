@@ -9,7 +9,7 @@ public class MapStringTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -37,7 +37,7 @@ public class MapStringTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -66,7 +66,7 @@ public class MapStringTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         importer.Configuration.RegisterClassMap<DefaultStringClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value
@@ -95,7 +95,7 @@ public class MapStringTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         importer.Configuration.RegisterClassMap<CustomStringClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid value

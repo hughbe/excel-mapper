@@ -13,7 +13,7 @@ public class MapDateTimeOffsetTests
     {
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -32,7 +32,7 @@ public class MapDateTimeOffsetTests
     {
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -52,7 +52,7 @@ public class MapDateTimeOffsetTests
     {
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -71,7 +71,7 @@ public class MapDateTimeOffsetTests
     {
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -92,7 +92,7 @@ public class MapDateTimeOffsetTests
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
         importer.Configuration.RegisterClassMap<DefaultDateTimeOffsetClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -112,7 +112,7 @@ public class MapDateTimeOffsetTests
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
         importer.Configuration.RegisterClassMap<DefaultNullableDateTimeOffsetClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -133,7 +133,7 @@ public class MapDateTimeOffsetTests
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
         importer.Configuration.RegisterClassMap<CustomDateTimeOffsetClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -155,7 +155,7 @@ public class MapDateTimeOffsetTests
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
         importer.Configuration.RegisterClassMap<DateTimeOffsetFormatsArrayMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -178,7 +178,7 @@ public class MapDateTimeOffsetTests
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
         importer.Configuration.RegisterClassMap<DateTimeOffsetEnumerableFormatsMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -201,7 +201,7 @@ public class MapDateTimeOffsetTests
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
         importer.Configuration.RegisterClassMap<CustomNullableDateTimeOffsetClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.

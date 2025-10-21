@@ -11,7 +11,7 @@ public class MapTimeSpanTests
     {
         using var importer = Helpers.GetImporter("TimeSpans.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -30,7 +30,7 @@ public class MapTimeSpanTests
     {
         using var importer = Helpers.GetImporter("TimeSpans.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -53,7 +53,7 @@ public class MapTimeSpanTests
             c.Map(o => o.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -78,7 +78,7 @@ public class MapTimeSpanTests
                 .WithInvalidFallback(new TimeSpan(03, 04, 05));
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -104,7 +104,7 @@ public class MapTimeSpanTests
     {
         using var importer = Helpers.GetImporter("TimeSpans.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -129,7 +129,7 @@ public class MapTimeSpanTests
                 .WithFormats("yyyy-MM-dd", "g");
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -156,7 +156,7 @@ public class MapTimeSpanTests
                 .WithFormats((IEnumerable<string>)["yyyy-MM-dd", "g"]);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -183,7 +183,7 @@ public class MapTimeSpanTests
     {
         using var importer = Helpers.GetImporter("TimeSpans.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -207,7 +207,7 @@ public class MapTimeSpanTests
             c.Map(o => o.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -233,7 +233,7 @@ public class MapTimeSpanTests
                 .WithInvalidFallback(new TimeSpan(03, 04, 05));
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.

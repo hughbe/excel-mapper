@@ -10,7 +10,7 @@ public class MapHalfTests
     {
         using var importer = Helpers.GetImporter("Doubles.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -29,7 +29,7 @@ public class MapHalfTests
     {
         using var importer = Helpers.GetImporter("Doubles.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -49,7 +49,7 @@ public class MapHalfTests
     {
         using var importer = Helpers.GetImporter("Doubles.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -77,7 +77,7 @@ public class MapHalfTests
             c.Map(o => o.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -102,7 +102,7 @@ public class MapHalfTests
                 .WithInvalidFallback((Half)10.0f);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -123,7 +123,7 @@ public class MapHalfTests
     {
         using var importer = Helpers.GetImporter("Doubles.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -152,7 +152,7 @@ public class MapHalfTests
             c.Map(o => o.Value);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -178,7 +178,7 @@ public class MapHalfTests
                 .WithInvalidFallback((Half)10.0f);
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.

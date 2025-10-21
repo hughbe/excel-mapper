@@ -18,7 +18,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<string[]>();
@@ -30,7 +30,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<Array>();
@@ -42,7 +42,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IEnumerable>();
@@ -54,7 +54,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IEnumerable<string>>();
@@ -66,7 +66,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ICollection>();
@@ -78,7 +78,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ICollection<string>>();
@@ -90,7 +90,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyCollection<string>>();
@@ -102,7 +102,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IList>();
@@ -114,7 +114,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IList<string>>();
@@ -126,7 +126,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IReadOnlyList<string>>();
@@ -138,7 +138,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ArrayList>();
@@ -150,7 +150,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<Queue>();
@@ -162,7 +162,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CollectionBase>());
@@ -173,7 +173,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubCollectionBase>();
@@ -189,7 +189,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ReadOnlyCollectionBase>());
@@ -200,7 +200,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubReadOnlyCollectionBase>();
@@ -216,7 +216,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<Stack>();
@@ -228,7 +228,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StringCollection>();
@@ -240,7 +240,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<List<string>>();
@@ -252,7 +252,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SortedSet<string>>();
@@ -264,7 +264,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<Collection<string>>();
@@ -276,7 +276,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ReadOnlyCollection<string>>();
@@ -288,7 +288,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableArray<string>>();
@@ -300,7 +300,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableList<string>>();
@@ -312,7 +312,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableStack<string>>();
@@ -324,7 +324,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableQueue<string>>();
@@ -336,7 +336,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableSortedSet<string>>();
@@ -348,7 +348,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ImmutableHashSet<string>>();
@@ -360,7 +360,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<FrozenSet<string>>();
@@ -372,7 +372,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ObservableCollection<string>>();
@@ -384,7 +384,7 @@ public class MultiMapTests
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<BlockingCollection<string>>();
@@ -397,7 +397,7 @@ public class MultiMapTests
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         importer.Configuration.RegisterClassMap(new MultiMapRowMap());
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<MultiMapRow>();

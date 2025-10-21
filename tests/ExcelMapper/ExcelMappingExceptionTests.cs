@@ -43,7 +43,7 @@ public class ExcelMappingExceptionTests
     public void Ctor_Message_SheetWithReadHeading_RowIndex_ColumnIndex()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var exception = new ExcelMappingException("Message", sheet, 10, 1);
@@ -58,7 +58,7 @@ public class ExcelMappingExceptionTests
     public void Ctor_Message_SheetWithNonReadHeading_RowIndex_ColumnIndex()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         var exception = new ExcelMappingException("Message", sheet, 10, 1);
         Assert.Equal("Message in column \"StringValue\" on row 10 in sheet \"Primitives\".", exception.Message);
         Assert.Null(exception.InnerException);

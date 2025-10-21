@@ -27,7 +27,7 @@ public class PredicateColumnMatcherTests
     public void ColumnMatches_Invoke_ReturnsExpected(bool result)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         List<string> calls = [];
@@ -53,7 +53,7 @@ public class PredicateColumnMatcherTests
     public void ColumnMatches_SheetWithNoHeadingHasHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         bool Predicate(string ColumnName) => true;
         var matcher = new PredicateColumnMatcher(Predicate);
@@ -65,7 +65,7 @@ public class PredicateColumnMatcherTests
     public void ColumnMatches_SheetWithNoHeadingHasNoHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         bool Predicate(string ColumnName) => true;
@@ -80,7 +80,7 @@ public class PredicateColumnMatcherTests
     public void ColumnMatches_InvalidColumnIndex_ThrowsArgumentOutOfRangeException(int columnIndex)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         bool Predicate(string ColumnName) => true;

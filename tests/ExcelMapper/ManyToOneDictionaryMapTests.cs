@@ -170,7 +170,7 @@ public class ManyToOneDictionaryMapTests
     public void TryGetValue_InvokeCanRead_Success()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new MockReaderFactory(new MockReader(() => (true, [])));
@@ -200,7 +200,7 @@ public class ManyToOneDictionaryMapTests
     public void TryGetValue_InvokeSheetWithoutHeadingHasHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
         var valuePipeline = new ValuePipeline<string>();
@@ -216,7 +216,7 @@ public class ManyToOneDictionaryMapTests
     public void TryGetValue_InvokeSheetWithoutHeadingHasNoHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
@@ -233,7 +233,7 @@ public class ManyToOneDictionaryMapTests
     public void TryGetValue_InvokeCantReadPropertyInfo_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
@@ -250,7 +250,7 @@ public class ManyToOneDictionaryMapTests
     public void TryGetValue_InvokeCantReadFieldInfo_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
@@ -267,7 +267,7 @@ public class ManyToOneDictionaryMapTests
     public void TryGetValue_InvokeCantReadEventInfo_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
@@ -284,7 +284,7 @@ public class ManyToOneDictionaryMapTests
     public void TryGetValue_InvokeCantReadNullMember_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new MockReaderFactory(new MockReader(() => (false, null)));
@@ -300,7 +300,7 @@ public class ManyToOneDictionaryMapTests
     public void TryGetValue_InvokeCantReadNullMemberIColumnNamesProviderCellReaderFactoryEmpty_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(s => false));
@@ -316,7 +316,7 @@ public class ManyToOneDictionaryMapTests
     public void TryGetValue_InvokeCantReadNullMemberIColumnNamesProviderCellReaderFactorySingle_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new ColumnNamesReaderFactory("NoSuchColumn");
@@ -332,7 +332,7 @@ public class ManyToOneDictionaryMapTests
     public void TryGetValue_InvokeCantReadNullMemberIColumnNamesProviderCellReaderFactoryMultiple_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new ColumnNamesReaderFactory("NoSuchColumn1", "NoSuchColumn2");
@@ -348,7 +348,7 @@ public class ManyToOneDictionaryMapTests
     public void TryGetValue_InvokeCantReadNullMemberIColumnIndicesProviderCellReaderFactoryEmpty_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new EmptyColumnIndicesReaderFactory();
@@ -364,7 +364,7 @@ public class ManyToOneDictionaryMapTests
     public void TryGetValue_InvokeCantReadNullMemberIColumnIndicesProviderCellReaderFactorySingle_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new ColumnIndicesReaderFactory(10);
@@ -380,7 +380,7 @@ public class ManyToOneDictionaryMapTests
     public void TryGetValue_InvokeCantReadNullMemberIColumnIndicesProviderCellReaderFactoryMultiple_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new ColumnIndicesReaderFactory(0, 1);

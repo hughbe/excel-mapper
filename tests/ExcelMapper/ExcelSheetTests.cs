@@ -11,7 +11,7 @@ public class ExcelSheetTests
     public void NumberOfColumns_Get_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         Assert.Equal(1, sheet.NumberOfColumns);
     }
 
@@ -19,7 +19,7 @@ public class ExcelSheetTests
     public void Visibility_Get_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("HiddenSheets.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         Assert.Equal("VisibleSheet", sheet.Name);
         Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
 
@@ -36,7 +36,7 @@ public class ExcelSheetTests
     public void ReadHeading_HasHeading_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         ExcelHeading heading = sheet.ReadHeading();
         Assert.Same(heading, sheet.Heading);
         Assert.Equal(["Int Value", "StringValue", "Bool Value", "Enum Value", "DateValue", "ArrayValue", "MappedValue", "TrimmedValue"], heading.ColumnNames);
@@ -47,7 +47,7 @@ public class ExcelSheetTests
     public void ReadHeading_DuplicatedColumnName_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("DuplicatedColumns.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         ExcelHeading heading = sheet.ReadHeading();
         Assert.Same(heading, sheet.Heading);
         Assert.Equal(["MyColumn", "MyColumn"], heading.ColumnNames);
@@ -58,7 +58,7 @@ public class ExcelSheetTests
     public void ReadHeading_EmptyColumnName_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("EmptyColumns.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         ExcelHeading heading = sheet.ReadHeading();
         Assert.Same(heading, sheet.Heading);
         Assert.Equal(["", "Column2", "", " Column4 "], heading.ColumnNames);
@@ -69,7 +69,7 @@ public class ExcelSheetTests
     public void ReadHeading_NonZeroHeadingIndex_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Non Zero Header Index.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HeadingIndex = 3;
 
         ExcelHeading heading = sheet.ReadHeading();
@@ -82,7 +82,7 @@ public class ExcelSheetTests
     public void ReadHeading_AlreadyReadHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadHeading());
@@ -92,7 +92,7 @@ public class ExcelSheetTests
     public void ReadHeading_DoesNotHaveHasHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadHeading());
@@ -112,7 +112,7 @@ public class ExcelSheetTests
     public void ReadHeading_Closed_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         importer.Dispose();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadHeading());
@@ -123,7 +123,7 @@ public class ExcelSheetTests
     public void ReadRows_NotReadHeading_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var rows = sheet.ReadRows<StringValue>();
         Assert.Equal(new string?[] { "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
@@ -139,7 +139,7 @@ public class ExcelSheetTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         importer.Configuration.RegisterClassMap<StringValueClassMapColumnIndex>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         var rows = sheet.ReadRows<StringValue>();
@@ -154,7 +154,7 @@ public class ExcelSheetTests
     public void ReadRows_ReadHeading_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var rows = sheet.ReadRows<StringValue>();
@@ -169,7 +169,7 @@ public class ExcelSheetTests
     public void ReadRows_ReadHeadingNonZeroHeadingIndex_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Non Zero Header Index.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HeadingIndex = 3;
         sheet.ReadHeading();
 
@@ -185,7 +185,7 @@ public class ExcelSheetTests
     public void ReadRows_AllReadHasHeadingTrue_ReturnsEmpty()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var rows1 = sheet.ReadRows<StringValue>();
         Assert.Equal(new string?[] { "value", "  value  ", null, "value" }, rows1.Select(p => p.Value).ToArray());
@@ -204,7 +204,7 @@ public class ExcelSheetTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         importer.Configuration.RegisterClassMap<StringValueClassMapColumnIndex>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         var rows1 = sheet.ReadRows<StringValue>();
@@ -226,7 +226,7 @@ public class ExcelSheetTests
 
         importer.ReadSheet();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         var rows = sheet.ReadRows<StringValue>();
@@ -241,7 +241,7 @@ public class ExcelSheetTests
 
         importer.ReadSheet();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = true;
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>());
@@ -251,7 +251,7 @@ public class ExcelSheetTests
     public void ReadRows_Closed_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         importer.Dispose();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>());
@@ -272,7 +272,7 @@ public class ExcelSheetTests
     public void ReadRows_IndexCount_ReturnsExpected(int startIndex, int count, string?[] expectedValues)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var rows = sheet.ReadRows<StringValue>(startIndex, count);
@@ -288,7 +288,7 @@ public class ExcelSheetTests
     public void ReadRows_IndexCountNotReadHeading_ReturnsExpected(int startIndex, int count, string?[] expectedValues)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var rows = sheet.ReadRows<StringValue>(startIndex, count);
         Assert.Equal(expectedValues, rows.Select(p => p.Value).ToArray());
@@ -303,7 +303,7 @@ public class ExcelSheetTests
     public void ReadRows_IndexCountReadHeading_ReturnsExpected(int startIndex, int count, string?[] expectedValues)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         ExcelHeading heading = sheet.ReadHeading();
 
@@ -331,7 +331,7 @@ public class ExcelSheetTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
         importer.Configuration.RegisterClassMap<StringValueClassMapColumnIndex>();
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         var rows = sheet.ReadRows<StringValue>(startIndex, count).ToList();
@@ -346,7 +346,7 @@ public class ExcelSheetTests
     public void ReadRows_IntIntClosed_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         importer.Dispose();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>(0, 1));
@@ -361,7 +361,7 @@ public class ExcelSheetTests
 
         importer.ReadSheet();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         var rows = sheet.ReadRows<StringValue>(0, 0);
@@ -376,7 +376,7 @@ public class ExcelSheetTests
 
         importer.ReadSheet();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         var rows = sheet.ReadRows<StringValue>(0, 1);
@@ -391,7 +391,7 @@ public class ExcelSheetTests
 
         importer.ReadSheet();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = true;
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>(1, 1));
@@ -401,7 +401,7 @@ public class ExcelSheetTests
     public void ReadRows_BlankLinesNotSkipped_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("BlankLines.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<BlankLinesClass>().ToArray());
         Assert.Equal(0, sheet.CurrentRowIndex);
@@ -412,7 +412,7 @@ public class ExcelSheetTests
     {
         using var importer = Helpers.GetImporter("BlankLines.xlsx");
         importer.Configuration.SkipBlankLines = true;
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         BlankLinesClass[] rows = [.. sheet.ReadRows<BlankLinesClass>()];
         Assert.Equal(4, rows.Length);
@@ -431,7 +431,7 @@ public class ExcelSheetTests
     public void ReadRow_BlankLinesNotSkipped_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("BlankLines.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
@@ -478,7 +478,7 @@ public class ExcelSheetTests
     {
         using var importer = Helpers.GetImporter("BlankLines.xlsx");
         importer.Configuration.SkipBlankLines = true;
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<BlankLinesClass>();
@@ -510,7 +510,7 @@ public class ExcelSheetTests
     {
         using var importer = Helpers.GetImporter("BlankLines_Empty.xlsx");
         importer.Configuration.SkipBlankLines = true;
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<BlankLinesClass>();
@@ -546,7 +546,7 @@ public class ExcelSheetTests
     public void ReadRows_NegativeStartIndex_ThrowsArgumentOutOfRangeException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => sheet.ReadRows<StringValue>(-1, 0));
     }
 
@@ -557,7 +557,7 @@ public class ExcelSheetTests
     public void ReadRows_StartIndexLargerThanHeadingIndex_ThrowsArgumentOutOfRangeException(int headingIndex, int startIndex)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HeadingIndex = headingIndex;
         Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => sheet.ReadRows<StringValue>(startIndex, 0));
     }
@@ -566,7 +566,7 @@ public class ExcelSheetTests
     public void ReadRows_NegativeCount_ThrowsArgumentOutOfRangeException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         Assert.Throws<ArgumentOutOfRangeException>("count", () => sheet.ReadRows<StringValue>(1, -1));
     }
 
@@ -574,7 +574,7 @@ public class ExcelSheetTests
     public void ReadRows_LargeCount_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>(1, 1000).ToArray());
@@ -585,7 +585,7 @@ public class ExcelSheetTests
     public void ReadRows_LargeCountOffsetFromHeading_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>(1000, 1000).ToArray());
         Assert.Equal(5, sheet.CurrentRowIndex);
     }
@@ -596,7 +596,7 @@ public class ExcelSheetTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         importer.Configuration.RegisterClassMap<StringValueClassMapColumnIndex>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         StringValue value = sheet.ReadRow<StringValue>();
@@ -611,7 +611,7 @@ public class ExcelSheetTests
     public void ReadRow_HasHeadingFalseAutomapped_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValue>());
@@ -623,7 +623,7 @@ public class ExcelSheetTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         importer.Configuration.RegisterClassMap<StringValueClassMapColumnName>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValue>());
@@ -635,7 +635,7 @@ public class ExcelSheetTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         importer.Configuration.RegisterClassMap<StringValuesClassMapColumnNames>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValues>());
@@ -645,7 +645,7 @@ public class ExcelSheetTests
     public void HasHeading_SetWhenAlreadyRead_InvalidOperationException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<InvalidOperationException>(() => sheet.HasHeading = false);
@@ -656,7 +656,7 @@ public class ExcelSheetTests
     public void HeadingIndex_SetNegative_ThrowsArgumentOutOfRangeException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         Assert.Throws<ArgumentOutOfRangeException>("value", () => sheet.HeadingIndex = -1);
 
         sheet.HasHeading = false;
@@ -671,7 +671,7 @@ public class ExcelSheetTests
     public void HeadingIndex_SetAfterHeadingSet_ThrowsInvalidOperationException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<InvalidOperationException>(() => sheet.HeadingIndex = 0);
@@ -681,7 +681,7 @@ public class ExcelSheetTests
     public void HeadingIndex_SetWhenHasHeadingFalse_ThrowsInvalidOperationException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
         Assert.Throws<InvalidOperationException>(() => sheet.HeadingIndex = 0);
@@ -728,7 +728,7 @@ public class ExcelSheetTests
     public void ReadRow_CantMapType_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<Helpers.IListInterface>());
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IDisposable>());
     }
@@ -737,7 +737,7 @@ public class ExcelSheetTests
     public void ReadHeading_TooLargeHeadingIndex_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Non Zero Header Index.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.HeadingIndex = 8;
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadHeading());
@@ -747,7 +747,7 @@ public class ExcelSheetTests
     public void ReadRow_NoMoreRows_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         Assert.NotEmpty(sheet.ReadRows<object>().ToArray());
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<object>());
@@ -758,7 +758,7 @@ public class ExcelSheetTests
     public void TryReadRow_NoMoreRows_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         Assert.NotEmpty(sheet.ReadRows<object>().ToArray());
 
         Assert.False(sheet.TryReadRow(out object? row));
@@ -769,7 +769,7 @@ public class ExcelSheetTests
     public void ReadRow_Closed_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         importer.Dispose();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValue>());
@@ -780,7 +780,7 @@ public class ExcelSheetTests
     public void TryReadRow_Closed_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         importer.Dispose();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.TryReadRow<StringValue>(out var row));
@@ -807,7 +807,7 @@ public class ExcelSheetTests
 
         map.Map(t => t.RawRow);
         importer.Configuration.RegisterClassMap(map);
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
 
         var rows = sheet.ReadRows<Dictionary>().ToArray();
 

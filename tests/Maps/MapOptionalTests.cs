@@ -10,7 +10,7 @@ public class MapOptionalTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<MissingColumnPropertyClass>());
@@ -21,7 +21,7 @@ public class MapOptionalTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<MissingColumnFieldClass>());
@@ -32,7 +32,7 @@ public class MapOptionalTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<MissingColumnPropertyAttributeClass>();
@@ -44,7 +44,7 @@ public class MapOptionalTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<MissingColumnFieldAttributeClass>();
@@ -56,7 +56,7 @@ public class MapOptionalTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<MissingColumnPropertyEnumerableClass>());
@@ -67,7 +67,7 @@ public class MapOptionalTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<MissingColumnEnumerableFieldClass>());
@@ -78,7 +78,7 @@ public class MapOptionalTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<MissingColumnPropertyEnumerableAttributeClass>();
@@ -90,7 +90,7 @@ public class MapOptionalTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<MissingColumnEnumerableFieldAttributeClass>();
@@ -103,7 +103,7 @@ public class MapOptionalTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<DefaultMissingColumnPropertyClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<MissingColumnPropertyClass>());
@@ -115,7 +115,7 @@ public class MapOptionalTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<DefaultMissingColumnFieldClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<MissingColumnFieldClass>());
@@ -127,7 +127,7 @@ public class MapOptionalTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<DefaultMissingColumnPropertyAttributeClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<MissingColumnPropertyAttributeClass>();
@@ -140,7 +140,7 @@ public class MapOptionalTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<DefaultMissingColumnFieldAttributeClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<MissingColumnFieldAttributeClass>();
@@ -153,7 +153,7 @@ public class MapOptionalTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<DefaultMissingColumnPropertyEnumerableClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<MissingColumnPropertyEnumerableClass>());
@@ -165,7 +165,7 @@ public class MapOptionalTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<DefaultMissingColumnEnumerableFieldClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<MissingColumnEnumerableFieldClass>());
@@ -177,7 +177,7 @@ public class MapOptionalTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<DefaultMissingColumnPropertyEnumerableAttributeClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<MissingColumnPropertyEnumerableAttributeClass>();
@@ -190,7 +190,7 @@ public class MapOptionalTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<DefaultMissingColumnEnumerableFieldAttributeClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<MissingColumnEnumerableFieldAttributeClass>();
@@ -203,7 +203,7 @@ public class MapOptionalTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<CustomMissingColumnPropertyClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<MissingColumnPropertyClass>();
@@ -216,7 +216,7 @@ public class MapOptionalTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<CustomMissingColumnFieldClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<MissingColumnFieldClass>();
@@ -229,7 +229,7 @@ public class MapOptionalTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<CustomMissingColumnPropertyEnumerableClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<MissingColumnPropertyEnumerableAttributeClass>();
@@ -242,7 +242,7 @@ public class MapOptionalTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<CustomMissingColumnEnumerableFieldClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<MissingColumnEnumerableFieldClass>();
@@ -438,7 +438,7 @@ public class MapOptionalTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IgnoredColumnPropertyClass>();
@@ -459,7 +459,7 @@ public class MapOptionalTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IgnoredColumnFieldClass>();
@@ -482,7 +482,7 @@ public class MapOptionalTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<MissingColumnIgnoredPropertyClass>();
@@ -503,7 +503,7 @@ public class MapOptionalTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<MissingColumnIgnoredFieldClass>();
@@ -527,7 +527,7 @@ public class MapOptionalTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IgnoredRecursivePropertyClass>();
@@ -548,7 +548,7 @@ public class MapOptionalTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IgnoredRecursiveFieldClass>();
@@ -576,7 +576,7 @@ public class MapOptionalTests
                 .WithColumnName("NoSuchColumn");
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ArrayIndexerClass>());
@@ -598,7 +598,7 @@ public class MapOptionalTests
                 .MakeOptional();
         });
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var row = sheet.ReadRow<ArrayIndexerClass>();

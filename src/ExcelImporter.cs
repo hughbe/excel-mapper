@@ -119,7 +119,7 @@ public class ExcelImporter : IDisposable
     /// <returns>A lazily evaluated list of each sheet in the document.</returns>
     public IEnumerable<ExcelSheet> ReadSheets()
     {
-        while (TryReadSheet(out ExcelSheet? sheet))
+        while (TryReadSheet(out var sheet))
         {
             yield return sheet;
         }
@@ -134,7 +134,7 @@ public class ExcelImporter : IDisposable
     /// <returns>The next sheet in the document.</returns>
     public ExcelSheet ReadSheet()
     {
-        if (!TryReadSheet(out ExcelSheet? sheet))
+        if (!TryReadSheet(out var sheet))
         {
             throw new ExcelMappingException("No more sheets.");
         }
@@ -152,7 +152,7 @@ public class ExcelImporter : IDisposable
     {
         ArgumentNullException.ThrowIfNull(sheetName);
 
-        if (!TryReadSheet(sheetName, out ExcelSheet? sheet))
+        if (!TryReadSheet(sheetName, out var sheet))
         {
             throw new ExcelMappingException($"The sheet \"{sheetName}\" does not exist.");
         }
@@ -168,7 +168,7 @@ public class ExcelImporter : IDisposable
     /// <returns>The sheet in the document at the given zero-based index.</returns>
     public ExcelSheet ReadSheet(int sheetIndex)
     {
-        if (!TryReadSheet(sheetIndex, out ExcelSheet? sheet))
+        if (!TryReadSheet(sheetIndex, out var sheet))
         {
             throw new ArgumentOutOfRangeException(nameof(sheetIndex), sheetIndex, $"The sheet index {SheetIndex} must be between 0 and {NumberOfSheets}.");
         }

@@ -26,7 +26,7 @@ public class MultidimensionalIndexerMapTests
     public void TryGetValue_InvokeCanRead_Success()
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new MultidimensionalArrayFactory<string>();
@@ -40,7 +40,7 @@ public class MultidimensionalIndexerMapTests
     public void TryGetValue_InvokeCanReadMultiple_Success()
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var factory = new MultidimensionalArrayFactory<string>();

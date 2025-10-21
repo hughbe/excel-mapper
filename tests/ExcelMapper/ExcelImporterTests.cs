@@ -277,7 +277,7 @@ public class ExcelImporterTests
     public void ReadSheet_AllSheets_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         Assert.Equal("Primitives", sheet.Name);
         Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
         Assert.Equal(0, sheet.Index);
@@ -381,7 +381,7 @@ public class ExcelImporterTests
     public void ReadSheet_SheetNameExistsNotAlreadyRead_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet("Empty");
+        var sheet = importer.ReadSheet("Empty");
         Assert.Equal("Empty", sheet.Name);
         Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
         Assert.Equal(1, sheet.Index);
@@ -408,7 +408,7 @@ public class ExcelImporterTests
         importer.ReadSheet();
 
         // Reading a named sheet should reset the reader before finding the sheet.
-        ExcelSheet sheet = importer.ReadSheet("Empty");
+        var sheet = importer.ReadSheet("Empty");
         Assert.Equal("Empty", sheet.Name);
         Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
         Assert.Equal(1, sheet.Index);
@@ -534,7 +534,7 @@ public class ExcelImporterTests
     public void ReadSheet_SheetIndexExistsNotAlreadyRead_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        ExcelSheet sheet = importer.ReadSheet(1);
+        var sheet = importer.ReadSheet(1);
         Assert.Equal("Empty", sheet.Name);
         Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
         Assert.Equal(1, sheet.Index);
@@ -561,7 +561,7 @@ public class ExcelImporterTests
         importer.ReadSheet();
 
         // Reading a named sheet should reset the reader before finding the sheet.
-        ExcelSheet sheet = importer.ReadSheet(1);
+        var sheet = importer.ReadSheet(1);
         Assert.Equal("Empty", sheet.Name);
         Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
         Assert.Equal(1, sheet.Index);

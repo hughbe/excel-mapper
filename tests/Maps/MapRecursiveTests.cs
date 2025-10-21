@@ -10,7 +10,7 @@ public class MapRecursiveTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<RecursivePropertyClass>());
@@ -28,7 +28,7 @@ public class MapRecursiveTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<RecursiveFieldClass>());
@@ -46,7 +46,7 @@ public class MapRecursiveTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<RecursiveIndirectParent>());

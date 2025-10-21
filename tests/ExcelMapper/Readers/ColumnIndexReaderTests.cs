@@ -25,7 +25,7 @@ public class ColumnIndexReaderTests
     public void TryGetValue_Invoke_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var reader = new ColumnIndexReader(0);
@@ -40,7 +40,7 @@ public class ColumnIndexReaderTests
     public void TryGetValue_InvokeNoMatch_ReturnsNull(int columnIndex)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var reader = new ColumnIndexReader(columnIndex);

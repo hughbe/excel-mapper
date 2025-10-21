@@ -9,7 +9,7 @@ public class MapEnumTests
     {
         using var importer = Helpers.GetImporter("Enums.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -31,7 +31,7 @@ public class MapEnumTests
     {
         using var importer = Helpers.GetImporter("Enums.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -54,7 +54,7 @@ public class MapEnumTests
     {
         using var importer = Helpers.GetImporter("Enums.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -76,7 +76,7 @@ public class MapEnumTests
     {
         using var importer = Helpers.GetImporter("Enums.xlsx");
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -100,7 +100,7 @@ public class MapEnumTests
         using var importer = Helpers.GetImporter("Enums.xlsx");
         importer.Configuration.RegisterClassMap<DefaultEnumClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -123,7 +123,7 @@ public class MapEnumTests
         using var importer = Helpers.GetImporter("Enums.xlsx");
         importer.Configuration.RegisterClassMap<DefaultNullableCustomEnumClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -147,7 +147,7 @@ public class MapEnumTests
         using var importer = Helpers.GetImporter("Enums.xlsx");
         importer.Configuration.RegisterClassMap<CustomEnumClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -173,7 +173,7 @@ public class MapEnumTests
         using var importer = Helpers.GetImporter("Enums.xlsx");
         importer.Configuration.RegisterClassMap<IgnoreCaseEnumClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -199,7 +199,7 @@ public class MapEnumTests
         using var importer = Helpers.GetImporter("Enums.xlsx");
         importer.Configuration.RegisterClassMap<CustomNullableCustomEnumClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
@@ -225,7 +225,7 @@ public class MapEnumTests
         using var importer = Helpers.GetImporter("Enums.xlsx");
         importer.Configuration.RegisterClassMap<IgnoreCaseNullableCustomEnumClassMap>();
 
-        ExcelSheet sheet = importer.ReadSheet();
+        var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         // Valid cell value.
