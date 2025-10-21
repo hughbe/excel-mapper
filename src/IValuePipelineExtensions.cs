@@ -72,60 +72,266 @@ public static class IValuePipelineExtensions
     }
 
     /// <summary>
-    /// Specifies data formats used when mapping the value of a cell to a DateTime. This is useful for
-    /// mapping columns where data formats differ. Existing date formats are overriden.
+    /// Specifies formats used when mapping the value of a cell to a DateTime. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
     /// <param name="map">The map to use.</param>
-    /// <param name="formats">A list of date formats to use when mapping the value of a cell to a DateTime.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTime> WithDateFormats(this IValuePipeline<DateTime> map, params string[] formats)
+    public static IValuePipeline<DateTime> WithFormats(this IValuePipeline<DateTime> map, params string[] formats)
     {
-        map.AddFormats(formats);
+        map.AddDateTimeFormats(formats);
         return map;
     }
 
     /// <summary>
-    /// Specifies data formats used when mapping the value of a cell to a DateTime. This is useful for
-    /// mapping columns where data formats differ. Existing date formats are overriden.
+    /// Specifies formats used when mapping the value of a cell to a DateTime. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
     /// <param name="map">The map to use.</param>
-    /// <param name="formats">A list of date formats to use when mapping the value of a cell to a DateTime.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTime> WithDateFormats(this IValuePipeline<DateTime> map, IEnumerable<string> formats)
+    public static IValuePipeline<DateTime> WithFormats(this IValuePipeline<DateTime> map, IEnumerable<string> formats)
     {
         ArgumentNullException.ThrowIfNull(formats);
-
-        return map.WithDateFormats([.. formats]);
+        return map.WithFormats([.. formats]);
     }
 
     /// <summary>
-    /// Specifies data formats used when mapping the value of a cell to a DateTime. This is useful for
-    /// mapping columns where data formats differ. Existing date formats are overriden.
+    /// Specifies formats used when mapping the value of a cell to a DateTime. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
     /// <param name="map">The map to use.</param>
-    /// <param name="formats">A list of date formats to use when mapping the value of a cell to a DateTime.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTime?> WithDateFormats(this IValuePipeline<DateTime?> map, params string[] formats)
+    public static IValuePipeline<DateTime?> WithFormats(this IValuePipeline<DateTime?> map, params string[] formats)
     {
-        map.AddFormats(formats);
+        map.AddDateTimeFormats(formats);
         return map;
     }
 
     /// <summary>
-    /// Specifies data formats used when mapping the value of a cell to a DateTime. This is useful for
-    /// mapping columns where data formats differ. Existing date formats are overriden.
+    /// Specifies formats used when mapping the value of a cell to a DateTime. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
     /// <param name="map">The map to use.</param>
-    /// <param name="formats">A list of date formats to use when mapping the value of a cell to a DateTime.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTime?> WithDateFormats(this IValuePipeline<DateTime?> map, IEnumerable<string> formats)
+    public static IValuePipeline<DateTime?> WithFormats(this IValuePipeline<DateTime?> map, IEnumerable<string> formats)
     {
         ArgumentNullException.ThrowIfNull(formats);
-
-        return map.WithDateFormats([.. formats]);
+        return map.WithFormats([.. formats]);
     }
 
-    private static void AddFormats(this IValuePipeline map, string[] formats)
+    /// <summary>
+    /// Specifies formats used when mapping the value of a cell to a DateTimeOffset. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTimeOffset.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<DateTimeOffset> WithFormats(this IValuePipeline<DateTimeOffset> map, params string[] formats)
+    {
+        map.AddDateTimeOffsetFormats(formats);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies formats used when mapping the value of a cell to a DateTimeOffset. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTimeOffset.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<DateTimeOffset> WithFormats(this IValuePipeline<DateTimeOffset> map, IEnumerable<string> formats)
+    {
+        ArgumentNullException.ThrowIfNull(formats);
+        return map.WithFormats([.. formats]);
+    }
+
+    /// <summary>
+    /// Specifies formats used when mapping the value of a cell to a DateTimeOffset. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTimeOffset.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<DateTimeOffset?> WithFormats(this IValuePipeline<DateTimeOffset?> map, params string[] formats)
+    {
+        map.AddDateTimeOffsetFormats(formats);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies formats used when mapping the value of a cell to a DateTimeOffset. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTimeOffset.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<DateTimeOffset?> WithFormats(this IValuePipeline<DateTimeOffset?> map, IEnumerable<string> formats)
+    {
+        ArgumentNullException.ThrowIfNull(formats);
+        return map.WithFormats([.. formats]);
+    }
+
+    /// <summary>
+    /// Specifies formats used when mapping the value of a cell to a TimeSpan. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeSpan.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<TimeSpan> WithFormats(this IValuePipeline<TimeSpan> map, params string[] formats)
+    {
+        map.AddTimeSpanFormats(formats);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies formats used when mapping the value of a cell to a TimeSpan. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeSpan.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<TimeSpan> WithFormats(this IValuePipeline<TimeSpan> map, IEnumerable<string> formats)
+    {
+        ArgumentNullException.ThrowIfNull(formats);
+        return map.WithFormats([.. formats]);
+    }
+
+    /// <summary>
+    /// Specifies formats used when mapping the value of a cell to a TimeSpan. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeSpan.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<TimeSpan?> WithFormats(this IValuePipeline<TimeSpan?> map, params string[] formats)
+    {
+        map.AddTimeSpanFormats(formats);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies formats used when mapping the value of a cell to a TimeSpan. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeSpan.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<TimeSpan?> WithFormats(this IValuePipeline<TimeSpan?> map, IEnumerable<string> formats)
+    {
+        ArgumentNullException.ThrowIfNull(formats);
+        return map.WithFormats([.. formats]);
+    }
+
+    /// <summary>
+    /// Specifies formats used when mapping the value of a cell to a DateOnly. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateOnly.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<DateOnly> WithFormats(this IValuePipeline<DateOnly> map, params string[] formats)
+    {
+        map.AddDateOnlyFormats(formats);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies formats used when mapping the value of a cell to a DateOnly. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateOnly.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<DateOnly> WithFormats(this IValuePipeline<DateOnly> map, IEnumerable<string> formats)
+    {
+        ArgumentNullException.ThrowIfNull(formats);
+        return map.WithFormats([.. formats]);
+    }
+
+    /// <summary>
+    /// Specifies formats used when mapping the value of a cell to a DateOnly. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateOnly.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<DateOnly?> WithFormats(this IValuePipeline<DateOnly?> map, params string[] formats)
+    {
+        map.AddDateOnlyFormats(formats);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies formats used when mapping the value of a cell to a DateOnly. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateOnly.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<DateOnly?> WithFormats(this IValuePipeline<DateOnly?> map, IEnumerable<string> formats)
+    {
+        ArgumentNullException.ThrowIfNull(formats);
+        return map.WithFormats([.. formats]);
+    }
+
+    /// <summary>
+    /// Specifies formats used when mapping the value of a cell to a TimeOnly. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeOnly.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<TimeOnly> WithFormats(this IValuePipeline<TimeOnly> map, params string[] formats)
+    {
+        map.AddTimeOnlyFormats(formats);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies formats used when mapping the value of a cell to a TimeOnly. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeOnly.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<TimeOnly> WithFormats(this IValuePipeline<TimeOnly> map, IEnumerable<string> formats)
+    {
+        ArgumentNullException.ThrowIfNull(formats);
+        return map.WithFormats([.. formats]);
+    }
+
+    /// <summary>
+    /// Specifies formats used when mapping the value of a cell to a TimeOnly. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeOnly.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<TimeOnly?> WithFormats(this IValuePipeline<TimeOnly?> map, params string[] formats)
+    {
+        map.AddTimeOnlyFormats(formats);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies formats used when mapping the value of a cell to a TimeOnly. This is useful for
+    /// mapping columns where formats differ. Existing formats are overriden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeOnly.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<TimeOnly?> WithFormats(this IValuePipeline<TimeOnly?> map, IEnumerable<string> formats)
+    {
+        ArgumentNullException.ThrowIfNull(formats);
+        return map.WithFormats([.. formats]);
+    }
+
+    private static void ValidateFormats(string[] formats)
     {
         ArgumentNullException.ThrowIfNull(formats);
         if (formats.Length == 0)
@@ -139,17 +345,91 @@ public static class IValuePipelineExtensions
                 throw new ArgumentException("Formats cannot contain null or empty values.", nameof(formats));
             }
         }
+    }
 
-        var dateTimeItem = map.CellValueMappers
+    private static void AddDateTimeFormats(this IValuePipeline map, string[] formats)
+    {
+        ArgumentNullException.ThrowIfNull(formats);
+        ValidateFormats(formats);
+
+        var mapper = map.CellValueMappers
             .OfType<DateTimeMapper>()
             .FirstOrDefault();
-        if (dateTimeItem == null)
+        if (mapper == null)
         {
-            dateTimeItem = new DateTimeMapper();
-            map.AddCellValueMapper(dateTimeItem);
+            mapper = new DateTimeMapper();
+            map.AddCellValueMapper(mapper);
         }
 
-        dateTimeItem.Formats = formats;
+        mapper.Formats = formats;
+    }
+
+    private static void AddDateTimeOffsetFormats(this IValuePipeline map, string[] formats)
+    {
+        ArgumentNullException.ThrowIfNull(formats);
+        ValidateFormats(formats);
+
+        var mapper = map.CellValueMappers
+            .OfType<DateTimeOffsetMapper>()
+            .FirstOrDefault();
+        if (mapper == null)
+        {
+            mapper = new DateTimeOffsetMapper();
+            map.AddCellValueMapper(mapper);
+        }
+
+        mapper.Formats = formats;
+    }
+
+    private static void AddTimeSpanFormats(this IValuePipeline map, string[] formats)
+    {
+        ArgumentNullException.ThrowIfNull(formats);
+        ValidateFormats(formats);
+
+        var mapper = map.CellValueMappers
+            .OfType<TimeSpanMapper>()
+            .FirstOrDefault();
+        if (mapper == null)
+        {
+            mapper = new TimeSpanMapper();
+            map.AddCellValueMapper(mapper);
+        }
+
+        mapper.Formats = formats;
+    }
+
+    private static void AddDateOnlyFormats(this IValuePipeline map, string[] formats)
+    {
+        ArgumentNullException.ThrowIfNull(formats);
+        ValidateFormats(formats);
+
+        var mapper = map.CellValueMappers
+            .OfType<DateOnlyMapper>()
+            .FirstOrDefault();
+        if (mapper == null)
+        {
+            mapper = new DateOnlyMapper();
+            map.AddCellValueMapper(mapper);
+        }
+
+        mapper.Formats = formats;
+    }
+
+    private static void AddTimeOnlyFormats(this IValuePipeline map, string[] formats)
+    {
+        ArgumentNullException.ThrowIfNull(formats);
+        ValidateFormats(formats);
+
+        var mapper = map.CellValueMappers
+            .OfType<TimeOnlyMapper>()
+            .FirstOrDefault();
+        if (mapper == null)
+        {
+            mapper = new TimeOnlyMapper();
+            map.AddCellValueMapper(mapper);
+        }
+
+        mapper.Formats = formats;
     }
 
     /// <summary>

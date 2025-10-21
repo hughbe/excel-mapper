@@ -223,7 +223,7 @@ public class ColumnIndicesReaderFactoryTests
     [Fact]
     public void GetColumnIndices_Invoke_ReturnsExpected()
     {
-        var factory = new ColumnIndicesReaderFactory(new int[] { 1, 2, 3 });
-        Assert.Equal(new int[] { 1, 2, 3 }, factory.GetColumnIndices(null!)!);
+        var factory = new ColumnIndicesReaderFactory([1, 2, 3]);
+        Assert.Equal([1, 2, 3], factory.GetColumnIndices(null!)!);
     }
 }

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using Xunit;
 
 namespace ExcelMapper.Factories;

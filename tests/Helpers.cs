@@ -32,8 +32,16 @@ public static class Helpers
         public string Value { get; set; } = default!;
         public object ObjectValue { get; set; } = default!;
         public NestedClass NestedValue { get; set; } = default!;
-        public DateTime DateValue { get; set; }
-        public DateTime? NullableDateValue { get; set; }
+        public DateTime DateTimeValue { get; set; }
+        public DateTime? NullableDateTimeValue { get; set; }
+        public DateTimeOffset DateTimeOffsetValue { get; set; }
+        public DateTimeOffset? NullableDateTimeOffsetValue { get; set; }
+        public TimeSpan TimeSpanValue { get; set; }
+        public TimeSpan? NullableTimeSpanValue { get; set; }
+        public DateOnly DateOnlyValue { get; set; }
+        public DateOnly? NullableDateOnlyValue { get; set; }
+        public TimeOnly TimeOnlyValue { get; set; }
+        public TimeOnly? NullableTimeOnlyValue { get; set; }
         public IListInterface UnknownInterfaceValue { get; set; } = default!;
         public ConcreteIEnumerable ConcreteIEnumerable { get; set; } = default!;
         public ConcreteIDictionary ConcreteIDictionary { get; set; } = default!;

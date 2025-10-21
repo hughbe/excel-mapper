@@ -258,7 +258,7 @@ public class ColumnsMatchingReaderFactoryTests
 
         static bool Match(string columnName) => columnName.StartsWith("Value");
         var factory = new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(Match));
-        Assert.Equal(new int[] { 0, 1 }, factory.GetColumnIndices(sheet));
+        Assert.Equal([0, 1], factory.GetColumnIndices(sheet));
     }
 
     [Fact]
@@ -269,7 +269,7 @@ public class ColumnsMatchingReaderFactoryTests
 
         static bool Match(int columnIndex) => columnIndex == 0 || columnIndex == 1;
         var factory = new ColumnsMatchingReaderFactory(new CustomColumnMatcher(Match));
-        Assert.Equal(new int[] { 0, 1 }, factory.GetColumnIndices(sheet));
+        Assert.Equal([0, 1], factory.GetColumnIndices(sheet));
     }
 
     [Fact]

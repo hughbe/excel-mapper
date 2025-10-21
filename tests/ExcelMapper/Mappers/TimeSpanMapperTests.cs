@@ -9,22 +9,22 @@ using Xunit;
 
 namespace ExcelMapper.Mappers.Tests;
 
-public class DateTimeMapperTests
+public class TimeSpanMapperTests
 {
     [Fact]
     public void Ctor_Default()
     {
-        var item = new DateTimeMapper();
-        Assert.Equal(["G"], item.Formats);
+        var item = new TimeSpanMapper();
+        Assert.Equal(["c"], item.Formats);
         Assert.Null(item.Provider);
-        Assert.Equal(DateTimeStyles.None, item.Style);
+        Assert.Equal(TimeSpanStyles.None, item.Style);
     }
 
     [Fact]
     public void Formats_SetValid_GetReturnsExpected()
     {
         var formats = new string[] { "abc" };
-        var item = new DateTimeMapper
+        var item = new TimeSpanMapper
         {
             Formats = formats
         };
@@ -38,28 +38,28 @@ public class DateTimeMapperTests
     [Fact]
     public void Formats_SetNull_ThrowsArgumentNullException()
     {
-        var item = new DateTimeMapper();
+        var item = new TimeSpanMapper();
         Assert.Throws<ArgumentNullException>("value", () => item.Formats = null!);
     }
 
     [Fact]
     public void Formats_SetEmpty_ThrowsArgumentException()
     {
-        var item = new DateTimeMapper();
+        var item = new TimeSpanMapper();
         Assert.Throws<ArgumentException>("value", () => item.Formats = []);
     }
 
     [Fact]
     public void Formats_SetNullValueInValue_ThrowsArgumentException()
     {
-        var item = new DateTimeMapper();
+        var item = new TimeSpanMapper();
         Assert.Throws<ArgumentException>("value", () => item.Formats = [null!]);
     }
 
     [Fact]
     public void Formats_SetEmptyValueInValue_ThrowsArgumentException()
     {
-        var item = new DateTimeMapper();
+        var item = new TimeSpanMapper();
         Assert.Throws<ArgumentException>("value", () => item.Formats = [""]);
     }
 
@@ -67,7 +67,7 @@ public class DateTimeMapperTests
     public void Provider_Set_GetReturnsExpected()
     {
         var provider = CultureInfo.CurrentCulture;
-        var item = new DateTimeMapper
+        var item = new TimeSpanMapper
         {
             Provider = provider
         };
@@ -83,11 +83,11 @@ public class DateTimeMapperTests
     }
 
     [Theory]
-    [InlineData(DateTimeStyles.AdjustToUniversal)]
-    [InlineData((DateTimeStyles)int.MaxValue)]
-    public void Styles_Set_GetReturnsExpected(DateTimeStyles style)
+    [InlineData(TimeSpanStyles.AssumeNegative)]
+    [InlineData((TimeSpanStyles)int.MaxValue)]
+    public void Styles_Set_GetReturnsExpected(TimeSpanStyles style)
     {
-        var item = new DateTimeMapper
+        var item = new TimeSpanMapper
         {
             Style = style
         };
@@ -100,17 +100,17 @@ public class DateTimeMapperTests
 
     public static IEnumerable<object[]> GetProperty_ValidStringValue_TestData()
     {
-        yield return new object[] { new DateTime(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "G" }, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
-        yield return new object[] { new DateTime(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "G", "yyyy-MM-dd" }, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
-        yield return new object[] { "   2017-07-12   ", new string[] { "G", "yyyy-MM-dd" }, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 7, 12) };
-        yield return new object[] { new DateTime(2017, 7, 12, 7, 57, 46).ToString("R"), new string[] { "yyyy-MM-dd", "R" }, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
+        yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "G" }, TimeSpanStyles.None, new TimeSpan(2017, 7, 12, 7, 57, 46) };
+        yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "G", "yyyy-MM-dd" }, TimeSpanStyles.None, new TimeSpan(2017, 7, 12, 7, 57, 46) };
+        yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "yyyy-MM-dd", "G" }, TimeSpanStyles.AssumeNegative, new TimeSpan(2017, 7, 12, 7, 57, 46) };
+        yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46).ToString("c"), new string[] { "yyyy-MM-dd", "c" }, TimeSpanStyles.AssumeNegative, new TimeSpan(2017, 7, 12, 7, 57, 46) };
     }
 
     [Theory]
     [MemberData(nameof(GetProperty_ValidStringValue_TestData))]
-    public void GetProperty_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, DateTimeStyles style, DateTime expected)
+    public void GetProperty_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, TimeSpanStyles style, TimeSpan expected)
     {
-        var item = new DateTimeMapper
+        var item = new TimeSpanMapper
         {
             Formats = formats,
             Style = style
@@ -118,7 +118,7 @@ public class DateTimeMapperTests
 
         var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.True(result.Succeeded);
-        Assert.Equal(expected, Assert.IsType<DateTime>(result.Value));
+        Assert.Equal(expected, Assert.IsType<TimeSpan>(result.Value));
         Assert.Null(result.Exception);
     }
 
@@ -129,29 +129,30 @@ public class DateTimeMapperTests
     [InlineData("12/07/2017 07:57:61")]
     public void GetProperty_InvalidStringValue_ReturnsInvalid(string? stringValue)
     {
-        var item = new DateTimeMapper();
+        var item = new TimeSpanMapper();
         var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);
     }
 
-    public static IEnumerable<object[]> GetProperty_ValidDateTimeValue_TestData()
+    public static IEnumerable<object[]> GetProperty_ValidTimeSpanValue_TestData()
     {
-        yield return new object[] { new DateTime(2017, 7, 12, 7, 57, 46), new string[] { "G" }, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
-        yield return new object[] { new DateTime(2017, 7, 12, 7, 57, 46), new string[] { "G", "yyyy-MM-dd" }, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
+        yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46), new string[] { "G" }, TimeSpanStyles.None, new TimeSpan(2017, 7, 12, 7, 57, 46) };
+        yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46), new string[] { "G", "yyyy-MM-dd" }, TimeSpanStyles.None, new TimeSpan(2017, 7, 12, 7, 57, 46) };
+        yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46), new string[] { "yyyy-MM-dd", "G" }, TimeSpanStyles.AssumeNegative, new TimeSpan(2017, 7, 12, 7, 57, 46) };
     }
 
     [Theory]
-    [MemberData(nameof(GetProperty_ValidDateTimeValue_TestData))]
-    public void GetProperty_ValidDateTimeValue_ReturnsSuccess(DateTime dateTimeValue, string[] formats, DateTimeStyles style, DateTime expected)
+    [MemberData(nameof(GetProperty_ValidTimeSpanValue_TestData))]
+    public void GetProperty_ValidTimeSpanValue_ReturnsSuccess(TimeSpan timeSpanValue, string[] formats, TimeSpanStyles style, TimeSpan expected)
     {
         var reader = new MockExcelDataReader
         {
-            GetValueAction = (i) => dateTimeValue
+            GetValueAction = (i) => timeSpanValue
         };
 
-        var item = new DateTimeMapper
+        var item = new TimeSpanMapper
         {
             Formats = formats,
             Style = style
@@ -159,19 +160,19 @@ public class DateTimeMapperTests
 
         var result = item.MapCellValue(new ReadCellResult(0, reader, preserveFormatting: false));
         Assert.True(result.Succeeded);
-        Assert.Equal(expected, Assert.IsType<DateTime>(result.Value));
+        Assert.Equal(expected, Assert.IsType<TimeSpan>(result.Value));
         Assert.Null(result.Exception);
     }
 
     [Fact]
     public void GetProperty_InvalidFormats_ThrowsFormatException()
     {
-        var item = new DateTimeMapper
+        var item = new TimeSpanMapper
         {
             Formats = ["Invalid"]
         };
 
-        var result = item.MapCellValue(new ReadCellResult(0, new DateTime(2020, 1, 1).ToString(), preserveFormatting: false));
+        var result = item.MapCellValue(new ReadCellResult(0, new TimeSpan(1, 0, 0).ToString(), preserveFormatting: false));
         Assert.IsType<FormatException>(result.Exception);
     }
 

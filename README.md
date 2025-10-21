@@ -478,7 +478,7 @@ The fluent API provides extensive configuration options:
 
 **Advanced:**
 - `.WithConverter(value => ...)` - Custom conversion delegate
-- `.WithDateFormats("yyyy-MM-dd", "dd/MM/yyyy")` - Parse dates with specific formats
+- `.WithFormats("yyyy-MM-dd", "dd/MM/yyyy")` - Parse dates, times, durations and formats (`DateTime`, `DateTimeOffset`, `TimeSpan`, `DateOnly`, `TimeOnly`) with specific formats
 - `.WithMapping(dictionary)` - Map string values to enum/object values
 - `.WithElementMap(...)` - Configure element pipeline for collections
 
@@ -521,7 +521,7 @@ public class PresidentMap : ExcelClassMap<President>
 
         // Date parsing with multiple formats
         Map(p => p.DateOfBirth)
-            .WithDateFormats("yyyy-MM-dd", "dd/MM/yyyy");
+            .WithFormats("yyyy-MM-dd", "dd/MM/yyyy");
 
         // Try multiple column names
         Map(p => p.Party)
@@ -694,7 +694,7 @@ public class PresidentMap : ExcelClassMap<President>
         Map(p => p.Elections)
             .WithColumnNames("First Election", "Second Election")
             .WithElementMap(m => m
-                .WithDateFormats("yyyy-MM-dd", "dd/MM/yyyy")
+                .WithFormats("yyyy-MM-dd", "dd/MM/yyyy")
             );
     }
 }

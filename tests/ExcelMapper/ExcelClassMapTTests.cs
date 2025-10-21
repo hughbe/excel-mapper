@@ -127,8 +127,8 @@ public class ExcelClassMapTTests
     public void Map_EnumIgnoreCaseNotEnum_ThrowsArgumentException()
     {
         var map = new ExcelClassMap<TestClass>();
-        Assert.Throws<ArgumentException>("TProperty", () => map.Map(p => p.DateValue, ignoreCase: true));
-        Assert.Throws<ArgumentException>("TProperty", () => map.Map(p => p.NullableDateValue, ignoreCase: true));
+        Assert.Throws<ArgumentException>("TProperty", () => map.Map(p => p.DateTimeValue, ignoreCase: true));
+        Assert.Throws<ArgumentException>("TProperty", () => map.Map(p => p.NullableDateTimeValue, ignoreCase: true));
     }
 
     [Fact]
@@ -306,8 +306,10 @@ public class ExcelClassMapTTests
         public string StringValue { get; set; } = default!;
         public TestEnum EnumValue { get; set; }
         public TestEnum? NullableEnumValue { get; set; }
-        public DateTime DateValue { get; set; }
-        public DateTime? NullableDateValue { get; set; }
+        public DateTime DateTimeValue { get; set; }
+        public DateTime? NullableDateTimeValue { get; set; }
+        public TimeSpan TimeSpanValue { get; set; }
+        public TimeSpan? NullableTimeSpanValue { get; set; }
         public ChildClass? ObjectValue { get; set; }
     }
 

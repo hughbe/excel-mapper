@@ -5,15 +5,15 @@ using ExcelMapper.Abstractions;
 namespace ExcelMapper.Mappers;
 
 /// <summary>
-/// A mapper that tries to map the value of a cell to a DateTime.
+/// A mapper that tries to map the value of a cell to a TimeSpan.
 /// </summary>
-public class DateTimeMapper : ICellMapper
+public class TimeSpanMapper : ICellMapper
 {
-    private string[] _formats = ["G"];
+    private string[] _formats = ["c"];
 
     /// <summary>
-    /// Gets or sets the date formats used to map the value to a DateTime.
-    /// This defaults to "G" - the default Excel format.
+    /// Gets or sets the date formats used to map the value to a TimeSpan.
+    /// This defaults to "c" - the default TimeSpan format.
     /// </summary>
     public string[] Formats
     {
@@ -39,28 +39,28 @@ public class DateTimeMapper : ICellMapper
     }
 
     /// <summary>
-    /// Gets or sets the IFormatProvider used to map the value to a DateTime.
+    /// Gets or sets the IFormatProvider used to map the value to a TimeSpan.
     /// </summary>
     public IFormatProvider? Provider { get; set; }
 
     /// <summary>
-    /// Gets or sets the DateTimeStyles used to map the value to a DateTime.
+    /// Gets or sets the TimeSpanStyles used to map the value to a TimeSpan.
     /// </summary>
-    public DateTimeStyles Style { get; set; }
+    public TimeSpanStyles Style { get; set; }
 
     public CellMapperResult MapCellValue(ReadCellResult readResult)
     {
-        // Excel stores dates as numbers (the number of days since 1899-12-30).
-        // ExcelDataReader automatically converts these cells to DateTime.
-        if (readResult.GetValue() is DateTime dateTimeValue)
+        // Excel stores durations as number of days.
+        // ExcelDataReader automatically converts these cells to TimeSpan.
+        if (readResult.GetValue() is TimeSpan timeSpanValue)
         {
-            return CellMapperResult.Success(dateTimeValue);
+            return CellMapperResult.Success(timeSpanValue);
         }
         
         var stringValue = readResult.GetString();
         try
         {
-            var result = DateTime.ParseExact(stringValue!, Formats, Provider, Style);
+            var result = TimeSpan.ParseExact(stringValue!, Formats, Provider, Style);
             return CellMapperResult.Success(result);
         }
         catch (Exception exception)

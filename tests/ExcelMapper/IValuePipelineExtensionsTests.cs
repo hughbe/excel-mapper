@@ -44,7 +44,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var dictionaryMapping = new Dictionary<string, DateTime> { { "key", DateTime.MinValue } };
         StringComparer comparer = StringComparer.CurrentCultureIgnoreCase;
 
-        var map = Map(t => t.DateValue);
+        var map = Map(t => t.DateTimeValue);
         Assert.Same(map, map.WithMapping(dictionaryMapping, comparer));
 
         var item = map.Pipeline.CellValueMappers.OfType<DictionaryMapper<DateTime>>().Single();
@@ -81,12 +81,12 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 
     [Theory]
     [MemberData(nameof(Formats_TestData))]
-    public void WithDateFormats_AutoMappedStringArray_Success(IEnumerable<string> formats)
+    public void WithFormats_DateTimeAutoMappedStringArray_Success(IEnumerable<string> formats)
     {
         var formatsArray = formats.ToArray();
 
-        var map = Map(t => t.DateValue);
-        Assert.Same(map, map.WithDateFormats(formatsArray));
+        var map = Map(t => t.DateTimeValue);
+        Assert.Same(map, map.WithFormats(formatsArray));
 
         DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
@@ -94,14 +94,14 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 
     [Theory]
     [MemberData(nameof(Formats_TestData))]
-    public void WithDateFormats_NotMappedStringArray_Success(IEnumerable<string> formats)
+    public void WithFormats_DateTimeNotMappedStringArray_Success(IEnumerable<string> formats)
     {
         var formatsArray = formats.ToArray();
 
-        var map = Map(t => t.DateValue);
+        var map = Map(t => t.DateTimeValue);
         map.Pipeline.RemoveCellValueMapper(0);
 
-        Assert.Same(map, map.WithDateFormats(formatsArray));
+        Assert.Same(map, map.WithFormats(formatsArray));
 
         DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
@@ -109,10 +109,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 
     [Theory]
     [MemberData(nameof(Formats_TestData))]
-    public void WithDateFormats_AutoMappedIEnumerableString_Success(ICollection<string> formats)
+    public void WithFormats_DateTimeAutoMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        var map = Map(t => t.DateValue);
-        Assert.Same(map, map.WithDateFormats(formats));
+        var map = Map(t => t.DateTimeValue);
+        Assert.Same(map, map.WithFormats(formats));
 
         DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
         Assert.Equal(formats, item.Formats);
@@ -120,61 +120,61 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 
     [Theory]
     [MemberData(nameof(Formats_TestData))]
-    public void WithDateFormats_NotMappedIEnumerableString_Success(ICollection<string> formats)
+    public void WithFormats_DateTimeNotMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        var map = Map(t => t.DateValue);
+        var map = Map(t => t.DateTimeValue);
         map.Pipeline.RemoveCellValueMapper(0);
 
-        Assert.Same(map, map.WithDateFormats(formats));
+        Assert.Same(map, map.WithFormats(formats));
 
         DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
     [Fact]
-    public void WithDateFormats_NullFormats_ThrowsArgumentNullException()
+    public void WithFormats_DateTimeNullFormats_ThrowsArgumentNullException()
     {
-        var map = Map(t => t.DateValue);
+        var map = Map(t => t.DateTimeValue);
 
-        Assert.Throws<ArgumentNullException>("formats", () => map.WithDateFormats(null!));
-        Assert.Throws<ArgumentNullException>("formats", () => map.WithDateFormats((IEnumerable<string>)null!));
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
     }
 
     [Fact]
-    public void WithDateFormats_EmptyFormats_ThrowsArgumentException()
+    public void WithFormats_DateTimeEmptyFormats_ThrowsArgumentException()
     {
-        var map = Map(t => t.DateValue);
+        var map = Map(t => t.DateTimeValue);
 
-        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats([]));
-        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats(new List<string>()));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
     }
 
     [Fact]
-    public void WithDateFormats_NullValueInFormats_ThrowsArgumentException()
+    public void WithFormats_DateTimeNullValueInFormats_ThrowsArgumentException()
     {
-        var map = Map(t => t.DateValue);
+        var map = Map(t => t.DateTimeValue);
 
-        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats([null!]));
-        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats(new List<string> { null! }));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
     }
 
     [Fact]
-    public void WithDateFormats_EmptyValueInFormats_ThrowsArgumentException()
+    public void WithFormats_DateTimeEmptyValueInFormats_ThrowsArgumentException()
     {
-        var map = Map(t => t.DateValue);
+        var map = Map(t => t.DateTimeValue);
 
-        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats([string.Empty]));
-        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats(new List<string> { string.Empty }));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
 
     [Theory]
     [MemberData(nameof(Formats_TestData))]
-    public void WithDateFormats_NullableAutoMappedStringArray_Success(IEnumerable<string> formats)
+    public void WithFormats_DateTimeNullableAutoMappedStringArray_Success(IEnumerable<string> formats)
     {
         var formatsArray = formats.ToArray();
 
-        var map = Map(t => t.NullableDateValue);
-        Assert.Same(map, map.WithDateFormats(formatsArray));
+        var map = Map(t => t.NullableDateTimeValue);
+        Assert.Same(map, map.WithFormats(formatsArray));
 
         DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
@@ -182,14 +182,14 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 
     [Theory]
     [MemberData(nameof(Formats_TestData))]
-    public void WithDateFormats_NullableNotMappedStringArray_Success(IEnumerable<string> formats)
+    public void WithFormats_DateTimeNullableNotMappedStringArray_Success(IEnumerable<string> formats)
     {
         var formatsArray = formats.ToArray();
 
-        var map = Map(t => t.NullableDateValue);
+        var map = Map(t => t.NullableDateTimeValue);
         map.Pipeline.RemoveCellValueMapper(0);
 
-        Assert.Same(map, map.WithDateFormats(formatsArray));
+        Assert.Same(map, map.WithFormats(formatsArray));
 
         DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
@@ -197,10 +197,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 
     [Theory]
     [MemberData(nameof(Formats_TestData))]
-    public void WithDateFormats_NullableAutoMappedIEnumerableString_Success(ICollection<string> formats)
+    public void WithFormats_DateTimeNullableAutoMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        var map = Map(t => t.NullableDateValue);
-        Assert.Same(map, map.WithDateFormats(formats));
+        var map = Map(t => t.NullableDateTimeValue);
+        Assert.Same(map, map.WithFormats(formats));
 
         DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
         Assert.Equal(formats, item.Formats);
@@ -208,51 +208,755 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 
     [Theory]
     [MemberData(nameof(Formats_TestData))]
-    public void WithDateFormats_NullableNotMappedIEnumerableString_Success(ICollection<string> formats)
+    public void WithFormats_DateTimeNullableNotMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        var map = Map(t => t.NullableDateValue);
+        var map = Map(t => t.NullableDateTimeValue);
         map.Pipeline.RemoveCellValueMapper(0);
 
-        Assert.Same(map, map.WithDateFormats(formats));
+        Assert.Same(map, map.WithFormats(formats));
 
         DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
     [Fact]
-    public void WithDateFormats_NullableNullFormats_ThrowsArgumentNullException()
+    public void WithFormats_DateTimeNullableNullFormats_ThrowsArgumentNullException()
     {
-        var map = Map(t => t.NullableDateValue);
+        var map = Map(t => t.NullableDateTimeValue);
 
-        Assert.Throws<ArgumentNullException>("formats", () => map.WithDateFormats(null!));
-        Assert.Throws<ArgumentNullException>("formats", () => map.WithDateFormats((IEnumerable<string>)null!));
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
     }
 
     [Fact]
-    public void WithDateFormats_NullableEmptyFormats_ThrowsArgumentException()
+    public void WithFormats_DateTimeNullableEmptyFormats_ThrowsArgumentException()
     {
-        var map = Map(t => t.NullableDateValue);
+        var map = Map(t => t.NullableDateTimeValue);
 
-        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats([]));
-        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats(new List<string>()));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
     }
 
     [Fact]
-    public void WithDateFormats_NullableNullValueInFormats_ThrowsArgumentException()
+    public void WithFormats_DateTimeNullableNullValueInFormats_ThrowsArgumentException()
     {
-        var map = Map(t => t.NullableDateValue);
+        var map = Map(t => t.NullableDateTimeValue);
 
-        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats([null!]));
-        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats(new List<string> { null! }));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
     }
 
     [Fact]
-    public void WithDateFormats_NullableEmptyValueInFormats_ThrowsArgumentException()
+    public void WithFormats_DateTimeNullableEmptyValueInFormats_ThrowsArgumentException()
     {
-        var map = Map(t => t.NullableDateValue);
+        var map = Map(t => t.NullableDateTimeValue);
 
-        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats([string.Empty]));
-        Assert.Throws<ArgumentException>("formats", () => map.WithDateFormats(new List<string> { string.Empty }));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_DateTimeOffsetAutoMappedStringArray_Success(IEnumerable<string> formats)
+    {
+        var formatsArray = formats.ToArray();
+
+        var map = Map(t => t.DateTimeOffsetValue);
+        Assert.Same(map, map.WithFormats(formatsArray));
+
+        DateTimeOffsetMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Same(formatsArray, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_DateTimeOffsetNotMappedStringArray_Success(IEnumerable<string> formats)
+    {
+        var formatsArray = formats.ToArray();
+
+        var map = Map(t => t.DateTimeOffsetValue);
+        map.Pipeline.RemoveCellValueMapper(0);
+
+        Assert.Same(map, map.WithFormats(formatsArray));
+
+        DateTimeOffsetMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Same(formatsArray, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_DateTimeOffsetAutoMappedIEnumerableString_Success(ICollection<string> formats)
+    {
+        var map = Map(t => t.DateTimeOffsetValue);
+        Assert.Same(map, map.WithFormats(formats));
+
+        DateTimeOffsetMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Equal(formats, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_DateTimeOffsetNotMappedIEnumerableString_Success(ICollection<string> formats)
+    {
+        var map = Map(t => t.DateTimeOffsetValue);
+        map.Pipeline.RemoveCellValueMapper(0);
+
+        Assert.Same(map, map.WithFormats(formats));
+
+        DateTimeOffsetMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Equal(formats, item.Formats);
+    }
+
+    [Fact]
+    public void WithFormats_DateTimeOffsetNullFormats_ThrowsArgumentNullException()
+    {
+        var map = Map(t => t.DateTimeOffsetValue);
+
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
+    }
+
+    [Fact]
+    public void WithFormats_DateTimeOffsetEmptyFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.DateTimeOffsetValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
+    }
+
+    [Fact]
+    public void WithFormats_DateTimeOffsetNullValueInFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.DateTimeOffsetValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
+    }
+
+    [Fact]
+    public void WithFormats_DateTimeOffsetEmptyValueInFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.DateTimeOffsetValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_DateTimeOffsetNullableAutoMappedStringArray_Success(IEnumerable<string> formats)
+    {
+        var formatsArray = formats.ToArray();
+
+        var map = Map(t => t.NullableDateTimeOffsetValue);
+        Assert.Same(map, map.WithFormats(formatsArray));
+
+        DateTimeOffsetMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Same(formatsArray, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_DateTimeOffsetNullableNotMappedStringArray_Success(IEnumerable<string> formats)
+    {
+        var formatsArray = formats.ToArray();
+
+        var map = Map(t => t.NullableDateTimeOffsetValue);
+        map.Pipeline.RemoveCellValueMapper(0);
+
+        Assert.Same(map, map.WithFormats(formatsArray));
+
+        DateTimeOffsetMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Same(formatsArray, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_DateTimeOffsetNullableAutoMappedIEnumerableString_Success(ICollection<string> formats)
+    {
+        var map = Map(t => t.NullableDateTimeOffsetValue);
+        Assert.Same(map, map.WithFormats(formats));
+
+        DateTimeOffsetMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Equal(formats, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_DateTimeOffsetNullableNotMappedIEnumerableString_Success(ICollection<string> formats)
+    {
+        var map = Map(t => t.NullableDateTimeOffsetValue);
+        map.Pipeline.RemoveCellValueMapper(0);
+
+        Assert.Same(map, map.WithFormats(formats));
+
+        DateTimeOffsetMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Equal(formats, item.Formats);
+    }
+
+    [Fact]
+    public void WithFormats_DateTimeOffsetNullableNullFormats_ThrowsArgumentNullException()
+    {
+        var map = Map(t => t.NullableDateTimeOffsetValue);
+
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
+    }
+
+    [Fact]
+    public void WithFormats_DateTimeOffsetNullableEmptyFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.NullableDateTimeOffsetValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
+    }
+
+    [Fact]
+    public void WithFormats_DateTimeOffsetNullableNullValueInFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.NullableDateTimeOffsetValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
+    }
+
+    [Fact]
+    public void WithFormats_DateTimeOffsetNullableEmptyValueInFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.NullableDateTimeOffsetValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_TimeSpanAutoMappedStringArray_Success(IEnumerable<string> formats)
+    {
+        var formatsArray = formats.ToArray();
+
+        var map = Map(t => t.TimeSpanValue);
+        Assert.Same(map, map.WithFormats(formatsArray));
+
+        TimeSpanMapper item = map.Pipeline.CellValueMappers.OfType<TimeSpanMapper>().Single();
+        Assert.Same(formatsArray, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_TimeSpanNotMappedStringArray_Success(IEnumerable<string> formats)
+    {
+        var formatsArray = formats.ToArray();
+
+        var map = Map(t => t.TimeSpanValue);
+        map.Pipeline.RemoveCellValueMapper(0);
+
+        Assert.Same(map, map.WithFormats(formatsArray));
+
+        TimeSpanMapper item = map.Pipeline.CellValueMappers.OfType<TimeSpanMapper>().Single();
+        Assert.Same(formatsArray, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_TimeSpanAutoMappedIEnumerableString_Success(ICollection<string> formats)
+    {
+        var map = Map(t => t.TimeSpanValue);
+        Assert.Same(map, map.WithFormats(formats));
+
+        TimeSpanMapper item = map.Pipeline.CellValueMappers.OfType<TimeSpanMapper>().Single();
+        Assert.Equal(formats, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_TimeSpanNotMappedIEnumerableString_Success(ICollection<string> formats)
+    {
+        var map = Map(t => t.TimeSpanValue);
+        map.Pipeline.RemoveCellValueMapper(0);
+
+        Assert.Same(map, map.WithFormats(formats));
+
+        TimeSpanMapper item = map.Pipeline.CellValueMappers.OfType<TimeSpanMapper>().Single();
+        Assert.Equal(formats, item.Formats);
+    }
+
+    [Fact]
+    public void WithFormats_TimeSpanNullFormats_ThrowsArgumentNullException()
+    {
+        var map = Map(t => t.TimeSpanValue);
+
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
+    }
+
+    [Fact]
+    public void WithFormats_TimeSpanEmptyFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.TimeSpanValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
+    }
+
+    [Fact]
+    public void WithFormats_TimeSpanNullValueInFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.TimeSpanValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
+    }
+
+    [Fact]
+    public void WithFormats_TimeSpanEmptyValueInFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.TimeSpanValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_TimeSpanNullableAutoMappedStringArray_Success(IEnumerable<string> formats)
+    {
+        var formatsArray = formats.ToArray();
+
+        var map = Map(t => t.NullableTimeSpanValue);
+        Assert.Same(map, map.WithFormats(formatsArray));
+
+        TimeSpanMapper item = map.Pipeline.CellValueMappers.OfType<TimeSpanMapper>().Single();
+        Assert.Same(formatsArray, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_TimeSpanNullableNotMappedStringArray_Success(IEnumerable<string> formats)
+    {
+        var formatsArray = formats.ToArray();
+
+        var map = Map(t => t.NullableTimeSpanValue);
+        map.Pipeline.RemoveCellValueMapper(0);
+
+        Assert.Same(map, map.WithFormats(formatsArray));
+
+        TimeSpanMapper item = map.Pipeline.CellValueMappers.OfType<TimeSpanMapper>().Single();
+        Assert.Same(formatsArray, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_TimeSpanNullableAutoMappedIEnumerableString_Success(ICollection<string> formats)
+    {
+        var map = Map(t => t.NullableTimeSpanValue);
+        Assert.Same(map, map.WithFormats(formats));
+
+        TimeSpanMapper item = map.Pipeline.CellValueMappers.OfType<TimeSpanMapper>().Single();
+        Assert.Equal(formats, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_TimeSpanNullableNotMappedIEnumerableString_Success(ICollection<string> formats)
+    {
+        var map = Map(t => t.NullableTimeSpanValue);
+        map.Pipeline.RemoveCellValueMapper(0);
+
+        Assert.Same(map, map.WithFormats(formats));
+
+        TimeSpanMapper item = map.Pipeline.CellValueMappers.OfType<TimeSpanMapper>().Single();
+        Assert.Equal(formats, item.Formats);
+    }
+
+    [Fact]
+    public void WithFormats_TimeSpanNullableNullFormats_ThrowsArgumentNullException()
+    {
+        var map = Map(t => t.NullableTimeSpanValue);
+
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
+    }
+
+    [Fact]
+    public void WithFormats_TimeSpanNullableEmptyFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.NullableTimeSpanValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
+    }
+
+    [Fact]
+    public void WithFormats_TimeSpanNullableNullValueInFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.NullableTimeSpanValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
+    }
+
+    [Fact]
+    public void WithFormats_TimeSpanNullableEmptyValueInFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.NullableTimeSpanValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_DateOnlyAutoMappedStringArray_Success(IEnumerable<string> formats)
+    {
+        var formatsArray = formats.ToArray();
+
+        var map = Map(t => t.DateOnlyValue);
+        Assert.Same(map, map.WithFormats(formatsArray));
+
+        DateOnlyMapper item = map.Pipeline.CellValueMappers.OfType<DateOnlyMapper>().Single();
+        Assert.Same(formatsArray, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_DateOnlyNotMappedStringArray_Success(IEnumerable<string> formats)
+    {
+        var formatsArray = formats.ToArray();
+
+        var map = Map(t => t.DateOnlyValue);
+        map.Pipeline.RemoveCellValueMapper(0);
+
+        Assert.Same(map, map.WithFormats(formatsArray));
+
+        DateOnlyMapper item = map.Pipeline.CellValueMappers.OfType<DateOnlyMapper>().Single();
+        Assert.Same(formatsArray, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_DateOnlyAutoMappedIEnumerableString_Success(ICollection<string> formats)
+    {
+        var map = Map(t => t.DateOnlyValue);
+        Assert.Same(map, map.WithFormats(formats));
+
+        DateOnlyMapper item = map.Pipeline.CellValueMappers.OfType<DateOnlyMapper>().Single();
+        Assert.Equal(formats, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_DateOnlyNotMappedIEnumerableString_Success(ICollection<string> formats)
+    {
+        var map = Map(t => t.DateOnlyValue);
+        map.Pipeline.RemoveCellValueMapper(0);
+
+        Assert.Same(map, map.WithFormats(formats));
+
+        DateOnlyMapper item = map.Pipeline.CellValueMappers.OfType<DateOnlyMapper>().Single();
+        Assert.Equal(formats, item.Formats);
+    }
+
+    [Fact]
+    public void WithFormats_DateOnlyNullFormats_ThrowsArgumentNullException()
+    {
+        var map = Map(t => t.DateOnlyValue);
+
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
+    }
+
+    [Fact]
+    public void WithFormats_DateOnlyEmptyFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.DateOnlyValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
+    }
+
+    [Fact]
+    public void WithFormats_DateOnlyNullValueInFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.DateOnlyValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
+    }
+
+    [Fact]
+    public void WithFormats_DateOnlyEmptyValueInFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.DateOnlyValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_DateOnlyNullableAutoMappedStringArray_Success(IEnumerable<string> formats)
+    {
+        var formatsArray = formats.ToArray();
+
+        var map = Map(t => t.NullableDateOnlyValue);
+        Assert.Same(map, map.WithFormats(formatsArray));
+
+        DateOnlyMapper item = map.Pipeline.CellValueMappers.OfType<DateOnlyMapper>().Single();
+        Assert.Same(formatsArray, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_DateOnlyNullableNotMappedStringArray_Success(IEnumerable<string> formats)
+    {
+        var formatsArray = formats.ToArray();
+
+        var map = Map(t => t.NullableDateOnlyValue);
+        map.Pipeline.RemoveCellValueMapper(0);
+
+        Assert.Same(map, map.WithFormats(formatsArray));
+
+        DateOnlyMapper item = map.Pipeline.CellValueMappers.OfType<DateOnlyMapper>().Single();
+        Assert.Same(formatsArray, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_DateOnlyNullableAutoMappedIEnumerableString_Success(ICollection<string> formats)
+    {
+        var map = Map(t => t.NullableDateOnlyValue);
+        Assert.Same(map, map.WithFormats(formats));
+
+        DateOnlyMapper item = map.Pipeline.CellValueMappers.OfType<DateOnlyMapper>().Single();
+        Assert.Equal(formats, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_DateOnlyNullableNotMappedIEnumerableString_Success(ICollection<string> formats)
+    {
+        var map = Map(t => t.NullableDateOnlyValue);
+        map.Pipeline.RemoveCellValueMapper(0);
+
+        Assert.Same(map, map.WithFormats(formats));
+
+        DateOnlyMapper item = map.Pipeline.CellValueMappers.OfType<DateOnlyMapper>().Single();
+        Assert.Equal(formats, item.Formats);
+    }
+
+    [Fact]
+    public void WithFormats_DateOnlyNullableNullFormats_ThrowsArgumentNullException()
+    {
+        var map = Map(t => t.NullableDateOnlyValue);
+
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
+    }
+
+    [Fact]
+    public void WithFormats_DateOnlyNullableEmptyFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.NullableDateOnlyValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
+    }
+
+    [Fact]
+    public void WithFormats_DateOnlyNullableNullValueInFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.NullableDateOnlyValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
+    }
+
+    [Fact]
+    public void WithFormats_DateOnlyNullableEmptyValueInFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.NullableDateOnlyValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_TimeOnlyAutoMappedStringArray_Success(IEnumerable<string> formats)
+    {
+        var formatsArray = formats.ToArray();
+
+        var map = Map(t => t.TimeOnlyValue);
+        Assert.Same(map, map.WithFormats(formatsArray));
+
+        TimeOnlyMapper item = map.Pipeline.CellValueMappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Same(formatsArray, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_TimeOnlyNotMappedStringArray_Success(IEnumerable<string> formats)
+    {
+        var formatsArray = formats.ToArray();
+
+        var map = Map(t => t.TimeOnlyValue);
+        map.Pipeline.RemoveCellValueMapper(0);
+
+        Assert.Same(map, map.WithFormats(formatsArray));
+
+        TimeOnlyMapper item = map.Pipeline.CellValueMappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Same(formatsArray, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_TimeOnlyAutoMappedIEnumerableString_Success(ICollection<string> formats)
+    {
+        var map = Map(t => t.TimeOnlyValue);
+        Assert.Same(map, map.WithFormats(formats));
+
+        TimeOnlyMapper item = map.Pipeline.CellValueMappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Equal(formats, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_TimeOnlyNotMappedIEnumerableString_Success(ICollection<string> formats)
+    {
+        var map = Map(t => t.TimeOnlyValue);
+        map.Pipeline.RemoveCellValueMapper(0);
+
+        Assert.Same(map, map.WithFormats(formats));
+
+        TimeOnlyMapper item = map.Pipeline.CellValueMappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Equal(formats, item.Formats);
+    }
+
+    [Fact]
+    public void WithFormats_TimeOnlyNullFormats_ThrowsArgumentNullException()
+    {
+        var map = Map(t => t.TimeOnlyValue);
+
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
+    }
+
+    [Fact]
+    public void WithFormats_TimeOnlyEmptyFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.TimeOnlyValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
+    }
+
+    [Fact]
+    public void WithFormats_TimeOnlyNullValueInFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.TimeOnlyValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
+    }
+
+    [Fact]
+    public void WithFormats_TimeOnlyEmptyValueInFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.TimeOnlyValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_TimeOnlyNullableAutoMappedStringArray_Success(IEnumerable<string> formats)
+    {
+        var formatsArray = formats.ToArray();
+
+        var map = Map(t => t.NullableTimeOnlyValue);
+        Assert.Same(map, map.WithFormats(formatsArray));
+
+        TimeOnlyMapper item = map.Pipeline.CellValueMappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Same(formatsArray, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_TimeOnlyNullableNotMappedStringArray_Success(IEnumerable<string> formats)
+    {
+        var formatsArray = formats.ToArray();
+
+        var map = Map(t => t.NullableTimeOnlyValue);
+        map.Pipeline.RemoveCellValueMapper(0);
+
+        Assert.Same(map, map.WithFormats(formatsArray));
+
+        TimeOnlyMapper item = map.Pipeline.CellValueMappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Same(formatsArray, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_TimeOnlyNullableAutoMappedIEnumerableString_Success(ICollection<string> formats)
+    {
+        var map = Map(t => t.NullableTimeOnlyValue);
+        Assert.Same(map, map.WithFormats(formats));
+
+        TimeOnlyMapper item = map.Pipeline.CellValueMappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Equal(formats, item.Formats);
+    }
+
+    [Theory]
+    [MemberData(nameof(Formats_TestData))]
+    public void WithFormats_TimeOnlyNullableNotMappedIEnumerableString_Success(ICollection<string> formats)
+    {
+        var map = Map(t => t.NullableTimeOnlyValue);
+        map.Pipeline.RemoveCellValueMapper(0);
+
+        Assert.Same(map, map.WithFormats(formats));
+
+        TimeOnlyMapper item = map.Pipeline.CellValueMappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Equal(formats, item.Formats);
+    }
+
+    [Fact]
+    public void WithFormats_TimeOnlyNullableNullFormats_ThrowsArgumentNullException()
+    {
+        var map = Map(t => t.NullableTimeOnlyValue);
+
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
+        Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
+    }
+
+    [Fact]
+    public void WithFormats_TimeOnlyNullableEmptyFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.NullableTimeOnlyValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
+    }
+
+    [Fact]
+    public void WithFormats_TimeOnlyNullableNullValueInFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.NullableTimeOnlyValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
+    }
+
+    [Fact]
+    public void WithFormats_TimeOnlyNullableEmptyValueInFormats_ThrowsArgumentException()
+    {
+        var map = Map(t => t.NullableTimeOnlyValue);
+
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
+        Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
 
     [Fact]

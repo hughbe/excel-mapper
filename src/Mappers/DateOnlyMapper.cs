@@ -5,15 +5,15 @@ using ExcelMapper.Abstractions;
 namespace ExcelMapper.Mappers;
 
 /// <summary>
-/// A mapper that tries to map the value of a cell to a DateTime.
+/// A mapper that tries to map the value of a cell to a DateOnly.
 /// </summary>
-public class DateTimeMapper : ICellMapper
+public class DateOnlyMapper : ICellMapper
 {
-    private string[] _formats = ["G"];
+    private string[] _formats = ["d"];
 
     /// <summary>
-    /// Gets or sets the date formats used to map the value to a DateTime.
-    /// This defaults to "G" - the default Excel format.
+    /// Gets or sets the date formats used to map the value to a DateOnly.
+    /// This defaults to "d" - the default DateOnly format.
     /// </summary>
     public string[] Formats
     {
@@ -39,28 +39,28 @@ public class DateTimeMapper : ICellMapper
     }
 
     /// <summary>
-    /// Gets or sets the IFormatProvider used to map the value to a DateTime.
+    /// Gets or sets the IFormatProvider used to map the value to a DateOnly.
     /// </summary>
     public IFormatProvider? Provider { get; set; }
 
     /// <summary>
-    /// Gets or sets the DateTimeStyles used to map the value to a DateTime.
+    /// Gets or sets the DateTimeStyles used to map the value to a DateOnly.
     /// </summary>
     public DateTimeStyles Style { get; set; }
 
     public CellMapperResult MapCellValue(ReadCellResult readResult)
     {
         // Excel stores dates as numbers (the number of days since 1899-12-30).
-        // ExcelDataReader automatically converts these cells to DateTime.
+        // ExcelDataReader automatically converts these cells to DateOnly.
         if (readResult.GetValue() is DateTime dateTimeValue)
         {
-            return CellMapperResult.Success(dateTimeValue);
+            return CellMapperResult.Success(DateOnly.FromDateTime(dateTimeValue));
         }
         
         var stringValue = readResult.GetString();
         try
         {
-            var result = DateTime.ParseExact(stringValue!, Formats, Provider, Style);
+            var result = DateOnly.ParseExact(stringValue!, Formats, Provider, Style);
             return CellMapperResult.Success(result);
         }
         catch (Exception exception)

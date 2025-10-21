@@ -4,7 +4,6 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -104,6 +103,30 @@ public static class AutoMapper
         if (type == typeof(DateTime))
         {
             mapper = new DateTimeMapper();
+            emptyFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, isEmpty: true);
+            invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, isEmpty: false);
+        }
+        else if (type == typeof(DateTimeOffset))
+        {
+            mapper = new DateTimeOffsetMapper();
+            emptyFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, isEmpty: true);
+            invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, isEmpty: false);
+        }
+        else if (type == typeof(TimeSpan))
+        {
+            mapper = new TimeSpanMapper();
+            emptyFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, isEmpty: true);
+            invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, isEmpty: false);
+        }
+        else if (type == typeof(DateOnly))
+        {
+            mapper = new DateOnlyMapper();
+            emptyFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, isEmpty: true);
+            invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, isEmpty: false);
+        }
+        else if (type == typeof(TimeOnly))
+        {
+            mapper = new TimeOnlyMapper();
             emptyFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, isEmpty: true);
             invalidFallback = ReconcileFallback(FallbackStrategy.ThrowIfPrimitive, isEmpty: false);
         }

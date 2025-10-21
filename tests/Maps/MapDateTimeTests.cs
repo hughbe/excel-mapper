@@ -40,8 +40,8 @@ public class MapDateTimeTests
         Assert.Equal(new DateTime(2017, 07, 19), row1);
 
         // Empty cell value.
-        var row5 = sheet.ReadRow<DateTime?>();
-        Assert.Null(row5);
+        var row2 = sheet.ReadRow<DateTime?>();
+        Assert.Null(row2);
 
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTime?>());
@@ -79,8 +79,8 @@ public class MapDateTimeTests
         Assert.Equal(new DateTime(2017, 07, 19), row1.Value);
 
         // Empty cell value.
-        var row5 = sheet.ReadRow<NullableDateTimeValue>();
-        Assert.Null(row5.Value);
+        var row2 = sheet.ReadRow<NullableDateTimeValue>();
+        Assert.Null(row2.Value);
 
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableDateTimeValue>());
@@ -120,8 +120,8 @@ public class MapDateTimeTests
         Assert.Equal(new DateTime(2017, 07, 19), row1.Value);
 
         // Empty cell value.
-        var row5 = sheet.ReadRow<NullableDateTimeValue>();
-        Assert.Null(row5.Value);
+        var row2 = sheet.ReadRow<NullableDateTimeValue>();
+        Assert.Null(row2.Value);
 
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableDateTimeValue>());
@@ -141,12 +141,12 @@ public class MapDateTimeTests
         Assert.Equal(new DateTime(2017, 07, 19), row1.Value);
 
         // Empty cell value.
-        var row5 = sheet.ReadRow<DateTimeValue>();
-        Assert.Equal(new DateTime(2017, 07, 20), row5.Value);
+        var row2 = sheet.ReadRow<DateTimeValue>();
+        Assert.Equal(new DateTime(2017, 07, 20), row2.Value);
 
         // Invalid cell value.
-        var row6 = sheet.ReadRow<DateTimeValue>();
-        Assert.Equal(new DateTime(2017, 07, 21), row6.Value);
+        var row3 = sheet.ReadRow<DateTimeValue>();
+        Assert.Equal(new DateTime(2017, 07, 21), row3.Value);
     }
 
     [Fact]
@@ -209,12 +209,12 @@ public class MapDateTimeTests
         Assert.Equal(new DateTime(2017, 07, 19), row1.Value);
 
         // Empty cell value.
-        var row5 = sheet.ReadRow<NullableDateTimeValue>();
-        Assert.Equal(new DateTime(2017, 07, 20), row5.Value);
+        var row2 = sheet.ReadRow<NullableDateTimeValue>();
+        Assert.Equal(new DateTime(2017, 07, 20), row2.Value);
 
         // Invalid cell value.
-        var row6 = sheet.ReadRow<NullableDateTimeValue>();
-        Assert.Equal(new DateTime(2017, 07, 21), row6.Value);
+        var row3 = sheet.ReadRow<NullableDateTimeValue>();
+        Assert.Equal(new DateTime(2017, 07, 21), row3.Value);
     }
 
     [Fact]
@@ -286,7 +286,7 @@ public class MapDateTimeTests
         public DateTimeFormatsArrayMap()
         {
             Map(o => o.CustomValue)
-                .WithDateFormats("yyyy-MM-dd", "G");
+                .WithFormats("yyyy-MM-dd", "G");
         }
     }
 
@@ -295,7 +295,7 @@ public class MapDateTimeTests
         public DateTimeEnumerableFormatsMap()
         {
             Map(o => o.CustomValue)
-                .WithDateFormats(new List<string> { "yyyy-MM-dd", "G" });
+                .WithFormats(new List<string> { "yyyy-MM-dd", "G" });
         }
     }
 

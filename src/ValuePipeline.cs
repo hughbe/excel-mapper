@@ -70,6 +70,31 @@ public class ValuePipeline : IValuePipeline
     /// </summary>
     public IFallbackItem? InvalidFallback { get; set; }
 
+    /// <summary>
+    /// Processes a cell value through the complete transformation and mapping pipeline to produce a final property value.
+    /// This method orchestrates the entire value mapping process: transforming the raw cell value, running it through
+    /// the mapper pipeline, and applying fallback strategies when needed.
+    /// </summary>
+    /// <param name="pipeline">The value pipeline containing transformers, mappers, and fallback items to use.</param>
+    /// <param name="sheet">The Excel sheet being read, used for context in transformers and error messages.</param>
+    /// <param name="rowIndex">The zero-based index of the row being processed, used for error reporting.</param>
+    /// <param name="readResult">The result of reading a cell, containing the raw value and column information.</param>
+    /// <param name="preserveFormatting">Whether to preserve Excel formatting when reading string values.</param>
+    /// <param name="member">The property or field being mapped to, used for error messages. Can be null.</param>
+    /// <returns>
+    /// The final mapped value after applying transformers, mappers, and fallbacks. 
+    /// May return null if empty fallback returns null, or throw an exception if fallbacks are configured to throw.
+    /// </returns>
+    /// <remarks>
+    /// <para>Processing order:</para>
+    /// <list type="number">
+    /// <item><description>Apply all cell value transformers (e.g., trimming)</description></item>
+    /// <item><description>Check if value is empty and apply empty fallback if configured</description></item>
+    /// <item><description>Run value through mapper pipeline until one succeeds or all fail</description></item>
+    /// <item><description>If all mappers fail, apply invalid fallback if configured</description></item>
+    /// <item><description>Return the final mapped value or throw if no fallback handled the failure</description></item>
+    /// </list>
+    /// </remarks>
     internal static object? GetPropertyValue(
         IValuePipeline pipeline,
         ExcelSheet sheet,

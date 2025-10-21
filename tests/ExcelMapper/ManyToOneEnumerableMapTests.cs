@@ -399,7 +399,7 @@ public class ManyToOneEnumerableMapTests
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        var factory = new MockReaderFactory(new MockReader(() => (true, [new ReadCellResult(0, "Value1", false),new ReadCellResult(1, "Value1", false)])));
+        var factory = new MockReaderFactory(new MockReader(() => (true, [new ReadCellResult(0, "Value1", false),new ReadCellResult(0, "Value1", false)])));
         var elementPipeline = new ValuePipeline<string>();
         var enumerableFactory = new ListEnumerableFactory<string>();
         var map = new ManyToOneEnumerableMap<string>(factory, elementPipeline, enumerableFactory);

@@ -5,14 +5,14 @@ using ExcelMapper.Abstractions;
 namespace ExcelMapper.Mappers;
 
 /// <summary>
-/// A mapper that tries to map the value of a cell to a DateTime.
+/// A mapper that tries to map the value of a cell to a DateTimeOffset.
 /// </summary>
-public class DateTimeMapper : ICellMapper
+public class DateTimeOffsetMapper : ICellMapper
 {
     private string[] _formats = ["G"];
 
     /// <summary>
-    /// Gets or sets the date formats used to map the value to a DateTime.
+    /// Gets or sets the date formats used to map the value to a DateTimeOffset.
     /// This defaults to "G" - the default Excel format.
     /// </summary>
     public string[] Formats
@@ -39,28 +39,28 @@ public class DateTimeMapper : ICellMapper
     }
 
     /// <summary>
-    /// Gets or sets the IFormatProvider used to map the value to a DateTime.
+    /// Gets or sets the IFormatProvider used to map the value to a DateTimeOffset.
     /// </summary>
     public IFormatProvider? Provider { get; set; }
 
     /// <summary>
-    /// Gets or sets the DateTimeStyles used to map the value to a DateTime.
+    /// Gets or sets the DateTimeStyles used to map the value to a DateTimeOffset.
     /// </summary>
     public DateTimeStyles Style { get; set; }
 
     public CellMapperResult MapCellValue(ReadCellResult readResult)
     {
         // Excel stores dates as numbers (the number of days since 1899-12-30).
-        // ExcelDataReader automatically converts these cells to DateTime.
-        if (readResult.GetValue() is DateTime dateTimeValue)
+        // ExcelDataReader automatically converts these cells to DateTimeOffset.
+        if (readResult.GetValue() is DateTime dateTimeOffsetValue)
         {
-            return CellMapperResult.Success(dateTimeValue);
+            return CellMapperResult.Success(new DateTimeOffset(dateTimeOffsetValue));
         }
         
         var stringValue = readResult.GetString();
         try
         {
-            var result = DateTime.ParseExact(stringValue!, Formats, Provider, Style);
+            var result = DateTimeOffset.ParseExact(stringValue!, Formats, Provider, Style);
             return CellMapperResult.Success(result);
         }
         catch (Exception exception)
