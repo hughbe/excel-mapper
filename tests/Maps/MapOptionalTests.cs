@@ -1,3 +1,4 @@
+using System;
 using Xunit;
 
 namespace ExcelMapper.Tests;
@@ -445,6 +446,14 @@ public class MapOptionalTests
         Assert.Equal("a", row1.MappedValue);
     }
 
+    private class IgnoredColumnPropertyClass
+    {
+        [ExcelIgnore]
+        public string StringValue { get; set; } = "CustomValue";
+
+        public string MappedValue { get; set; } = default!;
+    }
+
     [Fact]
     public void ReadRows_IgnoredField_DoesNotDeserialize()
     {
@@ -458,6 +467,16 @@ public class MapOptionalTests
         Assert.Equal("a", row1.MappedValue);
     }
 
+#pragma warning disable CS0649
+    private class IgnoredColumnFieldClass
+    {
+        [ExcelIgnore]
+        public string StringValue = "CustomValue";
+
+        public string MappedValue = default!;
+    }
+#pragma warning restore CS0649
+
     [Fact]
     public void ReadRows_IgnoredMissingProperty_DoesNotDeserialize()
     {
@@ -469,6 +488,14 @@ public class MapOptionalTests
         var row1 = sheet.ReadRow<MissingColumnIgnoredPropertyClass>();
         Assert.Equal(10, row1.NoSuchColumn);
         Assert.Equal("a", row1.MappedValue);
+    }
+
+    private class MissingColumnIgnoredPropertyClass
+    {
+        [ExcelIgnore]
+        public int NoSuchColumn { get; set; } = 10;
+
+        public string MappedValue { get; set; } = default!;
     }
 
     [Fact]
@@ -484,31 +511,7 @@ public class MapOptionalTests
         Assert.Equal("a", row1.MappedValue);
     }
 
-    private class IgnoredColumnPropertyClass
-    {
-        [ExcelIgnore]
-        public string StringValue { get; set; } = "CustomValue";
-
-        public string MappedValue { get; set; } = default!;
-    }
-
-    private class MissingColumnIgnoredPropertyClass
-    {
-        [ExcelIgnore]
-        public int NoSuchColumn { get; set; } = 10;
-
-        public string MappedValue { get; set; } = default!;
-    }
-
 #pragma warning disable CS0649
-    private class IgnoredColumnFieldClass
-    {
-        [ExcelIgnore]
-        public string StringValue = "CustomValue";
-
-        public string MappedValue = default!;
-    }
-
     private class MissingColumnIgnoredFieldClass
     {
         [ExcelIgnore]
@@ -532,6 +535,14 @@ public class MapOptionalTests
         Assert.Equal("a", row1.MappedValue);
     }
 
+    private class IgnoredRecursivePropertyClass
+    {
+        [ExcelIgnore]
+        public IgnoredRecursivePropertyClass StringValue { get; set; } = default!;
+
+        public string MappedValue { get; set; } = default!;
+    }
+
     [Fact]
     public void ReadRows_IgnoredRecursiveField_DoesNotDeserialize()
     {
@@ -543,14 +554,6 @@ public class MapOptionalTests
         var row1 = sheet.ReadRow<IgnoredRecursiveFieldClass>();
         Assert.Null(row1.StringValue);
         Assert.Equal("a", row1.MappedValue);
-    }
-
-    private class IgnoredRecursivePropertyClass
-    {
-        [ExcelIgnore]
-        public IgnoredRecursivePropertyClass StringValue { get; set; } = default!;
-
-        public string MappedValue { get; set; } = default!;
     }
 
 #pragma warning disable CS0649
@@ -567,7 +570,11 @@ public class MapOptionalTests
     public void ReadRows_CustomMappedArrayIndexerNoSuchColumn_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        importer.Configuration.RegisterClassMap<CustomArrayIndexerNoSuchColumn>();
+        importer.Configuration.RegisterClassMap<ArrayIndexerClass>(c =>
+        {
+            c.Map(p => p.Values[0])
+                .WithColumnName("NoSuchColumn");
+        });
 
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
@@ -580,20 +587,16 @@ public class MapOptionalTests
         public string[] Values { get; set; } = default!;
     }
 
-    private class CustomArrayIndexerNoSuchColumn : ExcelClassMap<ArrayIndexerClass>
-    {
-        public CustomArrayIndexerNoSuchColumn()
-        {
-            Map(p => p.Values[0])
-                .WithColumnName("NoSuchColumn");
-        }
-    }
-
     [Fact]
     public void ReadRows_CustomMappedArrayIndexerNoSuchColumnOptionalValue_Success()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        importer.Configuration.RegisterClassMap<CustomArrayIndexerNoSuchColumnOptionalValue>();
+        importer.Configuration.RegisterClassMap<ArrayIndexerClass>(c =>
+        {
+            c.Map(p => p.Values[0])
+                .WithColumnName("NoSuchColumn")
+                .MakeOptional();
+        });
 
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
@@ -601,16 +604,4 @@ public class MapOptionalTests
         var row = sheet.ReadRow<ArrayIndexerClass>();
         Assert.Equal(new object?[] { null }, row.Values);
     }
-
-    private class CustomArrayIndexerNoSuchColumnOptionalValue : ExcelClassMap<ArrayIndexerClass>
-    {
-        public CustomArrayIndexerNoSuchColumnOptionalValue()
-        {
-            Map(p => p.Values[0])
-                .WithColumnName("NoSuchColumn")
-                .MakeOptional();
-        }
-    }
-
-#pragma warning restore CS0649
 }

@@ -35,7 +35,7 @@ public class ExcelColumnsMatchingAttribute : Attribute
         ArgumentNullException.ThrowIfNull(matcherType);
         if (!matcherType.ImplementsInterface(typeof(IExcelColumnMatcher)))
         {
-            throw new ArgumentException("Matcher type must implement IExcelColumnMatcher", nameof(matcherType));
+            throw new ArgumentException($"Matcher type must implement {nameof(IExcelColumnMatcher)}", nameof(matcherType));
         }
 
         Type = matcherType;

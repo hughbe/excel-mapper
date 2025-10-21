@@ -15,7 +15,7 @@ public class ImmutableHashSetEnumerableFactory<T> : IEnumerableFactory<T>
 
         if (_builder is not null)
         {
-            throw new ExcelMappingException("Cannot begin mapping until End() was called.");
+            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
         _builder = ImmutableHashSet.CreateBuilder<T?>();
@@ -30,7 +30,7 @@ public class ImmutableHashSetEnumerableFactory<T> : IEnumerableFactory<T>
     public void Set(int index, T? item)
     {
         EnsureMapping();
-        throw new NotSupportedException("Set is not supported for ImmutableHashSetEnumerableFactory.");
+        throw new NotSupportedException($"Set is not supported for {nameof(ImmutableHashSetEnumerableFactory<T>)}.");
     }
 
     public object End()

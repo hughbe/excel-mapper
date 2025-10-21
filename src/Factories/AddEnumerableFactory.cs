@@ -18,7 +18,7 @@ public class AddEnumerableFactory<T> : IEnumerableFactory<T>
         ArgumentNullException.ThrowIfNull(collectionType);
         if (collectionType.IsInterface)
         {
-            throw new ArgumentException("Interface list types cannot be created. Use ListEnumerableFactory instead.", nameof(collectionType));
+            throw new ArgumentException($"Interface list types cannot be created. Use {nameof(ListEnumerableFactory<T>)} instead.", nameof(collectionType));
         }
         if (collectionType.IsAbstract)
         {
@@ -26,7 +26,7 @@ public class AddEnumerableFactory<T> : IEnumerableFactory<T>
         }
         if (!collectionType.ImplementsInterface(typeof(IEnumerable)))
         {
-            throw new ArgumentException($"Collection type {collectionType} must implement IEnumerable.", nameof(collectionType));
+            throw new ArgumentException($"Collection type {collectionType} must implement {nameof(IEnumerable)}.", nameof(collectionType));
         }
         if (collectionType.GetConstructor(Type.EmptyTypes) is null)
         {
@@ -43,7 +43,7 @@ public class AddEnumerableFactory<T> : IEnumerableFactory<T>
 
         if (_items is not null)
         {
-            throw new ExcelMappingException("Cannot begin mapping until End() was called.");
+            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
         _items = Activator.CreateInstance(CollectionType);
@@ -58,7 +58,7 @@ public class AddEnumerableFactory<T> : IEnumerableFactory<T>
     public void Set(int index, T? item)
     {
         EnsureMapping();
-        throw new NotSupportedException("Set is not supported for AddEnumerableFactory.");
+        throw new NotSupportedException($"Set is not supported for {nameof(AddEnumerableFactory<T>)}.");
     }
 
     public object End()

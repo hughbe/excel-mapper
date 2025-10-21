@@ -16,7 +16,7 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
         ArgumentNullException.ThrowIfNull(collectionType);
         if (collectionType.IsInterface)
         {
-            throw new ArgumentException("Interface collection types cannot be created. Use ListEnumerableFactory instead.", nameof(collectionType));
+            throw new ArgumentException($"Interface collection types cannot be created. Use {nameof(ListEnumerableFactory<T>)} instead.", nameof(collectionType));
         }
         if (collectionType.IsAbstract)
         {
@@ -24,7 +24,7 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
         }
         if (collectionType.IsArray)
         {
-            throw new ArgumentException("Array types cannot be created. Use ArrayEnumerableFactory instead.", nameof(collectionType));
+            throw new ArgumentException($"Array types cannot be created. Use {nameof(ArrayEnumerableFactory<T>)} instead.", nameof(collectionType));
         }
         if (!collectionType.ImplementsInterface(typeof(ICollection<T?>)))
         {
@@ -44,7 +44,7 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
 
         if (_items is not null)
         {
-            throw new ExcelMappingException("Cannot begin mapping until End() was called.");
+            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
         _items = (ICollection<T?>)Activator.CreateInstance(CollectionType)!;
@@ -59,7 +59,7 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
     public void Set(int index, T? item)
     {
         EnsureMapping();
-        throw new NotSupportedException("Set is not supported for ICollection<T> implementing collection types.");
+        throw new NotSupportedException($"Set is not supported for {nameof(ICollectionTImplementingEnumerableFactory<T>)}.");
     }
 
     public object End()

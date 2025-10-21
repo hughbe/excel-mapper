@@ -37,7 +37,7 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
 
         if (_items is not null)
         {
-            throw new ExcelMappingException("Cannot begin mapping until End() was called.");
+            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
         _items = new HashSet<T?>(count);
@@ -52,7 +52,7 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
     public void Set(int index, T? item)
     {
         EnsureMapping();
-        throw new NotSupportedException("Set is not supported for ConstructorSetEnumerableFactory.");
+        throw new NotSupportedException($"Set is not supported for {nameof(ConstructorSetEnumerableFactory<T>)}.");
     }
 
     public object End()

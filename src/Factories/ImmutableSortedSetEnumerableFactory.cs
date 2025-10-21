@@ -15,7 +15,7 @@ public class ImmutableSortedSetEnumerableFactory<T> : IEnumerableFactory<T>
 
         if (_builder is not null)
         {
-            throw new ExcelMappingException("Cannot begin mapping until End() was called.");
+            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
         _builder = ImmutableSortedSet.CreateBuilder<T?>();
@@ -30,7 +30,7 @@ public class ImmutableSortedSetEnumerableFactory<T> : IEnumerableFactory<T>
     public void Set(int index, T? item)
     {
         EnsureMapping();
-        throw new NotSupportedException("Set is not supported for ImmutableSortedSetEnumerableFactory.");
+        throw new NotSupportedException($"Set is not supported for {nameof(ImmutableSortedSetEnumerableFactory<T>)}.");
     }
 
     public object End()

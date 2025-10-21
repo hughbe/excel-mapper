@@ -25,7 +25,7 @@ public class ChangeTypeMapper : ICellMapper
 
         if (!type.ImplementsInterface(typeof(IConvertible)))
         {
-            throw new ArgumentException($"Type \"{type}\" must implement IConvertible to support Convert.ChangeType.", nameof(type));
+            throw new ArgumentException($"Type \"{type}\" must implement {nameof(IConvertible)} to support {nameof(Convert)}.{nameof(Convert.ChangeType)}.", nameof(type));
         }
 
         Type = type;

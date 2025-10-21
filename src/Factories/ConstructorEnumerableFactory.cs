@@ -40,7 +40,7 @@ public class ConstructorEnumerableFactory<T> : IEnumerableFactory<T>
 
         if (_items is not null)
         {
-            throw new ExcelMappingException("Cannot begin mapping until End() was called.");
+            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
         _items = new List<T?>(count);

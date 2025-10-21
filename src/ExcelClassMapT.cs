@@ -51,7 +51,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="ignoreCase">A flag indicating whether enum parsing is case insensitive.</param>
     /// <returns>The map for the given property or field.</returns>
     public OneToOneMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression, bool ignoreCase) where TProperty : struct
-        => MapEnumInternal<TProperty>(expression, ignoreCase);
+        => MapEnumInternal(expression, ignoreCase);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -62,7 +62,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <param name="ignoreCase">A flag indicating whether enum parsing is case insensitive.</param>
     /// <returns>The map for the given property or field.</returns>
     public OneToOneMap<TProperty?> Map<TProperty>(Expression<Func<T, TProperty?>> expression, bool ignoreCase) where TProperty : struct
-        => MapEnumInternal<TProperty?>(expression, ignoreCase);
+        => MapEnumInternal(expression, ignoreCase);
 
     private OneToOneMap<TProperty> MapEnumInternal<TProperty>(Expression<Func<T, TProperty>> expression, bool ignoreCase)
     {

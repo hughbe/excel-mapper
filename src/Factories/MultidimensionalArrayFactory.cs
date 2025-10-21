@@ -22,7 +22,7 @@ public class MultidimensionalArrayFactory<T> : IMultidimensionalArrayFactory<T>
 
         if (_items is not null)
         {
-            throw new ExcelMappingException("Cannot begin mapping until End() was called.");
+            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
         _items = Array.CreateInstance(typeof(T), lengths);

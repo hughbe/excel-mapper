@@ -16,7 +16,7 @@ public class ImmutableArrayEnumerableFactory<T> : IEnumerableFactory<T>
 
         if (_builder is not null)
         {
-            throw new ExcelMappingException("Cannot begin mapping until End() was called.");
+            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
         _builder = ImmutableArray.CreateBuilder<T?>(count);

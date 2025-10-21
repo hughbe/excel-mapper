@@ -15,7 +15,7 @@ public class HashSetEnumerableFactory<T> : IEnumerableFactory<T>
 
         if (_items is not null)
         {
-            throw new ExcelMappingException("Cannot begin mapping until End() was called.");
+            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
         _items = [];
@@ -31,7 +31,7 @@ public class HashSetEnumerableFactory<T> : IEnumerableFactory<T>
     public void Set(int index, T? item)
     {
         EnsureMapping();
-        throw new NotSupportedException("Set is not supported for HashSetEnumerableFactory.");
+        throw new NotSupportedException($"Set is not supported for {nameof(HashSetEnumerableFactory<T>)}.");
     }
 
     public object End()

@@ -39,7 +39,7 @@ public class IDictionaryTImplementingFactory<TKey, TValue> : Abstractions.IDicti
 
         if (_items is not null)
         {
-            throw new ExcelMappingException("Cannot begin mapping until End() was called.");
+            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
         _items = (IDictionary<TKey, TValue?>)Activator.CreateInstance(DictionaryType)!;

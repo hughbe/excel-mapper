@@ -1303,6 +1303,30 @@ public class AutoMapperTests
         Assert.Null(classMap);
     }
 
+    [Fact]
+    public void TryCreateClass_Map_InterfaceTypeProperty_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<InterfaceProperty>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private class InterfaceProperty
+    {
+        public IDisposable Property { get; set; } = default!;
+    }
+
+    [Fact]
+    public void TryCreateClass_Map_InterfaceTypeField_ReturnsFalse()
+    {
+        Assert.False(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<InterfaceField>? classMap));
+        Assert.Null(classMap);
+    }
+
+    private class InterfaceField
+    {
+        public IDisposable Field = default!;
+    }
+
     [Theory]
     [InlineData(FallbackStrategy.ThrowIfPrimitive - 1)]
     [InlineData(FallbackStrategy.SetToDefaultValue + 1)]

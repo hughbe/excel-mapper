@@ -9,10 +9,19 @@ public class FixedValueFallbackTests
     [InlineData(null)]
     [InlineData(1)]
     [InlineData("value")]
-    public void Ctor_Default(object? value)
+    public void Ctor_Object(object? value)
     {
         var fallback = new FixedValueFallback(value);
         Assert.Same(value, fallback.Value);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData(1)]
+    [InlineData("value")]
+    public void PerformFallback_Invoke_ReturnsFixedValue(object? value)
+    {
+        var fallback = new FixedValueFallback(value);
 
         var result = fallback.PerformFallback(null!, 0, new ReadCellResult(), null, null!);
         Assert.Same(value, result);

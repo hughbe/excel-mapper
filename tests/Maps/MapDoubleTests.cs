@@ -62,6 +62,61 @@ public class MapDoubleTests
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DoubleClass>());
     }
 
+    private class DoubleClass
+    {
+        public double Value { get; set; }
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedDouble_Success()
+    {
+        using var importer = Helpers.GetImporter("Doubles.xlsx");
+        importer.Configuration.RegisterClassMap<DoubleClass>(c =>
+        {
+            c.Map(o => o.Value);
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<DoubleClass>();
+        Assert.Equal(2.2345, row1.Value);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DoubleClass>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DoubleClass>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedDouble_Success()
+    {
+        using var importer = Helpers.GetImporter("Doubles.xlsx");
+        importer.Configuration.RegisterClassMap<DoubleClass>(c =>
+        {
+            c.Map(o => o.Value)
+                .WithEmptyFallback(-10.0f)
+                .WithInvalidFallback(10.0f);
+        });
+
+        ExcelSheet sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<DoubleClass>();
+        Assert.Equal(2.2345, row1.Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<DoubleClass>();
+        Assert.Equal(-10, row2.Value);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<DoubleClass>();
+        Assert.Equal(10, row3.Value);
+    }
+
     [Fact]
     public void ReadRow_AutoMappedNullableDouble_Success()
     {
@@ -82,31 +137,19 @@ public class MapDoubleTests
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableDoubleClass>());
     }
 
-    [Fact]
-    public void ReadRow_DefaultMappedDouble_Success()
+    private class NullableDoubleClass
     {
-        using var importer = Helpers.GetImporter("Doubles.xlsx");
-        importer.Configuration.RegisterClassMap<DefaultDoubleClassMap>();
-
-        ExcelSheet sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        // Valid cell value.
-        var row1 = sheet.ReadRow<DoubleClass>();
-        Assert.Equal(2.2345, row1.Value);
-
-        // Empty cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DoubleClass>());
-
-        // Invalid cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DoubleClass>());
+        public double? Value { get; set; }
     }
 
     [Fact]
     public void ReadRow_DefaultMappedNullableDouble_Success()
     {
         using var importer = Helpers.GetImporter("Doubles.xlsx");
-        importer.Configuration.RegisterClassMap<DefaultNullableDoubleClassMap>();
+        importer.Configuration.RegisterClassMap<NullableDoubleClass>(c =>
+        {
+            c.Map(o => o.Value);
+        });
 
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
@@ -124,32 +167,15 @@ public class MapDoubleTests
     }
 
     [Fact]
-    public void ReadRow_CustomMappedDouble_Success()
-    {
-        using var importer = Helpers.GetImporter("Doubles.xlsx");
-        importer.Configuration.RegisterClassMap<CustomDoubleClassMap>();
-
-        ExcelSheet sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        // Valid cell value.
-        var row1 = sheet.ReadRow<DoubleClass>();
-        Assert.Equal(2.2345, row1.Value);
-
-        // Empty cell value.
-        var row2 = sheet.ReadRow<DoubleClass>();
-        Assert.Equal(-10, row2.Value);
-
-        // Invalid cell value.
-        var row3 = sheet.ReadRow<DoubleClass>();
-        Assert.Equal(10, row3.Value);
-    }
-
-    [Fact]
     public void ReadRow_CustomMappedNullableDouble_Success()
     {
         using var importer = Helpers.GetImporter("Doubles.xlsx");
-        importer.Configuration.RegisterClassMap<CustomNullableDoubleClassMap>();
+        importer.Configuration.RegisterClassMap<NullableDoubleClass>(c =>
+        {
+            c.Map(o => o.Value)
+                .WithEmptyFallback(-10.0f)
+                .WithInvalidFallback(10.0f);
+        });
 
         ExcelSheet sheet = importer.ReadSheet();
         sheet.ReadHeading();
@@ -165,51 +191,5 @@ public class MapDoubleTests
         // Invalid cell value.
         var row3 = sheet.ReadRow<NullableDoubleClass>();
         Assert.Equal(10, row3.Value);
-    }
-
-    private class DoubleClass
-    {
-        public double Value { get; set; }
-    }
-
-    private class DefaultDoubleClassMap : ExcelClassMap<DoubleClass>
-    {
-        public DefaultDoubleClassMap()
-        {
-            Map(o => o.Value);
-        }
-    }
-
-    private class CustomDoubleClassMap : ExcelClassMap<DoubleClass>
-    {
-        public CustomDoubleClassMap()
-        {
-            Map(o => o.Value)
-                .WithEmptyFallback(-10.0)
-                .WithInvalidFallback(10.0);
-        }
-    }
-
-    private class NullableDoubleClass
-    {
-        public double? Value { get; set; }
-    }
-
-    private class DefaultNullableDoubleClassMap : ExcelClassMap<NullableDoubleClass>
-    {
-        public DefaultNullableDoubleClassMap()
-        {
-            Map(o => o.Value);
-        }
-    }
-
-    private class CustomNullableDoubleClassMap : ExcelClassMap<NullableDoubleClass>
-    {
-        public CustomNullableDoubleClassMap()
-        {
-            Map(o => o.Value)
-                .WithEmptyFallback(-10.0)
-                .WithInvalidFallback(10.0);
-        }
     }
 }

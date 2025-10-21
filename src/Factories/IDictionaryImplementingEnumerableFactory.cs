@@ -16,7 +16,7 @@ public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<T
         ArgumentNullException.ThrowIfNull(dictionaryType);
         if (dictionaryType.IsInterface)
         {
-            throw new ArgumentException("Interface dictionary types cannot be created. Use DictionaryEnumerableFactory instead.", nameof(dictionaryType));
+            throw new ArgumentException($"Interface dictionary types cannot be created. Use {nameof(DictionaryFactory<TKey, TValue>)} instead.", nameof(dictionaryType));
         }
         if (dictionaryType.IsAbstract)
         {
@@ -24,7 +24,7 @@ public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<T
         }
         if (!dictionaryType.ImplementsInterface(typeof(IDictionary)))
         {
-            throw new ArgumentException($"Dictionary type {dictionaryType} must implement IDictionary.", nameof(dictionaryType));
+            throw new ArgumentException($"Dictionary type {dictionaryType} must implement {nameof(IDictionary)}.", nameof(dictionaryType));
         }
         if (dictionaryType.GetConstructor(Type.EmptyTypes) is null)
         {
@@ -40,7 +40,7 @@ public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<T
 
         if (_items is not null)
         {
-            throw new ExcelMappingException("Cannot begin mapping until End() was called.");
+            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
         _items = (IDictionary)Activator.CreateInstance(DictionaryType)!;

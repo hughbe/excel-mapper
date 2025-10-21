@@ -26,7 +26,7 @@ public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValu
         }
         if (!dictionaryType.ImplementsInterface(typeof(IEnumerable)))
         {
-            throw new ArgumentException($"Dictionary type {dictionaryType} must implement IEnumerable.", nameof(dictionaryType));
+            throw new ArgumentException($"Dictionary type {dictionaryType} must implement {nameof(IEnumerable)}.", nameof(dictionaryType));
         }
         if (dictionaryType.GetConstructor(Type.EmptyTypes) is null)
         {
@@ -43,7 +43,7 @@ public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValu
 
         if (_items is not null)
         {
-            throw new ExcelMappingException("Cannot begin mapping until End() was called.");
+            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
         _items = Activator.CreateInstance(DictionaryType);

@@ -51,16 +51,6 @@ internal static class ReflectionUtilities
         return false;
     }
 
-    public static object? DefaultValue(this Type type)
-    {
-        if (type.GetTypeInfo().IsValueType)
-        {
-            return Activator.CreateInstance(type);
-        }
-
-        return null;
-    }
-
     public static Type MemberType(this MemberInfo member)
     {
         if (member is PropertyInfo property)

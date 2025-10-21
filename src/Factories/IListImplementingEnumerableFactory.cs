@@ -16,7 +16,7 @@ public class IListImplementingEnumerableFactory<T> : IEnumerableFactory<T>
         ArgumentNullException.ThrowIfNull(listType);
         if (listType.IsInterface)
         {
-            throw new ArgumentException("Interface collection types cannot be created. Use ListEnumerableFactory instead.", nameof(listType));
+            throw new ArgumentException($"Interface collection types cannot be created. Use {nameof(ListEnumerableFactory<T>)} instead.", nameof(listType));
         }
         if (listType.IsAbstract)
         {
@@ -24,11 +24,11 @@ public class IListImplementingEnumerableFactory<T> : IEnumerableFactory<T>
         }
         if (listType.IsArray)
         {
-            throw new ArgumentException("Array types cannot be created. Use ArrayEnumerableFactory instead.", nameof(listType));
+            throw new ArgumentException($"Array types cannot be created. Use {nameof(ArrayEnumerableFactory<T>)} instead.", nameof(listType));
         }
         if (!listType.ImplementsInterface(typeof(IList)))
         {
-            throw new ArgumentException($"List type {listType} must implement IList.", nameof(listType));
+            throw new ArgumentException($"List type {listType} must implement {nameof(IList)}.", nameof(listType));
         }
         if (listType.GetConstructor(Type.EmptyTypes) is null)
         {
@@ -44,7 +44,7 @@ public class IListImplementingEnumerableFactory<T> : IEnumerableFactory<T>
 
         if (_items is not null)
         {
-            throw new ExcelMappingException("Cannot begin mapping until End() was called.");
+            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
         _items = (IList)Activator.CreateInstance(ListType)!;
