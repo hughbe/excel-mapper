@@ -21,7 +21,7 @@ public class ConvertUsingMapperTests
     }
 
     [Fact]
-    public void GetProperty_ValidStringValue_ReturnsSuccess()
+    public void Map_ValidStringValue_ReturnsSuccess()
     {
         ConvertUsingMapperDelegate converter = (ReadCellResult readResult) =>
         {
@@ -31,14 +31,14 @@ public class ConvertUsingMapperTests
         };
         var item = new ConvertUsingMapper(converter);
         
-        var result = item.MapCellValue(new ReadCellResult(0, "string", preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, "string", preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(10, result.Value);
         Assert.Null(result.Exception);
     }
 
     [Fact]
-    public void GetProperty_InvalidStringValue_ReturnsSuccess()
+    public void Map_InvalidStringValue_ReturnsSuccess()
     {
         ConvertUsingMapperDelegate converter = (ReadCellResult readResult) =>
         {
@@ -48,7 +48,7 @@ public class ConvertUsingMapperTests
         };
         var item = new ConvertUsingMapper(converter);
         
-        var result = item.MapCellValue(new ReadCellResult(0, "string", preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, "string", preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.IsType<DivideByZeroException>(result.Exception);

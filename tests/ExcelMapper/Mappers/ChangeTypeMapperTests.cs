@@ -30,11 +30,11 @@ public class ChangeTypeMapperTests
 
     [Theory]
     [InlineData(typeof(int), "1", 1)]
-    public void GetProperty_ValidStringValue_ReturnsSuccess(Type type, string stringValue, object expected)
+    public void Map_ValidStringValue_ReturnsSuccess(Type type, string stringValue, object expected)
     {
         var item = new ChangeTypeMapper(type);
 
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(expected, result.Value);
         Assert.Null(result.Exception);
@@ -45,11 +45,11 @@ public class ChangeTypeMapperTests
     [InlineData(typeof(uint), "abc")]
     [InlineData(typeof(uint), "")]
     [InlineData(typeof(uint), null)]
-    public void GetProperty_InvalidStringValue_ReturnsInvalid(Type type, string? stringValue)
+    public void Map_InvalidStringValue_ReturnsInvalid(Type type, string? stringValue)
     {
         var item = new ChangeTypeMapper(type);
 
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);

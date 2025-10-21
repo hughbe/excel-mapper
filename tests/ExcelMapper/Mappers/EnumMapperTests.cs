@@ -40,7 +40,7 @@ public class EnumMapperTests
         Assert.Throws<ArgumentException>("enumType", () => new EnumMapper(enumType));
     }
 
-    public static IEnumerable<object[]> GetProperty_ValidStringValue_TestData()
+    public static IEnumerable<object[]> Map_ValidStringValue_TestData()
     {
         yield return new object[] { new EnumMapper(typeof(ConsoleColor)), "Black", ConsoleColor.Black };
         yield return new object[] { new EnumMapper(typeof(ConsoleColor), ignoreCase: true), "Black", ConsoleColor.Black };
@@ -48,17 +48,17 @@ public class EnumMapperTests
     }
 
     [Theory]
-    [MemberData(nameof(GetProperty_ValidStringValue_TestData))]
-    public void GetProperty_ValidStringValue_ReturnsSuccess(EnumMapper item, string stringValue, Enum expected)
+    [MemberData(nameof(Map_ValidStringValue_TestData))]
+    public void Map_ValidStringValue_ReturnsSuccess(EnumMapper item, string stringValue, Enum expected)
     {
         
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(expected, result.Value);
         Assert.Null(result.Exception);
     }
 
-    public static IEnumerable<object?[]> GetProperty_InvalidStringValue_TestData()
+    public static IEnumerable<object?[]> Map_InvalidStringValue_TestData()
     {
         yield return new object?[] { new EnumMapper(typeof(ConsoleColor)), null };
         yield return new object[] { new EnumMapper(typeof(ConsoleColor)), "" };
@@ -67,10 +67,10 @@ public class EnumMapperTests
     }
 
     [Theory]
-    [MemberData(nameof(GetProperty_InvalidStringValue_TestData))]
-    public void GetProperty_InvalidStringValue_ReturnsInvalid(EnumMapper item, string? stringValue)
+    [MemberData(nameof(Map_InvalidStringValue_TestData))]
+    public void Map_InvalidStringValue_ReturnsInvalid(EnumMapper item, string? stringValue)
     {
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);

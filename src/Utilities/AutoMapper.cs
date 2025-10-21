@@ -218,7 +218,7 @@ public static class AutoMapper
     private static bool TryGetCreateEnumerableFactory<TElement>(Type listType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
     {
         // Try well-known collection types
-        if (TryGetWellKnownEnumerableFactory<TElement>(listType, out result))
+        if (TryGetWellKnownEnumerableFactory(listType, out result))
         {
             return true;
         }
@@ -226,13 +226,13 @@ public static class AutoMapper
         // Try interface types
         if (listType.IsInterface)
         {
-            return TryGetInterfaceEnumerableFactory<TElement>(listType, out result);
+            return TryGetInterfaceEnumerableFactory(listType, out result);
         }
 
         // Try concrete types
         if (!listType.IsAbstract)
         {
-            return TryGetConcreteTypeEnumerableFactory<TElement>(listType, out result);
+            return TryGetConcreteTypeEnumerableFactory(listType, out result);
         }
 
         result = default;
@@ -309,13 +309,13 @@ public static class AutoMapper
         var hasDefaultConstructor = listType.GetConstructor([]) is not null;
 
         // Try default constructor with collection interfaces
-        if (hasDefaultConstructor && TryGetDefaultConstructorFactory<TElement>(listType, out result))
+        if (hasDefaultConstructor && TryGetDefaultConstructorFactory(listType, out result))
         {
             return true;
         }
 
         // Try constructor-based factories
-        if (TryGetConstructorBasedFactory<TElement>(listType, out result))
+        if (TryGetConstructorBasedFactory(listType, out result))
         {
             return true;
         }

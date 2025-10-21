@@ -48,7 +48,7 @@ public class DateOnlyMapper : ICellMapper
     /// </summary>
     public DateTimeStyles Style { get; set; }
 
-    public CellMapperResult MapCellValue(ReadCellResult readResult)
+    public CellMapperResult Map(ReadCellResult readResult)
     {
         // Excel stores dates as numbers (the number of days since 1899-12-30).
         // ExcelDataReader automatically converts these cells to DateOnly.

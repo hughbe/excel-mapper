@@ -8,7 +8,7 @@ namespace ExcelMapper.Mappers;
 /// </summary>
 public class UriMapper : ICellMapper
 {
-    public CellMapperResult MapCellValue(ReadCellResult readResult)
+    public CellMapperResult Map(ReadCellResult readResult)
     {
         var stringValue = readResult.GetString();
 

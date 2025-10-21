@@ -14,7 +14,7 @@ public class ParsableMapper<TParse> : ICellMapper where TParse : IParsable<TPars
     /// </summary>
     public IFormatProvider? Provider { get; set; }
 
-    public CellMapperResult MapCellValue(ReadCellResult readResult)
+    public CellMapperResult Map(ReadCellResult readResult)
     {
         var value = readResult.GetString();
         try

@@ -11,7 +11,7 @@ namespace ExcelMapper.Mappers
         private static readonly object s_boxedTrue = true;
         private static readonly object s_boxedFalse = false;
 
-        public CellMapperResult MapCellValue(ReadCellResult readResult)
+        public CellMapperResult Map(ReadCellResult readResult)
         {
             if (readResult.GetValue() is bool boolValue)
             {

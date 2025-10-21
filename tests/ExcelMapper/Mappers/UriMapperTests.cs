@@ -8,18 +8,18 @@ namespace ExcelMapper.Mappers.Tests;
 
 public class UriMapperTests
 {
-    public static IEnumerable<object[]> GetProperty_TestData()
+    public static IEnumerable<object[]> Map_TestData()
     {
         yield return new object[] { "http://microsoft.com", new Uri("http://microsoft.com") };
     }
 
     [Theory]
-    [MemberData(nameof(GetProperty_TestData))]
-    public void GetProperty_ValidStringValue_ReturnsSuccess(string stringValue, Uri expected)
+    [MemberData(nameof(Map_TestData))]
+    public void Map_ValidStringValue_ReturnsSuccess(string stringValue, Uri expected)
     {
         var item = new UriMapper();
         
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(expected, result.Value);
         Assert.Null(result.Exception);
@@ -29,10 +29,10 @@ public class UriMapperTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("invalid")]
-    public void GetProperty_InvalidStringValue_ReturnsInvalid(string? stringValue)
+    public void Map_InvalidStringValue_ReturnsInvalid(string? stringValue)
     {
         var item = new UriMapper();
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);
@@ -40,13 +40,13 @@ public class UriMapperTests
 
     [Theory]
     [InlineData("/relative")]
-    public void GetProperty_InvalidStringValueWindows_ReturnsInvalid(string stringValue)
+    public void Map_InvalidStringValueWindows_ReturnsInvalid(string stringValue)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             return;
         }
 
-        GetProperty_InvalidStringValue_ReturnsInvalid(stringValue);
+        Map_InvalidStringValue_ReturnsInvalid(stringValue);
     }
 }

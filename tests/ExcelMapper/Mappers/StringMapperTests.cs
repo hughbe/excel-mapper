@@ -9,11 +9,11 @@ public class StringMapperTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("abc")]
-    public void GetProperty_Invoke_ReturnsBegan(string? stringValue)
+    public void Map_Invoke_ReturnsBegan(string? stringValue)
     {
         var item = new StringMapper();
 
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(stringValue, result.Value);
         Assert.Null(result.Exception);

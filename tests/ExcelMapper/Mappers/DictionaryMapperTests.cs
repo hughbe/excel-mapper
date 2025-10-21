@@ -57,13 +57,13 @@ public class DictionaryMapperTests
     [InlineData("key", true, CellMapperResult.HandleAction.UseResultAndStopMapping, "value")]
     [InlineData("key2", true, CellMapperResult.HandleAction.UseResultAndStopMapping, 10)]
     [InlineData("no_such_key", false, CellMapperResult.HandleAction.IgnoreResultAndContinueMapping, null)]
-    public void MapCellValue_ValidStringValueOptional_ReturnsSuccess(string? stringValue, bool expectedSucceeded, CellMapperResult.HandleAction expectedAction, object? expectedValue)
+    public void Map_ValidStringValueOptional_ReturnsSuccess(string? stringValue, bool expectedSucceeded, CellMapperResult.HandleAction expectedAction, object? expectedValue)
     {
         var mapping = new Dictionary<string, object> { { "key", "value" }, { "KEY2", 10 } };
         var comparer = StringComparer.OrdinalIgnoreCase;
         var item = new DictionaryMapper<object>(mapping, comparer, DictionaryMapperBehavior.Optional);
 
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.Equal(expectedSucceeded, result.Succeeded);
         Assert.Equal(expectedAction, result.Action);
         Assert.Equal(expectedValue, result.Value);
@@ -75,13 +75,13 @@ public class DictionaryMapperTests
     [InlineData("key", true, CellMapperResult.HandleAction.UseResultAndStopMapping, "value")]
     [InlineData("key2", true, CellMapperResult.HandleAction.UseResultAndStopMapping, 10)]
     [InlineData("no_such_key", false, CellMapperResult.HandleAction.IgnoreResultAndContinueMapping, null)]
-    public void MapCellValue_ValidStringValueRequired_ReturnsSuccess(string? stringValue, bool expectedSucceeded, CellMapperResult.HandleAction expectedAction, object? expectedValue)
+    public void Map_ValidStringValueRequired_ReturnsSuccess(string? stringValue, bool expectedSucceeded, CellMapperResult.HandleAction expectedAction, object? expectedValue)
     {
         var mapping = new Dictionary<string, object> { { "key", "value" }, { "KEY2", 10 } };
         var comparer = StringComparer.OrdinalIgnoreCase;
         var item = new DictionaryMapper<object>(mapping, comparer, DictionaryMapperBehavior.Optional);
 
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.Equal(expectedSucceeded, result.Succeeded);
         Assert.Equal(expectedAction, result.Action);
         Assert.Equal(expectedValue, result.Value);

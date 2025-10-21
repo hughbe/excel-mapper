@@ -31,7 +31,7 @@ public class ChangeTypeMapper : ICellMapper
         Type = type;
     }
 
-    public CellMapperResult MapCellValue(ReadCellResult readResult)
+    public CellMapperResult Map(ReadCellResult readResult)
     {
         var value = readResult.GetValue();
         try

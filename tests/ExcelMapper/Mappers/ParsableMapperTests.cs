@@ -34,10 +34,10 @@ public class ParsableMapperTests
 
     [Theory]
     [InlineData("123", 123)]
-    public void MapCellValue_ParsableValue_ReturnsExpected(string stringValue, nint expected)
+    public void Map_ParsableValue_ReturnsExpected(string stringValue, nint expected)
     {
         var mapper = new ParsableMapper<nint>();
-        var result = mapper.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = mapper.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(expected, Assert.IsType<nint>(result.Value));
         Assert.Null(result.Exception);
@@ -48,10 +48,10 @@ public class ParsableMapperTests
     [InlineData("")]
     [InlineData("invalid")]
     [InlineData("12/07/2017 07:57:61")]
-    public void MapCellValue_InvalidStringValue_ReturnsInvalid(string? stringValue)
+    public void Map_InvalidStringValue_ReturnsInvalid(string? stringValue)
     {
         var item = new ParsableMapper<nint>();
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);

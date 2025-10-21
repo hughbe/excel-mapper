@@ -98,7 +98,7 @@ public class TimeOnlyMapperTests
         Assert.Equal(style, item.Style);
     }
 
-    public static IEnumerable<object[]> GetProperty_ValidStringValue_TestData()
+    public static IEnumerable<object[]> Map_ValidStringValue_TestData()
     {
         yield return new object[] { new TimeOnly(7, 57, 46).ToString("T"), new string[] { "T" }, DateTimeStyles.None, new TimeOnly(7, 57, 46) };
         yield return new object[] { new TimeOnly(7, 57, 46).ToString("T"), new string[] { "T", "yyyy-MM-dd" }, DateTimeStyles.None, new TimeOnly(7, 57, 46) };
@@ -107,8 +107,8 @@ public class TimeOnlyMapperTests
     }
 
     [Theory]
-    [MemberData(nameof(GetProperty_ValidStringValue_TestData))]
-    public void GetProperty_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, DateTimeStyles style, TimeOnly expected)
+    [MemberData(nameof(Map_ValidStringValue_TestData))]
+    public void Map_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, DateTimeStyles style, TimeOnly expected)
     {
         var item = new TimeOnlyMapper
         {
@@ -116,7 +116,7 @@ public class TimeOnlyMapperTests
             Style = style
         };
 
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(expected, Assert.IsType<TimeOnly>(result.Value));
         Assert.Null(result.Exception);
@@ -127,17 +127,17 @@ public class TimeOnlyMapperTests
     [InlineData("")]
     [InlineData("invalid")]
     [InlineData("12/07/2017 07:57:61")]
-    public void GetProperty_InvalidStringValue_ReturnsInvalid(string? stringValue)
+    public void Map_InvalidStringValue_ReturnsInvalid(string? stringValue)
     {
         var item = new TimeOnlyMapper();
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);
     }
 
 
-    public static IEnumerable<object[]> GetProperty_ValidTimeSpan_TestData()
+    public static IEnumerable<object[]> Map_ValidTimeSpan_TestData()
     {
         yield return new object[] { new TimeSpan(7, 57, 46), new string[] { "T" }, DateTimeStyles.None, new TimeOnly(7, 57, 46) };
         yield return new object[] { new TimeSpan(0, 0, 0), new string[] { "T" }, DateTimeStyles.None, new TimeOnly(0, 0, 0) };
@@ -145,8 +145,8 @@ public class TimeOnlyMapperTests
     }
 
     [Theory]
-    [MemberData(nameof(GetProperty_ValidTimeSpan_TestData))]
-    public void GetProperty_ValidTimeSpan_ReturnsSuccess(TimeSpan timeSpanValue, string[] formats, DateTimeStyles style, TimeOnly expected)
+    [MemberData(nameof(Map_ValidTimeSpan_TestData))]
+    public void Map_ValidTimeSpan_ReturnsSuccess(TimeSpan timeSpanValue, string[] formats, DateTimeStyles style, TimeOnly expected)
     {
         var reader = new MockExcelDataReader
         {
@@ -159,21 +159,21 @@ public class TimeOnlyMapperTests
             Style = style
         };
 
-        var result = item.MapCellValue(new ReadCellResult(0, reader, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(expected, Assert.IsType<TimeOnly>(result.Value));
         Assert.Null(result.Exception);
     }
 
-    public static IEnumerable<object[]> GetProperty_InvalidTimeSpan_TestData()
+    public static IEnumerable<object[]> Map_InvalidTimeSpan_TestData()
     {
         yield return new object[] { -1 };
         yield return new object[] { TimeOnly.MaxValue.Ticks + 1 };
     }
 
     [Theory]
-    [MemberData(nameof(GetProperty_InvalidTimeSpan_TestData))]
-    public void GetProperty_InvalidTimeSpan_ReturnsInvalid(long ticks)
+    [MemberData(nameof(Map_InvalidTimeSpan_TestData))]
+    public void Map_InvalidTimeSpan_ReturnsInvalid(long ticks)
     {
         var timeSpan = new TimeSpan(ticks);
         var reader = new MockExcelDataReader
@@ -182,33 +182,33 @@ public class TimeOnlyMapperTests
         };
 
         var item = new TimeOnlyMapper();
-        var result = item.MapCellValue(new ReadCellResult(0, reader, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.IsType<ArgumentOutOfRangeException>(result.Exception);
     }
 
     [Fact]
-    public void GetProperty_InvalidFormats_ThrowsFormatException()
+    public void Map_InvalidFormats_ThrowsFormatException()
     {
         var item = new TimeOnlyMapper
         {
             Formats = ["Invalid"]
         };
 
-        var result = item.MapCellValue(new ReadCellResult(0, new TimeOnly(7, 57, 46).ToString(), preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, new TimeOnly(7, 57, 46).ToString(), preserveFormatting: false));
         Assert.IsType<FormatException>(result.Exception);
     }
 
     [Fact]
-    public void GetProperty_InvalidStyle_ThrowsArgumentException()
+    public void Map_InvalidStyle_ThrowsArgumentException()
     {
         var item = new TimeOnlyMapper
         {
             Style = DateTimeStyles.AssumeLocal | DateTimeStyles.AssumeUniversal
         };
 
-        var result = item.MapCellValue(new ReadCellResult(0, new TimeOnly(7, 57, 46).ToString(), preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, new TimeOnly(7, 57, 46).ToString(), preserveFormatting: false));
         Assert.IsType<ArgumentException>(result.Exception);
     }
 

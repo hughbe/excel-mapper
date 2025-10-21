@@ -2,5 +2,5 @@
 
 public interface ICellMapper
 {
-    CellMapperResult MapCellValue(ReadCellResult readResult);
+    CellMapperResult Map(ReadCellResult readResult);
 }

@@ -327,7 +327,7 @@ ColumnNameReader.TryGetValue() → ReadCellResult("John Doe")
     ↓
 ValuePipeline<string>:
   1. TrimCellValueTransformer → "John Doe"
-  2. StringMapper.MapCellValue() → CellMapperResult.Success("John Doe")
+  2. StringMapper.Map() → CellMapperResult.Success("John Doe")
     ↓
 Person.Name = "John Doe"
 ```
@@ -345,7 +345,7 @@ ColumnNamesReader.TryGetValues() → [ReadCellResult("95"), ReadCellResult("87")
     ↓
 For each ReadCellResult:
   ValuePipeline<int>:
-    1. ChangeTypeMapper.MapCellValue() → CellMapperResult.Success(95)
+    1. ChangeTypeMapper.Map() → CellMapperResult.Success(95)
     2. ListEnumerableFactory<int>.Add(95)
     ↓
 ListEnumerableFactory<int>.End() → List<int> {95, 87, 92}

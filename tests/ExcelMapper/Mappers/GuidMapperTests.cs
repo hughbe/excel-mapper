@@ -7,7 +7,7 @@ namespace ExcelMapper.Mappers.Tests;
 
 public class GuidMapperTests
 {
-    public static IEnumerable<object[]> GetProperty_ValidStringValue_TestData()
+    public static IEnumerable<object[]> Map_ValidStringValue_TestData()
     {
         yield return new object[] { "a8a110d5fc4943c5bf46802db8f843ff", new Guid("a8a110d5fc4943c5bf46802db8f843ff") };
         yield return new object[] { "a8a110d5-fc49-43c5-bf46-802db8f843ff", new Guid("a8a110d5fc4943c5bf46802db8f843ff") };
@@ -17,12 +17,12 @@ public class GuidMapperTests
     }
 
     [Theory]
-    [MemberData(nameof(GetProperty_ValidStringValue_TestData))]
-    public void GetProperty_ValidStringValue_ReturnsSuccess(string stringValue, Guid expected)
+    [MemberData(nameof(Map_ValidStringValue_TestData))]
+    public void Map_ValidStringValue_ReturnsSuccess(string stringValue, Guid expected)
     {
         var item = new GuidMapper();
 
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(expected, result.Value);
         Assert.Null(result.Exception);
@@ -32,11 +32,11 @@ public class GuidMapperTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("invalid")]
-    public void GetProperty_InvalidStringValue_ReturnsInvalid(string? stringValue)
+    public void Map_InvalidStringValue_ReturnsInvalid(string? stringValue)
     {
         var item = new GuidMapper();
 
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);

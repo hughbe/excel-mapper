@@ -98,7 +98,7 @@ public class TimeSpanMapperTests
         Assert.Equal(style, item.Style);
     }
 
-    public static IEnumerable<object[]> GetProperty_ValidStringValue_TestData()
+    public static IEnumerable<object[]> Map_ValidStringValue_TestData()
     {
         yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "G" }, TimeSpanStyles.None, new TimeSpan(2017, 7, 12, 7, 57, 46) };
         yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "G", "yyyy-MM-dd" }, TimeSpanStyles.None, new TimeSpan(2017, 7, 12, 7, 57, 46) };
@@ -107,8 +107,8 @@ public class TimeSpanMapperTests
     }
 
     [Theory]
-    [MemberData(nameof(GetProperty_ValidStringValue_TestData))]
-    public void GetProperty_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, TimeSpanStyles style, TimeSpan expected)
+    [MemberData(nameof(Map_ValidStringValue_TestData))]
+    public void Map_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, TimeSpanStyles style, TimeSpan expected)
     {
         var item = new TimeSpanMapper
         {
@@ -116,7 +116,7 @@ public class TimeSpanMapperTests
             Style = style
         };
 
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(expected, Assert.IsType<TimeSpan>(result.Value));
         Assert.Null(result.Exception);
@@ -127,16 +127,16 @@ public class TimeSpanMapperTests
     [InlineData("")]
     [InlineData("invalid")]
     [InlineData("12/07/2017 07:57:61")]
-    public void GetProperty_InvalidStringValue_ReturnsInvalid(string? stringValue)
+    public void Map_InvalidStringValue_ReturnsInvalid(string? stringValue)
     {
         var item = new TimeSpanMapper();
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);
     }
 
-    public static IEnumerable<object[]> GetProperty_ValidTimeSpanValue_TestData()
+    public static IEnumerable<object[]> Map_ValidTimeSpanValue_TestData()
     {
         yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46), new string[] { "G" }, TimeSpanStyles.None, new TimeSpan(2017, 7, 12, 7, 57, 46) };
         yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46), new string[] { "G", "yyyy-MM-dd" }, TimeSpanStyles.None, new TimeSpan(2017, 7, 12, 7, 57, 46) };
@@ -144,8 +144,8 @@ public class TimeSpanMapperTests
     }
 
     [Theory]
-    [MemberData(nameof(GetProperty_ValidTimeSpanValue_TestData))]
-    public void GetProperty_ValidTimeSpanValue_ReturnsSuccess(TimeSpan timeSpanValue, string[] formats, TimeSpanStyles style, TimeSpan expected)
+    [MemberData(nameof(Map_ValidTimeSpanValue_TestData))]
+    public void Map_ValidTimeSpanValue_ReturnsSuccess(TimeSpan timeSpanValue, string[] formats, TimeSpanStyles style, TimeSpan expected)
     {
         var reader = new MockExcelDataReader
         {
@@ -158,21 +158,21 @@ public class TimeSpanMapperTests
             Style = style
         };
 
-        var result = item.MapCellValue(new ReadCellResult(0, reader, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(expected, Assert.IsType<TimeSpan>(result.Value));
         Assert.Null(result.Exception);
     }
 
     [Fact]
-    public void GetProperty_InvalidFormats_ThrowsFormatException()
+    public void Map_InvalidFormats_ThrowsFormatException()
     {
         var item = new TimeSpanMapper
         {
             Formats = ["Invalid"]
         };
 
-        var result = item.MapCellValue(new ReadCellResult(0, new TimeSpan(1, 0, 0).ToString(), preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, new TimeSpan(1, 0, 0).ToString(), preserveFormatting: false));
         Assert.IsType<FormatException>(result.Exception);
     }
 

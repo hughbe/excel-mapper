@@ -406,7 +406,7 @@ public class CantReadTests
     {
         private readonly Exception _exception = exception;
 
-        public CellMapperResult MapCellValue(ReadCellResult readResult) => CellMapperResult.Invalid(_exception);
+        public CellMapperResult Map(ReadCellResult readResult) => CellMapperResult.Invalid(_exception);
     }
 
     [Fact]
@@ -455,6 +455,6 @@ public class CantReadTests
 
     private class IgnoreCellMapper : ICellMapper
     {
-        public CellMapperResult MapCellValue(ReadCellResult readResult) => CellMapperResult.Ignore();
+        public CellMapperResult Map(ReadCellResult readResult) => CellMapperResult.Ignore();
     }
 }

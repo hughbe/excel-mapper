@@ -98,7 +98,7 @@ public class DateOnlyMapperTests
         Assert.Equal(style, item.Style);
     }
 
-    public static IEnumerable<object[]> GetProperty_Valid_TestData()
+    public static IEnumerable<object[]> Map_Valid_TestData()
     {
         yield return new object[] { new DateOnly(2025, 10, 18).ToString("D"), new string[] { "D" }, DateTimeStyles.None, new DateOnly(2025, 10, 18) };
         yield return new object[] { new DateOnly(2025, 10, 18).ToString("D"), new string[] { "D", "yyyy-MM-dd" }, DateTimeStyles.None, new DateOnly(2025, 10, 18) };
@@ -107,8 +107,8 @@ public class DateOnlyMapperTests
     }
 
     [Theory]
-    [MemberData(nameof(GetProperty_Valid_TestData))]
-    public void GetProperty_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, DateTimeStyles style, DateOnly expected)
+    [MemberData(nameof(Map_Valid_TestData))]
+    public void Map_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, DateTimeStyles style, DateOnly expected)
     {
         var item = new DateOnlyMapper
         {
@@ -116,7 +116,7 @@ public class DateOnlyMapperTests
             Style = style
         };
 
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(expected, Assert.IsType<DateOnly>(result.Value));
         Assert.Null(result.Exception);
@@ -127,16 +127,16 @@ public class DateOnlyMapperTests
     [InlineData("")]
     [InlineData("invalid")]
     [InlineData("12/07/2017 07:57:61")]
-    public void GetProperty_InvalidStringValue_ReturnsInvalid(string? stringValue)
+    public void Map_InvalidStringValue_ReturnsInvalid(string? stringValue)
     {
         var item = new DateOnlyMapper();
-        var result = item.MapCellValue(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);
     }
 
-    public static IEnumerable<object[]> GetProperty_ValidDateTimeValue_TestData()
+    public static IEnumerable<object[]> Map_ValidDateTimeValue_TestData()
     {
         yield return new object[] { new DateTime(2025, 10, 18, 7, 57, 46), new string[] { "D" }, DateTimeStyles.None, new DateOnly(2025, 10, 18) };
         yield return new object[] { new DateTime(2025, 10, 18, 7, 57, 46), new string[] { "D", "yyyy-MM-dd" }, DateTimeStyles.None, new DateOnly(2025, 10, 18) };
@@ -144,8 +144,8 @@ public class DateOnlyMapperTests
     }
 
     [Theory]
-    [MemberData(nameof(GetProperty_ValidDateTimeValue_TestData))]
-    public void GetProperty_ValidDateTimeValue_ReturnsSuccess(DateTime dateTimeValue, string[] formats, DateTimeStyles style, DateOnly expected)
+    [MemberData(nameof(Map_ValidDateTimeValue_TestData))]
+    public void Map_ValidDateTimeValue_ReturnsSuccess(DateTime dateTimeValue, string[] formats, DateTimeStyles style, DateOnly expected)
     {
         var reader = new MockExcelDataReader
         {
@@ -158,33 +158,33 @@ public class DateOnlyMapperTests
             Style = style
         };
 
-        var result = item.MapCellValue(new ReadCellResult(0, reader, preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal(expected, Assert.IsType<DateOnly>(result.Value));
         Assert.Null(result.Exception);
     }
 
     [Fact]
-    public void GetProperty_InvalidFormats_ThrowsFormatException()
+    public void Map_InvalidFormats_ThrowsFormatException()
     {
         var item = new DateOnlyMapper
         {
             Formats = ["Invalid"]
         };
 
-        var result = item.MapCellValue(new ReadCellResult(0, new DateOnly(2025, 10, 18).ToString(), preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, new DateOnly(2025, 10, 18).ToString(), preserveFormatting: false));
         Assert.IsType<FormatException>(result.Exception);
     }
 
     [Fact]
-    public void GetProperty_InvalidStyle_ThrowsArgumentException()
+    public void Map_InvalidStyle_ThrowsArgumentException()
     {
         var item = new DateOnlyMapper
         {
             Style = DateTimeStyles.AssumeLocal | DateTimeStyles.AssumeUniversal
         };
 
-        var result = item.MapCellValue(new ReadCellResult(0, new DateOnly(2025, 10, 18).ToString(), preserveFormatting: false));
+        var result = item.Map(new ReadCellResult(0, new DateOnly(2025, 10, 18).ToString(), preserveFormatting: false));
         Assert.IsType<ArgumentException>(result.Exception);
     }
 

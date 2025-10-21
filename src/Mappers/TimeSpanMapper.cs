@@ -48,7 +48,7 @@ public class TimeSpanMapper : ICellMapper
     /// </summary>
     public TimeSpanStyles Style { get; set; }
 
-    public CellMapperResult MapCellValue(ReadCellResult readResult)
+    public CellMapperResult Map(ReadCellResult readResult)
     {
         // Excel stores durations as number of days.
         // ExcelDataReader automatically converts these cells to TimeSpan.

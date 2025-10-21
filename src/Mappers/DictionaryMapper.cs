@@ -37,7 +37,7 @@ public class DictionaryMapper<T> : ICellMapper
         Behavior = behavior;
     }
 
-    public CellMapperResult MapCellValue(ReadCellResult readResult)
+    public CellMapperResult Map(ReadCellResult readResult)
     {
         // If we didn't find anything, keep going. This is not necessarily a fatal error.
         var stringValue = readResult.GetString();
