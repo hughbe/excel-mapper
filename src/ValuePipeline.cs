@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Reflection;
 using ExcelMapper.Abstractions;
+using ExcelMapper.Utilities;
 
 namespace ExcelMapper;
 
@@ -11,50 +13,19 @@ namespace ExcelMapper;
 /// </summary>
 public class ValuePipeline : IValuePipeline
 {
-    private readonly List<ICellTransformer> _cellValueTransformers = [];
-    private readonly List<ICellMapper> _cellValueMappers = [];
-
     /// <summary>
     /// Gets the list of objects that take the initial string value read from a cell and
     /// modifies the string value. This is useful for things like trimming the string value
     /// before mapping it.
     /// </summary>
-    public IReadOnlyList<ICellTransformer> CellValueTransformers => _cellValueTransformers;
+    public IList<ICellTransformer> Transformers { get; } = new NonNullCollection<ICellTransformer>();
 
     /// <summary>
     /// Gets the pipeline of items that take the initial string value read from a cell and
     /// converts the string value into the type of the property or field. The items form
     /// a pipeline: if a mapper fails to parse or map the cell value, the next item is used.
     /// </summary>
-    public IReadOnlyList<ICellMapper> CellValueMappers => _cellValueMappers;
-
-    /// <summary>
-    /// Adds the given mapper to the pipeline of cell value mappers.
-    /// </summary>
-    /// <param name="mapper">The mapper to add.</param>
-    public void AddCellValueMapper(ICellMapper mapper)
-    {
-        ArgumentNullException.ThrowIfNull(mapper);
-
-        _cellValueMappers.Add(mapper);
-    }
-
-    /// <summary>
-    /// Removes the mapper at the given index from the pipeline of cell value mappers.
-    /// </summary>
-    /// <param name="index">The index of the mapper to remove.</param>
-    public void RemoveCellValueMapper(int index) => _cellValueMappers.RemoveAt(index);
-
-    /// <summary>
-    /// Adds the given transformer to the pipeline of cell value transformers.
-    /// </summary>
-    /// <param name="transformer">The tranformer to add.</param>
-    public void AddCellValueTransformer(ICellTransformer transformer)
-    {
-        ArgumentNullException.ThrowIfNull(transformer);
-
-        _cellValueTransformers.Add(transformer);
-    }
+    public IList<ICellMapper> Mappers { get; } = new NonNullCollection<ICellMapper>();
 
     /// <summary>
     /// Gets or sets an object that handles mapping a cell value to a property or field if the value of the
@@ -103,7 +74,7 @@ public class ValuePipeline : IValuePipeline
         bool preserveFormatting,
         MemberInfo? member)
     {
-        foreach (ICellTransformer transformer in pipeline.CellValueTransformers)
+        foreach (var transformer in pipeline.Transformers)
         {
             readResult = new ReadCellResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult), preserveFormatting);
         }
@@ -114,7 +85,7 @@ public class ValuePipeline : IValuePipeline
         }
 
         CellMapperResult? finalResult = null;
-        foreach (ICellMapper mapper in pipeline.CellValueMappers)
+        foreach (var mapper in pipeline.Mappers)
         {
             var result = mapper.Map(readResult);
             if (result.Action != CellMapperResult.HandleAction.IgnoreResultAndContinueMapping)

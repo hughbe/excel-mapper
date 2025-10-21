@@ -24,7 +24,7 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithTrim<TMap>(this TMap map) where TMap : IValuePipeline
     {
-        map.AddCellValueTransformer(new TrimCellValueTransformer());
+        map.Transformers.Add(new TrimCellTransformer());
         return map;
     }
 
@@ -36,18 +36,28 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="mappers">A list of additional custom mappers that will be used to map the value of a cell to a property or field</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithCellValueMappers<TMap>(this TMap map, params ICellMapper[] mappers) where TMap : IValuePipeline
+    public static TMap WithMappers<TMap>(this TMap map, params ICellMapper[] mappers) where TMap : IValuePipeline
+        => map.WithMappers((IEnumerable<ICellMapper>)mappers);
+    
+    public static TMap WithMappers<TMap>(this TMap map, params IEnumerable<ICellMapper> mappers) where TMap : IValuePipeline
     {
         ArgumentNullException.ThrowIfNull(mappers);
 
-        foreach (ICellMapper mapper in mappers)
+        foreach (var mapper in mappers)
         {
-            ArgumentNullException.ThrowIfNull(mapper, nameof(mappers));
+            if (mapper == null)
+            {
+                throw new ArgumentException("Mappers cannot contain null values.", nameof(mappers));
+            }
         }
 
-        foreach (ICellMapper mapper in mappers)
+        // Clear any existing mappers.
+        map.Mappers.Clear();
+
+        // Then, add the new mappers.
+        foreach (var mapper in mappers)
         {
-            map.AddCellValueMapper(mapper);
+            map.Mappers.Add(mapper);
         }
 
         return map;
@@ -67,7 +77,7 @@ public static class IValuePipelineExtensions
     public static TMap WithMapping<TMap, TValue>(this TMap map, IDictionary<string, TValue> mappingDictionary, IEqualityComparer<string>? comparer = null, DictionaryMapperBehavior behavior = DictionaryMapperBehavior.Optional) where TMap : IValuePipeline<TValue>
     {
         var item = new DictionaryMapper<TValue>(mappingDictionary, comparer, behavior);
-        map.AddCellValueMapper(item);
+        map.Mappers.Add(item);
         return map;
     }
 
@@ -80,7 +90,7 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static IValuePipeline<DateTime> WithFormats(this IValuePipeline<DateTime> map, params string[] formats)
     {
-        map.AddDateTimeFormats(formats);
+        map.AddFormats<DateTimeMapper>(formats);
         return map;
     }
 
@@ -106,7 +116,7 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static IValuePipeline<DateTime?> WithFormats(this IValuePipeline<DateTime?> map, params string[] formats)
     {
-        map.AddDateTimeFormats(formats);
+        map.AddFormats<DateTimeMapper>(formats);
         return map;
     }
 
@@ -132,7 +142,7 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static IValuePipeline<DateTimeOffset> WithFormats(this IValuePipeline<DateTimeOffset> map, params string[] formats)
     {
-        map.AddDateTimeOffsetFormats(formats);
+        map.AddFormats<DateTimeOffsetMapper>(formats);
         return map;
     }
 
@@ -158,7 +168,7 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static IValuePipeline<DateTimeOffset?> WithFormats(this IValuePipeline<DateTimeOffset?> map, params string[] formats)
     {
-        map.AddDateTimeOffsetFormats(formats);
+        map.AddFormats<DateTimeOffsetMapper>(formats);
         return map;
     }
 
@@ -184,7 +194,7 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static IValuePipeline<TimeSpan> WithFormats(this IValuePipeline<TimeSpan> map, params string[] formats)
     {
-        map.AddTimeSpanFormats(formats);
+        map.AddFormats<TimeSpanMapper>(formats);
         return map;
     }
 
@@ -210,7 +220,7 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static IValuePipeline<TimeSpan?> WithFormats(this IValuePipeline<TimeSpan?> map, params string[] formats)
     {
-        map.AddTimeSpanFormats(formats);
+        map.AddFormats<TimeSpanMapper>(formats);
         return map;
     }
 
@@ -236,7 +246,7 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static IValuePipeline<DateOnly> WithFormats(this IValuePipeline<DateOnly> map, params string[] formats)
     {
-        map.AddDateOnlyFormats(formats);
+        map.AddFormats<DateOnlyMapper>(formats);
         return map;
     }
 
@@ -262,7 +272,7 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static IValuePipeline<DateOnly?> WithFormats(this IValuePipeline<DateOnly?> map, params string[] formats)
     {
-        map.AddDateOnlyFormats(formats);
+        map.AddFormats<DateOnlyMapper>(formats);
         return map;
     }
 
@@ -288,7 +298,7 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static IValuePipeline<TimeOnly> WithFormats(this IValuePipeline<TimeOnly> map, params string[] formats)
     {
-        map.AddTimeOnlyFormats(formats);
+        map.AddFormats<TimeOnlyMapper>(formats);
         return map;
     }
 
@@ -299,7 +309,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TimeOnly> WithFormats(this IValuePipeline<TimeOnly> map, IEnumerable<string> formats)
+    public static IValuePipeline<TimeOnly> WithFormats(this IValuePipeline<TimeOnly> map, params IEnumerable<string> formats)
     {
         ArgumentNullException.ThrowIfNull(formats);
         return map.WithFormats([.. formats]);
@@ -314,7 +324,7 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static IValuePipeline<TimeOnly?> WithFormats(this IValuePipeline<TimeOnly?> map, params string[] formats)
     {
-        map.AddTimeOnlyFormats(formats);
+        map.AddFormats<TimeOnlyMapper>(formats);
         return map;
     }
 
@@ -347,86 +357,18 @@ public static class IValuePipelineExtensions
         }
     }
 
-    private static void AddDateTimeFormats(this IValuePipeline map, string[] formats)
+    private static void AddFormats<TCellMapper>(this IValuePipeline map, string[] formats) where TCellMapper : IFormatsCellMapper, new()
     {
         ArgumentNullException.ThrowIfNull(formats);
         ValidateFormats(formats);
 
-        var mapper = map.CellValueMappers
-            .OfType<DateTimeMapper>()
+        var mapper = map.Mappers
+            .OfType<TCellMapper>()
             .FirstOrDefault();
         if (mapper == null)
         {
-            mapper = new DateTimeMapper();
-            map.AddCellValueMapper(mapper);
-        }
-
-        mapper.Formats = formats;
-    }
-
-    private static void AddDateTimeOffsetFormats(this IValuePipeline map, string[] formats)
-    {
-        ArgumentNullException.ThrowIfNull(formats);
-        ValidateFormats(formats);
-
-        var mapper = map.CellValueMappers
-            .OfType<DateTimeOffsetMapper>()
-            .FirstOrDefault();
-        if (mapper == null)
-        {
-            mapper = new DateTimeOffsetMapper();
-            map.AddCellValueMapper(mapper);
-        }
-
-        mapper.Formats = formats;
-    }
-
-    private static void AddTimeSpanFormats(this IValuePipeline map, string[] formats)
-    {
-        ArgumentNullException.ThrowIfNull(formats);
-        ValidateFormats(formats);
-
-        var mapper = map.CellValueMappers
-            .OfType<TimeSpanMapper>()
-            .FirstOrDefault();
-        if (mapper == null)
-        {
-            mapper = new TimeSpanMapper();
-            map.AddCellValueMapper(mapper);
-        }
-
-        mapper.Formats = formats;
-    }
-
-    private static void AddDateOnlyFormats(this IValuePipeline map, string[] formats)
-    {
-        ArgumentNullException.ThrowIfNull(formats);
-        ValidateFormats(formats);
-
-        var mapper = map.CellValueMappers
-            .OfType<DateOnlyMapper>()
-            .FirstOrDefault();
-        if (mapper == null)
-        {
-            mapper = new DateOnlyMapper();
-            map.AddCellValueMapper(mapper);
-        }
-
-        mapper.Formats = formats;
-    }
-
-    private static void AddTimeOnlyFormats(this IValuePipeline map, string[] formats)
-    {
-        ArgumentNullException.ThrowIfNull(formats);
-        ValidateFormats(formats);
-
-        var mapper = map.CellValueMappers
-            .OfType<TimeOnlyMapper>()
-            .FirstOrDefault();
-        if (mapper == null)
-        {
-            mapper = new TimeOnlyMapper();
-            map.AddCellValueMapper(mapper);
+            mapper = new TCellMapper();
+            map.Mappers.Add(mapper);
         }
 
         mapper.Formats = formats;
@@ -470,7 +412,7 @@ public static class IValuePipelineExtensions
         ArgumentNullException.ThrowIfNull(converter);
 
         var item = new ConvertUsingMapper(converter);
-        map.AddCellValueMapper(item);
+        map.Mappers.Add(item);
         return map;
     }
 

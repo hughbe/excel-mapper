@@ -309,10 +309,9 @@ public class CantReadTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<IntPropertyClass>(c =>
         {
-            var map = c.Map(m => m.Member)
-                .WithColumnName("Int Value");
-            map.RemoveCellValueMapper(0);
-            map.AddCellValueMapper(new ExceptionThrowingMapper(exception));
+            c.Map(m => m.Member)
+                .WithColumnName("Int Value")
+                .WithMappers(new ExceptionThrowingMapper(exception));
         });
 
         var sheet = importer.ReadSheet();
@@ -332,10 +331,9 @@ public class CantReadTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<IntFieldClass>(c =>
         {
-            var map = c.Map(m => m.Member)
-                .WithColumnName("Int Value");
-            map.RemoveCellValueMapper(0);
-            map.AddCellValueMapper(new ExceptionThrowingMapper(exception));
+            c.Map(m => m.Member)
+                .WithColumnName("Int Value")
+                .WithMappers(new ExceptionThrowingMapper(exception));
         });
 
         var sheet = importer.ReadSheet();
@@ -354,10 +352,9 @@ public class CantReadTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<IntPropertyClass>(c =>
         {
-            var map = c.Map(m => m.Member)
-                .WithColumnName("Int Value");
-            map.RemoveCellValueMapper(0);
-            map.AddCellValueMapper(new ExceptionThrowingMapper(null!));
+            c.Map(m => m.Member)
+                .WithColumnName("Int Value")
+                .WithMappers(new ExceptionThrowingMapper(null!));
         });
 
         var sheet = importer.ReadSheet();
@@ -376,10 +373,9 @@ public class CantReadTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<IntFieldClass>(c =>
         {
-            var map = c.Map(m => m.Member)
-                .WithColumnName("Int Value");
-            map.RemoveCellValueMapper(0);
-            map.AddCellValueMapper(new ExceptionThrowingMapper(null!));
+            c.Map(m => m.Member)
+                .WithColumnName("Int Value")
+                .WithMappers(new ExceptionThrowingMapper(null!));
         });
 
         var sheet = importer.ReadSheet();
@@ -416,9 +412,8 @@ public class CantReadTests
         importer.Configuration.RegisterClassMap<IntPropertyClass>(c =>
         {
             var map = c.Map(m => m.Member)
-                .WithColumnName("Int Value");
-            map.RemoveCellValueMapper(0);
-            map.AddCellValueMapper(new IgnoreCellMapper());
+                .WithColumnName("Int Value")
+                .WithMappers(new IgnoreCellMapper());
         });
 
         var sheet = importer.ReadSheet();
@@ -438,9 +433,8 @@ public class CantReadTests
         importer.Configuration.RegisterClassMap<IntFieldClass>(c =>
         {
             var map = c.Map(m => m.Member)
-                .WithColumnName("Int Value");
-            map.RemoveCellValueMapper(0);
-            map.AddCellValueMapper(new IgnoreCellMapper());
+                .WithColumnName("Int Value")
+                .WithMappers(new IgnoreCellMapper());
         });
 
         var sheet = importer.ReadSheet();

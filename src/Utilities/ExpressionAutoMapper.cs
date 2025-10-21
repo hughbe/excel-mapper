@@ -173,7 +173,7 @@ internal static class ExpressionAutoMapper
         static IMap memberMapCreator(IMappedExpression finalExpression, FallbackStrategy emptyValueStrategy)
         {
             var member = finalExpression is MappedMemberExpression memberExpression ? memberExpression.Member : null;
-            return AutoMapper.CreateOneToOneMap<TProperty>(member, finalExpression.GetDefaultCellReaderFactory(), emptyValueStrategy, isAutoMapping: false)!;
+            return AutoMapper.CreateOneToOneMap<TProperty>(member, finalExpression.GetDefaultCellReaderFactory(), emptyValueStrategy, isAutoMapping: false);
         }
 
         return (OneToOneMap<TProperty>)GetOrCreateMap<T, TProperty>(classMap, expression, memberMapCreator);

@@ -74,8 +74,8 @@ public class ExcelClassMap<T> : ExcelClassMap
 
         var mapper = new EnumMapper(enumType, ignoreCase);
         var map = Map(expression);
-        map.RemoveCellValueMapper(0);
-        map.AddCellValueMapper(mapper);
+        map.Mappers.Clear();
+        map.Mappers.Add(mapper);
         return map;
     }
 

@@ -160,8 +160,8 @@ Raw value is read from Excel cell via reader:
 #### Stage 2: Transformation (`ICellTransformer`)
 
 String value is transformed before mapping:
-- **`TrimCellValueTransformer`**: Trims whitespace
-- Custom transformers can be added via `AddCellValueTransformer()`
+- **`TrimCellTransformer`**: Trims whitespace
+- Custom transformers can be added via `AddCellTransformer()`
 
 #### Stage 3: Mapping (`ICellMapper`)
 
@@ -326,7 +326,7 @@ ColumnNameReaderFactory.GetCellReader() → ColumnNameReader
 ColumnNameReader.TryGetValue() → ReadCellResult("John Doe")
     ↓
 ValuePipeline<string>:
-  1. TrimCellValueTransformer → "John Doe"
+  1. TrimCellTransformer → "John Doe"
   2. StringMapper.Map() → CellMapperResult.Success("John Doe")
     ↓
 Person.Name = "John Doe"

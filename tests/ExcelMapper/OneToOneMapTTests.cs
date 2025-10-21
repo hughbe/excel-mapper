@@ -19,12 +19,12 @@ public class OneToOneMapTTests
         var factory = new ColumnNameReaderFactory("Column");
         var map = new SubOneToOneMap<string>(factory);
         Assert.Same(factory, map.ReaderFactory);
-        Assert.Empty(map.CellValueMappers);
-        Assert.Same(map.CellValueMappers, map.CellValueMappers);
-        Assert.Same(map.CellValueMappers, map.Pipeline.CellValueMappers);
-        Assert.Empty(map.CellValueTransformers);
-        Assert.Same(map.CellValueTransformers, map.CellValueTransformers);
-        Assert.Same(map.CellValueTransformers, map.Pipeline.CellValueTransformers);
+        Assert.Empty(map.Mappers);
+        Assert.Same(map.Mappers, map.Mappers);
+        Assert.Same(map.Mappers, map.Pipeline.Mappers);
+        Assert.Empty(map.Transformers);
+        Assert.Same(map.Transformers, map.Transformers);
+        Assert.Same(map.Transformers, map.Pipeline.Transformers);
         Assert.False(map.Optional);
         Assert.False(map.PreserveFormatting);
     }
@@ -227,60 +227,6 @@ public class OneToOneMapTTests
 
         var emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
         Assert.Equal("Empty", emptyFallback.Value);
-    }
-
-    [Fact]
-    public void AddCellValueMapper_ValidItem_Success()
-    {
-        var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<string>(factory);
-        var item1 = new BoolMapper();
-        var item2 = new BoolMapper();
-
-        map.AddCellValueMapper(item1);
-        map.AddCellValueMapper(item2);
-        Assert.Equal([item1, item2], map.CellValueMappers);
-    }
-
-    [Fact]
-    public void AddCellValueMapper_NullItem_ThrowsArgumentNullException()
-    {
-        var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<string>(factory);
-
-        Assert.Throws<ArgumentNullException>("mapper", () => map.AddCellValueMapper(null!));
-    }
-
-    [Fact]
-    public void RemoveCellValueMapper_Index_Success()
-    {
-        var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<string>(factory);
-        map.AddCellValueMapper(new BoolMapper());
-
-        map.RemoveCellValueMapper(0);
-        Assert.Empty(map.CellValueMappers);
-    }
-
-    [Fact]
-    public void AddCellValueTransformer_ValidTransformer_Success()
-    {
-        var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<string>(factory);
-        var transformer1 = new TrimCellValueTransformer();
-        var transformer2 = new TrimCellValueTransformer();
-
-        map.AddCellValueTransformer(transformer1);
-        map.AddCellValueTransformer(transformer2);
-        Assert.Equal([transformer1, transformer2], map.CellValueTransformers);
-    }
-
-    [Fact]
-    public void AddCellValueTransformer_NullTransformer_ThrowsArgumentNullException()
-    {
-        var factory = new ColumnNameReaderFactory("Column");
-        var map = new SubOneToOneMap<string>(factory);
-        Assert.Throws<ArgumentNullException>("transformer", () => map.AddCellValueTransformer(null!));
     }
 
     [Fact]

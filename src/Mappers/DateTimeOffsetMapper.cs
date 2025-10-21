@@ -7,7 +7,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a DateTimeOffset.
 /// </summary>
-public class DateTimeOffsetMapper : ICellMapper
+public class DateTimeOffsetMapper : IFormatsCellMapper
 {
     private string[] _formats = ["G"];
 

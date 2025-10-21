@@ -22,28 +22,22 @@ public static class AutoMapper
     internal static OneToOneMap<T>? CreateOneToOneMap<T>(MemberInfo? member, ICellReaderFactory defaultCellReaderFactory, FallbackStrategy emptyValueStrategy, bool isAutoMapping)
     {
         var map = new OneToOneMap<T>(defaultCellReaderFactory);
-        if (!TrySetupValuePipeline(map.Pipeline, emptyValueStrategy, isAutoMapping))
+        if (!TrySetupValuePipeline(member, map.Pipeline, emptyValueStrategy, isAutoMapping))
         {
             return null;
         }
 
         if (member != null)
         {
-            var defaultValueAttribute = member.GetCustomAttribute<ExcelDefaultValueAttribute>();
-            if (defaultValueAttribute != null)
-            {
-                map.EmptyFallback = new FixedValueFallback(defaultValueAttribute.Value);
-            }
-
             ApplyMemberAttributesToMap(member, map);
         }
 
         return map;
     }
 
-    private static bool TrySetupValuePipeline<T>(IValuePipeline<T> pipeline, FallbackStrategy emptyValueStrategy, bool isAutoMapping)
+    private static bool TrySetupValuePipeline<T>(MemberInfo? member, IValuePipeline<T> pipeline, FallbackStrategy emptyValueStrategy, bool isAutoMapping)
     {
-        if (!TryGetWellKnownMap<T>(emptyValueStrategy, out var mapper, out var emptyFallback, out var invalidFallback))
+        if (!TryGetWellKnownMapper<T>(out var mapper))
         {
             // Cannot auto map an unsupported primitive.
             // But allow `Map(o => o.Value)` as the user can define a custom converter after
@@ -58,16 +52,18 @@ public static class AutoMapper
 
         if (mapper != null)
         {
-            pipeline.AddCellValueMapper(mapper);
+            pipeline.Mappers.Add(mapper);
         }
-        if (emptyFallback != null)
+
+        if (member != null && member.GetCustomAttribute<ExcelDefaultValueAttribute>() is { } defaultValueAttribute)
         {
-            pipeline.EmptyFallback = emptyFallback;
+            pipeline.EmptyFallback = new FixedValueFallback(defaultValueAttribute.Value);
         }
-        if (invalidFallback != null)
+        else
         {
-            pipeline.InvalidFallback = invalidFallback;
+            pipeline.EmptyFallback = CreateEmptyFallback<T>(emptyValueStrategy);
         }
+        pipeline.InvalidFallback = s_throwFallback;
         return true;
     }
 
@@ -102,25 +98,21 @@ public static class AutoMapper
         [typeof(Version)] = s_versionMapper,
     }.ToFrozenDictionary();
 
-    private static bool TryGetWellKnownMap<T>(
-        FallbackStrategy emptyValueStrategy,
-        [NotNullWhen(true)] out ICellMapper? mapper,
-        [NotNullWhen(true)] out IFallbackItem? emptyFallback,
-        [NotNullWhen(true)] out IFallbackItem? invalidFallback)
+    private static bool TryGetWellKnownMapper<T>([NotNullWhen(true)] out ICellMapper? mapper)
     {
-        var type = typeof(T).GetNullableTypeOrThis(out var isNullable);
-
-        ICellMapper? knownMapper = null;
+        var type = typeof(T).GetNullableTypeOrThis(out _);
 
         // Fast path: Check dictionary for well-known types.
         if (s_wellKnownTypeMappers.TryGetValue(type, out var cachedMapper))
         {
-            knownMapper = cachedMapper;
+            mapper = cachedMapper;
+            return true;
         }
         // Check for enum types.
         else if (type.IsEnum)
         {
-            knownMapper = new EnumMapper(type);
+            mapper = new EnumMapper(type);
+            return true;
         }
         // Check for types implementing interfaces.
         else if (CanConstructObject(type))
@@ -128,49 +120,37 @@ public static class AutoMapper
             // Check for types implementing IConvertible.
             if (type.ImplementsInterface(typeof(IConvertible)))
             {
-                knownMapper = new ChangeTypeMapper(type);
+                mapper = new ChangeTypeMapper(type);
+                return true;
             }
             // Check for types implementing IParsable<T>.
             else if (type.ImplementsGenericInterface(typeof(IParsable<>), out var parsableInterfaceType))
             {
-                knownMapper = (ICellMapper)Activator.CreateInstance(typeof(ParsableMapper<>).MakeGenericType(parsableInterfaceType))!;
+                mapper = (ICellMapper)Activator.CreateInstance(typeof(ParsableMapper<>).MakeGenericType(parsableInterfaceType))!;
+                return true;
             }
         }
 
-        // No mapper found.
-        if (knownMapper == null)
+        mapper = null;
+        return false;
+    }
+
+    private static IFallbackItem CreateEmptyFallback<T>(FallbackStrategy emptyValueStrategy)
+    {
+        var isNullable = typeof(T).IsNullable();
+
+        // Empty nullable values should be set to null.
+        if (isNullable || !typeof(T).IsValueType)
         {
-            mapper = null;
-            emptyFallback = null;
-            invalidFallback = null;
-            return false;
+            return s_nullFallback;
         }
-        
-        mapper = knownMapper;
-
-        // Set up the empty fallback.
-        IFallbackItem CreateEmptyFallback()
+        else if (emptyValueStrategy == FallbackStrategy.SetToDefaultValue)
         {
-            // Empty nullable values should be set to null.
-            if (isNullable || !type.IsValueType)
-            {
-                return s_nullFallback;
-            }
-            else if (emptyValueStrategy == FallbackStrategy.SetToDefaultValue)
-            {
-                return new FixedValueFallbackFactory(() => Activator.CreateInstance(type));
-            }
-
-            // Throw if we can't set to null or default value.
-            return s_throwFallback;
+            return new FixedValueFallbackFactory(() => Activator.CreateInstance(typeof(T)));
         }
 
-        emptyFallback = CreateEmptyFallback();
-        
-        // Set up the invalid fallback.
-        invalidFallback = s_throwFallback;
-
-        return true;
+        // Throw if we can't set to null or default value.
+        return s_throwFallback;
     }
     
     private static readonly Lazy<MethodInfo> s_tryCreateSplitGenericMapMethod = new(
@@ -205,7 +185,7 @@ public static class AutoMapper
         // First, get the pipeline for the element. This is used to convert individual values
         // to be added to/included in the collection.
         var elementPipeline = new ValuePipeline<TElement>();
-        if (!TrySetupValuePipeline(elementPipeline, emptyValueStrategy, isAutoMapping: true))
+        if (!TrySetupValuePipeline(member, elementPipeline, emptyValueStrategy, isAutoMapping: true))
         {
             map = null;
             return false;
@@ -636,7 +616,7 @@ public static class AutoMapper
     internal static bool TryCreateGenericDictionaryMap<TKey, TValue>(MemberInfo? member, Type dictionaryType, FallbackStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out ManyToOneDictionaryMap<TKey, TValue>? map) where TKey : notnull
     {
         var valuePipeline = new ValuePipeline<TValue>();
-        if (!TrySetupValuePipeline(valuePipeline, emptyValueStrategy, isAutoMapping))
+        if (!TrySetupValuePipeline(member, valuePipeline, emptyValueStrategy, isAutoMapping))
         {
             map = null;
             return false;

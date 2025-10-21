@@ -12,30 +12,94 @@ namespace ExcelMapper.Tests;
 public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 {
     [Fact]
-    public void WithCellValueMappers_ValidMappers_ThrowsArgumentNullException()
+    public void WithMappers_ParamsArrayValidMappers_Success()
     {
         var map = Map(t => t.Value);
-        var mapper1 = Assert.Single(map.Pipeline.CellValueMappers);
+        var mapper1 = Assert.Single(map.Pipeline.Mappers);
         var mapper2 = new BoolMapper();
+        Assert.Same(map, map.WithMappers(mapper2));
+        Assert.Equal([mapper2], map.Pipeline.Mappers);
 
-        Assert.Same(map, map.WithCellValueMappers(mapper2));
-        Assert.Equal([mapper1, mapper2], map.Pipeline.CellValueMappers);
+        // Multiple.
+        var mapper3 = new DateTimeMapper();
+        var mapper4 = new TimeSpanMapper();
+        Assert.Same(map, map.WithMappers(mapper3, mapper4));
+        Assert.Equal([mapper3, mapper4], map.Pipeline.Mappers);
+
     }
 
     [Fact]
-    public void WithCellValueMappers_NullMappers_ThrowsArgumentNullException()
+    public void WithMappers_ParamsArrayEmptyMappers_Success()
     {
         var map = Map(t => t.Value);
-
-        Assert.Throws<ArgumentNullException>("mappers", () => map.WithCellValueMappers(null!));
+        var mapper1 = Assert.Single(map.Pipeline.Mappers);
+        Assert.Same(map, map.WithMappers([]));
+        Assert.Empty(map.Pipeline.Mappers);
     }
 
     [Fact]
-    public void WithCellValueMappers_NullMapperInMapperss_ThrowsArgumentNullException()
+    public void WithMappers_ParamsArrayNullMappers_ThrowsArgumentNullException()
     {
         var map = Map(t => t.Value);
+        Assert.Throws<ArgumentNullException>("mappers", () => map.WithMappers(null!));
+    }
 
-        Assert.Throws<ArgumentNullException>("mappers", () => map.WithCellValueMappers([null!]));
+    [Fact]
+    public void WithMappers_ParamsArrayNullMapperInMappers_ThrowsArgumentException()
+    {
+        var map = Map(t => t.Value);
+        var mapper = Assert.Single(map.Pipeline.Mappers);
+        Assert.Throws<ArgumentException>("mappers", () => map.WithMappers([null!]));
+        Assert.Same(mapper, Assert.Single(map.Pipeline.Mappers));
+
+        // Null in middle does not affect existing mappers.
+        Assert.Throws<ArgumentException>("mappers", () => map.WithMappers([new BoolMapper(), null!]));
+        Assert.Same(mapper, Assert.Single(map.Pipeline.Mappers));
+    }
+    
+    [Fact]
+    public void WithMappers_ParamsIEnumerableValidMappers_Success()
+    {
+        var map = Map(t => t.Value);
+        var mapper1 = Assert.Single(map.Pipeline.Mappers);
+        var mapper2 = new BoolMapper();
+        Assert.Same(map, map.WithMappers((IEnumerable<ICellMapper>)[mapper2]));
+        Assert.Equal([mapper2], map.Pipeline.Mappers);
+
+        // Multiple.
+        var mapper3 = new DateTimeMapper();
+        var mapper4 = new TimeSpanMapper();
+        Assert.Same(map, map.WithMappers((IEnumerable<ICellMapper>)[mapper3, mapper4]));
+        Assert.Equal([mapper3, mapper4], map.Pipeline.Mappers);
+    }
+
+    [Fact]
+    public void WithMappers_ParamsIEnumerableEmptyMappers_Success()
+    {
+        var map = Map(t => t.Value);
+        var mapper1 = Assert.Single(map.Pipeline.Mappers);
+        Assert.Same(map, map.WithMappers((IEnumerable<ICellMapper>)[]));
+        Assert.Empty(map.Pipeline.Mappers);
+    }
+
+    [Fact]
+    public void WithMappers_ParamsIEnumerableNullMappers_ThrowsArgumentNullException()
+    {
+        var map = Map(t => t.Value);
+        Assert.Throws<ArgumentNullException>("mappers", () => map.WithMappers((IEnumerable<ICellMapper>)null!));
+    }
+
+    [Fact]
+    public void WithMappers_ParamsIEnumerableNullMapperInMappers_ThrowsArgumentException()
+    {
+        var map = Map(t => t.Value);
+        var mapper = Assert.Single(map.Pipeline.Mappers);
+        Assert.Throws<ArgumentException>("mappers", () => map.WithMappers((IEnumerable<ICellMapper>)[null!]));
+        Assert.Same(mapper, Assert.Single(map.Pipeline.Mappers));
+
+        // Null in middle does not affect existing mappers.
+        Assert.Throws<ArgumentException>("mappers", () => map.WithMappers([new BoolMapper(), null!]));
+        Assert.Same(mapper, Assert.Single(map.Pipeline.Mappers));
     }
 
     [Fact]
@@ -47,10 +111,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateTimeValue);
         Assert.Same(map, map.WithMapping(dictionaryMapping, comparer));
 
-        var item = map.Pipeline.CellValueMappers.OfType<DictionaryMapper<DateTime>>().Single();
+        var item = map.Pipeline.Mappers.OfType<DictionaryMapper<DateTime>>().Single();
         Assert.NotSame(dictionaryMapping, item.MappingDictionary);
         Assert.Equal(dictionaryMapping, item.MappingDictionary);
-
         Assert.Same(comparer, Assert.IsType<Dictionary<string, DateTime>>(item.MappingDictionary).Comparer);
     }
 
@@ -58,7 +121,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithMapping_NullMapping_ThrowsArgumentNullException()
     {
         var map = Map(t => t.Value);
-
         Assert.Throws<ArgumentNullException>("mappingDictionary", () => map.WithMapping((Dictionary<string, string>)null!));
     }
 
@@ -68,8 +130,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.Value);
         Assert.Same(map, map.WithTrim());
 
-        var transformer = Assert.Single(map.Pipeline.CellValueTransformers);
-        Assert.IsType<TrimCellValueTransformer>(transformer);
+        var transformer = Assert.Single(map.Pipeline.Transformers);
+        Assert.IsType<TrimCellTransformer>(transformer);
     }
 
     public static IEnumerable<object[]> Formats_TestData()
@@ -88,7 +150,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateTimeValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
+        DateTimeMapper item = map.Pipeline.Mappers.OfType<DateTimeMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -98,12 +160,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var formatsArray = formats.ToArray();
 
-        var map = Map(t => t.DateTimeValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.DateTimeValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
+        DateTimeMapper item = map.Pipeline.Mappers.OfType<DateTimeMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -114,7 +174,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateTimeValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
+        DateTimeMapper item = map.Pipeline.Mappers.OfType<DateTimeMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -122,12 +182,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_DateTimeNotMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        var map = Map(t => t.DateTimeValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.DateTimeValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
+        DateTimeMapper item = map.Pipeline.Mappers.OfType<DateTimeMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -135,7 +193,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateTimeNullFormats_ThrowsArgumentNullException()
     {
         var map = Map(t => t.DateTimeValue);
-
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
     }
@@ -144,7 +201,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateTimeEmptyFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.DateTimeValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
     }
@@ -153,7 +209,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateTimeNullValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.DateTimeValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
     }
@@ -162,7 +217,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateTimeEmptyValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.DateTimeValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
@@ -176,7 +230,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateTimeValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
+        DateTimeMapper item = map.Pipeline.Mappers.OfType<DateTimeMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -186,12 +240,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var formatsArray = formats.ToArray();
 
-        var map = Map(t => t.NullableDateTimeValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.NullableDateTimeValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
+        DateTimeMapper item = map.Pipeline.Mappers.OfType<DateTimeMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -202,7 +254,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateTimeValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
+        DateTimeMapper item = map.Pipeline.Mappers.OfType<DateTimeMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -210,12 +262,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_DateTimeNullableNotMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        var map = Map(t => t.NullableDateTimeValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.NullableDateTimeValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateTimeMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeMapper>().Single();
+        DateTimeMapper item = map.Pipeline.Mappers.OfType<DateTimeMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -223,7 +273,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateTimeNullableNullFormats_ThrowsArgumentNullException()
     {
         var map = Map(t => t.NullableDateTimeValue);
-
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
     }
@@ -232,7 +281,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateTimeNullableEmptyFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.NullableDateTimeValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
     }
@@ -241,7 +289,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateTimeNullableNullValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.NullableDateTimeValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
     }
@@ -250,7 +297,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateTimeNullableEmptyValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.NullableDateTimeValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
@@ -264,7 +310,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateTimeOffsetValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateTimeOffsetMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeOffsetMapper>().Single();
+        DateTimeOffsetMapper item = map.Pipeline.Mappers.OfType<DateTimeOffsetMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -274,12 +320,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var formatsArray = formats.ToArray();
 
-        var map = Map(t => t.DateTimeOffsetValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.DateTimeOffsetValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateTimeOffsetMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeOffsetMapper>().Single();
+        DateTimeOffsetMapper item = map.Pipeline.Mappers.OfType<DateTimeOffsetMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -290,7 +334,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateTimeOffsetValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateTimeOffsetMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeOffsetMapper>().Single();
+        DateTimeOffsetMapper item = map.Pipeline.Mappers.OfType<DateTimeOffsetMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -298,12 +342,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_DateTimeOffsetNotMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        var map = Map(t => t.DateTimeOffsetValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.DateTimeOffsetValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateTimeOffsetMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeOffsetMapper>().Single();
+        DateTimeOffsetMapper item = map.Pipeline.Mappers.OfType<DateTimeOffsetMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -311,7 +353,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateTimeOffsetNullFormats_ThrowsArgumentNullException()
     {
         var map = Map(t => t.DateTimeOffsetValue);
-
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
     }
@@ -320,7 +361,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateTimeOffsetEmptyFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.DateTimeOffsetValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
     }
@@ -329,7 +369,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateTimeOffsetNullValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.DateTimeOffsetValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
     }
@@ -338,7 +377,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateTimeOffsetEmptyValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.DateTimeOffsetValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
@@ -352,7 +390,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateTimeOffsetValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateTimeOffsetMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeOffsetMapper>().Single();
+        DateTimeOffsetMapper item = map.Pipeline.Mappers.OfType<DateTimeOffsetMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -362,12 +400,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var formatsArray = formats.ToArray();
 
-        var map = Map(t => t.NullableDateTimeOffsetValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.NullableDateTimeOffsetValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateTimeOffsetMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeOffsetMapper>().Single();
+        DateTimeOffsetMapper item = map.Pipeline.Mappers.OfType<DateTimeOffsetMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -378,7 +414,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateTimeOffsetValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateTimeOffsetMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeOffsetMapper>().Single();
+        DateTimeOffsetMapper item = map.Pipeline.Mappers.OfType<DateTimeOffsetMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -386,12 +422,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_DateTimeOffsetNullableNotMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        var map = Map(t => t.NullableDateTimeOffsetValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.NullableDateTimeOffsetValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateTimeOffsetMapper item = map.Pipeline.CellValueMappers.OfType<DateTimeOffsetMapper>().Single();
+        DateTimeOffsetMapper item = map.Pipeline.Mappers.OfType<DateTimeOffsetMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -399,7 +433,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateTimeOffsetNullableNullFormats_ThrowsArgumentNullException()
     {
         var map = Map(t => t.NullableDateTimeOffsetValue);
-
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
     }
@@ -408,7 +441,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateTimeOffsetNullableEmptyFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.NullableDateTimeOffsetValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
     }
@@ -417,7 +449,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateTimeOffsetNullableNullValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.NullableDateTimeOffsetValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
     }
@@ -426,7 +457,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateTimeOffsetNullableEmptyValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.NullableDateTimeOffsetValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
@@ -440,7 +470,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.TimeSpanValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        TimeSpanMapper item = map.Pipeline.CellValueMappers.OfType<TimeSpanMapper>().Single();
+        TimeSpanMapper item = map.Pipeline.Mappers.OfType<TimeSpanMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -450,12 +480,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var formatsArray = formats.ToArray();
 
-        var map = Map(t => t.TimeSpanValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.TimeSpanValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        TimeSpanMapper item = map.Pipeline.CellValueMappers.OfType<TimeSpanMapper>().Single();
+        TimeSpanMapper item = map.Pipeline.Mappers.OfType<TimeSpanMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -466,7 +494,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.TimeSpanValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        TimeSpanMapper item = map.Pipeline.CellValueMappers.OfType<TimeSpanMapper>().Single();
+        TimeSpanMapper item = map.Pipeline.Mappers.OfType<TimeSpanMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -474,12 +502,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_TimeSpanNotMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        var map = Map(t => t.TimeSpanValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.TimeSpanValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        TimeSpanMapper item = map.Pipeline.CellValueMappers.OfType<TimeSpanMapper>().Single();
+        TimeSpanMapper item = map.Pipeline.Mappers.OfType<TimeSpanMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -487,7 +513,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_TimeSpanNullFormats_ThrowsArgumentNullException()
     {
         var map = Map(t => t.TimeSpanValue);
-
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
     }
@@ -496,7 +521,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_TimeSpanEmptyFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.TimeSpanValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
     }
@@ -505,7 +529,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_TimeSpanNullValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.TimeSpanValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
     }
@@ -514,7 +537,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_TimeSpanEmptyValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.TimeSpanValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
@@ -528,7 +550,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableTimeSpanValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        TimeSpanMapper item = map.Pipeline.CellValueMappers.OfType<TimeSpanMapper>().Single();
+        TimeSpanMapper item = map.Pipeline.Mappers.OfType<TimeSpanMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -538,12 +560,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var formatsArray = formats.ToArray();
 
-        var map = Map(t => t.NullableTimeSpanValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.NullableTimeSpanValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        TimeSpanMapper item = map.Pipeline.CellValueMappers.OfType<TimeSpanMapper>().Single();
+        TimeSpanMapper item = map.Pipeline.Mappers.OfType<TimeSpanMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -554,7 +574,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableTimeSpanValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        TimeSpanMapper item = map.Pipeline.CellValueMappers.OfType<TimeSpanMapper>().Single();
+        TimeSpanMapper item = map.Pipeline.Mappers.OfType<TimeSpanMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -562,12 +582,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_TimeSpanNullableNotMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        var map = Map(t => t.NullableTimeSpanValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.NullableTimeSpanValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        TimeSpanMapper item = map.Pipeline.CellValueMappers.OfType<TimeSpanMapper>().Single();
+        TimeSpanMapper item = map.Pipeline.Mappers.OfType<TimeSpanMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -575,7 +593,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_TimeSpanNullableNullFormats_ThrowsArgumentNullException()
     {
         var map = Map(t => t.NullableTimeSpanValue);
-
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
     }
@@ -584,7 +601,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_TimeSpanNullableEmptyFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.NullableTimeSpanValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
     }
@@ -593,7 +609,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_TimeSpanNullableNullValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.NullableTimeSpanValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
     }
@@ -602,7 +617,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_TimeSpanNullableEmptyValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.NullableTimeSpanValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
@@ -616,7 +630,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateOnlyValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateOnlyMapper item = map.Pipeline.CellValueMappers.OfType<DateOnlyMapper>().Single();
+        DateOnlyMapper item = map.Pipeline.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -626,12 +640,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var formatsArray = formats.ToArray();
 
-        var map = Map(t => t.DateOnlyValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.DateOnlyValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateOnlyMapper item = map.Pipeline.CellValueMappers.OfType<DateOnlyMapper>().Single();
+        DateOnlyMapper item = map.Pipeline.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -642,7 +654,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateOnlyValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateOnlyMapper item = map.Pipeline.CellValueMappers.OfType<DateOnlyMapper>().Single();
+        DateOnlyMapper item = map.Pipeline.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -650,12 +662,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_DateOnlyNotMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        var map = Map(t => t.DateOnlyValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.DateOnlyValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateOnlyMapper item = map.Pipeline.CellValueMappers.OfType<DateOnlyMapper>().Single();
+        DateOnlyMapper item = map.Pipeline.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -663,7 +673,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateOnlyNullFormats_ThrowsArgumentNullException()
     {
         var map = Map(t => t.DateOnlyValue);
-
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
     }
@@ -672,7 +681,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateOnlyEmptyFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.DateOnlyValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
     }
@@ -681,7 +689,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateOnlyNullValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.DateOnlyValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
     }
@@ -690,7 +697,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateOnlyEmptyValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.DateOnlyValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
@@ -704,7 +710,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateOnlyValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateOnlyMapper item = map.Pipeline.CellValueMappers.OfType<DateOnlyMapper>().Single();
+        DateOnlyMapper item = map.Pipeline.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -714,12 +720,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var formatsArray = formats.ToArray();
 
-        var map = Map(t => t.NullableDateOnlyValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.NullableDateOnlyValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateOnlyMapper item = map.Pipeline.CellValueMappers.OfType<DateOnlyMapper>().Single();
+        DateOnlyMapper item = map.Pipeline.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -730,7 +734,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateOnlyValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateOnlyMapper item = map.Pipeline.CellValueMappers.OfType<DateOnlyMapper>().Single();
+        DateOnlyMapper item = map.Pipeline.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -738,12 +742,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_DateOnlyNullableNotMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        var map = Map(t => t.NullableDateOnlyValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.NullableDateOnlyValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateOnlyMapper item = map.Pipeline.CellValueMappers.OfType<DateOnlyMapper>().Single();
+        DateOnlyMapper item = map.Pipeline.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -751,7 +753,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateOnlyNullableNullFormats_ThrowsArgumentNullException()
     {
         var map = Map(t => t.NullableDateOnlyValue);
-
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
     }
@@ -760,7 +761,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateOnlyNullableEmptyFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.NullableDateOnlyValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
     }
@@ -769,7 +769,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateOnlyNullableNullValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.NullableDateOnlyValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
     }
@@ -778,7 +777,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_DateOnlyNullableEmptyValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.NullableDateOnlyValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
@@ -792,7 +790,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.TimeOnlyValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        TimeOnlyMapper item = map.Pipeline.CellValueMappers.OfType<TimeOnlyMapper>().Single();
+        TimeOnlyMapper item = map.Pipeline.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -802,12 +800,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var formatsArray = formats.ToArray();
 
-        var map = Map(t => t.TimeOnlyValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.TimeOnlyValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        TimeOnlyMapper item = map.Pipeline.CellValueMappers.OfType<TimeOnlyMapper>().Single();
+        TimeOnlyMapper item = map.Pipeline.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -818,7 +814,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.TimeOnlyValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        TimeOnlyMapper item = map.Pipeline.CellValueMappers.OfType<TimeOnlyMapper>().Single();
+        TimeOnlyMapper item = map.Pipeline.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -826,12 +822,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_TimeOnlyNotMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        var map = Map(t => t.TimeOnlyValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.TimeOnlyValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        TimeOnlyMapper item = map.Pipeline.CellValueMappers.OfType<TimeOnlyMapper>().Single();
+        TimeOnlyMapper item = map.Pipeline.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -839,7 +833,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_TimeOnlyNullFormats_ThrowsArgumentNullException()
     {
         var map = Map(t => t.TimeOnlyValue);
-
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
     }
@@ -848,7 +841,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_TimeOnlyEmptyFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.TimeOnlyValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
     }
@@ -857,7 +849,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_TimeOnlyNullValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.TimeOnlyValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
     }
@@ -866,7 +857,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_TimeOnlyEmptyValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.TimeOnlyValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
@@ -880,7 +870,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableTimeOnlyValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        TimeOnlyMapper item = map.Pipeline.CellValueMappers.OfType<TimeOnlyMapper>().Single();
+        TimeOnlyMapper item = map.Pipeline.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -890,12 +880,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var formatsArray = formats.ToArray();
 
-        var map = Map(t => t.NullableTimeOnlyValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.NullableTimeOnlyValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        TimeOnlyMapper item = map.Pipeline.CellValueMappers.OfType<TimeOnlyMapper>().Single();
+        TimeOnlyMapper item = map.Pipeline.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Same(formatsArray, item.Formats);
     }
 
@@ -906,7 +894,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableTimeOnlyValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        TimeOnlyMapper item = map.Pipeline.CellValueMappers.OfType<TimeOnlyMapper>().Single();
+        TimeOnlyMapper item = map.Pipeline.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -914,12 +902,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_TimeOnlyNullableNotMappedIEnumerableString_Success(ICollection<string> formats)
     {
-        var map = Map(t => t.NullableTimeOnlyValue);
-        map.Pipeline.RemoveCellValueMapper(0);
-
+        var map = Map(t => t.NullableTimeOnlyValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        TimeOnlyMapper item = map.Pipeline.CellValueMappers.OfType<TimeOnlyMapper>().Single();
+        TimeOnlyMapper item = map.Pipeline.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Equal(formats, item.Formats);
     }
 
@@ -927,7 +913,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_TimeOnlyNullableNullFormats_ThrowsArgumentNullException()
     {
         var map = Map(t => t.NullableTimeOnlyValue);
-
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
     }
@@ -936,7 +921,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_TimeOnlyNullableEmptyFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.NullableTimeOnlyValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
     }
@@ -945,7 +929,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_TimeOnlyNullableNullValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.NullableTimeOnlyValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
     }
@@ -954,7 +937,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithFormats_TimeOnlyNullableEmptyValueInFormats_ThrowsArgumentException()
     {
         var map = Map(t => t.NullableTimeOnlyValue);
-
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
@@ -968,7 +950,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
             Assert.Equal("stringValue", stringValue);
             return "abc";
         }));
-        ConvertUsingMapper item = map.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
+        ConvertUsingMapper item = map.Pipeline.Mappers.OfType<ConvertUsingMapper>().Single();
 
         var result = item.Converter(new ReadCellResult(0, "stringValue", preserveFormatting: false));
         Assert.True(result.Succeeded);
@@ -987,7 +969,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 
         var map = Map(t => t.Value);
         Assert.Same(map, map.WithConverter(converter));
-        ConvertUsingMapper item = map.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
+        ConvertUsingMapper item = map.Pipeline.Mappers.OfType<ConvertUsingMapper>().Single();
 
         var result = item.Converter(new ReadCellResult(0, "stringValue", preserveFormatting: false));
         Assert.False(result.Succeeded);
@@ -1004,7 +986,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
             Assert.Equal("stringValue", readResult.StringValue);
             return CellMapperResult.Success("abc");
         }));
-        ConvertUsingMapper item = map.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
+        ConvertUsingMapper item = map.Pipeline.Mappers.OfType<ConvertUsingMapper>().Single();
 
         var result = item.Converter(new ReadCellResult(0, "stringValue", preserveFormatting: false));
         Assert.True(result.Succeeded);
@@ -1023,8 +1005,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 
         var map = Map(t => t.Value);
         Assert.Same(map, map.WithConverter(converter));
-        ConvertUsingMapper item = map.Pipeline.CellValueMappers.OfType<ConvertUsingMapper>().Single();
-
+        ConvertUsingMapper item = map.Pipeline.Mappers.OfType<ConvertUsingMapper>().Single();
         Assert.Throws<NotSupportedException>(() => item.Converter(new ReadCellResult(0, "stringValue", preserveFormatting: false)));
     }
 
@@ -1032,7 +1013,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithConverter_NullConverter_ThrowsArgumentNullException()
     {
         var map = Map(t => t.Value);
-
         Assert.Throws<ArgumentNullException>("converter", () => map.WithConverter((ConvertUsingSimpleMapperDelegate<string>)null!));
         Assert.Throws<ArgumentNullException>("converter", () => map.WithConverter(null!));
     }
@@ -1047,7 +1027,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 
         var emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
         var invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
-
         Assert.Same(emptyFallback, invalidFallback);
         Assert.Equal(value, emptyFallback.Value);
         Assert.Equal(value, invalidFallback.Value);
@@ -1063,7 +1042,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 
         var emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
         var invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
-
         Assert.Same(emptyFallback, invalidFallback);
         Assert.Equal(value, emptyFallback.Value);
         Assert.Equal(value, invalidFallback.Value);
@@ -1074,7 +1052,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var map = Map(t => t.Value);
         Assert.Same(map, map.WithThrowingFallback());
-
         Assert.Same(map.Pipeline.EmptyFallback, map.Pipeline.InvalidFallback);
         Assert.IsType<ThrowFallback>(map.Pipeline.EmptyFallback);
         Assert.IsType<ThrowFallback>(map.Pipeline.InvalidFallback);
@@ -1085,7 +1062,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var map = Map(t => t.Value).WithEmptyFallback("Empty").WithInvalidFallback("Invalid");
         Assert.Same(map, map.WithThrowingFallback());
-
         Assert.Same(map.Pipeline.EmptyFallback, map.Pipeline.InvalidFallback);
         Assert.IsType<ThrowFallback>(map.Pipeline.EmptyFallback);
         Assert.IsType<ThrowFallback>(map.Pipeline.InvalidFallback);
@@ -1097,7 +1073,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var fallback = new FixedValueFallback("Fallback");
         var map = Map(t => t.Value);
         Assert.Same(map, map.WithFallbackItem(fallback));
-
         Assert.Same(map.Pipeline.EmptyFallback, map.Pipeline.InvalidFallback);
         Assert.Same(fallback, map.Pipeline.EmptyFallback);
         Assert.Same(fallback, map.Pipeline.InvalidFallback);
@@ -1109,7 +1084,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var fallback = new FixedValueFallback("Value");
         var map = Map(t => t.Value).WithEmptyFallback("Empty").WithInvalidFallback("Invalid");
         Assert.Same(map, map.WithFallbackItem(fallback));
-
         Assert.Same(map.Pipeline.EmptyFallback, map.Pipeline.InvalidFallback);
         Assert.Same(fallback, map.Pipeline.EmptyFallback);
         Assert.Same(fallback, map.Pipeline.InvalidFallback);
@@ -1154,7 +1128,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var map = Map(t => t.Value);
         Assert.Same(map, map.WithThrowingEmptyFallback());
-
         Assert.IsType<ThrowFallback>(map.Pipeline.EmptyFallback);
     }
 
@@ -1163,7 +1136,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var map = Map(t => t.Value).WithInvalidFallback("Invalid");
         Assert.Same(map, map.WithThrowingEmptyFallback());
-
         Assert.IsType<ThrowFallback>(map.Pipeline.EmptyFallback);
 
         var invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
@@ -1176,7 +1148,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var emptyFallback = new FixedValueFallback(10);
         var map = Map(t => t.Value);
         Assert.Same(map, map.WithEmptyFallbackItem(emptyFallback));
-
         Assert.Same(emptyFallback, map.Pipeline.EmptyFallback);
     }
 
@@ -1186,7 +1157,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var emptyFallback = new FixedValueFallback(10);
         var map = Map(t => t.Value).WithInvalidFallback("Invalid");
         Assert.Same(map, map.WithEmptyFallbackItem(emptyFallback));
-
         Assert.Same(emptyFallback, map.Pipeline.EmptyFallback);
 
         var invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
@@ -1232,7 +1202,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var map = Map(t => t.Value);
         Assert.Same(map, map.WithThrowingInvalidFallback());
-
         Assert.IsType<ThrowFallback>(map.Pipeline.InvalidFallback);
     }
 
@@ -1241,7 +1210,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var map = Map(t => t.Value).WithEmptyFallback("Empty");
         Assert.Same(map, map.WithThrowingInvalidFallback());
-
         Assert.IsType<ThrowFallback>(map.Pipeline.InvalidFallback);
         var emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
         Assert.Equal("Empty", emptyFallback.Value);
@@ -1253,7 +1221,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var invalidFallback = new FixedValueFallback(10);
         var map = Map(t => t.Value);
         Assert.Same(map, map.WithInvalidFallbackItem(invalidFallback));
-
         Assert.Same(invalidFallback, map.Pipeline.InvalidFallback);
     }
 
@@ -1263,7 +1230,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var invalidFallback = new FixedValueFallback(10);
         var map = Map(t => t.Value).WithEmptyFallback("Empty");
         Assert.Same(map, map.WithInvalidFallbackItem(invalidFallback));
-
         Assert.Same(invalidFallback, map.Pipeline.InvalidFallback);
         var emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
         Assert.Equal("Empty", emptyFallback.Value);

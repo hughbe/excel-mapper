@@ -58,9 +58,9 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>
         return true;
     }
 
-    public IReadOnlyList<ICellTransformer> CellValueTransformers => Pipeline.CellValueTransformers;
+    public IList<ICellTransformer> Transformers => Pipeline.Transformers;
 
-    public IReadOnlyList<ICellMapper> CellValueMappers => Pipeline.CellValueMappers;
+    public IList<ICellMapper> Mappers => Pipeline.Mappers;
 
     public IFallbackItem? EmptyFallback
     {
@@ -73,12 +73,6 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>
         get => Pipeline.InvalidFallback;
         set => Pipeline.InvalidFallback = value;
     }
-
-    public void AddCellValueMapper(ICellMapper mapper) => Pipeline.AddCellValueMapper(mapper);
-
-    public void AddCellValueTransformer(ICellTransformer transformer) => Pipeline.AddCellValueTransformer(transformer);
-
-    public void RemoveCellValueMapper(int index) => Pipeline.RemoveCellValueMapper(index);
 
     /// <summary>
     /// Specifies a fixed fallback to be used if the value of a cell is empty or cannot be mapped.
