@@ -1,6 +1,6 @@
 namespace ExcelMapper.Tests;
 
-public class ExcelDefaultValueAttributeTests
+public class ExcelInvalidValueAttributeTests
 {
     [Theory]
     [InlineData(null)]
@@ -8,7 +8,7 @@ public class ExcelDefaultValueAttributeTests
     [InlineData(1)]
     public void Ctor_Object(object? value)
     {
-        var attribute = new ExcelDefaultValueAttribute(value);
+        var attribute = new ExcelInvalidValueAttribute(value);
         Assert.Equal(value, attribute.Value);
     }
 }

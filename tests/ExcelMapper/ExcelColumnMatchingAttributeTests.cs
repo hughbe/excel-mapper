@@ -6,10 +6,12 @@ namespace ExcelMapper.Tests;
 
 public class ExcelColumnMatchingAttributeTests
 {
-    [Fact]
-    public void Ctor_Type()
+    [Theory]
+    [InlineData(typeof(ColumnMatcher))]
+    [InlineData(typeof(RegexColumnMatcher))]
+    [InlineData(typeof(NoConstructorExcelColumnMatcher))]
+    public void Ctor_Type(Type matcherType)
     {
-        var matcherType = typeof(ColumnMatcher);
         var attribute = new ExcelColumnMatchingAttribute(matcherType);
         Assert.Same(matcherType, attribute.Type);
         Assert.Null(attribute.ConstructorArguments);
@@ -18,13 +20,39 @@ public class ExcelColumnMatchingAttributeTests
     [Fact]
     public void Ctor_NullMatcherType_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>("matcherType", () => new ExcelColumnMatchingAttribute((Type)null!));
+        Assert.Throws<ArgumentNullException>("matcherType", () => new ExcelColumnMatchingAttribute(null!));
     }
 
-    [Fact]
-    public void Ctor_InvalidMatcherType_ThrowsArgumentException()
+
+    [Theory]
+    [InlineData(typeof(IExcelColumnMatcher))]
+    [InlineData(typeof(ISubExcelColumnMatcher))]
+    [InlineData(typeof(AbstractExcelColumnMatcher))]
+    [InlineData(typeof(int))]
+    [InlineData(typeof(object))]
+    [InlineData(typeof(ExcelColumnMatchingAttributeTests))]
+    public void Ctor_InvalidMatcherType_ThrowsArgumentException(Type matcherType)
     {
-        Assert.Throws<ArgumentException>("matcherType", () => new ExcelColumnMatchingAttribute(typeof(IExcelColumnMatcher)));
+        Assert.Throws<ArgumentException>("matcherType", () => new ExcelColumnMatchingAttribute(matcherType));
+    }
+
+    private interface ISubExcelColumnMatcher : IExcelColumnMatcher
+    {
+    }
+
+    private abstract class AbstractExcelColumnMatcher : IExcelColumnMatcher
+    {
+        public abstract bool ColumnMatches(ExcelSheet sheet, int columnIndex);
+    }
+
+    private class NoConstructorExcelColumnMatcher : IExcelColumnMatcher
+    {
+        private NoConstructorExcelColumnMatcher()
+        {
+        }
+
+        public bool ColumnMatches(ExcelSheet sheet, int columnIndex)
+            => throw new NotImplementedException();
     }
     
     [Fact]

@@ -2,7 +2,7 @@
 
 namespace ExcelMapper.Transformers.Tests;
 
-public class TrimCellTransformerTests
+public class TrimStringCellTransformerTests
 {
     [Theory]
     [InlineData(null, null)]
@@ -10,7 +10,7 @@ public class TrimCellTransformerTests
     [InlineData(" abc ", "abc")]
     public void TransformStringValue_Invoke_ReturnsExpected(string? stringValue, string? expected)
     {
-        var transformer = new TrimCellTransformer();
+        var transformer = new TrimStringCellTransformer();
         Assert.Equal(expected, transformer.TransformStringValue(null!, 0, new ReadCellResult(0, stringValue, preserveFormatting: false)));
     }
 }

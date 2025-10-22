@@ -6,10 +6,12 @@ namespace ExcelMapper.Tests;
 
 public class ExcelColumnsMatchingAttributeTests
 {
-    [Fact]
-    public void Ctor_Type()
+    [Theory]
+    [InlineData(typeof(ColumnMatcher))]
+    [InlineData(typeof(RegexColumnMatcher))]
+    [InlineData(typeof(NoConstructorExcelColumnMatcher))]
+    public void Ctor_Type(Type matcherType)
     {
-        var matcherType = typeof(ColumnMatcher);
         var attribute = new ExcelColumnsMatchingAttribute(matcherType);
         Assert.Same(matcherType, attribute.Type);
         Assert.Null(attribute.ConstructorArguments);
@@ -21,10 +23,35 @@ public class ExcelColumnsMatchingAttributeTests
         Assert.Throws<ArgumentNullException>("matcherType", () => new ExcelColumnsMatchingAttribute((Type)null!));
     }
 
-    [Fact]
-    public void Ctor_InvalidMatcherType_ThrowsArgumentException()
+    [Theory]
+    [InlineData(typeof(IExcelColumnMatcher))]
+    [InlineData(typeof(ISubExcelColumnMatcher))]
+    [InlineData(typeof(AbstractExcelColumnMatcher))]
+    [InlineData(typeof(int))]
+    [InlineData(typeof(object))]
+    [InlineData(typeof(ExcelColumnsMatchingAttributeTests))]
+    public void Ctor_InvalidMatcherType_ThrowsArgumentException(Type matcherType)
     {
-        Assert.Throws<ArgumentException>("matcherType", () => new ExcelColumnsMatchingAttribute(typeof(IExcelColumnMatcher)));
+        Assert.Throws<ArgumentException>("matcherType", () => new ExcelColumnsMatchingAttribute(matcherType));
+    }
+
+    private interface ISubExcelColumnMatcher : IExcelColumnMatcher
+    {
+    }
+
+    private abstract class AbstractExcelColumnMatcher : IExcelColumnMatcher
+    {
+        public abstract bool ColumnMatches(ExcelSheet sheet, int columnIndex);
+    }
+
+    private class NoConstructorExcelColumnMatcher : IExcelColumnMatcher
+    {
+        private NoConstructorExcelColumnMatcher()
+        {
+        }
+
+        public bool ColumnMatches(ExcelSheet sheet, int columnIndex)
+            => throw new NotImplementedException();
     }
     
     [Fact]

@@ -25,17 +25,17 @@ Built on top of [ExcelDataReader](https://github.com/ExcelDataReader/ExcelDataRe
 using ExcelMapper;
 
 // Define your model
-public class Product
+public class Employee
 {
     public string Name { get; set; }
-    public decimal Price { get; set; }
-    public int Stock { get; set; }
+    public string Department { get; set; }
+    public decimal Salary { get; set; }
 }
 
 // Read Excel data
-using var importer = new ExcelImporter("products.xlsx");
+using var importer = new ExcelImporter("employees.xlsx");
 var sheet = importer.ReadSheet();
-var products = sheet.ReadRows<Product>().ToArray();
+var employees = sheet.ReadRows<Employee>().ToArray();
 ```
 
 That's it! ExcelMapper automatically maps columns to properties by name.
@@ -57,8 +57,17 @@ That's it! ExcelMapper automatically maps columns to properties by name.
   - [Nested Objects](#nested-objects)
   - [Enums](#enums)
   - [Custom Converters](#custom-converters)
+- [Special Scenarios](#special-scenarios)
+  - [Sheets Without Headers](#sheets-without-headers)
+  - [Headers Not in First Row](#headers-not-in-first-row)
 - [Error Handling](#error-handling)
 - [Performance Tips](#performance-tips)
+- [Supported Types](#supported-types)
+- [CSV Support](#csv-support)
+- [Common Issues & Troubleshooting](#common-issues--troubleshooting)
+- [Best Practices](#best-practices)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Installation
 
@@ -70,27 +79,27 @@ dotnet add package ExcelDataReader.Mapping
 
 ### Simple Example
 
-| Name          | Email              | Age |
-|---------------|--------------------|-----|
-| John Smith    | john@example.com   | 32  |
-| Jane Doe      | jane@example.com   | 28  |
+| Name          | Department  | Salary  |
+|---------------|-------------|---------|
+| Alice Johnson | Engineering | 95000   |
+| Bob Smith     | Marketing   | 78000   |
 
 ```csharp
 using ExcelMapper;
 
-public class Person
+public class Employee
 {
     public string Name { get; set; }
-    public string Email { get; set; }
-    public int Age { get; set; }
+    public string Department { get; set; }
+    public decimal Salary { get; set; }
 }
 
-using var importer = new ExcelImporter("people.xlsx");
+using var importer = new ExcelImporter("employees.xlsx");
 var sheet = importer.ReadSheet();
-var people = sheet.ReadRows<Person>().ToArray();
+var employees = sheet.ReadRows<Employee>().ToArray();
 
-Console.WriteLine(people[0].Name);  // John Smith
-Console.WriteLine(people[1].Age);   // 28
+Console.WriteLine(employees[0].Name);      // Alice Johnson
+Console.WriteLine(employees[1].Salary);    // 78000
 ```
 
 ## Reading Workbooks
@@ -171,27 +180,27 @@ if (importer.TryReadSheet(1, out var secondSheet))
 
 ```csharp
 // Lazy evaluation - rows are read as you iterate
-var rows = sheet.ReadRows<Product>();
+var rows = sheet.ReadRows<Employee>();
 
 // Or materialize to array
-var products = sheet.ReadRows<Product>().ToArray();
+var employees = sheet.ReadRows<Employee>().ToArray();
 ```
 
 ### Read Specific Range
 
 ```csharp
 // Read 10 rows starting from row index 5 (after header)
-var rows = sheet.ReadRows<Product>(startIndex: 5, count: 10);
+var rows = sheet.ReadRows<Employee>(startIndex: 5, count: 10);
 ```
 
 ### Read Rows Sequentially
 
 ```csharp
 // Throws if no more rows
-var row1 = sheet.ReadRow<Product>();
+var row1 = sheet.ReadRow<Employee>();
 
 // Returns false if no more rows
-if (sheet.TryReadRow<Product>(out var row2))
+if (sheet.TryReadRow<Employee>(out var row2))
 {
     // Process row2
 }
@@ -203,7 +212,7 @@ if (sheet.TryReadRow<Product>(out var row2))
 // Enable blank line skipping (off by default for performance)
 importer.Configuration.SkipBlankLines = true;
 
-var rows = sheet.ReadRows<Product>();
+var rows = sheet.ReadRows<Employee>();
 ```
 
 ### Security: Column Count Limits
@@ -237,31 +246,29 @@ importer.Configuration.MaxColumnsPerSheet = int.MaxValue;
 ExcelMapper automatically maps public properties and fields by matching column names (case-insensitive by default).
 **Example:**
 
-| Name          | Location         | Attendance | Date       | Link                  | Revenue | Cause   |
-|---------------|------------------|------------|------------|-----------------------|---------|---------|
-| Pub Quiz      | The Blue Anchor  | 20         | 2017-07-18 | http://eventbrite.com | 100.2   | Charity |
-| Live Music    | The Raven        | 15         | 2017-07-17 | http://example.com    | 105.6   | Profit  |
+| Name          | Department  | Position        | HireDate   | Salary | Active |
+|---------------|-------------|-----------------|------------|--------|--------|
+| Alice Johnson | Engineering | Senior Engineer | 2020-03-15 | 95000  | true   |
+| Bob Smith     | Marketing   | Manager         | 2019-07-22 | 78000  | true   |
 
 ```csharp
-public enum EventCause { Profit, Charity }
-
-public class Event
+public class Employee
 {
     public string Name { get; set; }
-    public string Location { get; set; }
-    public int Attendance { get; set; }
-    public DateTime Date { get; set; }
-    public Uri Link { get; set; }
-    public EventCause Cause { get; set; }
+    public string Department { get; set; }
+    public string Position { get; set; }
+    public DateTime HireDate { get; set; }
+    public decimal Salary { get; set; }
+    public bool Active { get; set; }
 }
 
-using var importer = new ExcelImporter("events.xlsx");
+using var importer = new ExcelImporter("employees.xlsx");
 var sheet = importer.ReadSheet();
-var events = sheet.ReadRows<Event>().ToArray();
+var employees = sheet.ReadRows<Employee>().ToArray();
 
-Console.WriteLine(events[0].Name);     // Pub Quiz
-Console.WriteLine(events[0].Cause);    // Charity
-Console.WriteLine(events[1].Revenue);  // 105.6
+Console.WriteLine(employees[0].Name);       // Alice Johnson
+Console.WriteLine(employees[0].Position);   // Senior Engineer
+Console.WriteLine(employees[1].Salary);     // 78000
 ```
 
 ### Attribute-Based Mapping
@@ -274,11 +281,11 @@ Map properties to columns with different names:
 
 | Full Name      | #Age |
 |----------------|------|
-| Donald Trump   | 73   |
-| Barack Obama   | 58   |
+| Alice Johnson  | 32   |
+| Bob Smith      | 45   |
 
 ```csharp
-public class President
+public class Employee
 {
     [ExcelColumnName("Full Name")]
     public string Name { get; set; }
@@ -287,9 +294,9 @@ public class President
     public int Age { get; set; }
 }
 
-var presidents = sheet.ReadRows<President>().ToArray();
-Console.WriteLine(presidents[0].Name);  // Donald Trump
-Console.WriteLine(presidents[1].Age);   // 58
+var employees = sheet.ReadRows<Employee>().ToArray();
+Console.WriteLine(employees[0].Name);  // Alice Johnson
+Console.WriteLine(employees[1].Age);   // 45
 ```
 
 #### Multiple Column Name Variants
@@ -297,7 +304,7 @@ Console.WriteLine(presidents[1].Age);   // 58
 Try multiple column names in order of preference:
 
 ```csharp
-public class President
+public class Employee
 {
     public string Name { get; set; }
 
@@ -306,24 +313,47 @@ public class President
     public int Age { get; set; }
 
     // Or use multiple attributes
-    [ExcelColumnName("Party")]
-    [ExcelColumnName("Political Party")]
-    public string PoliticalParty { get; set; }
+    [ExcelColumnName("Dept")]
+    [ExcelColumnName("Department")]
+    public string Department { get; set; }
 }
 ```
 
 #### Pattern Matching
 
-Match columns using regex patterns:
+Match columns using regex patterns or custom matchers:
 
 ```csharp
-public class Pub
+public class Employee
 {
     public string Name { get; set; }
 
-    // Match columns like "2024 Attendance", "2025 Projected Attendance"
-    [ExcelColumnMatching(@"\d{4}.*Attendance", RegexOptions.IgnoreCase)]
-    public int Attendance { get; set; }
+    // Match columns like "2024 Salary", "2025 Projected Salary"
+    [ExcelColumnMatching(@"\d{4}.*Salary", RegexOptions.IgnoreCase)]
+    public decimal Salary { get; set; }
+}
+```
+
+For advanced matching logic, implement `IExcelColumnMatcher`:
+
+```csharp
+public class StartsWithMatcher : IExcelColumnMatcher
+{
+    private readonly string _prefix;
+
+    public StartsWithMatcher(string prefix)
+    {
+        _prefix = prefix;
+    }
+
+    public bool IsMatch(string columnName) => columnName.StartsWith(_prefix);
+}
+
+public class Employee
+{
+    // Use custom matcher to match columns starting with "Bonus_"
+    [ExcelColumnsMatching(typeof(StartsWithMatcher), ConstructorArguments = new object[] { "Bonus_" })]
+    public decimal TotalBonus { get; set; }
 }
 ```
 
@@ -333,11 +363,11 @@ Map by zero-based column index (useful for sheets without headers):
 
 |                |    |
 |----------------|----|
-| Donald Trump   | 73 |
-| Barack Obama   | 58 |
+| Alice Johnson  | 32 |
+| Bob Smith      | 45 |
 
 ```csharp
-public class President
+public class Employee
 {
     [ExcelColumnIndex(0)]
     public string Name { get; set; }
@@ -348,7 +378,7 @@ public class President
 
 var sheet = importer.ReadSheet();
 sheet.HasHeading = false;  // No header row
-var presidents = sheet.ReadRows<President>().ToArray();
+var employees = sheet.ReadRows<Employee>().ToArray();
 ```
 
 #### Multiple Index Variants
@@ -367,7 +397,7 @@ public class Data
 Skip properties if columns are missing:
 
 ```csharp
-public class President
+public class Employee
 {
     public string Name { get; set; }
 
@@ -379,13 +409,13 @@ public class President
 #### Default Values
 
 Provide default values for empty cells:
-| Name         | Age |
-|--------------|-----|
-| Donald Trump |     |
-| Barack Obama | 58  |
+| Name          | Age |
+|---------------|-----|
+| Alice Johnson |     |
+| Bob Smith     | 45  |
 
 ```csharp
-public class President
+public class Employee
 {
     public string Name { get; set; }
 
@@ -399,7 +429,7 @@ public class President
 Exclude properties from mapping:
 
 ```csharp
-public class President
+public class Employee
 {
     public string Name { get; set; }
 
@@ -415,47 +445,156 @@ public class President
 
 Read formatted string values instead of raw values:
 
-| ID    | Price  |
-|-------|--------|
-| 00123 | $45.99 |
-| 00456 | $12.50 |
+| Employee ID | Salary   |
+|-------------|----------|
+| 00123       | $95,000  |
+| 00456       | $78,000  |
 
 ```csharp
-public class Product
+public class Employee
 {
     [ExcelPreserveFormatting]
-    public string ID { get; set; }    // "00123" with leading zeros
+    public string EmployeeID { get; set; }    // "00123" with leading zeros
 
     [ExcelPreserveFormatting]
-    public string Price { get; set; }  // "$45.99" with currency symbol
+    public string Salary { get; set; }  // "$95,000" with currency symbol
 }
 ```
+
+#### Trim String Values
+
+Automatically trim whitespace from string values:
+
+| Name             |
+|------------------|
+|  Alice Johnson   |
+|   Bob Smith      |
+
+```csharp
+public class Employee
+{
+    [ExcelTrimString]
+    public string Name { get; set; }  // "Alice Johnson", "Bob Smith" (trimmed)
+}
+```
+
+Or use the fluent API:
+
+```csharp
+public class EmployeeMap : ExcelClassMap<Employee>
+{
+    public EmployeeMap()
+    {
+        Map(e => e.Name).WithTrim();
+    }
+}
+```
+
+#### Invalid Value Fallback
+
+Provide a fallback value when cell value cannot be parsed:
+
+| Name          | Age    |
+|---------------|--------|
+| Alice Johnson | 32     |
+| Bob Smith     | N/A    |
+
+```csharp
+public class Employee
+{
+    public string Name { get; set; }
+
+    [ExcelInvalidValue(-1)]
+    public int Age { get; set; }  // -1 if cell value is invalid (e.g., "N/A")
+}
+```
+
+**Note:** `ExcelInvalidValue` only handles invalid/unparseable values. Empty cells will still throw unless you also use `ExcelDefaultValue` or make the property nullable with `ExcelOptional`.
+
+#### Advanced Fallback Strategies
+
+For more complex fallback scenarios, use `IFallbackItem` types:
+
+```csharp
+public class ThrowFallbackItem : IFallbackItem
+{
+    public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult)
+    {
+        throw new InvalidOperationException("Custom error message");
+    }
+}
+
+public class Employee
+{
+    public string Name { get; set; }
+
+    // Throw custom exception when cell is empty
+    [ExcelEmptyFallback(typeof(ThrowFallbackItem))]
+    public int Age { get; set; }
+
+    // Use fallback with constructor arguments when value is invalid
+    [ExcelInvalidFallback(typeof(DefaultFallbackItem), ConstructorArguments = new object[] { -1 })]
+    public int YearsOfService { get; set; }
+}
+```
+
+**Available Fallback Attributes:**
+- `[ExcelEmptyFallback(Type)]` - Handles empty cells using custom `IFallbackItem`
+- `[ExcelInvalidFallback(Type)]` - Handles invalid/unparseable values using custom `IFallbackItem`
+
+Both attributes support `ConstructorArguments` property to pass parameters to the fallback item constructor.
+
+#### Custom Cell Transformers
+
+Transform cell values before mapping using custom transformers:
+
+```csharp
+public class UpperCaseTransformer : ICellTransformer
+{
+    public string? TransformStringValue(ExcelSheet sheet, int rowIndex, ReadCellResult readResult)
+    {
+        return readResult.StringValue?.ToUpperInvariant();
+    }
+}
+
+public class Employee
+{
+    [ExcelTransformer(typeof(UpperCaseTransformer))]
+    public string Name { get; set; }  // "ALICE JOHNSON"
+
+    // Use built-in trimming transformer
+    [ExcelTransformer(typeof(TrimStringCellTransformer))]
+    public string Department { get; set; }
+}
+```
+
+The `ExcelTransformerAttribute` accepts any type implementing `ICellTransformer` and supports `ConstructorArguments` for parameterized transformers.
 
 ### Fluent API Mapping
 
 For complex scenarios, use fluent mapping with `ExcelClassMap<T>`:
 
 ```csharp
-public class ProductMap : ExcelClassMap<Product>
+public class EmployeeMap : ExcelClassMap<Employee>
 {
-    public ProductMap()
+    public EmployeeMap()
     {
-        Map(p => p.Name)
-            .WithColumnName("Product Name");
+        Map(e => e.Name)
+            .WithColumnName("Full Name");
 
-        Map(p => p.Price)
+        Map(e => e.Salary)
             .WithColumnIndex(2);
 
-        Map(p => p.Category)
-            .WithColumnNames("Category", "Type", "Classification")
+        Map(e => e.Department)
+            .WithColumnNames("Department", "Dept", "Division")
             .MakeOptional();
     }
 }
 
 // Register the map
-importer.Configuration.RegisterClassMap<ProductMap>();
+importer.Configuration.RegisterClassMap<EmployeeMap>();
 
-var products = sheet.ReadRows<Product>();
+var employees = sheet.ReadRows<Employee>();
 ```
 
 #### Fluent Mapping Options
@@ -484,54 +623,55 @@ The fluent API provides extensive configuration options:
 
 #### Complete Fluent Example
 ```csharp
-public enum MaritalStatus { Married, Divorced, Single }
+public enum EmploymentStatus { FullTime, PartTime, Contract }
 
-public class President
+public class Employee
 {
     public string Name { get; set; }
-    public MaritalStatus Status { get; set; }
-    public int Children { get; set; }
-    public float ApprovalRating { get; set; }
-    public DateTime DateOfBirth { get; set; }
-    public string Party { get; set; }
+    public EmploymentStatus Status { get; set; }
+    public int YearsOfService { get; set; }
+    public float PerformanceScore { get; set; }
+    public DateTime HireDate { get; set; }
+    public string Department { get; set; }
 }
 
-public class PresidentMap : ExcelClassMap<President>
+public class EmployeeMap : ExcelClassMap<Employee>
 {
-    public PresidentMap()
+    public EmployeeMap()
     {
-        Map(p => p.Name);
+        Map(e => e.Name);
 
         // Map misspelled column and string values
-        Map(p => p.Status)
-            .WithColumnName("Marrital Status")
-            .WithMapping(new Dictionary<string, MaritalStatus>
+        Map(e => e.Status)
+            .WithColumnName("Employment Status")
+            .WithMapping(new Dictionary<string, EmploymentStatus>
             {
-                { "Twice Married", MaritalStatus.Married }
+                { "FT", EmploymentStatus.FullTime },
+                { "PT", EmploymentStatus.PartTime }
             });
 
         // Map by index
-        Map(p => p.Children)
+        Map(e => e.YearsOfService)
             .WithColumnIndex(2);
 
         // Custom converter
-        Map(p => p.ApprovalRating)
-            .WithColumnName("Approval Rating (%)")
+        Map(e => e.PerformanceScore)
+            .WithColumnName("Performance (%)")
             .WithConverter(value => float.Parse(value.TrimEnd('%')) / 100f);
 
         // Date parsing with multiple formats
-        Map(p => p.DateOfBirth)
+        Map(e => e.HireDate)
             .WithFormats("yyyy-MM-dd", "dd/MM/yyyy");
 
         // Try multiple column names
-        Map(p => p.Party)
-            .WithColumnNames("Political Party", "Party", "Affiliation");
+        Map(e => e.Department)
+            .WithColumnNames("Dept", "Department", "Division");
     }
 }
 
 // Register and use
-importer.Configuration.RegisterClassMap<PresidentMap>();
-var presidents = sheet.ReadRows<President>();
+importer.Configuration.RegisterClassMap<EmployeeMap>();
+var employees = sheet.ReadRows<Employee>();
 ```
 
 ## Error Handling
@@ -544,42 +684,42 @@ By default:
 
 Configure fallback behavior:
 
-| Name         | Status  | Children | DateOfBirth |
-|--------------|---------|----------|-------------|
-| Donald Trump | invalid | invalid  | invalid     |
-| Barack Obama |         |          |             |
+| Name          | Status  | YearsOfService | HireDate    |
+|---------------|---------|----------------|-------------|
+| Alice Johnson | invalid | invalid        | invalid     |
+| Bob Smith     |         |                |             |
 
 ```csharp
-public enum MaritalStatus { Married, Single, Invalid, Unknown }
+public enum EmploymentStatus { FullTime, PartTime, Invalid, Unknown }
 
-public class President
+public class Employee
 {
     public string Name { get; set; }
-    public MaritalStatus Status { get; set; }
-    public int? Children { get; set; }
-    public DateTime? DateOfBirth { get; set; }
+    public EmploymentStatus Status { get; set; }
+    public int? YearsOfService { get; set; }
+    public DateTime? HireDate { get; set; }
 }
 
-public class PresidentMap : ExcelClassMap<President>
+public class EmployeeMap : ExcelClassMap<Employee>
 {
-    public PresidentMap()
+    public EmployeeMap()
     {
-        Map(p => p.Name);
+        Map(e => e.Name);
 
-        Map(p => p.Status)
-            .WithEmptyFallback(MaritalStatus.Unknown)     // Empty cells
-            .WithInvalidFallback(MaritalStatus.Invalid);  // Invalid values
+        Map(e => e.Status)
+            .WithEmptyFallback(EmploymentStatus.Unknown)     // Empty cells
+            .WithInvalidFallback(EmploymentStatus.Invalid);  // Invalid values
 
-        Map(p => p.Children)
+        Map(e => e.YearsOfService)
             .WithInvalidFallback(-1);  // Can't parse as int
 
-        Map(p => p.DateOfBirth)
+        Map(e => e.HireDate)
             .WithInvalidFallback(null);  // Can't parse as DateTime
     }
 }
 
-importer.Configuration.RegisterClassMap<PresidentMap>();
-var presidents = sheet.ReadRows<President>();
+importer.Configuration.RegisterClassMap<EmployeeMap>();
+var employees = sheet.ReadRows<Employee>();
 ```
 
 ## Advanced Features
@@ -588,28 +728,28 @@ var presidents = sheet.ReadRows<President>();
 
 Parse string values to enums (case-sensitive by default):
 
-| Name         | Status   |
-|--------------|----------|
-| Donald Trump | Married  |
-| Barack Obama | married  |
-| Joe Biden    | DIVORCED |
+| Name          | Status   |
+|---------------|----------|
+| Alice Johnson | FullTime |
+| Bob Smith     | fulltime |
+| Carol White   | PARTTIME |
 
 ```csharp
-public enum MaritalStatus { Married, Divorced, Single }
+public enum EmploymentStatus { FullTime, PartTime, Contract }
 
-public class President
+public class Employee
 {
     public string Name { get; set; }
-    public MaritalStatus Status { get; set; }
+    public EmploymentStatus Status { get; set; }
 }
 
 // Case-insensitive enum parsing
-public class PresidentMap : ExcelClassMap<President>
+public class EmployeeMap : ExcelClassMap<Employee>
 {
-    public PresidentMap()
+    public EmployeeMap()
     {
-        Map(p => p.Name);
-        Map(p => p.Status, ignoreCase: true);  // Handles "married", "MARRIED", etc.
+        Map(e => e.Name);
+        Map(e => e.Status, ignoreCase: true);  // Handles "fulltime", "FULLTIME", etc.
     }
 }
 ```
@@ -622,77 +762,98 @@ ExcelMapper supports multiple strategies for mapping collections.
 
 By default, splits cell value by comma:
 
-| Name         | Tags                     |
-|--------------|--------------------------|
-| Barack Obama | President,Democrat,2000s |
+| Name          | Skills                           |
+|---------------|----------------------------------|
+| Alice Johnson | C#,Python,SQL                    |
+| Bob Smith     | Java,JavaScript,Docker,Kubernetes |
 
 ```csharp
-public class Person
+public class Employee
 {
     public string Name { get; set; }
-    public string[] Tags { get; set; }  // Auto-split by comma
+    public string[] Skills { get; set; }  // Auto-split by comma
+}
+```
+
+Customize the separator using fluent API:
+
+```csharp
+public class EmployeeMap : ExcelClassMap<Employee>
+{
+    public EmployeeMap()
+    {
+        Map(e => e.Name);
+        
+        // Split by semicolon instead of comma
+        Map(e => e.Skills)
+            .WithSeparators(';');
+            
+        // Split by multiple separators (pipe or comma)
+        Map(e => e.Tags)
+            .WithSeparators('|', ',');
+    }
 }
 ```
 
 #### Multiple Columns by Name
 
 ```csharp
-public class Pub
+public class Employee
 {
     public string Name { get; set; }
 
-    [ExcelColumnNames("Drink1", "Drink2", "Drink3")]
-    public string[] Drinks { get; set; }
+    [ExcelColumnNames("Review1", "Review2", "Review3")]
+    public int[] Reviews { get; set; }
 }
 ```
 
 #### Multiple Columns by Index
 
 ```csharp
-public class Pub
+public class Employee
 {
     public string Name { get; set; }
 
     [ExcelColumnIndices(1, 2, 3)]
-    public string[] Drinks { get; set; }
+    public int[] QuarterlyScores { get; set; }
 }
 ```
 
 #### Multiple Columns by Pattern
 
 ```csharp
-public class Pub
+public class Employee
 {
     public string Name { get; set; }
 
-    [ExcelColumnsMatching(@"Drink\d+", RegexOptions.IgnoreCase)]
-    public string[] Drinks { get; set; }
+    [ExcelColumnsMatching(@"Q\d+.*Score", RegexOptions.IgnoreCase)]
+    public int[] QuarterlyScores { get; set; }
 }
 ```
 
 #### Fluent Collection Mapping
 
 ```csharp
-public class President
+public class Employee
 {
     public string Name { get; set; }
-    public string[] Children { get; set; }
-    public DateTime[] Elections { get; set; }
+    public string[] Skills { get; set; }
+    public DateTime[] Certifications { get; set; }
 }
 
-public class PresidentMap : ExcelClassMap<President>
+public class EmployeeMap : ExcelClassMap<Employee>
 {
-    public PresidentMap()
+    public EmployeeMap()
     {
-        Map(p => p.Name);
+        Map(e => e.Name);
 
         // Split by comma (default)
-        Map(p => p.Children)
-            .WithColumnName("Children Names");
+        Map(e => e.Skills)
+            .WithColumnName("Skills");
 
         // Read multiple columns
-        Map(p => p.Elections)
-            .WithColumnNames("First Election", "Second Election")
+        Map(e => e.Certifications)
+            .WithColumnNames("Certification Date 1", "Certification Date 2")
             .WithElementMap(m => m
                 .WithFormats("yyyy-MM-dd", "dd/MM/yyyy")
             );
@@ -705,7 +866,8 @@ public class PresidentMap : ExcelClassMap<President>
 - `T[]` - Arrays
 - `List<T>`, `IList<T>`, `ICollection<T>`, `IEnumerable<T>`
 - `HashSet<T>`, `ISet<T>`
-- `FrozenSet<T>`, `ImmutableHashSet<T>`
+- `ImmutableArray<T>`, `ImmutableList<T>`, `ImmutableHashSet<T>`
+- `FrozenSet<T>` (.NET 8+)
 - And more...
 
 ### Dictionaries
@@ -754,40 +916,42 @@ public class RecordMap : ExcelClassMap<Record>
 
 Map nested properties to Excel columns:
 
-
-| Name         | Elected    | Votes |
-|--------------|------------|-------|
-| Barack Obama | 2008-11-04 | 365   |
+| Name          | HireDate   | Department | Location |
+|---------------|------------|------------|----------|
+| Alice Johnson | 2020-03-15 | Engineering| Seattle  |
+| Bob Smith     | 2019-07-22 | Marketing  | New York |
 
 ```csharp
-public class Election
-{
-    public DateTime Date { get; set; }
-    public int Votes { get; set; }
-}
-
-public class President
+public class DepartmentInfo
 {
     public string Name { get; set; }
-    public Election ElectionInfo { get; set; }
+    public string Location { get; set; }
 }
 
-public class PresidentMap : ExcelClassMap<President>
+public class Employee
 {
-    public PresidentMap()
+    public string Name { get; set; }
+    public DateTime HireDate { get; set; }
+    public DepartmentInfo Department { get; set; }
+}
+
+public class EmployeeMap : ExcelClassMap<Employee>
+{
+    public EmployeeMap()
     {
-        Map(p => p.Name);
+        Map(e => e.Name);
+        Map(e => e.HireDate);
 
         // Map nested properties
-        Map(p => p.ElectionInfo.Date)
-            .WithColumnName("Elected");
+        Map(e => e.Department.Name)
+            .WithColumnName("Department");
 
-        Map(p => p.ElectionInfo.Votes);
+        Map(e => e.Department.Location);
     }
 }
 
-importer.Configuration.RegisterClassMap<PresidentMap>();
-var presidents = sheet.ReadRows<President>();
+importer.Configuration.RegisterClassMap<EmployeeMap>();
+var employees = sheet.ReadRows<Employee>();
 ```
 
 ### Custom Converters
@@ -795,11 +959,11 @@ var presidents = sheet.ReadRows<President>();
 Create custom type conversions:
 
 ```csharp
-public class ProductMap : ExcelClassMap<Product>
+public class EmployeeMap : ExcelClassMap<Employee>
 {
-    public ProductMap()
+    public EmployeeMap()
     {
-        Map(p => p.Price)
+        Map(e => e.Salary)
             .WithConverter(value => 
             {
                 // Remove currency symbol and parse
@@ -807,13 +971,15 @@ public class ProductMap : ExcelClassMap<Product>
                 return decimal.Parse(cleaned);
             });
 
-        Map(p => p.Available)
+        Map(e => e.Active)
             .WithConverter(value => value.ToLower() switch
             {
                 "yes" => true,
                 "y" => true,
+                "active" => true,
                 "no" => false,
                 "n" => false,
+                "inactive" => false,
                 _ => false
             });
     }
@@ -826,60 +992,60 @@ public class ProductMap : ExcelClassMap<Product>
 
 Disable header row and use column indices:
 
-|           |                  |
-|-----------|------------------|
-| Pub Quiz  | The Blue Anchor  |
-| Live Music| The Raven        |
+|               |            |
+|---------------|------------|
+| Alice Johnson | Engineering|
+| Bob Smith     | Marketing  |
 
 ```csharp
-public class Event
+public class Employee
 {
     public string Name { get; set; }
-    public string Location { get; set; }
+    public string Department { get; set; }
 }
 
-public class EventMap : ExcelClassMap<Event>
+public class EmployeeMap : ExcelClassMap<Employee>
 {
-    public EventMap()
+    public EmployeeMap()
     {
         Map(e => e.Name).WithColumnIndex(0);
-        Map(e => e.Location).WithColumnIndex(1);
+        Map(e => e.Department).WithColumnIndex(1);
     }
 }
 
-using var importer = new ExcelImporter("events.xlsx");
-importer.Configuration.RegisterClassMap<EventMap>();
+using var importer = new ExcelImporter("employees.xlsx");
+importer.Configuration.RegisterClassMap<EmployeeMap>();
 
 var sheet = importer.ReadSheet();
 sheet.HasHeading = false;  // Disable header row
 
-var events = sheet.ReadRows<Event>();
+var employees = sheet.ReadRows<Employee>();
 ```
 
 ### Headers Not in First Row
 
 Skip rows before the header:
 
-|               |          |
-|---------------|----------|
-| Report Title  |          |
-|               |          |
-| Name          | Location |
-| Pub Quiz      | Downtown |
-| Live Music    | Uptown   |
+|                      |             |
+|----------------------|-------------|
+| Employee Report 2025 |             |
+|                      |             |
+| Name                 | Department  |
+| Alice Johnson        | Engineering |
+| Bob Smith            | Marketing   |
 
 ```csharp
-public class Event
+public class Employee
 {
     public string Name { get; set; }
-    public string Location { get; set; }
+    public string Department { get; set; }
 }
 
-using var importer = new ExcelImporter("events.xlsx");
+using var importer = new ExcelImporter("employees.xlsx");
 var sheet = importer.ReadSheet();
 sheet.HeadingIndex = 2;  // Header is on row 3 (zero-based index 2)
 
-var events = sheet.ReadRows<Event>();
+var employees = sheet.ReadRows<Employee>();
 ```
 
 ## Performance Tips
@@ -887,18 +1053,18 @@ var events = sheet.ReadRows<Event>();
 1. **Use streaming**: `ReadRows<T>()` uses lazy evaluation - don't materialize unnecessarily
    ```csharp
    // Good - processes one at a time
-   foreach (var product in sheet.ReadRows<Product>())
+   foreach (var employee in sheet.ReadRows<Employee>())
    {
-       ProcessProduct(product);
+       ProcessEmployee(employee);
    }
 
    // Avoid - loads everything into memory
-   var allProducts = sheet.ReadRows<Product>().ToList();
+   var allEmployees = sheet.ReadRows<Employee>().ToList();
    ```
 
 2. **Register maps once**: Class maps are cached per type
    ```csharp
-   importer.Configuration.RegisterClassMap<ProductMap>();
+   importer.Configuration.RegisterClassMap<EmployeeMap>();
    ```
 
 3. **Disable blank line skipping**: Off by default for performance
@@ -908,8 +1074,8 @@ var events = sheet.ReadRows<Event>();
 
 4. **Use column indices for headerless sheets**: Faster than column name lookup
    ```csharp
-   Map(p => p.Name).WithColumnIndex(0);  // Faster
-   Map(p => p.Name).WithColumnName("Name");  // Requires lookup
+   Map(e => e.Name).WithColumnIndex(0);  // Faster
+   Map(e => e.Name).WithColumnName("Name");  // Requires lookup
    ```
 
 ## Supported Types
@@ -924,14 +1090,283 @@ var events = sheet.ReadRows<Event>();
 ### Collection Types
 - `T[]`, `List<T>`, `IList<T>`, `ICollection<T>`, `IEnumerable<T>`
 - `HashSet<T>`, `ISet<T>`, `FrozenSet<T>`, `ImmutableHashSet<T>`
+- `ImmutableArray<T>`, `ImmutableList<T>`
 - `Dictionary<TKey, TValue>`, `IDictionary<TKey, TValue>`
 - `FrozenDictionary<TKey, TValue>`, `ImmutableDictionary<TKey, TValue>`
+
+### Date and Time Types
+
+ExcelMapper has comprehensive support for modern .NET date and time types:
+
+- `DateTime`, `DateTimeOffset` - Full date and time
+- `DateOnly` - Date without time (available in .NET 6+)
+- `TimeOnly` - Time without date (available in .NET 6+)
+- `TimeSpan` - Duration/time interval
+
+All support custom format parsing with `.WithFormats()`.
 
 ### Complex Types
 - Classes with public properties/fields
 - Record types
 - Nested objects
 - `ExpandoObject` for dynamic scenarios
+
+## CSV Support
+
+ExcelMapper supports CSV files in addition to Excel formats:
+
+```csharp
+// CSV files are automatically detected
+using var importer = new ExcelImporter("employees.csv");
+var sheet = importer.ReadSheet();
+var employees = sheet.ReadRows<Employee>();
+```
+
+Supported formats:
+- `.xlsx` - Excel 2007+ (Office Open XML)
+- `.xls` - Excel 97-2003 (Binary Format)
+- `.csv` - Comma-separated values
+
+## Common Issues & Troubleshooting
+
+### Column Not Found
+
+**Problem**: `ExcelMappingException: Could not find column 'ColumnName'`
+
+**Solutions**:
+```csharp
+// Option 1: Make the property optional
+public class Employee
+{
+    [ExcelOptional]
+    public string MiddleName { get; set; }
+}
+
+// Option 2: Try multiple column names
+public class Employee
+{
+    [ExcelColumnNames("Department", "Dept", "Division")]
+    public string Department { get; set; }
+}
+
+// Option 3: Use pattern matching for flexible headers
+public class Employee
+{
+    [ExcelColumnMatching(@"dept.*", RegexOptions.IgnoreCase)]
+    public string Department { get; set; }
+}
+```
+
+### Empty Cell Handling
+
+**Problem**: Exception when reading empty cells into non-nullable types
+
+**Solutions**:
+```csharp
+// Option 1: Use nullable types
+public class Employee
+{
+    public string Name { get; set; }
+    public int? YearsOfService { get; set; }  // Nullable - allows null for empty cells
+}
+
+// Option 2: Provide default value
+public class Employee
+{
+    public string Name { get; set; }
+    
+    [ExcelDefaultValue(0)]
+    public int YearsOfService { get; set; }  // Uses 0 for empty cells
+}
+
+// Option 3: Use fluent API
+public class EmployeeMap : ExcelClassMap<Employee>
+{
+    public EmployeeMap()
+    {
+        Map(e => e.YearsOfService)
+            .WithEmptyFallback(0);
+    }
+}
+```
+
+### Invalid Data Parsing
+
+**Problem**: Exception when cell contains invalid data (e.g., "N/A" in numeric column)
+
+**Solutions**:
+```csharp
+// Option 1: Use ExcelInvalidValue attribute
+public class Employee
+{
+    [ExcelInvalidValue(-1)]
+    public int YearsOfService { get; set; }  // Uses -1 when value can't be parsed
+}
+
+// Option 2: Use fluent API for both empty and invalid
+public class EmployeeMap : ExcelClassMap<Employee>
+{
+    public EmployeeMap()
+    {
+        Map(e => e.YearsOfService)
+            .WithValueFallback(-1);  // Handles both empty AND invalid
+    }
+}
+
+// Option 3: Custom converter for complex logic
+public class EmployeeMap : ExcelClassMap<Employee>
+{
+    public EmployeeMap()
+    {
+        Map(e => e.YearsOfService)
+            .WithConverter(value => 
+            {
+                if (string.IsNullOrWhiteSpace(value) || value == "N/A")
+                    return -1;
+                return int.Parse(value);
+            });
+    }
+}
+```
+
+### Case Sensitivity Issues
+
+**Problem**: Column names don't match due to different casing
+
+**Solution**: Column name matching is case-insensitive by default, but you can control enum parsing:
+
+```csharp
+public class EmployeeMap : ExcelClassMap<Employee>
+{
+    public EmployeeMap()
+    {
+        // Enum parsing can be case-insensitive
+        Map(e => e.Status, ignoreCase: true);
+    }
+}
+```
+
+### Date Format Issues
+
+**Problem**: Dates not parsing correctly from different formats
+
+**Solution**: Specify expected date formats:
+
+```csharp
+public class EmployeeMap : ExcelClassMap<Employee>
+{
+    public EmployeeMap()
+    {
+        Map(e => e.HireDate)
+            .WithFormats("yyyy-MM-dd", "dd/MM/yyyy", "MM/dd/yyyy");
+            
+        // Works for DateOnly, TimeOnly, TimeSpan too
+        Map(e => e.BirthDate)  // DateOnly property
+            .WithFormats("yyyy-MM-dd", "dd/MM/yyyy");
+    }
+}
+```
+
+### Performance Issues with Large Files
+
+**Problem**: Memory or performance issues with large Excel files
+
+**Solutions**:
+```csharp
+// 1. Use streaming - don't materialize all rows at once
+foreach (var employee in sheet.ReadRows<Employee>())
+{
+    // Process one at a time
+    ProcessEmployee(employee);
+}
+
+// 2. Disable blank line checking if not needed (it's off by default)
+importer.Configuration.SkipBlankLines = false;
+
+// 3. Use column indices instead of names for headerless sheets
+public class EmployeeMap : ExcelClassMap<Employee>
+{
+    public EmployeeMap()
+    {
+        Map(e => e.Name).WithColumnIndex(0);  // Faster than name lookup
+        Map(e => e.Department).WithColumnIndex(1);
+    }
+}
+
+// 4. Adjust column count limits for very wide sheets
+importer.Configuration.MaxColumnsPerSheet = 20000;  // Default is 10000
+```
+
+### Multiple Sheets
+
+**Problem**: Need to read specific sheets or multiple sheets
+
+**Solution**:
+```csharp
+using var importer = new ExcelImporter("workbook.xlsx");
+
+// Read specific sheet by index
+var firstSheet = importer.ReadSheet(0);
+var employees = firstSheet.ReadRows<Employee>();
+
+// Read specific sheet by name
+var engineeringSheet = importer.ReadSheet("Engineering");
+var engineers = engineeringSheet.ReadRows<Employee>();
+
+// Read all sheets
+foreach (var sheet in importer.ReadSheets())
+{
+    Console.WriteLine($"Processing sheet: {sheet.Name}");
+    var sheetEmployees = sheet.ReadRows<Employee>();
+    // Process employees...
+}
+
+// Check number of sheets
+Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
+```
+
+## Best Practices
+
+1. **Register class maps once** - Class maps are cached, so register them during application startup
+   ```csharp
+   importer.Configuration.RegisterClassMap<EmployeeMap>();
+   ```
+
+2. **Use streaming for large files** - Avoid `.ToList()` or `.ToArray()` unless necessary
+   ```csharp
+   // Good
+   foreach (var employee in sheet.ReadRows<Employee>())
+       ProcessEmployee(employee);
+   
+   // Avoid if dataset is large
+   var allEmployees = sheet.ReadRows<Employee>().ToList();
+   ```
+
+3. **Handle missing columns gracefully** - Use `[ExcelOptional]` for non-critical columns
+   ```csharp
+   [ExcelOptional]
+   public string MiddleName { get; set; }
+   ```
+
+4. **Provide fallback values** - Make your code resilient to data quality issues
+   ```csharp
+   [ExcelDefaultValue(0)]
+   [ExcelInvalidValue(-1)]
+   public int YearsOfService { get; set; }
+   ```
+
+5. **Use meaningful error messages** - Custom fallback items can provide better diagnostics
+   ```csharp
+   public class CustomFallback : IFallbackItem
+   {
+       public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult)
+       {
+           throw new InvalidOperationException(
+               $"Invalid data in row {rowIndex}, column {readResult.ColumnName}: {readResult.StringValue}"
+           );
+       }
+   }
+   ```
 
 ## Contributing
 

@@ -44,29 +44,36 @@ public static class AutoMapper
             return false;
         }
 
-        // Setup the fallbacks.
-        if (member != null && member.GetCustomAttribute<ExcelDefaultValueAttribute>() is { } defaultValueAttribute)
+        // Setup the transformers - ExcelTrimString, etc.
+        if (member != null)
         {
-            map.Pipeline.EmptyFallback = new FixedValueFallback(defaultValueAttribute.Value);
+            MemberMapper.AddTransformers(map.Pipeline, member);
+        }
+
+        // Setup the empty fallback.
+        if (member != null && MemberMapper.GetDefaultEmptyValueFallback(member) is { } emptyFallback)
+        {
+            map.Pipeline.EmptyFallback = emptyFallback;
         }
         else
         {
-            map.Pipeline.EmptyFallback = CreateEmptyFallback<T>(emptyValueStrategy);
+            map.Pipeline.EmptyFallback ??= CreateEmptyFallback<T>(emptyValueStrategy);
         }
 
-        map.Pipeline.InvalidFallback = s_throwFallback;
+        // Setup the invalid fallback.
+        if (member != null && MemberMapper.GetDefaultInvalidValueFallback(member) is { } invalidFallback)
+        {
+            map.Pipeline.InvalidFallback = invalidFallback;
+        }
+        else
+        {
+            map.Pipeline.InvalidFallback ??= s_throwFallback;
+        }
 
-        // Apply member attributes.
+        // Apply member attributes (ExcelOptional, ExcelPreserveFormatting, etc.)
         if (member != null)
         {
-            if (Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)))
-            {
-                map.Optional = true;
-            }
-            if (Attribute.IsDefined(member, typeof(ExcelPreserveFormattingAttribute)))
-            {
-                map.PreserveFormatting = true;
-            }
+            MemberMapper.ApplyMemberAttributes(map, member);
         }
 
         return true;

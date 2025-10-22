@@ -26,10 +26,14 @@ public class ExcelColumnMatchingAttribute : Attribute
     /// <summary>
     /// Initializes a new instance of <see cref="ExcelColumnMatchingAttribute"/> with the specified matcher.
     /// </summary>
-    /// <param name="name">The name of the column.</param>
+    /// <param name="matcherType">The type of the <see cref="IExcelColumnMatcher"/>.</param>
     public ExcelColumnMatchingAttribute(Type matcherType)
     {
         ArgumentNullException.ThrowIfNull(matcherType);
+        if (matcherType.IsAbstract || matcherType.IsInterface)
+        {
+            throw new ArgumentException("Matcher type cannot be abstract or an interface", nameof(matcherType));
+        }
         if (!matcherType.ImplementsInterface(typeof(IExcelColumnMatcher)))
         {
             throw new ArgumentException($"Matcher type must implement {nameof(IExcelColumnMatcher)}", nameof(matcherType));

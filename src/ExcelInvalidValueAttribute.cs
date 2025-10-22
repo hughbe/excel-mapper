@@ -5,17 +5,17 @@
 namespace ExcelMapper;
 
 /// <summary>
-/// Provides a value to use if the property or field is empty in Excel.
+/// Provides a value to use if the property or field is invalid in Excel.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-public sealed class ExcelDefaultValueAttribute : Attribute
+public sealed class ExcelInvalidValueAttribute : Attribute
 {
     public object? Value { get; }
 
     /// <summary>
-    /// Initializes a new instance of <see cref="ExcelDefaultValueAttribute"/>.
+    /// Initializes a new instance of <see cref="ExcelInvalidValueAttribute"/>.
     /// </summary>
-    public ExcelDefaultValueAttribute(object? value)
+    public ExcelInvalidValueAttribute(object? value)
     {
         Value = value;
     }

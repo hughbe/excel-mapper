@@ -1,12 +1,16 @@
 ﻿namespace ExcelMapper.Tests;
 
-public class TrimValueTests
+public class MapWithTrimTests
 {
     [Fact]
     public void ReadRow_CustomMappedString_Success()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        importer.Configuration.RegisterClassMap<TrimStringValueMap>();
+        importer.Configuration.RegisterClassMap<StringValue>(c =>
+        {
+            c.Map(o => o.Value)
+                .WithTrim();
+        });
 
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
@@ -24,14 +28,5 @@ public class TrimValueTests
     private class StringValue
     {
         public string Value { get; set; } = default!;
-    }
-
-    private class TrimStringValueMap : ExcelClassMap<StringValue>
-    {
-        public TrimStringValueMap()
-        {
-            Map(o => o.Value)
-                .WithTrim();
-        }
     }
 }

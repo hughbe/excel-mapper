@@ -21,7 +21,42 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithTrim<TMap>(this TMap map) where TMap : IValuePipeline
     {
-        map.Transformers.Add(new TrimCellTransformer());
+        map.Transformers.Add(new TrimStringCellTransformer());
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies additional custom transformers that will be used to map the value of a cell to
+    /// a property or field.
+    /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="transformers">A list of additional custom transformers that will be used to map the value of a cell to a property or field</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static TMap WithTransformers<TMap>(this TMap map, params ICellTransformer[] transformers) where TMap : IValuePipeline
+        => map.WithTransformers((IEnumerable<ICellTransformer>)transformers);
+
+    public static TMap WithTransformers<TMap>(this TMap map, params IEnumerable<ICellTransformer> transformers) where TMap : IValuePipeline
+    {
+        ArgumentNullException.ThrowIfNull(transformers);
+
+        foreach (var transformer in transformers)
+        {
+            if (transformer == null)
+            {
+                throw new ArgumentException("Transformers cannot contain null values.", nameof(transformers));
+            }
+        }
+
+        // Clear any existing transformers.
+        map.Transformers.Clear();
+
+        // Then, add the new transformers.
+        foreach (var transformer in transformers)
+        {
+            map.Transformers.Add(transformer);
+        }
+
         return map;
     }
 

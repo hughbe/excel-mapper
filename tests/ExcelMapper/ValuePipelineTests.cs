@@ -109,8 +109,8 @@ public class ValuePipelineTests
     public void Transformers_AddValidItem_Success()
     {
         var pipeline = new ValuePipeline();
-        var item1 = new TrimCellTransformer();
-        var item2 = new TrimCellTransformer();
+        var item1 = new TrimStringCellTransformer();
+        var item2 = new TrimStringCellTransformer();
 
         pipeline.Transformers.Add(item1);
         pipeline.Transformers.Add(item2);
@@ -128,9 +128,9 @@ public class ValuePipelineTests
     public void Transformers_RemoveValidItem_Success()
     {
         var pipeline = new ValuePipeline();
-        var item1 = new TrimCellTransformer();
-        var item2 = new TrimCellTransformer();
-        var item3 = new TrimCellTransformer();
+        var item1 = new TrimStringCellTransformer();
+        var item2 = new TrimStringCellTransformer();
+        var item3 = new TrimStringCellTransformer();
 
         pipeline.Transformers.Add(item1);
         pipeline.Transformers.Add(item2);
@@ -160,8 +160,8 @@ public class ValuePipelineTests
     public void Transformers_SetValidItem_Success()
     {
         var pipeline = new ValuePipeline();
-        var item1 = new TrimCellTransformer();
-        var item2 = new TrimCellTransformer();
+        var item1 = new TrimStringCellTransformer();
+        var item2 = new TrimStringCellTransformer();
         pipeline.Transformers.Add(item1);
 
         pipeline.Transformers[0] = item2;
@@ -172,7 +172,7 @@ public class ValuePipelineTests
     public void Transformers_SetNullItem_ThrowsArgumentNullException()
     {
         var pipeline = new ValuePipeline();
-        pipeline.Transformers.Add(new TrimCellTransformer());
+        pipeline.Transformers.Add(new TrimStringCellTransformer());
         Assert.Throws<ArgumentNullException>("item", () => pipeline.Transformers[0] = null!);
     }
 
