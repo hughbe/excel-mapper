@@ -29,48 +29,55 @@ public static class AutoMapper
 
     private static bool TrySetupMap<T>(MemberInfo? member, IToOneMap map, FallbackStrategy emptyValueStrategy, bool isAutoMapping)
     {
-        // Try to get a well-known mapper for the type.
-        // If we are auto mapping and no well-known mapper is found, fail the auto mapping.
-        // But, allow `Map(o => o.Value)` as the user can define a custom converter after
-        // creating the map.
-        // If the user doesn't add any mappers to the property, an ExcelMappingException
-        // will be thrown at the point of registering the class map.
-        if (TryGetWellKnownMapper<T>(out var mapper))
+        // Setup mappers - ExcelMapper, etc.
+        if (member != null)
         {
-            map.Pipeline.Mappers.Add(mapper);
-        }
-        else if (isAutoMapping)
-        {
-            return false;
+            MemberMapper.AddMappers(map.Pipeline, member);
         }
 
-        // Setup the transformers - ExcelTrimString, etc.
+        // If no mappers are speciified, try to get a well-known mapper for the type.
+        if (map.Pipeline.Mappers.Count == 0)
+        {
+            // If we are auto mapping and no well-known mapper is found, fail the auto mapping.
+            // But, allow `Map(o => o.Value)` as the user can define a custom converter after
+            // creating the map.
+            // If the user doesn't add any mappers to the property, an ExcelMappingException
+            // will be thrown at the point of registering the class map.
+            if (TryGetWellKnownMapper<T>(out var mapper))
+            {
+                map.Pipeline.Mappers.Add(mapper);
+            }
+            else if (isAutoMapping)
+            {
+                return false;
+            }
+        }
+
+        // Setup the transformers - ExcelTrimString, ExcelTransformer, etc.
         if (member != null)
         {
             MemberMapper.AddTransformers(map.Pipeline, member);
         }
 
-        // Setup the empty fallback.
-        if (member != null && MemberMapper.GetDefaultEmptyValueFallback(member) is { } emptyFallback)
+        // Setup the empty fallback - ExcelDefaultValue, ExcelEmptyFallback, etc.
+        if (member != null)
         {
-            map.Pipeline.EmptyFallback = emptyFallback;
-        }
-        else
-        {
-            map.Pipeline.EmptyFallback ??= CreateEmptyFallback<T>(emptyValueStrategy);
+            map.Pipeline.EmptyFallback = MemberMapper.GetDefaultEmptyValueFallback(member);
         }
 
-        // Setup the invalid fallback.
-        if (member != null && MemberMapper.GetDefaultInvalidValueFallback(member) is { } invalidFallback)
-        {
-            map.Pipeline.InvalidFallback = invalidFallback;
-        }
-        else
-        {
-            map.Pipeline.InvalidFallback ??= s_throwFallback;
-        }
+        // If no fallback is specified, use the empty value strategy.
+        map.Pipeline.EmptyFallback ??= CreateEmptyFallback<T>(emptyValueStrategy);
 
-        // Apply member attributes (ExcelOptional, ExcelPreserveFormatting, etc.)
+        // Setup the invalid fallback - ExcelInvalidValue, ExcelInvalidFallback, etc.
+        if (member != null)
+        {
+            map.Pipeline.InvalidFallback = MemberMapper.GetDefaultInvalidValueFallback(member);
+        }
+        
+        // If no fallback is specified, use the throw fallback.
+        map.Pipeline.InvalidFallback ??= s_throwFallback;
+
+        // Apply member attributes - ExcelOptional, ExcelPreserveFormatting, etc.
         if (member != null)
         {
             MemberMapper.ApplyMemberAttributes(map, member);

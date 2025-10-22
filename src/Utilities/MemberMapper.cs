@@ -92,6 +92,19 @@ internal static class MemberMapper
         return new ColumnNameReaderFactory(member.Name);
     }
 
+    internal static void AddMappers(IValuePipeline pipeline, MemberInfo member)
+    {
+        // If the member has ExcelMapper attributes, add the mappers.
+        if (member.GetCustomAttributes<ExcelMapperAttribute>() is { } mapperAttributes)
+        {
+            foreach (var mapperAttribute in mapperAttributes)
+            {
+                var mapper = (ICellMapper)Activator.CreateInstance(mapperAttribute.Type, mapperAttribute.ConstructorArguments)!;
+                pipeline.Mappers.Add(mapper);
+            }
+        }
+    }
+
     internal static IFallbackItem? GetDefaultEmptyValueFallback(MemberInfo member)
     {
         // If the member has a ExcelDefaultValue attribute, add the fallback.
