@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using ExcelMapper.Abstractions;
 using ExcelMapper.Readers;
 
 namespace ExcelMapper;

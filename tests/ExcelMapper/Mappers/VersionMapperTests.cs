@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using ExcelMapper.Abstractions;
-using Xunit;
+﻿using ExcelMapper.Abstractions;
 
 namespace ExcelMapper.Mappers.Tests;
 

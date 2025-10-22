@@ -1,7 +1,4 @@
-﻿using System;
-using ExcelMapper.Abstractions;
-
-namespace ExcelMapper.Mappers;
+﻿namespace ExcelMapper.Mappers;
 
 /// <summary>
 /// Tries to map the value of a cell to <see cref="Version"/>.

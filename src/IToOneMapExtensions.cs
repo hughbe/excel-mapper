@@ -1,5 +1,3 @@
-using ExcelMapper.Abstractions;
-
 namespace ExcelMapper;
 
 public static class IToOneMapExtensions

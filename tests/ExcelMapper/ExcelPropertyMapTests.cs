@@ -1,7 +1,5 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using ExcelMapper.Readers;
-using Xunit;
 
 namespace ExcelMapper.Tests
 {

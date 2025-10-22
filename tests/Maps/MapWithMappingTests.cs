@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using ExcelMapper.Mappers;
-using Xunit;
+﻿using ExcelMapper.Mappers;
 
 namespace ExcelMapper.Tests;
 

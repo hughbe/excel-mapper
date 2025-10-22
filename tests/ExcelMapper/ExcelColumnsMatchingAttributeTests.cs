@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Readers;
-using Xunit;
 
 namespace ExcelMapper.Tests;
 

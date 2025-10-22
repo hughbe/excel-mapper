@@ -1,7 +1,4 @@
-﻿using System;
-using ExcelMapper.Abstractions;
-
-namespace ExcelMapper.Readers;
+﻿namespace ExcelMapper.Readers;
 
 /// <summary>
 /// Reads the value of a single cell given the zero-based index of it's column.

@@ -1,6 +1,4 @@
-﻿using ExcelMapper.Abstractions;
-
-namespace ExcelMapper.Mappers;
+﻿namespace ExcelMapper.Mappers;
 
 /// <summary>
 /// A mapper that returns the string value of a cell.

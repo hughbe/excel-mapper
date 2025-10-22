@@ -1,6 +1,4 @@
-﻿using System;
-using ExcelMapper.Tests;
-using Xunit;
+﻿using ExcelMapper.Tests;
 
 namespace ExcelMapper.Readers.Tests;
 

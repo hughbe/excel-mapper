@@ -1,5 +1,4 @@
-﻿using System;
-namespace ExcelMapper.Abstractions;
+﻿namespace ExcelMapper.Abstractions;
 
 /// <summary>
 /// An enumeration describing the result of an operation to map the value

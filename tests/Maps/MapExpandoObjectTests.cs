@@ -1,5 +1,4 @@
 ﻿using System.Dynamic;
-using Xunit;
 
 namespace ExcelMapper.Tests;
 

@@ -1,6 +1,4 @@
-﻿using ExcelMapper.Abstractions;
-
-namespace ExcelMapper.Transformers;
+﻿namespace ExcelMapper.Transformers;
 
 public class TrimCellTransformer : ICellTransformer
 {

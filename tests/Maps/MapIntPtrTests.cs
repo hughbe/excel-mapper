@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace ExcelMapper.Tests;
 
 public class MapIntPtrTests

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ExcelMapper.Abstractions;
+﻿namespace ExcelMapper.Abstractions;
 
 internal interface IFormatsCellMapper : ICellMapper
 {

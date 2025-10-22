@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Frozen;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
@@ -9,7 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using ExcelDataReader;
-using ExcelMapper.Abstractions;
 using ExcelMapper.Factories;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;

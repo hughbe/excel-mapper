@@ -1,8 +1,4 @@
-﻿using System;
-using ExcelMapper.Abstractions;
-using ExcelMapper.Utilities;
-
-namespace ExcelMapper.Readers;
+﻿namespace ExcelMapper.Readers;
 
 /// <summary>
 /// Reads a multiple values of one or more columns given the name of each column.

@@ -1,6 +1,4 @@
-﻿using Xunit;
-
-namespace ExcelMapper.Tests;
+﻿namespace ExcelMapper.Tests;
 
 public class MapObjectTests
 {

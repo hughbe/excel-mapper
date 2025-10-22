@@ -1,7 +1,4 @@
-﻿using System;
-using ExcelMapper.Abstractions;
-
-namespace ExcelMapper.Mappers;
+﻿namespace ExcelMapper.Mappers;
 
 public delegate CellMapperResult ConvertUsingMapperDelegate(ReadCellResult readResult);
 

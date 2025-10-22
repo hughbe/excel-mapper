@@ -1,6 +1,5 @@
 using System.Globalization;
 using ExcelMapper.Abstractions;
-using Xunit;
 
 namespace ExcelMapper.Mappers.Tests;
 

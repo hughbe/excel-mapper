@@ -1,8 +1,6 @@
-using System;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
 using ExcelMapper.Transformers;
-using Xunit;
 
 namespace ExcelMapper.Tests;
 

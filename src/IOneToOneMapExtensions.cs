@@ -1,5 +1,3 @@
-using System;
-using ExcelMapper.Abstractions;
 using ExcelMapper.Readers;
 
 namespace ExcelMapper;

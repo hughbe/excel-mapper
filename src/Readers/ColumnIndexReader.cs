@@ -1,6 +1,4 @@
 using ExcelDataReader;
-using ExcelMapper.Abstractions;
-using ExcelMapper.Utilities;
 
 namespace ExcelMapper.Readers;
 

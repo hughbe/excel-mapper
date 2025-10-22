@@ -1,7 +1,4 @@
-﻿using System;
-using Xunit;
-
-namespace ExcelMapper.Readers.Tests;
+﻿namespace ExcelMapper.Readers.Tests;
 
 public class ColumnIndicesReaderTests
 {

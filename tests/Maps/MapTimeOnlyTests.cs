@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Xunit;
-
-namespace ExcelMapper.Tests;
+﻿namespace ExcelMapper.Tests;
 
 public class MapTimeOnlyTests
 {

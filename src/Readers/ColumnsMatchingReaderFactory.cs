@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using ExcelMapper.Abstractions;
-
-namespace ExcelMapper.Readers;
+﻿namespace ExcelMapper.Readers;
 
 /// <summary>
 /// Reads the value of a multiples cells given a list of column names or a predicate matching the column name.

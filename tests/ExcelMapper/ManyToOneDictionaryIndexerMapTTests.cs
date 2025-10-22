@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using ExcelMapper.Factories;
 using ExcelMapper.Readers;
-using Xunit;
 
 namespace ExcelMapper.Tests;
 

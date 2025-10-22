@@ -1,7 +1,4 @@
-﻿using System;
-using ExcelMapper.Abstractions;
-
-namespace ExcelMapper.Readers;
+﻿namespace ExcelMapper.Readers;
 
 /// <summary>
 /// Reads the value of a cell and produces multiple values by splitting the string value

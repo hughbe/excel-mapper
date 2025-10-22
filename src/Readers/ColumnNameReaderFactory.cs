@@ -1,8 +1,4 @@
-﻿using System;
-using ExcelMapper.Abstractions;
-using ExcelMapper.Utilities;
-
-namespace ExcelMapper.Readers;
+﻿namespace ExcelMapper.Readers;
 
 /// <summary>
 /// Reads the value of a single cell given the name of it's column.

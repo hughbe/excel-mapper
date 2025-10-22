@@ -1,6 +1,4 @@
 ﻿using ExcelMapper.Abstractions;
-using System;
-using Xunit;
 
 namespace ExcelMapper.Readers.Tests;
 

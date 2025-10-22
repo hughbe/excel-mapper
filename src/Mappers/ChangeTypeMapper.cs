@@ -1,8 +1,4 @@
-﻿using System;
-using ExcelMapper.Abstractions;
-using ExcelMapper.Utilities;
-
-namespace ExcelMapper.Mappers;
+﻿namespace ExcelMapper.Mappers;
 
 /// <summary>
 /// A mapper that tries to map the value of a cell to an IConvertible object using Convert.ChangeType.
