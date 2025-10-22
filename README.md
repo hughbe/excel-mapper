@@ -52,20 +52,24 @@ That's it! ExcelMapper automatically maps columns to properties by name.
   - [Attribute-Based Mapping](#attribute-based-mapping)
   - [Fluent API Mapping](#fluent-api-mapping)
 - [Advanced Features](#advanced-features)
+  - [Value Mapping](#value-mapping)
   - [Collections and Arrays](#collections-and-arrays)
   - [Dictionaries](#dictionaries)
   - [Nested Objects](#nested-objects)
   - [Enums](#enums)
   - [Custom Converters](#custom-converters)
+  - [Custom Transformers and Mappers](#custom-transformers-and-mappers)
 - [Special Scenarios](#special-scenarios)
   - [Sheets Without Headers](#sheets-without-headers)
   - [Headers Not in First Row](#headers-not-in-first-row)
 - [Error Handling](#error-handling)
 - [Performance Tips](#performance-tips)
+- [Thread Safety](#thread-safety)
 - [Supported Types](#supported-types)
 - [CSV Support](#csv-support)
 - [Common Issues & Troubleshooting](#common-issues--troubleshooting)
 - [Best Practices](#best-practices)
+- [API Reference](#api-reference)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -117,9 +121,21 @@ using var importer = new ExcelImporter(stream);
 // CSV file
 using var importer = new ExcelImporter("data.csv", ExcelImporterFileType.Csv);
 
-// From existing IExcelDataReader
+// From existing IExcelDataReader (for advanced scenarios)
 using var reader = ExcelReaderFactory.CreateReader(stream);
 using var importer = new ExcelImporter(reader);
+```
+
+**Advanced: Access the underlying ExcelDataReader**
+
+```csharp
+using var importer = new ExcelImporter("data.xlsx");
+
+// Access the underlying reader for advanced scenarios
+IExcelDataReader reader = importer.Reader;
+
+// Check number of sheets
+int sheetCount = importer.NumberOfSheets;
 ```
 
 ## Reading Sheets
@@ -130,10 +146,16 @@ using var importer = new ExcelImporter(reader);
 foreach (var sheet in importer.ReadSheets())
 {
     Console.WriteLine($"Sheet: {sheet.Name}");
-    Console.WriteLine($"Visibility: {sheet.Visibility}");
+    Console.WriteLine($"Visibility: {sheet.Visibility}");  // Visible, Hidden, or VeryHidden
+    Console.WriteLine($"Index: {sheet.Index}");
     Console.WriteLine($"Columns: {sheet.NumberOfColumns}");
 }
 ```
+
+**Sheet Visibility:**
+- `ExcelSheetVisibility.Visible` - Normal visible sheets
+- `ExcelSheetVisibility.Hidden` - Hidden sheets (can be unhidden in Excel)
+- `ExcelSheetVisibility.VeryHidden` - Very hidden sheets (requires VBA to unhide)
 
 ### Read Sheets Sequentially
 
@@ -189,9 +211,20 @@ var employees = sheet.ReadRows<Employee>().ToArray();
 ### Read Specific Range
 
 ```csharp
-// Read 10 rows starting from row index 5 (after header)
+// Read 10 rows starting from row index 5 (after header at index 0)
+// Note: startIndex is relative to the beginning of the file, not after the header
 var rows = sheet.ReadRows<Employee>(startIndex: 5, count: 10);
+
+// Example: If header is at row 0, data starts at row 1
+// startIndex: 1 = first data row
+// startIndex: 11 = 11th data row
 ```
+
+**Important Notes:**
+- `startIndex` is the zero-based row index from the start of the sheet
+- The `startIndex` must be **after** the header row
+- If `HeadingIndex` is 0 (default), `startIndex` must be at least 1
+- The method will throw `ExcelMappingException` if rows don't exist
 
 ### Read Rows Sequentially
 
@@ -241,9 +274,17 @@ importer.Configuration.MaxColumnsPerSheet = int.MaxValue;
 
 ## Mapping Strategies
 
+ExcelMapper supports three approaches to mapping Excel rows to objects.
+
 ### Automatic Mapping
 
-ExcelMapper automatically maps public properties and fields by matching column names (case-insensitive by default).
+ExcelMapper automatically maps **public properties and fields** by matching column names (case-insensitive by default).
+
+**Important:** 
+- Only **public instance properties with setters** are auto-mapped
+- Only **public instance fields** are auto-mapped
+- Static members, read-only properties, and indexers are ignored
+- Use `[ExcelIgnore]` to exclude specific properties/fields
 **Example:**
 
 | Name          | Department  | Position        | HireDate   | Salary | Active |
@@ -574,6 +615,8 @@ The `ExcelTransformerAttribute` accepts any type implementing `ICellTransformer`
 
 For complex scenarios, use fluent mapping with `ExcelClassMap<T>`:
 
+**Method 1: Create a class that inherits from ExcelClassMap<T>**
+
 ```csharp
 public class EmployeeMap : ExcelClassMap<Employee>
 {
@@ -596,6 +639,31 @@ importer.Configuration.RegisterClassMap<EmployeeMap>();
 
 var employees = sheet.ReadRows<Employee>();
 ```
+
+**Method 2: Use lambda-based inline configuration**
+
+```csharp
+// Configure inline without creating a separate class
+importer.Configuration.RegisterClassMap<Employee>(map =>
+{
+    map.Map(e => e.Name)
+        .WithColumnName("Full Name");
+
+    map.Map(e => e.Salary)
+        .WithColumnIndex(2);
+
+    map.Map(e => e.Department)
+        .WithColumnNames("Department", "Dept", "Division")
+        .MakeOptional();
+});
+
+var employees = sheet.ReadRows<Employee>();
+```
+
+This lambda approach is useful for:
+- Quick one-off mappings
+- Testing and prototyping
+- Dynamic configuration scenarios
 
 #### Fluent Mapping Options
 
@@ -647,7 +715,9 @@ public class EmployeeMap : ExcelClassMap<Employee>
             .WithMapping(new Dictionary<string, EmploymentStatus>
             {
                 { "FT", EmploymentStatus.FullTime },
-                { "PT", EmploymentStatus.PartTime }
+                { "PT", EmploymentStatus.PartTime },
+                { "Contract", EmploymentStatus.Contract },
+                { "Contractor", EmploymentStatus.Contract }
             });
 
         // Map by index
@@ -673,6 +743,64 @@ public class EmployeeMap : ExcelClassMap<Employee>
 importer.Configuration.RegisterClassMap<EmployeeMap>();
 var employees = sheet.ReadRows<Employee>();
 ```
+
+### Value Mapping
+
+Map string cell values to specific enum or object values using `.WithMapping()`:
+
+| Name          | Size | Priority |
+|---------------|------|----------|
+| Alice Johnson | L    | High     |
+| Bob Smith     | M    | Med      |
+
+```csharp
+public enum TShirtSize { Small, Medium, Large, XLarge }
+public enum Priority { Low, Medium, High }
+
+public class Employee
+{
+    public string Name { get; set; }
+    public TShirtSize Size { get; set; }
+    public Priority Priority { get; set; }
+}
+
+public class EmployeeMap : ExcelClassMap<Employee>
+{
+    public EmployeeMap()
+    {
+        Map(e => e.Name);
+        
+        // Map string values to enum
+        Map(e => e.Size)
+            .WithMapping(new Dictionary<string, TShirtSize>
+            {
+                { "S", TShirtSize.Small },
+                { "M", TShirtSize.Medium },
+                { "L", TShirtSize.Large },
+                { "XL", TShirtSize.XLarge }
+            });
+            
+        // Handle abbreviations and variations
+        Map(e => e.Priority)
+            .WithMapping(new Dictionary<string, Priority>
+            {
+                { "Low", Priority.Low },
+                { "L", Priority.Low },
+                { "Medium", Priority.Medium },
+                { "Med", Priority.Medium },
+                { "M", Priority.Medium },
+                { "High", Priority.High },
+                { "H", Priority.High }
+            });
+    }
+}
+```
+
+This is especially useful for:
+- Mapping abbreviations to full values
+- Handling data entry variations
+- Converting legacy codes to enum values
+- Supporting multiple languages or formats
 
 ## Error Handling
 
@@ -839,6 +967,7 @@ public class Employee
     public string Name { get; set; }
     public string[] Skills { get; set; }
     public DateTime[] Certifications { get; set; }
+    public int[] Scores { get; set; }
 }
 
 public class EmployeeMap : ExcelClassMap<Employee>
@@ -851,24 +980,39 @@ public class EmployeeMap : ExcelClassMap<Employee>
         Map(e => e.Skills)
             .WithColumnName("Skills");
 
-        // Read multiple columns
+        // Read multiple columns with custom element mapping
         Map(e => e.Certifications)
             .WithColumnNames("Certification Date 1", "Certification Date 2")
             .WithElementMap(m => m
                 .WithFormats("yyyy-MM-dd", "dd/MM/yyyy")
+                .WithInvalidFallback(DateTime.MinValue)
+            );
+            
+        // Configure element conversion for split values
+        Map(e => e.Scores)
+            .WithColumnName("Quarterly Scores")
+            .WithSeparators(';')
+            .WithElementMap(m => m
+                .WithInvalidFallback(-1)  // Handle non-numeric values
             );
     }
 }
 ```
 
+The `.WithElementMap()` method allows you to configure how individual elements in a collection are parsed, including:
+- Custom formats (`.WithFormats()`)
+- Fallback values (`.WithEmptyFallback()`, `.WithInvalidFallback()`)
+- Custom converters (`.WithConverter()`)
+- Value mappings (`.WithMapping()`)
+
 #### Supported Collection Types
 
-- `T[]` - Arrays
-- `List<T>`, `IList<T>`, `ICollection<T>`, `IEnumerable<T>`
-- `HashSet<T>`, `ISet<T>`
-- `ImmutableArray<T>`, `ImmutableList<T>`, `ImmutableHashSet<T>`
-- `FrozenSet<T>` (.NET 8+)
-- And more...
+- **Arrays**: `T[]`
+- **Lists**: `List<T>`, `IList<T>`, `ICollection<T>`, `IEnumerable<T>`
+- **Sets**: `HashSet<T>`, `ISet<T>`, `FrozenSet<T>` (.NET 8+), `ImmutableHashSet<T>`, `ImmutableSortedSet<T>`
+- **Immutable Collections**: `ImmutableArray<T>`, `ImmutableList<T>`
+- **Observable Collections**: `ObservableCollection<T>`
+- **Custom collections** with `Add(T)` method and parameterless constructor
 
 ### Dictionaries
 
@@ -908,9 +1052,10 @@ public class RecordMap : ExcelClassMap<Record>
 #### Supported Dictionary Types
 
 - `Dictionary<TKey, TValue>`, `IDictionary<TKey, TValue>`
-- `FrozenDictionary<TKey, TValue>`
-- `ImmutableDictionary<TKey, TValue>`
+- `FrozenDictionary<TKey, TValue>` (.NET 8+)
+- `ImmutableDictionary<TKey, TValue>`, `ImmutableSortedDictionary<TKey, TValue>`
 - Keys are derived from column names
+- Values can be any supported type
 
 ### Nested Objects
 
@@ -954,6 +1099,36 @@ importer.Configuration.RegisterClassMap<EmployeeMap>();
 var employees = sheet.ReadRows<Employee>();
 ```
 
+**Circular Reference Detection:**
+
+ExcelMapper automatically detects and prevents circular references during auto-mapping:
+
+```csharp
+public class Person
+{
+    public string Name { get; set; }
+    public Person Parent { get; set; }  // Would cause infinite recursion
+}
+
+// This will throw ExcelMappingException with a clear error message
+var people = sheet.ReadRows<Person>();
+// Exception: "Circular reference detected: type 'Person' references itself 
+//             through its members. Consider applying the ExcelIgnore 
+//             attribute to break the cycle."
+```
+
+**Solution - use `[ExcelIgnore]`:**
+
+```csharp
+public class Person
+{
+    public string Name { get; set; }
+    
+    [ExcelIgnore]  // Break the circular reference
+    public Person Parent { get; set; }
+}
+```
+
 ### Custom Converters
 
 Create custom type conversions:
@@ -982,6 +1157,94 @@ public class EmployeeMap : ExcelClassMap<Employee>
                 "inactive" => false,
                 _ => false
             });
+    }
+}
+```
+
+### Custom Transformers and Mappers
+
+For advanced scenarios, implement `ICellTransformer` or `ICellMapper`:
+
+**ICellTransformer** - Transforms string values before mapping:
+
+```csharp
+public class UpperCaseTransformer : ICellTransformer
+{
+    public string? TransformStringValue(ExcelSheet sheet, int rowIndex, ReadCellResult readResult)
+    {
+        return readResult.StringValue?.ToUpperInvariant();
+    }
+}
+
+public class EmployeeMap : ExcelClassMap<Employee>
+{
+    public EmployeeMap()
+    {
+        Map(e => e.Name)
+            .WithTransformers(new UpperCaseTransformer());
+            
+        // Or use the built-in trim transformer
+        Map(e => e.Department)
+            .WithTrim();  // Convenience method for TrimStringCellTransformer
+    }
+}
+```
+
+**ICellMapper** - Custom type conversion logic:
+
+```csharp
+public class PhoneNumberMapper : ICellMapper
+{
+    public CellMapperResult Map(ReadCellResult readResult)
+    {
+        var value = readResult.StringValue;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return CellMapperResult.Empty();
+        }
+
+        try
+        {
+            // Remove formatting and validate
+            var cleaned = new string(value.Where(char.IsDigit).ToArray());
+            if (cleaned.Length != 10)
+            {
+                return CellMapperResult.Invalid(
+                    new FormatException("Phone number must be 10 digits"));
+            }
+            
+            return CellMapperResult.Success(cleaned);
+        }
+        catch (Exception ex)
+        {
+            return CellMapperResult.Invalid(ex);
+        }
+    }
+}
+
+public class ContactMap : ExcelClassMap<Contact>
+{
+    public ContactMap()
+    {
+        Map(e => e.PhoneNumber)
+            .WithMappers(new PhoneNumberMapper());
+    }
+}
+```
+
+**Chaining Transformers and Mappers:**
+
+```csharp
+public class EmployeeMap : ExcelClassMap<Employee>
+{
+    public EmployeeMap()
+    {
+        Map(e => e.Name)
+            .WithTransformers(
+                new TrimStringCellTransformer(),
+                new UpperCaseTransformer()
+            )
+            .WithMappers(new CustomStringMapper());
     }
 }
 ```
@@ -1078,14 +1341,60 @@ var employees = sheet.ReadRows<Employee>();
    Map(e => e.Name).WithColumnName("Name");  // Requires lookup
    ```
 
+## Thread Safety
+
+**Important:** `ExcelSheet` instances maintain mutable state (current row index) and are **not thread-safe**. Each instance should be used by only one thread at a time.
+
+**Safe concurrent processing:**
+
+```csharp
+// Read all rows first
+var employees = sheet.ReadRows<Employee>().ToList();
+
+// Then process in parallel
+Parallel.ForEach(employees, employee =>
+{
+    ProcessEmployee(employee);
+});
+```
+
+**Unsafe concurrent processing:**
+
+```csharp
+// DON'T DO THIS - Not thread-safe!
+Parallel.ForEach(sheet.ReadRows<Employee>(), employee =>
+{
+    ProcessEmployee(employee);
+});
+```
+
+**Multiple sheets:**
+
+```csharp
+// Each sheet can be processed independently
+using var importer = new ExcelImporter("workbook.xlsx");
+
+foreach (var sheet in importer.ReadSheets())
+{
+    // Each sheet is independent and can be processed separately
+    var data = sheet.ReadRows<Employee>().ToList();
+    
+    // Now safe to process in parallel
+    Parallel.ForEach(data, row => ProcessRow(row));
+}
+```
+
 ## Supported Types
 
 ### Primitive Types
-- Numeric: `int`, `long`, `double`, `decimal`, `float`, `byte`, `short`, `uint`, `ulong`, `ushort`, `sbyte`
-- Text: `string`, `char`
-- Other: `bool`, `DateTime`, `Guid`, `Uri`
-- Enums (with optional case-insensitive parsing)
-- Nullable versions of all value types
+- **Numeric**: `int`, `long`, `double`, `decimal`, `float`, `byte`, `short`, `uint`, `ulong`, `ushort`, `sbyte`
+- **Extended Numeric**: `Int128`, `UInt128`, `BigInteger`, `Half`, `nint` (IntPtr), `nuint` (UIntPtr), `Complex`
+- **Text**: `string`, `char`
+- **Other**: `bool`, `Guid`, `Uri`, `Version`
+- **Enums**: With optional case-insensitive parsing
+- **Nullable versions** of all value types
+- **Any type implementing `IParsable<T>`** (.NET 7+) - automatically supported
+- **Any type implementing `IConvertible`** - automatically supported
 
 ### Collection Types
 - `T[]`, `List<T>`, `IList<T>`, `ICollection<T>`, `IEnumerable<T>`
@@ -1098,34 +1407,93 @@ var employees = sheet.ReadRows<Employee>();
 
 ExcelMapper has comprehensive support for modern .NET date and time types:
 
-- `DateTime`, `DateTimeOffset` - Full date and time
+- `DateTime` - Full date and time with timezone support
+- `DateTimeOffset` - Date and time with explicit timezone offset
 - `DateOnly` - Date without time (available in .NET 6+)
 - `TimeOnly` - Time without date (available in .NET 6+)
 - `TimeSpan` - Duration/time interval
 
 All support custom format parsing with `.WithFormats()`.
 
+**Example:**
+
+```csharp
+public class EventMap : ExcelClassMap<Event>
+{
+    public EventMap()
+    {
+        Map(e => e.EventDate)
+            .WithFormats("yyyy-MM-dd", "dd/MM/yyyy", "MM/dd/yyyy");
+            
+        Map(e => e.StartTime)
+            .WithFormats("HH:mm:ss", "hh:mm tt");
+            
+        Map(e => e.Duration)
+            .WithFormats(@"hh\:mm\:ss", @"mm\:ss");
+    }
+}
+```
+
 ### Complex Types
 - Classes with public properties/fields
-- Record types
+- Record types (C# 9+)
 - Nested objects
 - `ExpandoObject` for dynamic scenarios
+
+**Record Type Example:**
+
+```csharp
+// Records work seamlessly with ExcelMapper
+public record Employee(string Name, string Department, decimal Salary);
+
+using var importer = new ExcelImporter("employees.xlsx");
+var sheet = importer.ReadSheet();
+var employees = sheet.ReadRows<Employee>().ToArray();
+```
+
+**ExpandoObject Example:**
+
+```csharp
+using System.Dynamic;
+
+// Read rows as dynamic objects when column structure varies
+using var importer = new ExcelImporter("data.xlsx");
+var sheet = importer.ReadSheet();
+
+foreach (dynamic row in sheet.ReadRows<ExpandoObject>())
+{
+    Console.WriteLine(row.ColumnName);  // Access properties dynamically
+}
+
+// Or use in a property
+public class FlexibleData
+{
+    public string Id { get; set; }
+    public ExpandoObject Metadata { get; set; }  // Maps all remaining columns
+}
+```
 
 ## CSV Support
 
 ExcelMapper supports CSV files in addition to Excel formats:
 
 ```csharp
-// CSV files are automatically detected
-using var importer = new ExcelImporter("employees.csv");
+// Specify CSV file type explicitly
+using var importer = new ExcelImporter("employees.csv", ExcelImporterFileType.Csv);
 var sheet = importer.ReadSheet();
 var employees = sheet.ReadRows<Employee>();
+
+// Or let ExcelDataReader auto-detect (may work for .csv extension)
+using var importer = new ExcelImporter("employees.csv");
 ```
 
-Supported formats:
+**Supported file formats:**
 - `.xlsx` - Excel 2007+ (Office Open XML)
-- `.xls` - Excel 97-2003 (Binary Format)
+- `.xls` - Excel 97-2003 (Binary Format)  
+- `.xlsb` - Excel Binary Workbook
 - `.csv` - Comma-separated values
+
+**Note:** For CSV files, it's recommended to explicitly specify `ExcelImporterFileType.Csv` to ensure proper parsing.
 
 ## Common Issues & Troubleshooting
 
@@ -1367,6 +1735,108 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
        }
    }
    ```
+
+6. **Dispose resources properly** - Always use `using` statements with `ExcelImporter`
+   ```csharp
+   using var importer = new ExcelImporter("data.xlsx");
+   // Work with importer
+   // Automatically disposed at end of scope
+   ```
+
+7. **Be mindful of thread safety** - Don't share `ExcelSheet` instances across threads
+
+## API Reference
+
+### Core Classes
+
+**`ExcelImporter`** - Main entry point for reading Excel files
+- `ReadSheet()` / `TryReadSheet()` - Read sheets sequentially or by name/index
+- `ReadSheets()` - Enumerate all sheets
+- `Configuration` - Access configuration for registering maps
+- `Reader` - Access underlying `IExcelDataReader` for advanced scenarios
+- `NumberOfSheets` - Get total sheet count
+
+**`ExcelSheet`** - Represents a single worksheet
+- `ReadRows<T>()` - Read all rows as typed objects (lazy evaluation)
+- `ReadRows<T>(startIndex, count)` - Read specific range of rows
+- `ReadRow<T>()` / `TryReadRow<T>()` - Read single row
+- `ReadHeading()` - Explicitly read header row
+- `Name` - Sheet name
+- `Visibility` - Sheet visibility (Visible, Hidden, VeryHidden)
+- `Index` - Zero-based sheet index
+- `NumberOfColumns` - Column count
+- `HasHeading` - Whether sheet has header row (default: true)
+- `HeadingIndex` - Zero-based index of header row (default: 0)
+- `CurrentRowIndex` - Current row being processed
+
+**`ExcelImporterConfiguration`** - Configuration settings
+- `RegisterClassMap<T>()` - Register type-specific mapping
+- `RegisterClassMap<T>(Action<ExcelClassMap<T>>)` - Inline lambda configuration
+- `TryGetClassMap<T>()` - Check if map exists
+- `SkipBlankLines` - Skip empty rows (default: false)
+- `MaxColumnsPerSheet` - Security limit (default: 10,000)
+
+**`ExcelClassMap<T>`** - Fluent mapping configuration
+- `Map(expression)` - Map property or field
+- `MapObject<TElement>(expression)` - Map nested object
+- `MapEnumerable<TElement>(expression)` - Map collection
+- `MapDictionary<TKey, TValue>(expression)` - Map dictionary
+
+### Mapping Attributes
+
+| Attribute | Purpose |
+|-----------|---------|
+| `[ExcelColumnName("Name")]` | Map to specific column name |
+| `[ExcelColumnNames("Name1", "Name2")]` | Try multiple column names |
+| `[ExcelColumnIndex(0)]` | Map to column by index |
+| `[ExcelColumnIndices(0, 1)]` | Try multiple column indices |
+| `[ExcelColumnMatching(@"regex", options)]` | Match columns by pattern |
+| `[ExcelColumnsMatching(typeof(Matcher))]` | Custom column matching |
+| `[ExcelOptional]` | Don't throw if column missing |
+| `[ExcelIgnore]` | Exclude from mapping |
+| `[ExcelDefaultValue(value)]` | Default for empty cells |
+| `[ExcelInvalidValue(value)]` | Default for invalid values |
+| `[ExcelEmptyFallback(typeof(Fallback))]` | Custom empty cell handling |
+| `[ExcelInvalidFallback(typeof(Fallback))]` | Custom invalid value handling |
+| `[ExcelPreserveFormatting]` | Read formatted string |
+| `[ExcelTrimString]` | Auto-trim whitespace |
+| `[ExcelTransformer(typeof(Transformer))]` | Apply custom transformer |
+
+### Fluent API Methods
+
+**Column Selection:**
+- `.WithColumnName("Name")` - Map to specific column
+- `.WithColumnNames("Name1", "Name2")` - Try multiple names
+- `.WithColumnIndex(0)` - Map by index
+- `.WithColumnIndices(0, 1, 2)` - Try multiple indices
+- `.WithColumnNameMatching(predicate)` - Use predicate
+- `.WithColumnMatching(matcher)` - Custom matcher
+
+**Behavior:**
+- `.MakeOptional()` - Don't throw if missing
+- `.WithEmptyFallback(value)` - Default for empty
+- `.WithInvalidFallback(value)` - Default for invalid
+- `.WithValueFallback(value)` - Default for both
+- `.WithConverter(value => ...)` - Custom conversion
+- `.WithFormats("format1", "format2")` - Date/time formats
+- `.WithMapping(dictionary)` - Value mapping
+- `.WithTrim()` - Trim whitespace
+- `.WithTransformers(...)` - Custom transformers
+- `.WithMappers(...)` - Custom mappers
+
+**Collections:**
+- `.WithSeparators(';', ',')` - Split delimiters (char)
+- `.WithSeparators(";", ",")` - Split delimiters (string)
+- `.WithElementMap(m => ...)` - Configure element pipeline
+
+### Extension Interfaces
+
+Implement these for advanced customization:
+
+- `ICellMapper` - Custom type conversion logic
+- `ICellTransformer` - Transform string values before mapping
+- `IFallbackItem` - Custom fallback behavior
+- `IExcelColumnMatcher` - Custom column matching logic
 
 ## Contributing
 
