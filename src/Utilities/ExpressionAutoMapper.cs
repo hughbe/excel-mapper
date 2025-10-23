@@ -65,7 +65,7 @@ internal static class ExpressionAutoMapper
                (unaryExpression.NodeType == ExpressionType.Convert || unaryExpression.NodeType == ExpressionType.ConvertChecked))
         {
             expression = unaryExpression.Operand;
-            // If we have multiple converts, we want the innermost type
+            // If we have multiple converts, we want the outermost type
             // e.g. ((A)(B)x) should give us A, not B
             convertedType ??= unaryExpression.Type;
         }

@@ -3,12 +3,19 @@
 namespace ExcelMapper.Abstractions;
 
 /// <summary>
-/// An interface that describes an object that is called when an empty or invalid
-/// value of cell is encountered. This can be used to return a fixed value or to throw
-/// an exception.
+/// Defines a fallback item for handling read errors or missing data.
 /// </summary>
 public interface IFallbackItem
 {
+    /// <summary>
+    /// Performs the fallback operation.
+    /// </summary>
+    /// <param name="sheet">The sheet.</param>
+    /// <param name="rowIndex">The row index.</param>
+    /// <param name="readResult">The read cell result.</param>
+    /// <param name="exception">The exception that occurred, if any.</param>
+    /// <param name="member">The member being mapped to, if any.</param>
+    /// <returns>The fallback value.</returns>
     object? PerformFallback(
         ExcelSheet sheet,
         int rowIndex,

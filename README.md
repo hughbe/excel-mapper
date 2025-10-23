@@ -559,7 +559,7 @@ For more complex fallback scenarios, use `IFallbackItem` types:
 ```csharp
 public class ThrowFallbackItem : IFallbackItem
 {
-    public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult)
+    public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member)
     {
         throw new InvalidOperationException("Custom error message");
     }
@@ -1727,7 +1727,7 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
    ```csharp
    public class CustomFallback : IFallbackItem
    {
-       public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult)
+       public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member)
        {
            throw new InvalidOperationException(
                $"Invalid data in row {rowIndex}, column {readResult.ColumnName}: {readResult.StringValue}"

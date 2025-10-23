@@ -168,7 +168,7 @@ public class ExcelImporter : IDisposable
     {
         if (!TryReadSheet(sheetIndex, out var sheet))
         {
-            throw new ArgumentOutOfRangeException(nameof(sheetIndex), sheetIndex, $"The sheet index {SheetIndex} must be between 0 and {NumberOfSheets}.");
+            throw new ArgumentOutOfRangeException(nameof(sheetIndex), sheetIndex, $"The sheet index {sheetIndex} must be between 0 and {NumberOfSheets - 1}.");
         }
 
         return sheet;
