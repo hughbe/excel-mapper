@@ -1,5 +1,8 @@
 namespace ExcelMapper.Abstractions;
 
+/// <summary>
+/// Map for to-one relationships.
+/// </summary>
 public interface IToOneMap : IMap
 {
     /// <summary>

@@ -57,6 +57,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
 
     private readonly ConcurrentDictionary<ExcelSheet, ICellsReader?> _factoryCache = new();
 
+    /// <inheritdoc />
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
         ArgumentNullException.ThrowIfNull(sheet);

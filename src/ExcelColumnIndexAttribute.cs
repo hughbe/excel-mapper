@@ -23,7 +23,7 @@ public class ExcelColumnIndexAttribute : Attribute
     }
 
     /// <summary>
-    /// The index of the column.
+    /// Gets or sets the index of the column.
     /// </summary>
     public int Index
     {

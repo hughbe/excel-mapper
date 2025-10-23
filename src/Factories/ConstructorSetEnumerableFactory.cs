@@ -3,6 +3,10 @@ using System.Reflection;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs a set by passing a HashSet&lt;T&gt; of items to a constructor that accepts ISet&lt;T&gt;.
+/// </summary>
+/// <typeparam name="T">The type of the set elements.</typeparam>
 public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
 {
     public Type SetType { get; }
@@ -10,6 +14,11 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
 
     private HashSet<T?>? _items;
 
+    /// <summary>
+    /// Constructs a factory that creates sets of the given type.
+    /// </summary>
+    /// <param name="setType">The type of set to create.</param>
+    /// <exception cref="ArgumentException">Thrown when the set type is invalid or unsupported.</exception>
     public ConstructorSetEnumerableFactory(Type setType)
     {
         ArgumentNullException.ThrowIfNull(setType);
@@ -28,6 +37,7 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
         SetType = setType;
     }
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -40,18 +50,21 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
         _items = new HashSet<T?>(count);
     }
 
+    /// <inheritdoc/>
     public void Add(T? item)
     {
         EnsureMapping();
         _items.Add(item);
     }
 
+    /// <inheritdoc/>
     public void Set(int index, T? item)
     {
         EnsureMapping();
         throw new NotSupportedException($"Set is not supported for {nameof(ConstructorSetEnumerableFactory<T>)}.");
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -66,6 +79,7 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _items = null;

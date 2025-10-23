@@ -1,11 +1,13 @@
 ﻿namespace ExcelMapper.Abstractions;
 
 /// <summary>
-/// An interface that creates a reader for multiple cells on a specific sheet.
-/// This is a performance optimisation to avoid recalculating
-/// column indices for each row.
+/// Factory for getting cells readers for a given sheet.
+/// This is a performance optimization to cache column indices.
 /// </summary>
 public interface ICellsReaderFactory
 {
+    /// <summary>
+    /// Gets a cells reader for the given sheet.
+    /// </summary>
     ICellsReader? GetCellsReader(ExcelSheet sheet);
 }

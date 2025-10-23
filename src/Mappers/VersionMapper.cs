@@ -5,6 +5,7 @@
 /// </summary>
 public class VersionMapper : ICellMapper
 {
+    /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult readResult)
     {
         var stringValue = readResult.GetString();

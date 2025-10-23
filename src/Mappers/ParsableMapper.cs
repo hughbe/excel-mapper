@@ -10,6 +10,7 @@ public class ParsableMapper<TParse> : ICellMapper where TParse : IParsable<TPars
     /// </summary>
     public IFormatProvider? Provider { get; set; }
 
+    /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult readResult)
     {
         var value = readResult.GetString();

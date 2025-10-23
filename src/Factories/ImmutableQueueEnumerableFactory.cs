@@ -3,10 +3,15 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs an ImmutableQueue&lt;T&gt; by collecting items in a list and creating a queue at the end.
+/// </summary>
+/// <typeparam name="T">The type of the queue elements.</typeparam>
 public class ImmutableQueueEnumerableFactory<T> : IEnumerableFactory<T>
 {
     private List<T?>? _items;
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -19,12 +24,14 @@ public class ImmutableQueueEnumerableFactory<T> : IEnumerableFactory<T>
         _items = new List<T?>(count);
     }
 
+    /// <inheritdoc/>
     public void Add(T? item)
     {
         EnsureMapping();
         _items.Add(item);
     }
 
+    /// <inheritdoc/>
     public void Set(int index, T? item)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(index);
@@ -39,6 +46,7 @@ public class ImmutableQueueEnumerableFactory<T> : IEnumerableFactory<T>
         _items[index] = item;
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -53,6 +61,7 @@ public class ImmutableQueueEnumerableFactory<T> : IEnumerableFactory<T>
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _items = null;

@@ -36,6 +36,14 @@ public static class IValuePipelineExtensions
     public static TMap WithTransformers<TMap>(this TMap map, params ICellTransformer[] transformers) where TMap : IValuePipeline
         => map.WithTransformers((IEnumerable<ICellTransformer>)transformers);
 
+    /// <summary>
+    /// Specifies additional custom transformers that will be used to map the value of a cell to
+    /// a property or field.
+    /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="transformers">A list of additional custom transformers that will be used to map the value of a cell to a property or field</param>
+    /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithTransformers<TMap>(this TMap map, params IEnumerable<ICellTransformer> transformers) where TMap : IValuePipeline
     {
         ArgumentNullException.ThrowIfNull(transformers);
@@ -71,6 +79,14 @@ public static class IValuePipelineExtensions
     public static TMap WithMappers<TMap>(this TMap map, params ICellMapper[] mappers) where TMap : IValuePipeline
         => map.WithMappers((IEnumerable<ICellMapper>)mappers);
     
+    /// <summary>
+    /// Specifies additional custom mappers that will be used to map the value of a cell to
+    /// a property or field.
+    /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="mappers">A list of additional custom mappers that will be used to map the value of a cell to a property or field</param>
+    /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithMappers<TMap>(this TMap map, params IEnumerable<ICellMapper> mappers) where TMap : IValuePipeline
     {
         ArgumentNullException.ThrowIfNull(mappers);
@@ -97,14 +113,14 @@ public static class IValuePipelineExtensions
 
     /// <summary>
     /// Specifies that the value of a cell should be mapped to a fixed value if it cannot be parsed. This
-    /// is useful for mapping columns where equivilent data was entered differently.
+    /// is useful for mapping columns where equivalent data was entered differently.
     /// </summary>
     /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <typeparam name="T">The type of the property or field that the map represents.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="mappingDictionary">A dictionary that maps a fixed string value to a fixed value of T.</param>
     /// <param name="comparer">The comparer uses to map fixed string values. This allows for case-insensitive mappings, for example.</param>
-    /// <param name="behavior">Whether or not an error a failure to match is an error.</param>
+    /// <param name="behavior">Whether or not a failure to match is an error.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithMapping<TMap, TValue>(this TMap map, IDictionary<string, TValue> mappingDictionary, IEqualityComparer<string>? comparer = null, DictionaryMapperBehavior behavior = DictionaryMapperBehavior.Optional) where TMap : IValuePipeline<TValue>
     {
@@ -439,6 +455,15 @@ public static class IValuePipelineExtensions
         return map.WithConverter(actualConverter);
     }
 
+    /// <summary>
+    /// Specifies that the value of a cell should be mapped to a value using the given delegate. This is
+    /// useful for specifying custom mapping behaviour for a property or field without having to write
+    /// your own ICellMapper.
+    /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="converter">A delegate that is invoked to map the read cell result to the value of a property or field.</param>
+    /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithConverter<TMap>(this TMap map, ConvertUsingMapperDelegate converter) where TMap: IValuePipeline
     {
         ArgumentNullException.ThrowIfNull(converter);

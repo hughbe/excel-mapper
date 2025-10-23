@@ -27,6 +27,7 @@ public class ChangeTypeMapper : ICellMapper
         Type = type;
     }
 
+    /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult readResult)
     {
         var value = readResult.GetValue();

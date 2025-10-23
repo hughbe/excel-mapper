@@ -43,10 +43,14 @@ public struct ReadCellResult
         {
             _stringValue = value?.ToString();
         }
-        
+
         return _stringValue;
     }
 
+    /// <summary>
+    /// Gets the value of the cell.
+    /// </summary>
+    /// <returns>The value of the cell.</returns>
     public object? GetValue()
     {
         if (Reader == null || _value != null)
@@ -65,6 +69,9 @@ public struct ReadCellResult
         return value;
     }
 
+    /// <summary>
+    /// Gets whether the cell is empty.
+    /// </summary>
     public bool IsEmpty()
     {
         // If we preserve formatting, get the value as a string.

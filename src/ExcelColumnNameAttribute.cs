@@ -23,7 +23,7 @@ public class ExcelColumnNameAttribute : Attribute
     }
 
     /// <summary>
-    /// The name of the column.
+    /// Gets or sets the name of the column.
     /// </summary>
     public string Name
     {

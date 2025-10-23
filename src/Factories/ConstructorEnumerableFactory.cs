@@ -4,6 +4,10 @@ using System.Reflection;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs a collection by passing a list of items to a constructor that accepts IList&lt;T&gt;, IEnumerable&lt;T&gt;, or ICollection.
+/// </summary>
+/// <typeparam name="T">The type of the collection elements.</typeparam>
 public class ConstructorEnumerableFactory<T> : IEnumerableFactory<T>
 {
     public Type CollectionType { get; }
@@ -11,6 +15,11 @@ public class ConstructorEnumerableFactory<T> : IEnumerableFactory<T>
 
     private List<T?>? _items;
 
+    /// <summary>
+    /// Constructs a factory that creates collections of the given type.
+    /// </summary>
+    /// <param name="collectionType">The type of collection to create.</param>
+    /// <exception cref="ArgumentException">Thrown when the collection type is invalid or unsupported.</exception>
     public ConstructorEnumerableFactory(Type collectionType)
     {
         ArgumentNullException.ThrowIfNull(collectionType);
@@ -31,6 +40,7 @@ public class ConstructorEnumerableFactory<T> : IEnumerableFactory<T>
         CollectionType = collectionType;
     }
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -43,12 +53,14 @@ public class ConstructorEnumerableFactory<T> : IEnumerableFactory<T>
         _items = new List<T?>(count);
     }
 
+    /// <inheritdoc/>
     public void Add(T? item)
     {
         EnsureMapping();
         _items.Add(item);
     }
 
+    /// <inheritdoc/>
     public void Set(int index, T? item)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(index);
@@ -63,6 +75,7 @@ public class ConstructorEnumerableFactory<T> : IEnumerableFactory<T>
         _items[index] = item;
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -77,6 +90,7 @@ public class ConstructorEnumerableFactory<T> : IEnumerableFactory<T>
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _items = null;

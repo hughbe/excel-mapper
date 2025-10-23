@@ -2,10 +2,20 @@ using System.Text.RegularExpressions;
 
 namespace ExcelMapper.Readers;
 
+/// <summary>
+/// Matches column names based on a regular expression.
+/// </summary>
 public class RegexColumnMatcher : IExcelColumnMatcher
 {
+    /// <summary>
+    /// Gets the regular expression used to match column names.
+    /// </summary>
     public Regex Regex { get; }
 
+    /// <summary>
+    /// Constructs a matcher that matches column names based on the given regular expression.
+    /// </summary>
+    /// <param name="regex">The regular expression used to match column names.</param>
     public RegexColumnMatcher(Regex regex)
     {
         ArgumentNullException.ThrowIfNull(regex);
@@ -13,6 +23,7 @@ public class RegexColumnMatcher : IExcelColumnMatcher
         Regex = regex;
     }
 
+    /// <inheritdoc/>
     public bool ColumnMatches(ExcelSheet sheet, int columnIndex)
     {
         ArgumentNullException.ThrowIfNull(sheet);

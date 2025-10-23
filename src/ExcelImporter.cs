@@ -35,11 +35,16 @@ public class ExcelImporter : IDisposable
     /// <summary>
     /// Constructs an importer that reads an Excel file from a path.
     /// </summary>
-    /// <param name="path"></param>
+    /// <param name="path">A path to an Excel file.</param>
     public ExcelImporter(string path) : this(path, ExcelImporterFileType.Excel)
     {
     }
 
+    /// <summary>
+    /// Constructs an importer that reads an Excel or csv file from a path.
+    /// </summary>
+    /// <param name="path">A path to the file to read.</param>
+    /// <param name="fileType">The type of file.</param>
     public ExcelImporter(string path, ExcelImporterFileType fileType)
     {
         ArgumentNullException.ThrowIfNull(path);

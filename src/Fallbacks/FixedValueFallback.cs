@@ -13,6 +13,7 @@ public class FixedValueFallback(object? value) : IFallbackItem
     /// </summary>
     public object? Value { get; } = value;
 
+    /// <inheritdoc/>
     public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult result, Exception? exception, MemberInfo? member)
         => Value;
 }

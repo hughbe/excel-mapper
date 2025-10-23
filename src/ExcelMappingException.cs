@@ -3,6 +3,9 @@ using System.Reflection;
 
 namespace ExcelMapper;
 
+/// <summary>
+/// Represents errors that occur during Excel mapping.
+/// </summary>
 public class ExcelMappingException : Exception
 {
     /// <summary>
@@ -55,7 +58,7 @@ public class ExcelMappingException : Exception
         RowIndex = rowIndex;
         ColumnIndex = columnIndex;
     }
-    
+
     /// <summary>
     /// The sheet that is currently being read.
     /// </summary>
@@ -65,12 +68,12 @@ public class ExcelMappingException : Exception
     /// The zero-based index of the row in the sheet that is currently being read.
     /// </summary>
     public int RowIndex { get; } = -1;
-    
+
     /// <summary>
     /// The zero-based index of the column in the sheet that is currently being read.
     /// </summary>
     public int ColumnIndex { get; } = -1;
-    
+
     internal static ExcelMappingException CreateForNoSuchColumn(ExcelSheet sheet, int rowIndex, object readerFactory, MemberInfo? member)
     {
         if (readerFactory is IColumnNameProviderCellReaderFactory columnNameProvider)

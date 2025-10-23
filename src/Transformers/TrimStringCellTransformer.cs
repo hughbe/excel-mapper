@@ -5,6 +5,7 @@
 /// </summary>
 public class TrimStringCellTransformer : ICellTransformer
 {
+    /// <inheritdoc/>
     public string? TransformStringValue(ExcelSheet sheet, int rowIndex, ReadCellResult readResult)
         => readResult.GetString()?.Trim();
 }

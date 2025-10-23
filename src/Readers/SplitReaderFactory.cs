@@ -42,8 +42,14 @@ public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesPr
         _readerFactory = readerFactory;
     }
 
+    /// <summary>
+    /// Splits the given string value into multiple values.
+    /// </summary>
+    /// <param name="value">The string value to split.</param>
+    /// <returns>The multiple values produced by splitting the string value.</returns>
     protected abstract string[] GetValues(string value);
 
+    /// <inheritdoc/>
     public ICellsReader? GetCellsReader(ExcelSheet sheet)
     {
         ICellReader? reader = _readerFactory.GetCellReader(sheet);
@@ -55,6 +61,7 @@ public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesPr
         return new Reader(reader, this);
     }
 
+    /// <inheritdoc/>
     public string[]? GetColumnNames(ExcelSheet sheet)
     {
         if (_readerFactory is IColumnNameProviderCellReaderFactory nameProvider)
@@ -65,7 +72,7 @@ public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesPr
         return null;
     }
 
-
+    /// <inheritdoc/>
     public int[]? GetColumnIndices(ExcelSheet sheet)
     {
         if (_readerFactory is IColumnIndexProviderCellReaderFactory indexProvider)

@@ -18,6 +18,7 @@ public class FixedValueFallbackFactory : IFallbackItem
         Factory = factory;
     }
 
+    /// <inheritdoc/>
     public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult result, Exception? exception, MemberInfo? member)
         => Factory();
 }

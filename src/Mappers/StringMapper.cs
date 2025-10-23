@@ -5,6 +5,7 @@
 /// </summary>
 public class StringMapper : ICellMapper
 {
+    /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult result)
         => CellMapperResult.SuccessIfNoOtherSuccess(result.GetString());
 }

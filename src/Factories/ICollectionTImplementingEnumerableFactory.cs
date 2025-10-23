@@ -2,11 +2,20 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs a collection by instantiating a type that implements ICollection&lt;T&gt; and adding items.
+/// </summary>
+/// <typeparam name="T">The type of the collection elements.</typeparam>
 public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
 {
     public Type CollectionType { get; }
     private ICollection<T?>? _items;
 
+    /// <summary>
+    /// Constructs a factory that creates collections of the given type.
+    /// </summary>
+    /// <param name="collectionType">The type of collection to create.</param>
+    /// <exception cref="ArgumentException">Thrown when the collection type is invalid or unsupported.</exception>
     public ICollectionTImplementingEnumerableFactory(Type collectionType)
     {
         ArgumentNullException.ThrowIfNull(collectionType);
@@ -34,6 +43,7 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
         CollectionType = collectionType;
     }
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -46,18 +56,21 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
         _items = (ICollection<T?>)Activator.CreateInstance(CollectionType)!;
     }
 
+    /// <inheritdoc/>
     public void Add(T? item)
     {
         EnsureMapping();
         _items.Add(item);
     }
 
+    /// <inheritdoc/>
     public void Set(int index, T? item)
     {
         EnsureMapping();
         throw new NotSupportedException($"Set is not supported for {nameof(ICollectionTImplementingEnumerableFactory<T>)}.");
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -72,6 +85,7 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _items = null;

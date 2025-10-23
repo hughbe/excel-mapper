@@ -2,10 +2,15 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs a HashSet&lt;T&gt; by pre-allocating capacity and adding items.
+/// </summary>
+/// <typeparam name="T">The type of the set elements.</typeparam>
 public class HashSetEnumerableFactory<T> : IEnumerableFactory<T>
 {
     private HashSet<T?>? _items;
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -19,18 +24,21 @@ public class HashSetEnumerableFactory<T> : IEnumerableFactory<T>
         _items.EnsureCapacity(count);
     }
 
+    /// <inheritdoc/>
     public void Add(T? item)
     {
         EnsureMapping();
         _items.Add(item);
     }
 
+    /// <inheritdoc/>
     public void Set(int index, T? item)
     {
         EnsureMapping();
         throw new NotSupportedException($"Set is not supported for {nameof(HashSetEnumerableFactory<T>)}.");
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -45,6 +53,7 @@ public class HashSetEnumerableFactory<T> : IEnumerableFactory<T>
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _items = null;

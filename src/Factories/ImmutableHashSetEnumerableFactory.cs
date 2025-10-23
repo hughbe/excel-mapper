@@ -3,10 +3,15 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs an ImmutableHashSet&lt;T&gt; by using a builder and converting to immutable at the end.
+/// </summary>
+/// <typeparam name="T">The type of the set elements.</typeparam>
 public class ImmutableHashSetEnumerableFactory<T> : IEnumerableFactory<T>
 {
     private ImmutableHashSet<T?>.Builder? _builder;
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -19,18 +24,21 @@ public class ImmutableHashSetEnumerableFactory<T> : IEnumerableFactory<T>
         _builder = ImmutableHashSet.CreateBuilder<T?>();
     }
 
+    /// <inheritdoc/>
     public void Add(T? item)
     {
         EnsureMapping();
         _builder.Add(item);
     }
 
+    /// <inheritdoc/>
     public void Set(int index, T? item)
     {
         EnsureMapping();
         throw new NotSupportedException($"Set is not supported for {nameof(ImmutableHashSetEnumerableFactory<T>)}.");
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -45,6 +53,7 @@ public class ImmutableHashSetEnumerableFactory<T> : IEnumerableFactory<T>
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _builder = null;

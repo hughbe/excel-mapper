@@ -2,11 +2,20 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs a collection by instantiating a type that implements IList&lt;T&gt; and adding items.
+/// </summary>
+/// <typeparam name="T">The type of the collection elements.</typeparam>
 public class IListTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
 {
     public Type CollectionType { get; }
     private IList<T?>? _items;
 
+    /// <summary>
+    /// Constructs a factory that creates collections of the given type.
+    /// </summary>
+    /// <param name="collectionType">The type of collection to create.</param>
+    /// <exception cref="ArgumentException">Thrown when the collection type is invalid or unsupported.</exception>
     public IListTImplementingEnumerableFactory(Type collectionType)
     {
         ArgumentNullException.ThrowIfNull(collectionType);
@@ -34,6 +43,7 @@ public class IListTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
         CollectionType = collectionType;
     }
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -46,12 +56,14 @@ public class IListTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
         _items = (IList<T?>)Activator.CreateInstance(CollectionType)!;
     }
 
+    /// <inheritdoc/>
     public void Add(T? item)
     {
         EnsureMapping();
         _items.Add(item);
     }
 
+    /// <inheritdoc/>
     public void Set(int index, T? item)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(index);
@@ -66,6 +78,7 @@ public class IListTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
         _items[index] = item;
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -80,6 +93,7 @@ public class IListTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _items = null;

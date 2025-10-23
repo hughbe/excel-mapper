@@ -3,10 +3,15 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs an ImmutableList&lt;T&gt; by using a builder and converting to immutable at the end.
+/// </summary>
+/// <typeparam name="T">The type of the list elements.</typeparam>
 public class ImmutableListEnumerableFactory<T> : IEnumerableFactory<T>
 {
     private ImmutableList<T?>.Builder? _builder;
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -19,12 +24,14 @@ public class ImmutableListEnumerableFactory<T> : IEnumerableFactory<T>
         _builder = ImmutableList.CreateBuilder<T?>();
     }
 
+    /// <inheritdoc/>
     public void Add(T? item)
     {
         EnsureMapping();
         _builder.Add(item);
     }
 
+    /// <inheritdoc/>
     public void Set(int index, T? item)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(index);
@@ -39,6 +46,7 @@ public class ImmutableListEnumerableFactory<T> : IEnumerableFactory<T>
         _builder[index] = item;
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -53,6 +61,7 @@ public class ImmutableListEnumerableFactory<T> : IEnumerableFactory<T>
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _builder = null;

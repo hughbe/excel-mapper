@@ -14,12 +14,17 @@ public class ColumnIndicesReader : ICellsReader
     /// </summary>
     public IList<int> ColumnIndices { get; }
 
+    /// <summary>
+    /// Constructs a reader that reads the values of cells at the given column indices.
+    /// </summary>
+    /// <param name="columnIndices">The zero-based indices for each column to read.</param>
     public ColumnIndicesReader(IList<int> columnIndices)
     {
         ColumnUtilities.ValidateColumnIndices(columnIndices, nameof(columnIndices));
         ColumnIndices = columnIndices;
     }
 
+    /// <inheritdoc/>
     public bool TryGetValues(IExcelDataReader reader, bool preserveFormatting, [NotNullWhen(true)] out IEnumerable<ReadCellResult>? result)
     {
         result = ColumnIndices.Select(columnIndex => new ReadCellResult(columnIndex, reader, preserveFormatting));

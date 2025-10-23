@@ -4,8 +4,17 @@ namespace ExcelMapper;
 
 public delegate void MemberSetValueDelegate(object instance, object value);
 
+/// <summary>
+/// Maps a member to an Excel column.
+/// </summary>
 public class ExcelPropertyMap
 {
+    /// <summary>
+    /// Constructs a property map for a member and map.
+    /// </summary>
+    /// <param name="member"></param>
+    /// <param name="map"></param>
+    /// <exception cref="ArgumentException"></exception>
     public ExcelPropertyMap(MemberInfo member, IMap map)
     {
         ArgumentNullException.ThrowIfNull(member);
@@ -33,9 +42,18 @@ public class ExcelPropertyMap
         }
     }
 
+    /// <summary>
+    /// Gets the member that is mapped.
+    /// </summary>
     public MemberInfo Member { get; }
 
+    /// <summary>
+    /// Gets the delegate used to set the value of the member.
+    /// </summary>
     public MemberSetValueDelegate SetValueFactory { get; }
 
+    /// <summary>
+    /// Gets the map used to map the member.
+    /// </summary>
     public IMap Map { get; }
 }

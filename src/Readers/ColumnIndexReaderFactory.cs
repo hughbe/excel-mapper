@@ -20,6 +20,7 @@ public sealed class ColumnIndexReaderFactory : ICellReaderFactory, IColumnIndexP
         ColumnIndex = columnIndex;
     }
 
+    /// <inheritdoc/>
     public ICellReader? GetCellReader(ExcelSheet sheet)
     {
         ArgumentNullException.ThrowIfNull(sheet);
@@ -31,5 +32,6 @@ public sealed class ColumnIndexReaderFactory : ICellReaderFactory, IColumnIndexP
         return new ColumnIndexReader(ColumnIndex);
     }
 
+    /// <inheritdoc/>
     public int GetColumnIndex(ExcelSheet sheet) => ColumnIndex;
 }

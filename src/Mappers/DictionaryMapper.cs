@@ -20,7 +20,7 @@ public class DictionaryMapper<T> : ICellMapper
     /// </summary>
     /// <param name="mappingDictionary">The dictionary used to map the value of a cell to an object.</param>
     /// <param name="comparer">The equality comparer used to the value of a cell to an object.</param>
-    /// <param name="required">Whether or not an error a failure to match is an error.</param>
+    /// <param name="behavior">Whether or not a failure to match is an error.</param>
     public DictionaryMapper(IDictionary<string, T> mappingDictionary, IEqualityComparer<string>? comparer, DictionaryMapperBehavior behavior)
     {
         ArgumentNullException.ThrowIfNull(mappingDictionary);

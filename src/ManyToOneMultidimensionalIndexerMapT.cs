@@ -48,6 +48,7 @@ public class ManyToOneMultidimensionalIndexerMapT<TValue> : IMultidimensionalInd
         return lengths;
     }
 
+    /// <inheritdoc/>
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
         ArgumentNullException.ThrowIfNull(sheet);

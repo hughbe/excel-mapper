@@ -3,11 +3,16 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs an ImmutableArray&lt;T&gt; by using a builder and converting to immutable at the end.
+/// </summary>
+/// <typeparam name="T">The type of the array elements.</typeparam>
 public class ImmutableArrayEnumerableFactory<T> : IEnumerableFactory<T>
 {
     private ImmutableArray<T?>.Builder? _builder;
     private int _currentIndex = -1;
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -22,12 +27,14 @@ public class ImmutableArrayEnumerableFactory<T> : IEnumerableFactory<T>
         _currentIndex = 0;
     }
 
+    /// <inheritdoc/>
     public void Add(T? item)
     {
         EnsureMapping();
         _builder[_currentIndex++] = item;
     }
 
+    /// <inheritdoc/>
     public void Set(int index, T? item)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(index);
@@ -36,6 +43,7 @@ public class ImmutableArrayEnumerableFactory<T> : IEnumerableFactory<T>
         _builder[index] = item;
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -50,6 +58,7 @@ public class ImmutableArrayEnumerableFactory<T> : IEnumerableFactory<T>
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _builder = null;

@@ -22,6 +22,7 @@ public class ConvertUsingMapper : ICellMapper
         Converter = converter;
     }
 
+    /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult readResult)
     {
         try

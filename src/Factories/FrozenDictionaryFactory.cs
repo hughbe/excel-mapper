@@ -3,10 +3,16 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs a FrozenDictionary&lt;TKey, TValue&gt; by collecting key-value pairs in a dictionary and then freezing them.
+/// </summary>
+/// <typeparam name="TKey">The type of the dictionary keys.</typeparam>
+/// <typeparam name="TValue">The type of the dictionary values.</typeparam>
 public class FrozenDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> where TKey : notnull
 {
     private Dictionary<TKey, TValue?>? _items;
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -19,6 +25,7 @@ public class FrozenDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TV
         _items = new Dictionary<TKey, TValue?>(count);
     }
 
+    /// <inheritdoc/>
     public void Add(TKey key, TValue? value)
     {
         ArgumentNullException.ThrowIfNull(key);
@@ -26,6 +33,7 @@ public class FrozenDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TV
         _items.Add(key, value);
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -40,6 +48,7 @@ public class FrozenDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TV
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _items = null;

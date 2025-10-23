@@ -8,9 +8,9 @@ using System.Collections;
 namespace ExcelMapper;
 
 /// <summary>
-/// A map that maps a row of a sheet to an object of the given type.
+/// Maps a row of a sheet to an object of the given type.
 /// </summary>
-/// <typeparam name="T">The typ eof the object to create.</typeparam>
+/// <typeparam name="T">The type of the object to create.</typeparam>
 public class ExcelClassMap<T> : ExcelClassMap
 {
     /// <summary>

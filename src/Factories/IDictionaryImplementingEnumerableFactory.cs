@@ -3,11 +3,21 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs a dictionary by instantiating a type that implements IDictionary and adding key-value pairs.
+/// </summary>
+/// <typeparam name="TKey">The type of the dictionary keys.</typeparam>
+/// <typeparam name="TValue">The type of the dictionary values.</typeparam>
 public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> where TKey : notnull
 {
     public Type DictionaryType { get; }
     private IDictionary? _items;
 
+    /// <summary>
+    /// Constructs a factory that creates dictionaries of the given type.
+    /// </summary>
+    /// <param name="dictionaryType">The type of dictionary to create.</param>
+    /// <exception cref="ArgumentException">Thrown when the dictionary type is invalid or unsupported.</exception>
     public IDictionaryImplementingFactory(Type dictionaryType)
     {
         ArgumentNullException.ThrowIfNull(dictionaryType);
@@ -31,6 +41,7 @@ public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<T
         DictionaryType = dictionaryType;
     }
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -43,6 +54,7 @@ public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<T
         _items = (IDictionary)Activator.CreateInstance(DictionaryType)!;
     }
 
+    /// <inheritdoc/>
     public void Add(TKey key, TValue? value)
     {
         ArgumentNullException.ThrowIfNull(key);
@@ -50,6 +62,7 @@ public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<T
         _items.Add(key, value);
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -64,6 +77,7 @@ public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<T
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _items = null;

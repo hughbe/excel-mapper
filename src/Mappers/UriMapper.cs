@@ -5,6 +5,7 @@
 /// </summary>
 public class UriMapper : ICellMapper
 {
+    /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult readResult)
     {
         var stringValue = readResult.GetString();

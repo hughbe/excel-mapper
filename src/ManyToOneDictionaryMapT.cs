@@ -60,6 +60,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
     
     private readonly ConcurrentDictionary<ExcelSheet, ICellsReader?> _factoryCache = new();
 
+    /// <inheritdoc/>
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
         ArgumentNullException.ThrowIfNull(sheet);
@@ -67,7 +68,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
         {
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
         }
-        
+
         var cellsReader = _factoryCache.GetOrAdd(sheet, s => _readerFactory.GetCellsReader(s));
 
         if (cellsReader == null || !cellsReader.TryGetValues(reader, PreserveFormatting, out var valueResults))

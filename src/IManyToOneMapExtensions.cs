@@ -2,6 +2,9 @@ using ExcelMapper.Readers;
 
 namespace ExcelMapper;
 
+/// <summary>
+/// Provides extension methods for <see cref="IManyToOneMap"/>.
+/// </summary>
 public static class IManyToOneMapExtensions
 {
     /// <summary>

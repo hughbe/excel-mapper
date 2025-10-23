@@ -3,6 +3,11 @@ using System.Reflection;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs a dictionary by passing a Dictionary&lt;TKey, TValue&gt; of items to a constructor that accepts IDictionary&lt;TKey, TValue&gt;.
+/// </summary>
+/// <typeparam name="TKey">The type of the dictionary keys.</typeparam>
+/// <typeparam name="TValue">The type of the dictionary values.</typeparam>
 public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> where TKey : notnull
 {
     public Type DictionaryType { get; }
@@ -10,6 +15,11 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
 
     private Dictionary<TKey, TValue?>? _items;
 
+    /// <summary>
+    /// Constructs a factory that creates dictionaries of the given type.
+    /// </summary>
+    /// <param name="dictionaryType">The type of dictionary to create.</param>
+    /// <exception cref="ArgumentException">Thrown when the dictionary type is invalid or unsupported.</exception>
     public ConstructorDictionaryFactory(Type dictionaryType)
     {
         ArgumentNullException.ThrowIfNull(dictionaryType);
@@ -27,6 +37,7 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
         DictionaryType = dictionaryType;
     }
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -39,12 +50,14 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
         _items = new Dictionary<TKey, TValue?>(count);
     }
 
+    /// <inheritdoc/>
     public void Add(TKey key, TValue? value)
     {
         EnsureMapping();
         _items!.Add(key, value);
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -59,6 +72,7 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _items = null;

@@ -1,5 +1,8 @@
 namespace ExcelMapper.Abstractions;
 
+/// <summary>
+/// Map for enumerable indexer values.
+/// </summary>
 public interface IEnumerableIndexerMap : IMap
 {
     /// <summary>

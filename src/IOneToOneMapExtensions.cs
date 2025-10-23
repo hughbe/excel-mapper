@@ -2,6 +2,9 @@ using ExcelMapper.Readers;
 
 namespace ExcelMapper;
 
+/// <summary>
+/// Extension methods for <see cref="IOneToOneMap"/>.
+/// </summary>
 public static class IOneToOneMapExtensions
 {
     /// <summary>

@@ -1,5 +1,8 @@
 namespace ExcelMapper;
 
+/// <summary>
+/// Extension methods for <see cref="IToOneMap"/>.
+/// </summary>
 public static class IToOneMapExtensions
 {
     /// <summary>
@@ -14,7 +17,7 @@ public static class IToOneMapExtensions
         map.Optional = true;
         return map;
     }
-    
+
     /// <summary>
     /// Makes the reader of the map peserve formatting when reading string values.
     /// </summary>

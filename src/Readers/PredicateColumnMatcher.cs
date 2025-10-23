@@ -1,15 +1,26 @@
 namespace ExcelMapper.Readers;
 
+/// <summary>
+/// Matches column names based on a predicate.
+/// </summary>
 public class PredicateColumnMatcher : IExcelColumnMatcher
 {
+    /// <summary>
+    /// Gets the predicate used to match column names.
+    /// </summary>
     public Func<string, bool> Predicate { get; }
 
+    /// <summary>
+    /// Constructs a matcher that matches column names based on the given predicate.
+    /// </summary>
+    /// <param name="predicate">The predicate used to match column names.</param>
     public PredicateColumnMatcher(Func<string, bool> predicate)
     {
         ArgumentNullException.ThrowIfNull(predicate);
         Predicate = predicate;
     }
 
+    /// <inheritdoc/>
     public bool ColumnMatches(ExcelSheet sheet, int columnIndex)
     {
         ArgumentNullException.ThrowIfNull(sheet);

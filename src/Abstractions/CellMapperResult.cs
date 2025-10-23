@@ -1,15 +1,28 @@
 ﻿namespace ExcelMapper.Abstractions;
 
 /// <summary>
-/// An enumeration describing the result of an operation to map the value
-/// of a cell to a property or field.
+/// The result of mapping a cell to a value.
 /// </summary>
 public readonly struct CellMapperResult
 {
+    /// <summary>
+    /// The mapped value, if any.
+    /// </summary>
     public object? Value { get; }
+
+    /// <summary>
+    /// The exception that occurred during mapping, if any.
+    /// </summary>
     public Exception? Exception { get; }
+
+    /// <summary>
+    /// The action to take based on the result of mapping.
+    /// </summary>
     public HandleAction Action { get; }
 
+    /// <summary>
+    /// Gets whether or not the mapping succeeded.
+    /// </summary>
     public bool Succeeded => Action != HandleAction.ErrorAndContinueMapping && Action != HandleAction.IgnoreResultAndContinueMapping;
 
     internal CellMapperResult(object? value, Exception? exception, HandleAction action)
@@ -43,6 +56,9 @@ public readonly struct CellMapperResult
     /// </summary>
     public static CellMapperResult Invalid(Exception exception) => new(null, exception, HandleAction.ErrorAndContinueMapping);
 
+    /// <summary>
+    /// Specifies what to do with the result of mapping.
+    /// </summary>
     public enum HandleAction
     {
         /// <summary>

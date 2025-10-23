@@ -46,6 +46,7 @@ public class DateOnlyMapper : ICellMapper, IFormatsCellMapper
     /// </summary>
     public DateTimeStyles Style { get; set; }
 
+    /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult readResult)
     {
         // Excel stores dates as numbers (the number of days since 1899-12-30).

@@ -10,6 +10,9 @@ namespace ExcelMapper;
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
 public sealed class ExcelInvalidValueAttribute : Attribute
 {
+    /// <summary>
+    /// Gets the invalid value.
+    /// </summary>
     public object? Value { get; }
 
     /// <summary>

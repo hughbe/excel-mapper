@@ -10,6 +10,9 @@ namespace ExcelMapper;
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
 public sealed class ExcelDefaultValueAttribute : Attribute
 {
+    /// <summary>
+    /// Gets the default value.
+    /// </summary>
     public object? Value { get; }
 
     /// <summary>

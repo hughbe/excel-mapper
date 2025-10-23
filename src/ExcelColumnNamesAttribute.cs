@@ -23,7 +23,7 @@ public class ExcelColumnNamesAttribute : Attribute
     }
 
     /// <summary>
-    /// The names of the columns.
+    /// Gets or sets the names of the columns.
     /// </summary>
     public string[] Names
     {

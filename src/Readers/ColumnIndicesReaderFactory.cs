@@ -21,6 +21,7 @@ public sealed class ColumnIndicesReaderFactory : ICellReaderFactory, ICellsReade
         ColumnIndices = columnIndices;
     }
 
+    /// <inheritdoc/>
     public ICellReader? GetCellReader(ExcelSheet sheet)
     {
         ArgumentNullException.ThrowIfNull(sheet);
@@ -36,6 +37,7 @@ public sealed class ColumnIndicesReaderFactory : ICellReaderFactory, ICellsReade
         return null;
     }
 
+    /// <inheritdoc/>
     public ICellsReader? GetCellsReader(ExcelSheet sheet)
     {
         ArgumentNullException.ThrowIfNull(sheet);

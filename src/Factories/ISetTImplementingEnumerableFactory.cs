@@ -2,11 +2,20 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs a set by instantiating a type that implements ISet&lt;T&gt; and adding items.
+/// </summary>
+/// <typeparam name="T">The type of the set elements.</typeparam>
 public class ISetTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
 {
     public Type SetType { get; }
     private ISet<T?>? _items;
 
+    /// <summary>
+    /// Constructs a factory that creates sets of the given type.
+    /// </summary>
+    /// <param name="setType">The type of set to create.</param>
+    /// <exception cref="ArgumentException">Thrown when the set type is invalid or unsupported.</exception>
     public ISetTImplementingEnumerableFactory(Type setType)
     {
         ArgumentNullException.ThrowIfNull(setType);
@@ -30,6 +39,7 @@ public class ISetTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
         SetType = setType;
     }
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -42,18 +52,21 @@ public class ISetTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
         _items = (ISet<T?>)Activator.CreateInstance(SetType)!;
     }
 
+    /// <inheritdoc/>
     public void Add(T? item)
     {
         EnsureMapping();
         _items.Add(item);
     }
 
+    /// <inheritdoc/>
     public void Set(int index, T? item)
     {
         EnsureMapping();
         throw new NotSupportedException($"Set is not supported for {nameof(HashSetEnumerableFactory<T>)}.");
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -68,6 +81,7 @@ public class ISetTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _items = null;

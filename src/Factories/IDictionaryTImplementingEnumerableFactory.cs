@@ -2,11 +2,21 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs a dictionary by instantiating a type that implements IDictionary&lt;TKey, TValue&gt; and adding key-value pairs.
+/// </summary>
+/// <typeparam name="TKey">The type of the dictionary keys.</typeparam>
+/// <typeparam name="TValue">The type of the dictionary values.</typeparam>
 public class IDictionaryTImplementingFactory<TKey, TValue> : Abstractions.IDictionaryFactory<TKey, TValue> where TKey : notnull
 {
     public Type DictionaryType { get; }
     private IDictionary<TKey, TValue?>? _items;
 
+    /// <summary>
+    /// Constructs a factory that creates dictionaries of the given type.
+    /// </summary>
+    /// <param name="dictionaryType">The type of dictionary to create.</param>
+    /// <exception cref="ArgumentException">Thrown when the dictionary type is invalid or unsupported.</exception>
     public IDictionaryTImplementingFactory(Type dictionaryType)
     {
         ArgumentNullException.ThrowIfNull(dictionaryType);
@@ -30,6 +40,7 @@ public class IDictionaryTImplementingFactory<TKey, TValue> : Abstractions.IDicti
         DictionaryType = dictionaryType;
     }
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -42,6 +53,7 @@ public class IDictionaryTImplementingFactory<TKey, TValue> : Abstractions.IDicti
         _items = (IDictionary<TKey, TValue?>)Activator.CreateInstance(DictionaryType)!;
     }
 
+    /// <inheritdoc/>
     public void Add(TKey key, TValue? value)
     {
         ArgumentNullException.ThrowIfNull(key);
@@ -49,6 +61,7 @@ public class IDictionaryTImplementingFactory<TKey, TValue> : Abstractions.IDicti
         _items.Add(key, value);
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -63,6 +76,7 @@ public class IDictionaryTImplementingFactory<TKey, TValue> : Abstractions.IDicti
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _items = null;

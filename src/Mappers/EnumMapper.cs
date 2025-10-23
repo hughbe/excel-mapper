@@ -43,6 +43,7 @@ public class EnumMapper : ICellMapper
         IgnoreCase = ignoreCase;
     }
 
+    /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult readResult)
     {
         var stringValue = readResult.GetString();

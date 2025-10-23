@@ -46,6 +46,7 @@ public class TimeSpanMapper : ICellMapper, IFormatsCellMapper
     /// </summary>
     public TimeSpanStyles Style { get; set; }
 
+    /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult readResult)
     {
         // Excel stores durations as number of days.

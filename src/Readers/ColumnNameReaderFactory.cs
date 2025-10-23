@@ -20,6 +20,7 @@ public sealed class ColumnNameReaderFactory : ICellReaderFactory, IColumnNamePro
         ColumnName = columnName;
     }
 
+    /// <inheritdoc/>
     public ICellReader? GetCellReader(ExcelSheet sheet)
     {
         ArgumentNullException.ThrowIfNull(sheet);
@@ -35,5 +36,6 @@ public sealed class ColumnNameReaderFactory : ICellReaderFactory, IColumnNamePro
         return new ColumnIndexReader(columnIndex);
     }
 
+    /// <inheritdoc/>
     public string GetColumnName(ExcelSheet sheet) => ColumnName;
 }

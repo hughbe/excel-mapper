@@ -4,12 +4,22 @@ using System.Reflection;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs a dictionary by calling the Add method to add key-value pairs.
+/// </summary>
+/// <typeparam name="TKey">The type of the dictionary keys.</typeparam>
+/// <typeparam name="TValue">The type of the dictionary values.</typeparam>
 public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> where TKey : notnull
 {
-    public Type DictionaryType { get;  }
+    public Type DictionaryType { get; }
     private object? _items;
     private readonly MethodInfo _addMethod;
 
+    /// <summary>
+    /// Constructs a factory that creates dictionaries of the given type.
+    /// </summary>
+    /// <param name="dictionaryType">The type of dictionary to create.</param>
+    /// <exception cref="ArgumentException">Thrown when the dictionary type is invalid or unsupported.</exception>
     public AddDictionaryFactory(Type dictionaryType)
     {
         ArgumentNullException.ThrowIfNull(dictionaryType);
@@ -34,6 +44,7 @@ public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValu
         _addMethod = dictionaryType.GetMethod("Add", [typeof(TKey), typeof(TValue)]) ?? throw new ArgumentException($"Type does not have an Add({typeof(TKey)}, {typeof(TValue)}) method.", nameof(dictionaryType));
     }
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -46,12 +57,14 @@ public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValu
         _items = Activator.CreateInstance(DictionaryType);
     }
 
+    /// <inheritdoc/>
     public void Add(TKey key, TValue? value)
     {
         EnsureMapping();
         _addMethod.InvokeUnwrapped(_items, [key, value]);
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -66,6 +79,7 @@ public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValu
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _items = null;

@@ -35,5 +35,6 @@ public class CharSplitReaderFactory : SplitReaderFactory
     {
     }
 
+    /// <inheritdoc/>
     protected override string[] GetValues(string value) => value.Split(Separators, Options);
 }

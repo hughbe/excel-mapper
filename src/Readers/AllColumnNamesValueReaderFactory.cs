@@ -7,6 +7,7 @@ namespace ExcelMapper.Readers;
 /// </summary>
 public sealed class AllColumnNamesReaderFactory : ICellsReaderFactory
 {
+    /// <inheritdoc/>
     public ICellsReader? GetCellsReader(ExcelSheet sheet)
     {
         ArgumentNullException.ThrowIfNull(sheet);

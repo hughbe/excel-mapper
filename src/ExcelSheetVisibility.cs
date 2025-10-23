@@ -1,7 +1,7 @@
 namespace ExcelMapper;
 
 /// <summary>
-/// An enum describing the visiblity of an excel sheet.
+/// Describes the visibility of an Excel sheet.
 /// </summary>
 public enum ExcelSheetVisibility
 {

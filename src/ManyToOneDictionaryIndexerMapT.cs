@@ -24,6 +24,7 @@ public class ManyToOneDictionaryIndexerMapT<TKey, TValue> : IDictionaryIndexerMa
     /// <inheritdoc/>
     public Dictionary<object, IMap> Values { get; } = [];
 
+    /// <inheritdoc/>
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
         ArgumentNullException.ThrowIfNull(sheet);

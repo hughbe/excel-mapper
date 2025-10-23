@@ -3,10 +3,15 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs an ImmutableSortedSet&lt;T&gt; by using a builder and converting to immutable at the end.
+/// </summary>
+/// <typeparam name="T">The type of the set elements.</typeparam>
 public class ImmutableSortedSetEnumerableFactory<T> : IEnumerableFactory<T>
 {
     private ImmutableSortedSet<T?>.Builder? _builder;
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -19,18 +24,21 @@ public class ImmutableSortedSetEnumerableFactory<T> : IEnumerableFactory<T>
         _builder = ImmutableSortedSet.CreateBuilder<T?>();
     }
 
+    /// <inheritdoc/>
     public void Add(T? item)
     {
         EnsureMapping();
         _builder.Add(item);
     }
 
+    /// <inheritdoc/>
     public void Set(int index, T? item)
     {
         EnsureMapping();
         throw new NotSupportedException($"Set is not supported for {nameof(ImmutableSortedSetEnumerableFactory<T>)}.");
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -45,6 +53,7 @@ public class ImmutableSortedSetEnumerableFactory<T> : IEnumerableFactory<T>
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _builder = null;

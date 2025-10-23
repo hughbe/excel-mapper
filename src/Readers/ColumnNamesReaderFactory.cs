@@ -21,6 +21,7 @@ public sealed class ColumnNamesReaderFactory : ICellReaderFactory, ICellsReaderF
         ColumnNames = columnNames;
     }
     
+    /// <inheritdoc/>
     public ICellReader? GetCellReader(ExcelSheet sheet)
     {
         ArgumentNullException.ThrowIfNull(sheet);
@@ -40,6 +41,7 @@ public sealed class ColumnNamesReaderFactory : ICellReaderFactory, ICellsReaderF
         return null;
     }
 
+    /// <inheritdoc/>
     public ICellsReader? GetCellsReader(ExcelSheet sheet)
     {
         ArgumentNullException.ThrowIfNull(sheet);

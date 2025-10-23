@@ -4,12 +4,21 @@ using System.Reflection;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs a collection by calling the Add method to add items.
+/// </summary>
+/// <typeparam name="T">The type of the collection items.</typeparam>
 public class AddEnumerableFactory<T> : IEnumerableFactory<T>
 {
-    public Type CollectionType { get;  }
+    public Type CollectionType { get; }
     private object? _items;
     private readonly MethodInfo _addMethod;
 
+    /// <summary>
+    /// Constructs a factory that creates collections of the given type.
+    /// </summary>
+    /// <param name="collectionType">The type of collection to create.</param>
+    /// <exception cref="ArgumentException">Thrown when the collection type is invalid or unsupported.</exception>
     public AddEnumerableFactory(Type collectionType)
     {
         ArgumentNullException.ThrowIfNull(collectionType);
@@ -34,6 +43,7 @@ public class AddEnumerableFactory<T> : IEnumerableFactory<T>
         _addMethod = collectionType.GetMethod("Add", [typeof(T)]) ?? throw new ArgumentException($"Type does not have an Add({typeof(T)}) method.", nameof(collectionType));
     }
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -46,18 +56,21 @@ public class AddEnumerableFactory<T> : IEnumerableFactory<T>
         _items = Activator.CreateInstance(CollectionType);
     }
 
+    /// <inheritdoc/>
     public void Add(T? item)
     {
         EnsureMapping();
         _addMethod.InvokeUnwrapped(_items, [item]);
     }
 
+    /// <inheritdoc/>
     public void Set(int index, T? item)
     {
         EnsureMapping();
         throw new NotSupportedException($"Set is not supported for {nameof(AddEnumerableFactory<T>)}.");
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -72,6 +85,7 @@ public class AddEnumerableFactory<T> : IEnumerableFactory<T>
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _items = null;

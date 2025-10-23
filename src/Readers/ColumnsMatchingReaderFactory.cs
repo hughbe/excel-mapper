@@ -17,6 +17,7 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
         Matcher = matcher;
     }
 
+    /// <inheritdoc/>
     public ICellReader? GetCellReader(ExcelSheet sheet)
     {
         ArgumentNullException.ThrowIfNull(sheet);
@@ -32,6 +33,7 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
         return null;
     }
 
+    /// <inheritdoc/>
     public ICellsReader? GetCellsReader(ExcelSheet sheet)
     {
         ArgumentNullException.ThrowIfNull(sheet);

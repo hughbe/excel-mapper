@@ -2,10 +2,15 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs a List&lt;T&gt; by pre-allocating capacity and adding items.
+/// </summary>
+/// <typeparam name="T">The type of the list elements.</typeparam>
 public class ListEnumerableFactory<T> : IEnumerableFactory<T>
 {
     private List<T?>? _items;
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -18,12 +23,14 @@ public class ListEnumerableFactory<T> : IEnumerableFactory<T>
         _items = new List<T?>(count);
     }
 
+    /// <inheritdoc/>
     public void Add(T? item)
     {
         EnsureMapping();
         _items.Add(item);
     }
 
+    /// <inheritdoc/>
     public void Set(int index, T? item)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(index, nameof(index));
@@ -38,6 +45,7 @@ public class ListEnumerableFactory<T> : IEnumerableFactory<T>
         _items[index] = item;
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -52,6 +60,7 @@ public class ListEnumerableFactory<T> : IEnumerableFactory<T>
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _items = null;

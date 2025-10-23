@@ -307,8 +307,7 @@ Factories create collection instances during mapping:
 
 #### Multidimensional Array Factories (`IMultidimensionalArrayFactory`)
 
-- **`TwoDimensionalArrayFactory<T>`**: Creates `T[,]` arrays
-- **`MultidimensionalArrayFactory<T>`**: Creates arrays with arbitrary dimensions
+- **`MultidimensionalArrayFactory<T>`**: Creates arrays with arbitrary dimensions (including two-dimensional `T[,]` arrays)
 
 ## Data Flow Example
 

@@ -2,10 +2,16 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Factories;
 
+/// <summary>
+/// Constructs a Dictionary&lt;TKey, TValue&gt; by pre-allocating capacity and adding key-value pairs.
+/// </summary>
+/// <typeparam name="TKey">The type of the dictionary keys.</typeparam>
+/// <typeparam name="TValue">The type of the dictionary values.</typeparam>
 public class DictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> where TKey : notnull
 {
     private Dictionary<TKey, TValue?>? _items;
 
+    /// <inheritdoc/>
     public void Begin(int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
@@ -18,6 +24,7 @@ public class DictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> 
         _items = new Dictionary<TKey, TValue?>(count);
     }
 
+    /// <inheritdoc/>
     public void Add(TKey key, TValue? value)
     {
         ArgumentNullException.ThrowIfNull(key);
@@ -25,6 +32,7 @@ public class DictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> 
         _items.Add(key, value);
     }
 
+    /// <inheritdoc/>
     public object End()
     {
         EnsureMapping();
@@ -39,6 +47,7 @@ public class DictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> 
         }
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         _items = null;

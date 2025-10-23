@@ -23,7 +23,7 @@ public class ExcelColumnIndicesAttribute : Attribute
     }
 
     /// <summary>
-    /// The indices of the columns.
+    /// Gets or sets the indices of the columns.
     /// </summary>
     public int[] Indices
     {
