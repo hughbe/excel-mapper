@@ -20,11 +20,7 @@ public class ExcelMappingDictionaryBehaviorAttribute : Attribute
     /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid behavior is specified.</exception>
     public ExcelMappingDictionaryBehaviorAttribute(MappingDictionaryMapperBehavior behavior)
     {
-        if (!Enum.IsDefined(behavior))
-        {
-            throw new ArgumentOutOfRangeException(nameof(behavior), behavior, $"Invalid value \"{behavior}\".");
-        }
-
+        EnumUtilities.ValidateIsDefined(behavior);
         Behavior = behavior;
     }
 }

@@ -15,11 +15,7 @@ public class UriMapper : ICellMapper
         get => _uriKind;
         set
         {
-            if (!Enum.IsDefined(value))
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), value, $"Invalid value \"{value}\".");
-            }
-
+            EnumUtilities.ValidateIsDefined(value);
             _uriKind = value;
         }
     }

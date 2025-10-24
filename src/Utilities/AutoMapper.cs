@@ -949,10 +949,7 @@ public static class AutoMapper
     /// <returns>True if the class map could be created, else false.</returns>
     public static bool TryCreateClassMap<T>(FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ExcelClassMap<T>? result)
     {
-        if (!Enum.IsDefined(emptyValueStrategy))
-        {
-            throw new ArgumentException($"Invalid value \"{emptyValueStrategy}\".", nameof(emptyValueStrategy));
-        }
+        EnumUtilities.ValidateIsDefined(emptyValueStrategy);
 
         if (!TryCreateMap<T>(null, typeof(T), new ColumnIndexReaderFactory(0), s_allColumnNamesReaderFactory, emptyValueStrategy, isAutoMapping: true, typeStack: null, out var classMap))
         {

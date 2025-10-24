@@ -1610,9 +1610,9 @@ public class AutoMapperTests
     [Theory]
     [InlineData(FallbackStrategy.ThrowIfPrimitive - 1)]
     [InlineData(FallbackStrategy.SetToDefaultValue + 1)]
-    public void TryCreateClass_Map_InvalidFallbackStrategy_ThrowsArgumentException(FallbackStrategy emptyValueStrategy)
+    public void TryCreateClass_Map_InvalidFallbackStrategy_ThrowsArgumentOutOfRangeException(FallbackStrategy emptyValueStrategy)
     {
-        Assert.Throws<ArgumentException>("emptyValueStrategy", () => AutoMapper.TryCreateClassMap<TestClass>(emptyValueStrategy, out _));
+        Assert.Throws<ArgumentOutOfRangeException>("emptyValueStrategy", () => AutoMapper.TryCreateClassMap<TestClass>(emptyValueStrategy, out _));
     }
 
     private enum MyEnum

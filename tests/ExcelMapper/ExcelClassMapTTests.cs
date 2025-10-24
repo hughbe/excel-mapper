@@ -29,9 +29,9 @@ public class ExcelClassMapTTests
     [Theory]
     [InlineData(FallbackStrategy.ThrowIfPrimitive - 1)]
     [InlineData(FallbackStrategy.SetToDefaultValue + 1)]
-    public void Ctor_InvalidEmptyValueStrategy_ThrowsArgumentException(FallbackStrategy emptyValueStrategy)
+    public void Ctor_InvalidEmptyValueStrategy_ThrowsArgumentOutOfRangeException(FallbackStrategy emptyValueStrategy)
     {
-        Assert.Throws<ArgumentException>("emptyValueStrategy", () => new TestClassMap(emptyValueStrategy));
+        Assert.Throws<ArgumentOutOfRangeException>("emptyValueStrategy", () => new TestClassMap(emptyValueStrategy));
     }
 
     [Fact]

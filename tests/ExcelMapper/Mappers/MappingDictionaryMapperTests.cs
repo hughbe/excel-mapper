@@ -44,9 +44,9 @@ public class MappingDictionaryMapperTests
     [Theory]
     [InlineData(MappingDictionaryMapperBehavior.Optional - 1)]
     [InlineData(MappingDictionaryMapperBehavior.Required + 1)]
-    public void Ctor_InvalidBehavior_ThrowsArgumentException(MappingDictionaryMapperBehavior behavior)
+    public void Ctor_InvalidBehavior_ThrowsArgumentOutOfRangeException(MappingDictionaryMapperBehavior behavior)
     {
-        Assert.Throws<ArgumentException>("behavior", () => new MappingDictionaryMapper<object>(new Dictionary<string, object>(), null, behavior));
+        Assert.Throws<ArgumentOutOfRangeException>("behavior", () => new MappingDictionaryMapper<object>(new Dictionary<string, object>(), null, behavior));
     }
 
     [Theory]

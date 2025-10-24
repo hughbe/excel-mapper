@@ -18,11 +18,7 @@ public class ExcelMappingDictionaryComparerAttribute : Attribute
     /// <exception cref="ArgumentException">Thrown when an invalid comparison is specified.</exception>
     public ExcelMappingDictionaryComparerAttribute(StringComparison comparison)
     {
-        if (!Enum.IsDefined(comparison))
-        {
-            throw new ArgumentOutOfRangeException(nameof(comparison), comparison, $"Invalid value \"{comparison}\".");
-        }
-
+        EnumUtilities.ValidateIsDefined(comparison);
         Comparison = comparison;
     }
 }

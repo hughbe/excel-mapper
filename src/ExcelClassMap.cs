@@ -25,10 +25,7 @@ public class ExcelClassMap : IMap
     public ExcelClassMap(Type type, FallbackStrategy emptyValueStrategy)
     {
         ArgumentNullException.ThrowIfNull(type);
-        if (!Enum.IsDefined(emptyValueStrategy))
-        {
-            throw new ArgumentException($"Invalid value \"{emptyValueStrategy}\".", nameof(emptyValueStrategy));
-        }
+        EnumUtilities.ValidateIsDefined(emptyValueStrategy);
 
         Type = type;
         EmptyValueStrategy = emptyValueStrategy;

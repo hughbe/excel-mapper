@@ -24,10 +24,7 @@ public class MappingDictionaryMapper<T> : ICellMapper
     public MappingDictionaryMapper(IDictionary<string, T> mappingDictionary, IEqualityComparer<string>? comparer, MappingDictionaryMapperBehavior behavior)
     {
         ArgumentNullException.ThrowIfNull(mappingDictionary);
-        if (!Enum.IsDefined(behavior))
-        {
-            throw new ArgumentException($"Invalid value \"{behavior}\".", nameof(behavior));
-        }
+        EnumUtilities.ValidateIsDefined(behavior);
 
         MappingDictionary = new Dictionary<string, T>(mappingDictionary, comparer);
         Behavior = behavior;
