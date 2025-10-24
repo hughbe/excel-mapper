@@ -28,7 +28,14 @@ public class SplitCellValueReaderTests
     [InlineData(StringSplitOptions.RemoveEmptyEntries + 1)]
     public void Options_Set_GetReturnsExpected(StringSplitOptions options)
     {
-        var factory = new SubSplitReaderFactory(new ColumnNameReaderFactory("ColumnName")) { Options = options };
+        var factory = new SubSplitReaderFactory(new ColumnNameReaderFactory("ColumnName"))
+        {
+            Options = options
+        };
+        Assert.Equal(options, factory.Options);
+
+        // Set same.
+        factory.Options = options;
         Assert.Equal(options, factory.Options);
     }
 

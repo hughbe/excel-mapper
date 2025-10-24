@@ -1,14 +1,108 @@
-﻿using System.Collections.ObjectModel;
-
-namespace ExcelMapper.Tests;
+﻿namespace ExcelMapper.Tests;
 
 public class CharSplitValueTests
 {
     [Fact]
+    public void ReadRow_AutoMappedSeparatorsAttributeArrayMap_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SeparatorsClass>();
+        Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, row1.Value);
+
+        var row2 = sheet.ReadRow<SeparatorsClass>();
+        Assert.Equal(new string?[] { "1", null, "3" }, row2.Value);
+
+        var row3 = sheet.ReadRow<SeparatorsClass>();
+        Assert.Equal(new string[] { "1", "2", "3" }, row3.Value);
+    }
+
+    private class SeparatorsClass
+    {
+        [ExcelSeparators(';', ',')]
+        public string[] Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedSeparatorsAttributeArrayMap_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
+        importer.Configuration.RegisterClassMap<SeparatorsClass>(c =>
+        {
+            c.Map(p => p.Value);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SeparatorsClass>();
+        Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, row1.Value);
+
+        var row2 = sheet.ReadRow<SeparatorsClass>();
+        Assert.Equal(new string?[] { "1", null, "3" }, row2.Value);
+
+        var row3 = sheet.ReadRow<SeparatorsClass>();
+        Assert.Equal(new string[] { "1", "2", "3" }, row3.Value);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedSeparatorsAttributeOptionsArrayMap_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SeparatorsOptionsClass>();
+        Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, row1.Value);
+
+        var row2 = sheet.ReadRow<SeparatorsOptionsClass>();
+        Assert.Equal(new string?[] { "1", "3" }, row2.Value);
+
+        var row3 = sheet.ReadRow<SeparatorsOptionsClass>();
+        Assert.Equal(new string[] { "1", "2", "3" }, row3.Value);
+    }
+
+    private class SeparatorsOptionsClass
+    {
+        [ExcelSeparators(';', ',', Options = StringSplitOptions.RemoveEmptyEntries)]
+        public string[] Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedSeparatorsAttributeOptionsArrayMap_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
+        importer.Configuration.RegisterClassMap<SeparatorsOptionsClass>(c =>
+        {
+            c.Map(p => p.Value);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<SeparatorsOptionsClass>();
+        Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, row1.Value);
+
+        var row2 = sheet.ReadRow<SeparatorsOptionsClass>();
+        Assert.Equal(new string?[] { "1", "3" }, row2.Value);
+
+        var row3 = sheet.ReadRow<SeparatorsOptionsClass>();
+        Assert.Equal(new string[] { "1", "2", "3" }, row3.Value);
+    }
+
+    [Fact]
     public void ReadRow_SeparatorsArrayMap_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
-        importer.Configuration.RegisterClassMap<SplitWithSeparatorsArrayMap>();
+        importer.Configuration.RegisterClassMap<AutoSplitWithSeparatorClass>(c =>
+        {
+            c.Map(p => p.Value)
+                .WithSeparators(';', ',');
+        });
 
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
@@ -16,15 +110,27 @@ public class CharSplitValueTests
         var row1 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
         Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, row1.Value);
 
-        var row2 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
-        Assert.Equal(new string[] { "1", "2", "3" }, row2.Value);
+        var row2 = sheet.ReadRow<SeparatorsClass>();
+        Assert.Equal(new string?[] { "1", null, "3" }, row2.Value);
+
+        var row3 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
+        Assert.Equal(new string[] { "1", "2", "3" }, row3.Value);
+    }
+
+    private class AutoSplitWithSeparatorClass
+    {
+        public string[] Value { get; set; } = default!;
     }
 
     [Fact]
     public void ReadRow_IEnumerableSeparatorsMap_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
-        importer.Configuration.RegisterClassMap<SplitWithEnumerableSeparatorsMap>();
+        importer.Configuration.RegisterClassMap<AutoSplitWithSeparatorClass>(c =>
+        {
+            c.Map(p => p.Value)
+                .WithSeparators(new List<char> { ';', ',' });
+        });
 
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
@@ -32,48 +138,22 @@ public class CharSplitValueTests
         var row1 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
         Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, row1.Value);
 
-        var row2 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
-        Assert.Equal(new string[] { "1", "2", "3" }, row2.Value);
-    }
+        var row2 = sheet.ReadRow<SeparatorsClass>();
+        Assert.Equal(new string?[] { "1", null, "3" }, row2.Value);
 
-    private class AutoSplitWithSeparatorClass
-    {
-        public string[] Value { get; set; } = default!;
-        public ObservableCollection<ObservableCollectionEnum> EnumValue { get; set; } = default!;
-    }
-
-    private class SplitWithSeparatorsArrayMap : ExcelClassMap<AutoSplitWithSeparatorClass>
-    {
-        public SplitWithSeparatorsArrayMap()
-        {
-            Map(p => p.Value)
-                .WithSeparators(';', ',');
-        }
-    }
-
-    private class SplitWithEnumerableSeparatorsMap : ExcelClassMap<AutoSplitWithSeparatorClass>
-    {
-        public SplitWithEnumerableSeparatorsMap()
-        {
-            Map(p => p.Value)
-                .WithSeparators(new List<char> { ';', ',' });
-        }
-    }
-
-    public enum ObservableCollectionEnum
-    {
-        Value1,
-        Value2,
-        Value3,
-        Empty,
-        Invalid
+        var row3 = sheet.ReadRow<AutoSplitWithSeparatorClass>();
+        Assert.Equal(new string[] { "1", "2", "3" }, row3.Value);
     }
 
     [Fact]
     public void ReadRow_MultiMapMissingRow_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
-        importer.Configuration.RegisterClassMap<MissingColumnRowMap>();
+        importer.Configuration.RegisterClassMap<MissingColumnRow>(c =>
+        {
+            c.Map(p => p.MissingValue)
+                .WithSeparators(';', ',');
+        });
 
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
@@ -81,40 +161,26 @@ public class CharSplitValueTests
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<MissingColumnRow>());
     }
 
+    private class MissingColumnRow
+    {
+        public int[] MissingValue { get; set; } = default!;
+    }
+
     [Fact]
     public void ReadRow_MultiMapOptionalMissingRow_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("SplitWithCustomSeparators.xlsx");
-        importer.Configuration.RegisterClassMap<OptionalMissingColumnRowMap>();
+        importer.Configuration.RegisterClassMap<MissingColumnRow>(c =>
+        {
+            c.Map(p => p.MissingValue)
+                .WithSeparators(';', ',')
+                .MakeOptional();
+        });
 
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         MissingColumnRow row = sheet.ReadRow<MissingColumnRow>();
         Assert.Null(row.MissingValue);
-    }
-
-    private class MissingColumnRow
-    {
-        public int[] MissingValue { get; set; } = default!;
-    }
-
-    private class MissingColumnRowMap : ExcelClassMap<MissingColumnRow>
-    {
-        public MissingColumnRowMap()
-        {
-            Map(p => p.MissingValue)
-                .WithSeparators(';', ',');
-        }
-    }
-
-    private class OptionalMissingColumnRowMap : ExcelClassMap<MissingColumnRow>
-    {
-        public OptionalMissingColumnRowMap()
-        {
-            Map(p => p.MissingValue)
-                .WithSeparators(';', ',')
-                .MakeOptional();
-        }
     }
 }

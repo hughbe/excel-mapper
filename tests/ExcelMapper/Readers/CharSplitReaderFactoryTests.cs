@@ -58,6 +58,10 @@ public class CharSplitReaderFactoryTests
             Options = value
         };
         Assert.Equal(value, factory.Options);
+
+        // Set same.
+        factory.Options = value;
+        Assert.Equal(value, factory.Options);
     }
 
 #pragma warning disable CS0184 // The is operator is being used to test interface implementation

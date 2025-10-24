@@ -322,10 +322,32 @@ public class ManyToOneEnumerableMapTests
         var enumerableFactory = new ListEnumerableFactory<string>();
         var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
 
-        Assert.Throws<ArgumentException>("value", () => map.WithSeparators(new char[0]));
-        Assert.Throws<ArgumentException>("value", () => map.WithSeparators(new List<char>()));
-        Assert.Throws<ArgumentException>("value", () => map.WithSeparators(new string[0]));
-        Assert.Throws<ArgumentException>("value", () => map.WithSeparators(new List<string>()));
+        Assert.Throws<ArgumentException>("separators", () => map.WithSeparators(Array.Empty<char>()));
+        Assert.Throws<ArgumentException>("separators", () => map.WithSeparators(new List<char>()));
+        Assert.Throws<ArgumentException>("separators", () => map.WithSeparators(Array.Empty<string>()));
+        Assert.Throws<ArgumentException>("separators", () => map.WithSeparators(new List<string>()));
+    }
+
+    [Fact]
+    public void WithSeparators_NullValueInSeparators_ThrowsArgumentException()
+    {
+        var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
+        var enumerableFactory = new ListEnumerableFactory<string>();
+        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+
+        Assert.Throws<ArgumentException>("separators", () => map.WithSeparators([",", null!]));
+        Assert.Throws<ArgumentException>("separators", () => map.WithSeparators(new List<string> { ",", null! }));
+    }
+
+    [Fact]
+    public void WithSeparators_EmptyValueInSeparators_ThrowsArgumentException()
+    {
+        var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
+        var enumerableFactory = new ListEnumerableFactory<string>();
+        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+
+        Assert.Throws<ArgumentException>("separators", () => map.WithSeparators([",", string.Empty]));
+        Assert.Throws<ArgumentException>("separators", () => map.WithSeparators(new List<string> { ",", string.Empty }));
     }
 
     [Fact]
@@ -335,10 +357,10 @@ public class ManyToOneEnumerableMapTests
         var enumerableFactory = new ListEnumerableFactory<string>();
         var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory).WithColumnNames("ColumnNames");
 
-        Assert.Throws<ExcelMappingException>(() => map.WithSeparators(new char[0]));
-        Assert.Throws<ExcelMappingException>(() => map.WithSeparators(new List<char>()));
-        Assert.Throws<ExcelMappingException>(() => map.WithSeparators(new string[0]));
-        Assert.Throws<ExcelMappingException>(() => map.WithSeparators(new List<string>()));
+        Assert.Throws<ExcelMappingException>(() => map.WithSeparators(['c']));
+        Assert.Throws<ExcelMappingException>(() => map.WithSeparators(new List<char> { 'c' }));
+        Assert.Throws<ExcelMappingException>(() => map.WithSeparators([","]));
+        Assert.Throws<ExcelMappingException>(() => map.WithSeparators(new List<string> { "," }));
     }
 
     [Fact]

@@ -160,7 +160,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithSeparators(params char[] separators)
     {
-        ArgumentNullException.ThrowIfNull(separators);
+        SeparatorUtilities.ValidateSeparators(separators);
 
         if (ReaderFactory is not SplitReaderFactory splitColumnReader)
         {
@@ -181,10 +181,9 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// </summary>
     /// <param name="separators">The separators used to split the value of a single cell.</param>
     /// <returns>The map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithSeparators(IEnumerable<char> separators)
+    public ManyToOneEnumerableMap<TElement> WithSeparators(params IEnumerable<char> separators)
     {
         ArgumentNullException.ThrowIfNull(separators);
-
         return WithSeparators(separators.ToArray());
     }
 
@@ -196,7 +195,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithSeparators(params string[] separators)
     {
-        ArgumentNullException.ThrowIfNull(separators);
+        SeparatorUtilities.ValidateSeparators(separators);
 
         if (ReaderFactory is not SplitReaderFactory splitColumnReader)
         {
@@ -217,10 +216,9 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// </summary>
     /// <param name="separators">The separators used to split the value of a single cell.</param>
     /// <returns>The map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithSeparators(IEnumerable<string> separators)
+    public ManyToOneEnumerableMap<TElement> WithSeparators(params IEnumerable<string> separators)
     {
         ArgumentNullException.ThrowIfNull(separators);
-
         return WithSeparators(separators.ToArray());
     }
 }

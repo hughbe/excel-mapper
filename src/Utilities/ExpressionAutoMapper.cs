@@ -192,7 +192,7 @@ internal static class ExpressionAutoMapper
                 member = null;
                 type = finalExpression.MappedValueType;
             }
-            if (!AutoMapper.TryCreateSplitMapGeneric<TElement>(member, type, finalExpression.GetDefaultCellsReaderFactory() ?? new CharSplitReaderFactory(finalExpression.GetDefaultCellReaderFactory()), emptyValueStrategy, out var map))
+            if (!AutoMapper.TryCreateSplitMapGeneric<TElement>(member, type, finalExpression.GetDefaultCellsReaderFactory() ?? MemberMapper.GetDefaultSplitCellsReaderFactory(member, finalExpression.GetDefaultCellReaderFactory()), emptyValueStrategy, out var map))
             {
                 throw new ExcelMappingException($"No known way to instantiate type \"{type}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
             }

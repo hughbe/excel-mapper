@@ -319,7 +319,7 @@ public class ExcelSheetTests
         yield return new object[] { 0, 4, new string?[] { "Value", "value", "  value  ", null } };
         yield return new object[] { 1, 4, new string?[] { "value", "  value  ", null, "value" } };
         yield return new object[] { 1, 2, new string?[] { "value", "  value  " } };
-        yield return new object[] { 1, 0, new string?[0] };
+        yield return new object[] { 1, 0, Array.Empty<string?>() };
     }
 
     [Theory]

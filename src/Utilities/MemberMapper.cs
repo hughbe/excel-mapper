@@ -94,6 +94,33 @@ internal static class MemberMapper
         return new ColumnNameReaderFactory(member.Name);
     }
 
+    internal static ICellsReaderFactory GetDefaultSplitCellsReaderFactory(MemberInfo? member, ICellReaderFactory innerReaderFactory)
+    {
+        if (member != null)
+        {
+            // If the member has a ExcelSeparator attribute, use that separator.
+            if (member.GetCustomAttribute<ExcelSeparatorsAttribute>() is { } separatorsAttribute)
+            {
+                if (separatorsAttribute.StringSeparators is { } stringSeparators)
+                {
+                    return new StringSplitReaderFactory(innerReaderFactory)
+                    {
+                        Separators = stringSeparators,
+                        Options = separatorsAttribute.Options
+                    };
+                }
+
+                return new CharSplitReaderFactory(innerReaderFactory)
+                {
+                    Separators = separatorsAttribute.CharSeparators!,
+                    Options = separatorsAttribute.Options
+                };
+            }
+        }
+
+        return new CharSplitReaderFactory(innerReaderFactory);
+    }
+
     internal static bool AddMappers(IValuePipeline pipeline, MemberInfo member)
     {
         var addDefaultMappers = true;

@@ -987,11 +987,12 @@ public static class AutoMapper
     /// <returns>True if the member is able to be mapped.</returns>
     private static bool TryAutoMapMember<TMember>(MemberInfo member, FallbackStrategy emptyValueStrategy, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map)
     {
+        var readerFactory = MemberMapper.GetDefaultCellReaderFactory(member);
         return TryCreateMap<TMember>(
             member,
             typeof(TMember),
-            MemberMapper.GetDefaultCellReaderFactory(member),
-            MemberMapper.GetDefaultCellsReaderFactory(member) ?? new CharSplitReaderFactory(MemberMapper.GetDefaultCellReaderFactory(member)),
+            readerFactory,
+            MemberMapper.GetDefaultCellsReaderFactory(member) ?? MemberMapper.GetDefaultSplitCellsReaderFactory(member, readerFactory),
             emptyValueStrategy,
             isAutoMapping: true,
             typeStack,

@@ -90,7 +90,7 @@ public class ExcelColumnMatchingAttributeTests
     public static IEnumerable<object?[]> ConstructorArguments_Set_TestData()
     {
         yield return new object?[] { null };
-        yield return new object[] { new object[0] };
+        yield return new object[] { Array.Empty<object>() };
         yield return new object[] { new object?[] { "Value", null } };
     }
 

@@ -47,4 +47,18 @@ public class StringSplitReaderFactoryTests
         var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("ColumnName"));
         Assert.Throws<ArgumentException>("value", () => factory.Separators = []);
     }
+
+    [Fact]
+    public void Separators_SetNullValueInArray_ThrowsArgumentException()
+    {
+        var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("ColumnName"));
+        Assert.Throws<ArgumentException>("value", () => factory.Separators = [",", null!]);
+    }
+
+    [Fact]
+    public void Separators_SetEmptyValueInArray_ThrowsArgumentException()
+    {
+        var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("ColumnName"));
+        Assert.Throws<ArgumentException>("value", () => factory.Separators = [",", ""]);
+    }
 }

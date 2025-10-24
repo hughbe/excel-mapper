@@ -1,4 +1,6 @@
-﻿namespace ExcelMapper.Readers;
+﻿using System.Runtime.CompilerServices;
+
+namespace ExcelMapper.Readers;
 
 /// <summary>
 /// Reads the value of a cell and produces multiple values by splitting the string value
@@ -16,12 +18,7 @@ public class StringSplitReaderFactory : SplitReaderFactory
         get => _separators;
         set
         {
-            ArgumentNullException.ThrowIfNull(value);
-            if (value.Length == 0)
-            {
-                throw new ArgumentException("Separators cannot be empty.", nameof(value));
-            }
-
+            SeparatorUtilities.ValidateSeparators(value);
             _separators = value;
         }
     }

@@ -16,12 +16,7 @@ public class CharSplitReaderFactory : SplitReaderFactory
         get => _separators;
         set
         {
-            ArgumentNullException.ThrowIfNull(value);
-            if (value.Length == 0)
-            {
-                throw new ArgumentException("Separators cannot be empty.", nameof(value));
-            }
-
+            SeparatorUtilities.ValidateSeparators(value);
             _separators = value;
         }
     }

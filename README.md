@@ -1061,9 +1061,28 @@ public class Employee
 }
 ```
 
-Customize the separator using fluent API:
+Customize the separator using attributes or fluent API:
 
 ```csharp
+// Using attributes
+public class Employee
+{
+    public string Name { get; set; }
+    
+    // Split by semicolon instead of comma
+    [ExcelSeparators(';')]
+    public string[] Skills { get; set; }
+    
+    // Split by multiple separators (pipe or comma)
+    [ExcelSeparators('|', ',')]
+    public string[] Tags { get; set; }
+    
+    // String separators also supported
+    [ExcelSeparators(";", "||")]
+    public string[] Categories { get; set; }
+}
+
+// Or using fluent API
 public class EmployeeMap : ExcelClassMap<Employee>
 {
     public EmployeeMap()
@@ -1959,6 +1978,7 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 | `[ExcelPreserveFormatting]` | Read formatted string |
 | `[ExcelTrimString]` | Auto-trim whitespace |
 | `[ExcelFormats("format1", "format2")]` | Parse dates/times with specific formats |
+| `[ExcelSeparators(';', ',')]` | Split cell value with custom separators |
 | `[ExcelTransformer(typeof(Transformer))]` | Apply custom transformer |
 | `[ExcelMappingDictionary("key", value)]` | Map string value to enum/object (multiple allowed) |
 | `[ExcelMappingDictionaryComparer(comparison)]` | Set string comparison for dictionary keys |
