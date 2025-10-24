@@ -87,12 +87,10 @@ public static class AutoMapper
         return true;
     }
 
-    // Cached singleton instances for stateless objects
-    private static readonly ICellMapper s_dateTimeMapper = new DateTimeMapper();
-    private static readonly ICellMapper s_dateTimeOffsetMapper = new DateTimeOffsetMapper();
-    private static readonly ICellMapper s_timeSpanMapper = new TimeSpanMapper();
-    private static readonly ICellMapper s_dateOnlyMapper = new DateOnlyMapper();
-    private static readonly ICellMapper s_timeOnlyMapper = new TimeOnlyMapper();
+    // Cached singleton instances for stateless, immutable objects.
+    // Note: Mappers with mutable state (e.g., IFormatsCellMapper with settable Formats property)
+    // cannot be cached as singletons because they can be modified via .WithFormats(), causing
+    // race conditions when tests run in parallel or maps are created concurrently.
     private static readonly ICellMapper s_guidMapper = new GuidMapper();
     private static readonly ICellMapper s_boolMapper = new BoolMapper();
     private static readonly ICellMapper s_stringMapper = new StringMapper();
@@ -104,11 +102,6 @@ public static class AutoMapper
 
     private static readonly FrozenDictionary<Type, ICellMapper> s_wellKnownTypeMappers = new Dictionary<Type, ICellMapper>
     {
-        [typeof(DateTime)] = s_dateTimeMapper,
-        [typeof(DateTimeOffset)] = s_dateTimeOffsetMapper,
-        [typeof(TimeSpan)] = s_timeSpanMapper,
-        [typeof(DateOnly)] = s_dateOnlyMapper,
-        [typeof(TimeOnly)] = s_timeOnlyMapper,
         [typeof(Guid)] = s_guidMapper,
         [typeof(bool)] = s_boolMapper,
         [typeof(string)] = s_stringMapper,
@@ -118,15 +111,39 @@ public static class AutoMapper
         [typeof(Version)] = s_versionMapper,
     }.ToFrozenDictionary();
 
+    // These types have mappers with mutable state and must be instantiated fresh each time
+    private static readonly FrozenSet<Type> s_mutableMapperTypes = new HashSet<Type>
+    {
+        typeof(DateTime),
+        typeof(DateTimeOffset),
+        typeof(TimeSpan),
+        typeof(DateOnly),
+        typeof(TimeOnly),
+    }.ToFrozenSet();
+
     private static bool TryGetWellKnownMapper<T>([NotNullWhen(true)] out ICellMapper? mapper)
     {
         var type = typeof(T).GetNullableTypeOrThis(out _);
 
-        // Fast path: Check dictionary for well-known types.
+        // Fast path: Check dictionary for well-known types with immutable mappers.
         if (s_wellKnownTypeMappers.TryGetValue(type, out var cachedMapper))
         {
             mapper = cachedMapper;
             return true;
+        }
+        // Check for types with mutable mappers (cannot be cached as singletons).
+        else if (s_mutableMapperTypes.Contains(type))
+        {
+            mapper = type switch
+            {
+                Type t when t == typeof(DateTime) => new DateTimeMapper(),
+                Type t when t == typeof(DateTimeOffset) => new DateTimeOffsetMapper(),
+                Type t when t == typeof(TimeSpan) => new TimeSpanMapper(),
+                Type t when t == typeof(DateOnly) => new DateOnlyMapper(),
+                Type t when t == typeof(TimeOnly) => new TimeOnlyMapper(),
+                _ => null
+            };
+            return mapper != null;
         }
         // Check for enum types.
         else if (type.IsEnum)
