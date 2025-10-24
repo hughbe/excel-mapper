@@ -3910,6 +3910,7 @@ public class MapDictionaryTest
         public SortedList<string, ExcelSheet> Value { get; set; } = default!;
     }
 
+#if NET9_0_OR_GREATER
     [Fact]
     public void ReadRow_AutoMappedOrderedDictionaryStringObject_ReturnsExpected()
     {
@@ -4205,6 +4206,7 @@ public class MapDictionaryTest
     {
         public OrderedDictionary<string, ExcelSheet> Value { get; set; } = default!;
     }
+#endif
 
     [Fact]
     public void ReadRow_AutoMappedSortedDictionaryStringObject_ReturnsExpected()

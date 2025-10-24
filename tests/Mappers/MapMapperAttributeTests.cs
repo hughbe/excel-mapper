@@ -171,10 +171,10 @@ public class MapMapperAttributeTests
         public CustomMapper(bool value)
         {
             Assert.True(value);
-            _innerMapper = new DictionaryMapper<string>(new Dictionary<string, string>
+            _innerMapper = new MappingDictionaryMapper<string>(new Dictionary<string, string>
                     {
                         { "a", "12345" }
-                    }, null, behavior: DictionaryMapperBehavior.Optional);
+                    }, null, behavior: MappingDictionaryMapperBehavior.Optional);
         }
 
         public CellMapperResult Map(ReadCellResult readResult) => _innerMapper.Map(readResult);

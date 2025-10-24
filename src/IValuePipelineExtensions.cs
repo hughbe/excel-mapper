@@ -122,9 +122,9 @@ public static class IValuePipelineExtensions
     /// <param name="comparer">The comparer uses to map fixed string values. This allows for case-insensitive mappings, for example.</param>
     /// <param name="behavior">Whether or not a failure to match is an error.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithMapping<TMap, TValue>(this TMap map, IDictionary<string, TValue> mappingDictionary, IEqualityComparer<string>? comparer = null, DictionaryMapperBehavior behavior = DictionaryMapperBehavior.Optional) where TMap : IValuePipeline<TValue>
+    public static TMap WithMapping<TMap, TValue>(this TMap map, IDictionary<string, TValue> mappingDictionary, IEqualityComparer<string>? comparer = null, MappingDictionaryMapperBehavior behavior = MappingDictionaryMapperBehavior.Optional) where TMap : IValuePipeline<TValue>
     {
-        var item = new DictionaryMapper<TValue>(mappingDictionary, comparer, behavior);
+        var item = new MappingDictionaryMapper<TValue>(mappingDictionary, comparer, behavior);
         map.Mappers.Add(item);
         return map;
     }

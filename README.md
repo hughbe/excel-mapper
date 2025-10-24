@@ -611,6 +611,85 @@ public class Employee
 
 The `ExcelTransformerAttribute` accepts any type implementing `ICellTransformer` and supports `ConstructorArguments` for parameterized transformers.
 
+#### Value Mapping with Attributes
+
+Map string cell values to specific enum or object values using attributes:
+
+| Name          | Size | Priority |
+|---------------|------|----------|
+| Alice Johnson | L    | High     |
+| Bob Smith     | M    | Med      |
+
+```csharp
+public enum TShirtSize { Small, Medium, Large, XLarge }
+public enum Priority { Low, Medium, High }
+
+public class Employee
+{
+    public string Name { get; set; }
+
+    // Map string values to enum using attributes
+    [ExcelMappingDictionary("S", TShirtSize.Small)]
+    [ExcelMappingDictionary("M", TShirtSize.Medium)]
+    [ExcelMappingDictionary("L", TShirtSize.Large)]
+    [ExcelMappingDictionary("XL", TShirtSize.XLarge)]
+    public TShirtSize Size { get; set; }
+
+    // Handle abbreviations and variations
+    [ExcelMappingDictionary("Low", Priority.Low)]
+    [ExcelMappingDictionary("L", Priority.Low)]
+    [ExcelMappingDictionary("Medium", Priority.Medium)]
+    [ExcelMappingDictionary("Med", Priority.Medium)]
+    [ExcelMappingDictionary("M", Priority.Medium)]
+    [ExcelMappingDictionary("High", Priority.High)]
+    [ExcelMappingDictionary("H", Priority.High)]
+    public Priority Priority { get; set; }
+}
+
+var employees = sheet.ReadRows<Employee>().ToArray();
+Console.WriteLine(employees[0].Size);      // Large
+Console.WriteLine(employees[1].Priority);  // Medium
+```
+
+**Case-Insensitive Matching:**
+
+By default, dictionary key matching is case-sensitive. Use `ExcelMappingDictionaryComparerAttribute` for case-insensitive or custom comparisons:
+
+```csharp
+public class Employee
+{
+    // Case-insensitive matching
+    [ExcelMappingDictionary("b", "extra")]
+    [ExcelMappingDictionaryComparer(StringComparison.InvariantCultureIgnoreCase)]
+    public string Code { get; set; }  // Matches "B", "b" to "extra"
+}
+```
+
+**Required vs Optional Mapping:**
+
+Control whether unmapped values should cause errors:
+
+```csharp
+public class Employee
+{
+    // Optional (default) - unmapped values pass through as-is
+    [ExcelMappingDictionary("FT", "Full Time")]
+    [ExcelMappingDictionary("PT", "Part Time")]
+    public string Status { get; set; }
+
+    // Required - unmapped values trigger InvalidFallback or throw
+    [ExcelMappingDictionary("A", "Active")]
+    [ExcelMappingDictionary("I", "Inactive")]
+    [ExcelMappingDictionaryBehavior(MappingDictionaryMapperBehavior.Required)]
+    [ExcelInvalidValue("Unknown")]
+    public string EmploymentStatus { get; set; }
+}
+```
+
+**Available Behaviors:**
+- `MappingDictionaryMapperBehavior.Optional` (default) - Unmapped values pass through unchanged
+- `MappingDictionaryMapperBehavior.Required` - Unmapped values are treated as invalid, triggering fallback behavior
+
 ### Fluent API Mapping
 
 For complex scenarios, use fluent mapping with `ExcelClassMap<T>`:
@@ -746,7 +825,13 @@ var employees = sheet.ReadRows<Employee>();
 
 ### Value Mapping
 
-Map string cell values to specific enum or object values using `.WithMapping()`:
+Map string cell values to specific enum or object values using either attributes or the fluent API.
+
+#### Attribute-Based Value Mapping
+
+See [Value Mapping with Attributes](#value-mapping-with-attributes) in the Attribute-Based Mapping section.
+
+#### Fluent API Value Mapping
 
 | Name          | Size | Priority |
 |---------------|------|----------|
@@ -794,6 +879,27 @@ public class EmployeeMap : ExcelClassMap<Employee>
             });
     }
 }
+```
+
+**Case-Insensitive Matching:**
+
+```csharp
+Map(e => e.Code)
+    .WithMapping(new Dictionary<string, string>
+    {
+        { "b", "extra" }
+    }, StringComparer.OrdinalIgnoreCase);  // Case-insensitive
+```
+
+**Required vs Optional Behavior:**
+
+```csharp
+Map(e => e.Status)
+    .WithMapping(new Dictionary<string, string>
+    {
+        { "A", "Active" }
+    }, behavior: MappingDictionaryMapperBehavior.Required)  // Unmapped values are invalid
+    .WithInvalidFallback("Unknown");
 ```
 
 This is especially useful for:
@@ -1801,6 +1907,9 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 | `[ExcelPreserveFormatting]` | Read formatted string |
 | `[ExcelTrimString]` | Auto-trim whitespace |
 | `[ExcelTransformer(typeof(Transformer))]` | Apply custom transformer |
+| `[ExcelMappingDictionary("key", value)]` | Map string value to enum/object (multiple allowed) |
+| `[ExcelMappingDictionaryComparer(comparison)]` | Set string comparison for dictionary keys |
+| `[ExcelMappingDictionaryBehavior(behavior)]` | Control required vs optional mapping |
 
 ### Fluent API Methods
 

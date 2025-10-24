@@ -175,7 +175,7 @@ String value is converted to target type via mapper pipeline:
 - **`GuidMapper`**: Parses GUID strings
 - **`EnumMapper`**: Parses enum values by name (with optional case-insensitivity)
 - **`UriMapper`**: Parses URI strings
-- **`DictionaryMapper<T>`**: Maps nested objects using sub-maps
+- **`MappingDictionaryMapper<T>`**: Maps nested objects using sub-maps
 - **`ConvertUsingMapper`**: Custom conversion via delegates
 
 **Mapper Pipeline Behavior**:

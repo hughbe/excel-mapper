@@ -36,7 +36,8 @@ public static class AutoMapper
         }
 
         // If no mappers are speciified, try to get a well-known mapper for the type.
-        if (map.Pipeline.Mappers.Count == 0)
+        // MappingDictionaryMapper is unique because it returns .
+        if (!map.Pipeline.Mappers.Any(m => !m.GetType().IsGenericType || m.GetType().GetGenericTypeDefinition() != typeof(MappingDictionaryMapper<>)))
         {
             // If we are auto mapping and no well-known mapper is found, fail the auto mapping.
             // But, allow `Map(o => o.Value)` as the user can define a custom converter after
@@ -45,7 +46,7 @@ public static class AutoMapper
             // will be thrown at the point of registering the class map.
             if (TryGetWellKnownMapper<T>(out var mapper))
             {
-                map.Pipeline.Mappers.Add(mapper);
+                map.Pipeline.Mappers.Insert(0, mapper);
             }
             else if (isAutoMapping)
             {

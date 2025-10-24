@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Reflection;
 using ExcelMapper.Fallbacks;
+using ExcelMapper.Mappers;
 using ExcelMapper.Readers;
 using ExcelMapper.Transformers;
 
@@ -95,13 +96,42 @@ internal static class MemberMapper
     internal static void AddMappers(IValuePipeline pipeline, MemberInfo member)
     {
         // If the member has ExcelMapper attributes, add the mappers.
-        if (member.GetCustomAttributes<ExcelMapperAttribute>() is { } mapperAttributes)
+        var mapperAttributes = member.GetCustomAttributes<ExcelMapperAttribute>().ToArray();
+        if (mapperAttributes.Length > 0)
         {
             foreach (var mapperAttribute in mapperAttributes)
             {
                 var mapper = (ICellMapper)Activator.CreateInstance(mapperAttribute.Type, mapperAttribute.ConstructorArguments)!;
                 pipeline.Mappers.Add(mapper);
             }
+        }
+
+        // If the member has any ExcelMappingDictionary attributes, add a MappingDictionaryMapper.
+        var mappingDictionaryAttributes = member.GetCustomAttributes<ExcelMappingDictionaryAttribute>().ToArray();
+        if (mappingDictionaryAttributes.Length > 0)
+        {
+            // Build the mapping dictionary.
+            var mappingDictionary = new Dictionary<string, object?>(mappingDictionaryAttributes.Length);
+            foreach (var mappingDictionaryAttribute in mappingDictionaryAttributes)
+            {
+                mappingDictionary.Add(mappingDictionaryAttribute.Value, mappingDictionaryAttribute.MappedValue);
+            }
+
+            // If the member has a ExcelMappingDictionaryComparer attribute, get the comparer.
+            IEqualityComparer<string>? comparer = null;
+            if (member.GetCustomAttribute<ExcelMappingDictionaryComparerAttribute>() is { } comparerAttribute)
+            {
+                comparer = StringComparer.FromComparison(comparerAttribute.Comparison);
+            }
+
+            // If the member has a ExcelMappingDictionaryBehavior attribute, get the behavior.
+            var behavior = MappingDictionaryMapperBehavior.Optional;
+            if (member.GetCustomAttribute<ExcelMappingDictionaryBehaviorAttribute>() is { } behaviorAttribute)
+            {
+                behavior = behaviorAttribute.Behavior;
+            }
+
+            pipeline.Mappers.Add(new MappingDictionaryMapper<object?>(mappingDictionary, comparer, behavior));
         }
     }
 

@@ -199,7 +199,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateTimeValue);
         Assert.Same(map, map.WithMapping(dictionaryMapping, comparer));
 
-        var item = map.Mappers.OfType<DictionaryMapper<DateTime>>().Single();
+        var item = map.Mappers.OfType<MappingDictionaryMapper<DateTime>>().Single();
         Assert.NotSame(dictionaryMapping, item.MappingDictionary);
         Assert.Equal(dictionaryMapping, item.MappingDictionary);
         Assert.Same(comparer, Assert.IsType<Dictionary<string, DateTime>>(item.MappingDictionary).Comparer);
