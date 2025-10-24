@@ -50,8 +50,10 @@ public class ISetTImplementingEnumerableFactoryTests
     [InlineData(typeof(ReadOnlyCollection<string>))]
     [InlineData(typeof(ReadOnlyCollection<int>))]
     [InlineData(typeof(HashSet<string>))]
+#if NET9_0_OR_GREATER
     [InlineData(typeof(ReadOnlySet<int>))]
     [InlineData(typeof(ReadOnlySet<string>))]
+#endif
     [InlineData(typeof(ISet<int>))]
     [InlineData(typeof(ISet<string>))]
     [InlineData(typeof(IReadOnlySet<int>))]

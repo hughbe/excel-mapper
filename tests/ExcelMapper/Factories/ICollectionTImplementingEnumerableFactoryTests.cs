@@ -48,8 +48,10 @@ public class ICollectionTImplementingEnumerableFactoryTests
     [InlineData(typeof(ReadOnlyObservableCollection<int>))]
     [InlineData(typeof(ReadOnlyObservableCollection<string>))]
     [InlineData(typeof(HashSet<string>))]
+#if NET9_0_OR_GREATER
     [InlineData(typeof(ReadOnlySet<int>))]
     [InlineData(typeof(ReadOnlySet<string>))]
+#endif
     [InlineData(typeof(SubCollectionBase))]
     [InlineData(typeof(NoConstructorClass))]
     [InlineData(typeof(NoConstructorClass<int>))]

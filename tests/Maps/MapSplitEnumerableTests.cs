@@ -1878,6 +1878,7 @@ public class MapSplitEnumerableTests
         Assert.Equal([-2], row5.Value);
     }
 
+#if NET9_0_OR_GREATER
     [Fact]
     public void ReadRow_AutoMappedReadOnlySetIntClass_ReturnsExpected()
     {
@@ -1962,6 +1963,7 @@ public class MapSplitEnumerableTests
         var row5 = sheet.ReadRow<ReadOnlySetIntClass>();
         Assert.Equal([-2], row5.Value);
     }
+#endif
 
     [Fact]
     public void ReadRow_AutoMappedQueueInt_ReturnsExpected()

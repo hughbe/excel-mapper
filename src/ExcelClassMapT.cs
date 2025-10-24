@@ -166,6 +166,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlySet<TElement>>> expression)
         => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
+#if NET9_0_OR_GREATER
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map Collection.
@@ -175,6 +176,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ReadOnlySet<TElement>>> expression)
         => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+#endif
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.

@@ -957,6 +957,7 @@ public class AutoMapperTests
     {
     }
 
+#if NET9_0_OR_GREATER
     [Fact]
     public void TryCreateClass_Map_ReadOnlySetStringType_ReturnsTrue()
     {
@@ -977,6 +978,7 @@ public class AutoMapperTests
         {
         }
     }
+#endif
 
     [Fact]
     public void TryCreateClass_Map_SortedSetStringType_ReturnsTrue()
@@ -1430,6 +1432,7 @@ public class AutoMapperTests
     {
     }
 
+#if NET9_0_OR_GREATER
     [Fact]
     public void TryCreateClass_Map_OrderedDictionaryStringObjectType_ReturnsTrue()
     {
@@ -1447,6 +1450,7 @@ public class AutoMapperTests
     private class SubOrderedDictionaryStringObject : OrderedDictionary<string, object>
     {
     }
+#endif
 
     [Fact]
     public void TryCreateClass_Map_SortedDictionaryStringObjectType_ReturnsTrue()

@@ -48,7 +48,9 @@ public class IListTImplementingEnumerableFactoryTests
     [InlineData(typeof(AbstractClass))]
     [InlineData(typeof(ImmutableList<int>))]
     [InlineData(typeof(FrozenSet<int>))]
+#if NET9_0_OR_GREATER
     [InlineData(typeof(ReadOnlySet<int>))]
+#endif
     [InlineData(typeof(HashSet<int>))]
     [InlineData(typeof(SubCollectionBase))]
     [InlineData(typeof(NoConstructorClass))]

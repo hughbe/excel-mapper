@@ -52,11 +52,13 @@ public class ReadOnlyObservableCollectionEnumerableFactoryTests
     [InlineData(typeof(SubReadOnlyObservableCollection<string>))]
     [InlineData(typeof(ObservableCollectionConstructor<string>))]
     [InlineData(typeof(HashSet<string>))]
+#if NET9_0_OR_GREATER
+    [InlineData(typeof(ReadOnlySet<int>))]
     [InlineData(typeof(ReadOnlySet<string>))]
+#endif
     [InlineData(typeof(SubCollectionBase))]
     [InlineData(typeof(ICollectionGeneric<int>))]
     [InlineData(typeof(IListGeneric<int>))]
-    [InlineData(typeof(ReadOnlySet<int>))]
     public void Ctor_InvalidCollectionType_ThrowsArgumentException(Type collectionType)
     {
         Assert.Throws<ArgumentException>("collectionType", () => new ReadOnlyObservableCollectionEnumerableFactory<int>(collectionType));

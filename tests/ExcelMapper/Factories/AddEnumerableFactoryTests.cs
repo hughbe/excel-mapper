@@ -47,7 +47,9 @@ public class AddEnumerableFactoryTests
     [InlineData(typeof(ReadOnlyObservableCollection<string>))]
     [InlineData(typeof(AbstractClass))]
     [InlineData(typeof(FrozenSet<int>))]
+#if NET9_0_OR_GREATER
     [InlineData(typeof(ReadOnlySet<int>))]
+#endif
     [InlineData(typeof(NonEnumerableAddClass<int>))]
     [InlineData(typeof(SubCollectionBase))]
     [InlineData(typeof(ImmutableArray<int>))]

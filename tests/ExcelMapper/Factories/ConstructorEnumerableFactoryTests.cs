@@ -60,7 +60,9 @@ public class ConstructorEnumerableFactoryTests
     [InlineData(typeof(ReadOnlyCollection<string>))]
     [InlineData(typeof(FrozenSet<string>))]
     [InlineData(typeof(HashSet<string>))]
+#if NET9_0_OR_GREATER
     [InlineData(typeof(ReadOnlySet<int>))]
+#endif
     public void Ctor_InvalidCollectionType_ThrowsArgumentException(Type collectionType)
     {
         Assert.Throws<ArgumentException>("collectionType", () => new ConstructorEnumerableFactory<int>(collectionType));
