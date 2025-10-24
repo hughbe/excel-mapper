@@ -1,10 +1,29 @@
 ﻿namespace ExcelMapper.Mappers;
 
 /// <summary>
-/// Tries to map the value of a cell to an absolute <see cref="Uri"/>.
+/// Tries to map the value of a cell to a <see cref="Uri"/>.
 /// </summary>
 public class UriMapper : ICellMapper
 {
+    private UriKind _uriKind = UriKind.Absolute;
+
+    /// <summary>
+    /// Gets or sets the kind of URI to create.
+    /// </summary>
+    public UriKind UriKind
+    {
+        get => _uriKind;
+        set
+        {
+            if (!Enum.IsDefined(value))
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value, $"Invalid value \"{value}\".");
+            }
+
+            _uriKind = value;
+        }
+    }
+
     /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult readResult)
     {
@@ -12,7 +31,7 @@ public class UriMapper : ICellMapper
 
         try
         {
-            var uri = new Uri(stringValue!, UriKind.Absolute);
+            var uri = new Uri(stringValue!, UriKind);
             return CellMapperResult.Success(uri);
         }
         catch (Exception exception)

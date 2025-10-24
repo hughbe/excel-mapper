@@ -100,7 +100,6 @@ public static class AutoMapper
     private static readonly ICellMapper s_guidMapper = new GuidMapper();
     private static readonly ICellMapper s_boolMapper = new BoolMapper();
     private static readonly ICellMapper s_stringMapper = new StringMapper();
-    private static readonly ICellMapper s_uriMapper = new UriMapper();
     private static readonly ICellMapper s_versionMapper = new VersionMapper();
     private static readonly AllColumnNamesReaderFactory s_allColumnNamesReaderFactory = new();
     private static readonly IFallbackItem s_throwFallback = new ThrowFallback();
@@ -113,7 +112,6 @@ public static class AutoMapper
         [typeof(string)] = s_stringMapper,
         [typeof(object)] = s_stringMapper,
         [typeof(IConvertible)] = s_stringMapper,
-        [typeof(Uri)] = s_uriMapper,
         [typeof(Version)] = s_versionMapper,
     }.ToFrozenDictionary();
 
@@ -125,6 +123,7 @@ public static class AutoMapper
         typeof(TimeSpan),
         typeof(DateOnly),
         typeof(TimeOnly),
+        typeof(Uri)
     }.ToFrozenSet();
 
     [ExcludeFromCodeCoverage]
@@ -148,6 +147,7 @@ public static class AutoMapper
                 Type t when t == typeof(TimeSpan) => new TimeSpanMapper(),
                 Type t when t == typeof(DateOnly) => new DateOnlyMapper(),
                 Type t when t == typeof(TimeOnly) => new TimeOnlyMapper(),
+                Type t when t == typeof(Uri) => new UriMapper(),
                 _ => throw new NotImplementedException("Unexpected mutable mapper type."),
             };
             return true;
