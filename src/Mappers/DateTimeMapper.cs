@@ -18,20 +18,7 @@ public class DateTimeMapper : ICellMapper, IFormatsCellMapper
         get => _formats;
         set
         {
-            ArgumentNullException.ThrowIfNull(value);
-            if (value.Length == 0)
-            {
-                throw new ArgumentException("Formats cannot be empty.", nameof(value));
-            }
-
-            foreach (var format in value)
-            {
-                if (string.IsNullOrEmpty(format))
-                {
-                    throw new ArgumentException("Formats cannot contain null or empty values.", nameof(value));
-                }
-            }
-
+            FormatUtilities.ValidateFormats(value);
             _formats = value;
         }
     }

@@ -30,14 +30,14 @@ public static class AutoMapper
     private static bool TrySetupMap<T>(MemberInfo? member, IToOneMap map, FallbackStrategy emptyValueStrategy, bool isAutoMapping)
     {
         // Setup mappers - ExcelMapper, etc.
+        var addDefaultMappers = true;
         if (member != null)
         {
-            MemberMapper.AddMappers(map.Pipeline, member);
+            addDefaultMappers = MemberMapper.AddMappers(map.Pipeline, member);
         }
 
         // If no mappers are speciified, try to get a well-known mapper for the type.
-        // MappingDictionaryMapper is unique because it returns .
-        if (!map.Pipeline.Mappers.Any(m => !m.GetType().IsGenericType || m.GetType().GetGenericTypeDefinition() != typeof(MappingDictionaryMapper<>)))
+        if (addDefaultMappers)
         {
             // If we are auto mapping and no well-known mapper is found, fail the auto mapping.
             // But, allow `Map(o => o.Value)` as the user can define a custom converter after
@@ -52,6 +52,12 @@ public static class AutoMapper
             {
                 return false;
             }
+        }
+
+        // Modify the mappers - ExcelFormats, etc.
+        if (member != null)
+        {
+            MemberMapper.ModifyMappers(map.Pipeline, member);
         }
 
         // Setup the transformers - ExcelTrimString, ExcelTransformer, etc.
@@ -121,6 +127,7 @@ public static class AutoMapper
         typeof(TimeOnly),
     }.ToFrozenSet();
 
+    [ExcludeFromCodeCoverage]
     private static bool TryGetWellKnownMapper<T>([NotNullWhen(true)] out ICellMapper? mapper)
     {
         var type = typeof(T).GetNullableTypeOrThis(out _);
@@ -141,9 +148,9 @@ public static class AutoMapper
                 Type t when t == typeof(TimeSpan) => new TimeSpanMapper(),
                 Type t when t == typeof(DateOnly) => new DateOnlyMapper(),
                 Type t when t == typeof(TimeOnly) => new TimeOnlyMapper(),
-                _ => null
+                _ => throw new NotImplementedException("Unexpected mutable mapper type."),
             };
-            return mapper != null;
+            return true;
         }
         // Check for enum types.
         else if (type.IsEnum)

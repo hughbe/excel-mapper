@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Reflection;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
@@ -93,8 +94,10 @@ internal static class MemberMapper
         return new ColumnNameReaderFactory(member.Name);
     }
 
-    internal static void AddMappers(IValuePipeline pipeline, MemberInfo member)
+    internal static bool AddMappers(IValuePipeline pipeline, MemberInfo member)
     {
+        var addDefaultMappers = true;
+
         // If the member has ExcelMapper attributes, add the mappers.
         var mapperAttributes = member.GetCustomAttributes<ExcelMapperAttribute>().ToArray();
         if (mapperAttributes.Length > 0)
@@ -104,6 +107,9 @@ internal static class MemberMapper
                 var mapper = (ICellMapper)Activator.CreateInstance(mapperAttribute.Type, mapperAttribute.ConstructorArguments)!;
                 pipeline.Mappers.Add(mapper);
             }
+
+            // Since explicit mappers were added, do not add default mappers.
+            addDefaultMappers = false;
         }
 
         // If the member has any ExcelMappingDictionary attributes, add a MappingDictionaryMapper.
@@ -132,6 +138,26 @@ internal static class MemberMapper
             }
 
             pipeline.Mappers.Add(new MappingDictionaryMapper<object?>(mappingDictionary, comparer, behavior));
+
+            // If the dictionary mapper was added as required, do not add default mappers.
+            if (behavior == MappingDictionaryMapperBehavior.Required)
+            {
+                addDefaultMappers = false;
+            }
+        }
+
+        return addDefaultMappers;
+    }
+
+    internal static void ModifyMappers(IValuePipeline pipeline, MemberInfo member)
+    {
+        // If the member has a ExcelFormats attribute, modify the mappers.
+        if (member.GetCustomAttribute<ExcelFormatsAttribute>() is { } formatsAttribute)
+        {
+            foreach (var mapper in pipeline.Mappers.OfType<IFormatsCellMapper>())
+            {
+                mapper.Formats = formatsAttribute.Formats;
+            }
         }
     }
 

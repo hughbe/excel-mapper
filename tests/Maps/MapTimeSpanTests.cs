@@ -22,6 +22,80 @@ public class MapTimeSpanTests
     }
 
     [Fact]
+    public void ReadRow_NullableTimeSpan_Success()
+    {
+        using var importer = Helpers.GetImporter("TimeSpans.xlsx");
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<TimeSpan?>();
+        Assert.Equal(new TimeSpan(01, 01, 01), row1);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<TimeSpan?>();
+        Assert.Null(row2);
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TimeSpan?>());
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedFormatsAttributeTimeSpan_Success()
+    {
+        using var importer = Helpers.GetImporter("TimeSpans.xlsx");
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<FormatsTimeSpanValue>();
+        Assert.Equal(new TimeSpan(02, 01, 01), row1.CustomValue);
+
+        var row2 = sheet.ReadRow<FormatsTimeSpanValue>();
+        Assert.Equal(new TimeSpan(18, 30, 00), row2.CustomValue);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FormatsTimeSpanValue>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FormatsTimeSpanValue>());
+    }
+
+    private class FormatsTimeSpanValue
+    {
+        [ExcelFormats("yyyy-MM-dd", "g")]
+        public TimeSpan CustomValue { get; set; }
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedFormatsAttributeTimeSpan_Success()
+    {
+        using var importer = Helpers.GetImporter("TimeSpans.xlsx");
+        importer.Configuration.RegisterClassMap<FormatsTimeSpanValue>(c =>
+        {
+            c.Map(o => o.CustomValue);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<FormatsTimeSpanValue>();
+        Assert.Equal(new TimeSpan(02, 01, 01), row1.CustomValue);
+
+        var row2 = sheet.ReadRow<FormatsTimeSpanValue>();
+        Assert.Equal(new TimeSpan(18, 30, 00), row2.CustomValue);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FormatsTimeSpanValue>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FormatsTimeSpanValue>());
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedTimeSpan_Success()
     {
         using var importer = Helpers.GetImporter("TimeSpans.xlsx");
@@ -93,26 +167,6 @@ public class MapTimeSpanTests
     private class TimeSpanValue
     {
         public TimeSpan Value { get; set; }
-    }
-
-    [Fact]
-    public void ReadRow_NullableTimeSpan_Success()
-    {
-        using var importer = Helpers.GetImporter("TimeSpans.xlsx");
-
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        // Valid cell value.
-        var row1 = sheet.ReadRow<TimeSpan?>();
-        Assert.Equal(new TimeSpan(01, 01, 01), row1);
-
-        // Empty cell value.
-        var row2 = sheet.ReadRow<TimeSpan?>();
-        Assert.Null(row2);
-
-        // Invalid cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TimeSpan?>());
     }
 
     [Fact]

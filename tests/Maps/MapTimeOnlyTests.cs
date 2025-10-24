@@ -48,6 +48,160 @@ public class MapTimeOnlyTests
     }
 
     [Fact]
+    public void ReadRow_NullableTimeOnly_Success()
+    {
+        using var importer = Helpers.GetImporter("TimeOnly.xlsx");
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid time.
+        var row1 = sheet.ReadRow<TimeOnly?>();
+        Assert.Equal(new TimeOnly(07, 01, 00), row1);
+
+        // Earliest time.
+        var row2 = sheet.ReadRow<TimeOnly?>();
+        Assert.Equal(new TimeOnly(00, 00, 00), row2);
+
+        // Latest time.
+        var row3 = sheet.ReadRow<TimeOnly?>();
+        Assert.Equal(new TimeOnly(23, 59, 59), row3);
+
+        // Valid duration.
+        var row4 = sheet.ReadRow<TimeOnly?>();
+        Assert.Equal(new TimeOnly(432620000000), row4);
+
+        // Earliest duration.
+        var row5 = sheet.ReadRow<TimeOnly?>();
+        Assert.Equal(new TimeOnly(00, 00, 00), row5);
+
+        // Latest duration.
+        var row6 = sheet.ReadRow<TimeOnly?>();
+        Assert.Equal(new TimeOnly(23, 59, 59), row6);
+
+        // Large time.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TimeOnly?>());
+
+        // Empty cell value.
+        var row8 = sheet.ReadRow<TimeOnly?>();
+        Assert.Null(row8);
+
+        // Negative cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TimeOnly?>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TimeOnly?>());
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedFormatsAttributeTimeOnly_Success()
+    {
+        using var importer = Helpers.GetImporter("TimeOnly.xlsx");
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid time.
+        var row1 = sheet.ReadRow<FormatsTimeOnlyValue>();
+        Assert.Equal(new TimeOnly(07, 01, 00), row1.CustomValue);
+
+        // Earliest time.
+        var row2 = sheet.ReadRow<FormatsTimeOnlyValue>();
+        Assert.Equal(new TimeOnly(00, 00, 00), row2.CustomValue);
+
+        // Latest time.
+        var row3 = sheet.ReadRow<FormatsTimeOnlyValue>();
+        Assert.Equal(new TimeOnly(23, 59, 59), row3.CustomValue);
+
+        // Valid duration.
+        var row4 = sheet.ReadRow<FormatsTimeOnlyValue>();
+        Assert.Equal(new TimeOnly(432620000000), row4.CustomValue);
+
+        // Earliest duration.
+        var row5 = sheet.ReadRow<FormatsTimeOnlyValue>();
+        Assert.Equal(new TimeOnly(00, 00, 00), row5.CustomValue);
+
+        // Latest duration.
+        var row6 = sheet.ReadRow<FormatsTimeOnlyValue>();
+        Assert.Equal(new TimeOnly(23, 59, 59), row6.CustomValue);
+
+        // Large time.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FormatsTimeOnlyValue>());
+
+        // Custom format.
+        var row7 = sheet.ReadRow<FormatsTimeOnlyValue>();
+        Assert.Equal(new TimeOnly(286660000000), row7.CustomValue);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FormatsTimeOnlyValue>());
+
+        // Negative cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FormatsTimeOnlyValue>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FormatsTimeOnlyValue>());
+    }
+
+    private class FormatsTimeOnlyValue
+    {
+        [ExcelFormats("yyyy-MM-dd", "o")]
+        public TimeOnly CustomValue { get; set; }
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedFormatsAttributeTimeOnly_Success()
+    {
+        using var importer = Helpers.GetImporter("TimeOnly.xlsx");
+        importer.Configuration.RegisterClassMap<FormatsTimeOnlyValue>(c =>
+        {
+            c.Map(o => o.CustomValue);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid time.
+        var row1 = sheet.ReadRow<FormatsTimeOnlyValue>();
+        Assert.Equal(new TimeOnly(07, 01, 00), row1.CustomValue);
+
+        // Earliest time.
+        var row2 = sheet.ReadRow<FormatsTimeOnlyValue>();
+        Assert.Equal(new TimeOnly(00, 00, 00), row2.CustomValue);
+
+        // Latest time.
+        var row3 = sheet.ReadRow<FormatsTimeOnlyValue>();
+        Assert.Equal(new TimeOnly(23, 59, 59), row3.CustomValue);
+
+        // Valid duration.
+        var row4 = sheet.ReadRow<FormatsTimeOnlyValue>();
+        Assert.Equal(new TimeOnly(432620000000), row4.CustomValue);
+
+        // Earliest duration.
+        var row5 = sheet.ReadRow<FormatsTimeOnlyValue>();
+        Assert.Equal(new TimeOnly(00, 00, 00), row5.CustomValue);
+
+        // Latest duration.
+        var row6 = sheet.ReadRow<FormatsTimeOnlyValue>();
+        Assert.Equal(new TimeOnly(23, 59, 59), row6.CustomValue);
+
+        // Large time.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FormatsTimeOnlyValue>());
+
+        // Custom format.
+        var row7 = sheet.ReadRow<FormatsTimeOnlyValue>();
+        Assert.Equal(new TimeOnly(286660000000), row7.CustomValue);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FormatsTimeOnlyValue>());
+
+        // Negative cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FormatsTimeOnlyValue>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FormatsTimeOnlyValue>());
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedTimeOnly_Success()
     {
         using var importer = Helpers.GetImporter("TimeOnly.xlsx");
@@ -202,52 +356,6 @@ public class MapTimeOnlyTests
     }
 
     [Fact]
-    public void ReadRow_NullableTimeOnly_Success()
-    {
-        using var importer = Helpers.GetImporter("TimeOnly.xlsx");
-
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        // Valid time.
-        var row1 = sheet.ReadRow<TimeOnly?>();
-        Assert.Equal(new TimeOnly(07, 01, 00), row1);
-
-        // Earliest time.
-        var row2 = sheet.ReadRow<TimeOnly?>();
-        Assert.Equal(new TimeOnly(00, 00, 00), row2);
-
-        // Latest time.
-        var row3 = sheet.ReadRow<TimeOnly?>();
-        Assert.Equal(new TimeOnly(23, 59, 59), row3);
-
-        // Valid duration.
-        var row4 = sheet.ReadRow<TimeOnly?>();
-        Assert.Equal(new TimeOnly(432620000000), row4);
-
-        // Earliest duration.
-        var row5 = sheet.ReadRow<TimeOnly?>();
-        Assert.Equal(new TimeOnly(00, 00, 00), row5);
-
-        // Latest duration.
-        var row6 = sheet.ReadRow<TimeOnly?>();
-        Assert.Equal(new TimeOnly(23, 59, 59), row6);
-
-        // Large time.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TimeOnly?>());
-
-        // Empty cell value.
-        var row8 = sheet.ReadRow<TimeOnly?>();
-        Assert.Null(row8);
-
-        // Negative cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TimeOnly?>());
-
-        // Invalid cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TimeOnly?>());
-    }
-
-    [Fact]
     public void ReadRow_CustomFormatsArrayTimeOnly_Success()
     {
         using var importer = Helpers.GetImporter("TimeOnly.xlsx");
@@ -299,6 +407,11 @@ public class MapTimeOnlyTests
 
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomTimeOnlyValue>());
+    }
+
+    private class CustomTimeOnlyValue
+    {
+        public TimeOnly CustomValue { get; set; }
     }
 
     [Fact]
@@ -353,11 +466,6 @@ public class MapTimeOnlyTests
 
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomTimeOnlyValue>());
-    }
-
-    private class CustomTimeOnlyValue
-    {
-        public TimeOnly CustomValue { get; set; }
     }
 
     [Fact]

@@ -51,12 +51,13 @@ That's it! ExcelMapper automatically maps columns to properties by name.
   - [Automatic Mapping](#automatic-mapping)
   - [Attribute-Based Mapping](#attribute-based-mapping)
   - [Fluent API Mapping](#fluent-api-mapping)
+- [Error Handling](#error-handling)
 - [Advanced Features](#advanced-features)
   - [Value Mapping](#value-mapping)
+  - [Enums](#enums)
   - [Collections and Arrays](#collections-and-arrays)
   - [Dictionaries](#dictionaries)
   - [Nested Objects](#nested-objects)
-  - [Enums](#enums)
   - [Custom Converters](#custom-converters)
   - [Custom Transformers and Mappers](#custom-transformers-and-mappers)
 - [Special Scenarios](#special-scenarios)
@@ -530,6 +531,57 @@ public class EmployeeMap : ExcelClassMap<Employee>
     }
 }
 ```
+
+#### Date and Time Formats
+
+Specify custom formats for parsing date, time, and duration types:
+
+| Event         | EventDate  | StartTime | Duration |
+|---------------|------------|-----------|----------|
+| Conference    | 2024-03-15 | 09:30     | 02:30:00 |
+| Workshop      | 15/03/2024 | 2:00 PM   | 01:15:00 |
+
+```csharp
+public class Event
+{
+    public string Event { get; set; }
+    
+    [ExcelFormats("yyyy-MM-dd", "dd/MM/yyyy", "MM/dd/yyyy")]
+    public DateTime EventDate { get; set; }
+    
+    [ExcelFormats("HH:mm", "hh:mm tt")]
+    public TimeOnly StartTime { get; set; }
+    
+    [ExcelFormats(@"hh\:mm\:ss", @"mm\:ss")]
+    public TimeSpan Duration { get; set; }
+}
+```
+
+Or use the fluent API:
+
+```csharp
+public class EventMap : ExcelClassMap<Event>
+{
+    public EventMap()
+    {
+        Map(e => e.EventDate)
+            .WithFormats("yyyy-MM-dd", "dd/MM/yyyy", "MM/dd/yyyy");
+            
+        Map(e => e.StartTime)
+            .WithFormats("HH:mm", "hh:mm tt");
+            
+        Map(e => e.Duration)
+            .WithFormats(@"hh\:mm\:ss", @"mm\:ss");
+    }
+}
+```
+
+**Supported Types:**
+- `DateTime` / `DateTime?`
+- `DateTimeOffset` / `DateTimeOffset?`
+- `DateOnly` / `DateOnly?` (.NET 6+)
+- `TimeOnly` / `TimeOnly?` (.NET 6+)
+- `TimeSpan` / `TimeSpan?`
 
 #### Invalid Value Fallback
 
@@ -1906,6 +1958,7 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 | `[ExcelInvalidFallback(typeof(Fallback))]` | Custom invalid value handling |
 | `[ExcelPreserveFormatting]` | Read formatted string |
 | `[ExcelTrimString]` | Auto-trim whitespace |
+| `[ExcelFormats("format1", "format2")]` | Parse dates/times with specific formats |
 | `[ExcelTransformer(typeof(Transformer))]` | Apply custom transformer |
 | `[ExcelMappingDictionary("key", value)]` | Map string value to enum/object (multiple allowed) |
 | `[ExcelMappingDictionaryComparer(comparison)]` | Set string comparison for dictionary keys |

@@ -389,26 +389,9 @@ public static class IValuePipelineExtensions
         return map.WithFormats([.. formats]);
     }
 
-    private static void ValidateFormats(string[] formats)
-    {
-        ArgumentNullException.ThrowIfNull(formats);
-        if (formats.Length == 0)
-        {
-            throw new ArgumentException("Formats cannot be empty.", nameof(formats));
-        }
-        foreach (var format in formats)
-        {
-            if (string.IsNullOrEmpty(format))
-            {
-                throw new ArgumentException("Formats cannot contain null or empty values.", nameof(formats));
-            }
-        }
-    }
-
     private static void AddFormats<TCellMapper>(this IValuePipeline map, string[] formats) where TCellMapper : IFormatsCellMapper, new()
     {
-        ArgumentNullException.ThrowIfNull(formats);
-        ValidateFormats(formats);
+        FormatUtilities.ValidateFormats(formats);
 
         var mapper = map.Mappers
             .OfType<TCellMapper>()
