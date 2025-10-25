@@ -10,28 +10,57 @@ namespace ExcelMapper;
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
 public class ExcelColumnNamesAttribute : Attribute
 {
-    private string[] _columnNames;
+    private IReadOnlyList<string> _columnNames;
+    private StringComparison _comparison = StringComparison.OrdinalIgnoreCase;
 
     /// <summary>
     /// Initializes a new instance of <see cref="ExcelColumnNamesAttribute"/> with the specified column name.
     /// </summary>
     /// <param name="columnNames">The names of the columns.</param>
+    /// <param name="comparison">The string comparison to use when matching column names.</param>
     public ExcelColumnNamesAttribute(params string[] columnNames)
     {
-        ColumnUtilities.ValidateColumnNames(columnNames , nameof(columnNames));
+        ColumnUtilities.ValidateColumnNames(columnNames);
         _columnNames = columnNames;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="ExcelColumnNamesAttribute"/> with the specified column name.
+    /// </summary>
+    /// <param name="comparison">The string comparison to use when matching column names.</param>
+    /// <param name="columnNames">The names of the columns.</param>
+    public ExcelColumnNamesAttribute(string[] columnNames, StringComparison comparison)
+    {
+        ColumnUtilities.ValidateColumnNames(columnNames);
+        EnumUtilities.ValidateIsDefined(comparison);
+        _columnNames = columnNames;
+        _comparison = comparison;
     }
 
     /// <summary>
     /// Gets or sets the names of the columns.
     /// </summary>
-    public string[] Names
+    public IReadOnlyList<string> Names
     {
         get => _columnNames;
         set
         {
-            ColumnUtilities.ValidateColumnNames(value , nameof(value));
+            ColumnUtilities.ValidateColumnNames(value);
             _columnNames = value;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the string comparison to use when matching column names.
+    /// </summary>
+    /// <remarks>The default is <see cref="StringComparison.OrdinalIgnoreCase"/>.</remarks>
+    public StringComparison Comparison
+    {
+        get => _comparison;
+        set
+        {
+            EnumUtilities.ValidateIsDefined(value);
+            _comparison = value;
         }
     }
 }

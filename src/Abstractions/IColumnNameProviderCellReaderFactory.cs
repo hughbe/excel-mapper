@@ -10,5 +10,5 @@ public interface IColumnNameProviderCellReaderFactory
     /// </summary>
     /// <param name="sheet">The sheet to get the column name for.</param>
     /// <returns>The column name for the given sheet.</returns>
-    string GetColumnName(ExcelSheet sheet);
+    string? GetColumnName(ExcelSheet sheet);
 }

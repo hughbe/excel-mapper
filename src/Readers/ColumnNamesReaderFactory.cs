@@ -8,31 +8,41 @@ public sealed class ColumnNamesReaderFactory : ICellReaderFactory, ICellsReaderF
     /// <summary>
     /// Gets the names of each column to read.
     /// </summary>
-    public string[] ColumnNames { get; }
+    public IReadOnlyList<string> ColumnNames { get; }
+
+    /// <summary>
+    /// Gets the string comparison used when matching column names.
+    /// </summary>
+    public StringComparison Comparison { get; } = StringComparison.OrdinalIgnoreCase;
 
     /// <summary>
     /// Constructs a reader that reads the values of one or more columns with a given name
     /// and returns the string value of for each column.
     /// </summary>
     /// <param name="columnNames">The names of each column to read.</param>
-    public ColumnNamesReaderFactory(params string[] columnNames)
+    public ColumnNamesReaderFactory(params IReadOnlyList<string> columnNames) : this(columnNames, StringComparison.OrdinalIgnoreCase)
     {
-        ColumnUtilities.ValidateColumnNames(columnNames, nameof(columnNames));
+    }
+
+    /// <summary>
+    /// Constructs a reader that reads the values of one or more columns with a given name
+    /// and returns the string value of for each column.
+    /// </summary>
+    /// <param name="columnNames">The names of each column to read.</param>
+    public ColumnNamesReaderFactory(IReadOnlyList<string> columnNames, StringComparison comparison)
+    {
+        ColumnUtilities.ValidateColumnNames(columnNames);
+        EnumUtilities.ValidateIsDefined(comparison);
         ColumnNames = columnNames;
+        Comparison = comparison;
     }
     
     /// <inheritdoc/>
     public ICellReader? GetCellReader(ExcelSheet sheet)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
-        if (sheet.Heading == null)
+        foreach (var columnName in ColumnNames)
         {
-            throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
-        }
-
-        foreach (string columnName in ColumnNames)
-        {
-            if (sheet.Heading.TryGetColumnIndex(columnName, out var columnIndex))
+            if (ColumnUtilities.TryGetColumnIndex(sheet, columnName, Comparison, out var columnIndex))
             {
                 return new ColumnIndexReader(columnIndex);
             }
@@ -50,10 +60,10 @@ public sealed class ColumnNamesReaderFactory : ICellReaderFactory, ICellsReaderF
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
         }
 
-        var indices = new int[ColumnNames.Length];
-        for (int i = 0; i < ColumnNames.Length; i++)
+        var indices = new int[ColumnNames.Count];
+        for (int i = 0; i < ColumnNames.Count; i++)
         {
-            if (!sheet.Heading.TryGetColumnIndex(ColumnNames[i], out var index))
+            if (!ColumnUtilities.TryGetColumnIndex(sheet, ColumnNames[i], Comparison, out var index))
             {
                 return null;
             }
@@ -64,5 +74,5 @@ public sealed class ColumnNamesReaderFactory : ICellReaderFactory, ICellsReaderF
         return new ColumnIndicesReader(indices);
     }
 
-    public string[] GetColumnNames(ExcelSheet sheet) => ColumnNames;
+    public IReadOnlyList<string> GetColumnNames(ExcelSheet sheet) => ColumnNames;
 }

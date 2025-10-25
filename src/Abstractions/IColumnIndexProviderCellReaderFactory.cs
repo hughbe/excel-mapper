@@ -11,5 +11,5 @@ public interface IColumnIndexProviderCellReaderFactory
     /// </summary>
     /// <param name="sheet">The sheet to get the column index for.</param>
     /// <returns>The column index for the given sheet.</returns>
-    int GetColumnIndex(ExcelSheet sheet);
+    int? GetColumnIndex(ExcelSheet sheet);
 }

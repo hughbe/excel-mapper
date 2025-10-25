@@ -9,13 +9,56 @@ namespace ExcelMapper.Tests;
 public class IOneToOneMapExtensionsTests
 {
     [Fact]
-    public void WithColumnName_ValidColumnName_Success()
+    public void WithColumnName_String_Success()
     {
         var map = new CustomOneToOneMap();
         Assert.Same(map, map.WithColumnName("ColumnName"));
 
         var factory = Assert.IsType<ColumnNameReaderFactory>(map.ReaderFactory);
         Assert.Equal("ColumnName", factory.ColumnName);
+        Assert.Equal(StringComparison.OrdinalIgnoreCase, factory.Comparison);
+    }
+
+    [Theory]
+    [InlineData(StringComparison.CurrentCulture)]
+    [InlineData(StringComparison.CurrentCultureIgnoreCase)]
+    [InlineData(StringComparison.InvariantCulture)]
+    [InlineData(StringComparison.InvariantCultureIgnoreCase)]
+    [InlineData(StringComparison.Ordinal)]
+    [InlineData(StringComparison.OrdinalIgnoreCase)]
+    public void WithColumnName_StringStringComparison_Success(StringComparison comparison)
+    {
+        var map = new CustomOneToOneMap();
+        Assert.Same(map, map.WithColumnName("ColumnName", comparison));
+
+        var factory = Assert.IsType<ColumnNameReaderFactory>(map.ReaderFactory);
+        Assert.Equal("ColumnName", factory.ColumnName);
+        Assert.Equal(comparison, factory.Comparison);
+    }
+
+    [Fact]
+    public void WithColumnName_NullColumnName_ThrowsArgumentNullException()
+    {
+        var map = new CustomOneToOneMap();
+        Assert.Throws<ArgumentNullException>("columnName", () => map.WithColumnName(null!));
+        Assert.Throws<ArgumentNullException>("columnName", () => map.WithColumnName(null!, StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void WithColumnName_EmptyColumnName_ThrowsArgumentException()
+    {
+        var map = new CustomOneToOneMap();
+        Assert.Throws<ArgumentException>("columnName", () => map.WithColumnName(string.Empty));
+        Assert.Throws<ArgumentException>("columnName", () => map.WithColumnName(string.Empty, StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Theory]
+    [InlineData(StringComparison.CurrentCulture - 1)]
+    [InlineData(StringComparison.OrdinalIgnoreCase + 1)]
+    public void WithColumnName_InvalidStringComparison_ThrowsArgumentOutOfRangeException(StringComparison comparison)
+    {
+        var map = new CustomOneToOneMap();
+        Assert.Throws<ArgumentOutOfRangeException>("comparison", () => map.WithColumnName("ColumnName", comparison));
     }
 
     public static IEnumerable<object[]> WithColumnNameMatching_ParamsString_TestData()
@@ -127,20 +170,6 @@ public class IOneToOneMapExtensionsTests
 
         var innerReader = Assert.IsType<ColumnNameReaderFactory>(map.ReaderFactory);
         Assert.Equal("ColumnName", innerReader.ColumnName);
-    }
-
-    [Fact]
-    public void WithColumnName_NullColumnName_ThrowsArgumentNullException()
-    {
-        var map = new CustomOneToOneMap();
-        Assert.Throws<ArgumentNullException>("columnName", () => map.WithColumnName(null!));
-    }
-
-    [Fact]
-    public void WithColumnName_EmptyColumnName_ThrowsArgumentException()
-    {
-        var map = new CustomOneToOneMap();
-        Assert.Throws<ArgumentException>("columnName", () => map.WithColumnName(string.Empty));
     }
 
     [Theory]

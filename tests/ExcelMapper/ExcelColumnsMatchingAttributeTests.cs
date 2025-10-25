@@ -60,6 +60,7 @@ public class ExcelColumnsMatchingAttributeTests
         var attribute = new ExcelColumnsMatchingAttribute(@"Year \d+$");
         Assert.Equal(typeof(RegexColumnMatcher), attribute.Type);
         var regex = Assert.IsType<Regex>(Assert.Single(attribute.ConstructorArguments!));
+        Assert.Equal(RegexOptions.None, regex.Options);
         Assert.Matches(regex, "Year 2024");
         Assert.DoesNotMatch(regex, "year 2024");
     }
@@ -70,6 +71,7 @@ public class ExcelColumnsMatchingAttributeTests
         var attribute = new ExcelColumnsMatchingAttribute(@"Year \d+$", RegexOptions.IgnoreCase);
         Assert.Equal(typeof(RegexColumnMatcher), attribute.Type);
         var regex = Assert.IsType<Regex>(Assert.Single(attribute.ConstructorArguments!));
+        Assert.Equal(RegexOptions.IgnoreCase, regex.Options);
         Assert.Matches(regex, "Year 2024");
         Assert.Matches(regex, "year 2024");
     }

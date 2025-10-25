@@ -11,7 +11,7 @@ namespace ExcelMapper.Tests;
 public class IManyToOneMapExtensionsTests
 {
     [Fact]
-    public void WithColumnNames_ParamsString_Success()
+    public void WithColumnNames_ParamsIReadOnlyListString_Success()
     {
         var columnNames = new string[] { "ColumnName1", "ColumnName2" };
         var factory = new ColumnNamesReaderFactory("Column");
@@ -21,10 +21,11 @@ public class IManyToOneMapExtensionsTests
 
         var valueReader = Assert.IsType<ColumnNamesReaderFactory>(map.ReaderFactory);
         Assert.Same(columnNames, valueReader.ColumnNames);
+        Assert.Equal(StringComparison.OrdinalIgnoreCase, valueReader.Comparison);
     }
 
     [Fact]
-    public void WithColumnNames_IEnumerableString_Success()
+    public void WithColumnNames_ParamsIEnumerableString_Success()
     {
         var columnNames = new string[] { "ColumnName1", "ColumnName2" };
         var map = new CustomManyToOneMap().WithColumnNames("ColumnNames");
@@ -32,6 +33,45 @@ public class IManyToOneMapExtensionsTests
 
         var valueReader = Assert.IsType<ColumnNamesReaderFactory>(map.ReaderFactory);
         Assert.Equal(columnNames, valueReader.ColumnNames);
+        Assert.Equal(StringComparison.OrdinalIgnoreCase, valueReader.Comparison);
+    }
+
+    [Theory]
+    [InlineData(StringComparison.CurrentCulture)]
+    [InlineData(StringComparison.CurrentCultureIgnoreCase)]
+    [InlineData(StringComparison.InvariantCulture)]
+    [InlineData(StringComparison.InvariantCultureIgnoreCase)]
+    [InlineData(StringComparison.Ordinal)]
+    [InlineData(StringComparison.OrdinalIgnoreCase)]
+    public void WithColumnNames_IReadOnlyListStringStringComparison_Success(StringComparison comparison)
+    {
+        var columnNames = new string[] { "ColumnName1", "ColumnName2" };
+        var factory = new ColumnNamesReaderFactory("Column");
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory).WithColumnNames("ColumnNames");
+        Assert.Same(map, map.WithColumnNames(columnNames, comparison));
+
+        var valueReader = Assert.IsType<ColumnNamesReaderFactory>(map.ReaderFactory);
+        Assert.Same(columnNames, valueReader.ColumnNames);
+        Assert.Equal(comparison, valueReader.Comparison);
+    }
+
+    [Theory]
+    [InlineData(StringComparison.CurrentCulture)]
+    [InlineData(StringComparison.CurrentCultureIgnoreCase)]
+    [InlineData(StringComparison.InvariantCulture)]
+    [InlineData(StringComparison.InvariantCultureIgnoreCase)]
+    [InlineData(StringComparison.Ordinal)]
+    [InlineData(StringComparison.OrdinalIgnoreCase)]
+    public void WithColumnNames_IEnumerableStringComparison_Success(StringComparison comparison)
+    {
+        var columnNames = new string[] { "ColumnName1", "ColumnName2" };
+        var map = new CustomManyToOneMap().WithColumnNames("ColumnNames");
+        Assert.Same(map, map.WithColumnNames((IEnumerable<string>)columnNames, comparison));
+
+        var valueReader = Assert.IsType<ColumnNamesReaderFactory>(map.ReaderFactory);
+        Assert.Equal(columnNames, valueReader.ColumnNames);
+        Assert.Equal(comparison, valueReader.Comparison);
     }
 
     [Fact]
@@ -42,7 +82,9 @@ public class IManyToOneMapExtensionsTests
         var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory).WithColumnNames("ColumnNames");
 
         Assert.Throws<ArgumentNullException>("columnNames", () => map.WithColumnNames(null!));
+        Assert.Throws<ArgumentNullException>("columnNames", () => map.WithColumnNames(null!, StringComparison.OrdinalIgnoreCase));
         Assert.Throws<ArgumentNullException>("columnNames", () => map.WithColumnNames((IEnumerable<string>)null!));
+        Assert.Throws<ArgumentNullException>("columnNames", () => map.WithColumnNames((IEnumerable<string>)null!, StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -53,7 +95,9 @@ public class IManyToOneMapExtensionsTests
         var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory).WithColumnNames("ColumnNames");
 
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([]));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([], StringComparison.OrdinalIgnoreCase));
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string>()));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string>(), StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -64,7 +108,9 @@ public class IManyToOneMapExtensionsTests
         var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory).WithColumnNames("ColumnNames");
 
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([null!]));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([null!], StringComparison.OrdinalIgnoreCase));
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string> { null! }));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string> { null! }, StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -75,14 +121,28 @@ public class IManyToOneMapExtensionsTests
         var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory).WithColumnNames("ColumnNames");
 
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([""]));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([""], StringComparison.OrdinalIgnoreCase));
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string> { "" }));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string> { "" }, StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Theory]
+    [InlineData(StringComparison.CurrentCulture - 1)]
+    [InlineData(StringComparison.OrdinalIgnoreCase + 1)]
+    public void WithColumnNames_InvalidStringComparison_ThrowsArgumentOutOfRangeException(StringComparison comparison)
+    {
+        var columnNames = new string[] { "ColumnName1", "ColumnName2" };
+        var factory = new ColumnNamesReaderFactory("Column");
+        var dictionaryFactory = new DictionaryFactory<string, string>();
+        var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory);
+        Assert.Throws<ArgumentOutOfRangeException>("comparison", () => map.WithColumnNames(columnNames, comparison));
+        Assert.Throws<ArgumentOutOfRangeException>("comparison", () => map.WithColumnNames((IEnumerable<string>)columnNames, comparison));
     }
 
     [Fact]
     public void WithColumnsMatching_Invoke_Success()
     {
         var matcher = new NamesColumnMatcher("ColumnName1", "ColumnName2");
-        var columnIndices = new int[] { 0, 1 };
         var map = new CustomManyToOneMap().WithColumnNames("ColumnNames");
         Assert.Same(map, map.WithColumnsMatching(matcher));
 

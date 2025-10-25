@@ -11,29 +11,32 @@ public sealed class ColumnNameReaderFactory : ICellReaderFactory, IColumnNamePro
     public string ColumnName { get; }
 
     /// <summary>
+    /// The string comparison to use when matching column names.
+    /// </summary>
+    public StringComparison Comparison { get; }
+
+    /// <summary>
     /// Constructs a reader that reads the value of a single cell given the name of it's column.
     /// </summary>
     /// <param name="columnName">The name of the column to read.</param>
-    public ColumnNameReaderFactory(string columnName)
+    /// <param name="comparison">The string comparison to use when matching column names.</param>
+    public ColumnNameReaderFactory(string columnName, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
     {
-        ColumnUtilities.ValidateColumnName(columnName, nameof(columnName));
+        ColumnUtilities.ValidateColumnName(columnName);
+        EnumUtilities.ValidateIsDefined(comparison);
         ColumnName = columnName;
+        Comparison = comparison;
     }
 
     /// <inheritdoc/>
     public ICellReader? GetCellReader(ExcelSheet sheet)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
-        if (sheet.Heading == null)
+        if (ColumnUtilities.TryGetColumnIndex(sheet, ColumnName, Comparison, out var columnIndex))
         {
-            throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
-        }
-        if (!sheet.Heading.TryGetColumnIndex(ColumnName, out int columnIndex))
-        {
-            return null;
+            return new ColumnIndexReader(columnIndex);
         }
 
-        return new ColumnIndexReader(columnIndex);
+        return null;
     }
 
     /// <inheritdoc/>

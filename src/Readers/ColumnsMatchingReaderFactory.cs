@@ -55,7 +55,7 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
         return new ColumnIndicesReader(indices);
     }
 
-    public string[]? GetColumnNames(ExcelSheet sheet)
+    public IReadOnlyList<string>? GetColumnNames(ExcelSheet sheet)
     {
         ArgumentNullException.ThrowIfNull(sheet);
         if (sheet.Heading == null)
@@ -72,10 +72,10 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
             }
         }
 
-        return names.ToArray();
+        return [.. names];
     }
 
-    public int[] GetColumnIndices(ExcelSheet sheet)
+    public IReadOnlyList<int> GetColumnIndices(ExcelSheet sheet)
     {
         ArgumentNullException.ThrowIfNull(sheet);
 
@@ -88,6 +88,6 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
             }
         }
 
-        return indices.ToArray();
+        return indices;
     }
 }

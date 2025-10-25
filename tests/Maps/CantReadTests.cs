@@ -1,4 +1,5 @@
 using ExcelMapper.Abstractions;
+using ExcelMapper.Readers;
 
 namespace ExcelMapper.Tests;
 
@@ -297,6 +298,379 @@ public class CantReadTests
     {
         [ExcelColumnNames("Value", "NoSuchColumn")]
         public IEnumerable<string> Member = default!;
+    }
+
+    [Fact]
+    public void CantRead_EnumerableNullReader_ThrowsCorrectException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<EnumerableFieldClass>(c =>
+        {
+            c.Map(m => m.Member)
+                .WithReaderFactory(new MockCellsReaderFactory
+                {
+                    GetCellsReaderAction = sheet => null!
+                });
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
+        Assert.StartsWith($"Could not read value for member \"Member\" on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(-1, ex.ColumnIndex);
+    }
+    
+    private class MockCellsReaderFactory : ICellsReaderFactory
+    {
+        public Func<ExcelSheet, ICellsReader?>? GetCellsReaderAction { get; set; }
+
+        public ICellsReader? GetCellsReader(ExcelSheet sheet) => GetCellsReaderAction!.Invoke(sheet);
+    }
+
+    [Fact]
+    public void CantRead_EnumerableNullReaderIColumnIndexProviderCellReaderFactory_ThrowsCorrectException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<EnumerableFieldClass>(c =>
+        {
+            c.Map(m => m.Member)
+                .WithReaderFactory(new MockCellsReaderFactoryIColumnIndexProvider
+                {
+                    GetCellsReaderAction = sheet => null!,
+                    GetColumnIndexAction = sheet => 1
+                });
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
+        Assert.StartsWith($"Could not read value for member \"Member\" for column at index 1 on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(-1, ex.ColumnIndex);
+    }
+
+    private class MockCellsReaderFactoryIColumnIndexProvider : MockCellsReaderFactory, IColumnIndexProviderCellReaderFactory
+    {
+        public Func<ExcelSheet, int?>? GetColumnIndexAction { get; set; }
+
+        public int? GetColumnIndex(ExcelSheet sheet) => GetColumnIndexAction!.Invoke(sheet);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData(-1)]
+    public void CantRead_EnumerableNullReaderIColumnIndexProviderCellReaderFactoryNull_ThrowsCorrectException(int? result)
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<EnumerableFieldClass>(c =>
+        {
+            c.Map(m => m.Member)
+                .WithReaderFactory(new MockCellsReaderFactoryIColumnIndexProvider
+                {
+                    GetCellsReaderAction = sheet => null!,
+                    GetColumnIndexAction = sheet => result
+                });
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
+        Assert.StartsWith($"Could not read value for member \"Member\" on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(-1, ex.ColumnIndex);
+    }
+
+    [Fact]
+    public void CantRead_EnumerableNullReaderIColumnNameProviderCellReaderFactory_ThrowsCorrectException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<EnumerableFieldClass>(c =>
+        {
+            c.Map(m => m.Member)
+                .WithReaderFactory(new MockCellsReaderFactoryIColumnNameProvider
+                {
+                    GetCellsReaderAction = sheet => null!,
+                    GetColumnNameAction = sheet => "ColumnName"
+                });
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
+        Assert.StartsWith($"Could not read value for member \"Member\" for column \"ColumnName\" on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(-1, ex.ColumnIndex);
+    }
+
+    private class MockCellsReaderFactoryIColumnNameProvider : MockCellsReaderFactory, IColumnNameProviderCellReaderFactory
+    {
+        public Func<ExcelSheet, string?>? GetColumnNameAction { get; set; }
+
+        public string? GetColumnName(ExcelSheet sheet) => GetColumnNameAction!.Invoke(sheet);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void CantRead_EnumerableNullReaderIColumnNameProviderCellReaderFactoryNull_ThrowsCorrectException(string? result)
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<EnumerableFieldClass>(c =>
+        {
+            c.Map(m => m.Member)
+                .WithReaderFactory(new MockCellsReaderFactoryIColumnNameProvider
+                {
+                    GetCellsReaderAction = sheet => null!,
+                    GetColumnNameAction = sheet => result
+                });
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
+        Assert.StartsWith($"Could not read value for member \"Member\" on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(-1, ex.ColumnIndex);
+    }
+
+    [Fact]
+    public void CantRead_EnumerableNullReaderIColumnIndicesProviderCellReaderFactoryOne_ThrowsCorrectException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<EnumerableFieldClass>(c =>
+        {
+            c.Map(m => m.Member)
+                .WithReaderFactory(new MockCellsReaderFactoryIColumnIndicesProvider
+                {
+                    GetCellsReaderAction = sheet => null!,
+                    GetColumnIndicesAction = sheet => [1]
+                });
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
+        Assert.StartsWith($"Could not read value for member \"Member\" for column at index 1 on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(-1, ex.ColumnIndex);
+    }
+
+    private class MockCellsReaderFactoryIColumnIndicesProvider : MockCellsReaderFactory, IColumnIndicesProviderCellReaderFactory
+    {
+        public Func<ExcelSheet, IReadOnlyList<int>?>? GetColumnIndicesAction { get; set; }
+
+        public IReadOnlyList<int>? GetColumnIndices(ExcelSheet sheet) => GetColumnIndicesAction!.Invoke(sheet);
+    }
+
+    [Fact]
+    public void CantRead_EnumerableNullReaderIColumnIndicesProviderCellReaderFactoryTwo_ThrowsCorrectException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<EnumerableFieldClass>(c =>
+        {
+            c.Map(m => m.Member)
+                .WithReaderFactory(new MockCellsReaderFactoryIColumnIndicesProvider
+                {
+                    GetCellsReaderAction = sheet => null!,
+                    GetColumnIndicesAction = sheet => [1, 2]
+                });
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
+        Assert.StartsWith($"Could not read value for member \"Member\" for columns at indices 1, 2 on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(-1, ex.ColumnIndex);
+    }
+
+    [Fact]
+    public void CantRead_EnumerableNullReaderIColumnIndicesProviderCellReaderFactoryNull_ThrowsCorrectException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<EnumerableFieldClass>(c =>
+        {
+            c.Map(m => m.Member)
+                .WithReaderFactory(new MockCellsReaderFactoryIColumnIndicesProvider
+                {
+                    GetCellsReaderAction = sheet => null!,
+                    GetColumnIndicesAction = sheet => null!
+                });
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
+        Assert.StartsWith($"Could not read value for member \"Member\" on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(-1, ex.ColumnIndex);
+    }
+
+    [Fact]
+    public void CantRead_EnumerableNullReaderIColumnIndicesProviderCellReaderFactoryEmpty_ThrowsCorrectException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<EnumerableFieldClass>(c =>
+        {
+            c.Map(m => m.Member)
+                .WithReaderFactory(new MockCellsReaderFactoryIColumnIndicesProvider
+                {
+                    GetCellsReaderAction = sheet => null!,
+                    GetColumnIndicesAction = sheet => []
+                });
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
+        Assert.StartsWith($"Could not read value for member \"Member\" (no columns matching) on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(-1, ex.ColumnIndex);
+    }
+
+    [Fact]
+    public void CantRead_EnumerableNullReaderIColumnNamesProviderCellReaderFactoryOne_ThrowsCorrectException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<EnumerableFieldClass>(c =>
+        {
+            c.Map(m => m.Member)
+                .WithReaderFactory(new MockCellsReaderFactoryIColumnNamesProvider
+                {
+                    GetCellsReaderAction = sheet => null!,
+                    GetColumnNamesAction = sheet => ["ColumnName"]
+                });
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
+        Assert.StartsWith($"Could not read value for member \"Member\" for column \"ColumnName\" on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(-1, ex.ColumnIndex);
+    }
+
+    private class MockCellsReaderFactoryIColumnNamesProvider : MockCellsReaderFactory, IColumnNamesProviderCellReaderFactory
+    {
+        public Func<ExcelSheet, IReadOnlyList<string>?>? GetColumnNamesAction { get; set; }
+
+        public IReadOnlyList<string>? GetColumnNames(ExcelSheet sheet) => GetColumnNamesAction!.Invoke(sheet);
+    }
+
+    [Fact]
+    public void CantRead_EnumerableNullReaderIColumnNamesProviderCellReaderFactoryTwo_ThrowsCorrectException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<EnumerableFieldClass>(c =>
+        {
+            c.Map(m => m.Member)
+                .WithReaderFactory(new MockCellsReaderFactoryIColumnNamesProvider
+                {
+                    GetCellsReaderAction = sheet => null!,
+                    GetColumnNamesAction = sheet => ["ColumnName1", "ColumnName2"]
+                });
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
+        Assert.StartsWith($"Could not read value for member \"Member\" for columns \"ColumnName1\", \"ColumnName2\" on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(-1, ex.ColumnIndex);
+    }
+
+    [Fact]
+    public void CantRead_EnumerableNullReaderIColumnNamesProviderCellReaderFactoryNull_ThrowsCorrectException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<EnumerableFieldClass>(c =>
+        {
+            c.Map(m => m.Member)
+                .WithReaderFactory(new MockCellsReaderFactoryIColumnNamesProvider
+                {
+                    GetCellsReaderAction = sheet => null!,
+                    GetColumnNamesAction = sheet => null!
+                });
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
+        Assert.StartsWith($"Could not read value for member \"Member\" on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(-1, ex.ColumnIndex);
+    }
+
+    [Fact]
+    public void CantRead_EnumerableNullReaderIColumnNamesProviderCellReaderFactoryEmpty_ThrowsCorrectException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<EnumerableFieldClass>(c =>
+        {
+            c.Map(m => m.Member)
+                .WithReaderFactory(new MockCellsReaderFactoryIColumnNamesProvider
+                {
+                    GetCellsReaderAction = sheet => null!,
+                    GetColumnNamesAction = sheet => []
+                });
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
+        Assert.StartsWith($"Could not read value for member \"Member\" (no columns matching) on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(-1, ex.ColumnIndex);
+    }
+
+    [Fact]
+    public void CantRead_EnumerableCompositeNull_ThrowsCorrectException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.RegisterClassMap<EnumerableFieldClass>(c =>
+        {
+            c.Map(m => m.Member)
+                .WithReaderFactory(new CompositeCellsReaderFactory(
+                    new MockReaderFactory
+                    {
+                        GetCellReaderAction = sheet => null!
+                    }
+                ));
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
+        Assert.StartsWith($"Could not read value for member \"Member\" on row 0 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(-1, ex.ColumnIndex);
+    }
+
+    private class EnumerableFieldClass
+    {
+        public IEnumerable<string> Member = default!;
+    }
+
+    private class MockReaderFactory : ICellReaderFactory
+    {
+        public Func<ExcelSheet, ICellReader>? GetCellReaderAction { get; set; }
+
+        public ICellReader? GetCellReader(ExcelSheet sheet) => GetCellReaderAction!.Invoke(sheet);
     }
 
     [Fact]

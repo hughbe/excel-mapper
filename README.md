@@ -279,7 +279,7 @@ ExcelMapper supports three approaches to mapping Excel rows to objects.
 
 ### Automatic Mapping
 
-ExcelMapper automatically maps **public properties and fields** by matching column names (case-insensitive by default).
+ExcelMapper automatically maps **public properties and fields** by matching column names. Column name matching is **case-insensitive by default** using `StringComparison.OrdinalIgnoreCase`.
 
 **Important:** 
 - Only **public instance properties with setters** are auto-mapped
@@ -315,7 +315,7 @@ Console.WriteLine(employees[1].Salary);     // 78000
 
 ### Attribute-Based Mapping
 
-Use attributes to declaratively configure mapping behavior.
+Use attributes to declaratively configure mapping behavior. Column name matching is **case-insensitive by default** (`StringComparison.OrdinalIgnoreCase`).
 
 #### Column Name Mapping
 
@@ -341,6 +341,35 @@ Console.WriteLine(employees[0].Name);  // Alice Johnson
 Console.WriteLine(employees[1].Age);   // 45
 ```
 
+**String Comparison Options:**
+
+Control how column names are matched using `StringComparison`:
+
+```csharp
+public class Employee
+{
+    // Case-insensitive matching (default)
+    [ExcelColumnName("Full Name")]
+    public string Name { get; set; }
+
+    // Case-sensitive matching
+    [ExcelColumnName("Department", StringComparison.Ordinal)]
+    public string Department { get; set; }
+
+    // Culture-aware case-insensitive matching
+    [ExcelColumnName("Città", StringComparison.CurrentCultureIgnoreCase)]
+    public string City { get; set; }
+}
+```
+
+**Available StringComparison Options:**
+- `StringComparison.OrdinalIgnoreCase` (default) - Case-insensitive, culture-invariant
+- `StringComparison.Ordinal` - Case-sensitive, culture-invariant
+- `StringComparison.CurrentCultureIgnoreCase` - Case-insensitive using current culture
+- `StringComparison.CurrentCulture` - Case-sensitive using current culture
+- `StringComparison.InvariantCultureIgnoreCase` - Case-insensitive using invariant culture
+- `StringComparison.InvariantCulture` - Case-sensitive using invariant culture
+
 #### Multiple Column Name Variants
 
 Try multiple column names in order of preference:
@@ -350,13 +379,13 @@ public class Employee
 {
     public string Name { get; set; }
 
-    // Try these column names in order
+    // Try these column names in order (case-insensitive by default)
     [ExcelColumnNames("Age", "#Age", "Years")]
     public int Age { get; set; }
 
-    // Or use multiple attributes
-    [ExcelColumnName("Dept")]
-    [ExcelColumnName("Department")]
+    // Or use multiple attributes with different comparison modes
+    [ExcelColumnName("Dept", StringComparison.OrdinalIgnoreCase)]
+    [ExcelColumnName("Department", StringComparison.Ordinal)]
     public string Department { get; set; }
 }
 ```
@@ -1776,16 +1805,28 @@ public class EmployeeMap : ExcelClassMap<Employee>
 
 ### Case Sensitivity Issues
 
-**Problem**: Column names don't match due to different casing
+**Problem**: Column names don't match due to different casing or culture-specific characters
 
-**Solution**: Column name matching is case-insensitive by default, but you can control enum parsing:
+**Solution**: Column name matching is case-insensitive by default (`StringComparison.OrdinalIgnoreCase`), but you can customize it:
 
 ```csharp
+// Using attributes - specify comparison mode
+public class Employee
+{
+    // Case-sensitive matching
+    [ExcelColumnName("Name", StringComparison.Ordinal)]
+    public string Name { get; set; }
+
+    // Culture-aware matching (for non-English characters)
+    [ExcelColumnName("Città", StringComparison.CurrentCultureIgnoreCase)]
+    public string City { get; set; }
+}
+
+// Enum parsing can also be case-insensitive
 public class EmployeeMap : ExcelClassMap<Employee>
 {
     public EmployeeMap()
     {
-        // Enum parsing can be case-insensitive
         Map(e => e.Status, ignoreCase: true);
     }
 }
@@ -1963,7 +2004,8 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 
 | Attribute | Purpose |
 |-----------|---------|
-| `[ExcelColumnName("Name")]` | Map to specific column name |
+| `[ExcelColumnName("Name")]` | Map to specific column name (case-insensitive by default) |
+| `[ExcelColumnName("Name", StringComparison.Ordinal)]` | Map to column name with specific comparison mode |
 | `[ExcelColumnNames("Name1", "Name2")]` | Try multiple column names |
 | `[ExcelColumnIndex(0)]` | Map to column by index |
 | `[ExcelColumnIndices(0, 1)]` | Try multiple column indices |

@@ -135,19 +135,19 @@ public class MapSplitEnumerableTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ArrayClass>();
-        Assert.Equal(new string[] { "1", "2", "3" }, Assert.IsType<object[]>(row1.Value));
+        Assert.Equal(["1", "2", "3"], Assert.IsType<object[]>(row1.Value));
 
         var row2 = sheet.ReadRow<ArrayClass>();
-        Assert.Equal(new string?[] { "1", null, "2" }, Assert.IsType<object?[]>(row2.Value));
+        Assert.Equal(["1", null, "2"], Assert.IsType<object?[]>(row2.Value));
 
         var row3 = sheet.ReadRow<ArrayClass>();
-        Assert.Equal(new string[] { "1" }, Assert.IsType<object[]>(row3.Value));
+        Assert.Equal(["1"], Assert.IsType<object[]>(row3.Value));
 
         var row4 = sheet.ReadRow<ArrayClass>();
         Assert.Empty(row4.Value);
 
         var row5 = sheet.ReadRow<ArrayClass>();
-        Assert.Equal(new string[] { "Invalid" }, Assert.IsType<object[]>(row5.Value));
+        Assert.Equal(["Invalid"], Assert.IsType<object[]>(row5.Value));
     }
 
     public class ArrayClass
@@ -670,19 +670,19 @@ public class MapSplitEnumerableTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CollectionBaseClass>();
-        Assert.Equal(new string[] { "1", "2", "3" }, row1.Value.Cast<string>());
+        Assert.Equal(["1", "2", "3"], row1.Value.Cast<string>());
 
         var row2 = sheet.ReadRow<CollectionBaseClass>();
-        Assert.Equal(new string?[] { "1", null, "2" }, row2.Value.Cast<string>());
+        Assert.Equal(["1", null, "2"], row2.Value.Cast<string>());
 
         var row3 = sheet.ReadRow<CollectionBaseClass>();
-        Assert.Equal(new string[] { "1" }, row3.Value.Cast<string>());
+        Assert.Equal(["1"], row3.Value.Cast<string>());
 
         var row4 = sheet.ReadRow<CollectionBaseClass>();
         Assert.Empty(row4.Value.Cast<string>());
 
         var row5 = sheet.ReadRow<CollectionBaseClass>();
-        Assert.Equal(new string[] { "Invalid" }, row5.Value.Cast<string>());
+        Assert.Equal(["Invalid"], row5.Value.Cast<string>());
     }
 
     public class CollectionBaseClass
@@ -708,19 +708,19 @@ public class MapSplitEnumerableTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CollectionBaseClass>();
-        Assert.Equal(new string[] { "1", "2", "3" }, row1.Value.Cast<string>());
+        Assert.Equal(["1", "2", "3"], row1.Value.Cast<string>());
 
         var row2 = sheet.ReadRow<CollectionBaseClass>();
-        Assert.Equal(new string?[] { "1", null, "2" }, row2.Value.Cast<string?>());
+        Assert.Equal(["1", null, "2"], row2.Value.Cast<string?>());
 
         var row3 = sheet.ReadRow<CollectionBaseClass>();
-        Assert.Equal(new string[] { "1" }, row3.Value.Cast<string>());
+        Assert.Equal(["1"], row3.Value.Cast<string>());
 
         var row4 = sheet.ReadRow<CollectionBaseClass>();
         Assert.Empty(row4.Value.Cast<string>());
 
         var row5 = sheet.ReadRow<CollectionBaseClass>();
-        Assert.Equal(new string[] { "Invalid" }, row5.Value.Cast<string>());
+        Assert.Equal(["Invalid"], row5.Value.Cast<string>());
     }
 
     [Fact]
@@ -1008,19 +1008,19 @@ public class MapSplitEnumerableTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<StringCollectionClass>();
-        Assert.Equal(new string[] { "1", "2", "3" }, row1.Value.Cast<string>());
+        Assert.Equal(["1", "2", "3"], row1.Value.Cast<string>());
 
         var row2 = sheet.ReadRow<StringCollectionClass>();
-        Assert.Equal(new string[] { "1", "-1", "2" }, row2.Value.Cast<string>());
+        Assert.Equal(["1", "-1", "2"], row2.Value.Cast<string>());
 
         var row3 = sheet.ReadRow<StringCollectionClass>();
-        Assert.Equal(new string[] { "1" }, row3.Value.Cast<string>());
+        Assert.Equal(["1"], row3.Value.Cast<string>());
 
         var row4 = sheet.ReadRow<StringCollectionClass>();
         Assert.Empty(row4.Value);
 
         var row5 = sheet.ReadRow<StringCollectionClass>();
-        Assert.Equal(new string[] { "Invalid" }, row5.Value.Cast<string>());
+        Assert.Equal(["Invalid"], row5.Value.Cast<string>());
     }
 
     [Fact]

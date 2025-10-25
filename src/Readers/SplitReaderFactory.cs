@@ -62,22 +62,30 @@ public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesPr
     }
 
     /// <inheritdoc/>
-    public string[]? GetColumnNames(ExcelSheet sheet)
+    public IReadOnlyList<string>? GetColumnNames(ExcelSheet sheet)
     {
         if (_readerFactory is IColumnNameProviderCellReaderFactory nameProvider)
         {
-            return [nameProvider.GetColumnName(sheet)];
+            var columnName = nameProvider.GetColumnName(sheet);
+            if (!string.IsNullOrEmpty(columnName))
+            {
+                return [columnName];
+            }
         }
 
         return null;
     }
 
     /// <inheritdoc/>
-    public int[]? GetColumnIndices(ExcelSheet sheet)
+    public IReadOnlyList<int>? GetColumnIndices(ExcelSheet sheet)
     {
         if (_readerFactory is IColumnIndexProviderCellReaderFactory indexProvider)
         {
-            return [indexProvider.GetColumnIndex(sheet)];
+            var columnIndex = indexProvider.GetColumnIndex(sheet);
+            if (columnIndex != null && columnIndex != -1)
+            {
+                return [columnIndex.Value];
+            }
         }
 
         return null;

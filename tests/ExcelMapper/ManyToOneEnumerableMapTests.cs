@@ -13,9 +13,9 @@ public class ManyToOneEnumerableMapTests
     [Fact]
     public void Ctor_ICellsReaderFactory_IValuePipeline_CreateElementsFactory()
     {
-        var factory = new ColumnNamesReaderFactory("Column");
+        var readerFactory = new ColumnNamesReaderFactory("Column");
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         Assert.False(map.Optional);
         Assert.False(map.PreserveFormatting);
         Assert.NotNull(map.Pipeline);
@@ -31,8 +31,8 @@ public class ManyToOneEnumerableMapTests
     [Fact]
     public void Ctor_NullCreateEnumerableFactory_ThrowsArgumentNullException()
     {
-        var factory = new ColumnNamesReaderFactory("Column");
-        Assert.Throws<ArgumentNullException>("enumerableFactory", () => new ManyToOneEnumerableMap<string>(factory, null!));
+        var readerFactory = new ColumnNamesReaderFactory("Column");
+        Assert.Throws<ArgumentNullException>("enumerableFactory", () => new ManyToOneEnumerableMap<string>(readerFactory, null!));
     }
 
     public static IEnumerable<object[]> ReaderFactory_Set_TestData()
@@ -44,9 +44,9 @@ public class ManyToOneEnumerableMapTests
     [MemberData(nameof(ReaderFactory_Set_TestData))]
     public void ReaderFactory_SetValid_GetReturnsExpected(ICellsReaderFactory value)
     {
-        var factory = new ColumnNamesReaderFactory("Column");
+        var readerFactory = new ColumnNamesReaderFactory("Column");
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory)
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory)
         {
             ReaderFactory = value
         };
@@ -60,9 +60,9 @@ public class ManyToOneEnumerableMapTests
     [Fact]
     public void ReaderFactory_SetNull_ThrowsArgumentNullException()
     {
-        var factory = new ColumnNamesReaderFactory("Column");
+        var readerFactory = new ColumnNamesReaderFactory("Column");
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         Assert.Throws<ArgumentNullException>("value", () => map.ReaderFactory = null!);
     }
 
@@ -71,9 +71,9 @@ public class ManyToOneEnumerableMapTests
     [InlineData(false)]
     public void Optional_Set_GetReturnsExpected(bool value)
     {
-        var factory = new ColumnNamesReaderFactory("Column");
+        var readerFactory = new ColumnNamesReaderFactory("Column");
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory)
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory)
         {
             Optional = value
         };
@@ -93,9 +93,9 @@ public class ManyToOneEnumerableMapTests
     [InlineData(false)]
     public void PreserveFormatting_Set_GetReturnsExpected(bool value)
     {
-        var factory = new ColumnNamesReaderFactory("Column");
+        var readerFactory = new ColumnNamesReaderFactory("Column");
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory)
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory)
         {
             PreserveFormatting = value
         };
@@ -113,9 +113,9 @@ public class ManyToOneEnumerableMapTests
     [Fact]
     public void WithElementMap_ValidMap_Success()
     {
-        var factory = new ColumnNamesReaderFactory("Column");
+        var readerFactory = new ColumnNamesReaderFactory("Column");
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
 
         var newPipeline = new ValuePipeline<string>();
         Assert.Same(map, map.WithElementMap(e =>
@@ -129,9 +129,9 @@ public class ManyToOneEnumerableMapTests
     [Fact]
     public void WithElementMap_NullMap_ThrowsArgumentNullException()
     {
-        var factory = new ColumnNamesReaderFactory("Column");
+        var readerFactory = new ColumnNamesReaderFactory("Column");
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
 
         Assert.Throws<ArgumentNullException>("elementMap", () => map.WithElementMap(null!));
     }
@@ -139,9 +139,9 @@ public class ManyToOneEnumerableMapTests
     [Fact]
     public void WithElementMap_MapReturnsNull_ThrowsArgumentNullException()
     {
-        var factory = new ColumnNamesReaderFactory("Column");
+        var readerFactory = new ColumnNamesReaderFactory("Column");
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
 
         Assert.Throws<ArgumentNullException>("elementMap", () => map.WithElementMap(_ => null!));
     }
@@ -149,9 +149,9 @@ public class ManyToOneEnumerableMapTests
     [Fact]
     public void WithColumnName_SplitValidColumnName_Success()
     {
-        var factory = new CharSplitReaderFactory(new ColumnNameReaderFactory("Column"));
+        var readerFactory = new CharSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         Assert.Same(map, map.WithColumnName("ColumnName"));
 
         var newFactory = Assert.IsType<CharSplitReaderFactory>(map.ReaderFactory);
@@ -162,10 +162,48 @@ public class ManyToOneEnumerableMapTests
     [Fact]
     public void WithColumnName_MultiValidColumnName_Success()
     {
-        var factory = new ColumnNamesReaderFactory("Column");
+        var readerFactory = new ColumnNamesReaderFactory("Column");
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory).WithColumnNames("ColumnName");
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory).WithColumnNames("ColumnName");
         Assert.Same(map, map.WithColumnName("ColumnName"));
+
+        var newFactory = Assert.IsType<CharSplitReaderFactory>(map.ReaderFactory);
+        ColumnNameReaderFactory innerReader = Assert.IsType<ColumnNameReaderFactory>(newFactory.ReaderFactory);
+        Assert.Equal("ColumnName", innerReader.ColumnName);
+    }
+
+    [Theory]
+    [InlineData(StringComparison.CurrentCulture)]
+    [InlineData(StringComparison.CurrentCultureIgnoreCase)]
+    [InlineData(StringComparison.InvariantCulture)]
+    [InlineData(StringComparison.InvariantCultureIgnoreCase)]
+    [InlineData(StringComparison.Ordinal)]
+    [InlineData(StringComparison.OrdinalIgnoreCase)]
+    public void WithColumnName_SplitValidColumnNameStringComparison_Success(StringComparison comparison)
+    {
+        var readerFactory = new CharSplitReaderFactory(new ColumnNameReaderFactory("Column"));
+        var enumerableFactory = new ListEnumerableFactory<string>();
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
+        Assert.Same(map, map.WithColumnName("ColumnName", comparison));
+
+        var newFactory = Assert.IsType<CharSplitReaderFactory>(map.ReaderFactory);
+        ColumnNameReaderFactory innerReader = Assert.IsType<ColumnNameReaderFactory>(newFactory.ReaderFactory);
+        Assert.Equal("ColumnName", innerReader.ColumnName);
+    }
+
+    [Theory]
+    [InlineData(StringComparison.CurrentCulture)]
+    [InlineData(StringComparison.CurrentCultureIgnoreCase)]
+    [InlineData(StringComparison.InvariantCulture)]
+    [InlineData(StringComparison.InvariantCultureIgnoreCase)]
+    [InlineData(StringComparison.Ordinal)]
+    [InlineData(StringComparison.OrdinalIgnoreCase)]
+    public void WithColumnName_MultiValidColumnNameStringComparison_Success(StringComparison comparison)
+    {
+        var readerFactory = new ColumnNamesReaderFactory("Column");
+        var enumerableFactory = new ListEnumerableFactory<string>();
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory).WithColumnNames("ColumnName");
+        Assert.Same(map, map.WithColumnName("ColumnName", comparison));
 
         var newFactory = Assert.IsType<CharSplitReaderFactory>(map.ReaderFactory);
         ColumnNameReaderFactory innerReader = Assert.IsType<ColumnNameReaderFactory>(newFactory.ReaderFactory);
@@ -175,9 +213,9 @@ public class ManyToOneEnumerableMapTests
     [Fact]
     public void WithColumnName_NullColumnName_ThrowsArgumentNullException()
     {
-        var factory = new ColumnNamesReaderFactory("Column");
+        var readerFactory = new ColumnNamesReaderFactory("Column");
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
 
         Assert.Throws<ArgumentNullException>("columnName", () => map.WithColumnName(null!));
     }
@@ -185,11 +223,22 @@ public class ManyToOneEnumerableMapTests
     [Fact]
     public void WithColumnName_EmptyColumnName_ThrowsArgumentException()
     {
-        var factory = new ColumnNamesReaderFactory("Column");
+        var readerFactory = new ColumnNamesReaderFactory("Column");
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
 
         Assert.Throws<ArgumentException>("columnName", () => map.WithColumnName(string.Empty));
+    }
+
+    [Theory]
+    [InlineData(StringComparison.CurrentCulture - 1)]
+    [InlineData(StringComparison.OrdinalIgnoreCase + 1)]
+    public void WithColumnName_InvalidStringComparison_ThrowsArgumentOutOfRangeException(StringComparison comparison)
+    {
+        var readerFactory = new ColumnNamesReaderFactory("Column");
+        var enumerableFactory = new ListEnumerableFactory<string>();
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
+        Assert.Throws<ArgumentOutOfRangeException>("comparison", () => map.WithColumnName("ColumnName", comparison));
     }
 
     [Theory]
@@ -197,9 +246,9 @@ public class ManyToOneEnumerableMapTests
     [InlineData(1)]
     public void WithColumnIndex_SplitColumnIndex_Success(int columnIndex)
     {
-        var factory = new CharSplitReaderFactory(new ColumnNameReaderFactory("Column"));
+        var readerFactory = new CharSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         Assert.Same(map, map.WithColumnIndex(columnIndex));
 
         var newFactory = Assert.IsType<CharSplitReaderFactory>(map.ReaderFactory);
@@ -212,9 +261,9 @@ public class ManyToOneEnumerableMapTests
     [InlineData(1)]
     public void WithColumnIndex_MultiColumnIndex_Success(int columnIndex)
     {
-        var factory = new ColumnNamesReaderFactory("Column");
+        var readerFactory = new ColumnNamesReaderFactory("Column");
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory).WithColumnNames("ColumnName");
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory).WithColumnNames("ColumnName");
         Assert.Same(map, map.WithColumnIndex(columnIndex));
 
         var newFactory = Assert.IsType<CharSplitReaderFactory>(map.ReaderFactory);
@@ -225,9 +274,9 @@ public class ManyToOneEnumerableMapTests
     [Fact]
     public void WithColumnIndex_NegativeColumnIndex_ThrowsArgumentOutOfRangeException()
     {
-        var factory = new ColumnNamesReaderFactory("Column");
+        var readerFactory = new ColumnNamesReaderFactory("Column");
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
 
         Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => map.WithColumnIndex(-1));
     }
@@ -245,9 +294,9 @@ public class ManyToOneEnumerableMapTests
     {
         char[] separatorsArray = [.. separators];
 
-        var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
+        var readerFactory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         Assert.Same(map, map.WithSeparators(separatorsArray));
 
         var newFactory = Assert.IsType<CharSplitReaderFactory>(map.ReaderFactory);
@@ -258,9 +307,9 @@ public class ManyToOneEnumerableMapTests
     [MemberData(nameof(Separators_Char_TestData))]
     public void WithSeparators_IEnumerableChar_Success(ICollection<char> separators)
     {
-        var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
+        var readerFactory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         Assert.Same(map, map.WithSeparators(separators));
 
         var newFactory = Assert.IsType<CharSplitReaderFactory>(map.ReaderFactory);
@@ -280,9 +329,9 @@ public class ManyToOneEnumerableMapTests
     {
         string[] separatorsArray = [.. separators];
 
-        var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
+        var readerFactory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         Assert.Same(map, map.WithSeparators(separatorsArray));
 
         StringSplitReaderFactory newFactory = Assert.IsType<StringSplitReaderFactory>(map.ReaderFactory);
@@ -293,9 +342,9 @@ public class ManyToOneEnumerableMapTests
     [MemberData(nameof(Separators_String_TestData))]
     public void WithSeparators_IEnumerableString_Success(ICollection<string> separators)
     {
-        var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
+        var readerFactory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         Assert.Same(map, map.WithSeparators(separators));
 
         StringSplitReaderFactory newFactory = Assert.IsType<StringSplitReaderFactory>(map.ReaderFactory);
@@ -305,9 +354,9 @@ public class ManyToOneEnumerableMapTests
     [Fact]
     public void WithSeparators_NullSeparators_ThrowsArgumentNullException()
     {
-        var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
+        var readerFactory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
 
         Assert.Throws<ArgumentNullException>("separators", () => map.WithSeparators((char[])null!));
         Assert.Throws<ArgumentNullException>("separators", () => map.WithSeparators((IEnumerable<char>)null!));
@@ -318,9 +367,9 @@ public class ManyToOneEnumerableMapTests
     [Fact]
     public void WithSeparators_EmptySeparators_ThrowsArgumentException()
     {
-        var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
+        var readerFactory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
 
         Assert.Throws<ArgumentException>("separators", () => map.WithSeparators(Array.Empty<char>()));
         Assert.Throws<ArgumentException>("separators", () => map.WithSeparators(new List<char>()));
@@ -331,9 +380,9 @@ public class ManyToOneEnumerableMapTests
     [Fact]
     public void WithSeparators_NullValueInSeparators_ThrowsArgumentException()
     {
-        var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
+        var readerFactory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
 
         Assert.Throws<ArgumentException>("separators", () => map.WithSeparators([",", null!]));
         Assert.Throws<ArgumentException>("separators", () => map.WithSeparators(new List<string> { ",", null! }));
@@ -342,9 +391,9 @@ public class ManyToOneEnumerableMapTests
     [Fact]
     public void WithSeparators_EmptyValueInSeparators_ThrowsArgumentException()
     {
-        var factory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
+        var readerFactory = new StringSplitReaderFactory(new ColumnNameReaderFactory("Column"));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
 
         Assert.Throws<ArgumentException>("separators", () => map.WithSeparators([",", string.Empty]));
         Assert.Throws<ArgumentException>("separators", () => map.WithSeparators(new List<string> { ",", string.Empty }));
@@ -353,9 +402,9 @@ public class ManyToOneEnumerableMapTests
     [Fact]
     public void WithSeparators_MultiMap_ThrowsExcelMappingException()
     {
-        var factory = new ColumnNamesReaderFactory("Column");
+        var readerFactory = new ColumnNamesReaderFactory("Column");
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory).WithColumnNames("ColumnNames");
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory).WithColumnNames("ColumnNames");
 
         Assert.Throws<ExcelMappingException>(() => map.WithSeparators(['c']));
         Assert.Throws<ExcelMappingException>(() => map.WithSeparators(new List<char> { 'c' }));
@@ -370,9 +419,9 @@ public class ManyToOneEnumerableMapTests
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        var factory = new MockReaderFactory(new MockReader(() => (true, [])));
+        var readerFactory = new MockReaderFactory(new MockReader(() => (true, [])));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         object? result = null;
         Assert.True(map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Empty(Assert.IsType<List<string>>(result));
@@ -385,9 +434,9 @@ public class ManyToOneEnumerableMapTests
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        var factory = new MockReaderFactory(new MockReader(() => (true, [new ReadCellResult(0, "Value1", false),new ReadCellResult(0, "Value1", false)])));
+        var readerFactory = new MockReaderFactory(new MockReader(() => (true, [new ReadCellResult(0, "Value1", false),new ReadCellResult(0, "Value1", false)])));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         object? result = null;
         Assert.True(map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Equal([null, null], Assert.IsType<List<string?>>(result));
@@ -398,9 +447,9 @@ public class ManyToOneEnumerableMapTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
         var sheet = importer.ReadSheet();
-        var factory = new MockReaderFactory(new MockReader(() => (true, [])));
+        var readerFactory = new MockReaderFactory(new MockReader(() => (true, [])));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
         object? result = null;
         Assert.True(map.TryGetValue(sheet, 0, importer.Reader, member, out result));
@@ -414,9 +463,9 @@ public class ManyToOneEnumerableMapTests
         var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
 
-        var factory = new MockReaderFactory(new MockReader(() => (true, [])));
+        var readerFactory = new MockReaderFactory(new MockReader(() => (true, [])));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
         object? result = null;
         Assert.True(map.TryGetValue(sheet, 0, importer.Reader, member, out result));
@@ -427,9 +476,9 @@ public class ManyToOneEnumerableMapTests
     public void TryGetValue_NullSheet_ThrowsArgumentNullException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        var factory = new MockReaderFactory(new MockReader(() => (false, null)));
+        var readerFactory = new MockReaderFactory(new MockReader(() => (false, null)));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
         object? result = null;
         Assert.Throws<ArgumentNullException>("sheet", () => map.TryGetValue(null!, 0, importer.Reader, member, out result));
@@ -442,9 +491,9 @@ public class ManyToOneEnumerableMapTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         var sheet = importer.ReadSheet();
 
-        var factory = new MockReaderFactory(new MockReader(() => (false, null)));
+        var readerFactory = new MockReaderFactory(new MockReader(() => (false, null)));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
@@ -457,9 +506,9 @@ public class ManyToOneEnumerableMapTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         var sheet = importer.ReadSheet();
 
-        var factory = new MockReaderFactory(new MockReader(() => (false, null)));
+        var readerFactory = new MockReaderFactory(new MockReader(() => (false, null)));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         MemberInfo member = typeof(TestClass).GetField(nameof(TestClass._field))!;
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
@@ -472,9 +521,9 @@ public class ManyToOneEnumerableMapTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         var sheet = importer.ReadSheet();
 
-        var factory = new MockReaderFactory(new MockReader(() => (false, null)));
+        var readerFactory = new MockReaderFactory(new MockReader(() => (false, null)));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         MemberInfo member = typeof(TestClass).GetEvent(nameof(TestClass.Event))!;
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
@@ -487,9 +536,9 @@ public class ManyToOneEnumerableMapTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         var sheet = importer.ReadSheet();
 
-        var factory = new MockReaderFactory(new MockReader(() => (false, null)));
+        var readerFactory = new MockReaderFactory(new MockReader(() => (false, null)));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Null(result);
@@ -502,9 +551,9 @@ public class ManyToOneEnumerableMapTests
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        var factory = new ColumnsMatchingReaderFactory(new NamesColumnMatcher("NoSuchColumn"));
+        var readerFactory = new ColumnsMatchingReaderFactory(new NamesColumnMatcher("NoSuchColumn"));
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Null(result);
@@ -517,9 +566,9 @@ public class ManyToOneEnumerableMapTests
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        var factory = new ColumnNamesReaderFactory("NoSuchColumn");
+        var readerFactory = new ColumnNamesReaderFactory("NoSuchColumn");
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Null(result);
@@ -532,9 +581,9 @@ public class ManyToOneEnumerableMapTests
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        var factory = new ColumnNamesReaderFactory("NoSuchColumn1", "NoSuchColumn2");
+        var readerFactory = new ColumnNamesReaderFactory("NoSuchColumn1", "NoSuchColumn2");
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Null(result);
@@ -547,9 +596,9 @@ public class ManyToOneEnumerableMapTests
         var sheet = importer.ReadSheet();
         importer.Reader.Read();
 
-        var factory = new EmptyColumnIndicesReaderFactory();
+        var readerFactory = new EmptyColumnIndicesReaderFactory();
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Null(result);
@@ -562,9 +611,9 @@ public class ManyToOneEnumerableMapTests
         var sheet = importer.ReadSheet();
         importer.Reader.Read();
 
-        var factory = new ColumnIndicesReaderFactory(int.MaxValue);
+        var readerFactory = new ColumnIndicesReaderFactory(int.MaxValue);
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Null(result);
@@ -577,9 +626,9 @@ public class ManyToOneEnumerableMapTests
         var sheet = importer.ReadSheet();
         importer.Reader.Read();
 
-        var factory = new ColumnIndicesReaderFactory(1, int.MaxValue);
+        var readerFactory = new ColumnIndicesReaderFactory(1, int.MaxValue);
         var enumerableFactory = new ListEnumerableFactory<string>();
-        var map = new ManyToOneEnumerableMap<string>(factory, enumerableFactory);
+        var map = new ManyToOneEnumerableMap<string>(readerFactory, enumerableFactory);
         object? result = null;
         Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
         Assert.Null(result);
@@ -589,7 +638,7 @@ public class ManyToOneEnumerableMapTests
     {
         public ICellsReader? GetCellsReader(ExcelSheet sheet) => new ColumnIndicesReaderFactory(int.MaxValue).GetCellsReader(sheet);
 
-        public int[] GetColumnIndices(ExcelSheet sheet) => [];
+        public IReadOnlyList<int> GetColumnIndices(ExcelSheet sheet) => [];
     }
 
     private class MockReader : ICellsReader
@@ -601,7 +650,7 @@ public class ManyToOneEnumerableMapTests
 
         public Func<(bool, IEnumerable<ReadCellResult>?)> Action { get; }
 
-        public bool TryGetValues(IExcelDataReader factory, bool preserveFormatting, [NotNullWhen(true)] out IEnumerable<ReadCellResult>? result)
+        public bool TryGetValues(IExcelDataReader readerFactory, bool preserveFormatting, [NotNullWhen(true)] out IEnumerable<ReadCellResult>? result)
         {
             var (ret, res) = Action();
             result = res;

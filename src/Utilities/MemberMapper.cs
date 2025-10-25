@@ -10,58 +10,26 @@ namespace ExcelMapper.Utilities;
 
 internal static class MemberMapper
 {
-    internal static ICellsReaderFactory? GetDefaultCellsReaderFactory(MemberInfo? member)
-    {
-        // If no member was specified, read all the cells.
-        if (member == null)
-        {
-            return new AllColumnNamesReaderFactory();
-        }
-
-        // [ExcelColumnNames] attributes represent multiple columns.
-        var columnNamesAttribute = member.GetCustomAttribute<ExcelColumnNamesAttribute>();
-        if (columnNamesAttribute != null)
-        {
-            return new ColumnNamesReaderFactory(columnNamesAttribute.Names);
-        }
-
-        // [ExcelColumnsMatchingAttribute] attributes represent multiple columns.
-        var columnNameMatchingAttribute = member.GetCustomAttribute<ExcelColumnsMatchingAttribute>();
-        if (columnNameMatchingAttribute != null)
-        {
-            var matcher = (IExcelColumnMatcher)Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments)!;
-            return new ColumnsMatchingReaderFactory(matcher);
-        }
-
-        // [ExcelColumnIndices] attributes represents multiple columns.
-        var columnIndicesAttribute = member.GetCustomAttribute<ExcelColumnIndicesAttribute>();
-        if (columnIndicesAttribute != null)
-        {
-            return new ColumnIndicesReaderFactory(columnIndicesAttribute.Indices);
-        }
-
-        return null;
-    }
-
     internal static ICellReaderFactory GetDefaultCellReaderFactory(MemberInfo member)
     {
         var columnNameAttributes = member.GetCustomAttributes<ExcelColumnNameAttribute>().ToArray();
         // A single [ExcelColumnName] attribute represents one column.
         if (columnNameAttributes.Length == 1)
         {
-            return new ColumnNameReaderFactory(columnNameAttributes[0].Name);
+            return new ColumnNameReaderFactory(columnNameAttributes[0].Name, columnNameAttributes[0].Comparison);
         }
         // Multiple [ExcelColumnName] attributes still represents one column, but multiple options.
         else if (columnNameAttributes.Length > 1)
         {
-            return new ColumnNamesReaderFactory([.. columnNameAttributes.Select(c => c.Name)]);
+            return new CompositeCellsReaderFactory(
+                [.. columnNameAttributes.Select(c => new ColumnNameReaderFactory(c.Name, c.Comparison))]);
         }
 
         // [ExcelColumnNames] attributes still represents one column, but multiple options.
         var columnNamesAttribute = member.GetCustomAttribute<ExcelColumnNamesAttribute>();
         if (columnNamesAttribute != null)
         {
-            return new ColumnNamesReaderFactory(columnNamesAttribute.Names);
+            return new ColumnNamesReaderFactory(columnNamesAttribute.Names, columnNamesAttribute.Comparison);
         }
 
         // A single [ExcelColumnNameMatching] attributes still represents one column, but multiple options.
@@ -119,6 +87,38 @@ internal static class MemberMapper
         }
 
         return new CharSplitReaderFactory(innerReaderFactory);
+    }
+    internal static ICellsReaderFactory? GetDefaultCellsReaderFactory(MemberInfo? member)
+    {
+        // If no member was specified, read all the cells.
+        if (member == null)
+        {
+            return new AllColumnNamesReaderFactory();
+        }
+
+        // [ExcelColumnNames] attributes represent multiple columns.
+        var columnNamesAttribute = member.GetCustomAttribute<ExcelColumnNamesAttribute>();
+        if (columnNamesAttribute != null)
+        {
+            return new ColumnNamesReaderFactory(columnNamesAttribute.Names, columnNamesAttribute.Comparison);
+        }
+
+        // [ExcelColumnsMatchingAttribute] attributes represent multiple columns.
+        var columnNameMatchingAttribute = member.GetCustomAttribute<ExcelColumnsMatchingAttribute>();
+        if (columnNameMatchingAttribute != null)
+        {
+            var matcher = (IExcelColumnMatcher)Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments)!;
+            return new ColumnsMatchingReaderFactory(matcher);
+        }
+
+        // [ExcelColumnIndices] attributes represents multiple columns.
+        var columnIndicesAttribute = member.GetCustomAttribute<ExcelColumnIndicesAttribute>();
+        if (columnIndicesAttribute != null)
+        {
+            return new ColumnIndicesReaderFactory(columnIndicesAttribute.Indices);
+        }
+
+        return null;
     }
 
     internal static bool AddMappers(IValuePipeline pipeline, MemberInfo member)

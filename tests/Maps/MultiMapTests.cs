@@ -217,7 +217,7 @@ public class MultiMapTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<Stack>();
-        Assert.Equal(new Stack<string>(new string[] { "1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" }), row1.Cast<string>());
+        Assert.Equal(new Stack<string>(["1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3"]), row1.Cast<string>());
     }
     
     [Fact]
@@ -403,11 +403,11 @@ public class MultiMapTests
         Assert.Equal(new string[] { "a", "b" }, row1.IEnumerableNonGeneric);
         Assert.Equal([1, 2], row1.IEnumerableInt);
         Assert.Equal(new string[] { "a", "b" }, row1.ICollectionNonGeneric);
-        Assert.Equal(new string[] { "a", "b" }, row1.ICollectionString);
+        Assert.Equal(["a", "b"], row1.ICollectionString);
         Assert.Equal([true, false], row1.ICollectionBool);
-        Assert.Equal(new string[] { "a", "b" }, row1.IReadOnlyCollectionString);
-        Assert.Equal(new string[] { "a", "b" }, row1.ISetString);
-        Assert.Equal(new string[] { "a", "b" }, row1.IReadOnlySetString);
+        Assert.Equal(["a", "b"], row1.IReadOnlyCollectionString);
+        Assert.Equal(["a", "b"], row1.ISetString);
+        Assert.Equal(["a", "b"], row1.IReadOnlySetString);
         Assert.Equal(new string[] { "a", "b" }, row1.IListNonGeneric);
         Assert.Equal(["a", "b"], row1.IListString);
         Assert.Equal(["a", "b"], row1.IListObject);
@@ -419,9 +419,9 @@ public class MultiMapTests
         Assert.Equal(new string[] { "1", "2" }, row1.ListString);
         Assert.Equal(new string[] { "1", "2" }, row1._concreteICollection);
         Assert.Equal(new string[] { "1", "2" }, row1.CollectionString);
-        Assert.Equal(new string[] { "1", "2" }, row1.ReadOnlyCollectionString);
+        Assert.Equal(["1", "2"], row1.ReadOnlyCollectionString);
 #if NET9_0_OR_GREATER
-        Assert.Equal(new string[] { "1", "2" }, row1.ReadOnlySetString);
+        Assert.Equal(["1", "2"], row1.ReadOnlySetString);
 #endif
         Assert.Equal(new string[] { "1", "2" }, row1.ImmutableArrayString);
         Assert.Equal(new string[] { "1", "2" }, row1.ImmutableListString);
@@ -431,7 +431,7 @@ public class MultiMapTests
         Assert.Equal(new string[] { "1", "2" }, row1.ImmutableHashSetString);
         Assert.Equal(new string[] { "1", "2" }, row1.FrozenSetString);
         Assert.Equal(new string[] { "1", "2" }, row1.ObservableCollectionString);
-        Assert.Equal(new string[] { "1", "2" }, row1.ReadOnlyObservableCollectionString);
+        Assert.Equal(["1", "2"], row1.ReadOnlyObservableCollectionString);
         Assert.Equal(new string[] { "1", "2" }, row1.CustomObservableCollectionString);
         Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.a, ObservableCollectionEnum.b }, row1.CustomObservableCollectionEnum);
 
@@ -441,11 +441,11 @@ public class MultiMapTests
         Assert.Equal(new string[] { "c", "d" }, row2.IEnumerableNonGeneric);
         Assert.Equal([0, 0], row2.IEnumerableInt);
         Assert.Equal(new string[] { "c", "d" }, row2.ICollectionNonGeneric);
-        Assert.Equal(new string[] { "c", "d" }, row2.ICollectionString);
+        Assert.Equal(["c", "d"], row2.ICollectionString);
         Assert.Equal([false, true], row2.ICollectionBool);
-        Assert.Equal(new string[] { "c", "d" }, row2.IReadOnlyCollectionString);
-        Assert.Equal(new string[] { "c", "d" }, row2.ISetString);
-        Assert.Equal(new string[] { "c", "d" }, row2.IReadOnlySetString);
+        Assert.Equal(["c", "d"], row2.IReadOnlyCollectionString);
+        Assert.Equal(["c", "d"], row2.ISetString);
+        Assert.Equal(["c", "d"], row2.IReadOnlySetString);
         Assert.Equal(new string[] { "c", "d" }, row2.IListNonGeneric);
         Assert.Equal(["c", "d"], row2.IListString);
         Assert.Equal(["c", "d"], row2.IListObject);
@@ -457,9 +457,9 @@ public class MultiMapTests
         Assert.Equal(new string[] { "3", "4" }, row2.ListString);
         Assert.Equal(new string[] { "3", "4" }, row2._concreteICollection);
         Assert.Equal(new string[] { "3", "4" }, row2.CollectionString);
-        Assert.Equal(new string[] { "3", "4" }, row2.ReadOnlyCollectionString);
+        Assert.Equal(["3", "4"], row2.ReadOnlyCollectionString);
 #if NET9_0_OR_GREATER
-        Assert.Equal(new string[] { "3", "4" }, row2.ReadOnlySetString);
+        Assert.Equal(["3", "4"], row2.ReadOnlySetString);
 #endif
         Assert.Equal(new string[] { "3", "4" }, row2.ImmutableArrayString);
         Assert.Equal(new string[] { "3", "4" }, row2.ImmutableListString);
@@ -469,7 +469,7 @@ public class MultiMapTests
         Assert.Equal(new string[] { "3", "4" }, row2.ImmutableHashSetString);
         Assert.Equal(new string[] { "3", "4" }, row2.FrozenSetString);
         Assert.Equal(new string[] { "3", "4" }, row2.ObservableCollectionString);
-        Assert.Equal(new string[] { "3", "4" }, row2.ReadOnlyObservableCollectionString);
+        Assert.Equal(["3", "4"], row2.ReadOnlyObservableCollectionString);
         Assert.Equal(new string[] { "3", "4" }, row2.CustomObservableCollectionString);
         Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.custom, ObservableCollectionEnum.custom }, row2.CustomObservableCollectionEnum);
 
@@ -479,11 +479,11 @@ public class MultiMapTests
         Assert.Equal(new string[] { "e", "f" }, row3.IEnumerableNonGeneric);
         Assert.Equal([5, 6], row3.IEnumerableInt);
         Assert.Equal(new string[] { "e", "f" }, row3.ICollectionNonGeneric);
-        Assert.Equal(new string[] { "e", "f" }, row3.ICollectionString);
+        Assert.Equal(["e", "f"], row3.ICollectionString);
         Assert.Equal([false, false], row3.ICollectionBool);
-        Assert.Equal(new string[] { "e", "f" }, row3.IReadOnlyCollectionString);
-        Assert.Equal(new string[] { "e", "f" }, row3.ISetString);
-        Assert.Equal(new string[] { "e", "f" }, row3.IReadOnlySetString);
+        Assert.Equal(["e", "f"], row3.IReadOnlyCollectionString);
+        Assert.Equal(["e", "f"], row3.ISetString);
+        Assert.Equal(["e", "f"], row3.IReadOnlySetString);
         Assert.Equal(new string[] { "e", "f" }, row3.IListNonGeneric);
         Assert.Equal(["e", "f"], row3.IListString);
         Assert.Equal(["e", "f"], row3.IListObject);
@@ -495,9 +495,9 @@ public class MultiMapTests
         Assert.Equal(new string[] { "5", "6" }, row3.ListString);
         Assert.Equal(new string[] { "5", "6" }, row3._concreteICollection);
         Assert.Equal(new string[] { "5", "6" }, row3.CollectionString);
-        Assert.Equal(new string[] { "5", "6" }, row3.ReadOnlyCollectionString);
+        Assert.Equal(["5", "6"], row3.ReadOnlyCollectionString);
 #if NET9_0_OR_GREATER
-        Assert.Equal(new string[] { "5", "6" }, row3.ReadOnlySetString);
+        Assert.Equal(["5", "6"], row3.ReadOnlySetString);
 #endif
         Assert.Equal(new string[] { "5", "6" }, row3.ImmutableArrayString);
         Assert.Equal(new string[] { "5", "6" }, row3.ImmutableListString);
@@ -507,7 +507,7 @@ public class MultiMapTests
         Assert.Equal(new string[] { "5", "6" }, row3.ImmutableHashSetString);
         Assert.Equal(new string[] { "5", "6" }, row3.FrozenSetString);
         Assert.Equal(new string[] { "5", "6" }, row3.ObservableCollectionString);
-        Assert.Equal(new string[] { "5", "6" }, row3.ReadOnlyObservableCollectionString);
+        Assert.Equal(["5", "6"], row3.ReadOnlyObservableCollectionString);
         Assert.Equal(new string[] { "5", "6" }, row3.CustomObservableCollectionString);
         Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.custom, ObservableCollectionEnum.custom }, row3.CustomObservableCollectionEnum);
 
@@ -517,11 +517,11 @@ public class MultiMapTests
         Assert.Equal(new string[] { "g", "h" }, row4.IEnumerableNonGeneric);
         Assert.Equal([7, 8], row4.IEnumerableInt);
         Assert.Equal(new string[] { "g", "h" }, row4.ICollectionNonGeneric);
-        Assert.Equal(new string[] { "g", "h" }, row4.ICollectionString);
+        Assert.Equal(["g", "h"], row4.ICollectionString);
         Assert.Equal([false, true], row4.ICollectionBool);
-        Assert.Equal(new string[] { "g", "h" }, row4.IReadOnlyCollectionString);
-        Assert.Equal(new string[] { "g", "h" }, row4.ISetString);
-        Assert.Equal(new string[] { "g", "h" }, row4.IReadOnlySetString);
+        Assert.Equal(["g", "h"], row4.IReadOnlyCollectionString);
+        Assert.Equal(["g", "h"], row4.ISetString);
+        Assert.Equal(["g", "h"], row4.IReadOnlySetString);
         Assert.Equal(new string[] { "g", "h" }, row4.IListNonGeneric);
         Assert.Equal(["g", "h"], row4.IListString);
         Assert.Equal(["g", "h"], row4.IListObject);
@@ -533,9 +533,9 @@ public class MultiMapTests
         Assert.Equal(new string[] { "7", "8" }, row4.ListString);
         Assert.Equal(new string[] { "7", "8" }, row4._concreteICollection);
         Assert.Equal(new string[] { "7", "8" }, row4.CollectionString);
-        Assert.Equal(new string[] { "7", "8" }, row4.ReadOnlyCollectionString);
+        Assert.Equal(["7", "8"], row4.ReadOnlyCollectionString);
 #if NET9_0_OR_GREATER
-        Assert.Equal(new string[] { "7", "8" }, row4.ReadOnlySetString);
+        Assert.Equal(["7", "8"], row4.ReadOnlySetString);
 #endif
         Assert.Equal(new string[] { "7", "8" }, row4.ImmutableArrayString);
         Assert.Equal(new string[] { "7", "8" }, row4.ImmutableListString);
@@ -545,7 +545,7 @@ public class MultiMapTests
         Assert.Equal(new string[] { "7", "8" }, row4.ImmutableHashSetString);
         Assert.Equal(new string[] { "7", "8" }, row4.FrozenSetString);
         Assert.Equal(new string[] { "7", "8" }, row4.ObservableCollectionString);
-        Assert.Equal(new string[] { "7", "8" }, row4.ReadOnlyObservableCollectionString);
+        Assert.Equal(["7", "8"], row4.ReadOnlyObservableCollectionString);
         Assert.Equal(new string[] { "7", "8" }, row4.CustomObservableCollectionString);
         Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.custom, ObservableCollectionEnum.custom }, row4.CustomObservableCollectionEnum);
     }

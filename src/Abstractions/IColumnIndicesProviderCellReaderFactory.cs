@@ -11,5 +11,5 @@ public interface IColumnIndicesProviderCellReaderFactory
     /// </summary>
     /// <param name="sheet">The sheet to get the column indices for.</param>
     /// <returns>The column indices for the given sheet, or null if no column indices are available.</returns>
-    int[]? GetColumnIndices(ExcelSheet sheet);
+    IReadOnlyList<int>? GetColumnIndices(ExcelSheet sheet);
 }

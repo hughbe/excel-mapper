@@ -9,7 +9,7 @@ internal static class ColumnUtilities
         ArgumentOutOfRangeException.ThrowIfNegative(columnIndex, paramName);
     }
 
-    public static void ValidateColumnIndices(IList<int> columnIndices, [CallerArgumentExpression(nameof(columnIndices))] string? paramName = null)
+    public static void ValidateColumnIndices(IReadOnlyList<int> columnIndices, [CallerArgumentExpression(nameof(columnIndices))] string? paramName = null)
     {
         ArgumentNullException.ThrowIfNull(columnIndices, paramName);
         if (columnIndices.Count == 0)
@@ -30,7 +30,7 @@ internal static class ColumnUtilities
         ArgumentException.ThrowIfNullOrEmpty(columnName, paramName);
     }
 
-    public static void ValidateColumnNames(IList<string> columnNames, [CallerArgumentExpression(nameof(columnNames))] string? paramName = null)
+    public static void ValidateColumnNames(IReadOnlyList<string> columnNames, [CallerArgumentExpression(nameof(columnNames))] string? paramName = null)
     {
         ArgumentNullException.ThrowIfNull(columnNames, paramName);
         if (columnNames.Count == 0)
@@ -47,5 +47,51 @@ internal static class ColumnUtilities
 
             ArgumentException.ThrowIfNullOrEmpty(columnName, paramName);
         }
+    }
+
+    public static bool TryGetColumnIndex(ExcelSheet sheet, string columnName, StringComparison comparison, out int columnIndex)
+    {
+        ArgumentNullException.ThrowIfNull(sheet);
+        if (sheet.Heading == null)
+        {
+            throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
+        }
+
+        // ExcelSheet.TryGetColumnIndex defaults to OrdinalIgnoreCase.
+        // Ordinal comparison can be optimised by ensuring the column name is in the correct case.
+        if (comparison == StringComparison.OrdinalIgnoreCase || comparison == StringComparison.Ordinal)
+        {
+            if (!sheet.Heading.TryGetColumnIndex(columnName, out columnIndex))
+            {
+                return false;
+            }
+
+            if (comparison != StringComparison.OrdinalIgnoreCase)
+            {
+                // Verify that the comparison matches.
+                var actualName = sheet.Heading.GetColumnName(columnIndex);
+                if (!string.Equals(actualName, columnName, comparison))
+                {
+                    columnIndex = -1;
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        else
+        {
+            for (int i = 0; i < sheet.Heading.ColumnNames.Count; i++)
+            {
+                if (string.Equals(sheet.Heading.GetColumnName(i), columnName, comparison))
+                {
+                    columnIndex = i;
+                    return true;
+                }
+            }
+        }
+
+        columnIndex = -1;
+        return false;
     }
 }

@@ -13,7 +13,7 @@ public static class IManyToOneMapExtensions
     /// </summary>
     /// <param name="columnNames">The name of each column to read.</param>
     /// <returns>The map that invoked this method.</returns>
-    public static TMap WithColumnNames<TMap>(this TMap map, params string[] columnNames) where TMap : IManyToOneMap
+    public static TMap WithColumnNames<TMap>(this TMap map, params IReadOnlyList<string> columnNames) where TMap : IManyToOneMap
         => map.WithReaderFactory(new ColumnNamesReaderFactory(columnNames));
 
     /// <summary>
@@ -21,12 +21,34 @@ public static class IManyToOneMapExtensions
     /// in the columns with the given names.
     /// </summary>
     /// <param name="columnNames">The name of each column to read.</param>
+    /// <param name="comparison">The string comparison to use when matching column names.</param>
     /// <returns>The map that invoked this method.</returns>
-    public static TMap WithColumnNames<TMap>(this TMap map, IEnumerable<string> columnNames) where TMap : IManyToOneMap
+    public static TMap WithColumnNames<TMap>(this TMap map, IReadOnlyList<string> columnNames, StringComparison comparison) where TMap : IManyToOneMap
+        => map.WithReaderFactory(new ColumnNamesReaderFactory(columnNames, comparison));
+
+    /// <summary>
+    /// Sets the reader of the map to read the values of one or more cells contained
+    /// in the columns with the given names.
+    /// </summary>
+    /// <param name="columnNames">The name of each column to read.</param>
+    /// <returns>The map that invoked this method.</returns>
+    public static TMap WithColumnNames<TMap>(this TMap map, params IEnumerable<string> columnNames) where TMap : IManyToOneMap
     {
         ArgumentNullException.ThrowIfNull(columnNames);
-
         return map.WithColumnNames([.. columnNames]);
+    }
+
+    /// <summary>
+    /// Sets the reader of the map to read the values of one or more cells contained
+    /// in the columns with the given names.
+    /// </summary>
+    /// <param name="columnNames">The name of each column to read.</param>
+    /// <param name="comparison">The string comparison to use when matching column names.</param>
+    /// <returns>The map that invoked this method.</returns>
+    public static TMap WithColumnNames<TMap>(this TMap map, IEnumerable<string> columnNames, StringComparison comparison) where TMap : IManyToOneMap
+    {
+        ArgumentNullException.ThrowIfNull(columnNames);
+        return map.WithColumnNames([.. columnNames], comparison);
     }
 
     /// <summary>
@@ -56,9 +78,9 @@ public static class IManyToOneMapExtensions
     public static TMap WithColumnIndices<TMap>(this TMap map, IEnumerable<int> columnIndices) where TMap : IManyToOneMap
     {
         ArgumentNullException.ThrowIfNull(columnIndices);
-
         return map.WithColumnIndices([.. columnIndices]);
     }
+
     /// <summary>
     /// Sets the reader of the map to use a custom cell values reader.
     /// </summary>

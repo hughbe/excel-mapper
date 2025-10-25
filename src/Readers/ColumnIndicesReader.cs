@@ -12,15 +12,15 @@ public class ColumnIndicesReader : ICellsReader
     /// <summary>
     /// Gets the zero-based indices for each column to read.
     /// </summary>
-    public IList<int> ColumnIndices { get; }
+    public IReadOnlyList<int> ColumnIndices { get; }
 
     /// <summary>
     /// Constructs a reader that reads the values of cells at the given column indices.
     /// </summary>
     /// <param name="columnIndices">The zero-based indices for each column to read.</param>
-    public ColumnIndicesReader(IList<int> columnIndices)
+    public ColumnIndicesReader(IReadOnlyList<int> columnIndices)
     {
-        ColumnUtilities.ValidateColumnIndices(columnIndices, nameof(columnIndices));
+        ColumnUtilities.ValidateColumnIndices(columnIndices);
         ColumnIndices = columnIndices;
     }
 

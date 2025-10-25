@@ -8,16 +8,16 @@ public sealed class ColumnIndicesReaderFactory : ICellReaderFactory, ICellsReade
     /// <summary>
     /// Gets the zero-based indices for each column to read.
     /// </summary>
-    public int[] ColumnIndices { get; }
+    public IReadOnlyList<int> ColumnIndices { get; }
 
     /// <summary>
     /// Constructs a reader that reads the values of one or more columns with a given zero-based
     /// index and returns the string value of for each column.
     /// </summary>
     /// <param name="columnIndices">The list of zero-based column indices to read.</param>
-    public ColumnIndicesReaderFactory(params int[] columnIndices)
+    public ColumnIndicesReaderFactory(params IReadOnlyList<int> columnIndices)
     {
-        ColumnUtilities.ValidateColumnIndices(columnIndices, nameof(columnIndices));
+        ColumnUtilities.ValidateColumnIndices(columnIndices);
         ColumnIndices = columnIndices;
     }
 
@@ -26,7 +26,7 @@ public sealed class ColumnIndicesReaderFactory : ICellReaderFactory, ICellsReade
     {
         ArgumentNullException.ThrowIfNull(sheet);
 
-        foreach (int columnIndex in ColumnIndices)
+        foreach (var columnIndex in ColumnIndices)
         {
             if (columnIndex < sheet.NumberOfColumns)
             {
@@ -41,7 +41,7 @@ public sealed class ColumnIndicesReaderFactory : ICellReaderFactory, ICellsReade
     public ICellsReader? GetCellsReader(ExcelSheet sheet)
     {
         ArgumentNullException.ThrowIfNull(sheet);
-        foreach (int columnIndex in ColumnIndices)
+        foreach (var columnIndex in ColumnIndices)
         {
             if (columnIndex >= sheet.NumberOfColumns)
             {
@@ -52,5 +52,5 @@ public sealed class ColumnIndicesReaderFactory : ICellReaderFactory, ICellsReade
         return new ColumnIndicesReader(ColumnIndices);
     }
 
-    public int[] GetColumnIndices(ExcelSheet sheet) => ColumnIndices;
+    public IReadOnlyList<int> GetColumnIndices(ExcelSheet sheet) => ColumnIndices;
 }

@@ -12,12 +12,13 @@
     <Authors>Hugh Bellamy</Authors>
     <Title>Excel Mapper</Title>
     <Description>An extension of ExcelDataReader that supports fluent mapping of rows to C# objects.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/hughbe/excel-mapper</PackageProjectUrl>
     <RepositoryUrl>https://github.com/hughbe/excel-mapper</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>Copyright 2025 (c) Hugh Bellamy. All rights reserved.</Copyright>
-    <PackageTags>excel;mapping;mapper</PackageTags>
+    <PackageTags>excel;mapping;mapper;excel-mapper</PackageTags>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
 
@@ -30,6 +31,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <PropertyGroup>

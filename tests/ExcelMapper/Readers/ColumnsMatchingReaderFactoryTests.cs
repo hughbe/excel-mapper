@@ -225,7 +225,7 @@ public class ColumnsMatchingReaderFactoryTests
 
         static bool Match(string columnName) => columnName.StartsWith("Value");
         var factory = new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(Match));
-        Assert.Equal(new string[] { "Value", "Value2" }, factory.GetColumnNames(sheet));
+        Assert.Equal(["Value", "Value2"], factory.GetColumnNames(sheet));
     }
 
     [Fact]

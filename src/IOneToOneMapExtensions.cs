@@ -48,8 +48,8 @@ public static class IOneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="columnName">The name of the column to read</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithColumnName<TMap>(this TMap map, string columnName) where TMap : IOneToOneMap
-        => map.WithReaderFactory(new ColumnNameReaderFactory(columnName));
+    public static TMap WithColumnName<TMap>(this TMap map, string columnName, StringComparison comparison = StringComparison.OrdinalIgnoreCase) where TMap : IOneToOneMap
+        => map.WithReaderFactory(new ColumnNameReaderFactory(columnName, comparison));
 
     /// <summary>
     /// Sets the reader of the map to read the value of a single cell contained in the column at

@@ -33,5 +33,5 @@ public sealed class ColumnIndexReaderFactory : ICellReaderFactory, IColumnIndexP
     }
 
     /// <inheritdoc/>
-    public int GetColumnIndex(ExcelSheet sheet) => ColumnIndex;
+    public int? GetColumnIndex(ExcelSheet sheet) => ColumnIndex;
 }

@@ -11,15 +11,18 @@ namespace ExcelMapper;
 public class ExcelColumnNameAttribute : Attribute
 {
     private string _columnName;
+    private StringComparison _comparison = StringComparison.OrdinalIgnoreCase;
 
     /// <summary>
     /// Initializes a new instance of <see cref="ExcelColumnNameAttribute"/> with the specified column name.
     /// </summary>
     /// <param name="name">The name of the column.</param>
-    public ExcelColumnNameAttribute(string columnName)
+    public ExcelColumnNameAttribute(string columnName, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
     {
-        ColumnUtilities.ValidateColumnName(columnName , nameof(columnName));
+        ColumnUtilities.ValidateColumnName(columnName);
+        EnumUtilities.ValidateIsDefined(comparison);
         _columnName = columnName;
+        _comparison = comparison;
     }
 
     /// <summary>
@@ -30,8 +33,22 @@ public class ExcelColumnNameAttribute : Attribute
         get => _columnName;
         set
         {
-            ColumnUtilities.ValidateColumnName(value , nameof(value));
+            ColumnUtilities.ValidateColumnName(value, nameof(value));
             _columnName = value;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the string comparison to use when matching the column name.
+    /// The default is <see cref="StringComparison.Ordinal"/>.
+    /// </summary>
+    public StringComparison Comparison
+    {
+        get => _comparison;
+        set
+        {
+            EnumUtilities.ValidateIsDefined(value);
+            _comparison = value;
         }
     }
 }

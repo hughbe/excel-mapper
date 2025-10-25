@@ -10,5 +10,5 @@ public interface IColumnNamesProviderCellReaderFactory
     /// </summary>
     /// <param name="sheet">The sheet to get the column names for.</param>
     /// <returns>The column names for the given sheet, or null if no column names are available.</returns>
-    string[]? GetColumnNames(ExcelSheet sheet);
+    IReadOnlyList<string>? GetColumnNames(ExcelSheet sheet);
 }

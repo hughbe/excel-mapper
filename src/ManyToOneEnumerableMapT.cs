@@ -116,9 +116,9 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// </summary>
     /// <param name="columnName">The name of the column containing the cell to split.</param>
     /// <returns>The map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumnName(string columnName)
+    public ManyToOneEnumerableMap<TElement> WithColumnName(string columnName, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
     {
-        var columnReader = new ColumnNameReaderFactory(columnName);
+        var columnReader = new ColumnNameReaderFactory(columnName, comparison);
         if (ReaderFactory is SplitReaderFactory splitColumnReader)
         {
             splitColumnReader.ReaderFactory = columnReader;

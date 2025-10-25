@@ -360,7 +360,7 @@ public class ManyToOneDictionaryMapTests
     {
         public ICellsReader? GetCellsReader(ExcelSheet sheet) => new ColumnIndicesReaderFactory(int.MaxValue).GetCellsReader(sheet);
 
-        public int[] GetColumnIndices(ExcelSheet sheet) => [];
+        public IReadOnlyList<int> GetColumnIndices(ExcelSheet sheet) => [];
     }
     
     private class MockReader : ICellsReader
