@@ -101,7 +101,8 @@ public static class AutoMapper
     private static readonly ICellMapper s_boolMapper = new BoolMapper();
     private static readonly ICellMapper s_stringMapper = new StringMapper();
     private static readonly ICellMapper s_versionMapper = new VersionMapper();
-    private static readonly AllColumnNamesReaderFactory s_allColumnNamesReaderFactory = new();
+    internal static readonly ICellReaderFactory s_zeroColumnIndexReaderFactory = new ColumnIndexReaderFactory(0);
+    internal static readonly ICellsReaderFactory s_allColumnNamesReaderFactory = new AllColumnNamesReaderFactory();
     private static readonly IFallbackItem s_throwFallback = new ThrowFallback();
     private static readonly IFallbackItem s_nullFallback = new FixedValueFallback(null);
 
@@ -968,20 +969,23 @@ public static class AutoMapper
     {
         EnumUtilities.ValidateIsDefined(emptyValueStrategy);
 
-        if (!TryCreateMap<T>(null, typeof(T), new ColumnIndexReaderFactory(0), s_allColumnNamesReaderFactory, emptyValueStrategy, isAutoMapping: true, typeStack: null, out var classMap))
+        if (!TryCreateMap<T>(null, typeof(T), new ColumnIndexReaderFactory(0), s_allColumnNamesReaderFactory, emptyValueStrategy, isAutoMapping: true, typeStack: null, out var objectMap))
         {
             result = null;
             return false;
         }
 
-        if (classMap is ExcelClassMap<T> typedMap)
+        if (objectMap is ExcelClassMap<T> typedMap)
         {
             result = typedMap;
             return true;
         }
 
         // Wrap the class map in a BuiltinClassMap to satisfy the generic type.
-        result = new BuiltinClassMap<T>(classMap);
+        result = new ExcelClassMap<T>(emptyValueStrategy)
+        {
+            _valueMap = objectMap
+        };
         return true;
     }
 
@@ -1043,18 +1047,5 @@ public static class AutoMapper
 
         map = null;
         return false;
-    }
-
-    private class BuiltinClassMap<T> : ExcelClassMap<T>
-    {
-        private IMap BuiltinMap { get; }
-
-        public BuiltinClassMap(IMap primitiveMap)
-        {
-            BuiltinMap = primitiveMap;
-        }
-
-        public override bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
-            => BuiltinMap.TryGetValue(sheet, rowIndex, reader, null, out result);
     }
 }

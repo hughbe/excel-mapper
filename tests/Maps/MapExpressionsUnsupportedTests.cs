@@ -5,24 +5,10 @@ namespace ExcelMapper.Tests;
 public class MapExpressionsUnsupportedTests
 {
     [Fact]
-    public void Map_NoExpression_ThrowsArgumentException()
+    public void Map_MethodExpression_ThrowsArgumentException()
     {
         var map = new ExcelClassMap<StringClass>();
-        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p));
-    }
-
-    [Fact]
-    public void Map_CastNoExpression_ThrowsArgumentException()
-    {
-        var map = new ExcelClassMap<StringClass>();
-        Assert.Throws<ArgumentException>("expression", () => map.Map(p => (object)p));
-    }
-
-    [Fact]
-    public void Map_NewExpression_ThrowsArgumentException()
-    {
-        var map = new ExcelClassMap<StringClass>();
-        Assert.Throws<ArgumentException>("expression", () => map.Map(p => new List<string>()));
+        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value.ToString()));
     }
 
     [Fact]

@@ -18,21 +18,55 @@ public class MapDictionaryTest
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IEnumerable<KeyValuePair<String, object>>>());
+        var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IEnumerable<KeyValuePair<string, object>>>());
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
         Assert.Equal("1", row1["Column2"]);
         Assert.Equal("2", row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
-        var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IEnumerable<KeyValuePair<String, object>>>());
+        var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IEnumerable<KeyValuePair<string, object>>>());
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
         Assert.Equal("0", row2["Column2"]);
         Assert.Equal("0", row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
-        var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IEnumerable<KeyValuePair<String, object>>>());
+        var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IEnumerable<KeyValuePair<string, object>>>());
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedIEnumerableKeyValuePairStringObject_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap<IEnumerable<KeyValuePair<string, object>>>(c =>
+        {
+            c.MapDictionary<object>(p => p);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IEnumerable<KeyValuePair<string, object>>>());
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IEnumerable<KeyValuePair<string, object>>>());
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IEnumerable<KeyValuePair<string, object>>>());
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
         Assert.Equal("-2", row3["Column2"]);
@@ -185,21 +219,21 @@ public class MapDictionaryTest
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<ICollection<KeyValuePair<String, object>>>());
+        var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<ICollection<KeyValuePair<string, object>>>());
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
         Assert.Equal("1", row1["Column2"]);
         Assert.Equal("2", row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
-        var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<ICollection<KeyValuePair<String, object>>>());
+        var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<ICollection<KeyValuePair<string, object>>>());
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
         Assert.Equal("0", row2["Column2"]);
         Assert.Equal("0", row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
-        var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<ICollection<KeyValuePair<String, object>>>());
+        var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<ICollection<KeyValuePair<string, object>>>());
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
         Assert.Equal("-2", row3["Column2"]);
@@ -366,21 +400,21 @@ public class MapDictionaryTest
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IReadOnlyCollection<KeyValuePair<String, object>>>());
+        var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IReadOnlyCollection<KeyValuePair<string, object>>>());
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
         Assert.Equal("1", row1["Column2"]);
         Assert.Equal("2", row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
-        var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IReadOnlyCollection<KeyValuePair<String, object>>>());
+        var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IReadOnlyCollection<KeyValuePair<string, object>>>());
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
         Assert.Equal("0", row2["Column2"]);
         Assert.Equal("0", row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
-        var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IReadOnlyCollection<KeyValuePair<String, object>>>());
+        var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IReadOnlyCollection<KeyValuePair<string, object>>>());
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
         Assert.Equal("-2", row3["Column2"]);
@@ -547,7 +581,7 @@ public class MapDictionaryTest
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IList<KeyValuePair<String, object>>>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IList<KeyValuePair<string, object>>>());
     }
 
     [Fact]
@@ -613,7 +647,7 @@ public class MapDictionaryTest
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyList<KeyValuePair<String, object>>>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IReadOnlyList<KeyValuePair<string, object>>>());
     }
 
     [Fact]
@@ -702,6 +736,40 @@ public class MapDictionaryTest
     }
 
     [Fact]
+    public void ReadRow_DefaultMappedIDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap<IDictionary>(c =>
+        {
+            c.Map<object>(p => p);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary>());
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary>());
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary>());
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedSubIDictionary_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
@@ -724,7 +792,8 @@ public class MapDictionaryTest
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        var row1 = Assert.IsType<SubIDictionaryClass>(sheet.ReadRow<SubIDictionaryClass>());      Assert.Equal("a", row1.Value["Column1"]);
+        var row1 = Assert.IsType<SubIDictionaryClass>(sheet.ReadRow<SubIDictionaryClass>());
+        Assert.Equal("a", row1.Value["Column1"]);
         Assert.Equal("1", row1.Value["Column2"]);
         Assert.Equal("2", row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
@@ -777,6 +846,39 @@ public class MapDictionaryTest
         public void Remove(object key) => throw new NotImplementedException();
 
         IDictionaryEnumerator IDictionary.GetEnumerator() => throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedSubIDictionaryClass_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap<SubIDictionaryClass>(c =>
+        {
+            c.Map<object>(p => p);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = Assert.IsType<SubIDictionaryClass>(sheet.ReadRow<SubIDictionaryClass>());
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = Assert.IsType<SubIDictionaryClass>(sheet.ReadRow<SubIDictionaryClass>());
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = Assert.IsType<SubIDictionaryClass>(sheet.ReadRow<SubIDictionaryClass>());
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
     }
 
     [Fact]
@@ -918,6 +1020,40 @@ public class MapDictionaryTest
     }
 
     [Fact]
+    public void ReadRow_DefaultMappedIDictionaryStringObject_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap<IDictionary<string, object>>(c =>
+        {
+            c.Map(p => p);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary<string, object>>());
+        Assert.Equal(4, row1.Count);
+        Assert.Equal("a", row1["Column1"]);
+        Assert.Equal("1", row1["Column2"]);
+        Assert.Equal("2", row1["Column3"]);
+        Assert.Null(row1["Column4"]);
+
+        var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary<string, object>>());
+        Assert.Equal(4, row2.Count);
+        Assert.Equal("b", row2["Column1"]);
+        Assert.Equal("0", row2["Column2"]);
+        Assert.Equal("0", row2["Column3"]);
+        Assert.Null(row2["Column4"]);
+
+        var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary<string, object>>());
+        Assert.Equal(4, row3.Count);
+        Assert.Equal("c", row3["Column1"]);
+        Assert.Equal("-2", row3["Column2"]);
+        Assert.Equal("-1", row3["Column3"]);
+        Assert.Null(row3["Column4"]);
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedSubIDictionaryStringObject_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
@@ -997,6 +1133,39 @@ public class MapDictionaryTest
         public bool TryGetValue(string key, [MaybeNullWhen(false)] out object value) => throw new NotImplementedException();
 
         IEnumerator IEnumerable.GetEnumerator() => throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedSubIDictionaryStringObjectClass_Success()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap<SubIDictionaryStringObjectClass>(c =>
+        {
+            c.Map<object>(p => p);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = Assert.IsType<SubIDictionaryStringObjectClass>(sheet.ReadRow<SubIDictionaryStringObjectClass>());
+        Assert.Equal("a", row1.Value["Column1"]);
+        Assert.Equal("1", row1.Value["Column2"]);
+        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Null(row1.Value["Column4"]);
+
+        var row2 = Assert.IsType<SubIDictionaryStringObjectClass>(sheet.ReadRow<SubIDictionaryStringObjectClass>());
+        Assert.Equal(4, row2.Value.Count);
+        Assert.Equal("b", row2.Value["Column1"]);
+        Assert.Equal("0", row2.Value["Column2"]);
+        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Null(row2.Value["Column4"]);
+
+        var row3 = Assert.IsType<SubIDictionaryStringObjectClass>(sheet.ReadRow<SubIDictionaryStringObjectClass>());
+        Assert.Equal(4, row3.Value.Count);
+        Assert.Equal("c", row3.Value["Column1"]);
+        Assert.Equal("-2", row3.Value["Column2"]);
+        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Null(row3.Value["Column4"]);
     }
 
     [Fact]

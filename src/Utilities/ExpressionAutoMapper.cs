@@ -16,7 +16,19 @@ internal static class ExpressionAutoMapper
         while (true)
         {
             currentExpression = SkipConvert(currentExpression, out var currentTargetType);
-            if (currentExpression is MemberExpression memberExpression)
+            if (currentExpression is ParameterExpression parameterExpression)
+            {
+                // If we have reached the parameter expression and there are no other expressions, we
+                // need to map the parameter itself.
+                if (expressions.Count == 0)
+                {
+                    expressions.Push(new MappedParameterExpression(parameterExpression, currentTargetType));
+                    return expressions;
+                }
+
+                break;
+            }
+            else if (currentExpression is MemberExpression memberExpression)
             {
                 currentExpression = memberExpression.Expression!;
                 expressions.Push(new MappedMemberExpression(memberExpression, currentTargetType));
@@ -44,10 +56,6 @@ internal static class ExpressionAutoMapper
                 var methodCallExpression = (MethodCallExpression)currentExpression;
                 currentExpression = SkipConvert(methodCallExpression.Object!, out var _);
                 expressions.Push(new MappedEnumerableIndexerExpression(methodCallExpression, currentTargetType));
-            }
-            else if (currentExpression is ParameterExpression)
-            {
-                break;
             }
             else
             {
@@ -103,19 +111,25 @@ internal static class ExpressionAutoMapper
     {
         if (parentMap is ExcelClassMap classMap)
         {
-            if (expression is not MappedMemberExpression memberExpression)
+            if (expression is MappedParameterExpression parameterExpression)
+            {
+                classMap._valueMap = map;
+            }
+            else if (expression is MappedMemberExpression memberExpression)
+            {
+                var member = memberExpression.Member;
+                var existingPropertyMap = classMap.Properties.FirstOrDefault(m => m.Member.Equals(member));
+                if (existingPropertyMap is not null)
+                {
+                    classMap.Properties.Remove(existingPropertyMap);
+                }
+
+                classMap.Properties.Add(new ExcelPropertyMap(member, map));
+            }
+            else
             {
                 throw new ArgumentException($"Expected a member expression when adding to an object map. Received: {expression}", nameof(expression));
             }
-
-            var member = memberExpression.Member;
-            var existingPropertyMap = classMap.Properties.FirstOrDefault(m => m.Member.Equals(member));
-            if (existingPropertyMap is not null)
-            {
-                classMap.Properties.Remove(existingPropertyMap);
-            }
-
-            classMap.Properties.Add(new ExcelPropertyMap(member, map));
         }
         else if (parentMap is IEnumerableIndexerMap arrayIndexerMap)
         {
@@ -157,11 +171,6 @@ internal static class ExpressionAutoMapper
     private static IMap GetOrCreateMap<T, TProperty>(ExcelClassMap<T> classMap, Expression expression, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator)
     {
         var stack = BuildExpressionStack(expression);
-        if (stack.Count == 0)
-        {
-            throw new ArgumentException($"Expression must contain a member access, indexer, or dictionary access.", nameof(expression));
-        }
-
         return ProcessExpression<T, TProperty>(stack, classMap, stack.Pop(), memberMapCreator, classMap.EmptyValueStrategy);
     }
 
@@ -254,6 +263,29 @@ internal interface IMappedExpression
     IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, FallbackStrategy emptyValueStrategy);
     ICellReaderFactory GetDefaultCellReaderFactory();
     ICellsReaderFactory? GetDefaultCellsReaderFactory();
+}
+
+internal class MappedParameterExpression : IMappedExpression
+{
+    [ExcludeFromCodeCoverage]
+    public Type Type { get; }
+    public Type MappedValueType { get; }
+    [ExcludeFromCodeCoverage]
+    public object Context => throw new NotImplementedException();
+
+    public MappedParameterExpression(ParameterExpression expression, Type mappedType)
+    {
+        Type = expression.Type;
+        MappedValueType = mappedType ?? expression.Type;
+    }
+
+    [ExcludeFromCodeCoverage]
+    public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, FallbackStrategy emptyValueStrategy)
+        => throw new NotImplementedException();
+
+    public ICellReaderFactory GetDefaultCellReaderFactory() => AutoMapper.s_zeroColumnIndexReaderFactory;
+
+    public ICellsReaderFactory? GetDefaultCellsReaderFactory() => AutoMapper.s_allColumnNamesReaderFactory;
 }
 
 internal class MappedMemberExpression : IMappedExpression

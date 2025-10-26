@@ -11,9 +11,25 @@ namespace ExcelMapper.Tests;
 public class MultiMapTests
 {
     [Fact]
-    public void ReadRow_DefaultStringArray_ReturnsExpected()
+    public void ReadRow_AutoMappedStringArray_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<string[]>();
+        Assert.Equal(["1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3"], row1);
+    }
+    
+    [Fact]
+    public void ReadRow_DefaultMappedStringArray_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("MultiMap.xlsx");
+        importer.Configuration.RegisterClassMap<string[]>(c =>
+        {
+            c.Map(p => p);
+        });
         
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
@@ -23,7 +39,7 @@ public class MultiMapTests
     }
 
     [Fact]
-    public void ReadRow_DefaultArray_ReturnsExpected()
+    public void ReadRow_AutoMappedArray_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -35,7 +51,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultIEnumerable_ReturnsExpected()
+    public void ReadRow_AutoMappedIEnumerable_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -47,7 +63,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultIEnumerableString_ReturnsExpected()
+    public void ReadRow_AutoMappedIEnumerableString_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -59,7 +75,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultICollection_ReturnsExpected()
+    public void ReadRow_AutoMappedICollection_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -71,7 +87,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultICollectionString_ReturnsExpected()
+    public void ReadRow_AutoMappedICollectionString_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -83,7 +99,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultIReadOnlyCollectionString_ReturnsExpected()
+    public void ReadRow_AutoMappedIReadOnlyCollectionString_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -95,7 +111,7 @@ public class MultiMapTests
     }
 
     [Fact]
-    public void ReadRow_DefaultIList_ReturnsExpected()
+    public void ReadRow_AutoMappedIList_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -107,7 +123,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultIListString_ReturnsExpected()
+    public void ReadRow_AutoMappedIListString_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -119,7 +135,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultIReadOnlyListString_ReturnsExpected()
+    public void ReadRow_AutoMappedIReadOnlyListString_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -131,7 +147,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultArrayList_ReturnsExpected()
+    public void ReadRow_AutoMappedArrayList_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -143,7 +159,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultQueue_ReturnsExpected()
+    public void ReadRow_AutoMappedQueue_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -155,7 +171,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultCollectionBase_ThrowsExcelMappingException()
+    public void ReadRow_AutoMappedCollectionBase_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -166,7 +182,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultSubCollectionBase_ReturnsExpected()
+    public void ReadRow_AutoMappedSubCollectionBase_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -182,7 +198,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultReadOnlyCollectionBase_ThrowsExcelMappingException()
+    public void ReadRow_AutoMappedReadOnlyCollectionBase_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -193,7 +209,7 @@ public class MultiMapTests
     }    
 
     [Fact]
-    public void ReadRow_DefaultSubReadOnlyCollectionBase_Success()
+    public void ReadRow_AutoMappedSubReadOnlyCollectionBase_Success()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -209,7 +225,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultStack_ReturnsExpected()
+    public void ReadRow_AutoMappedStack_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -221,7 +237,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultStringCollection_ReturnsExpected()
+    public void ReadRow_AutoMappedStringCollection_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -233,7 +249,7 @@ public class MultiMapTests
     }
 
     [Fact]
-    public void ReadRow_DefaultListString_ReturnsExpected()
+    public void ReadRow_AutoMappedListString_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -245,7 +261,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultSortedSetString_ReturnsExpected()
+    public void ReadRow_AutoMappedSortedSetString_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -257,7 +273,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultCollectionString_ReturnsExpected()
+    public void ReadRow_AutoMappedCollectionString_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -269,7 +285,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultReadOnlyCollectionString_ReturnsExpected()
+    public void ReadRow_AutoMappedReadOnlyCollectionString_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -281,7 +297,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultImmutableArray_ReturnsExpected()
+    public void ReadRow_AutoMappedImmutableArray_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -293,7 +309,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultImmutableList_ReturnsExpected()
+    public void ReadRow_AutoMappedImmutableList_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -305,7 +321,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultImmutableStack_ReturnsExpected()
+    public void ReadRow_AutoMappedImmutableStack_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -317,7 +333,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultImmutableQueue_ReturnsExpected()
+    public void ReadRow_AutoMappedImmutableQueue_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -329,7 +345,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultImmutableSortedSet_ReturnsExpected()
+    public void ReadRow_AutoMappedImmutableSortedSet_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -341,7 +357,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultImmutableHashSet_ReturnsExpected()
+    public void ReadRow_AutoMappedImmutableHashSet_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -353,7 +369,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultFrozenSet_ReturnsExpected()
+    public void ReadRow_AutoMappedFrozenSet_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -365,7 +381,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultObservableCollectionString_ReturnsExpected()
+    public void ReadRow_AutoMappedObservableCollectionString_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
@@ -377,7 +393,7 @@ public class MultiMapTests
     }
     
     [Fact]
-    public void ReadRow_DefaultBlockingCollectionString_ReturnsExpected()
+    public void ReadRow_AutoMappedBlockingCollectionString_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
         
