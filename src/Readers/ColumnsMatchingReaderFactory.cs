@@ -55,6 +55,7 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
         return new ColumnIndicesReader(indices);
     }
 
+    /// <inheritdoc/>
     public IReadOnlyList<string>? GetColumnNames(ExcelSheet sheet)
     {
         ArgumentNullException.ThrowIfNull(sheet);
@@ -75,6 +76,7 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
         return [.. names];
     }
 
+    /// <inheritdoc/>
     public IReadOnlyList<int> GetColumnIndices(ExcelSheet sheet)
     {
         ArgumentNullException.ThrowIfNull(sheet);

@@ -70,6 +70,7 @@ public class CompositeCellsReaderFactory : ICellReaderFactory, ICellsReaderFacto
         return new CompositeCellsReader(readers);
     }
 
+    /// <inheritdoc/>
     public string GetColumnName(ExcelSheet sheet)
     {
         foreach (var factory in Factories)
@@ -87,6 +88,7 @@ public class CompositeCellsReaderFactory : ICellReaderFactory, ICellsReaderFacto
         return string.Empty;
     }
 
+    /// <inheritdoc/>
     public int? GetColumnIndex(ExcelSheet sheet)
     {
         foreach (var factory in Factories)
@@ -104,6 +106,7 @@ public class CompositeCellsReaderFactory : ICellReaderFactory, ICellsReaderFacto
         return null;
     }
 
+    /// <inheritdoc/>
     public IReadOnlyList<string>? GetColumnNames(ExcelSheet sheet)
     {
         var names = new List<string>(Factories.Count);
@@ -122,6 +125,7 @@ public class CompositeCellsReaderFactory : ICellReaderFactory, ICellsReaderFacto
         return names.Count > 0 ? names : null;
     }
 
+    /// <inheritdoc/>
     public IReadOnlyList<int>? GetColumnIndices(ExcelSheet sheet)
     {
         var indices = new List<int>(Factories.Count);

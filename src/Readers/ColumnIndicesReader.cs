@@ -18,7 +18,7 @@ public class ColumnIndicesReader : ICellsReader
     /// Constructs a reader that reads the values of cells at the given column indices.
     /// </summary>
     /// <param name="columnIndices">The zero-based indices for each column to read.</param>
-    public ColumnIndicesReader(IReadOnlyList<int> columnIndices)
+    public ColumnIndicesReader(params IReadOnlyList<int> columnIndices)
     {
         ColumnUtilities.ValidateColumnIndices(columnIndices);
         ColumnIndices = columnIndices;

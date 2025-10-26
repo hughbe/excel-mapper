@@ -66,7 +66,7 @@ public static class IManyToOneMapExtensions
     /// </summary>
     /// <param name="columnIndices">The zero-based index of each column to read.</param>
     /// <returns>The map that invoked this method.</returns>
-    public static TMap WithColumnIndices<TMap>(this TMap map, params int[] columnIndices) where TMap : IManyToOneMap
+    public static TMap WithColumnIndices<TMap>(this TMap map, params IReadOnlyList<int> columnIndices) where TMap : IManyToOneMap
         => map.WithReaderFactory(new ColumnIndicesReaderFactory(columnIndices));
 
     /// <summary>
@@ -75,7 +75,7 @@ public static class IManyToOneMapExtensions
     /// </summary>
     /// <param name="columnIndices">The zero-based index of each column to read.</param>
     /// <returns>The map that invoked this method.</returns>
-    public static TMap WithColumnIndices<TMap>(this TMap map, IEnumerable<int> columnIndices) where TMap : IManyToOneMap
+    public static TMap WithColumnIndices<TMap>(this TMap map, params IEnumerable<int> columnIndices) where TMap : IManyToOneMap
     {
         ArgumentNullException.ThrowIfNull(columnIndices);
         return map.WithColumnIndices([.. columnIndices]);

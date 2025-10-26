@@ -74,5 +74,6 @@ public sealed class ColumnNamesReaderFactory : ICellReaderFactory, ICellsReaderF
         return new ColumnIndicesReader(indices);
     }
 
+    /// <inheritdoc/>
     public IReadOnlyList<string> GetColumnNames(ExcelSheet sheet) => ColumnNames;
 }

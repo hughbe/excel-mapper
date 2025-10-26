@@ -3,7 +3,7 @@
 public class ColumnIndicesReaderTests
 {
     [Fact]
-    public void Ctor_ColumnIndices()
+    public void Ctor_IReadOnlyListInt()
     {
         var columnIndices = new int[] { 0, 1 };
         var reader = new ColumnIndicesReader(columnIndices);
@@ -17,7 +17,7 @@ public class ColumnIndicesReaderTests
     }
 
     [Fact]
-    public void Ctor_EmptyColumnNames_ThrowsArgumentException()
+    public void Ctor_EmptyColumnIndices_ThrowsArgumentException()
     {
         Assert.Throws<ArgumentException>("columnIndices", () => new ColumnIndicesReader([]));
     }

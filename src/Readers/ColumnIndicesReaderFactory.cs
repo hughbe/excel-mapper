@@ -52,5 +52,6 @@ public sealed class ColumnIndicesReaderFactory : ICellReaderFactory, ICellsReade
         return new ColumnIndicesReader(ColumnIndices);
     }
 
+    /// <inheritdoc/>
     public IReadOnlyList<int> GetColumnIndices(ExcelSheet sheet) => ColumnIndices;
 }
