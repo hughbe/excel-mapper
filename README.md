@@ -1069,6 +1069,49 @@ public class EmployeeMap : ExcelClassMap<Employee>
 }
 ```
 
+#### Mapping Enums with DescriptionAttribute
+
+ExcelMapper automatically supports mapping enum values using their `[Description]` attribute values. This is useful when your Excel data contains user-friendly text that differs from the enum names:
+
+| Status              |
+|---------------------|
+| Full Time Employee  |
+| Part Time Employee  |
+| Contract Worker     |
+
+```csharp
+using System.ComponentModel;
+
+public enum EmploymentStatus
+{
+    [Description("Full Time Employee")]
+    FullTime,
+    
+    [Description("Part Time Employee")]
+    PartTime,
+    
+    [Description("Contract Worker")]
+    Contract
+}
+
+public class Employee
+{
+    public EmploymentStatus Status { get; set; }
+}
+```
+
+The DescriptionAttribute mapping works automatically with:
+- Direct enum properties (automatic mapping)
+- Explicit property mapping via `RegisterClassMap`
+- Nullable enums
+- Both standard enum name matching and description matching (description takes precedence when both match)
+
+**Important Notes:**
+- Description matching is **case-sensitive**
+- Empty or null descriptions are ignored
+- If a description is not found, the mapper falls back to standard enum name matching
+- Enum values without a `[Description]` attribute can still be mapped using their standard names
+
 ### Collections and Arrays
 
 ExcelMapper supports multiple strategies for mapping collections.
