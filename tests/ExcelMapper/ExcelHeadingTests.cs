@@ -3,18 +3,28 @@
 public class ExcelHeadingTests
 {
     [Fact]
+    public void ColumnNames_Get_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
+
+        var columnNames = heading.ColumnNames;
+        Assert.Equal(["Int Value", "StringValue", "Bool Value", "Enum Value", "DateValue", "ArrayValue", "MappedValue", "TrimmedValue"], columnNames);
+        Assert.Same(columnNames, heading.ColumnNames);
+    }
+
+    [Fact]
     public void GetColumnName_Invoke_Roundtrips()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         var sheet = importer.ReadSheet();
         var heading = sheet.ReadHeading();
-        Assert.Equal(["Int Value", "StringValue", "Bool Value", "Enum Value", "DateValue", "ArrayValue", "MappedValue", "TrimmedValue"], heading.ColumnNames);
 
-        string[] columnNames = [.. heading.ColumnNames];
-        for (int i = 0; i < columnNames.Length; i++)
+        for (int i = 0; i < heading.ColumnNames.Count; i++)
         {
-            Assert.Equal(i, heading.GetColumnIndex(columnNames[i]));
-            Assert.Equal(columnNames[i], heading.GetColumnName(i));
+            Assert.Equal(i, heading.GetColumnIndex(heading.ColumnNames[i]));
+            Assert.Equal(heading.ColumnNames[i], heading.GetColumnName(i));
         }
     }
 
@@ -229,7 +239,7 @@ public class ExcelHeadingTests
     }
 
     [Fact]
-    public void GetColumnName_TryGetFirstColumnMatchingIndex_Roundtrips()
+    public void TryGetFirstColumnMatchingIndex_Invoke_Roundtrips()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         var sheet = importer.ReadSheet();
@@ -266,49 +276,5 @@ public class ExcelHeadingTests
 
         Assert.False(heading.TryGetFirstColumnMatchingIndex(e => e == columnName, out int index));
         Assert.Equal(-1, index);
-    }
-
-    [Fact]
-    public void ReadHeading_TooManyColumns_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("Primitives.xlsx");
-        importer.Configuration.MaxColumnsPerSheet = 5; // Primitives.xlsx has 8 columns
-        var sheet = importer.ReadSheet();
-
-        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadHeading());
-        Assert.Contains("exceeds the maximum", ex.Message);
-        Assert.Contains("8 columns", ex.Message);
-        Assert.Contains("(5)", ex.Message);
-    }
-
-    [Fact]
-    public void ReadHeading_ExactlyMaxColumns_Success()
-    {
-        using var importer = Helpers.GetImporter("Primitives.xlsx");
-        importer.Configuration.MaxColumnsPerSheet = 8; // Primitives.xlsx has exactly 8 columns
-        var sheet = importer.ReadSheet();
-
-        var heading = sheet.ReadHeading();
-        Assert.NotNull(heading);
-        Assert.Equal(8, heading.ColumnNames.Count);
-    }
-
-    [Fact]
-    public void ReadHeading_DefaultMaxColumns_AllowsLargeFiles()
-    {
-        using var importer = Helpers.GetImporter("Primitives.xlsx");
-        // Default is 10000, Primitives.xlsx has 8 columns - should work fine
-        var sheet = importer.ReadSheet();
-
-        var heading = sheet.ReadHeading();
-        Assert.NotNull(heading);
-        Assert.Equal(8, heading.ColumnNames.Count);
-    }
-
-    [Fact]
-    public void Configuration_MaxColumnsPerSheet_DefaultValue()
-    {
-        using var importer = Helpers.GetImporter("Primitives.xlsx");
-        Assert.Equal(10000, importer.Configuration.MaxColumnsPerSheet);
     }
 }

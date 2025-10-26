@@ -8,8 +8,6 @@ namespace ExcelMapper;
 /// </summary>
 public class ExcelHeading
 {
-    private readonly string[] _columnNames;
-
     internal ExcelHeading(IDataRecord reader, ExcelRange dataRange, ExcelImporterConfiguration configuration)
     {
         if (reader.FieldCount > configuration.MaxColumnsPerSheet)
@@ -28,7 +26,7 @@ public class ExcelHeading
         {
             var columnName = reader.GetValue(columnIndex + offset)?.ToString() ?? string.Empty;
             columnNames[columnIndex] = columnName; // Store original name
-            
+
             // For mapping, use unique key if duplicate
             var mappingKey = columnName;
             if (nameMapping.ContainsKey(mappingKey))
@@ -45,9 +43,14 @@ public class ExcelHeading
             nameMapping.Add(mappingKey, columnIndex);
         }
 
+        ColumnNames = columnNames;
         NameMapping = nameMapping;
-        _columnNames = columnNames;
     }
+
+    /// <summary>
+    /// Gets the list of all column names in the heading.
+    /// </summary>
+    public IReadOnlyList<string> ColumnNames { get; }
 
     private SortedList<string, int> NameMapping { get; }
 
@@ -59,8 +62,8 @@ public class ExcelHeading
     public string GetColumnName(int columnIndex)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(columnIndex);
-        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(columnIndex, _columnNames.Length);
-        return _columnNames[columnIndex];
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(columnIndex, ColumnNames.Count);
+        return ColumnNames[columnIndex];
     }
 
     /// <summary>
@@ -134,9 +137,4 @@ public class ExcelHeading
         index = NameMapping[key];
         return true;
     }
-
-    /// <summary>
-    /// Gets the list of all column names in the heading.
-    /// </summary>
-    public IReadOnlyList<string> ColumnNames => _columnNames;
 }

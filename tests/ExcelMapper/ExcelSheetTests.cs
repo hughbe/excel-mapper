@@ -383,6 +383,42 @@ public class ExcelSheetTests
     }
 
     [Fact]
+    public void ReadHeading_TooManyColumns_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.MaxColumnsPerSheet = 5; // Primitives.xlsx has 8 columns
+        var sheet = importer.ReadSheet();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadHeading());
+        Assert.Contains("exceeds the maximum", ex.Message);
+        Assert.Contains("8 columns", ex.Message);
+        Assert.Contains("(5)", ex.Message);
+    }
+
+    [Fact]
+    public void ReadHeading_ExactlyMaxColumns_Success()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.MaxColumnsPerSheet = 8; // Primitives.xlsx has exactly 8 columns
+        var sheet = importer.ReadSheet();
+
+        var heading = sheet.ReadHeading();
+        Assert.NotNull(heading);
+        Assert.Equal(8, heading.ColumnNames.Count);
+    }
+
+    [Fact]
+    public void ReadHeading_DefaultMaxColumns_AllowsLargeFiles()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet();
+
+        var heading = sheet.ReadHeading();
+        Assert.NotNull(heading);
+        Assert.Equal(8, heading.ColumnNames.Count);
+    }
+
+    [Fact]
     public void ReadRows_NotReadHeading_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
