@@ -684,24 +684,24 @@ public class ExcelImporterTests
 
         sheet1!.ReadHeading();
 
-        TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+        var sheet1Row1 = sheet1.ReadRow<TestClass>();
         Assert.Equal("a", sheet1Row1.StringValue);
 
-        TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+        var sheet1Row2 = sheet1.ReadRow<TestClass>();
         Assert.Equal("b", sheet1Row2.StringValue);
 
-        TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+        var sheet1Row3 = sheet1.ReadRow<TestClass>();
         Assert.Null(sheet1Row3.StringValue);
 
         sheet3!.ReadHeading();
 
-        TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+        var sheet3Row1 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s1", sheet3Row1.StringValue);
 
-        TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+        var sheet3Row2 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s2", sheet3Row2.StringValue);
 
-        TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+        var sheet3Row3 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s3", sheet3Row3.StringValue);
     }
 
@@ -716,22 +716,22 @@ public class ExcelImporterTests
         sheet1!.ReadHeading();
         sheet3!.ReadHeading();
 
-        TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+        var sheet1Row1 = sheet1.ReadRow<TestClass>();
         Assert.Equal("a", sheet1Row1.StringValue);
 
-        TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+        var sheet1Row2 = sheet1.ReadRow<TestClass>();
         Assert.Equal("b", sheet1Row2.StringValue);
 
-        TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+        var sheet1Row3 = sheet1.ReadRow<TestClass>();
         Assert.Null(sheet1Row3.StringValue);
 
-        TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+        var sheet3Row1 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s1", sheet3Row1.StringValue);
 
-        TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+        var sheet3Row2 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s2", sheet3Row2.StringValue);
 
-        TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+        var sheet3Row3 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s3", sheet3Row3.StringValue);
     }
 
@@ -746,22 +746,22 @@ public class ExcelImporterTests
         sheet1!.ReadHeading();
         sheet3!.ReadHeading();
 
-        TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+        var sheet3Row1 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s1", sheet3Row1.StringValue);
 
-        TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+        var sheet3Row2 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s2", sheet3Row2.StringValue);
 
-        TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+        var sheet3Row3 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s3", sheet3Row3.StringValue);
 
-        TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+        var sheet1Row1 = sheet1.ReadRow<TestClass>();
         Assert.Equal("a", sheet1Row1.StringValue);
 
-        TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+        var sheet1Row2 = sheet1.ReadRow<TestClass>();
         Assert.Equal("b", sheet1Row2.StringValue);
 
-        TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+        var sheet1Row3 = sheet1.ReadRow<TestClass>();
         Assert.Null(sheet1Row3.StringValue);
     }
 
@@ -775,24 +775,24 @@ public class ExcelImporterTests
 
         sheet3!.ReadHeading();
 
-        TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+        var sheet3Row1 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s1", sheet3Row1.StringValue);
 
-        TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+        var sheet3Row2 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s2", sheet3Row2.StringValue);
 
-        TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+        var sheet3Row3 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s3", sheet3Row3.StringValue);
 
         sheet1!.ReadHeading();
 
-        TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+        var sheet1Row1 = sheet1.ReadRow<TestClass>();
         Assert.Equal("a", sheet1Row1.StringValue);
 
-        TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+        var sheet1Row2 = sheet1.ReadRow<TestClass>();
         Assert.Equal("b", sheet1Row2.StringValue);
 
-        TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+        var sheet1Row3 = sheet1.ReadRow<TestClass>();
         Assert.Null(sheet1Row3.StringValue);
     }
 
@@ -807,22 +807,22 @@ public class ExcelImporterTests
         sheet3!.ReadHeading();
         sheet1!.ReadHeading();
 
-        TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+        var sheet1Row1 = sheet1.ReadRow<TestClass>();
         Assert.Equal("a", sheet1Row1.StringValue);
 
-        TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+        var sheet1Row2 = sheet1.ReadRow<TestClass>();
         Assert.Equal("b", sheet1Row2.StringValue);
 
-        TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+        var sheet1Row3 = sheet1.ReadRow<TestClass>();
         Assert.Null(sheet1Row3.StringValue);
 
-        TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+        var sheet3Row1 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s1", sheet3Row1.StringValue);
 
-        TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+        var sheet3Row2 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s2", sheet3Row2.StringValue);
 
-        TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+        var sheet3Row3 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s3", sheet3Row3.StringValue);
     }
 
@@ -837,22 +837,22 @@ public class ExcelImporterTests
         sheet3!.ReadHeading();
         sheet1!.ReadHeading();
 
-        TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+        var sheet3Row1 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s1", sheet3Row1.StringValue);
 
-        TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+        var sheet3Row2 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s2", sheet3Row2.StringValue);
 
-        TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+        var sheet3Row3 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s3", sheet3Row3.StringValue);
 
-        TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+        var sheet1Row1 = sheet1.ReadRow<TestClass>();
         Assert.Equal("a", sheet1Row1.StringValue);
 
-        TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+        var sheet1Row2 = sheet1.ReadRow<TestClass>();
         Assert.Equal("b", sheet1Row2.StringValue);
 
-        TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+        var sheet1Row3 = sheet1.ReadRow<TestClass>();
         Assert.Null(sheet1Row3.StringValue);
     }
 
@@ -867,22 +867,22 @@ public class ExcelImporterTests
         sheet1!.ReadHeading();
         sheet3!.ReadHeading();
 
-        TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+        var sheet1Row1 = sheet1.ReadRow<TestClass>();
         Assert.Equal("a", sheet1Row1.StringValue);
 
-        TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+        var sheet1Row2 = sheet1.ReadRow<TestClass>();
         Assert.Equal("b", sheet1Row2.StringValue);
 
-        TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+        var sheet3Row1 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s1", sheet3Row1.StringValue);
 
-        TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+        var sheet3Row2 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s2", sheet3Row2.StringValue);
 
-        TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+        var sheet1Row3 = sheet1.ReadRow<TestClass>();
         Assert.Null(sheet1Row3.StringValue);
 
-        TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+        var sheet3Row3 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s3", sheet3Row3.StringValue);
     }
 
@@ -897,22 +897,22 @@ public class ExcelImporterTests
         sheet1!.ReadHeading();
         sheet3!.ReadHeading();
 
-        TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+        var sheet1Row1 = sheet1.ReadRow<TestClass>();
         Assert.Equal("a", sheet1Row1.StringValue);
 
-        TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+        var sheet3Row1 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s1", sheet3Row1.StringValue);
 
-        TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+        var sheet1Row2 = sheet1.ReadRow<TestClass>();
         Assert.Equal("b", sheet1Row2.StringValue);
 
-        TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+        var sheet3Row2 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s2", sheet3Row2.StringValue);
 
-        TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+        var sheet1Row3 = sheet1.ReadRow<TestClass>();
         Assert.Null(sheet1Row3.StringValue);
 
-        TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+        var sheet3Row3 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s3", sheet3Row3.StringValue);
     }
 
@@ -927,22 +927,22 @@ public class ExcelImporterTests
         sheet1!.ReadHeading();
         sheet3!.ReadHeading();
 
-        TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+        var sheet3Row1 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s1", sheet3Row1.StringValue);
 
-        TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+        var sheet1Row1 = sheet1.ReadRow<TestClass>();
         Assert.Equal("a", sheet1Row1.StringValue);
 
-        TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+        var sheet1Row2 = sheet1.ReadRow<TestClass>();
         Assert.Equal("b", sheet1Row2.StringValue);
 
-        TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+        var sheet3Row2 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s2", sheet3Row2.StringValue);
 
-        TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+        var sheet3Row3 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s3", sheet3Row3.StringValue);
 
-        TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+        var sheet1Row3 = sheet1.ReadRow<TestClass>();
         Assert.Null(sheet1Row3.StringValue);
     }
 
@@ -957,22 +957,22 @@ public class ExcelImporterTests
         sheet1!.ReadHeading();
         sheet3!.ReadHeading();
 
-        TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+        var sheet3Row1 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s1", sheet3Row1.StringValue);
 
-        TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+        var sheet1Row1 = sheet1.ReadRow<TestClass>();
         Assert.Equal("a", sheet1Row1.StringValue);
 
-        TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+        var sheet3Row2 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s2", sheet3Row2.StringValue);
 
-        TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+        var sheet1Row2 = sheet1.ReadRow<TestClass>();
         Assert.Equal("b", sheet1Row2.StringValue);
 
-        TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+        var sheet3Row3 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s3", sheet3Row3.StringValue);
 
-        TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+        var sheet1Row3 = sheet1.ReadRow<TestClass>();
         Assert.Null(sheet1Row3.StringValue);
     }
 
@@ -989,22 +989,22 @@ public class ExcelImporterTests
         sheet1!.HasHeading = false;
         sheet3!.HasHeading = false;
 
-        TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+        var sheet1Row1 = sheet1.ReadRow<TestClass>();
         Assert.Equal("StringValue", sheet1Row1.StringValue);
 
-        TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+        var sheet1Row2 = sheet1.ReadRow<TestClass>();
         Assert.Equal("a", sheet1Row2.StringValue);
 
-        TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+        var sheet1Row3 = sheet1.ReadRow<TestClass>();
         Assert.Equal("b", sheet1Row3.StringValue);
 
-        TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+        var sheet3Row1 = sheet3.ReadRow<TestClass>();
         Assert.Equal("StringValue", sheet3Row1.StringValue);
 
-        TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+        var sheet3Row2 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s1", sheet3Row2.StringValue);
 
-        TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+        var sheet3Row3 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s2", sheet3Row3.StringValue);
     }
 
@@ -1021,22 +1021,22 @@ public class ExcelImporterTests
         sheet1!.HasHeading = false;
         sheet3!.HasHeading = false;
 
-        TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+        var sheet3Row1 = sheet3.ReadRow<TestClass>();
         Assert.Equal("StringValue", sheet3Row1.StringValue);
 
-        TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+        var sheet3Row2 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s1", sheet3Row2.StringValue);
 
-        TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+        var sheet3Row3 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s2", sheet3Row3.StringValue);
 
-        TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+        var sheet1Row1 = sheet1.ReadRow<TestClass>();
         Assert.Equal("StringValue", sheet1Row1.StringValue);
 
-        TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+        var sheet1Row2 = sheet1.ReadRow<TestClass>();
         Assert.Equal("a", sheet1Row2.StringValue);
 
-        TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+        var sheet1Row3 = sheet1.ReadRow<TestClass>();
         Assert.Equal("b", sheet1Row3.StringValue);
     }
 
@@ -1053,22 +1053,22 @@ public class ExcelImporterTests
         sheet1!.HasHeading = false;
         sheet3!.HasHeading = false;
 
-        TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+        var sheet1Row1 = sheet1.ReadRow<TestClass>();
         Assert.Equal("StringValue", sheet1Row1.StringValue);
 
-        TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+        var sheet3Row1 = sheet3.ReadRow<TestClass>();
         Assert.Equal("StringValue", sheet3Row1.StringValue);
 
-        TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+        var sheet1Row2 = sheet1.ReadRow<TestClass>();
         Assert.Equal("a", sheet1Row2.StringValue);
 
-        TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+        var sheet3Row2 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s1", sheet3Row2.StringValue);
 
-        TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+        var sheet1Row3 = sheet1.ReadRow<TestClass>();
         Assert.Equal("b", sheet1Row3.StringValue);
 
-        TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+        var sheet3Row3 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s2", sheet3Row3.StringValue);
     }
 
@@ -1085,22 +1085,22 @@ public class ExcelImporterTests
         sheet1!.HasHeading = false;
         sheet3!.HasHeading = false;
 
-        TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+        var sheet1Row1 = sheet1.ReadRow<TestClass>();
         Assert.Equal("StringValue", sheet1Row1.StringValue);
 
-        TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+        var sheet3Row1 = sheet3.ReadRow<TestClass>();
         Assert.Equal("StringValue", sheet3Row1.StringValue);
 
-        TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+        var sheet3Row2 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s1", sheet3Row2.StringValue);
 
-        TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+        var sheet1Row2 = sheet1.ReadRow<TestClass>();
         Assert.Equal("a", sheet1Row2.StringValue);
 
-        TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+        var sheet1Row3 = sheet1.ReadRow<TestClass>();
         Assert.Equal("b", sheet1Row3.StringValue);
 
-        TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+        var sheet3Row3 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s2", sheet3Row3.StringValue);
     }
 
@@ -1117,22 +1117,22 @@ public class ExcelImporterTests
         sheet1!.HasHeading = false;
         sheet3!.HasHeading = false;
 
-        TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+        var sheet3Row1 = sheet3.ReadRow<TestClass>();
         Assert.Equal("StringValue", sheet3Row1.StringValue);
 
-        TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+        var sheet1Row1 = sheet1.ReadRow<TestClass>();
         Assert.Equal("StringValue", sheet1Row1.StringValue);
 
-        TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+        var sheet1Row2 = sheet1.ReadRow<TestClass>();
         Assert.Equal("a", sheet1Row2.StringValue);
 
-        TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+        var sheet3Row2 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s1", sheet3Row2.StringValue);
 
-        TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+        var sheet3Row3 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s2", sheet3Row3.StringValue);
 
-        TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+        var sheet1Row3 = sheet1.ReadRow<TestClass>();
         Assert.Equal("b", sheet1Row3.StringValue);
     }
 
@@ -1149,22 +1149,22 @@ public class ExcelImporterTests
         sheet1!.HasHeading = false;
         sheet3!.HasHeading = false;
 
-        TestClass sheet3Row1 = sheet3.ReadRow<TestClass>();
+        var sheet3Row1 = sheet3.ReadRow<TestClass>();
         Assert.Equal("StringValue", sheet3Row1.StringValue);
 
-        TestClass sheet1Row1 = sheet1.ReadRow<TestClass>();
+        var sheet1Row1 = sheet1.ReadRow<TestClass>();
         Assert.Equal("StringValue", sheet1Row1.StringValue);
 
-        TestClass sheet3Row2 = sheet3.ReadRow<TestClass>();
+        var sheet3Row2 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s1", sheet3Row2.StringValue);
 
-        TestClass sheet1Row2 = sheet1.ReadRow<TestClass>();
+        var sheet1Row2 = sheet1.ReadRow<TestClass>();
         Assert.Equal("a", sheet1Row2.StringValue);
 
-        TestClass sheet3Row3 = sheet3.ReadRow<TestClass>();
+        var sheet3Row3 = sheet3.ReadRow<TestClass>();
         Assert.Equal("s2", sheet3Row3.StringValue);
 
-        TestClass sheet1Row3 = sheet1.ReadRow<TestClass>();
+        var sheet1Row3 = sheet1.ReadRow<TestClass>();
         Assert.Equal("b", sheet1Row3.StringValue);
     }
 

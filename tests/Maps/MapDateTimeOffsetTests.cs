@@ -325,7 +325,7 @@ public class MapDateTimeOffsetTests
         // Valid cell value.
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<DateTimeOffsetValueInt>(1, 1).ToArray());
         Assert.IsType<InvalidCastException>(ex.InnerException);
-        Assert.Equal($"Cannot assign \"{new DateTime(2025, 01, 01, 1, 1, 1)}\" to member \"Value\" of type \"System.Int32\" in column \"Date\" on row 2 in sheet \"Sheet1\".", ex.Message);
+        Assert.Equal($"Cannot assign \"{new DateTime(2025, 01, 01, 1, 1, 1)}\" to member \"Value\" of type \"System.Int32\" in column \"Date\" on row 1 in sheet \"Sheet1\".", ex.Message);
     }
 
     private class DateTimeOffsetValueInt

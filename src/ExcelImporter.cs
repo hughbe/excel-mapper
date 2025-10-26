@@ -30,7 +30,7 @@ public class ExcelImporter : IDisposable
     /// </summary>
     public int NumberOfSheets => Reader.ResultsCount;
 
-    private int SheetIndex { get; set; } = -1;
+    internal int SheetIndex { get; set; } = -1;
 
     /// <summary>
     /// Constructs an importer that reads an Excel file from a path.
@@ -272,35 +272,5 @@ public class ExcelImporter : IDisposable
     {
         Reader.Reset();
         SheetIndex = -1;
-    }
-
-    internal void MoveToSheet(ExcelSheet sheet)
-    {
-        // Already on the sheet.
-        if (SheetIndex == sheet.Index)
-        {
-            return;
-        }
-
-        // Read up to the current sheet.
-        Reader.Reset();
-        for (int i = 0; i < sheet.Index; i++)
-        {
-            Reader.NextResult();
-        }
-
-        // If the header has already been read, skip past it.
-        if (sheet.HasHeading && sheet.Heading != null)
-        {
-            sheet.ReadPastHeading();
-        }
-
-        // Read up to the current row.
-        for (int i = 0; i <= sheet.CurrentRowIndex; i++)
-        {
-            Reader.Read();
-        }
-
-        SheetIndex = sheet.Index;
     }
 }

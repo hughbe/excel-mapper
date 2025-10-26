@@ -34,10 +34,10 @@ public class ExcelSheetTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         var sheet = importer.ReadSheet();
-        ExcelHeading heading = sheet.ReadHeading();
+        var heading = sheet.ReadHeading();
         Assert.Same(heading, sheet.Heading);
         Assert.Equal(["Int Value", "StringValue", "Bool Value", "Enum Value", "DateValue", "ArrayValue", "MappedValue", "TrimmedValue"], heading.ColumnNames);
-        Assert.Equal(-1, sheet.CurrentRowIndex);
+        Assert.Equal(0, sheet.CurrentRowIndex);
     }
 
     [Fact]
@@ -45,10 +45,10 @@ public class ExcelSheetTests
     {
         using var importer = Helpers.GetImporter("DuplicatedColumns.xlsx");
         var sheet = importer.ReadSheet();
-        ExcelHeading heading = sheet.ReadHeading();
+        var heading = sheet.ReadHeading();
         Assert.Same(heading, sheet.Heading);
         Assert.Equal(["MyColumn", "MyColumn"], heading.ColumnNames);
-        Assert.Equal(-1, sheet.CurrentRowIndex);
+        Assert.Equal(0, sheet.CurrentRowIndex);
     }
 
     [Fact]
@@ -56,10 +56,10 @@ public class ExcelSheetTests
     {
         using var importer = Helpers.GetImporter("EmptyColumns.xlsx");
         var sheet = importer.ReadSheet();
-        ExcelHeading heading = sheet.ReadHeading();
+        var heading = sheet.ReadHeading();
         Assert.Same(heading, sheet.Heading);
         Assert.Equal(["", "Column2", "", " Column4 "], heading.ColumnNames);
-        Assert.Equal(-1, sheet.CurrentRowIndex);
+        Assert.Equal(0, sheet.CurrentRowIndex);
     }
 
     [Fact]
@@ -69,10 +69,10 @@ public class ExcelSheetTests
         var sheet = importer.ReadSheet();
         sheet.HeadingIndex = 3;
 
-        ExcelHeading heading = sheet.ReadHeading();
+        var heading = sheet.ReadHeading();
         Assert.Same(heading, sheet.Heading);
         Assert.Equal(["Value"], heading.ColumnNames);
-        Assert.Equal(-1, sheet.CurrentRowIndex);
+        Assert.Equal(3, sheet.CurrentRowIndex);
     }
 
     [Fact]
@@ -106,6 +106,16 @@ public class ExcelSheetTests
     }
 
     [Fact]
+    public void ReadHeading_TooLargeHeadingIndex_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Non Zero Header Index.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.HeadingIndex = 8;
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadHeading());
+    }
+
+    [Fact]
     public void ReadHeading_Closed_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
@@ -124,7 +134,7 @@ public class ExcelSheetTests
 
         var rows = sheet.ReadRows<StringValue>();
         Assert.Equal(new string?[] { "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
-        Assert.Equal(3, sheet.CurrentRowIndex);
+        Assert.Equal(4, sheet.CurrentRowIndex);
 
         Assert.NotNull(sheet.Heading);
         Assert.True(sheet.HasHeading);
@@ -156,7 +166,7 @@ public class ExcelSheetTests
 
         var rows = sheet.ReadRows<StringValue>();
         Assert.Equal(new string?[] { "value", "  value  ", null, "value"  }, rows.Select(p => p.Value).ToArray());
-        Assert.Equal(3, sheet.CurrentRowIndex);
+        Assert.Equal(4, sheet.CurrentRowIndex);
 
         Assert.NotNull(sheet.Heading);
         Assert.True(sheet.HasHeading);
@@ -172,7 +182,7 @@ public class ExcelSheetTests
 
         var rows = sheet.ReadRows<StringValue>();
         Assert.Equal(new string?[] { "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
-        Assert.Equal(3, sheet.CurrentRowIndex);
+        Assert.Equal(7, sheet.CurrentRowIndex);
 
         Assert.NotNull(sheet.Heading);
         Assert.True(sheet.HasHeading);
@@ -186,7 +196,7 @@ public class ExcelSheetTests
 
         var rows1 = sheet.ReadRows<StringValue>();
         Assert.Equal(new string?[] { "value", "  value  ", null, "value" }, rows1.Select(p => p.Value).ToArray());
-        Assert.Equal(3, sheet.CurrentRowIndex);
+        Assert.Equal(4, sheet.CurrentRowIndex);
 
         Assert.NotNull(sheet.Heading);
         Assert.True(sheet.HasHeading);
@@ -274,7 +284,7 @@ public class ExcelSheetTests
 
         var rows = sheet.ReadRows<StringValue>(startIndex, count);
         Assert.Equal(expectedValues, rows.Select(p => p.Value).ToArray());
-        Assert.Equal(startIndex + count, sheet.CurrentRowIndex);
+        Assert.Equal(count == 0 ? 0 : startIndex + count - 1, sheet.CurrentRowIndex);
 
         Assert.NotNull(sheet.Heading);
         Assert.True(sheet.HasHeading);
@@ -289,7 +299,7 @@ public class ExcelSheetTests
 
         var rows = sheet.ReadRows<StringValue>(startIndex, count);
         Assert.Equal(expectedValues, rows.Select(p => p.Value).ToArray());
-        Assert.Equal(startIndex + count, sheet.CurrentRowIndex);
+        Assert.Equal(count == 0 ? 0 : startIndex + count - 1, sheet.CurrentRowIndex);
 
         Assert.NotNull(sheet.Heading);
         Assert.True(sheet.HasHeading);
@@ -302,11 +312,11 @@ public class ExcelSheetTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         var sheet = importer.ReadSheet();
 
-        ExcelHeading heading = sheet.ReadHeading();
+        var heading = sheet.ReadHeading();
 
         var rows = sheet.ReadRows<StringValue>(startIndex, count);
         Assert.Equal(expectedValues, rows.Select(p => p.Value).ToArray());
-        Assert.Equal(startIndex + count, sheet.CurrentRowIndex);
+        Assert.Equal(count == 0 ? 0 : startIndex + count - 1, sheet.CurrentRowIndex);
 
         Assert.NotNull(sheet.Heading);
         Assert.Same(heading, sheet.Heading);
@@ -333,7 +343,7 @@ public class ExcelSheetTests
 
         var rows = sheet.ReadRows<StringValue>(startIndex, count).ToList();
         Assert.Equal(expectedValues, rows.Select(p => p.Value).ToArray());
-        Assert.Equal(startIndex + count, sheet.CurrentRowIndex);
+        Assert.Equal(count == 0 ? 0 : startIndex + count - 1, sheet.CurrentRowIndex);
 
         Assert.Null(sheet.Heading);
         Assert.False(sheet.HasHeading);
@@ -401,7 +411,7 @@ public class ExcelSheetTests
         var sheet = importer.ReadSheet();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<BlankLinesClass>().ToArray());
-        Assert.Equal(0, sheet.CurrentRowIndex);
+        Assert.Equal(1, sheet.CurrentRowIndex);
     }
 
     [Fact]
@@ -421,7 +431,7 @@ public class ExcelSheetTests
         Assert.Equal(3, rows[2].IntValue);
         Assert.Equal("C", rows[3].StringValue);
         Assert.Equal(0, rows[3].IntValue);
-        Assert.Equal(998, sheet.CurrentRowIndex);
+        Assert.Equal(999, sheet.CurrentRowIndex);
     }
 
     [Fact]
@@ -432,42 +442,42 @@ public class ExcelSheetTests
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
-        Assert.Equal(0, sheet.CurrentRowIndex);
+        Assert.Equal(1, sheet.CurrentRowIndex);
 
         var row1 = sheet.ReadRow<BlankLinesClass>();
         Assert.Equal("A", row1.StringValue);
         Assert.Equal(1, row1.IntValue);
-        Assert.Equal(1, sheet.CurrentRowIndex);
+        Assert.Equal(2, sheet.CurrentRowIndex);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
-        Assert.Equal(2, sheet.CurrentRowIndex);
+        Assert.Equal(3, sheet.CurrentRowIndex);
 
         var row2 = sheet.ReadRow<BlankLinesClass>();
         Assert.Equal("B", row2.StringValue);
         Assert.Equal(2, row2.IntValue);
-        Assert.Equal(3, sheet.CurrentRowIndex);
-
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
         Assert.Equal(4, sheet.CurrentRowIndex);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
         Assert.Equal(5, sheet.CurrentRowIndex);
 
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
+        Assert.Equal(6, sheet.CurrentRowIndex);
+
         var row3 = sheet.ReadRow<BlankLinesClass>();
         Assert.Null(row3.StringValue);
         Assert.Equal(3, row3.IntValue);
-        Assert.Equal(6, sheet.CurrentRowIndex);
+        Assert.Equal(7, sheet.CurrentRowIndex);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
-        Assert.Equal(7, sheet.CurrentRowIndex);
+        Assert.Equal(8, sheet.CurrentRowIndex);
 
         var row4 = sheet.ReadRow<BlankLinesClass>();
         Assert.Equal("C", row4.StringValue);
         Assert.Equal(0, row4.IntValue);
-        Assert.Equal(8, sheet.CurrentRowIndex);
+        Assert.Equal(9, sheet.CurrentRowIndex);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
-        Assert.Equal(9, sheet.CurrentRowIndex);
+        Assert.Equal(10, sheet.CurrentRowIndex);
     }
 
     [Fact]
@@ -481,25 +491,25 @@ public class ExcelSheetTests
         var row1 = sheet.ReadRow<BlankLinesClass>();
         Assert.Equal("A", row1.StringValue);
         Assert.Equal(1, row1.IntValue);
-        Assert.Equal(1, sheet.CurrentRowIndex);
+        Assert.Equal(2, sheet.CurrentRowIndex);
 
         var row2 = sheet.ReadRow<BlankLinesClass>();
         Assert.Equal("B", row2.StringValue);
         Assert.Equal(2, row2.IntValue);
-        Assert.Equal(3, sheet.CurrentRowIndex);
+        Assert.Equal(4, sheet.CurrentRowIndex);
 
         var row3 = sheet.ReadRow<BlankLinesClass>();
         Assert.Null(row3.StringValue);
         Assert.Equal(3, row3.IntValue);
-        Assert.Equal(6, sheet.CurrentRowIndex);
+        Assert.Equal(7, sheet.CurrentRowIndex);
 
         var row4 = sheet.ReadRow<BlankLinesClass>();
         Assert.Equal("C", row4.StringValue);
         Assert.Equal(0, row4.IntValue);
-        Assert.Equal(8, sheet.CurrentRowIndex);
+        Assert.Equal(9, sheet.CurrentRowIndex);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
-        Assert.Equal(998, sheet.CurrentRowIndex);
+        Assert.Equal(999, sheet.CurrentRowIndex);
     }
 
     [Fact]
@@ -513,30 +523,30 @@ public class ExcelSheetTests
         var row1 = sheet.ReadRow<BlankLinesClass>();
         Assert.Equal("A", row1.StringValue);
         Assert.Equal(1, row1.IntValue);
-        Assert.Equal(1, sheet.CurrentRowIndex);
+        Assert.Equal(2, sheet.CurrentRowIndex);
 
         var row2 = sheet.ReadRow<BlankLinesClass>();
         Assert.Equal("B", row2.StringValue);
         Assert.Equal(2, row2.IntValue);
-        Assert.Equal(3, sheet.CurrentRowIndex);
+        Assert.Equal(4, sheet.CurrentRowIndex);
 
         var row3 = sheet.ReadRow<BlankLinesClass>();
         Assert.Null(row3.StringValue);
         Assert.Equal(3, row3.IntValue);
-        Assert.Equal(6, sheet.CurrentRowIndex);
+        Assert.Equal(7, sheet.CurrentRowIndex);
 
         var row4 = sheet.ReadRow<BlankLinesClass>();
         Assert.Equal("C", row4.StringValue);
         Assert.Equal(0, row4.IntValue);
-        Assert.Equal(8, sheet.CurrentRowIndex);
+        Assert.Equal(9, sheet.CurrentRowIndex);
 
         var row5 = sheet.ReadRow<BlankLinesClass>();
         Assert.Equal(new DateTime(2025, 10, 25, 0, 0, 0).ToString(), row5.StringValue);
         Assert.Equal(4, row5.IntValue);
-        Assert.Equal(998, sheet.CurrentRowIndex);
+        Assert.Equal(999, sheet.CurrentRowIndex);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
-        Assert.Equal(998, sheet.CurrentRowIndex);
+        Assert.Equal(999, sheet.CurrentRowIndex);
     }
 
     [Fact]
@@ -575,7 +585,7 @@ public class ExcelSheetTests
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>(1, 1000).ToArray());
-        Assert.Equal(5, sheet.CurrentRowIndex);
+        Assert.Equal(4, sheet.CurrentRowIndex);
     }
 
     [Fact]
@@ -584,7 +594,7 @@ public class ExcelSheetTests
         using var importer = Helpers.GetImporter("Strings.xlsx");
         var sheet = importer.ReadSheet();
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>(1000, 1000).ToArray());
-        Assert.Equal(5, sheet.CurrentRowIndex);
+        Assert.Equal(4, sheet.CurrentRowIndex);
     }
 
     [Fact]
@@ -728,16 +738,6 @@ public class ExcelSheetTests
         var sheet = importer.ReadSheet();
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<Helpers.IListInterface>());
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IDisposable>());
-    }
-
-    [Fact]
-    public void ReadHeading_TooLargeHeadingIndex_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("Non Zero Header Index.xlsx");
-        var sheet = importer.ReadSheet();
-        sheet.HeadingIndex = 8;
-
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadHeading());
     }
 
     [Fact]

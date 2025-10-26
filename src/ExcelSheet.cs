@@ -134,8 +134,8 @@ public class ExcelSheet
             throw new ExcelMappingException($"Already read heading in sheet \"{Name}\".");
         }
 
-        Importer.MoveToSheet(this);
-        ReadPastHeading();
+        // Read up to the heading row.
+        ReadUpTo(HeadingIndex);
 
         var heading = new ExcelHeading(Reader, Importer.Configuration);
         Heading = heading;
@@ -205,6 +205,15 @@ public class ExcelSheet
             ReadHeading();
         }
 
+        // Skip to the start index
+        ReadUpTo(startIndex - 1);
+
+        // Handle zero count case.
+        if (count == 0)
+        {
+            return [];
+        }
+
         // Now delegate to iterator method for lazy evaluation
         return ReadRowsRangeIterator<T>(startIndex, count);
     }
@@ -214,20 +223,6 @@ public class ExcelSheet
     /// </summary>
     private IEnumerable<T> ReadRowsRangeIterator<T>(int startIndex, int count)
     {
-        // Reset the reader as we need to seek to the specific row.
-        Reader.Reset();
-        Importer.MoveToSheet(this);
-        CurrentRowIndex = HeadingIndex;
-        for (int i = HeadingIndex; i < startIndex; i++)
-        {
-            if (!Reader.Read())
-            {
-                throw new ExcelMappingException($"Sheet \"{Name}\" does not have row {i}.");
-            }
-
-            CurrentRowIndex++;
-        }
-        
         for (int i = 0; i < count; i++)
         {
             if (!TryReadRow(out T? row))
@@ -289,7 +284,7 @@ public class ExcelSheet
             Importer.Configuration.RegisterClassMap(typeof(T), classMap);
         }
 
-        bool result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out object? valueObject);
+        var result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out object? valueObject);
         value = (T?)valueObject;
         return result;
     }
@@ -301,7 +296,8 @@ public class ExcelSheet
             throw new ExcelMappingException($"The underlying reader is closed.");
         }
 
-        Importer.MoveToSheet(this);
+        // Ensure we're on the correct sheet and row.
+        ReadUpTo(CurrentRowIndex);
         if (!Reader.Read())
         {
             return false;
@@ -339,9 +335,26 @@ public class ExcelSheet
         return true;
     }
 
-    internal void ReadPastHeading()
+    internal void ReadUpTo(int index)
     {
-        for (int i = 0; i <= HeadingIndex; i++)
+        // If we're already on the correct sheet, no need to do anything.
+        if (Importer.SheetIndex != Index)
+    {
+            // Read up to the correct sheet.
+            Reader.Reset();
+            Importer.SheetIndex = 0;
+            
+            for (var i = 0; i < Index; i++)
+            {
+                Reader.NextResult();
+                Importer.SheetIndex++;
+            }
+
+            CurrentRowIndex = -1;
+        }
+
+        // Read up to the correct row.
+        for (var i = CurrentRowIndex; i < index; i++)
         {
             if (Reader.IsClosed)
             {
@@ -349,8 +362,10 @@ public class ExcelSheet
             }
             if (!Reader.Read())
             {
-                throw new ExcelMappingException($"Sheet \"{Name}\" has no heading.");
+                throw new ExcelMappingException($"Sheet \"{Name}\" does not have row {index}.");
             }
+
+            CurrentRowIndex++;
         }
     }
 }

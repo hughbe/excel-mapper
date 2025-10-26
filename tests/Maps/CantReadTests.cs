@@ -14,7 +14,7 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchColumnIndexPropertyClass>());
         Assert.StartsWith($"Could not read value for member \"Member\" for column at index {int.MaxValue}", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -33,7 +33,7 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchColumnIndexFieldClass>());
         Assert.StartsWith($"Could not read value for member \"Member\" for column at index {int.MaxValue}", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -52,7 +52,7 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchColumnNamePropertyClass>());
         Assert.StartsWith("Could not read value for member \"Member\" for column \"NoSuchColumn\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -71,7 +71,7 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchColumnNameFieldClass>());
         Assert.StartsWith("Could not read value for member \"Member\" for column \"NoSuchColumn\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -90,7 +90,7 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchColumnMatchingPropertyClass>());
         Assert.StartsWith($"Could not read value for member \"Member\" (no columns matching)", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -126,7 +126,7 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchColumnMatchingFieldClass>());
         Assert.StartsWith($"Could not read value for member \"Member\" (no columns matching)", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -157,7 +157,7 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchSplitColumnIndexPropertyClass>());
         Assert.StartsWith($"Could not read value for member \"Member\" for column at index {int.MaxValue}", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -176,7 +176,7 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchSplitColumnIndexFieldClass>());
         Assert.StartsWith($"Could not read value for member \"Member\" for column at index {int.MaxValue}", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -195,7 +195,7 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchSplitColumnNamePropertyClass>());
         Assert.StartsWith($"Could not read value for member \"Member\" for column \"NoSuchColumn\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -214,7 +214,7 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchSplitColumnNameFieldClass>());
         Assert.StartsWith($"Could not read value for member \"Member\" for column \"NoSuchColumn\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -233,7 +233,7 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchEnumerableColumnIndexPropertyClass>());
         Assert.StartsWith($"Could not read value for member \"Member\" for columns at indices 1, {int.MaxValue}", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -252,7 +252,7 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchEnumerableColumnIndexFieldClass>());
         Assert.StartsWith($"Could not read value for member \"Member\" for columns at indices 1, {int.MaxValue}", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -271,7 +271,7 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchEnumerableColumnNamePropertyClass>());
         Assert.StartsWith($"Could not read value for member \"Member\" for columns \"Value\", \"NoSuchColumn\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -290,7 +290,7 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchEnumerableColumnNameFieldClass>());
         Assert.StartsWith($"Could not read value for member \"Member\" for columns \"Value\", \"NoSuchColumn\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -317,8 +317,8 @@ public class CantReadTests
         sheet.ReadHeading();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
-        Assert.StartsWith($"Could not read value for member \"Member\" on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith($"Could not read value for member \"Member\" on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
     
@@ -347,8 +347,8 @@ public class CantReadTests
         sheet.ReadHeading();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
-        Assert.StartsWith($"Could not read value for member \"Member\" for column at index 1 on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith($"Could not read value for member \"Member\" for column at index 1 on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -379,8 +379,8 @@ public class CantReadTests
         sheet.ReadHeading();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
-        Assert.StartsWith($"Could not read value for member \"Member\" on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith($"Could not read value for member \"Member\" on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -402,8 +402,8 @@ public class CantReadTests
         sheet.ReadHeading();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
-        Assert.StartsWith($"Could not read value for member \"Member\" for column \"ColumnName\" on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith($"Could not read value for member \"Member\" for column \"ColumnName\" on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -434,8 +434,8 @@ public class CantReadTests
         sheet.ReadHeading();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
-        Assert.StartsWith($"Could not read value for member \"Member\" on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith($"Could not read value for member \"Member\" on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -457,8 +457,8 @@ public class CantReadTests
         sheet.ReadHeading();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
-        Assert.StartsWith($"Could not read value for member \"Member\" for column at index 1 on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith($"Could not read value for member \"Member\" for column at index 1 on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -487,8 +487,8 @@ public class CantReadTests
         sheet.ReadHeading();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
-        Assert.StartsWith($"Could not read value for member \"Member\" for columns at indices 1, 2 on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith($"Could not read value for member \"Member\" for columns at indices 1, 2 on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -510,8 +510,8 @@ public class CantReadTests
         sheet.ReadHeading();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
-        Assert.StartsWith($"Could not read value for member \"Member\" on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith($"Could not read value for member \"Member\" on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -533,8 +533,8 @@ public class CantReadTests
         sheet.ReadHeading();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
-        Assert.StartsWith($"Could not read value for member \"Member\" (no columns matching) on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith($"Could not read value for member \"Member\" (no columns matching) on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -556,8 +556,8 @@ public class CantReadTests
         sheet.ReadHeading();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
-        Assert.StartsWith($"Could not read value for member \"Member\" for column \"ColumnName\" on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith($"Could not read value for member \"Member\" for column \"ColumnName\" on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -586,8 +586,8 @@ public class CantReadTests
         sheet.ReadHeading();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
-        Assert.StartsWith($"Could not read value for member \"Member\" for columns \"ColumnName1\", \"ColumnName2\" on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith($"Could not read value for member \"Member\" for columns \"ColumnName1\", \"ColumnName2\" on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -609,8 +609,8 @@ public class CantReadTests
         sheet.ReadHeading();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
-        Assert.StartsWith($"Could not read value for member \"Member\" on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith($"Could not read value for member \"Member\" on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -632,8 +632,8 @@ public class CantReadTests
         sheet.ReadHeading();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
-        Assert.StartsWith($"Could not read value for member \"Member\" (no columns matching) on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith($"Could not read value for member \"Member\" (no columns matching) on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -656,8 +656,8 @@ public class CantReadTests
         sheet.ReadHeading();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EnumerableFieldClass>());
-        Assert.StartsWith($"Could not read value for member \"Member\" on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith($"Could not read value for member \"Member\" on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(-1, ex.ColumnIndex);
     }
 
@@ -690,8 +690,8 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IntPropertyClass>());
         Assert.Same(exception, ex.InnerException);
-        Assert.StartsWith("Cannot assign \"1\" to member \"Member\" of type \"System.Int32\" in column \"Int Value\" on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith("Cannot assign \"1\" to member \"Member\" of type \"System.Int32\" in column \"Int Value\" on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(0, ex.ColumnIndex);
     }
 
@@ -712,8 +712,8 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IntFieldClass>());
         Assert.Same(exception, ex.InnerException);
-        Assert.StartsWith("Cannot assign \"1\" to member \"Member\" of type \"System.Int32\" in column \"Int Value\" on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith("Cannot assign \"1\" to member \"Member\" of type \"System.Int32\" in column \"Int Value\" on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(0, ex.ColumnIndex);
     }
 
@@ -733,8 +733,8 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IntPropertyClass>());
         Assert.Null(ex.InnerException);
-        Assert.StartsWith("Cannot assign \"1\" to member \"Member\" of type \"System.Int32\" in column \"Int Value\" on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith("Cannot assign \"1\" to member \"Member\" of type \"System.Int32\" in column \"Int Value\" on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(0, ex.ColumnIndex);
     }
 
@@ -754,8 +754,8 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IntFieldClass>());
         Assert.Null(ex.InnerException);
-        Assert.StartsWith("Cannot assign \"1\" to member \"Member\" of type \"System.Int32\" in column \"Int Value\" on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith("Cannot assign \"1\" to member \"Member\" of type \"System.Int32\" in column \"Int Value\" on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(0, ex.ColumnIndex);
     }
 
@@ -792,8 +792,8 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IntPropertyClass>());
         Assert.Null(ex.InnerException);
-        Assert.StartsWith("Cannot assign \"1\" to member \"Member\" of type \"System.Int32\" in column \"Int Value\" on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith("Cannot assign \"1\" to member \"Member\" of type \"System.Int32\" in column \"Int Value\" on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(0, ex.ColumnIndex);
     }
 
@@ -813,8 +813,8 @@ public class CantReadTests
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IntFieldClass>());
         Assert.Null(ex.InnerException);
-        Assert.StartsWith("Cannot assign \"1\" to member \"Member\" of type \"System.Int32\" in column \"Int Value\" on row 0 in sheet \"Primitives\"", ex.Message);
-        Assert.Equal(0, ex.RowIndex);
+        Assert.StartsWith("Cannot assign \"1\" to member \"Member\" of type \"System.Int32\" in column \"Int Value\" on row 1 in sheet \"Primitives\"", ex.Message);
+        Assert.Equal(1, ex.RowIndex);
         Assert.Equal(0, ex.ColumnIndex);
     }
 
