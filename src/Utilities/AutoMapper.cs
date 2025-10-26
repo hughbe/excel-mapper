@@ -2,6 +2,7 @@
 using System.Collections.Frozen;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -44,13 +45,12 @@ public static class AutoMapper
             // creating the map.
             // If the user doesn't add any mappers to the property, an ExcelMappingException
             // will be thrown at the point of registering the class map.
-            if (TryGetWellKnownMapper<T>(out var mapper))
+            if (!TryAddWellKnownMappers<T>(map.Pipeline.Mappers))
             {
-                map.Pipeline.Mappers.Insert(0, mapper);
-            }
-            else if (isAutoMapping)
-            {
-                return false;
+                if (isAutoMapping)
+                {
+                    return false;
+                }
             }
         }
 
@@ -127,20 +127,20 @@ public static class AutoMapper
     }.ToFrozenSet();
 
     [ExcludeFromCodeCoverage]
-    private static bool TryGetWellKnownMapper<T>([NotNullWhen(true)] out ICellMapper? mapper)
+    private static bool TryAddWellKnownMappers<T>(IList<ICellMapper> mappers)
     {
         var type = typeof(T).GetNullableTypeOrThis(out _);
 
         // Fast path: Check dictionary for well-known types with immutable mappers.
         if (s_wellKnownTypeMappers.TryGetValue(type, out var cachedMapper))
         {
-            mapper = cachedMapper;
+            mappers.Add(cachedMapper);
             return true;
         }
         // Check for types with mutable mappers (cannot be cached as singletons).
         else if (s_mutableMapperTypes.Contains(type))
         {
-            mapper = type switch
+            mappers.Add(type switch
             {
                 Type t when t == typeof(DateTime) => new DateTimeMapper(),
                 Type t when t == typeof(DateTimeOffset) => new DateTimeOffsetMapper(),
@@ -149,13 +149,31 @@ public static class AutoMapper
                 Type t when t == typeof(TimeOnly) => new TimeOnlyMapper(),
                 Type t when t == typeof(Uri) => new UriMapper(),
                 _ => throw new NotImplementedException("Unexpected mutable mapper type."),
-            };
+            });
             return true;
         }
         // Check for enum types.
         else if (type.IsEnum)
         {
-            mapper = new EnumMapper(type);
+            mappers.Add(new EnumMapper(type));
+
+            // If enum values have a DescriptionAttribute, create a mapping dictionary for those
+            // string values.
+            var descriptions = type.GetFields(BindingFlags.Public | BindingFlags.Static)
+                .Select(f => new
+                {
+                    Field = f,
+                    DescriptionAttribute = f.GetCustomAttribute<DescriptionAttribute>()
+                })
+                .Where(x => x.DescriptionAttribute != null && !string.IsNullOrEmpty(x.DescriptionAttribute.Description))
+                .ToDictionary(
+                    x => x.DescriptionAttribute!.Description,
+                    x => (T)x.Field.GetValue(null)!);
+            if (descriptions.Count > 0)
+            {
+                mappers.Add(new MappingDictionaryMapper<T>(descriptions, null, MappingDictionaryMapperBehavior.Optional));
+            }
+
             return true;
         }
         // Check for types implementing interfaces.
@@ -164,18 +182,17 @@ public static class AutoMapper
             // Check for types implementing IConvertible.
             if (type.ImplementsInterface(typeof(IConvertible)))
             {
-                mapper = new ChangeTypeMapper(type);
+                mappers.Add(new ChangeTypeMapper(type));
                 return true;
             }
             // Check for types implementing IParsable<T>.
             else if (type.ImplementsGenericInterface(typeof(IParsable<>), out var parsableInterfaceType))
             {
-                mapper = (ICellMapper)Activator.CreateInstance(typeof(ParsableMapper<>).MakeGenericType(parsableInterfaceType))!;
+                mappers.Add((ICellMapper)Activator.CreateInstance(typeof(ParsableMapper<>).MakeGenericType(parsableInterfaceType))!);
                 return true;
             }
         }
 
-        mapper = null;
         return false;
     }
 

@@ -96,8 +96,8 @@ public class IManyToOneMapExtensionsTests
 
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([]));
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([], StringComparison.OrdinalIgnoreCase));
-        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string>()));
-        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string>(), StringComparison.OrdinalIgnoreCase));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames((IEnumerable<string>)new List<string>()));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames((IEnumerable<string>)new List<string>(), StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -109,8 +109,8 @@ public class IManyToOneMapExtensionsTests
 
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([null!]));
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([null!], StringComparison.OrdinalIgnoreCase));
-        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string> { null! }));
-        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string> { null! }, StringComparison.OrdinalIgnoreCase));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames((IEnumerable<string>)new List<string> { null! }));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames((IEnumerable<string>)new List<string> { null! }, StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -122,8 +122,8 @@ public class IManyToOneMapExtensionsTests
 
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([""]));
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([""], StringComparison.OrdinalIgnoreCase));
-        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string> { "" }));
-        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames(new List<string> { "" }, StringComparison.OrdinalIgnoreCase));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames((IEnumerable<string>)new List<string> { "" }));
+        Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames((IEnumerable<string>)new List<string> { "" }, StringComparison.OrdinalIgnoreCase));
     }
 
     [Theory]
@@ -175,7 +175,7 @@ public class IManyToOneMapExtensionsTests
     {
         var columnIndices = new List<int> { 0, 1 };
         var map = new CustomManyToOneMap().WithColumnNames("ColumnNames");
-        Assert.Same(map, map.WithColumnIndices(columnIndices));
+        Assert.Same(map, map.WithColumnIndices((IEnumerable<int>)columnIndices));
 
         var newFactory = Assert.IsType<ColumnIndicesReaderFactory>(map.ReaderFactory);
         Assert.Equal(columnIndices, newFactory.ColumnIndices);
@@ -196,7 +196,7 @@ public class IManyToOneMapExtensionsTests
         var map = new CustomManyToOneMap().WithColumnNames("ColumnNames");
 
         Assert.Throws<ArgumentException>("columnIndices", () => map.WithColumnIndices([]));
-        Assert.Throws<ArgumentException>("columnIndices", () => map.WithColumnIndices(new List<int>()));
+        Assert.Throws<ArgumentException>("columnIndices", () => map.WithColumnIndices((IEnumerable<int>)new List<int>()));
     }
 
     [Fact]
@@ -205,7 +205,7 @@ public class IManyToOneMapExtensionsTests
         var map = new CustomManyToOneMap().WithColumnNames("ColumnNames");
 
         Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => map.WithColumnIndices([-1]));
-        Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => map.WithColumnIndices(new List<int> { -1 }));
+        Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => map.WithColumnIndices((IEnumerable<int>)new List<int> { -1 }));
     }
 
     [Fact]
