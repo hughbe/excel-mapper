@@ -18,9 +18,6 @@ namespace ExcelMapper;
 /// </remarks>
 public class ExcelSheet
 {
-    private bool _hasHeading = true;
-    private int _headingIndex = 0;
-
     internal ExcelSheet(IExcelDataReader reader, int index, ExcelImporter importer)
     {
         Reader = reader;
@@ -62,6 +59,8 @@ public class ExcelSheet
     /// </summary>
     public int NumberOfColumns { get; }
 
+    private bool _hasHeading = true;
+
     /// <summary>
     /// Gets or sets whether the sheet has a heading. This is true by default.
     /// </summary>
@@ -86,7 +85,7 @@ public class ExcelSheet
     /// </summary>
     public int HeadingIndex
     {
-        get => _headingIndex;
+        get => _dataRange.Rows.Start.Value;
         set
         {
             ArgumentOutOfRangeException.ThrowIfNegative(value);
@@ -99,7 +98,29 @@ public class ExcelSheet
                 throw new InvalidOperationException("The heading has already been read.");
             }
 
-            _headingIndex = value;
+            // Adjust the data range. The data range starts at the heading index.
+            var rowsRange = value.._dataRange.Rows.End;
+            _dataRange = new ExcelRange(rowsRange, _dataRange.Columns);
+        }
+    }
+
+    private ExcelRange _dataRange = new();
+
+    /// <summary>
+    /// Gets or sets the range of rows and columns that contain data to be mapped. By default this is all rows and columns.
+    /// </summary>
+    public ExcelRange DataRange
+    {
+        get => _dataRange;
+        set
+        {
+            if (Heading != null)
+            {
+                throw new InvalidOperationException("The heading has already been read. Set this property before reading any rows.");
+            }
+
+            // Set the data range.
+            _dataRange = value;
         }
     }
 
@@ -137,7 +158,8 @@ public class ExcelSheet
         // Read up to the heading row.
         ReadUpTo(HeadingIndex);
 
-        var heading = new ExcelHeading(Reader, Importer.Configuration);
+        // Create the heading.
+        var heading = new ExcelHeading(Reader, DataRange, Importer.Configuration);
         Heading = heading;
         return heading;
     }
@@ -198,7 +220,7 @@ public class ExcelSheet
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(startIndex, HeadingIndex, nameof(startIndex));
         }
         ArgumentOutOfRangeException.ThrowIfNegative(count);
-        
+
         // Read the heading if we haven't already - this validates the sheet structure
         if (HasHeading && Heading == null)
         {
@@ -298,11 +320,15 @@ public class ExcelSheet
 
         // Ensure we're on the correct sheet and row.
         ReadUpTo(CurrentRowIndex);
-        if (!Reader.Read())
+
+        // Check if we've reached the end of the data range.
+        if (CurrentRowIndex + 1 >= _dataRange.Rows.End.GetOffset(Reader.RowCount))
         {
             return false;
         }
 
+        // Read the next row.
+        Reader.Read();
         CurrentRowIndex++;
 
         if (Importer.Configuration.SkipBlankLines)
@@ -339,7 +365,7 @@ public class ExcelSheet
     {
         // If we're already on the correct sheet, no need to do anything.
         if (Importer.SheetIndex != Index)
-    {
+        {
             // Read up to the correct sheet.
             Reader.Reset();
             Importer.SheetIndex = 0;

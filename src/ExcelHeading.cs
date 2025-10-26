@@ -10,7 +10,7 @@ public class ExcelHeading
 {
     private readonly string[] _columnNames;
 
-    internal ExcelHeading(IDataRecord reader, ExcelImporterConfiguration configuration)
+    internal ExcelHeading(IDataRecord reader, ExcelRange dataRange, ExcelImporterConfiguration configuration)
     {
         if (reader.FieldCount > configuration.MaxColumnsPerSheet)
         {
@@ -19,12 +19,14 @@ public class ExcelHeading
                 $"({configuration.MaxColumnsPerSheet}). Increase MaxColumnsPerSheet in the configuration if this is a legitimate file.");
         }
 
-        var nameMapping = new SortedList<string, int>(reader.FieldCount, StringComparer.OrdinalIgnoreCase);
-        var columnNames = new string[reader.FieldCount];
+        var (offset, length) = dataRange.Columns.GetOffsetAndLength(reader.FieldCount);
 
-        for (int columnIndex = 0; columnIndex < reader.FieldCount; columnIndex++)
+        var nameMapping = new SortedList<string, int>(length, StringComparer.OrdinalIgnoreCase);
+        var columnNames = new string[length];
+
+        for (var columnIndex = 0; columnIndex < length; columnIndex++)
         {
-            var columnName = reader.GetValue(columnIndex)?.ToString() ?? string.Empty;
+            var columnName = reader.GetValue(columnIndex + offset)?.ToString() ?? string.Empty;
             columnNames[columnIndex] = columnName; // Store original name
             
             // For mapping, use unique key if duplicate

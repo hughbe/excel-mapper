@@ -5,6 +5,190 @@ namespace ExcelMapper.Tests;
 public class ExcelSheetTests
 {
     [Fact]
+    public void DataRange_GetDefault_ReturnsFalse()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        Assert.Equal(Range.All, sheet.DataRange.Rows);
+        Assert.Equal(Range.All, sheet.DataRange.Columns);
+    }
+
+    public static IEnumerable<object[]> DataRange_Set_TestData()
+    {
+        yield return new object[] { new ExcelRange(), Range.All, Range.All };
+        yield return new object[] { new ExcelRange(1, 3, 2, 4), 1..4, 2..5 };
+        yield return new object[] { new ExcelRange(0, null, 0, null), 0.., 0.. };
+        yield return new object[] { new ExcelRange(5, null, 1, 10), 5.., 1..11 };
+        yield return new object[] { new ExcelRange(2, 6, 0, null), 2..7, 0.. };
+        yield return new object[] { new ExcelRange(Range.All, Range.All), Range.All, Range.All };
+        yield return new object[] { new ExcelRange(1..2, 3..4), 1..2, 3..4 };
+        yield return new object[] { new ExcelRange("AB2:AZ20"), 1..20, 27..52 };
+    }
+
+    [Theory]
+    [MemberData(nameof(DataRange_Set_TestData))]
+    public void DataRange_Set_GetReturnsExpected(ExcelRange value, Range expectedRows, Range expectedColumns)
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+
+        // Set.
+        sheet.DataRange = value;
+        Assert.Equal(expectedRows, sheet.DataRange.Rows);
+        Assert.Equal(expectedColumns, sheet.DataRange.Columns);
+        Assert.Equal(expectedRows.Start.Value, sheet.HeadingIndex);
+
+        // Set same value.
+        sheet.DataRange = value;
+        Assert.Equal(expectedRows, sheet.DataRange.Rows);
+        Assert.Equal(expectedColumns, sheet.DataRange.Columns);
+        Assert.Equal(expectedRows.Start.Value, sheet.HeadingIndex);
+    }
+
+    [Theory]
+    [MemberData(nameof(DataRange_Set_TestData))]
+    public void DataRange_SetHasHeadingFalse_GetReturnsExpected(ExcelRange value, Range expectedRows, Range expectedColumns)
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.HasHeading = false;
+
+        // Set.
+        sheet.DataRange = value;
+        Assert.Equal(expectedRows, sheet.DataRange.Rows);
+        Assert.Equal(expectedColumns, sheet.DataRange.Columns);
+        Assert.Equal(expectedRows.Start.Value, sheet.HeadingIndex);
+
+        // Set same value.
+        sheet.DataRange = value;
+        Assert.Equal(expectedRows, sheet.DataRange.Rows);
+        Assert.Equal(expectedColumns, sheet.DataRange.Columns);
+        Assert.Equal(expectedRows.Start.Value, sheet.HeadingIndex);
+    }
+
+    [Fact]
+    public void DataRange_SetReadHeading_ThrowsInvalidOperationException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<InvalidOperationException>(() => sheet.DataRange = new ExcelRange());
+    }
+
+    [Fact]
+    public void HasHeading_GetDefault_ReturnsTrue()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        Assert.True(sheet.HasHeading);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void HasHeading_Set_GetReturnsExpected(bool value)
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+
+        // Set.
+        sheet.HasHeading = value;
+        Assert.Equal(value, sheet.HasHeading);
+        Assert.Equal(Range.All, sheet.DataRange.Columns);
+
+        // Set same value.
+        sheet.HasHeading = value;
+        Assert.Equal(value, sheet.HasHeading);
+
+        // Set different value.
+        sheet.HasHeading = !value;
+        Assert.Equal(!value, sheet.HasHeading);
+    }
+
+    [Fact]
+    public void HasHeading_SetWhenAlreadyRead_InvalidOperationException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<InvalidOperationException>(() => sheet.HasHeading = false);
+        Assert.Throws<InvalidOperationException>(() => sheet.HasHeading = true);
+    }
+
+    [Fact]
+    public void Heading_GetDefault_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        Assert.Null(sheet.Heading);
+    }
+
+    [Fact]
+    public void HeadingIndex_GetDefault_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        Assert.Equal(0, sheet.HeadingIndex);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    public void HeadingIndex_Set_GetReturnsExpected(int headingIndex)
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+
+        // Set.
+        sheet.HeadingIndex = headingIndex;
+        Assert.Equal(headingIndex, sheet.HeadingIndex);
+        Assert.Equal(headingIndex.., sheet.DataRange.Rows);
+        Assert.Equal(Range.All, sheet.DataRange.Columns);
+
+        // Set same value.
+        sheet.HeadingIndex = headingIndex;
+        Assert.Equal(headingIndex, sheet.HeadingIndex);
+        Assert.Equal(headingIndex.., sheet.DataRange.Rows);
+    }
+
+    [Fact]
+    public void HeadingIndex_SetNegative_ThrowsArgumentOutOfRangeException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        Assert.Throws<ArgumentOutOfRangeException>("value", () => sheet.HeadingIndex = -1);
+
+        sheet.HasHeading = false;
+        Assert.Throws<ArgumentOutOfRangeException>("value", () => sheet.HeadingIndex = -1);
+
+        sheet.HasHeading = true;
+        sheet.ReadHeading();
+        Assert.Throws<ArgumentOutOfRangeException>("value", () => sheet.HeadingIndex = -1);
+    }
+
+    [Fact]
+    public void HeadingIndex_SetAfterHeadingSet_ThrowsInvalidOperationException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Throws<InvalidOperationException>(() => sheet.HeadingIndex = 0);
+    }
+
+    [Fact]
+    public void HeadingIndex_SetWhenHasHeadingFalse_ThrowsInvalidOperationException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.HasHeading = false;
+
+        Assert.Throws<InvalidOperationException>(() => sheet.HeadingIndex = 0);
+    }
+
+    [Fact]
     public void NumberOfColumns_Get_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
@@ -73,6 +257,78 @@ public class ExcelSheetTests
         Assert.Same(heading, sheet.Heading);
         Assert.Equal(["Value"], heading.ColumnNames);
         Assert.Equal(3, sheet.CurrentRowIndex);
+    }
+
+    [Fact]
+    public void ReadHeading_CustomDataRangeRowsStart_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Non Zero Header Index.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(3.., Range.All);
+
+        var heading = sheet.ReadHeading();
+        Assert.Same(heading, sheet.Heading);
+        Assert.Equal(["Value"], heading.ColumnNames);
+        Assert.Equal(3, sheet.CurrentRowIndex);
+    }
+
+    [Fact]
+    public void ReadHeading_CustomDataRangeColumnsStart_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(Range.All, 1..);
+
+        var heading = sheet.ReadHeading();
+        Assert.Same(heading, sheet.Heading);
+        Assert.Equal(["StringValue", "Bool Value", "Enum Value", "DateValue", "ArrayValue", "MappedValue", "TrimmedValue"], heading.ColumnNames);
+        Assert.Equal(0, sheet.CurrentRowIndex);
+    }
+
+    [Fact]
+    public void ReadHeading_CustomDataRangeColumnsEnd_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(Range.All, ..^1);
+
+        var heading = sheet.ReadHeading();
+        Assert.Same(heading, sheet.Heading);
+        Assert.Equal(["Int Value", "StringValue", "Bool Value", "Enum Value", "DateValue", "ArrayValue", "MappedValue"], heading.ColumnNames);
+        Assert.Equal(0, sheet.CurrentRowIndex);
+    }
+
+    [Fact]
+    public void ReadHeading_CustomDataRangeColumnsStartEnd_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(Range.All, 1..4);
+
+        var heading = sheet.ReadHeading();
+        Assert.Same(heading, sheet.Heading);
+        Assert.Equal(["StringValue", "Bool Value", "Enum Value"], heading.ColumnNames);
+        Assert.Equal(0, sheet.CurrentRowIndex);
+    }
+
+    [Fact]
+    public void ReadHeading_CustomDataRangeColumnsLargeStart_ThrowsArgumentOutOfRangeException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange("I:J");
+
+        Assert.Throws<ArgumentOutOfRangeException>("length", () => sheet.ReadHeading());
+    }
+
+    [Fact]
+    public void ReadHeading_CustomDataRangeColumnsLargeEnd_ThrowsArgumentOutOfRangeException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange("A:J");
+
+        Assert.Throws<ArgumentOutOfRangeException>("length", () => sheet.ReadHeading());
     }
 
     [Fact]
@@ -186,6 +442,133 @@ public class ExcelSheetTests
 
         Assert.NotNull(sheet.Heading);
         Assert.True(sheet.HasHeading);
+
+        // No more rows to read.
+        Assert.Empty(sheet.ReadRows<StringValue>());
+    }
+
+    [Fact]
+    public void ReadRows_CustomDataRangeRows_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Non Zero Header Index.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange("4:7");
+        sheet.ReadHeading();
+
+        var rows = sheet.ReadRows<StringValue>();
+        Assert.Equal(new string?[] { "value", "  value  ", null }, rows.Select(p => p.Value).ToArray());
+        Assert.Equal(6, sheet.CurrentRowIndex);
+
+        Assert.NotNull(sheet.Heading);
+        Assert.True(sheet.HasHeading);
+
+        // No more rows to read.
+        Assert.Empty(sheet.ReadRows<StringValue>());
+        Assert.Equal(6, sheet.CurrentRowIndex);
+    }
+
+    [Fact]
+    public void ReadRows_CustomDataRangeRowsOutOfRange_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Non Zero Header Index.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange("4:9");
+        sheet.ReadHeading();
+
+        var rows = sheet.ReadRows<StringValue>();
+        Assert.Equal(new string?[] { "value", "  value  ", null, "value", "value" }, rows.Select(p => p.Value).ToArray());
+        Assert.Equal(8, sheet.CurrentRowIndex);
+
+        Assert.NotNull(sheet.Heading);
+        Assert.True(sheet.HasHeading);
+
+        // No more rows to read.
+        Assert.Empty(sheet.ReadRows<StringValue>());
+        Assert.Equal(8, sheet.CurrentRowIndex);
+    }
+
+    [Fact]
+    public void ReadRows_CustomDataRangeColumns_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Primitives_Range.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange("B:D");
+        sheet.ReadHeading();
+
+        var rows = sheet.ReadRows<string[]>().ToArray();
+        Assert.Equal(new string?[] { "1", "a", "True" }, rows[0]);
+        Assert.Equal(4, sheet.CurrentRowIndex);
+
+        Assert.NotNull(sheet.Heading);
+        Assert.True(sheet.HasHeading);
+
+        // No more rows to read.
+        Assert.Empty(sheet.ReadRows<StringValue>());
+        Assert.Equal(4, sheet.CurrentRowIndex);
+    }
+
+    [Fact]
+    public void ReadRows_CustomDataRangeColumnsLargeStart_ThrowsArgumentOutOfRangeException()
+    {
+        using var importer = Helpers.GetImporter("Primitives_Range.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange("I:J");
+
+        Assert.Throws<ArgumentOutOfRangeException>("length", () => sheet.ReadRows<StringValue>());
+        Assert.Equal(0, sheet.CurrentRowIndex);
+
+        // Read again.
+        Assert.Throws<ArgumentOutOfRangeException>("length", () => sheet.ReadRows<StringValue>());
+        Assert.Equal(0, sheet.CurrentRowIndex);
+    }
+
+    [Fact]
+    public void ReadRows_CustomDataRangeColumnsLargeEnd_ThrowsArgumentOutOfRangeException()
+    {
+        using var importer = Helpers.GetImporter("Primitives_Range.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange("A:J");
+
+        Assert.Throws<ArgumentOutOfRangeException>("length", () => sheet.ReadRows<StringValue>());
+        Assert.Equal(0, sheet.CurrentRowIndex);
+
+        // Read again.
+        Assert.Throws<ArgumentOutOfRangeException>("length", () => sheet.ReadRows<StringValue>());
+        Assert.Equal(0, sheet.CurrentRowIndex);
+    }
+
+    [Fact]
+    public void ReadRows_CustomDataRangeColumnNameOutOfRange_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Primitives_Range.xlsx");
+        importer.Configuration.RegisterClassMap<StringValue>(c =>
+        {
+            c.Map(p => p.Value)
+                .WithColumnName("Int Value");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange("B1:D4");
+        sheet.ReadHeading();
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>().ToArray());
+        Assert.Equal(1, sheet.CurrentRowIndex);
+
+        // Read again.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>().ToArray());
+        Assert.Equal(2, sheet.CurrentRowIndex);
+
+        // Read again.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>().ToArray());
+        Assert.Equal(3, sheet.CurrentRowIndex);
+
+        // No more rows to read.
+        Assert.Empty(sheet.ReadRows<StringValue>());
+        Assert.Equal(3, sheet.CurrentRowIndex);
+
+        // Read again.
+        Assert.Empty(sheet.ReadRows<StringValue>());
+        Assert.Equal(3, sheet.CurrentRowIndex);
     }
 
     [Fact]
@@ -201,8 +584,9 @@ public class ExcelSheetTests
         Assert.NotNull(sheet.Heading);
         Assert.True(sheet.HasHeading);
 
-        StringValue[] rows2 = [.. sheet.ReadRows<StringValue>()];
-        Assert.Empty(rows2.Select(p => p.Value).ToArray());
+        // No more rows to read.
+        Assert.Empty(sheet.ReadRows<StringValue>().ToArray());
+        Assert.Equal(4, sheet.CurrentRowIndex);
     }
 
     [Fact]
@@ -221,8 +605,9 @@ public class ExcelSheetTests
         Assert.Null(sheet.Heading);
         Assert.False(sheet.HasHeading);
 
-        StringValue[] rows2 = [.. sheet.ReadRows<StringValue>()];
-        Assert.Empty(rows2.Select(p => p.Value).ToArray());
+        // No more rows to read.
+        Assert.Empty(sheet.ReadRows<StringValue>().Select(p => p.Value).ToArray());
+        Assert.Equal(4, sheet.CurrentRowIndex);
     }
 
     [Fact]
@@ -646,52 +1031,6 @@ public class ExcelSheetTests
         sheet.HasHeading = false;
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValues>());
-    }
-
-    [Fact]
-    public void HasHeading_SetWhenAlreadyRead_InvalidOperationException()
-    {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        Assert.Throws<InvalidOperationException>(() => sheet.HasHeading = false);
-        Assert.Throws<InvalidOperationException>(() => sheet.HasHeading = true);
-    }
-
-    [Fact]
-    public void HeadingIndex_SetNegative_ThrowsArgumentOutOfRangeException()
-    {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var sheet = importer.ReadSheet();
-        Assert.Throws<ArgumentOutOfRangeException>("value", () => sheet.HeadingIndex = -1);
-
-        sheet.HasHeading = false;
-        Assert.Throws<ArgumentOutOfRangeException>("value", () => sheet.HeadingIndex = -1);
-
-        sheet.HasHeading = true;
-        sheet.ReadHeading();
-        Assert.Throws<ArgumentOutOfRangeException>("value", () => sheet.HeadingIndex = -1);
-    }
-
-    [Fact]
-    public void HeadingIndex_SetAfterHeadingSet_ThrowsInvalidOperationException()
-    {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        Assert.Throws<InvalidOperationException>(() => sheet.HeadingIndex = 0);
-    }
-
-    [Fact]
-    public void HeadingIndex_SetWhenHasHeadingFalse_ThrowsInvalidOperationException()
-    {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var sheet = importer.ReadSheet();
-        sheet.HasHeading = false;
-
-        Assert.Throws<InvalidOperationException>(() => sheet.HeadingIndex = 0);
     }
 
     private class StringValueClassMapColumnIndex : ExcelClassMap<StringValue>

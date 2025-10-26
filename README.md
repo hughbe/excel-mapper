@@ -63,6 +63,7 @@ That's it! ExcelMapper automatically maps columns to properties by name.
 - [Special Scenarios](#special-scenarios)
   - [Sheets Without Headers](#sheets-without-headers)
   - [Headers Not in First Row](#headers-not-in-first-row)
+  - [Restricting Data Range](#restricting-data-range)
 - [Error Handling](#error-handling)
 - [Performance Tips](#performance-tips)
 - [Thread Safety](#thread-safety)
@@ -1560,6 +1561,97 @@ sheet.HeadingIndex = 2;  // Header is on row 3 (zero-based index 2)
 var employees = sheet.ReadRows<Employee>();
 ```
 
+### Restricting Data Range
+
+Limit which rows and columns are processed using `DataRange`:
+
+|                      |             |            |
+|----------------------|-------------|------------|
+| Employee Report 2025 |             |            |
+| Name                 | Department  | Obsolete   |
+| Alice Johnson        | Engineering | Old Data   |
+| Bob Smith            | Marketing   | Old Data   |
+| Carol White          | Sales       | Old Data   |
+|                      |             |            |
+| Footer: Generated... |             |            |
+
+```csharp
+using var importer = new ExcelImporter("employees.xlsx");
+var sheet = importer.ReadSheet();
+
+// Specify exact row and column ranges (zero-based indices)
+sheet.DataRange = new ExcelRange(
+    rowStart: 1,      // Start at row 2 (after row 0)
+    rowEnd: 4,        // End at row 5 (inclusive)
+    columnStart: 0,   // Start at column A
+    columnEnd: 1      // End at column B (inclusive)
+);
+
+var employees = sheet.ReadRows<Employee>();
+// Will read only rows 2-5, columns A-B
+// Skips header row 0, footer row 6, and column C
+```
+
+**Using Excel-style address notation:**
+
+```csharp
+// Parse Excel address strings like "A1:B10"
+sheet.DataRange = new ExcelRange("B2:D10");  // Columns B-D, rows 2-10
+
+// Single cell
+sheet.DataRange = new ExcelRange("A1");  // Just cell A1
+
+// Column ranges
+sheet.DataRange = new ExcelRange("A:C");  // All rows, columns A-C
+
+// Row ranges  
+sheet.DataRange = new ExcelRange("5:20");  // Rows 5-20, all columns
+```
+
+**Important Notes:**
+- `DataRange` must be set **before** calling `ReadHeading()` or `ReadRows()`
+- Row indices are zero-based (row 0 = first row)
+- When `HasHeading` is true, the heading row is at `DataRange.Rows.Start`
+- Data rows start **after** the heading row
+- Both row and column ranges are inclusive (start and end indices are included)
+- Use `Range.All` for unbounded ranges (e.g., `new ExcelRange(Range.All, 0..5)`)
+
+**Common Use Cases:**
+
+```csharp
+// Skip header and footer rows
+sheet.DataRange = new ExcelRange("A2:Z100");
+
+// Process only specific columns
+sheet.DataRange = new ExcelRange("B:E");  // Columns B, C, D, E
+
+// Limit data to first 1000 rows
+sheet.DataRange = new ExcelRange(
+    rowStart: 0,
+    rowEnd: 999,
+    columnStart: 0,
+    columnEnd: null  // No column limit
+);
+
+// Complex scenario: Header in row 3, data in rows 4-50, columns C-F
+var sheet = importer.ReadSheet();
+sheet.HeadingIndex = 3;  // Header at row 3
+sheet.DataRange = new ExcelRange("C3:F50");  // Range includes header and data
+```
+
+**Parse and TryParse methods:**
+
+```csharp
+// Parse - throws on invalid format
+var range1 = ExcelRange.Parse("A1:B10");
+
+// TryParse - returns false on invalid format
+if (ExcelRange.TryParse("A1:B10", out var range2))
+{
+    sheet.DataRange = range2;
+}
+```
+
 ## Performance Tips
 
 1. **Use streaming**: `ReadRows<T>()` uses lazy evaluation - don't materialize unnecessarily
@@ -2028,7 +2120,17 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 - `NumberOfColumns` - Column count
 - `HasHeading` - Whether sheet has header row (default: true)
 - `HeadingIndex` - Zero-based index of header row (default: 0)
+- `DataRange` - Range of rows and columns to process (default: all)
 - `CurrentRowIndex` - Current row being processed
+
+**`ExcelRange`** - Represents a range of rows and columns
+- Constructor: `new ExcelRange(rowStart, rowEnd, columnStart, columnEnd)` - Create range with explicit indices
+- Constructor: `new ExcelRange(rows, columns)` - Create range with Range objects
+- Constructor: `new ExcelRange(address)` - Create range from Excel address string (e.g., "A1:B10")
+- `Parse(string)` - Parse Excel address string (throws on error)
+- `TryParse(string, out ExcelRange)` - Try parse Excel address string (returns bool)
+- `Rows` - Row range (System.Range)
+- `Columns` - Column range (System.Range)
 
 **`ExcelImporterConfiguration`** - Configuration settings
 - `RegisterClassMap<T>()` - Register type-specific mapping
