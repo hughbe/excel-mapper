@@ -10,6 +10,9 @@ namespace ExcelMapper.Factories;
 /// <typeparam name="TValue">The type of the dictionary values.</typeparam>
 public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> where TKey : notnull
 {
+    /// <summary>
+    /// Gets the type of dictionary that this factory creates.
+    /// </summary>
     public Type DictionaryType { get; }
     private readonly ConstructorInfo _constructor;
 

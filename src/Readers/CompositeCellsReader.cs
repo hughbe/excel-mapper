@@ -13,6 +13,11 @@ public class CompositeCellsReader : ICellsReader
     /// </summary>
     public IReadOnlyList<ICellReader> Readers { get; }
 
+    private IExcelDataReader? _reader;
+    private bool _preserveFormatting;
+    private int _readerIndex;
+    private ReadCellResult? _current;
+
     /// <summary>
     /// Initializes a new instance of <see cref="CompositeCellsReader"/>.
     /// </summary>
@@ -37,26 +42,54 @@ public class CompositeCellsReader : ICellsReader
     }
 
     /// <inheritdoc/>
-    public bool TryGetValues(IExcelDataReader reader, bool preserveFormatting, [NotNullWhen(true)] out IEnumerable<ReadCellResult>? result)
+    public bool Start(IExcelDataReader reader, bool preserveFormatting, out int count)
     {
-        var cells = new List<ReadCellResult>();
-        foreach (var cellReader in Readers)
+        _reader = reader;
+        _preserveFormatting = preserveFormatting;
+        _readerIndex = -1;
+        _current = null;
+
+        // Count how many readers successfully produce values
+        int resultCount = 0;
+        for (int i = 0; i < Readers.Count; i++)
         {
-            if (cellReader.TryGetValue(reader, preserveFormatting, out var cellValues))
+            if (Readers[i].TryGetValue(reader, preserveFormatting, out _))
             {
-                cells.AddRange(cellValues);
+                resultCount++;
             }
         }
 
-        if (cells.Count > 0)
+        count = resultCount;
+        return true;
+    }
+
+    /// <inheritdoc/>
+    public bool TryGetNext([NotNullWhen(true)] out ReadCellResult result)
+    {
+        while (true)
         {
-            result = cells;
-            return true;
+            _readerIndex++;
+            if (_readerIndex >= Readers.Count)
+            {
+                result = default;
+                return false;
+            }
+
+            if (Readers[_readerIndex].TryGetValue(_reader!, _preserveFormatting, out var readResult))
+            {
+                _current = readResult;
+                result = readResult;
+                return true;
+            }
+            // Continue to the next reader
         }
-        else
-        {
-            result = null;
-            return false;
-        }
+    }
+
+    /// <inheritdoc/>
+    public void Reset()
+    {
+        _readerIndex = -1;
+        _current = null;
+        _reader = null;
     }
 }

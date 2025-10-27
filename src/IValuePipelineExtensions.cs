@@ -5,6 +5,12 @@ using ExcelMapper.Transformers;
 
 namespace ExcelMapper;
 
+/// <summary>
+/// A delegate that converts a string value read from an Excel cell to a strongly-typed value.
+/// </summary>
+/// <typeparam name="TValue">The type of value to convert to.</typeparam>
+/// <param name="stringValue">The string value read from the Excel cell, or null if the cell is empty.</param>
+/// <returns>The converted value of type <typeparamref name="TValue"/>.</returns>
 public delegate TValue ConvertUsingSimpleMapperDelegate<out TValue>(string? stringValue);
 
 /// <summary>

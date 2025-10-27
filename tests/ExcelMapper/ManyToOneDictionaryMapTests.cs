@@ -151,7 +151,7 @@ public class ManyToOneDictionaryMapTests
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        var factory = new MockReaderFactory(new MockReader(() => (true, [])));
+        var factory = new MockReaderFactory(new MockReader(() => (true, new MockEnumerator([]))));
         var dictionaryFactory = new DictionaryFactory<string, string>();
         var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory);
         object? result = null;
@@ -365,24 +365,78 @@ public class ManyToOneDictionaryMapTests
     
     private class MockReader : ICellsReader
     {
-        public MockReader(Func<(bool, IEnumerable<ReadCellResult>?)> action)
+        private IReadCellResultEnumerator? _enumerator;
+        private bool _result;
+
+        public MockReader(Func<(bool, IReadCellResultEnumerator?)> action)
         {
             Action = action;
         }
 
-        public Func<(bool, IEnumerable<ReadCellResult>?)> Action { get; }
+        public Func<(bool, IReadCellResultEnumerator?)> Action { get; }
 
-        public bool TryGetValues(IExcelDataReader factory, bool preserveFormatting, [NotNullWhen(true)] out IEnumerable<ReadCellResult>? result)
+        public bool Start(IExcelDataReader reader, bool preserveFormatting, out int count)
         {
             var (ret, res) = Action();
-            result = res;
+            _result = ret;
+            _enumerator = res;
+            count = _enumerator?.Count ?? 0;
             return ret;
+        }
+
+        public bool TryGetNext([NotNullWhen(true)] out ReadCellResult result)
+        {
+            if (_enumerator != null && _enumerator.MoveNext())
+            {
+                result = _enumerator.Current;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        public void Reset()
+        {
+            _enumerator?.Reset();
         }
     }
 
     private class MockReaderFactory(ICellsReader Reader) : ICellsReaderFactory
     {
         public ICellsReader? GetCellsReader(ExcelSheet sheet) => Reader;
+    }
+
+    private class MockEnumerator : IReadCellResultEnumerator
+    {
+        private readonly ReadCellResult[] _results;
+        private int _index = -1;
+
+        public MockEnumerator(ReadCellResult[] results)
+        {
+            _results = results;
+        }
+
+        public ReadCellResult Current => _results[_index];
+
+        object? System.Collections.IEnumerator.Current => Current;
+
+        public int Count => _results.Length;
+
+        public void Dispose()
+        {
+        }
+
+        public bool MoveNext()
+        {
+            _index++;
+            return _index < _results.Length;
+        }
+
+        public void Reset()
+        {
+            _index = -1;
+        }
     }
 
     private class TestClass

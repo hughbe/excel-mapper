@@ -1,4 +1,3 @@
-using System.Linq;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Tests;
 
@@ -16,9 +15,20 @@ public class AllColumnNamesValueReaderTests
         var factory = new AllColumnNamesReaderFactory();
         var reader = factory.GetCellsReader(sheet);
         Assert.NotNull(reader);
-        IEnumerable<ReadCellResult>? result = null;
-        Assert.True(reader.TryGetValues(importer.Reader, false, out result));
-        Assert.Equal(["Value"], result.Select(r => r.StringValue));
+        for (var i = 0; i < 2; i++)
+        {
+            Assert.True(reader.Start(importer.Reader, false, out var count));
+            Assert.Equal(1, count);
+            var values = new List<string?>();
+            while (reader.TryGetNext(out var result))
+            {
+                values.Add(result.StringValue);
+            }
+            Assert.Equal(["Value"], values);
+
+            // Reset for the next iteration.
+            reader.Reset();
+        }
     }
 
     [Fact]
@@ -26,7 +36,7 @@ public class AllColumnNamesValueReaderTests
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
         var factory = new AllColumnNamesReaderFactory();
-        IEnumerable<ReadCellResult>? result = null;
+        IReadCellResultEnumerator? result = null;
         Assert.Throws<ArgumentNullException>("sheet", () => factory.GetCellsReader(null!));
         Assert.Null(result);
     }

@@ -2,6 +2,11 @@ using System.Reflection;
 
 namespace ExcelMapper;
 
+/// <summary>
+/// A delegate that sets the value of a member (property or field) on an object instance.
+/// </summary>
+/// <param name="instance">The object instance whose member value should be set.</param>
+/// <param name="value">The value to set on the member.</param>
 public delegate void MemberSetValueDelegate(object instance, object value);
 
 /// <summary>

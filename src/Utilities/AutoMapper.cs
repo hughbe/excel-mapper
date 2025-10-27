@@ -7,7 +7,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using ExcelDataReader;
 using ExcelMapper.Factories;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
@@ -15,6 +14,10 @@ using ExcelMapper.Readers;
 
 namespace ExcelMapper.Utilities;
 
+/// <summary>
+/// Provides automatic mapping functionality for Excel cells to .NET types.
+/// This class automatically configures mappers, transformers, and fallback strategies based on type information and attributes.
+/// </summary>
 public static class AutoMapper
 {
     internal static OneToOneMap<T>? CreateOneToOneMap<T>(MemberInfo? member, ICellReaderFactory defaultCellReaderFactory, FallbackStrategy emptyValueStrategy, bool isAutoMapping)
@@ -449,7 +452,7 @@ public static class AutoMapper
         return false;
     }
 
-    public static ExcelClassMap GetOrCreateNestedMap(IMap parentMap, Type memberType, object? context, FallbackStrategy emptyValueStrategy)
+    internal static ExcelClassMap GetOrCreateNestedMap(IMap parentMap, Type memberType, object? context, FallbackStrategy emptyValueStrategy)
     {
         var method = GetOrCreateNestedMapGenericMethod.MakeGenericMethod(memberType);
         var parameters = new object?[] { parentMap, context, emptyValueStrategy };

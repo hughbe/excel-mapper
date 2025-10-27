@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
 
@@ -71,7 +70,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
 
         var cellsReader = _factoryCache.GetOrAdd(sheet, s => _readerFactory.GetCellsReader(s));
 
-        if (cellsReader == null || !cellsReader.TryGetValues(reader, PreserveFormatting, out var valueResults))
+        if (cellsReader == null || !cellsReader.Start(reader, PreserveFormatting, out var count))
         {
             if (Optional)
             {
@@ -82,19 +81,27 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
             throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
         }
 
-        DictionaryFactory.Begin(valueResults.Count());
+        DictionaryFactory.Begin(count);
         try
         {
-            foreach (var valueResult in valueResults)
+            try
             {
-                var elementKey = sheet.Heading.GetColumnName(valueResult.ColumnIndex);
-                // Convert the string key to TKey
-                TKey? convertedKey = (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
-                if (convertedKey != null)
+                while (cellsReader.TryGetNext(out var valueResult))
                 {
-                    var elementValue = (TValue)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, valueResult, PreserveFormatting, member)!;
-                    DictionaryFactory.Add(convertedKey, elementValue);
+                    // Get the column name for the current value
+                    var elementKey = sheet.Heading.GetColumnName(valueResult.ColumnIndex);
+                    // Convert the string key to TKey
+                    TKey? convertedKey = (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
+                    if (convertedKey != null)
+                    {
+                        var elementValue = (TValue)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, valueResult, PreserveFormatting, member)!;
+                        DictionaryFactory.Add(convertedKey, elementValue);
+                    }
                 }
+            }
+            finally
+            {
+                cellsReader.Reset();
             }
 
             value = DictionaryFactory.End();

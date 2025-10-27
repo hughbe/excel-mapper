@@ -1,5 +1,3 @@
-using System.Runtime.InteropServices;
-
 namespace ExcelMapper.Tests;
 
 public class ExcelMappingDictionaryComparerAttributeTests

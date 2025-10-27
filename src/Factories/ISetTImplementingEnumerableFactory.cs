@@ -8,6 +8,9 @@ namespace ExcelMapper.Factories;
 /// <typeparam name="T">The type of the set elements.</typeparam>
 public class ISetTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
 {
+    /// <summary>
+    /// Gets the type of set that this factory creates.
+    /// </summary>
     public Type SetType { get; }
     private ISet<T?>? _items;
 

@@ -1,8 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
-using ExcelMapper.Tests;
 
 namespace ExcelMapper.Readers.Tests;
 

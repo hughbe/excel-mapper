@@ -8,8 +8,9 @@ namespace ExcelMapper.Abstractions;
 /// </summary>
 public interface ICellsReader
 {
-    /// <summary>
-    /// Tries to read the value of multiple cells.
-    /// </summary>
-    bool TryGetValues(IExcelDataReader reader, bool preserveFormatting, [NotNullWhen(true)] out IEnumerable<ReadCellResult>? result);
+    bool Start(IExcelDataReader reader, bool preserveFormatting, out int count);
+
+    bool TryGetNext([NotNullWhen(true)] out ReadCellResult result);
+
+    void Reset();
 }

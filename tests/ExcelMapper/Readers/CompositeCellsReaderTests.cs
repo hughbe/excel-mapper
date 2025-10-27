@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
 
@@ -56,15 +54,26 @@ public class CompositeCellsReaderTests
             }
         );
 
-        Assert.True(factory.TryGetValues(null!, preserveFormatting, out var result));
-        var resultList = result!.ToList();
-        Assert.Equal(2, resultList.Count);
-        Assert.Equal(0, resultList[0].ColumnIndex);
-        Assert.Equal("Value1", resultList[0].StringValue);
-        Assert.Equal(preserveFormatting, resultList[0].PreserveFormatting);
-        Assert.Equal(1, resultList[1].ColumnIndex);
-        Assert.Equal("Value2", resultList[1].StringValue);
-        Assert.Equal(preserveFormatting, resultList[1].PreserveFormatting);
+        for (var i = 0; i < 2; i++)
+        {
+            Assert.True(factory.Start(null!, preserveFormatting, out var count));
+            Assert.Equal(2, count);
+            var resultList = new List<ReadCellResult>();
+            while (factory.TryGetNext(out var result))
+            {
+                resultList.Add(result);
+            }
+            Assert.Equal(2, resultList.Count);
+            Assert.Equal(0, resultList[0].ColumnIndex);
+            Assert.Equal("Value1", resultList[0].StringValue);
+            Assert.Equal(preserveFormatting, resultList[0].PreserveFormatting);
+            Assert.Equal(1, resultList[1].ColumnIndex);
+            Assert.Equal("Value2", resultList[1].StringValue);
+            Assert.Equal(preserveFormatting, resultList[1].PreserveFormatting);
+
+            // Reset for the next iteration.
+            factory.Reset();
+        }
     }
 
     [Theory]
@@ -79,8 +88,9 @@ public class CompositeCellsReaderTests
             }
         );
 
-        Assert.False(factory.TryGetValues(null!, preserveFormatting, out var result));
-        Assert.Null(result);
+        Assert.True(factory.Start(null!, preserveFormatting, out var count));
+        Assert.Equal(0, count);
+        Assert.False(factory.TryGetNext(out var result));
     }
 
     private class MockCellReader : ICellReader

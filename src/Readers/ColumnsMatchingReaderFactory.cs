@@ -5,12 +5,15 @@
 /// </summary>
 public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsReaderFactory, IColumnIndicesProviderCellReaderFactory, IColumnNamesProviderCellReaderFactory
 {
+    /// <summary>
+    /// Gets the matcher used to identify which columns to read.
+    /// </summary>
     public IExcelColumnMatcher Matcher { get; }
 
     /// <summary>
     /// Constructs a reader that reads the value of multiple cells given the predicate matching the column name.
     /// </summary>
-    /// <param name="predicate">The predicate containing the column name to read.</param>
+    /// <param name="matcher">The matcher used to identify which columns to read.</param>
     public ColumnsMatchingReaderFactory(IExcelColumnMatcher matcher)
     {
         ArgumentNullException.ThrowIfNull(matcher);

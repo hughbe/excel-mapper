@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using ExcelDataReader;
 
 namespace ExcelMapper.Readers;
@@ -46,8 +45,24 @@ public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesPr
     /// Splits the given string value into multiple values.
     /// </summary>
     /// <param name="value">The string value to split.</param>
-    /// <returns>The multiple values produced by splitting the string value.</returns>
+    /// <returns>The array of string values produced by splitting the string value.</returns>
     protected abstract string[] GetValues(string value);
+
+    /// <summary>
+    /// Gets the number of values that would be produced by splitting the given string value
+    /// without allocating the intermediate array. Returns -1 if the split is required.
+    /// </summary>
+    /// <param name="value">The string value to analyze.</param>
+    /// <returns>The count of values, or -1 if splitting is required.</returns>
+    protected abstract int GetCount(string value);
+
+    /// <summary>
+    /// Gets the next value from the remaining string.
+    /// Only called if GetCount returned a valid count.
+    /// </summary>
+    /// <param name="remaining">The remaining string to search.</param>
+    /// <returns>A tuple with the number of characters to advance (value + separator), or -1 if this was the last value; the start offset of the value (after trimming leading whitespace); and the length of the value.</returns>
+    protected abstract (int Advance, int ValueStart, int ValueLength) GetNextValue(ReadOnlySpan<char> remaining);
 
     /// <inheritdoc/>
     public ICellsReader? GetCellsReader(ExcelSheet sheet)
@@ -91,27 +106,82 @@ public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesPr
         return null;
     }
 
-    private class Reader(ICellReader Reader, SplitReaderFactory Splitter) : ICellsReader
+    private struct Reader(ICellReader Reader, SplitReaderFactory Splitter) : ICellsReader
     {
-        public bool TryGetValues(IExcelDataReader reader, bool preserveFormatting, [NotNullWhen(true)] out IEnumerable<ReadCellResult>? result)
+        private string[]? _values;
+        private ReadCellResult _readResult;
+        private int _currentIndex;
+        private int _position;
+
+        public bool Start(IExcelDataReader reader, bool preserveFormatting, out int count)
         {
+            _currentIndex = -1;
+            _values = null;
+            _position = 0;
+
             if (!Reader.TryGetValue(reader, preserveFormatting, out var readResult))
             {
-                result = null;
+                count = 0;
                 return false;
             }
+
+            _readResult = readResult;
 
             var stringValue = readResult.GetString();
             if (stringValue == null)
             {
-                result = [];
+                count = 0;
                 return true;
             }
 
-            result = Splitter
-                .GetValues(stringValue)
-                .Select(s => new ReadCellResult(readResult.ColumnIndex, s, preserveFormatting));
+            // Try to avoid splitting if possible
+            int directCount = Splitter.GetCount(stringValue);
+            if (directCount >= 0)
+            {
+                count = directCount;
+                return true;
+            }
+
+            // Fall back to splitting
+            _values = Splitter.GetValues(stringValue);
+            count = _values.Length;
             return true;
+        }
+
+        public bool TryGetNext([NotNullWhen(true)] out ReadCellResult result)
+        {
+            _currentIndex++;
+            if (_values == null)
+            {
+                if (!string.IsNullOrEmpty(_readResult.StringValue) && _position < _readResult.StringValue!.Length)
+                {
+                    var remaining = _readResult.StringValue.AsSpan(_position);
+                    var (advance, valueStart, valueLength) = Splitter.GetNextValue(remaining);
+                    var value = _readResult.StringValue!.Substring(_position + valueStart, valueLength);
+                    _position += advance >= 0 ? advance : remaining.Length;
+
+                    result = new ReadCellResult(_readResult.ColumnIndex, value, _readResult.PreserveFormatting);
+                    return true;
+                }
+            }
+            else
+            {
+                if (_currentIndex < _values.Length)
+                {
+                    result = new ReadCellResult(_readResult.ColumnIndex, _values[_currentIndex], _readResult.PreserveFormatting);
+                    return true;
+                }
+            }
+
+            result = default;
+            return false;
+        }
+
+        public void Reset()
+        {
+            _currentIndex = -1;
+            _values = null;
+            _position = 0;
         }
     }
 }

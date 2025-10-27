@@ -9,6 +9,9 @@ namespace ExcelMapper.Factories;
 /// <typeparam name="TValue">The type of the dictionary values.</typeparam>
 public class IDictionaryTImplementingFactory<TKey, TValue> : Abstractions.IDictionaryFactory<TKey, TValue> where TKey : notnull
 {
+    /// <summary>
+    /// Gets the type of dictionary that this factory creates.
+    /// </summary>
     public Type DictionaryType { get; }
     private IDictionary<TKey, TValue?>? _items;
 

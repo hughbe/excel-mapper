@@ -6,12 +6,86 @@ namespace ExcelMapper.Benchmarks;
 [MemoryDiagnoser]
 public class SplitEnumerable
 {
-    [Benchmark]
-    public void ExcelDataReaderMap_GetDouble()
-    {
-        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+    private ExcelImporter _importer = default!;
 
-        var sheet = importer.ReadSheet();
+    [IterationSetup]
+    public void Setup()
+    {
+        _importer = Helpers.GetImporter("SplitWithManyCommas.xlsx");
+    }
+    
+    [Benchmark]
+    public void MapSplitEnumerable_AutoMapped()
+    {
+        var sheet = _importer.ReadSheet();
+        sheet.ReadHeading();
+        
+        foreach (var value in sheet.ReadRows<ObjectArrayClass>())
+        {
+        }
+    }
+
+    [Benchmark]
+    public void MapSplitEnumerable_StringSeparatorSingleChar()
+    {
+        _importer.Configuration.RegisterClassMap<ObjectArrayClass>(c =>
+        {
+            c.Map(p => p.Value)
+                .WithSeparators(",");
+        });
+
+        var sheet = _importer.ReadSheet();
+        sheet.ReadHeading();
+
+        foreach (var value in sheet.ReadRows<ObjectArrayClass>())
+        {
+        }
+    }
+
+    [Benchmark]
+    public void MapSplitEnumerable_StringSeparatorMultipleChars()
+    {
+        _importer.Configuration.RegisterClassMap<ObjectArrayClass>(c =>
+        {
+            c.Map(p => p.Value)
+                .WithSeparators(",", ";");
+        });
+
+        var sheet = _importer.ReadSheet();
+        sheet.ReadHeading();
+
+        foreach (var value in sheet.ReadRows<ObjectArrayClass>())
+        {
+        }
+    }
+
+    [Benchmark]
+    public void MapSplitEnumerable_CharSeparatorSingle()
+    {
+        _importer.Configuration.RegisterClassMap<ObjectArrayClass>(c =>
+        {
+            c.Map(p => p.Value)
+                .WithSeparators(',');
+        });
+
+        var sheet = _importer.ReadSheet();
+        sheet.ReadHeading();
+
+        foreach (var value in sheet.ReadRows<ObjectArrayClass>())
+        {
+        }
+    }
+
+    [Benchmark]
+    public void MapSplitEnumerable_CharSeparatorMultiple()
+    {
+        _importer.Configuration.RegisterClassMap<ObjectArrayClass>(c =>
+        {
+            c.Map(p => p.Value)
+                .WithSeparators(',', ';');
+        });
+
+        var sheet = _importer.ReadSheet();
         sheet.ReadHeading();
 
         foreach (var value in sheet.ReadRows<ObjectArrayClass>())

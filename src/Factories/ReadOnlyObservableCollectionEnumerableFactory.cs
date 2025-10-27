@@ -10,6 +10,9 @@ namespace ExcelMapper.Factories;
 /// <typeparam name="T">The type of the collection elements.</typeparam>
 public class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFactory<T>
 {
+    /// <summary>
+    /// Gets the type of collection that this factory creates.
+    /// </summary>
     public Type CollectionType { get; }
     private readonly ConstructorInfo _constructor;
     private ObservableCollection<T?>? _items;

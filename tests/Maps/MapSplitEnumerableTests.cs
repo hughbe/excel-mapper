@@ -69,6 +69,36 @@ public class MapSplitEnumerableTests
     }
 
     [Fact]
+    public void ReadRow_CustomDefaultMappedObjectArray_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
+        var map = new ExcelClassMap<ObjectArrayClass>();
+        importer.Configuration.RegisterClassMap<ObjectArrayClass>(c =>
+        {
+            c.Map(p => p.Value)
+                .WithSeparators(",");
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var row1 = sheet.ReadRow<ObjectArrayClass>();
+        Assert.Equal(["1", "2", "3"], row1.Value);
+
+        var row2 = sheet.ReadRow<ObjectArrayClass>();
+        Assert.Equal(["1", null, "2"], row2.Value);
+
+        var row3 = sheet.ReadRow<ObjectArrayClass>();
+        Assert.Equal(["1"], row3.Value);
+
+        var row4 = sheet.ReadRow<ObjectArrayClass>();
+        Assert.Empty(row4.Value);
+
+        var row5 = sheet.ReadRow<ObjectArrayClass>();
+        Assert.Equal(["Invalid"], row5.Value);
+    }
+
+    [Fact]
     public void ReadRow_AutoMappedStringArray_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");

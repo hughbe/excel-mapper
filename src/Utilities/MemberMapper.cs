@@ -1,5 +1,4 @@
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Reflection;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;

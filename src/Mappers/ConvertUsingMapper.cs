@@ -1,5 +1,10 @@
 ﻿namespace ExcelMapper.Mappers;
 
+/// <summary>
+/// A delegate that maps the result of reading an Excel cell to a <see cref="CellMapperResult"/>.
+/// </summary>
+/// <param name="readResult">The result of reading a cell, containing the value and column information.</param>
+/// <returns>A <see cref="CellMapperResult"/> indicating whether the mapping succeeded and the mapped value.</returns>
 public delegate CellMapperResult ConvertUsingMapperDelegate(ReadCellResult readResult);
 
 /// <summary>

@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using ExcelDataReader;
 
 namespace ExcelMapper.Readers;
@@ -14,6 +13,10 @@ public class ColumnIndicesReader : ICellsReader
     /// </summary>
     public IReadOnlyList<int> ColumnIndices { get; }
 
+    private IExcelDataReader? _reader;
+    private bool _preserveFormatting;
+    private int _currentIndex;
+
     /// <summary>
     /// Constructs a reader that reads the values of cells at the given column indices.
     /// </summary>
@@ -25,9 +28,33 @@ public class ColumnIndicesReader : ICellsReader
     }
 
     /// <inheritdoc/>
-    public bool TryGetValues(IExcelDataReader reader, bool preserveFormatting, [NotNullWhen(true)] out IEnumerable<ReadCellResult>? result)
+    public bool Start(IExcelDataReader reader, bool preserveFormatting, out int count)
     {
-        result = ColumnIndices.Select(columnIndex => new ReadCellResult(columnIndex, reader, preserveFormatting));
+        _reader = reader;
+        _preserveFormatting = preserveFormatting;
+        _currentIndex = -1;
+        count = ColumnIndices.Count;
         return true;
+    }
+
+    /// <inheritdoc/>
+    public bool TryGetNext([NotNullWhen(true)] out ReadCellResult result)
+    {
+        if (_currentIndex < ColumnIndices.Count - 1)
+        {
+            _currentIndex++;
+            result = new ReadCellResult(ColumnIndices[_currentIndex], _reader!, _preserveFormatting);
+            return true;
+        }
+
+        result = default;
+        return false;
+    }
+
+    /// <inheritdoc/>
+    public void Reset()
+    {
+        _currentIndex = -1;
+        _reader = null;
     }
 }

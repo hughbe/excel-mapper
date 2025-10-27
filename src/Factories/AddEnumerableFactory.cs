@@ -10,6 +10,9 @@ namespace ExcelMapper.Factories;
 /// <typeparam name="T">The type of the collection items.</typeparam>
 public class AddEnumerableFactory<T> : IEnumerableFactory<T>
 {
+    /// <summary>
+    /// Gets the type of collection that this factory creates.
+    /// </summary>
     public Type CollectionType { get; }
     private object? _items;
     private readonly MethodInfo _addMethod;

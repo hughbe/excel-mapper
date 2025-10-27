@@ -64,7 +64,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
 
         var cellsReader = _factoryCache.GetOrAdd(sheet, s => _readerFactory.GetCellsReader(s));
 
-        if (cellsReader == null || !cellsReader.TryGetValues(reader, PreserveFormatting, out var results))
+        if (cellsReader == null || !cellsReader.Start(reader, PreserveFormatting, out var count))
         {
             if (Optional)
             {
@@ -75,13 +75,20 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
             throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
         }
 
-        EnumerableFactory.Begin(results.Count());
+        EnumerableFactory.Begin(count);
         try
         {
-            foreach (var result in results)
+            try
             {
-                var elementValue = (TElement?)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, result, PreserveFormatting, member);
-                EnumerableFactory.Add(elementValue);
+                while (cellsReader.TryGetNext(out var result))
+                {
+                    var elementValue = (TElement?)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, result, PreserveFormatting, member);
+                    EnumerableFactory.Add(elementValue);
+                }
+            }
+            finally
+            {
+                cellsReader.Reset();
             }
 
             value = EnumerableFactory.End();

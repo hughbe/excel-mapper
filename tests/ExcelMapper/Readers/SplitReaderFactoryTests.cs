@@ -1,4 +1,4 @@
-﻿using ExcelDataReader;
+using ExcelDataReader;
 using ExcelMapper.Abstractions;
 
 namespace ExcelMapper.Readers.Tests;
@@ -69,10 +69,45 @@ public class SplitCellValueReaderTests
         {
             GetCellReaderAction = sheet => new MockReader(() => (true, new ReadCellResult(0, "value1,value2", preserveFormatting: false)))
         };
+        var factory = new SubSplitReaderFactory(innerReaderFactory)
+        {
+            GetValuesAction = value => value.Split(',', StringSplitOptions.None)
+        };
+        var reader = factory.GetCellsReader(null!);
+        Assert.NotNull(reader);
+        Assert.NotSame(reader, factory.GetCellsReader(null!));
+
+        // Use the reader.
+        for (int i = 0; i < 2; i++)
+        {
+            Assert.True(reader!.Start(null!, false, out int count));
+            Assert.Equal(2, count);
+            var values = new List<string?>();
+            while (reader.TryGetNext(out var result))
+            {
+                values.Add(result.StringValue);
+            }
+            Assert.Equal(["value1", "value2"], values);
+
+            // Reset for the next iteration.
+            reader.Reset();
+        }
+    }
+
+    [Fact]
+    public void GetCellsReader_InvokeNoStarted_ReturnsExpected()
+    {
+        var innerReaderFactory = new MockCellReaderFactory
+        {
+            GetCellReaderAction = sheet => new MockReader(() => (true, new ReadCellResult(0, "value1,value2", preserveFormatting: false)))
+        };
         var factory = new SubSplitReaderFactory(innerReaderFactory);
         var reader = factory.GetCellsReader(null!);
         Assert.NotNull(reader);
         Assert.NotSame(reader, factory.GetCellsReader(null!));
+
+        Assert.False(reader.TryGetNext(out var result));
+        Assert.Equal(default, result);
     }
 
     [Fact]
@@ -83,8 +118,9 @@ public class SplitCellValueReaderTests
             GetCellReaderAction = sheet => new MockReader(() => (true, new ReadCellResult(0, (string?)null, preserveFormatting: false)))
         });
         var reader = factory.GetCellsReader(null!)!;
-        Assert.True(reader.TryGetValues(null!, false, out IEnumerable<ReadCellResult>? result));
-        Assert.Empty(result);
+        Assert.True(reader.Start(null!, false, out int count));
+        Assert.Equal(0, count);
+        Assert.False(reader.TryGetNext(out _));
     }
 
     [Fact]
@@ -94,10 +130,14 @@ public class SplitCellValueReaderTests
         {
             GetCellReaderAction = sheet => new MockReader(() => (true, new ReadCellResult(0, string.Empty, preserveFormatting: false)))
         };
-        var factory = new SubSplitReaderFactory(innerReaderFactory);
+        var factory = new SubSplitReaderFactory(innerReaderFactory)
+        {
+            GetValuesAction = value => []
+        };
         var reader = factory.GetCellsReader(null!)!;
-        Assert.True(reader.TryGetValues(null!, false, out IEnumerable<ReadCellResult>? result));
-        Assert.Empty(result);
+        Assert.True(reader.Start(null!, false, out int count));
+        Assert.Equal(0, count);
+        Assert.False(reader.TryGetNext(out _));
     }
 
     [Fact]
@@ -120,8 +160,8 @@ public class SplitCellValueReaderTests
         };
         var factory = new SubSplitReaderFactory(innerReaderFactory);
         var reader = factory.GetCellsReader(null!)!;
-        Assert.False(reader.TryGetValues(null!, false, out IEnumerable<ReadCellResult>? result));
-        Assert.Null(result);
+        Assert.False(reader.Start(null!, false, out int count));
+        Assert.Equal(0, count);
     }
 
     [Fact]
@@ -190,7 +230,22 @@ public class SplitCellValueReaderTests
 
     private class SubSplitReaderFactory(ICellReaderFactory readerFactory) : SplitReaderFactory(readerFactory)
     {
-        protected override string[] GetValues(string value) => [];
+        public Func<string, string[]>? GetValuesAction { get; set; }
+        public Func<string, int>? GetCountAction { get; set; }
+        public Func<ReadOnlySpan<char>, (int, int, int)>? GetNextValueAction { get; set; }
+
+        protected override string[] GetValues(string value) => GetValuesAction?.Invoke(value) ?? [];
+
+        protected override int GetCount(string value) => GetCountAction?.Invoke(value) ?? -1;
+
+        protected override (int Advance, int ValueStart, int ValueLength) GetNextValue(ReadOnlySpan<char> remaining)
+        {
+            if (GetNextValueAction != null)
+            {
+                return GetNextValueAction(remaining);
+            }
+            return (-1, 0, 0);
+        }
     }
 
     private class MockReader(Func<(bool, ReadCellResult)> action) : ICellReader

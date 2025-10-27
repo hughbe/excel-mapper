@@ -9,6 +9,9 @@ namespace ExcelMapper.Factories;
 /// <typeparam name="T">The type of the collection elements.</typeparam>
 public class IListImplementingEnumerableFactory<T> : IEnumerableFactory<T>
 {
+    /// <summary>
+    /// Gets the type of list that this factory creates.
+    /// </summary>
     public Type ListType { get; }
     private IList? _items;
 
