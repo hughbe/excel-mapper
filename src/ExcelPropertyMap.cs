@@ -30,16 +30,27 @@ public class ExcelPropertyMap
 
         if (member is PropertyInfo property)
         {
+            // Property must have a setter.
             if (!property.CanWrite)
             {
                 throw new ArgumentException($"Property \"{member.Name}\" is read-only.", nameof(member));
             }
+            // Property must be an instance property.
+            if (property.SetMethod!.IsStatic)
+            {
+                throw new ArgumentException($"Property \"{member.Name}\" cannot be static.", nameof(member));
+            }
+            // Property must not be an indexer.
+            if (property.GetIndexParameters().Length > 0)
+            {
+                throw new ArgumentException($"Property \"{member.Name}\" is an indexer and cannot be mapped.", nameof(member));
+            }
 
-            SetValueFactory = (instance, value) => property.SetValue(instance, value);
+            SetValueFactory = property.SetValue;
         }
         else if (member is FieldInfo field)
         {
-            SetValueFactory = (instance, value) => field.SetValue(instance, value);
+            SetValueFactory = field.SetValue;
         }
         else
         {

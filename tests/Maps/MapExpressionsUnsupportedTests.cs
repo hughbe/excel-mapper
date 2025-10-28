@@ -64,18 +64,43 @@ public class MapExpressionsUnsupportedTests
     {
         public int Value { get; set; } = default!;
     }
+
     [Fact]
     public void Map_StaticProperty_ThrowsArgumentException()
     {
-        var map = new ExcelClassMap<StaticMemberClass>();
-        Assert.Throws<ArgumentException>("expression", () => map.Map(o => StaticMemberClass.StaticValue));
+        var map = new ExcelClassMap<StaticPropertyClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => StaticPropertyClass.Value));
+    }
+
+    private class StaticPropertyClass
+    {
+        public static int Value { get; set; }
+    }
+
+    [Fact]
+    public void Map_GetOnlyProperty_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<GetOnlyPropertyClass>();
+        Assert.Throws<ArgumentException>("member", () => map.Map(o => o.Value));
+    }
+
+    private class GetOnlyPropertyClass
+    {
+        public int Value { get; }
     }
 
     [Fact]
     public void Map_StaticField_ThrowsArgumentException()
     {
-        var map = new ExcelClassMap<StaticMemberClass>();
-        Assert.Throws<ArgumentException>("expression", () => map.Map(o => StaticMemberClass.StaticField));
+        var map = new ExcelClassMap<StaticFieldClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.Map(o => StaticFieldClass.Value));
+    }
+
+    private class StaticFieldClass
+    {
+#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
+        public static int Value;
+#pragma warning restore CS0649 // Field is never assigned to, and will always have its default value
     }
 
     [Fact]
@@ -83,14 +108,6 @@ public class MapExpressionsUnsupportedTests
     {
         var map = new ExcelClassMap<ChainedStaticClass>();
         Assert.Throws<ArgumentException>("expression", () => map.Map(o => ChainedStaticClass.Inner.Value));
-    }
-
-    private class StaticMemberClass
-    {
-        public static int StaticValue { get; set; }
-#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
-        public static int StaticField;
-#pragma warning restore CS0649 // Field is never assigned to, and will always have its default value
     }
 
     private class ChainedStaticClass
