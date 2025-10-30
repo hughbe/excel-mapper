@@ -1171,6 +1171,149 @@ The DescriptionAttribute mapping works automatically with:
 - If a description is not found, the mapper falls back to standard enum name matching
 - Enum values without a `[Description]` attribute can still be mapped using their standard names
 
+
+    [Fact]
+    public void ReadRow_AutoMappedUriKindAttributeRelativeOrAbsolute_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Uris.xlsx");
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value (absolute URI).
+        var row1 = sheet.ReadRow<UriKindRelativeOrAbsoluteClass>();
+        Assert.Equal(new Uri("http://google.com"), row1.Uri);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<UriKindRelativeOrAbsoluteClass>();
+        Assert.Null(row2.Uri);
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<UriKindRelativeOrAbsoluteClass>());
+    }
+
+    private class UriKindRelativeOrAbsoluteClass
+    {
+        [ExcelUri(UriKind.RelativeOrAbsolute)]
+        public Uri Uri { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedUriKindAttributeRelativeOrAbsolute_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Uris.xlsx");
+        importer.Configuration.RegisterClassMap<UriKindRelativeOrAbsoluteClass>(c =>
+        {
+            c.Map(u => u.Uri);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value (absolute URI).
+        var row1 = sheet.ReadRow<UriKindRelativeOrAbsoluteClass>();
+        Assert.Equal(new Uri("http://google.com"), row1.Uri);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<UriKindRelativeOrAbsoluteClass>();
+        Assert.Null(row2.Uri);
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<UriKindRelativeOrAbsoluteClass>());
+    }
+### Uri Mapping
+
+ExcelMapper supports mapping cell values to `Uri` objects with configurable URI kind validation:
+
+| Website                   | API Endpoint         | Relative Path    |
+|---------------------------|----------------------|------------------|
+| https://example.com       | /api/v1/users        | ../resources     |
+| https://www.contoso.com   | /api/v1/products     | ./images/logo.png|
+
+```csharp
+public class Resource
+{
+    public Uri Website { get; set; }         // RelativeOrAbsolute URI
+    public Uri ApiEndpoint { get; set; }     // Relative URI
+    public Uri RelativePath { get; set; }    // Relative or absolute
+}
+```
+
+#### Controlling URI Kind
+
+By default, URIs accept any valid format (absolute, relative, or both). You can specify URI kind requirements using either attributes or the fluent API:
+
+**Using Attributes:**
+
+```csharp
+public class Resource
+{
+    // Require absolute URIs only (e.g., https://example.com)
+    [ExcelUri(UriKind.RelativeOrAbsolute)]
+    public Uri Website { get; set; }
+    
+    // Require relative URIs only (e.g., /api/v1/users)
+    [ExcelUri(UriKind.Relative)]
+    public Uri ApiEndpoint { get; set; }
+    
+    // Allow both absolute and relative URIs (default)
+    [ExcelUri(UriKind.RelativeOrRelativeOrAbsolute)]
+    public Uri RelativePath { get; set; }
+}
+
+var resources = sheet.ReadRows<Resource>();
+```
+
+**Using Fluent API:**
+
+```csharp
+public class ResourceMap : ExcelClassMap<Resource>
+{
+    public ResourceMap()
+    {
+        // Require absolute URIs only (e.g., https://example.com)
+        Map(r => r.Website)
+            .WithUriKind(UriKind.RelativeOrAbsolute);
+            
+        // Require relative URIs only (e.g., /api/v1/users)
+        Map(r => r.ApiEndpoint)
+            .WithUriKind(UriKind.Relative);
+            
+        // Allow both absolute and relative URIs (default)
+        Map(r => r.RelativePath)
+            .WithUriKind(UriKind.RelativeOrRelativeOrAbsolute);
+    }
+}
+
+importer.Configuration.RegisterClassMap<ResourceMap>();
+var resources = sheet.ReadRows<Resource>();
+```
+
+**Available UriKind Options:**
+- `UriKind.RelativeOrAbsolute` - Must be absolute URI (e.g., `https://example.com`)
+- `UriKind.Relative` - Must be relative URI (e.g., `/api/users` or `../path`)
+- `UriKind.RelativeOrRelativeOrAbsolute` (default) - Can be either absolute or relative
+
+**Error Handling:**
+
+```csharp
+public class ResourceMap : ExcelClassMap<Resource>
+{
+    public ResourceMap()
+    {
+        Map(r => r.Website)
+            .WithUriKind(UriKind.RelativeOrAbsolute)
+            .WithInvalidFallback(null);  // Use null for invalid URIs
+    }
+}
+```
+
+**Important Notes:**
+- **Hyperlink formulas are not supported** due to limitations in the underlying ExcelDataReader library. Only the displayed text value in cells is read, not the hyperlink target. If you need to read hyperlink targets, consider using a different library or extracting them separately.
+- Invalid URIs will throw an exception unless you provide a fallback value
+- Empty cells are treated as null for nullable `Uri?` properties
+- URI validation is performed using .NET's `Uri.TryCreate` method
+
 ### Collections and Arrays
 
 ExcelMapper supports multiple strategies for mapping collections.
@@ -2224,6 +2367,7 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 | `[ExcelPreserveFormatting]` | Read formatted string |
 | `[ExcelTrimString]` | Auto-trim whitespace |
 | `[ExcelFormats("format1", "format2")]` | Parse dates/times with specific formats |
+| `[ExcelUri(UriKind.RelativeOrAbsolute)]` | Specify URI kind (RelativeOrAbsolute, Relative, or RelativeOrRelativeOrAbsolute) |
 | `[ExcelSeparators(';', ',')]` | Split cell value with custom separators |
 | `[ExcelTransformer(typeof(Transformer))]` | Apply custom transformer |
 | `[ExcelMappingDictionary("key", value)]` | Map string value to enum/object (multiple allowed) |
@@ -2247,6 +2391,7 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 - `.WithValueFallback(value)` - Default for both
 - `.WithConverter(value => ...)` - Custom conversion
 - `.WithFormats("format1", "format2")` - Date/time formats
+- `.WithUriKind(UriKind)` - Specify URI kind for Uri properties
 - `.WithMapping(dictionary)` - Value mapping
 - `.WithTrim()` - Trim whitespace
 - `.WithTransformers(...)` - Custom transformers

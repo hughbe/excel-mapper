@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Runtime.InteropServices;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
 using ExcelMapper.Transformers;
@@ -398,7 +399,29 @@ public static class IValuePipelineExtensions
     private static void AddFormats<TCellMapper>(this IValuePipeline map, string[] formats) where TCellMapper : IFormatsCellMapper, new()
     {
         FormatUtilities.ValidateFormats(formats);
+        var mapper = map.GetOrAddMapper<TCellMapper>();
+        mapper.Formats = formats;
+    }
 
+    /// <summary>
+    /// Specifies the kind of URI to use when mapping the value of a cell to a Uri. This is useful for
+    /// specifying whether URIs should be absolute, relative, or either.
+    /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="uriKind">The kind of URI to use when mapping the value of a cell to a Uri. Must be a valid UriKind value (Absolute, Relative, or RelativeOrAbsolute).</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="uriKind"/> is not a valid UriKind value.</exception>
+    public static TMap WithUriKind<TMap>(this TMap map, UriKind uriKind) where TMap : IValuePipeline<Uri?>
+    {
+        EnumUtilities.ValidateIsDefined(uriKind);
+        var mapper = map.GetOrAddMapper<UriMapper>();
+        mapper.UriKind = uriKind;
+        return map;
+    }
+
+    private static TCellMapper GetOrAddMapper<TCellMapper>(this IValuePipeline map) where TCellMapper : ICellMapper, new()
+    {
         var mapper = map.Mappers
             .OfType<TCellMapper>()
             .FirstOrDefault();
@@ -408,7 +431,7 @@ public static class IValuePipelineExtensions
             map.Mappers.Add(mapper);
         }
 
-        mapper.Formats = formats;
+        return mapper;
     }
 
     /// <summary>

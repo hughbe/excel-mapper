@@ -185,6 +185,15 @@ internal static class MemberMapper
                 mapper.Formats = formatsAttribute.Formats;
             }
         }
+
+        // If the member has a ExcelUri attribute, modify the mappers.
+        if (member.GetCustomAttribute<ExcelUriAttribute>() is { } uriKindAttribute)
+        {
+            foreach (var mapper in pipeline.Mappers.OfType<UriMapper>())
+            {
+                mapper.UriKind = uriKindAttribute.UriKind;
+            }
+        }
     }
 
     internal static IFallbackItem? GetDefaultEmptyValueFallback(MemberInfo member)

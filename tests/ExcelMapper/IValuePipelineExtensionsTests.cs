@@ -199,10 +199,10 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateTimeValue);
         Assert.Same(map, map.WithMapping(dictionaryMapping, comparer));
 
-        var item = map.Mappers.OfType<MappingDictionaryMapper<DateTime>>().Single();
-        Assert.NotSame(dictionaryMapping, item.MappingDictionary);
-        Assert.Equal(dictionaryMapping, item.MappingDictionary);
-        Assert.Same(comparer, Assert.IsType<Dictionary<string, DateTime>>(item.MappingDictionary).Comparer);
+        var mapper = map.Mappers.OfType<MappingDictionaryMapper<DateTime>>().Single();
+        Assert.NotSame(dictionaryMapping, mapper.MappingDictionary);
+        Assert.Equal(dictionaryMapping, mapper.MappingDictionary);
+        Assert.Same(comparer, Assert.IsType<Dictionary<string, DateTime>>(mapper.MappingDictionary).Comparer);
     }
 
     [Fact]
@@ -238,8 +238,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateTimeValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateTimeMapper item = map.Mappers.OfType<DateTimeMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<DateTimeMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -251,8 +251,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateTimeValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateTimeMapper item = map.Mappers.OfType<DateTimeMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<DateTimeMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -262,8 +262,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateTimeValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateTimeMapper item = map.Mappers.OfType<DateTimeMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<DateTimeMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Theory]
@@ -273,8 +273,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateTimeValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateTimeMapper item = map.Mappers.OfType<DateTimeMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<DateTimeMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Fact]
@@ -318,8 +318,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateTimeValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateTimeMapper item = map.Mappers.OfType<DateTimeMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<DateTimeMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -331,8 +331,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateTimeValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateTimeMapper item = map.Mappers.OfType<DateTimeMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<DateTimeMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -342,8 +342,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateTimeValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateTimeMapper item = map.Mappers.OfType<DateTimeMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<DateTimeMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Theory]
@@ -353,8 +353,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateTimeValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateTimeMapper item = map.Mappers.OfType<DateTimeMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<DateTimeMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Fact]
@@ -398,8 +398,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateTimeOffsetValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateTimeOffsetMapper item = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -411,8 +411,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateTimeOffsetValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateTimeOffsetMapper item = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -422,8 +422,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateTimeOffsetValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateTimeOffsetMapper item = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Theory]
@@ -433,8 +433,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateTimeOffsetValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateTimeOffsetMapper item = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Fact]
@@ -478,8 +478,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateTimeOffsetValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateTimeOffsetMapper item = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -491,8 +491,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateTimeOffsetValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateTimeOffsetMapper item = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -502,8 +502,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateTimeOffsetValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateTimeOffsetMapper item = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Theory]
@@ -513,8 +513,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateTimeOffsetValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateTimeOffsetMapper item = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Fact]
@@ -558,8 +558,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.TimeSpanValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        TimeSpanMapper item = map.Mappers.OfType<TimeSpanMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<TimeSpanMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -571,8 +571,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.TimeSpanValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        TimeSpanMapper item = map.Mappers.OfType<TimeSpanMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<TimeSpanMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -582,8 +582,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.TimeSpanValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        TimeSpanMapper item = map.Mappers.OfType<TimeSpanMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<TimeSpanMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Theory]
@@ -593,8 +593,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.TimeSpanValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        TimeSpanMapper item = map.Mappers.OfType<TimeSpanMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<TimeSpanMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Fact]
@@ -638,8 +638,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableTimeSpanValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        TimeSpanMapper item = map.Mappers.OfType<TimeSpanMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<TimeSpanMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -651,8 +651,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableTimeSpanValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        TimeSpanMapper item = map.Mappers.OfType<TimeSpanMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<TimeSpanMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -662,8 +662,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableTimeSpanValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        TimeSpanMapper item = map.Mappers.OfType<TimeSpanMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<TimeSpanMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Theory]
@@ -673,8 +673,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableTimeSpanValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        TimeSpanMapper item = map.Mappers.OfType<TimeSpanMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<TimeSpanMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Fact]
@@ -718,8 +718,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateOnlyValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateOnlyMapper item = map.Mappers.OfType<DateOnlyMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -731,8 +731,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateOnlyValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateOnlyMapper item = map.Mappers.OfType<DateOnlyMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -742,8 +742,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateOnlyValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateOnlyMapper item = map.Mappers.OfType<DateOnlyMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Theory]
@@ -753,8 +753,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.DateOnlyValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateOnlyMapper item = map.Mappers.OfType<DateOnlyMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Fact]
@@ -798,8 +798,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateOnlyValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateOnlyMapper item = map.Mappers.OfType<DateOnlyMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -811,8 +811,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateOnlyValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        DateOnlyMapper item = map.Mappers.OfType<DateOnlyMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -822,8 +822,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateOnlyValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateOnlyMapper item = map.Mappers.OfType<DateOnlyMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Theory]
@@ -833,8 +833,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableDateOnlyValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        DateOnlyMapper item = map.Mappers.OfType<DateOnlyMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Fact]
@@ -878,8 +878,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.TimeOnlyValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        TimeOnlyMapper item = map.Mappers.OfType<TimeOnlyMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -891,8 +891,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.TimeOnlyValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        TimeOnlyMapper item = map.Mappers.OfType<TimeOnlyMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -902,8 +902,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.TimeOnlyValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        TimeOnlyMapper item = map.Mappers.OfType<TimeOnlyMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Theory]
@@ -913,8 +913,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.TimeOnlyValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        TimeOnlyMapper item = map.Mappers.OfType<TimeOnlyMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Fact]
@@ -958,8 +958,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableTimeOnlyValue);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        TimeOnlyMapper item = map.Mappers.OfType<TimeOnlyMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -971,8 +971,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableTimeOnlyValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formatsArray));
 
-        TimeOnlyMapper item = map.Mappers.OfType<TimeOnlyMapper>().Single();
-        Assert.Same(formatsArray, item.Formats);
+        var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Same(formatsArray, mapper.Formats);
     }
 
     [Theory]
@@ -982,8 +982,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableTimeOnlyValue);
         Assert.Same(map, map.WithFormats(formats));
 
-        TimeOnlyMapper item = map.Mappers.OfType<TimeOnlyMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Theory]
@@ -993,8 +993,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.NullableTimeOnlyValue).WithMappers([]);
         Assert.Same(map, map.WithFormats(formats));
 
-        TimeOnlyMapper item = map.Mappers.OfType<TimeOnlyMapper>().Single();
-        Assert.Equal(formats, item.Formats);
+        var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Equal(formats, mapper.Formats);
     }
 
     [Fact]
@@ -1029,6 +1029,41 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
 
+    [Theory]
+    [InlineData(UriKind.RelativeOrAbsolute)]
+    [InlineData(UriKind.Absolute)]
+    [InlineData(UriKind.Relative)]
+    public void WithUriKind_InvokeAutoMapped_Success(UriKind uriKind)
+    {
+        var map = Map(t => t.UriValue);
+        Assert.Same(map, map.WithUriKind(uriKind));
+
+        var mapper = map.Mappers.OfType<UriMapper>().Single();
+        Assert.Equal(uriKind, mapper.UriKind);
+    }
+
+    [Theory]
+    [InlineData(UriKind.RelativeOrAbsolute)]
+    [InlineData(UriKind.Absolute)]
+    [InlineData(UriKind.Relative)]
+    public void WithUriKind_InvokeNotMapped_Success(UriKind uriKind)
+    {
+        var map = Map(t => t.UriValue).WithMappers([]);
+        Assert.Same(map, map.WithUriKind(uriKind));
+
+        var mapper = map.Mappers.OfType<UriMapper>().Single();
+        Assert.Equal(uriKind, mapper.UriKind);
+    }
+
+    [Theory]
+    [InlineData(UriKind.RelativeOrAbsolute - 1)]
+    [InlineData(UriKind.Relative + 1)]
+    public void WithUriKind_InvalidUriKind_ThrowsArgumentOutOfRangeException(UriKind uriKind)
+    {
+        var map = Map(t => t.UriValue);
+        Assert.Throws<ArgumentOutOfRangeException>("uriKind", () => map.WithUriKind(uriKind));
+    }
+
     [Fact]
     public void WithConverter_SuccessConverterSimple_ReturnsExpected()
     {
@@ -1038,9 +1073,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
             Assert.Equal("stringValue", stringValue);
             return "abc";
         }));
-        ConvertUsingMapper item = map.Mappers.OfType<ConvertUsingMapper>().Single();
+        var mapper = map.Mappers.OfType<ConvertUsingMapper>().Single();
 
-        var result = item.Converter(new ReadCellResult(0, "stringValue", preserveFormatting: false));
+        var result = mapper.Converter(new ReadCellResult(0, "stringValue", preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal("abc", result.Value);
         Assert.Null(result.Exception);
@@ -1057,9 +1092,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 
         var map = Map(t => t.Value);
         Assert.Same(map, map.WithConverter(converter));
-        ConvertUsingMapper item = map.Mappers.OfType<ConvertUsingMapper>().Single();
+        var mapper = map.Mappers.OfType<ConvertUsingMapper>().Single();
 
-        var result = item.Converter(new ReadCellResult(0, "stringValue", preserveFormatting: false));
+        var result = mapper.Converter(new ReadCellResult(0, "stringValue", preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.IsType<NotSupportedException>(result.Exception);
@@ -1074,9 +1109,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
             Assert.Equal("stringValue", readResult.StringValue);
             return CellMapperResult.Success("abc");
         }));
-        ConvertUsingMapper item = map.Mappers.OfType<ConvertUsingMapper>().Single();
+        var mapper = map.Mappers.OfType<ConvertUsingMapper>().Single();
 
-        var result = item.Converter(new ReadCellResult(0, "stringValue", preserveFormatting: false));
+        var result = mapper.Converter(new ReadCellResult(0, "stringValue", preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal("abc", result.Value);
         Assert.Null(result.Exception);
@@ -1093,8 +1128,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 
         var map = Map(t => t.Value);
         Assert.Same(map, map.WithConverter(converter));
-        ConvertUsingMapper item = map.Mappers.OfType<ConvertUsingMapper>().Single();
-        Assert.Throws<NotSupportedException>(() => item.Converter(new ReadCellResult(0, "stringValue", preserveFormatting: false)));
+        var mapper = map.Mappers.OfType<ConvertUsingMapper>().Single();
+        Assert.Throws<NotSupportedException>(() => mapper.Converter(new ReadCellResult(0, "stringValue", preserveFormatting: false)));
     }
 
     [Fact]

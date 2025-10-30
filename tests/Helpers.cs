@@ -42,6 +42,7 @@ public static class Helpers
         public DateOnly? NullableDateOnlyValue { get; set; }
         public TimeOnly TimeOnlyValue { get; set; }
         public TimeOnly? NullableTimeOnlyValue { get; set; }
+        public Uri? UriValue { get; set; }
         public IListInterface UnknownInterfaceValue { get; set; } = default!;
         public ConcreteIEnumerable ConcreteIEnumerable { get; set; } = default!;
         public ConcreteIDictionary ConcreteIDictionary { get; set; } = default!;
