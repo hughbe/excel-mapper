@@ -613,6 +613,60 @@ public class EventMap : ExcelClassMap<Event>
 - `TimeOnly` / `TimeOnly?` (.NET 6+)
 - `TimeSpan` / `TimeSpan?`
 
+#### Culture-Specific Date and Time Parsing
+
+Specify a format provider (culture) for parsing date, time, and duration types. This is particularly useful when your Excel data uses locale-specific formatting:
+
+| Event         | EventDate  | StartTime | 
+|---------------|------------|-----------|
+| Conference    | 15.03.2024 | 14:30     |
+| Workshop      | 22.11.2024 | 09:15     |
+
+```csharp
+using System.Globalization;
+
+public class Event
+{
+    public string Event { get; set; }
+    public DateTime EventDate { get; set; }
+    public TimeOnly StartTime { get; set; }
+}
+
+public class EventMap : ExcelClassMap<Event>
+{
+    public EventMap()
+    {
+        var germanCulture = new CultureInfo("de-DE");
+        
+        Map(e => e.Event);
+        
+        Map(e => e.EventDate)
+            .WithFormats("dd.MM.yyyy")
+            .WithFormatProvider(germanCulture);
+            
+        Map(e => e.StartTime)
+            .WithFormats("HH:mm")
+            .WithFormatProvider(germanCulture);
+    }
+}
+
+importer.Configuration.RegisterClassMap<EventMap>();
+var events = sheet.ReadRows<Event>();
+```
+
+**Why use format providers?**
+- Handle locale-specific number formats (1.234,56 vs 1,234.56)
+- Parse dates with culture-specific month/day names
+- Support culture-specific date separators (. vs / vs -)
+- Ensure correct parsing of time formats across cultures
+
+**Supported Types with Format Providers:**
+- `DateTime` / `DateTime?`
+- `DateTimeOffset` / `DateTimeOffset?`
+- `DateOnly` / `DateOnly?` (.NET 6+)
+- `TimeOnly` / `TimeOnly?` (.NET 6+)
+- `TimeSpan` / `TimeSpan?`
+
 #### Invalid Value Fallback
 
 Provide a fallback value when cell value cannot be parsed:
@@ -1955,11 +2009,13 @@ ExcelMapper has comprehensive support for modern .NET date and time types:
 - `TimeOnly` - Time without date (available in .NET 6+)
 - `TimeSpan` - Duration/time interval
 
-All support custom format parsing with `.WithFormats()`.
+All support custom format parsing with `.WithFormats()` and culture-specific parsing with `.WithFormatProvider()`.
 
 **Example:**
 
 ```csharp
+using System.Globalization;
+
 public class EventMap : ExcelClassMap<Event>
 {
     public EventMap()
@@ -1972,6 +2028,25 @@ public class EventMap : ExcelClassMap<Event>
             
         Map(e => e.Duration)
             .WithFormats(@"hh\:mm\:ss", @"mm\:ss");
+    }
+}
+```
+
+**Culture-Specific Parsing:**
+
+Use `.WithFormatProvider()` to parse dates and times using specific cultures:
+
+```csharp
+public class EventMap : ExcelClassMap<Event>
+{
+    public EventMap()
+    {
+        var frenchCulture = new CultureInfo("fr-FR");
+        
+        // Parse French-formatted dates: "15/03/2024"
+        Map(e => e.EventDate)
+            .WithFormats("dd/MM/yyyy")
+            .WithFormatProvider(frenchCulture);
     }
 }
 ```

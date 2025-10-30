@@ -95,21 +95,25 @@ public class DateTimeMapperTests
         Assert.Equal(style, item.Style);
     }
 
-    public static IEnumerable<object[]> Map_ValidStringValue_TestData()
+    public static IEnumerable<object?[]> Map_ValidStringValue_TestData()
     {
-        yield return new object[] { new DateTime(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "G" }, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
-        yield return new object[] { new DateTime(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "G", "yyyy-MM-dd" }, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
-        yield return new object[] { "   2017-07-12   ", new string[] { "G", "yyyy-MM-dd" }, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 7, 12) };
-        yield return new object[] { new DateTime(2017, 7, 12, 7, 57, 46).ToString("R"), new string[] { "yyyy-MM-dd", "R" }, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
+        yield return new object?[] { new DateTime(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "G" }, null, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
+        yield return new object?[] { new DateTime(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "G", "yyyy-MM-dd" }, null, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
+        yield return new object?[] { "   2017-07-12   ", new string[] { "G", "yyyy-MM-dd" }, null, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 7, 12) };
+        yield return new object?[] { new DateTime(2017, 7, 12, 7, 57, 46).ToString("R"), new string[] { "yyyy-MM-dd", "R" }, null, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
+
+        var frenchCulture = new CultureInfo("fr-FR");
+        yield return new object?[] { new DateTime(2017, 10, 12, 7, 57, 46).ToString("yyyy-MMMM-dd HH:mm:ss", frenchCulture), new string[] { "yyyy-MMMM-dd HH:mm:ss" }, frenchCulture, DateTimeStyles.None, new DateTime(2017, 10, 12, 7, 57, 46) };
     }
 
     [Theory]
     [MemberData(nameof(Map_ValidStringValue_TestData))]
-    public void Map_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, DateTimeStyles style, DateTime expected)
+    public void Map_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, IFormatProvider? provider, DateTimeStyles style, DateTime expected)
     {
         var item = new DateTimeMapper
         {
             Formats = formats,
+            Provider = provider,
             Style = style
         };
 
@@ -133,15 +137,15 @@ public class DateTimeMapperTests
         Assert.NotNull(result.Exception);
     }
 
-    public static IEnumerable<object[]> Map_ValidDateTimeValue_TestData()
+    public static IEnumerable<object?[]> Map_ValidDateTimeValue_TestData()
     {
-        yield return new object[] { new DateTime(2017, 7, 12, 7, 57, 46), new string[] { "G" }, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
-        yield return new object[] { new DateTime(2017, 7, 12, 7, 57, 46), new string[] { "G", "yyyy-MM-dd" }, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
+        yield return new object?[] { new DateTime(2017, 7, 12, 7, 57, 46), new string[] { "G" }, null, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
+        yield return new object?[] { new DateTime(2017, 7, 12, 7, 57, 46), new string[] { "G", "yyyy-MM-dd" }, null, DateTimeStyles.None, new DateTime(2017, 7, 12, 7, 57, 46) };
     }
 
     [Theory]
     [MemberData(nameof(Map_ValidDateTimeValue_TestData))]
-    public void Map_ValidDateTimeValue_ReturnsSuccess(DateTime dateTimeValue, string[] formats, DateTimeStyles style, DateTime expected)
+    public void Map_ValidDateTimeValue_ReturnsSuccess(DateTime dateTimeValue, string[] formats, IFormatProvider? provider, DateTimeStyles style, DateTime expected)
     {
         var reader = new MockExcelDataReader
         {
@@ -151,6 +155,7 @@ public class DateTimeMapperTests
         var item = new DateTimeMapper
         {
             Formats = formats,
+            Provider = provider,
             Style = style
         };
 

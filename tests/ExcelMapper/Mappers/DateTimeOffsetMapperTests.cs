@@ -95,20 +95,24 @@ public class DateTimeOffsetMapperTests
         Assert.Equal(style, item.Style);
     }
 
-    public static IEnumerable<object[]> Map_Valid_TestData()
+    public static IEnumerable<object?[]> Map_Valid_TestData()
     {
-        yield return new object[] { new DateTimeOffset(new DateTime(2017, 7, 12, 7, 57, 46)).ToString("G"), new string[] { "G" }, DateTimeStyles.None, new DateTimeOffset(new DateTime(2017, 7, 12, 7, 57, 46)) };
-        yield return new object[] { new DateTimeOffset(new DateTime(2017, 7, 12, 7, 57, 46)).ToString("G"), new string[] { "G", "yyyy-MM-dd" }, DateTimeStyles.None, new DateTimeOffset(new DateTime(2017, 7, 12, 7, 57, 46)) };
-        yield return new object[] { "   2017-07-12   ", new string[] { "G", "yyyy-MM-dd" }, DateTimeStyles.AllowWhiteSpaces, new DateTimeOffset(new DateTime(2017, 7, 12)) };
+        yield return new object?[] { new DateTimeOffset(new DateTime(2017, 7, 12, 7, 57, 46)).ToString("G"), new string[] { "G" }, null, DateTimeStyles.None, new DateTimeOffset(new DateTime(2017, 7, 12, 7, 57, 46)) };
+        yield return new object?[] { new DateTimeOffset(new DateTime(2017, 7, 12, 7, 57, 46)).ToString("G"), new string[] { "G", "yyyy-MM-dd" }, null, DateTimeStyles.None, new DateTimeOffset(new DateTime(2017, 7, 12, 7, 57, 46)) };
+        yield return new object?[] { "   2017-07-12   ", new string[] { "G", "yyyy-MM-dd" }, null, DateTimeStyles.AllowWhiteSpaces, new DateTimeOffset(new DateTime(2017, 7, 12)) };
+
+        var frenchCulture = new CultureInfo("fr-FR");
+        yield return new object?[] { new DateTimeOffset(new DateTime(2017, 10, 12, 7, 57, 46)).ToString("yyyy-MMMM-dd HH:mm:ss", frenchCulture), new string[] { "yyyy-MMMM-dd HH:mm:ss" }, frenchCulture, DateTimeStyles.None, new DateTimeOffset(new DateTime(2017, 10, 12, 7, 57, 46)) };
     }
 
     [Theory]
     [MemberData(nameof(Map_Valid_TestData))]
-    public void Map_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, DateTimeStyles style, DateTimeOffset expected)
+    public void Map_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, IFormatProvider? provider, DateTimeStyles style, DateTimeOffset expected)
     {
         var item = new DateTimeOffsetMapper
         {
             Formats = formats,
+            Provider = provider,
             Style = style
         };
 
@@ -132,15 +136,15 @@ public class DateTimeOffsetMapperTests
         Assert.NotNull(result.Exception);
     }
 
-    public static IEnumerable<object[]> Map_ValidDateTimeValue_TestData()
+    public static IEnumerable<object?[]> Map_ValidDateTimeValue_TestData()
     {
-        yield return new object[] { new DateTime(2017, 7, 12, 7, 57, 46), new string[] { "G" }, DateTimeStyles.None, new DateTimeOffset(new DateTime(2017, 7, 12, 7, 57, 46)) };
-        yield return new object[] { new DateTime(2017, 7, 12, 7, 57, 46), new string[] { "G", "yyyy-MM-dd" }, DateTimeStyles.None, new DateTimeOffset(new DateTime(2017, 7, 12, 7, 57, 46)) };
+        yield return new object?[] { new DateTime(2017, 7, 12, 7, 57, 46), new string[] { "G" }, null, DateTimeStyles.None, new DateTimeOffset(new DateTime(2017, 7, 12, 7, 57, 46)) };
+        yield return new object?[] { new DateTime(2017, 7, 12, 7, 57, 46), new string[] { "G", "yyyy-MM-dd" }, null, DateTimeStyles.None, new DateTimeOffset(new DateTime(2017, 7, 12, 7, 57, 46)) };
     }
 
     [Theory]
     [MemberData(nameof(Map_ValidDateTimeValue_TestData))]
-    public void Map_ValidDateTimeValue_ReturnsSuccess(DateTime dateTimeValue, string[] formats, DateTimeStyles style, DateTimeOffset expected)
+    public void Map_ValidDateTimeValue_ReturnsSuccess(DateTime dateTimeValue, string[] formats, IFormatProvider? provider, DateTimeStyles style, DateTimeOffset expected)
     {
         var reader = new MockExcelDataReader
         {
@@ -150,6 +154,7 @@ public class DateTimeOffsetMapperTests
         var item = new DateTimeOffsetMapper
         {
             Formats = formats,
+            Provider = provider,
             Style = style
         };
 

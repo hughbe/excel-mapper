@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
@@ -53,7 +54,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("mappers", () => map.WithMappers([new BoolMapper(), null!]));
         Assert.Same(mapper, Assert.Single(map.Mappers));
     }
-    
+
     [Fact]
     public void WithMappers_ParamsIEnumerableValidMappers_Success()
     {
@@ -144,7 +145,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("transformers", () => map.WithTransformers([new TrimStringCellTransformer(), null!]));
         Assert.Same(transformer, Assert.Single(map.Transformers));
     }
-    
+
     [Fact]
     public void WithTransformers_ParamsIEnumerableValidTransformers_Success()
     {
@@ -1029,6 +1030,232 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
 
+    public static IEnumerable<object?[]> FormatProvider_TestData()
+    {
+        yield return new object?[] { null };
+        yield return new object[] { new CultureInfo("fr-FR") };
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_DateTimeAutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.DateTimeValue);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<DateTimeMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_DateTimeNotMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.DateTimeValue).WithMappers([]);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<DateTimeMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_DateTimeNullableAutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.NullableDateTimeValue);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<DateTimeMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_DateTimeNullableNotMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.NullableDateTimeValue).WithMappers([]);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<DateTimeMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_DateTimeOffsetAutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.DateTimeOffsetValue);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_DateTimeOffsetNotMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.DateTimeOffsetValue).WithMappers([]);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_DateTimeOffsetNullableAutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.NullableDateTimeOffsetValue);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_DateTimeOffsetNullableNotMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.NullableDateTimeOffsetValue).WithMappers([]);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_TimeSpanAutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.TimeSpanValue);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<TimeSpanMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_TimeSpanNotMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.TimeSpanValue).WithMappers([]);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<TimeSpanMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_TimeSpanNullableAutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.NullableTimeSpanValue);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<TimeSpanMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_TimeSpanNullableNotMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.NullableTimeSpanValue).WithMappers([]);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<TimeSpanMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_DateOnlyAutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.DateOnlyValue);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_DateOnlyNotMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.DateOnlyValue).WithMappers([]);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_DateOnlyNullableAutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.NullableDateOnlyValue);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_DateOnlyNullableNotMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.NullableDateOnlyValue).WithMappers([]);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_TimeOnlyAutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.TimeOnlyValue);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_TimeOnlyNotMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.TimeOnlyValue).WithMappers([]);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_TimeOnlyNullableAutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.NullableTimeOnlyValue);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_TimeOnlyNullableNotMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.NullableTimeOnlyValue).WithMappers([]);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
     [Theory]
     [InlineData(UriKind.RelativeOrAbsolute)]
     [InlineData(UriKind.Absolute)]
@@ -1241,7 +1468,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 
         var emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
         Assert.Equal(value, emptyFallback.Value);
-        
+
         var invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
         Assert.Equal("Invalid", invalidFallback.Value);
     }
@@ -1283,7 +1510,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Same(emptyFallback, map.Pipeline.EmptyFallback);
 
         var invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
-        Assert.Equal("Invalid", invalidFallback.Value);        
+        Assert.Equal("Invalid", invalidFallback.Value);
     }
 
     [Fact]

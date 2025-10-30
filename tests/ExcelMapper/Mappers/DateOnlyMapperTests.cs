@@ -95,21 +95,25 @@ public class DateOnlyMapperTests
         Assert.Equal(style, item.Style);
     }
 
-    public static IEnumerable<object[]> Map_Valid_TestData()
+    public static IEnumerable<object?[]> Map_Valid_TestData()
     {
-        yield return new object[] { new DateOnly(2025, 10, 18).ToString("D"), new string[] { "D" }, DateTimeStyles.None, new DateOnly(2025, 10, 18) };
-        yield return new object[] { new DateOnly(2025, 10, 18).ToString("D"), new string[] { "D", "yyyy-MM-dd" }, DateTimeStyles.None, new DateOnly(2025, 10, 18) };
-        yield return new object[] { $" {new DateOnly(2025, 10, 18):D}  ", new string[] { "yyyy-MM-dd", "D" }, DateTimeStyles.AllowWhiteSpaces, new DateOnly(2025, 10, 18) };
-        yield return new object[] { $" {new DateOnly(2025, 10, 18):R}  ", new string[] { "yyyy-MM-dd", "R" }, DateTimeStyles.AllowWhiteSpaces, new DateOnly(2025, 10, 18) };
+        yield return new object?[] { new DateOnly(2025, 10, 18).ToString("D"), new string[] { "D" }, null, DateTimeStyles.None, new DateOnly(2025, 10, 18) };
+        yield return new object?[] { new DateOnly(2025, 10, 18).ToString("D"), new string[] { "D", "yyyy-MM-dd" }, null, DateTimeStyles.None, new DateOnly(2025, 10, 18) };
+        yield return new object?[] { $" {new DateOnly(2025, 10, 18):D}  ", new string[] { "yyyy-MM-dd", "D" }, null, DateTimeStyles.AllowWhiteSpaces, new DateOnly(2025, 10, 18) };
+        yield return new object?[] { $" {new DateOnly(2025, 10, 18):R}  ", new string[] { "yyyy-MM-dd", "R" }, null, DateTimeStyles.AllowWhiteSpaces, new DateOnly(2025, 10, 18) };
+
+        var frenchCulture = new CultureInfo("fr-FR");
+        yield return new object?[] { new DateOnly(2025, 10, 18).ToString("yyyy-MMMM-dd", frenchCulture), new string[] { "yyyy-MMMM-dd" }, frenchCulture, DateTimeStyles.None, new DateOnly(2025, 10, 18) };
     }
 
     [Theory]
     [MemberData(nameof(Map_Valid_TestData))]
-    public void Map_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, DateTimeStyles style, DateOnly expected)
+    public void Map_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, IFormatProvider? provider, DateTimeStyles style, DateOnly expected)
     {
         var item = new DateOnlyMapper
         {
             Formats = formats,
+            Provider = provider,
             Style = style
         };
 
@@ -133,16 +137,16 @@ public class DateOnlyMapperTests
         Assert.NotNull(result.Exception);
     }
 
-    public static IEnumerable<object[]> Map_ValidDateTimeValue_TestData()
+    public static IEnumerable<object?[]> Map_ValidDateTimeValue_TestData()
     {
-        yield return new object[] { new DateTime(2025, 10, 18, 7, 57, 46), new string[] { "D" }, DateTimeStyles.None, new DateOnly(2025, 10, 18) };
-        yield return new object[] { new DateTime(2025, 10, 18, 7, 57, 46), new string[] { "D", "yyyy-MM-dd" }, DateTimeStyles.None, new DateOnly(2025, 10, 18) };
-        yield return new object[] { new DateTime(2025, 10, 18, 7, 57, 46), new string[] { "yyyy-MM-dd", "D" }, DateTimeStyles.AllowWhiteSpaces, new DateOnly(2025, 10, 18) };
+        yield return new object?[] { new DateTime(2025, 10, 18, 7, 57, 46), new string[] { "D" }, null, DateTimeStyles.None, new DateOnly(2025, 10, 18) };
+        yield return new object?[] { new DateTime(2025, 10, 18, 7, 57, 46), new string[] { "D", "yyyy-MM-dd" }, null, DateTimeStyles.None, new DateOnly(2025, 10, 18) };
+        yield return new object?[] { new DateTime(2025, 10, 18, 7, 57, 46), new string[] { "yyyy-MM-dd", "D" }, null, DateTimeStyles.AllowWhiteSpaces, new DateOnly(2025, 10, 18) };
     }
 
     [Theory]
     [MemberData(nameof(Map_ValidDateTimeValue_TestData))]
-    public void Map_ValidDateTimeValue_ReturnsSuccess(DateTime dateTimeValue, string[] formats, DateTimeStyles style, DateOnly expected)
+    public void Map_ValidDateTimeValue_ReturnsSuccess(DateTime dateTimeValue, string[] formats, IFormatProvider? provider, DateTimeStyles style, DateOnly expected)
     {
         var reader = new MockExcelDataReader
         {
@@ -152,6 +156,7 @@ public class DateOnlyMapperTests
         var item = new DateOnlyMapper
         {
             Formats = formats,
+            Provider = provider,
             Style = style
         };
 

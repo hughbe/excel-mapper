@@ -95,21 +95,25 @@ public class TimeSpanMapperTests
         Assert.Equal(style, item.Style);
     }
 
-    public static IEnumerable<object[]> Map_ValidStringValue_TestData()
+    public static IEnumerable<object?[]> Map_ValidStringValue_TestData()
     {
-        yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "G" }, TimeSpanStyles.None, new TimeSpan(2017, 7, 12, 7, 57, 46) };
-        yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "G", "yyyy-MM-dd" }, TimeSpanStyles.None, new TimeSpan(2017, 7, 12, 7, 57, 46) };
-        yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "yyyy-MM-dd", "G" }, TimeSpanStyles.AssumeNegative, new TimeSpan(2017, 7, 12, 7, 57, 46) };
-        yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46).ToString("c"), new string[] { "yyyy-MM-dd", "c" }, TimeSpanStyles.AssumeNegative, new TimeSpan(2017, 7, 12, 7, 57, 46) };
+        yield return new object?[] { new TimeSpan(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "G" }, null, TimeSpanStyles.None, new TimeSpan(2017, 7, 12, 7, 57, 46) };
+        yield return new object?[] { new TimeSpan(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "G", "yyyy-MM-dd" }, null, TimeSpanStyles.None, new TimeSpan(2017, 7, 12, 7, 57, 46) };
+        yield return new object?[] { new TimeSpan(2017, 7, 12, 7, 57, 46).ToString("G"), new string[] { "yyyy-MM-dd", "G" }, null, TimeSpanStyles.AssumeNegative, new TimeSpan(2017, 7, 12, 7, 57, 46) };
+        yield return new object?[] { new TimeSpan(2017, 7, 12, 7, 57, 46).ToString("c"), new string[] { "yyyy-MM-dd", "c" }, null, TimeSpanStyles.AssumeNegative, new TimeSpan(2017, 7, 12, 7, 57, 46) };
+
+        var frenchCulture = new CultureInfo("fr-FR");
+        yield return new object?[] { new TimeSpan(2017, 10, 12, 7, 57, 46).ToString("G", frenchCulture), new string[] { "G" }, frenchCulture, TimeSpanStyles.None, new TimeSpan(2017, 10, 12, 7, 57, 46) };
     }
 
     [Theory]
     [MemberData(nameof(Map_ValidStringValue_TestData))]
-    public void Map_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, TimeSpanStyles style, TimeSpan expected)
+    public void Map_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, IFormatProvider? provider, TimeSpanStyles style, TimeSpan expected)
     {
         var item = new TimeSpanMapper
         {
             Formats = formats,
+            Provider = provider,
             Style = style
         };
 
@@ -133,16 +137,16 @@ public class TimeSpanMapperTests
         Assert.NotNull(result.Exception);
     }
 
-    public static IEnumerable<object[]> Map_ValidTimeSpanValue_TestData()
+    public static IEnumerable<object?[]> Map_ValidTimeSpanValue_TestData()
     {
-        yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46), new string[] { "G" }, TimeSpanStyles.None, new TimeSpan(2017, 7, 12, 7, 57, 46) };
-        yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46), new string[] { "G", "yyyy-MM-dd" }, TimeSpanStyles.None, new TimeSpan(2017, 7, 12, 7, 57, 46) };
-        yield return new object[] { new TimeSpan(2017, 7, 12, 7, 57, 46), new string[] { "yyyy-MM-dd", "G" }, TimeSpanStyles.AssumeNegative, new TimeSpan(2017, 7, 12, 7, 57, 46) };
+        yield return new object?[] { new TimeSpan(2017, 7, 12, 7, 57, 46), new string[] { "G" }, null, TimeSpanStyles.None, new TimeSpan(2017, 7, 12, 7, 57, 46) };
+        yield return new object?[] { new TimeSpan(2017, 7, 12, 7, 57, 46), new string[] { "G", "yyyy-MM-dd" }, null, TimeSpanStyles.None, new TimeSpan(2017, 7, 12, 7, 57, 46) };
+        yield return new object?[] { new TimeSpan(2017, 7, 12, 7, 57, 46), new string[] { "yyyy-MM-dd", "G" }, null, TimeSpanStyles.AssumeNegative, new TimeSpan(2017, 7, 12, 7, 57, 46) };
     }
 
     [Theory]
     [MemberData(nameof(Map_ValidTimeSpanValue_TestData))]
-    public void Map_ValidTimeSpanValue_ReturnsSuccess(TimeSpan timeSpanValue, string[] formats, TimeSpanStyles style, TimeSpan expected)
+    public void Map_ValidTimeSpanValue_ReturnsSuccess(TimeSpan timeSpanValue, string[] formats, IFormatProvider? provider, TimeSpanStyles style, TimeSpan expected)
     {
         var reader = new MockExcelDataReader
         {
@@ -152,6 +156,7 @@ public class TimeSpanMapperTests
         var item = new TimeSpanMapper
         {
             Formats = formats,
+            Provider = provider,
             Style = style
         };
 

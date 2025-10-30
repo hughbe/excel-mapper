@@ -95,21 +95,25 @@ public class TimeOnlyMapperTests
         Assert.Equal(style, item.Style);
     }
 
-    public static IEnumerable<object[]> Map_ValidStringValue_TestData()
+    public static IEnumerable<object?[]> Map_ValidStringValue_TestData()
     {
-        yield return new object[] { new TimeOnly(7, 57, 46).ToString("T"), new string[] { "T" }, DateTimeStyles.None, new TimeOnly(7, 57, 46) };
-        yield return new object[] { new TimeOnly(7, 57, 46).ToString("T"), new string[] { "T", "yyyy-MM-dd" }, DateTimeStyles.None, new TimeOnly(7, 57, 46) };
-        yield return new object[] { $" {new TimeOnly(7, 57, 46):T}  ", new string[] { "yyyy-MM-dd", "T" }, DateTimeStyles.AllowWhiteSpaces, new TimeOnly(7, 57, 46) };
-        yield return new object[] { $" {new TimeOnly(7, 57, 46):R}  ", new string[] { "yyyy-MM-dd", "R" }, DateTimeStyles.AllowWhiteSpaces, new TimeOnly(7, 57, 46) };
+        yield return new object?[] { new TimeOnly(7, 57, 46).ToString("T"), new string[] { "T" }, null, DateTimeStyles.None, new TimeOnly(7, 57, 46) };
+        yield return new object?[] { new TimeOnly(7, 57, 46).ToString("T"), new string[] { "T", "yyyy-MM-dd" }, null, DateTimeStyles.None, new TimeOnly(7, 57, 46) };
+        yield return new object?[] { $" {new TimeOnly(7, 57, 46):T}  ", new string[] { "yyyy-MM-dd", "T" }, null, DateTimeStyles.AllowWhiteSpaces, new TimeOnly(7, 57, 46) };
+        yield return new object?[] { $" {new TimeOnly(7, 57, 46):R}  ", new string[] { "yyyy-MM-dd", "R" }, null, DateTimeStyles.AllowWhiteSpaces, new TimeOnly(7, 57, 46) };
+
+        var frenchCulture = new CultureInfo("fr-FR");
+        yield return new object?[] { new TimeOnly(14, 30, 0).ToString("HH:mm:ss", frenchCulture), new string[] { "HH:mm:ss" }, frenchCulture, DateTimeStyles.None, new TimeOnly(14, 30, 0) };
     }
 
     [Theory]
     [MemberData(nameof(Map_ValidStringValue_TestData))]
-    public void Map_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, DateTimeStyles style, TimeOnly expected)
+    public void Map_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, IFormatProvider? provider, DateTimeStyles style, TimeOnly expected)
     {
         var item = new TimeOnlyMapper
         {
             Formats = formats,
+            Provider = provider,
             Style = style
         };
 
@@ -134,16 +138,19 @@ public class TimeOnlyMapperTests
     }
 
 
-    public static IEnumerable<object[]> Map_ValidTimeSpan_TestData()
+    public static IEnumerable<object?[]> Map_ValidTimeSpan_TestData()
     {
-        yield return new object[] { new TimeSpan(7, 57, 46), new string[] { "T" }, DateTimeStyles.None, new TimeOnly(7, 57, 46) };
-        yield return new object[] { new TimeSpan(0, 0, 0), new string[] { "T" }, DateTimeStyles.None, new TimeOnly(0, 0, 0) };
-        yield return new object[] { new TimeSpan(23, 59, 59), new string[] { "T" }, DateTimeStyles.None, new TimeOnly(23, 59, 59) };
+        yield return new object?[] { new TimeSpan(7, 57, 46), new string[] { "T" }, null, DateTimeStyles.None, new TimeOnly(7, 57, 46) };
+        yield return new object?[] { new TimeSpan(0, 0, 0), new string[] { "T" }, null, DateTimeStyles.None, new TimeOnly(0, 0, 0) };
+        yield return new object?[] { new TimeSpan(23, 59, 59), new string[] { "T" }, null, DateTimeStyles.None, new TimeOnly(23, 59, 59) };
+
+        var frenchCulture = new CultureInfo("fr-FR");
+        yield return new object?[] { new TimeSpan(14, 30, 0), new string[] { "T" }, frenchCulture, DateTimeStyles.None, new TimeOnly(14, 30, 0) };
     }
 
     [Theory]
     [MemberData(nameof(Map_ValidTimeSpan_TestData))]
-    public void Map_ValidTimeSpan_ReturnsSuccess(TimeSpan timeSpanValue, string[] formats, DateTimeStyles style, TimeOnly expected)
+    public void Map_ValidTimeSpan_ReturnsSuccess(TimeSpan timeSpanValue, string[] formats, IFormatProvider? provider, DateTimeStyles style, TimeOnly expected)
     {
         var reader = new MockExcelDataReader
         {
@@ -153,6 +160,7 @@ public class TimeOnlyMapperTests
         var item = new TimeOnlyMapper
         {
             Formats = formats,
+            Provider = provider,
             Style = style
         };
 

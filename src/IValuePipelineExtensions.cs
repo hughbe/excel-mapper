@@ -156,7 +156,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTime> WithFormats(this IValuePipeline<DateTime> map, IEnumerable<string> formats)
+    public static IValuePipeline<DateTime> WithFormats(this IValuePipeline<DateTime> map, params IEnumerable<string> formats)
     {
         ArgumentNullException.ThrowIfNull(formats);
         return map.WithFormats([.. formats]);
@@ -182,7 +182,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTime?> WithFormats(this IValuePipeline<DateTime?> map, IEnumerable<string> formats)
+    public static IValuePipeline<DateTime?> WithFormats(this IValuePipeline<DateTime?> map, params IEnumerable<string> formats)
     {
         ArgumentNullException.ThrowIfNull(formats);
         return map.WithFormats([.. formats]);
@@ -208,7 +208,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTimeOffset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTimeOffset> WithFormats(this IValuePipeline<DateTimeOffset> map, IEnumerable<string> formats)
+    public static IValuePipeline<DateTimeOffset> WithFormats(this IValuePipeline<DateTimeOffset> map, params IEnumerable<string> formats)
     {
         ArgumentNullException.ThrowIfNull(formats);
         return map.WithFormats([.. formats]);
@@ -234,7 +234,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTimeOffset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTimeOffset?> WithFormats(this IValuePipeline<DateTimeOffset?> map, IEnumerable<string> formats)
+    public static IValuePipeline<DateTimeOffset?> WithFormats(this IValuePipeline<DateTimeOffset?> map, params IEnumerable<string> formats)
     {
         ArgumentNullException.ThrowIfNull(formats);
         return map.WithFormats([.. formats]);
@@ -260,7 +260,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeSpan.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TimeSpan> WithFormats(this IValuePipeline<TimeSpan> map, IEnumerable<string> formats)
+    public static IValuePipeline<TimeSpan> WithFormats(this IValuePipeline<TimeSpan> map, params IEnumerable<string> formats)
     {
         ArgumentNullException.ThrowIfNull(formats);
         return map.WithFormats([.. formats]);
@@ -286,7 +286,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeSpan.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TimeSpan?> WithFormats(this IValuePipeline<TimeSpan?> map, IEnumerable<string> formats)
+    public static IValuePipeline<TimeSpan?> WithFormats(this IValuePipeline<TimeSpan?> map, params IEnumerable<string> formats)
     {
         ArgumentNullException.ThrowIfNull(formats);
         return map.WithFormats([.. formats]);
@@ -312,7 +312,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateOnly> WithFormats(this IValuePipeline<DateOnly> map, IEnumerable<string> formats)
+    public static IValuePipeline<DateOnly> WithFormats(this IValuePipeline<DateOnly> map, params IEnumerable<string> formats)
     {
         ArgumentNullException.ThrowIfNull(formats);
         return map.WithFormats([.. formats]);
@@ -338,7 +338,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateOnly?> WithFormats(this IValuePipeline<DateOnly?> map, IEnumerable<string> formats)
+    public static IValuePipeline<DateOnly?> WithFormats(this IValuePipeline<DateOnly?> map, params IEnumerable<string> formats)
     {
         ArgumentNullException.ThrowIfNull(formats);
         return map.WithFormats([.. formats]);
@@ -390,7 +390,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TimeOnly?> WithFormats(this IValuePipeline<TimeOnly?> map, IEnumerable<string> formats)
+    public static IValuePipeline<TimeOnly?> WithFormats(this IValuePipeline<TimeOnly?> map, params IEnumerable<string> formats)
     {
         ArgumentNullException.ThrowIfNull(formats);
         return map.WithFormats([.. formats]);
@@ -401,6 +401,142 @@ public static class IValuePipelineExtensions
         FormatUtilities.ValidateFormats(formats);
         var mapper = map.GetOrAddMapper<TCellMapper>();
         mapper.Formats = formats;
+    }
+
+    /// <summary>
+    /// Specifies the format provider used when mapping the value of a cell to a DateTime. This is useful for
+    /// mapping columns where cultures differ. Existing provider is overridden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="provider">The format provider to use when mapping the value of a cell to a DateTime.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<DateTime> WithFormatProvider(this IValuePipeline<DateTime> map, IFormatProvider? provider)
+    {
+        map.AddFormatProvider<DateTimeMapper>(provider);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies the format provider used when mapping the value of a cell to a DateTime. This is useful for
+    /// mapping columns where cultures differ. Existing provider is overridden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="provider">The format provider to use when mapping the value of a cell to a DateTime.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<DateTime?> WithFormatProvider(this IValuePipeline<DateTime?> map, IFormatProvider? provider)
+    {
+        map.AddFormatProvider<DateTimeMapper>(provider);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies the format provider used when mapping the value of a cell to a DateTimeOffset. This is useful for
+    /// mapping columns where cultures differ. Existing provider is overridden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="provider">The format provider to use when mapping the value of a cell to a DateTimeOffset.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<DateTimeOffset> WithFormatProvider(this IValuePipeline<DateTimeOffset> map, IFormatProvider? provider)
+    {
+        map.AddFormatProvider<DateTimeOffsetMapper>(provider);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies the format provider used when mapping the value of a cell to a DateTimeOffset. This is useful for
+    /// mapping columns where cultures differ. Existing provider is overridden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="provider">The format provider to use when mapping the value of a cell to a DateTimeOffset.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<DateTimeOffset?> WithFormatProvider(this IValuePipeline<DateTimeOffset?> map, IFormatProvider? provider)
+    {
+        map.AddFormatProvider<DateTimeOffsetMapper>(provider);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies the format provider used when mapping the value of a cell to a TimeSpan. This is useful for
+    /// mapping columns where cultures differ. Existing provider is overridden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="provider">The format provider to use when mapping the value of a cell to a TimeSpan.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<TimeSpan> WithFormatProvider(this IValuePipeline<TimeSpan> map, IFormatProvider? provider)
+    {
+        map.AddFormatProvider<TimeSpanMapper>(provider);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies the format provider used when mapping the value of a cell to a TimeSpan. This is useful for
+    /// mapping columns where cultures differ. Existing provider is overridden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="provider">The format provider to use when mapping the value of a cell to a TimeSpan.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<TimeSpan?> WithFormatProvider(this IValuePipeline<TimeSpan?> map, IFormatProvider? provider)
+    {
+        map.AddFormatProvider<TimeSpanMapper>(provider);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies the format provider used when mapping the value of a cell to a DateOnly. This is useful for
+    /// mapping columns where cultures differ. Existing provider is overridden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="provider">The format provider to use when mapping the value of a cell to a DateOnly.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<DateOnly> WithFormatProvider(this IValuePipeline<DateOnly> map, IFormatProvider? provider)
+    {
+        map.AddFormatProvider<DateOnlyMapper>(provider);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies the format provider used when mapping the value of a cell to a DateOnly. This is useful for
+    /// mapping columns where cultures differ. Existing provider is overridden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="provider">The format provider to use when mapping the value of a cell to a DateOnly.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<DateOnly?> WithFormatProvider(this IValuePipeline<DateOnly?> map, IFormatProvider? provider)
+    {
+        map.AddFormatProvider<DateOnlyMapper>(provider);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies the format provider used when mapping the value of a cell to a TimeOnly. This is useful for
+    /// mapping columns where cultures differ. Existing provider is overridden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="provider">The format provider to use when mapping the value of a cell to a TimeOnly.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<TimeOnly> WithFormatProvider(this IValuePipeline<TimeOnly> map, IFormatProvider? provider)
+    {
+        map.AddFormatProvider<TimeOnlyMapper>(provider);
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies the format provider used when mapping the value of a cell to a TimeOnly. This is useful for
+    /// mapping columns where cultures differ. Existing provider is overridden.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="provider">The format provider to use when mapping the value of a cell to a TimeOnly.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<TimeOnly?> WithFormatProvider(this IValuePipeline<TimeOnly?> map, IFormatProvider? provider)
+    {
+        map.AddFormatProvider<TimeOnlyMapper>(provider);
+        return map;
+    }
+
+    private static void AddFormatProvider<TCellMapper>(this IValuePipeline map, IFormatProvider? provider) where TCellMapper : IFormatProviderCellMapper, new()
+    {
+        var mapper = map.GetOrAddMapper<TCellMapper>();
+        mapper.Provider = provider;
     }
 
     /// <summary>
