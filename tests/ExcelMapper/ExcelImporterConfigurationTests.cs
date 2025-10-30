@@ -6,24 +6,6 @@ namespace ExcelMapper.Tests;
 
 public class ExcelImporterConfigurationTests
 {
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void SkipBlankLines_Set_GetReturnsExpected(bool value)
-    {
-        using var importer = Helpers.GetImporter("Primitives.xlsx");
-        importer.Configuration.SkipBlankLines = value;
-        Assert.Equal(value, importer.Configuration.SkipBlankLines);
-
-        // Set same.
-        importer.Configuration.SkipBlankLines = value;
-        Assert.Equal(value, importer.Configuration.SkipBlankLines);
-
-        // Set different.
-        importer.Configuration.SkipBlankLines = !value;
-        Assert.Equal(!value, importer.Configuration.SkipBlankLines);
-    }
-
     [Fact]
     public void MaxColumnsPerSheet_DefaultValue_ReturnsExpected()
     {
@@ -55,6 +37,56 @@ public class ExcelImporterConfigurationTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         Assert.Throws<ArgumentOutOfRangeException>("value", () => importer.Configuration.MaxColumnsPerSheet = value);
+    }
+
+    [Fact]
+    public void SkipBlankLines_GetDefault_ReturnsFalse()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        Assert.False(importer.Configuration.ValidateDataAnnotations);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void SkipBlankLines_Set_GetReturnsExpected(bool value)
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.SkipBlankLines = value;
+        Assert.Equal(value, importer.Configuration.SkipBlankLines);
+
+        // Set same.
+        importer.Configuration.SkipBlankLines = value;
+        Assert.Equal(value, importer.Configuration.SkipBlankLines);
+
+        // Set different.
+        importer.Configuration.SkipBlankLines = !value;
+        Assert.Equal(!value, importer.Configuration.SkipBlankLines);
+    }
+
+    [Fact]
+    public void ValidateDataAnnotations_GetDefault_ReturnsFalse()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        Assert.False(importer.Configuration.ValidateDataAnnotations);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ValidateDataAnnotations_Set_GetReturnsExpected(bool value)
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Configuration.ValidateDataAnnotations = value;
+        Assert.Equal(value, importer.Configuration.ValidateDataAnnotations);
+
+        // Set same.
+        importer.Configuration.ValidateDataAnnotations = value;
+        Assert.Equal(value, importer.Configuration.ValidateDataAnnotations);
+
+        // Set different.
+        importer.Configuration.ValidateDataAnnotations = !value;
+        Assert.Equal(!value, importer.Configuration.ValidateDataAnnotations);
     }
 
     [Fact]

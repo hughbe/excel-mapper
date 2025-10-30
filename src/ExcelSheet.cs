@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using ExcelDataReader;
 
 namespace ExcelMapper;
@@ -306,7 +308,13 @@ public class ExcelSheet
             Importer.Configuration.RegisterClassMap(typeof(T), classMap);
         }
 
-        var result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out object? valueObject);
+        var result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out var valueObject);
+        // If we've been asked to validate with data annotations, do so now.
+        if (Importer.Configuration.ValidateDataAnnotations && result && valueObject is not null)
+        {
+            Validator.ValidateObject(valueObject, new ValidationContext(valueObject), validateAllProperties: true);
+        }
+
         value = (T?)valueObject;
         return result;
     }

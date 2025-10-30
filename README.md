@@ -634,6 +634,64 @@ public class Employee
 
 **Note:** `ExcelInvalidValue` only handles invalid/unparseable values. Empty cells will still throw unless you also use `ExcelDefaultValue` or make the property nullable with `ExcelOptional`.
 
+#### Data Annotations Validation
+
+Validate mapped objects using standard .NET data annotations:
+
+| Name          | Percentage |
+|---------------|------------|
+| Alice Johnson | 85         |
+| Bob Smith     | 150        |
+
+```csharp
+using System.ComponentModel.DataAnnotations;
+
+public class Employee
+{
+    public string Name { get; set; }
+
+    [Range(1, 100)]
+    public int Percentage { get; set; }
+}
+
+// Enable data annotations validation
+using var importer = new ExcelImporter("employees.xlsx");
+importer.Configuration.ValidateDataAnnotations = true;
+
+var sheet = importer.ReadSheet();
+var row1 = sheet.ReadRow<Employee>();  // Success: 85 is valid
+var row2 = sheet.ReadRow<Employee>();  // Throws: 150 is out of range
+```
+
+**Supported Data Annotations:**
+- `[Required]` - Property must have a value
+- `[Range(min, max)]` - Value must be within range
+- `[StringLength(max, MinimumLength = min)]` - String length constraints
+- `[RegularExpression(pattern)]` - Value must match pattern
+- `[EmailAddress]`, `[Phone]`, `[Url]` - Format validators
+- `[Compare(other)]` - Compare with another property
+- `[CreditCard]` - Credit card number validation
+- Any custom `ValidationAttribute`
+
+**Note:** Validation occurs **after** mapping is complete and **before** the object is returned. When validation fails, a `System.ComponentModel.DataAnnotations.ValidationException` is thrown with details about the validation error.
+
+**Error Handling:**
+
+```csharp
+using System.ComponentModel.DataAnnotations;
+
+try
+{
+    var employee = sheet.ReadRow<Employee>();
+}
+catch (ValidationException ex)
+{
+    // ex.Message contains the validation error message:
+    // "The field Percentage must be between 1 and 100."
+    Console.WriteLine($"Validation failed: {ex.Message}");
+}
+```
+
 #### Advanced Fallback Strategies
 
 For more complex fallback scenarios, use `IFallbackItem` types:
@@ -2138,6 +2196,7 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 - `TryGetClassMap<T>()` - Check if map exists
 - `SkipBlankLines` - Skip empty rows (default: false)
 - `MaxColumnsPerSheet` - Security limit (default: 10,000)
+- `ValidateDataAnnotations` - Enable data annotations validation (default: false)
 
 **`ExcelClassMap<T>`** - Fluent mapping configuration
 - `Map(expression)` - Map property or field

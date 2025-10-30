@@ -35,6 +35,12 @@ public class ExcelImporterConfiguration
     /// </summary>
     public bool SkipBlankLines { get; set; }
 
+    /// <summary>
+    /// Gets or sets whether data annotations should be validated during mapping.
+    /// Default is false.
+    /// </summary>
+    public bool ValidateDataAnnotations { get; set; }
+
 
     internal ExcelImporterConfiguration() { }
 
