@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using ExcelMapper.Abstractions;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
@@ -1590,5 +1591,259 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var map = Map(t => t.Value);
         Assert.Throws<ArgumentNullException>("fallbackItem", () => map.WithInvalidFallbackItem(null!));
+    }
+
+    [Theory]
+    [InlineData(NumberStyles.Integer)]
+    [InlineData(NumberStyles.HexNumber)]
+    [InlineData(NumberStyles.AllowThousands)]
+    public void WithNumberStyle_BigIntegerAutoMapped_Success(NumberStyles style)
+    {
+        var map = Map(t => t.BigIntegerValue);
+        Assert.Same(map, map.WithNumberStyle(style));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<BigInteger>>().Single();
+        Assert.Equal(style, mapper.Style);
+    }
+
+    [Theory]
+    [InlineData(NumberStyles.Integer)]
+    [InlineData(NumberStyles.HexNumber)]
+    public void WithNumberStyle_BigIntegerNotMapped_Success(NumberStyles style)
+    {
+        var map = Map(t => t.BigIntegerValue).WithMappers([]);
+        Assert.Same(map, map.WithNumberStyle(style));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<BigInteger>>().Single();
+        Assert.Equal(style, mapper.Style);
+    }
+
+    [Theory]
+    [InlineData(NumberStyles.Integer)]
+    [InlineData(NumberStyles.AllowThousands)]
+    public void WithNumberStyle_Int128AutoMapped_Success(NumberStyles style)
+    {
+        var map = Map(t => t.Int128Value);
+        Assert.Same(map, map.WithNumberStyle(style));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<Int128>>().Single();
+        Assert.Equal(style, mapper.Style);
+    }
+
+    [Theory]
+    [InlineData(NumberStyles.Integer)]
+    [InlineData(NumberStyles.AllowThousands)]
+    public void WithNumberStyle_UInt128AutoMapped_Success(NumberStyles style)
+    {
+        var map = Map(t => t.UInt128Value);
+        Assert.Same(map, map.WithNumberStyle(style));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<UInt128>>().Single();
+        Assert.Equal(style, mapper.Style);
+    }
+
+    [Theory]
+    [InlineData(NumberStyles.Float)]
+    [InlineData(NumberStyles.AllowThousands)]
+    public void WithNumberStyle_HalfAutoMapped_Success(NumberStyles style)
+    {
+        var map = Map(t => t.HalfValue);
+        Assert.Same(map, map.WithNumberStyle(style));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<Half>>().Single();
+        Assert.Equal(style, mapper.Style);
+    }
+
+    [Theory]
+    [InlineData(NumberStyles.Integer)]
+    [InlineData(NumberStyles.HexNumber)]
+    [InlineData(NumberStyles.AllowThousands)]
+    public void WithNumberStyle_NullableBigIntegerAutoMapped_Success(NumberStyles style)
+    {
+        var map = Map(t => t.NullableBigIntegerValue);
+        Assert.Same(map, map.WithNumberStyle(style));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<BigInteger>>().Single();
+        Assert.Equal(style, mapper.Style);
+    }
+
+    [Theory]
+    [InlineData(NumberStyles.Integer)]
+    [InlineData(NumberStyles.HexNumber)]
+    public void WithNumberStyle_NullableBigIntegerNotMapped_Success(NumberStyles style)
+    {
+        var map = Map(t => t.NullableBigIntegerValue).WithMappers([]);
+        Assert.Same(map, map.WithNumberStyle(style));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<BigInteger>>().Single();
+        Assert.Equal(style, mapper.Style);
+    }
+
+    [Theory]
+    [InlineData(NumberStyles.Integer)]
+    [InlineData(NumberStyles.AllowThousands)]
+    public void WithNumberStyle_NullableInt128AutoMapped_Success(NumberStyles style)
+    {
+        var map = Map(t => t.NullableInt128Value);
+        Assert.Same(map, map.WithNumberStyle(style));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<Int128>>().Single();
+        Assert.Equal(style, mapper.Style);
+    }
+
+    [Theory]
+    [InlineData(NumberStyles.Integer)]
+    [InlineData(NumberStyles.AllowThousands)]
+    public void WithNumberStyle_NullableUInt128AutoMapped_Success(NumberStyles style)
+    {
+        var map = Map(t => t.NullableUInt128Value);
+        Assert.Same(map, map.WithNumberStyle(style));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<UInt128>>().Single();
+        Assert.Equal(style, mapper.Style);
+    }
+
+    [Theory]
+    [InlineData(NumberStyles.Float)]
+    [InlineData(NumberStyles.AllowThousands)]
+    public void WithNumberStyle_NullableHalfAutoMapped_Success(NumberStyles style)
+    {
+        var map = Map(t => t.NullableHalfValue);
+        Assert.Same(map, map.WithNumberStyle(style));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<Half>>().Single();
+        Assert.Equal(style, mapper.Style);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_BigIntegerAutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.BigIntegerValue);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<BigInteger>>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_BigIntegerNotMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.BigIntegerValue).WithMappers([]);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<BigInteger>>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_Int128AutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.Int128Value);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<Int128>>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_UInt128AutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.UInt128Value);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<UInt128>>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_HalfAutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.HalfValue);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<Half>>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_ComplexAutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.ComplexValue);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<Complex>>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_NullableBigIntegerAutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.NullableBigIntegerValue);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<BigInteger>>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_NullableBigIntegerNotMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.NullableBigIntegerValue).WithMappers([]);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<BigInteger>>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_NullableInt128AutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.NullableInt128Value);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<Int128>>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_NullableUInt128AutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.NullableUInt128Value);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<UInt128>>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_NullableHalfAutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.NullableHalfValue);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<Half>>().Single();
+        Assert.Same(provider, mapper.Provider);
+    }
+
+    [Theory]
+    [MemberData(nameof(FormatProvider_TestData))]
+    public void WithFormatProvider_NullableComplexAutoMapped_Success(IFormatProvider? provider)
+    {
+        var map = Map(t => t.NullableComplexValue);
+        Assert.Same(map, map.WithFormatProvider(provider));
+
+        var mapper = map.Mappers.OfType<INumberBaseMapper<Complex>>().Single();
+        Assert.Same(provider, mapper.Provider);
     }
 }

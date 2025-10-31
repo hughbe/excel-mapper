@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Threading;
 using ExcelMapper.Factories;
@@ -183,8 +184,14 @@ public static class AutoMapper
         // Check for types implementing interfaces.
         else if (CanConstructObject(type))
         {
+            // Check for types implementing INumberBase<T>.
+            if (type.ImplementsGenericInterface(typeof(INumberBase<>), out var numberBaseInterfaceType))
+            {
+                mappers.Add((ICellMapper)Activator.CreateInstance(typeof(INumberBaseMapper<>).MakeGenericType(numberBaseInterfaceType))!);
+                return true;
+            }
             // Check for types implementing IConvertible.
-            if (type.ImplementsInterface(typeof(IConvertible)))
+            else if (type.ImplementsInterface(typeof(IConvertible)))
             {
                 mappers.Add(new ChangeTypeMapper(type));
                 return true;

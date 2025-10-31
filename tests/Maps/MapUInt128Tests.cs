@@ -1,4 +1,6 @@
-﻿namespace ExcelMapper.Tests;
+﻿using System.Globalization;
+
+namespace ExcelMapper.Tests;
 
 public class MapUInt128Tests
 {
@@ -221,5 +223,167 @@ public class MapUInt128Tests
                 .WithEmptyFallback((UInt128)11)
                 .WithInvalidFallback((UInt128)10);
         }
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedUInt128ValueNumberStyleAttribute_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers_Hex.xlsx");
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell values.
+        var row1 = sheet.ReadRow<NumberStyleAttributeUInt128Value>();
+        Assert.Equal((UInt128)0xAB, row1.Value);
+
+        var row2 = sheet.ReadRow<NumberStyleAttributeUInt128Value>();
+        Assert.Equal((UInt128)0x123, row2.Value);
+
+        var row3 = sheet.ReadRow<NumberStyleAttributeUInt128Value>();
+        Assert.Equal((UInt128)0xAB, row3.Value);
+
+        var row4 = sheet.ReadRow<NumberStyleAttributeUInt128Value>();
+        Assert.Equal((UInt128)0x123, row4.Value);
+
+        var row5 = sheet.ReadRow<NumberStyleAttributeUInt128Value>();
+        Assert.Equal((UInt128)123, row5.Value);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeUInt128Value>());
+
+        // Invalid cell values.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeUInt128Value>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeUInt128Value>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeUInt128Value>());
+    }
+
+    private class NumberStyleAttributeUInt128Value
+    {
+        [ExcelNumberStyle(NumberStyles.HexNumber)]
+        public UInt128 Value { get; set; }
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedUInt128ValueNumberStyleAttribute_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers_Hex.xlsx");
+        importer.Configuration.RegisterClassMap<NumberStyleAttributeUInt128Value>(c =>
+        {
+            c.Map(o => o.Value);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell values.
+        var row1 = sheet.ReadRow<NumberStyleAttributeUInt128Value>();
+        Assert.Equal((UInt128)0xAB, row1.Value);
+
+        var row2 = sheet.ReadRow<NumberStyleAttributeUInt128Value>();
+        Assert.Equal((UInt128)0x123, row2.Value);
+
+        var row3 = sheet.ReadRow<NumberStyleAttributeUInt128Value>();
+        Assert.Equal((UInt128)0xAB, row3.Value);
+
+        var row4 = sheet.ReadRow<NumberStyleAttributeUInt128Value>();
+        Assert.Equal((UInt128)0x123, row4.Value);
+
+        var row5 = sheet.ReadRow<NumberStyleAttributeUInt128Value>();
+        Assert.Equal((UInt128)123, row5.Value);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeUInt128Value>());
+
+        // Invalid cell values.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeUInt128Value>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeUInt128Value>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeUInt128Value>());
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedNullableUInt128ValueNumberStyleAttribute_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers_Hex.xlsx");
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell values.
+        var row1 = sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>();
+        Assert.Equal((UInt128)0xAB, row1.Value);
+
+        var row2 = sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>();
+        Assert.Equal((UInt128)0x123, row2.Value);
+
+        var row3 = sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>();
+        Assert.Equal((UInt128)0xAB, row3.Value);
+
+        var row4 = sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>();
+        Assert.Equal((UInt128)0x123, row4.Value);
+
+        var row5 = sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>();
+        Assert.Equal((UInt128)123, row5.Value);
+
+        // Empty cell value.
+        var row6 = sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>();
+        Assert.Null(row6.Value);
+
+        // Invalid cell values.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>());
+    }
+
+    private class NumberStyleAttributeNullableUInt128Value
+    {
+        [ExcelNumberStyle(NumberStyles.HexNumber)]
+        public UInt128? Value { get; set; }
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedNullableUInt128ValueNumberStyleAttribute_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers_Hex.xlsx");
+        importer.Configuration.RegisterClassMap<NumberStyleAttributeNullableUInt128Value>(c =>
+        {
+            c.Map(o => o.Value);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell values.
+        var row1 = sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>();
+        Assert.Equal((UInt128)0xAB, row1.Value);
+
+        var row2 = sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>();
+        Assert.Equal((UInt128)0x123, row2.Value);
+
+        var row3 = sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>();
+        Assert.Equal((UInt128)0xAB, row3.Value);
+
+        var row4 = sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>();
+        Assert.Equal((UInt128)0x123, row4.Value);
+
+        var row5 = sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>();
+        Assert.Equal((UInt128)123, row5.Value);
+
+        // Empty cell value.
+        var row6 = sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>();
+        Assert.Null(row6.Value);
+
+        // Invalid cell values.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>());
     }
 }

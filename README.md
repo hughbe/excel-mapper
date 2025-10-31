@@ -667,6 +667,116 @@ var events = sheet.ReadRows<Event>();
 - `TimeOnly` / `TimeOnly?` (.NET 6+)
 - `TimeSpan` / `TimeSpan?`
 
+#### Number Parsing with Number Styles
+
+Control how numeric values are parsed using `NumberStyles` to handle thousands separators, currency symbols, and other formatting. This is particularly useful for financial data or numbers formatted with locale-specific conventions:
+
+| ProductName | Price     | Quantity |
+|-------------|-----------|----------|
+| Widget A    | 1,234.56  | 1000     |
+| Widget B    | $2,500.00 | 500      |
+
+```csharp
+using System.Globalization;
+
+public class Product
+{
+    public string ProductName { get; set; }
+    
+    [ExcelNumberStyle(NumberStyles.AllowThousands | NumberStyles.AllowDecimalPoint)]
+    [ExcelDefaultValue(0.0)]
+    [ExcelInvalidValue(0.0)]
+    public decimal Price { get; set; }
+    
+    [ExcelNumberStyle(NumberStyles.AllowThousands)]
+    [ExcelDefaultValue(0)]
+    [ExcelInvalidValue(0)]
+    public int Quantity { get; set; }
+}
+
+var products = sheet.ReadRows<Product>().ToArray();
+// Successfully parses "1,234.56" as 1234.56 and "1000" as 1000
+```
+
+**Using Fluent API:**
+
+For more complex scenarios, use the fluent API with `.WithNumberStyle()` and `.WithFormatProvider()`:
+
+```csharp
+public class ProductMap : ExcelClassMap<Product>
+{
+    public ProductMap()
+    {
+        Map(p => p.ProductName);
+        
+        Map(p => p.Price)
+            .WithNumberStyle(NumberStyles.AllowThousands | NumberStyles.AllowDecimalPoint)
+            .WithEmptyFallback(0.0m)
+            .WithInvalidFallback(0.0m);
+            
+        Map(p => p.Quantity)
+            .WithNumberStyle(NumberStyles.AllowThousands)
+            .WithEmptyFallback(0)
+            .WithInvalidFallback(0);
+    }
+}
+
+importer.Configuration.RegisterClassMap<ProductMap>();
+```
+
+**Combining Number Styles with Format Providers:**
+
+When working with locale-specific number formats (e.g., European format using comma as decimal separator):
+
+| Price (EUR) |
+|-------------|
+| 1.234,56    |
+| 2.500,00    |
+
+```csharp
+public class ProductMap : ExcelClassMap<Product>
+{
+    public ProductMap()
+    {
+        var europeanFormat = new NumberFormatInfo
+        {
+            NumberGroupSeparator = ".",  // Period for thousands
+            NumberDecimalSeparator = "," // Comma for decimals
+        };
+        
+        Map(p => p.Price)
+            .WithNumberStyle(NumberStyles.AllowThousands | NumberStyles.AllowDecimalPoint)
+            .WithFormatProvider(europeanFormat)
+            .WithEmptyFallback(0.0m)
+            .WithInvalidFallback(0.0m);
+    }
+}
+```
+
+**Common NumberStyles Values:**
+
+- `NumberStyles.Integer` - Simple integers (default for integer types)
+- `NumberStyles.Float` - Floating-point numbers (default for float/double)
+- `NumberStyles.Number` - Includes thousands separator and decimal point
+- `NumberStyles.AllowThousands` - Allows thousands separators (e.g., 1,000)
+- `NumberStyles.AllowDecimalPoint` - Allows decimal point (e.g., 123.45)
+- `NumberStyles.AllowCurrencySymbol` - Allows currency symbols (e.g., $100)
+- `NumberStyles.AllowLeadingSign` - Allows leading +/- sign
+- `NumberStyles.AllowTrailingSign` - Allows trailing +/- sign
+- `NumberStyles.AllowParentheses` - Allows parentheses for negative numbers (e.g., (100))
+
+**Supported Numeric Types:**
+
+The `ExcelNumberStyle` attribute and `WithNumberStyle()` method work with:
+- `int`, `long`, `short`, `byte`, `sbyte`
+- `uint`, `ulong`, `ushort`
+- `float`, `double`, `decimal`
+- `Half` (.NET 5+)
+- `Int128`, `UInt128` (.NET 7+)
+- `BigInteger`
+- `IntPtr` (`nint`), `UIntPtr` (`nuint`)
+- Nullable versions of all above types
+
 #### Invalid Value Fallback
 
 Provide a fallback value when cell value cannot be parsed:
@@ -2442,6 +2552,7 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 | `[ExcelPreserveFormatting]` | Read formatted string |
 | `[ExcelTrimString]` | Auto-trim whitespace |
 | `[ExcelFormats("format1", "format2")]` | Parse dates/times with specific formats |
+| `[ExcelNumberStyle(NumberStyles.AllowThousands)]` | Control numeric parsing (thousands, currency, etc.) |
 | `[ExcelUri(UriKind.RelativeOrAbsolute)]` | Specify URI kind (RelativeOrAbsolute, Relative, or RelativeOrRelativeOrAbsolute) |
 | `[ExcelSeparators(';', ',')]` | Split cell value with custom separators |
 | `[ExcelTransformer(typeof(Transformer))]` | Apply custom transformer |
@@ -2466,6 +2577,8 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 - `.WithValueFallback(value)` - Default for both
 - `.WithConverter(value => ...)` - Custom conversion
 - `.WithFormats("format1", "format2")` - Date/time formats
+- `.WithFormatProvider(IFormatProvider)` - Culture-specific parsing for dates/times/numbers
+- `.WithNumberStyle(NumberStyles)` - Control numeric parsing (thousands, currency, etc.)
 - `.WithUriKind(UriKind)` - Specify URI kind for Uri properties
 - `.WithMapping(dictionary)` - Value mapping
 - `.WithTrim()` - Trim whitespace

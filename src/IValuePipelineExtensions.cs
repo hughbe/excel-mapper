@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
@@ -537,6 +539,70 @@ public static class IValuePipelineExtensions
     {
         var mapper = map.GetOrAddMapper<TCellMapper>();
         mapper.Provider = provider;
+    }
+
+    /// <summary>
+    /// Specifies the format provider used when mapping the value of a cell to a numeric type
+    /// that implements <see cref="INumberBase{T}"/>. This is useful for mapping columns where
+    /// cultures differ. Existing provider is overridden.
+    /// </summary>
+    /// <typeparam name="T">The type of the property or field that the map represents.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="provider">The format provider to use when mapping the value of a cell to a numeric type.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<T> WithFormatProvider<T>(this IValuePipeline<T> map, IFormatProvider? provider) where T : INumberBase<T>
+    {
+        var mapper = map.GetOrAddMapper<INumberBaseMapper<T>>();
+        mapper.Provider = provider;
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies the format provider used when mapping the value of a cell to a numeric type
+    /// that implements <see cref="INumberBase{T}"/>. This is useful for mapping columns where
+    /// cultures differ. Existing provider is overridden.
+    /// </summary>
+    /// <typeparam name="T">The type of the property or field that the map represents.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="provider">The format provider to use when mapping the value of a cell to a numeric type.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<T?> WithFormatProvider<T>(this IValuePipeline<T?> map, IFormatProvider? provider) where T : struct, INumberBase<T>
+    {
+        var mapper = map.GetOrAddMapper<INumberBaseMapper<T>>();
+        mapper.Provider = provider;
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies the number styles to use when mapping the value of a cell to a numeric type
+    /// that implements <see cref="INumberBase{T}"/>. This is useful for specifying
+    /// how numeric values are formatted in the Excel file.
+    /// </summary>
+    /// <typeparam name="T">The type of the property or field that the map represents.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="style">The number styles to use when mapping the value of a cell to a numeric type.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<T> WithNumberStyle<T>(this IValuePipeline<T> map, NumberStyles style) where T : INumberBase<T>
+    {
+        var mapper = map.GetOrAddMapper<INumberBaseMapper<T>>();
+        mapper.Style = style;
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies the number styles to use when mapping the value of a cell to a numeric type
+    /// that implements <see cref="INumberBase{T}"/>. This is useful for specifying
+    /// how numeric values are formatted in the Excel file.
+    /// </summary>
+    /// <typeparam name="T">The type of the property or field that the map represents.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="style">The number styles to use when mapping the value of a cell to a numeric type.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<T?> WithNumberStyle<T>(this IValuePipeline<T?> map, NumberStyles style) where T : struct, INumberBase<T>
+    {
+        var mapper = map.GetOrAddMapper<INumberBaseMapper<T>>();
+        mapper.Style = style;
+        return map;
     }
 
     /// <summary>

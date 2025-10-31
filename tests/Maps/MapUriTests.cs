@@ -1,6 +1,4 @@
-﻿using System.Security.AccessControl;
-
-namespace ExcelMapper.Tests;
+﻿namespace ExcelMapper.Tests;
 
 public class MapUriTests
 {

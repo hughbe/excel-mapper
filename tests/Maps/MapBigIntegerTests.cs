@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Globalization;
+using System.Numerics;
 
 namespace ExcelMapper.Tests;
 
@@ -168,15 +169,15 @@ public class MapBigIntegerTests
     }
 
     [Fact]
-    public void ReadRow_BigIntegerOverflow_ThrowsExcelMappingException()
+    public void ReadRow_BigIntegerOverflow_Success()
     {
         using var importer = Helpers.GetImporter("Overflow_Signed.xlsx");
 
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BigInteger>());
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BigInteger>());
+        var row1 = sheet.ReadRow<BigInteger>();
+        Assert.Equal(BigInteger.Parse("99999999999999894714318196151180578619374717510768490203036576904378504605335552"), row1);
     }
 
     private class BigIntegerValue
@@ -223,5 +224,85 @@ public class MapBigIntegerTests
                 .WithEmptyFallback((BigInteger)11)
                 .WithInvalidFallback((BigInteger)10);
         }
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedBigIntegerValueNumberStyleAttribute_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers_Hex.xlsx");
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell values.
+        var row1 = sheet.ReadRow<NumberStyleAttributeBigIntegerValue>();
+        Assert.Equal((BigInteger)(-85), row1.Value); // 0xAB = 171 unsigned, -85 signed
+
+        var row2 = sheet.ReadRow<NumberStyleAttributeBigIntegerValue>();
+        Assert.Equal((BigInteger)0x123, row2.Value);
+
+        var row3 = sheet.ReadRow<NumberStyleAttributeBigIntegerValue>();
+        Assert.Equal((BigInteger)(-85), row3.Value); // 0xAB = 171 unsigned, -85 signed
+
+        var row4 = sheet.ReadRow<NumberStyleAttributeBigIntegerValue>();
+        Assert.Equal((BigInteger)0x123, row4.Value);
+
+        var row5 = sheet.ReadRow<NumberStyleAttributeBigIntegerValue>();
+        Assert.Equal((BigInteger)123, row5.Value);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeBigIntegerValue>());
+
+        // Invalid cell values.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeBigIntegerValue>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeBigIntegerValue>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeBigIntegerValue>());
+    }
+
+    private class NumberStyleAttributeBigIntegerValue
+    {
+        [ExcelNumberStyle(NumberStyles.HexNumber)]
+        public BigInteger Value { get; set; }
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedBigIntegerValueNumberStyleAttribute_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers_Hex.xlsx");
+        importer.Configuration.RegisterClassMap<NumberStyleAttributeBigIntegerValue>(c =>
+        {
+            c.Map(o => o.Value);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell values.
+        var row1 = sheet.ReadRow<NumberStyleAttributeBigIntegerValue>();
+        Assert.Equal((BigInteger)(-85), row1.Value); // 0xAB = 171 unsigned, -85 signed
+
+        var row2 = sheet.ReadRow<NumberStyleAttributeBigIntegerValue>();
+        Assert.Equal((BigInteger)0x123, row2.Value);
+
+        var row3 = sheet.ReadRow<NumberStyleAttributeBigIntegerValue>();
+        Assert.Equal((BigInteger)(-85), row3.Value); // 0xAB = 171 unsigned, -85 signed
+
+        var row4 = sheet.ReadRow<NumberStyleAttributeBigIntegerValue>();
+        Assert.Equal((BigInteger)0x123, row4.Value);
+
+        var row5 = sheet.ReadRow<NumberStyleAttributeBigIntegerValue>();
+        Assert.Equal((BigInteger)123, row5.Value);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeBigIntegerValue>());
+
+        // Invalid cell values.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeBigIntegerValue>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeBigIntegerValue>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeBigIntegerValue>());
     }
 }

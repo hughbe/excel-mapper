@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Numerics;
 using System.Text;
 
 namespace ExcelMapper.Tests;
@@ -43,6 +44,16 @@ public static class Helpers
         public TimeOnly TimeOnlyValue { get; set; }
         public TimeOnly? NullableTimeOnlyValue { get; set; }
         public Uri? UriValue { get; set; }
+        public BigInteger BigIntegerValue { get; set; }
+        public Int128 Int128Value { get; set; }
+        public UInt128 UInt128Value { get; set; }
+        public Half HalfValue { get; set; }
+        public Complex ComplexValue { get; set; }
+        public BigInteger? NullableBigIntegerValue { get; set; }
+        public Int128? NullableInt128Value { get; set; }
+        public UInt128? NullableUInt128Value { get; set; }
+        public Half? NullableHalfValue { get; set; }
+        public Complex? NullableComplexValue { get; set; }
         public IListInterface UnknownInterfaceValue { get; set; } = default!;
         public ConcreteIEnumerable ConcreteIEnumerable { get; set; } = default!;
         public ConcreteIDictionary ConcreteIDictionary { get; set; } = default!;

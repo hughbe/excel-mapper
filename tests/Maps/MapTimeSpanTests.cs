@@ -22,6 +22,56 @@ public class MapTimeSpanTests
     }
 
     [Fact]
+    public void ReadRow_DefaultMappedTimeSpan_Success()
+    {
+        using var importer = Helpers.GetImporter("TimeSpans.xlsx");
+        importer.Configuration.RegisterClassMap<TimeSpan>(c =>
+        {
+            c.Map(p => p);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<TimeSpan>();
+        Assert.Equal(new TimeSpan(01, 01, 01), row1);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TimeSpan>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TimeSpan>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedTimeSpan_Success()
+    {
+        using var importer = Helpers.GetImporter("TimeSpans.xlsx");
+        importer.Configuration.RegisterClassMap<TimeSpan>(c =>
+        {
+            c.Map(p => p)
+                .WithEmptyFallback(new TimeSpan(02, 03, 04))
+                .WithInvalidFallback(new TimeSpan(03, 04, 05));
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<TimeSpan>();
+        Assert.Equal(new TimeSpan(01, 01, 01), row1);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<TimeSpan>();
+        Assert.Equal(new TimeSpan(02, 03, 04), row2);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<TimeSpan>();
+        Assert.Equal(new TimeSpan(03, 04, 05), row3);
+    }
+
+    [Fact]
     public void ReadRow_NullableTimeSpan_Success()
     {
         using var importer = Helpers.GetImporter("TimeSpans.xlsx");
@@ -39,6 +89,57 @@ public class MapTimeSpanTests
 
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TimeSpan?>());
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedNullableTimeSpan_Success()
+    {
+        using var importer = Helpers.GetImporter("TimeSpans.xlsx");
+        importer.Configuration.RegisterClassMap<TimeSpan?>(c =>
+        {
+            c.Map(p => p);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<TimeSpan?>();
+        Assert.Equal(new TimeSpan(01, 01, 01), row1);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<TimeSpan?>();
+        Assert.Null(row2);
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<TimeSpan?>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedNullableTimeSpan_Success()
+    {
+        using var importer = Helpers.GetImporter("TimeSpans.xlsx");
+        importer.Configuration.RegisterClassMap<TimeSpan?>(c =>
+        {
+            c.Map(p => p)
+                .WithEmptyFallback(new TimeSpan(02, 03, 04))
+                .WithInvalidFallback(new TimeSpan(03, 04, 05));
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<TimeSpan?>();
+        Assert.Equal(new TimeSpan(01, 01, 01), row1);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<TimeSpan?>();
+        Assert.Equal(new TimeSpan(02, 03, 04), row2);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<TimeSpan?>();
+        Assert.Equal(new TimeSpan(03, 04, 05), row3);
     }
 
     [Fact]
@@ -96,7 +197,7 @@ public class MapTimeSpanTests
     }
 
     [Fact]
-    public void ReadRow_AutoMappedTimeSpan_Success()
+    public void ReadRow_AutoMappedTimeSpanValue_Success()
     {
         using var importer = Helpers.GetImporter("TimeSpans.xlsx");
 
@@ -115,7 +216,7 @@ public class MapTimeSpanTests
     }
 
     [Fact]
-    public void ReadRow_DefaultMappedTimeSpan_Success()
+    public void ReadRow_DefaultMappedTimeSpanValue_Success()
     {
         using var importer = Helpers.GetImporter("TimeSpans.xlsx");
         importer.Configuration.RegisterClassMap<TimeSpanValue>(c =>
@@ -138,7 +239,7 @@ public class MapTimeSpanTests
     }
 
     [Fact]
-    public void ReadRow_CustomMappedTimeSpan_Success()
+    public void ReadRow_CustomMappedTimeSpanValue_Success()
     {
         using var importer = Helpers.GetImporter("TimeSpans.xlsx");
         importer.Configuration.RegisterClassMap<TimeSpanValue>(c =>
@@ -229,7 +330,7 @@ public class MapTimeSpanTests
     }
 
     [Fact]
-    public void ReadRow_AutoMappedNullableTimeSpan_Success()
+    public void ReadRow_AutoMappedNullableTimeSpanValue_Success()
     {
         using var importer = Helpers.GetImporter("TimeSpans.xlsx");
 
@@ -249,7 +350,7 @@ public class MapTimeSpanTests
     }
 
     [Fact]
-    public void ReadRow_DefaultMappedNullableTimeSpan_Success()
+    public void ReadRow_DefaultMappedNullableTimeSpanValue_Success()
     {
         using var importer = Helpers.GetImporter("TimeSpans.xlsx");
         importer.Configuration.RegisterClassMap<NullableTimeSpanValue>(c =>
@@ -273,7 +374,7 @@ public class MapTimeSpanTests
     }
 
     [Fact]
-    public void ReadRow_CustomMappedNullableTimeSpan_Success()
+    public void ReadRow_CustomMappedNullableTimeSpanValue_Success()
     {
         using var importer = Helpers.GetImporter("TimeSpans.xlsx");
         importer.Configuration.RegisterClassMap<NullableTimeSpanValue>(c =>

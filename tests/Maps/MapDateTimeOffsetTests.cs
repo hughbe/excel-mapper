@@ -25,6 +25,56 @@ public class MapDateTimeOffsetTests
     }
 
     [Fact]
+    public void ReadRow_DefaultMappedDateTimeOffset_Success()
+    {
+        using var importer = Helpers.GetImporter("DateTimes.xlsx");
+        importer.Configuration.RegisterClassMap<DateTimeOffset>(c =>
+        {
+            c.Map(p => p);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<DateTimeOffset>();
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeOffset>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeOffset>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedDateTimeOffset_Success()
+    {
+        using var importer = Helpers.GetImporter("DateTimes.xlsx");
+        importer.Configuration.RegisterClassMap<DateTimeOffset>(c =>
+        {
+            c.Map(p => p)
+                .WithEmptyFallback(new DateTimeOffset(new DateTime(2017, 07, 20)))
+                .WithInvalidFallback(new DateTimeOffset(new DateTime(2017, 07, 21)));
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<DateTimeOffset>();
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<DateTimeOffset>();
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 20)), row2);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<DateTimeOffset>();
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 21)), row3);
+    }
+
+    [Fact]
     public void ReadRow_NullableDateTimeOffset_Success()
     {
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
@@ -42,6 +92,57 @@ public class MapDateTimeOffsetTests
 
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeOffset?>());
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedNullableDateTimeOffset_Success()
+    {
+        using var importer = Helpers.GetImporter("DateTimes.xlsx");
+        importer.Configuration.RegisterClassMap<DateTimeOffset?>(c =>
+        {
+            c.Map(p => p);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<DateTimeOffset?>();
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<DateTimeOffset?>();
+        Assert.Null(row2);
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeOffset?>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedNullableDateTimeOffset_Success()
+    {
+        using var importer = Helpers.GetImporter("DateTimes.xlsx");
+        importer.Configuration.RegisterClassMap<DateTimeOffset?>(c =>
+        {
+            c.Map(p => p)
+                .WithEmptyFallback(new DateTimeOffset(new DateTime(2017, 07, 20)))
+                .WithInvalidFallback(new DateTimeOffset(new DateTime(2017, 07, 21)));
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<DateTimeOffset?>();
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<DateTimeOffset?>();
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 20)), row2);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<DateTimeOffset?>();
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 21)), row3);
     }
 
     [Fact]
@@ -99,7 +200,7 @@ public class MapDateTimeOffsetTests
     }
 
     [Fact]
-    public void ReadRow_AutoMappedDateTimeOffset_Success()
+    public void ReadRow_AutoMappedDateTimeOffsetValue_Success()
     {
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
 
@@ -117,13 +218,8 @@ public class MapDateTimeOffsetTests
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeOffsetValue>());
     }
 
-    private class DateTimeOffsetValue
-    {
-        public DateTimeOffset Value { get; set; }
-    }
-
     [Fact]
-    public void ReadRow_DefaultMappedDateTimeOffset_Success()
+    public void ReadRow_DefaultMappedDateTimeOffsetValue_Success()
     {
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
         importer.Configuration.RegisterClassMap<DateTimeOffsetValue>(c =>
@@ -146,7 +242,7 @@ public class MapDateTimeOffsetTests
     }
 
     [Fact]
-    public void ReadRow_CustomMappedDateTimeOffset_Success()
+    public void ReadRow_CustomMappedDateTimeOffsetValue_Success()
     {
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
         importer.Configuration.RegisterClassMap<DateTimeOffsetValue>(c =>
@@ -170,6 +266,11 @@ public class MapDateTimeOffsetTests
         // Invalid cell value.
         var row3 = sheet.ReadRow<DateTimeOffsetValue>();
         Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 21)), row3.Value);
+    }
+
+    private class DateTimeOffsetValue
+    {
+        public DateTimeOffset Value { get; set; }
     }
 
     [Fact]
@@ -232,7 +333,7 @@ public class MapDateTimeOffsetTests
     }
 
     [Fact]
-    public void ReadRow_AutoMappedNullableDateTimeOffset_Success()
+    public void ReadRow_AutoMappedNullableDateTimeOffsetValue_Success()
     {
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
 
@@ -251,13 +352,8 @@ public class MapDateTimeOffsetTests
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableDateTimeOffsetValue>());
     }
 
-    private class NullableDateTimeOffsetValue
-    {
-        public DateTimeOffset? Value { get; set; }
-    }
-
     [Fact]
-    public void ReadRow_DefaultMappedNullableDateTimeOffset_Success()
+    public void ReadRow_DefaultMappedNullableDateTimeOffsetValue_Success()
     {
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
         importer.Configuration.RegisterClassMap<NullableDateTimeOffsetValue>(c =>
@@ -281,7 +377,7 @@ public class MapDateTimeOffsetTests
     }
 
     [Fact]
-    public void ReadRow_CustomMappedNullableDateTimeOffset_Success()
+    public void ReadRow_CustomMappedNullableDateTimeOffsetValue_Success()
     {
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
         importer.Configuration.RegisterClassMap<NullableDateTimeOffsetValue>(c =>
@@ -307,6 +403,11 @@ public class MapDateTimeOffsetTests
         Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 21)), row3.Value);
     }
 
+    private class NullableDateTimeOffsetValue
+    {
+        public DateTimeOffset? Value { get; set; }
+    }
+
     [Fact]
     public void ReadRow_InvalidFormat_ThrowsErrorWithRightMessage()
     {
@@ -324,7 +425,7 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<DateTimeOffsetValueInt>(1, 1).ToArray());
-        Assert.IsType<InvalidCastException>(ex.InnerException);
+        Assert.IsType<FormatException>(ex.InnerException);
         Assert.Equal($"Cannot assign \"{new DateTime(2025, 01, 01, 1, 1, 1)}\" to member \"Value\" of type \"System.Int32\" in column \"Date\" on row 1 in sheet \"Sheet1\".", ex.Message);
     }
 

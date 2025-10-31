@@ -25,6 +25,56 @@ public class MapDateTimeTests
     }
 
     [Fact]
+    public void ReadRow_DefaultMappedDateTime_Success()
+    {
+        using var importer = Helpers.GetImporter("DateTimes.xlsx");
+        importer.Configuration.RegisterClassMap<DateTime>(c =>
+        {
+            c.Map(p => p);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<DateTime>();
+        Assert.Equal(new DateTime(2017, 07, 19), row1);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTime>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTime>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedDateTime_Success()
+    {
+        using var importer = Helpers.GetImporter("DateTimes.xlsx");
+        importer.Configuration.RegisterClassMap<DateTime>(c =>
+        {
+            c.Map(p => p)
+                .WithEmptyFallback(new DateTime(2017, 07, 20))
+                .WithInvalidFallback(new DateTime(2017, 07, 21));
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<DateTime>();
+        Assert.Equal(new DateTime(2017, 07, 19), row1);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<DateTime>();
+        Assert.Equal(new DateTime(2017, 07, 20), row2);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<DateTime>();
+        Assert.Equal(new DateTime(2017, 07, 21), row3);
+    }
+
+    [Fact]
     public void ReadRow_NullableDateTime_Success()
     {
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
@@ -42,6 +92,197 @@ public class MapDateTimeTests
 
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTime?>());
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedNullableDateTime_Success()
+    {
+        using var importer = Helpers.GetImporter("DateTimes.xlsx");
+        importer.Configuration.RegisterClassMap<DateTime?>(c =>
+        {
+            c.Map(p => p);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<DateTime?>();
+        Assert.Equal(new DateTime(2017, 07, 19), row1);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<DateTime?>();
+        Assert.Null(row2);
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTime?>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedNullableDateTime_Success()
+    {
+        using var importer = Helpers.GetImporter("DateTimes.xlsx");
+        importer.Configuration.RegisterClassMap<DateTime?>(c =>
+        {
+            c.Map(p => p)
+                .WithEmptyFallback(new DateTime(2017, 07, 20))
+                .WithInvalidFallback(new DateTime(2017, 07, 21));
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<DateTime?>();
+        Assert.Equal(new DateTime(2017, 07, 19), row1);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<DateTime?>();
+        Assert.Equal(new DateTime(2017, 07, 20), row2);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<DateTime?>();
+        Assert.Equal(new DateTime(2017, 07, 21), row3);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedDateTimeValue_Success()
+    {
+        using var importer = Helpers.GetImporter("DateTimes.xlsx");
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<DateTimeValue>();
+        Assert.Equal(new DateTime(2017, 07, 19), row1.Value);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeValue>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeValue>());
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedDateTimeValue_Success()
+    {
+        using var importer = Helpers.GetImporter("DateTimes.xlsx");
+        importer.Configuration.RegisterClassMap<DateTimeValue>(c =>
+        {
+            c.Map(o => o.Value);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<DateTimeValue>();
+        Assert.Equal(new DateTime(2017, 07, 19), row1.Value);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeValue>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeValue>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedDateTimeValue_Success()
+    {
+        using var importer = Helpers.GetImporter("DateTimes.xlsx");
+        importer.Configuration.RegisterClassMap<DateTimeValue>(c =>
+        {
+            c.Map(o => o.Value)
+                .WithEmptyFallback(new DateTime(2017, 07, 20))
+                .WithInvalidFallback(new DateTime(2017, 07, 21));
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<DateTimeValue>();
+        Assert.Equal(new DateTime(2017, 07, 19), row1.Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<DateTimeValue>();
+        Assert.Equal(new DateTime(2017, 07, 20), row2.Value);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<DateTimeValue>();
+        Assert.Equal(new DateTime(2017, 07, 21), row3.Value);
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedNullableDateTimeValue_Success()
+    {
+        using var importer = Helpers.GetImporter("DateTimes.xlsx");
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<NullableDateTimeValue>();
+        Assert.Equal(new DateTime(2017, 07, 19), row1.Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<NullableDateTimeValue>();
+        Assert.Null(row2.Value);
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableDateTimeValue>());
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedNullableDateTimeValue_Success()
+    {
+        using var importer = Helpers.GetImporter("DateTimes.xlsx");
+        importer.Configuration.RegisterClassMap<NullableDateTimeValue>(c =>
+        {
+            c.Map(o => o.Value);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<NullableDateTimeValue>();
+        Assert.Equal(new DateTime(2017, 07, 19), row1.Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<NullableDateTimeValue>();
+        Assert.Null(row2.Value);
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableDateTimeValue>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedNullableDateTimeValue_Success()
+    {
+        using var importer = Helpers.GetImporter("DateTimes.xlsx");
+        importer.Configuration.RegisterClassMap<NullableDateTimeValue>(c =>
+        {
+            c.Map(o => o.Value)
+                .WithEmptyFallback(new DateTime(2017, 07, 20))
+                .WithInvalidFallback(new DateTime(2017, 07, 21));
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<NullableDateTimeValue>();
+        Assert.Equal(new DateTime(2017, 07, 19), row1.Value);
+
+        // Empty cell value.
+        var row2 = sheet.ReadRow<NullableDateTimeValue>();
+        Assert.Equal(new DateTime(2017, 07, 20), row2.Value);
+
+        // Invalid cell value.
+        var row3 = sheet.ReadRow<NullableDateTimeValue>();
+        Assert.Equal(new DateTime(2017, 07, 21), row3.Value);
     }
 
     [Fact]
@@ -99,81 +340,7 @@ public class MapDateTimeTests
     }
 
     [Fact]
-    public void ReadRow_AutoMappedDateTime_Success()
-    {
-        using var importer = Helpers.GetImporter("DateTimes.xlsx");
-
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        // Valid cell value.
-        var row1 = sheet.ReadRow<DateTimeValue>();
-        Assert.Equal(new DateTime(2017, 07, 19), row1.Value);
-
-        // Empty cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeValue>());
-
-        // Invalid cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeValue>());
-    }
-
-    private class DateTimeValue
-    {
-        public DateTime Value { get; set; }
-    }
-
-    [Fact]
-    public void ReadRow_DefaultMappedDateTime_Success()
-    {
-        using var importer = Helpers.GetImporter("DateTimes.xlsx");
-        importer.Configuration.RegisterClassMap<DateTimeValue>(c =>
-        {
-            c.Map(o => o.Value);
-        });
-
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        // Valid cell value.
-        var row1 = sheet.ReadRow<DateTimeValue>();
-        Assert.Equal(new DateTime(2017, 07, 19), row1.Value);
-
-        // Empty cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeValue>());
-
-        // Invalid cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeValue>());
-    }
-
-    [Fact]
-    public void ReadRow_CustomMappedDateTime_Success()
-    {
-        using var importer = Helpers.GetImporter("DateTimes.xlsx");
-        importer.Configuration.RegisterClassMap<DateTimeValue>(c =>
-        {
-            c.Map(o => o.Value)
-                .WithEmptyFallback(new DateTime(2017, 07, 20))
-                .WithInvalidFallback(new DateTime(2017, 07, 21));
-        });
-
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        // Valid cell value.
-        var row1 = sheet.ReadRow<DateTimeValue>();
-        Assert.Equal(new DateTime(2017, 07, 19), row1.Value);
-
-        // Empty cell value.
-        var row2 = sheet.ReadRow<DateTimeValue>();
-        Assert.Equal(new DateTime(2017, 07, 20), row2.Value);
-
-        // Invalid cell value.
-        var row3 = sheet.ReadRow<DateTimeValue>();
-        Assert.Equal(new DateTime(2017, 07, 21), row3.Value);
-    }
-
-    [Fact]
-    public void ReadRow_CustomFormatsArrayDateTime_Success()
+    public void ReadRow_CustomFormatsArrayDateTimeValue_Success()
     {
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
         importer.Configuration.RegisterClassMap<CustomDateTimeValue>(c =>
@@ -193,19 +360,14 @@ public class MapDateTimeTests
         Assert.Equal(new DateTime(2017, 07, 18), row2.CustomValue);
 
         // Empty cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeValue>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomDateTimeValue>());
 
         // Invalid cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeValue>());
-    }
-
-    private class CustomDateTimeValue
-    {
-        public DateTime CustomValue { get; set; }
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomDateTimeValue>());
     }
 
     [Fact]
-    public void ReadRow_CustomEnumerableFormatsDateTime_Success()
+    public void ReadRow_CustomEnumerableFormatsDateTimeValue_Success()
     {
         using var importer = Helpers.GetImporter("DateTimes.xlsx");
         importer.Configuration.RegisterClassMap<CustomDateTimeValue>(c =>
@@ -225,30 +387,15 @@ public class MapDateTimeTests
         Assert.Equal(new DateTime(2017, 07, 18), row2.CustomValue);
 
         // Empty cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeValue>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomDateTimeValue>());
 
         // Invalid cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeValue>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomDateTimeValue>());
     }
 
-    [Fact]
-    public void ReadRow_AutoMappedNullableDateTime_Success()
+    private class DateTimeValue
     {
-        using var importer = Helpers.GetImporter("DateTimes.xlsx");
-
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        // Valid cell value.
-        var row1 = sheet.ReadRow<NullableDateTimeValue>();
-        Assert.Equal(new DateTime(2017, 07, 19), row1.Value);
-
-        // Empty cell value.
-        var row2 = sheet.ReadRow<NullableDateTimeValue>();
-        Assert.Null(row2.Value);
-
-        // Invalid cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableDateTimeValue>());
+        public DateTime Value { get; set; }
     }
 
     private class NullableDateTimeValue
@@ -256,55 +403,9 @@ public class MapDateTimeTests
         public DateTime? Value { get; set; }
     }
 
-    [Fact]
-    public void ReadRow_DefaultMappedNullableDateTime_Success()
+    private class CustomDateTimeValue
     {
-        using var importer = Helpers.GetImporter("DateTimes.xlsx");
-        importer.Configuration.RegisterClassMap<NullableDateTimeValue>(c =>
-        {
-            c.Map(o => o.Value);
-        });
-
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        // Valid cell value.
-        var row1 = sheet.ReadRow<NullableDateTimeValue>();
-        Assert.Equal(new DateTime(2017, 07, 19), row1.Value);
-
-        // Empty cell value.
-        var row2 = sheet.ReadRow<NullableDateTimeValue>();
-        Assert.Null(row2.Value);
-
-        // Invalid cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableDateTimeValue>());
-    }
-
-    [Fact]
-    public void ReadRow_CustomMappedNullableDateTime_Success()
-    {
-        using var importer = Helpers.GetImporter("DateTimes.xlsx");
-        importer.Configuration.RegisterClassMap<NullableDateTimeValue>(c =>
-        {
-            c.Map(o => o.Value)
-                .WithEmptyFallback(new DateTime(2017, 07, 20))
-                .WithInvalidFallback(new DateTime(2017, 07, 21));
-        });
-
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        // Valid cell value.
-        var row1 = sheet.ReadRow<NullableDateTimeValue>();
-        Assert.Equal(new DateTime(2017, 07, 19), row1.Value);
-
-        // Empty cell value.
-        var row2 = sheet.ReadRow<NullableDateTimeValue>();
-        Assert.Equal(new DateTime(2017, 07, 20), row2.Value);
-
-        // Invalid cell value.
-        var row3 = sheet.ReadRow<NullableDateTimeValue>();
-        Assert.Equal(new DateTime(2017, 07, 21), row3.Value);
+        public DateTime CustomValue { get; set; }
     }
 
     [Fact]
@@ -324,7 +425,7 @@ public class MapDateTimeTests
 
         // Valid cell value.
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<DateTimeValueInt>(1, 1).ToArray());
-        Assert.IsType<InvalidCastException>(ex.InnerException);
+        Assert.IsType<FormatException>(ex.InnerException);
         Assert.Equal($"Cannot assign \"{new DateTime(2025, 01, 01, 1, 1, 1)}\" to member \"Value\" of type \"System.Int32\" in column \"Date\" on row 1 in sheet \"Sheet1\".", ex.Message);
     }
 

@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace ExcelMapper.Tests;
 
 public class MapUIntPtrTests
@@ -221,5 +223,167 @@ public class MapUIntPtrTests
                 .WithEmptyFallback(11)
                 .WithInvalidFallback(10);
         }
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedUIntPtrValueNumberStyleAttribute_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers_Hex.xlsx");
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell values.
+        var row1 = sheet.ReadRow<NumberStyleAttributeUIntPtrValue>();
+        Assert.Equal((nuint)0xAB, row1.Value);
+
+        var row2 = sheet.ReadRow<NumberStyleAttributeUIntPtrValue>();
+        Assert.Equal((nuint)0x123, row2.Value);
+
+        var row3 = sheet.ReadRow<NumberStyleAttributeUIntPtrValue>();
+        Assert.Equal((nuint)0xAB, row3.Value);
+
+        var row4 = sheet.ReadRow<NumberStyleAttributeUIntPtrValue>();
+        Assert.Equal((nuint)0x123, row4.Value);
+
+        var row5 = sheet.ReadRow<NumberStyleAttributeUIntPtrValue>();
+        Assert.Equal((nuint)123, row5.Value);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeUIntPtrValue>());
+
+        // Invalid cell values.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeUIntPtrValue>());
+        
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeUIntPtrValue>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeUIntPtrValue>());
+    }
+
+    private class NumberStyleAttributeUIntPtrValue
+    {
+        [ExcelNumberStyle(NumberStyles.HexNumber)]
+        public nuint Value { get; set; }
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedUIntPtrValueNumberStyleAttribute_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers_Hex.xlsx");
+        importer.Configuration.RegisterClassMap<NumberStyleAttributeUIntPtrValue>(c =>
+        {
+            c.Map(o => o.Value);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell values.
+        var row1 = sheet.ReadRow<NumberStyleAttributeUIntPtrValue>();
+        Assert.Equal((nuint)0xAB, row1.Value);
+
+        var row2 = sheet.ReadRow<NumberStyleAttributeUIntPtrValue>();
+        Assert.Equal((nuint)0x123, row2.Value);
+
+        var row3 = sheet.ReadRow<NumberStyleAttributeUIntPtrValue>();
+        Assert.Equal((nuint)0xAB, row3.Value);
+
+        var row4 = sheet.ReadRow<NumberStyleAttributeUIntPtrValue>();
+        Assert.Equal((nuint)0x123, row4.Value);
+
+        var row5 = sheet.ReadRow<NumberStyleAttributeUIntPtrValue>();
+        Assert.Equal((nuint)123, row5.Value);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeUIntPtrValue>());
+
+        // Invalid cell values.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeUIntPtrValue>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeUIntPtrValue>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeUIntPtrValue>());
+    }
+
+    [Fact]
+    public void ReadRow_AutoMappedNullableUIntPtrValueNumberStyleAttribute_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers_Hex.xlsx");
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell values.
+        var row1 = sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>();
+        Assert.Equal((nuint)0xAB, row1.Value);
+
+        var row2 = sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>();
+        Assert.Equal((nuint)0x123, row2.Value);
+
+        var row3 = sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>();
+        Assert.Equal((nuint)0xAB, row3.Value);
+
+        var row4 = sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>();
+        Assert.Equal((nuint)0x123, row4.Value);
+
+        var row5 = sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>();
+        Assert.Equal((nuint)123, row5.Value);
+
+        // Empty cell value.
+        var row6 = sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>();
+        Assert.Null(row6.Value);
+
+        // Invalid cell values.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>());
+    }
+
+    private class NumberStyleAttributeNullableUIntPtrValue
+    {
+        [ExcelNumberStyle(NumberStyles.HexNumber)]
+        public nuint? Value { get; set; }
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedNullableUIntPtrValueNumberStyleAttribute_Success()
+    {
+        using var importer = Helpers.GetImporter("Numbers_Hex.xlsx");
+        importer.Configuration.RegisterClassMap<NumberStyleAttributeNullableUIntPtrValue>(c =>
+        {
+            c.Map(o => o.Value);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell values.
+        var row1 = sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>();
+        Assert.Equal((nuint)0xAB, row1.Value);
+
+        var row2 = sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>();
+        Assert.Equal((nuint)0x123, row2.Value);
+
+        var row3 = sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>();
+        Assert.Equal((nuint)0xAB, row3.Value);
+
+        var row4 = sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>();
+        Assert.Equal((nuint)0x123, row4.Value);
+
+        var row5 = sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>();
+        Assert.Equal((nuint)123, row5.Value);
+
+        // Empty cell value.
+        var row6 = sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>();
+        Assert.Null(row6.Value);
+
+        // Invalid cell values.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>());
+
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeNullableUIntPtrValue>());
     }
 }

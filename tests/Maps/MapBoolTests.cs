@@ -120,7 +120,147 @@ public class MapBoolTests
     public void ReadRow_DefaultMappedBool_Success()
     {
         using var importer = Helpers.GetImporter("Bools.xlsx");
-        importer.Configuration.RegisterClassMap<DefaultBoolClassMap>();
+        importer.Configuration.RegisterClassMap<bool>(c =>
+        {
+            c.Map(p => p);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<bool>();
+        Assert.True(row1);
+
+        var row2 = sheet.ReadRow<bool>();
+        Assert.True(row2);
+
+        var row3 = sheet.ReadRow<bool>();
+        Assert.False(row3);
+
+        var row4 = sheet.ReadRow<bool>();
+        Assert.False(row4);
+
+        // Empty cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<bool>());
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<bool>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedBool_Success()
+    {
+        using var importer = Helpers.GetImporter("Bools.xlsx");
+        importer.Configuration.RegisterClassMap<bool>(c =>
+        {
+            c.Map(p => p)
+                .WithEmptyFallback(true)
+                .WithInvalidFallback(true);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<bool>();
+        Assert.True(row1);
+
+        var row2 = sheet.ReadRow<bool>();
+        Assert.True(row2);
+
+        var row3 = sheet.ReadRow<bool>();
+        Assert.False(row3);
+
+        var row4 = sheet.ReadRow<bool>();
+        Assert.False(row4);
+
+        // Empty cell value.
+        var row5 = sheet.ReadRow<bool>();
+        Assert.True(row5);
+
+        // Invalid cell value.
+        var row6 = sheet.ReadRow<bool>();
+        Assert.True(row6);
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedNullableBool_Success()
+    {
+        using var importer = Helpers.GetImporter("Bools.xlsx");
+        importer.Configuration.RegisterClassMap<bool?>(c =>
+        {
+            c.Map(p => p);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<bool?>();
+        Assert.True(row1);
+
+        var row2 = sheet.ReadRow<bool?>();
+        Assert.True(row2);
+
+        var row3 = sheet.ReadRow<bool?>();
+        Assert.False(row3);
+
+        var row4 = sheet.ReadRow<bool?>();
+        Assert.False(row4);
+
+        // Empty cell value.
+        var row5 = sheet.ReadRow<bool?>();
+        Assert.Null(row5);
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<bool?>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedNullableBool_Success()
+    {
+        using var importer = Helpers.GetImporter("Bools.xlsx");
+        importer.Configuration.RegisterClassMap<bool?>(c =>
+        {
+            c.Map(p => p)
+                .WithEmptyFallback(true)
+                .WithInvalidFallback(true);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<bool?>();
+        Assert.True(row1);
+
+        var row2 = sheet.ReadRow<bool?>();
+        Assert.True(row2);
+
+        var row3 = sheet.ReadRow<bool?>();
+        Assert.False(row3);
+
+        var row4 = sheet.ReadRow<bool?>();
+        Assert.False(row4);
+
+        // Empty cell value.
+        var row5 = sheet.ReadRow<bool?>();
+        Assert.True(row5);
+
+        // Invalid cell value.
+        var row6 = sheet.ReadRow<bool?>();
+        Assert.True(row6);
+    }
+
+    [Fact]
+    public void ReadRow_DefaultMappedBoolValue_Success()
+    {
+        using var importer = Helpers.GetImporter("Bools.xlsx");
+        importer.Configuration.RegisterClassMap<BoolValue>(c =>
+        {
+            c.Map(o => o.Value);
+        });
 
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
@@ -146,40 +286,15 @@ public class MapBoolTests
     }
 
     [Fact]
-    public void ReadRow_DefaultMappedNullableBool_Success()
+    public void ReadRow_CustomMappedBoolValue_Success()
     {
         using var importer = Helpers.GetImporter("Bools.xlsx");
-        importer.Configuration.RegisterClassMap<DefaultNullableBoolMap>();
-
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        // Valid cell value.
-        var row1 = sheet.ReadRow<NullableBoolValue>();
-        Assert.True(row1.Value);
-
-        var row2 = sheet.ReadRow<NullableBoolValue>();
-        Assert.True(row2.Value);
-
-        var row3 = sheet.ReadRow<NullableBoolValue>();
-        Assert.False(row3.Value);
-
-        var row4 = sheet.ReadRow<NullableBoolValue>();
-        Assert.False(row4.Value);
-
-        // Empty cell value.
-        var row5 = sheet.ReadRow<NullableBoolValue>();
-        Assert.Null(row5.Value);
-
-        // Invalid cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableBoolValue>());
-    }
-
-    [Fact]
-    public void ReadRow_CustomMappedBool_Success()
-    {
-        using var importer = Helpers.GetImporter("Bools.xlsx");
-        importer.Configuration.RegisterClassMap<CustomBoolClassMap>();
+        importer.Configuration.RegisterClassMap<BoolValue>(c =>
+        {
+            c.Map(o => o.Value)
+                .WithEmptyFallback(true)
+                .WithInvalidFallback(true);
+        });
 
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
@@ -207,10 +322,48 @@ public class MapBoolTests
     }
 
     [Fact]
-    public void ReadRow_CustomMappedNullableBool_Success()
+    public void ReadRow_DefaultMappedNullableBoolValue_Success()
     {
         using var importer = Helpers.GetImporter("Bools.xlsx");
-        importer.Configuration.RegisterClassMap<CustomNullableBoolMap>();
+        importer.Configuration.RegisterClassMap<NullableBoolValue>(c =>
+        {
+            c.Map(o => o.Value);
+        });
+
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        // Valid cell value.
+        var row1 = sheet.ReadRow<NullableBoolValue>();
+        Assert.True(row1.Value);
+
+        var row2 = sheet.ReadRow<NullableBoolValue>();
+        Assert.True(row2.Value);
+
+        var row3 = sheet.ReadRow<NullableBoolValue>();
+        Assert.False(row3.Value);
+
+        var row4 = sheet.ReadRow<NullableBoolValue>();
+        Assert.False(row4.Value);
+
+        // Empty cell value.
+        var row5 = sheet.ReadRow<NullableBoolValue>();
+        Assert.Null(row5.Value);
+
+        // Invalid cell value.
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NullableBoolValue>());
+    }
+
+    [Fact]
+    public void ReadRow_CustomMappedNullableBoolValue_Success()
+    {
+        using var importer = Helpers.GetImporter("Bools.xlsx");
+        importer.Configuration.RegisterClassMap<NullableBoolValue>(c =>
+        {
+            c.Map(o => o.Value)
+                .WithEmptyFallback(true)
+                .WithInvalidFallback(true);
+        });
 
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
@@ -242,44 +395,8 @@ public class MapBoolTests
         public bool Value { get; set; }
     }
 
-    private class DefaultBoolClassMap : ExcelClassMap<BoolValue>
-    {
-        public DefaultBoolClassMap()
-        {
-            Map(o => o.Value);
-        }
-    }
-
-    private class CustomBoolClassMap : ExcelClassMap<BoolValue>
-    {
-        public CustomBoolClassMap()
-        {
-            Map(o => o.Value)
-                .WithEmptyFallback(true)
-                .WithInvalidFallback(true);
-        }
-    }
-
     private class NullableBoolValue
     {
         public bool? Value { get; set; }
-    }
-
-    private class DefaultNullableBoolMap : ExcelClassMap<NullableBoolValue>
-    {
-        public DefaultNullableBoolMap()
-        {
-            Map(o => o.Value);
-        }
-    }
-
-    private class CustomNullableBoolMap : ExcelClassMap<NullableBoolValue>
-    {
-        public CustomNullableBoolMap()
-        {
-            Map(o => o.Value)
-                .WithEmptyFallback(true)
-                .WithInvalidFallback(true);
-        }
     }
 }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using ExcelMapper.Fallbacks;
@@ -183,6 +184,15 @@ internal static class MemberMapper
             foreach (var mapper in pipeline.Mappers.OfType<IFormatsCellMapper>())
             {
                 mapper.Formats = formatsAttribute.Formats;
+            }
+        }
+
+        // If the member has a ExcelNumberStyle attribute, modify the mappers.
+        if (member.GetCustomAttribute<ExcelNumberStyleAttribute>() is { } numberStyleAttribute)
+        {
+            foreach (var mapper in pipeline.Mappers.OfType<INumberStyleCellMapper>())
+            {
+                mapper.Style = numberStyleAttribute.Style;
             }
         }
 
