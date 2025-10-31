@@ -232,7 +232,7 @@ public class SplitCellValueReaderTests
     {
         public Func<string, string[]>? GetValuesAction { get; set; }
         public Func<string, int>? GetCountAction { get; set; }
-        public Func<ReadOnlySpan<char>, (int, int, int)>? GetNextValueAction { get; set; }
+        public Func<string, (int, int, int)>? GetNextValueAction { get; set; }
 
         protected override string[] GetValues(string value) => GetValuesAction?.Invoke(value) ?? [];
 
@@ -242,7 +242,7 @@ public class SplitCellValueReaderTests
         {
             if (GetNextValueAction != null)
             {
-                return GetNextValueAction(remaining);
+                return GetNextValueAction(remaining.ToString());
             }
             return (-1, 0, 0);
         }
