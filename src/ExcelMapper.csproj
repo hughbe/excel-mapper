@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net$(NETCoreAppMaximumVersion)</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup>
     <PackageId>ExcelDataReader.Mapping</PackageId>
-    <PackageVersion>3.0.1</PackageVersion>
+    <PackageVersion>3.0.2</PackageVersion>
     <Authors>Hugh Bellamy</Authors>
     <Title>Excel Mapper</Title>
     <Description>An extension of ExcelDataReader that supports fluent mapping of rows to C# objects.</Description>
