@@ -14,7 +14,8 @@ internal static class MemberMapper
     {
         // Check for ExcelColumnName attributes - try to avoid materializing if possible
         var columnNameAttributes = member.GetCustomAttributes<ExcelColumnNameAttribute>();
-        using (var enumerator = columnNameAttributes.GetEnumerator())
+        var enumerator = columnNameAttributes.GetEnumerator();
+        try
         {
             if (enumerator.MoveNext())
             {
@@ -39,6 +40,10 @@ internal static class MemberMapper
                 return new CompositeCellsReaderFactory([.. factories]);
             }
         }
+        finally
+        {
+            enumerator.Dispose();
+        }
 
         // [ExcelColumnNames] attributes still represents one column, but multiple options.
         var columnNamesAttribute = member.GetCustomAttribute<ExcelColumnNamesAttribute>();
@@ -57,26 +62,31 @@ internal static class MemberMapper
 
         // Check for ExcelColumnIndex attributes - try to avoid materializing if possible
         var columnIndexAttributes = member.GetCustomAttributes<ExcelColumnIndexAttribute>();
-        using (var enumerator = columnIndexAttributes.GetEnumerator())
+        var indexEnumerator = columnIndexAttributes.GetEnumerator();
+        try
         {
-            if (enumerator.MoveNext())
+            if (indexEnumerator.MoveNext())
             {
-                var first = enumerator.Current;
-                if (!enumerator.MoveNext())
+                var first = indexEnumerator.Current;
+                if (!indexEnumerator.MoveNext())
                 {
                     // Only one attribute
                     return new ColumnIndexReaderFactory(first.Index);
                 }
                 
                 // Multiple attributes - need to materialize remaining
-                var indices = new List<int> { first.Index, enumerator.Current.Index };
-                while (enumerator.MoveNext())
+                var indices = new List<int> { first.Index, indexEnumerator.Current.Index };
+                while (indexEnumerator.MoveNext())
                 {
-                    indices.Add(enumerator.Current.Index);
+                    indices.Add(indexEnumerator.Current.Index);
                 }
                 
                 return new ColumnIndicesReaderFactory([.. indices]);
             }
+        }
+        finally
+        {
+            indexEnumerator.Dispose();
         }
 
         // [ExcelColumnIndices] attributes still represents one column, but multiple options.
