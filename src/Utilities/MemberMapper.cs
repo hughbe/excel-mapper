@@ -27,8 +27,9 @@ internal static class MemberMapper
                 }
                 
                 // Multiple attributes - need to materialize remaining
-                // Pre-allocate with small capacity to reduce reallocations (most cases have 2-3 attributes)
-                var factories = new List<ICellReaderFactory>(capacity: 4) 
+                // Pre-allocate with small capacity to reduce reallocations (most cases have 2-4 attributes)
+                const int InitialCapacity = 4;
+                var factories = new List<ICellReaderFactory>(capacity: InitialCapacity) 
                 { 
                     new ColumnNameReaderFactory(first.Name, first.Comparison),
                     new ColumnNameReaderFactory(enumerator.Current.Name, enumerator.Current.Comparison)
@@ -76,8 +77,9 @@ internal static class MemberMapper
                 }
                 
                 // Multiple attributes - need to materialize remaining
-                // Pre-allocate with small capacity to reduce reallocations (most cases have 2-3 attributes)
-                var indices = new List<int>(capacity: 4) { first.Index, indexEnumerator.Current.Index };
+                // Pre-allocate with small capacity to reduce reallocations (most cases have 2-4 attributes)
+                const int InitialCapacity = 4;
+                var indices = new List<int>(capacity: InitialCapacity) { first.Index, indexEnumerator.Current.Index };
                 while (indexEnumerator.MoveNext())
                 {
                     indices.Add(indexEnumerator.Current.Index);
