@@ -41,15 +41,19 @@ public static class ExcelImporterUtils
             .GetTypes()
             .Where(type => typeof(ExcelClassMap).IsAssignableFrom(type) && type.Namespace == namespaceString);
 
-        var classMaps = classMapTypes.Select(Activator.CreateInstance).OfType<ExcelClassMap>().ToArray();
-        if (classMaps.Length == 0)
+        var classMaps = new List<ExcelClassMap>();
+        foreach (var type in classMapTypes)
         {
-            throw new ArgumentException($"No ExcelClassMap types found in the namespace \"{namespaceString}\" in the assembly \"{assembly}\".", nameof(namespaceString));
+            if (Activator.CreateInstance(type) is ExcelClassMap classMap)
+            {
+                classMaps.Add(classMap);
+                importer.Configuration.RegisterClassMap(classMap);
+            }
         }
 
-        foreach (ExcelClassMap classMap in classMaps)
+        if (classMaps.Count == 0)
         {
-            importer.Configuration.RegisterClassMap(classMap);
+            throw new ArgumentException($"No ExcelClassMap types found in the namespace \"{namespaceString}\" in the assembly \"{assembly}\".", nameof(namespaceString));
         }
 
         return classMaps;

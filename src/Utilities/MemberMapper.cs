@@ -12,17 +12,32 @@ internal static class MemberMapper
 {
     internal static ICellReaderFactory GetDefaultCellReaderFactory(MemberInfo member)
     {
-        var columnNameAttributes = member.GetCustomAttributes<ExcelColumnNameAttribute>().ToArray();
-        // A single [ExcelColumnName] attribute represents one column.
-        if (columnNameAttributes.Length == 1)
+        // Check for ExcelColumnName attributes - try to avoid materializing if possible
+        var columnNameAttributes = member.GetCustomAttributes<ExcelColumnNameAttribute>();
+        using (var enumerator = columnNameAttributes.GetEnumerator())
         {
-            return new ColumnNameReaderFactory(columnNameAttributes[0].Name, columnNameAttributes[0].Comparison);
-        }
-        // Multiple [ExcelColumnName] attributes still represents one column, but multiple options.
-        else if (columnNameAttributes.Length > 1)
-        {
-            return new CompositeCellsReaderFactory(
-                [.. columnNameAttributes.Select(c => new ColumnNameReaderFactory(c.Name, c.Comparison))]);
+            if (enumerator.MoveNext())
+            {
+                var first = enumerator.Current;
+                if (!enumerator.MoveNext())
+                {
+                    // Only one attribute
+                    return new ColumnNameReaderFactory(first.Name, first.Comparison);
+                }
+                
+                // Multiple attributes - need to materialize remaining
+                var factories = new List<ICellReaderFactory> 
+                { 
+                    new ColumnNameReaderFactory(first.Name, first.Comparison),
+                    new ColumnNameReaderFactory(enumerator.Current.Name, enumerator.Current.Comparison)
+                };
+                while (enumerator.MoveNext())
+                {
+                    factories.Add(new ColumnNameReaderFactory(enumerator.Current.Name, enumerator.Current.Comparison));
+                }
+                
+                return new CompositeCellsReaderFactory([.. factories]);
+            }
         }
 
         // [ExcelColumnNames] attributes still represents one column, but multiple options.
@@ -40,16 +55,28 @@ internal static class MemberMapper
             return new ColumnsMatchingReaderFactory(matcher);
         }
 
-        // A single [ExcelColumnIndex] attribute represents one column.
-        var colummnIndexAttributes = member.GetCustomAttributes<ExcelColumnIndexAttribute>().ToArray();
-        if (colummnIndexAttributes.Length == 1)
+        // Check for ExcelColumnIndex attributes - try to avoid materializing if possible
+        var columnIndexAttributes = member.GetCustomAttributes<ExcelColumnIndexAttribute>();
+        using (var enumerator = columnIndexAttributes.GetEnumerator())
         {
-            return new ColumnIndexReaderFactory(colummnIndexAttributes[0].Index);
-        }
-        // Multiple [ExcelColumnIndex] attributes still represents one column, but multiple options.
-        else if (colummnIndexAttributes.Length > 1)
-        {
-            return new ColumnIndicesReaderFactory([.. colummnIndexAttributes.Select(c => c.Index)]);
+            if (enumerator.MoveNext())
+            {
+                var first = enumerator.Current;
+                if (!enumerator.MoveNext())
+                {
+                    // Only one attribute
+                    return new ColumnIndexReaderFactory(first.Index);
+                }
+                
+                // Multiple attributes - need to materialize remaining
+                var indices = new List<int> { first.Index, enumerator.Current.Index };
+                while (enumerator.MoveNext())
+                {
+                    indices.Add(enumerator.Current.Index);
+                }
+                
+                return new ColumnIndicesReaderFactory([.. indices]);
+            }
         }
 
         // [ExcelColumnIndices] attributes still represents one column, but multiple options.
@@ -126,30 +153,32 @@ internal static class MemberMapper
         var addDefaultMappers = true;
 
         // If the member has ExcelMapper attributes, add the mappers.
-        var mapperAttributes = member.GetCustomAttributes<ExcelMapperAttribute>().ToArray();
-        if (mapperAttributes.Length > 0)
+        var mapperAttributes = member.GetCustomAttributes<ExcelMapperAttribute>();
+        bool hasMapperAttributes = false;
+        foreach (var mapperAttribute in mapperAttributes)
         {
-            foreach (var mapperAttribute in mapperAttributes)
-            {
-                var mapper = (ICellMapper)Activator.CreateInstance(mapperAttribute.Type, mapperAttribute.ConstructorArguments)!;
-                pipeline.Mappers.Add(mapper);
-            }
+            hasMapperAttributes = true;
+            var mapper = (ICellMapper)Activator.CreateInstance(mapperAttribute.Type, mapperAttribute.ConstructorArguments)!;
+            pipeline.Mappers.Add(mapper);
+        }
 
-            // Since explicit mappers were added, do not add default mappers.
+        // Since explicit mappers were added, do not add default mappers.
+        if (hasMapperAttributes)
+        {
             addDefaultMappers = false;
         }
 
         // If the member has any ExcelMappingDictionary attributes, add a MappingDictionaryMapper.
-        var mappingDictionaryAttributes = member.GetCustomAttributes<ExcelMappingDictionaryAttribute>().ToArray();
-        if (mappingDictionaryAttributes.Length > 0)
+        var mappingDictionaryAttributes = member.GetCustomAttributes<ExcelMappingDictionaryAttribute>();
+        Dictionary<string, object?>? mappingDictionary = null;
+        foreach (var mappingDictionaryAttribute in mappingDictionaryAttributes)
         {
-            // Build the mapping dictionary.
-            var mappingDictionary = new Dictionary<string, object?>(mappingDictionaryAttributes.Length);
-            foreach (var mappingDictionaryAttribute in mappingDictionaryAttributes)
-            {
-                mappingDictionary.Add(mappingDictionaryAttribute.Value, mappingDictionaryAttribute.MappedValue);
-            }
+            mappingDictionary ??= new Dictionary<string, object?>();
+            mappingDictionary.Add(mappingDictionaryAttribute.Value, mappingDictionaryAttribute.MappedValue);
+        }
 
+        if (mappingDictionary != null)
+        {
             // If the member has a ExcelMappingDictionaryComparer attribute, get the comparer.
             IEqualityComparer<string>? comparer = null;
             if (member.GetCustomAttribute<ExcelMappingDictionaryComparerAttribute>() is { } comparerAttribute)

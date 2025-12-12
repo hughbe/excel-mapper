@@ -661,13 +661,25 @@ public static class AutoMapper
         if (dictionaryType.ImplementsInterface(typeof(IEnumerable)))
         {
             // If there are multiple add methods, we can't determine the key/value types.
-            var addMethods = dictionaryType.GetMethods()
-                .Where(m => m.Name == "Add" && m.GetParameters().Length == 2)
-                .ToArray();
-            
-            if (addMethods.Length == 1)
+            MethodInfo? singleAddMethod = null;
+            int addMethodCount = 0;
+            foreach (var method in dictionaryType.GetMethods())
             {
-                var parameters = addMethods[0].GetParameters();
+                if (method.Name == "Add" && method.GetParameters().Length == 2)
+                {
+                    singleAddMethod = method;
+                    addMethodCount++;
+                    if (addMethodCount > 1)
+                    {
+                        // Multiple Add methods - can't determine types
+                        break;
+                    }
+                }
+            }
+            
+            if (addMethodCount == 1 && singleAddMethod != null)
+            {
+                var parameters = singleAddMethod.GetParameters();
                 keyType = parameters[0].ParameterType;
                 valueType = parameters[1].ParameterType;
                 return true;
