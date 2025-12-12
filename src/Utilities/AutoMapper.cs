@@ -671,7 +671,8 @@ public static class AutoMapper
                     addMethodCount++;
                     if (addMethodCount > 1)
                     {
-                        // Multiple Add methods - can't determine types
+                        // Multiple Add methods - can't determine types, invalidate the method
+                        singleAddMethod = null;
                         break;
                     }
                 }
