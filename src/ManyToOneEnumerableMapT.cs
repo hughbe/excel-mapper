@@ -191,7 +191,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     public ManyToOneEnumerableMap<TElement> WithSeparators(params IEnumerable<char> separators)
     {
         ArgumentNullException.ThrowIfNull(separators);
-        return WithSeparators(separators.ToArray());
+        return WithSeparators(separators as char[] ?? separators.ToArray());
     }
 
     /// <summary>
@@ -226,6 +226,6 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     public ManyToOneEnumerableMap<TElement> WithSeparators(params IEnumerable<string> separators)
     {
         ArgumentNullException.ThrowIfNull(separators);
-        return WithSeparators(separators.ToArray());
+        return WithSeparators(separators as string[] ?? separators.ToArray());
     }
 }

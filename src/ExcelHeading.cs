@@ -78,7 +78,7 @@ public class ExcelHeading
 
         if (!NameMapping.TryGetValue(columnName, out int index))
         {
-            string foundColumns = string.Join(", ", NameMapping.Keys.Select(c => $"\"{c}\""));
+            var foundColumns = string.Join(", ", NameMapping.Keys.Select(static c => $"\"{c}\""));
             throw new ExcelMappingException($"Column \"{columnName}\" does not exist in [{foundColumns}]");
         }
 
@@ -110,7 +110,7 @@ public class ExcelHeading
 
         if (key == null)
         {
-            string foundColumns = string.Join(", ", NameMapping.Keys.Select(c => $"\"{c}\""));
+            var foundColumns = string.Join(", ", NameMapping.Keys.Select(static c => $"\"{c}\""));
             throw new ExcelMappingException($"No Columns found matching predicate from [{foundColumns}]");
         }
 
