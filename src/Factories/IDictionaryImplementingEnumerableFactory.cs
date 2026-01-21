@@ -23,7 +23,7 @@ public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<T
     /// <exception cref="ArgumentException">Thrown when the dictionary type is invalid or unsupported.</exception>
     public IDictionaryImplementingFactory(Type dictionaryType)
     {
-        ArgumentNullException.ThrowIfNull(dictionaryType);
+        ThrowHelpers.ThrowIfNull(dictionaryType, nameof(dictionaryType));
         if (dictionaryType.IsInterface)
         {
             throw new ArgumentException($"Interface dictionary types cannot be created. Use {nameof(DictionaryFactory<TKey, TValue>)} instead.", nameof(dictionaryType));
@@ -47,7 +47,7 @@ public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<T
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ThrowHelpers.ThrowIfNegative(count, nameof(count));
 
         if (_items is not null)
         {
@@ -60,7 +60,7 @@ public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<T
     /// <inheritdoc/>
     public void Add(TKey key, TValue? value)
     {
-        ArgumentNullException.ThrowIfNull(key);
+        ThrowHelpers.ThrowIfNull(key, nameof(key));
         EnsureMapping();
         _items.Add(key, value);
     }

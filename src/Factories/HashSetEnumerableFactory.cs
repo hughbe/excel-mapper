@@ -13,7 +13,7 @@ public class HashSetEnumerableFactory<T> : IEnumerableFactory<T>
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ThrowHelpers.ThrowIfNegative(count, nameof(count));
 
         if (_items is not null)
         {
@@ -21,7 +21,9 @@ public class HashSetEnumerableFactory<T> : IEnumerableFactory<T>
         }
 
         _items = [];
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         _items.EnsureCapacity(count);
+#endif
     }
 
     /// <inheritdoc/>

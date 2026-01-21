@@ -12,7 +12,7 @@ public class ManyToOneDictionaryIndexerMapT<TKey, TValue> : IDictionaryIndexerMa
 {
     public ManyToOneDictionaryIndexerMapT(IDictionaryFactory<TKey, TValue> dictionaryFactory)
     {
-        ArgumentNullException.ThrowIfNull(dictionaryFactory);
+        ThrowHelpers.ThrowIfNull(dictionaryFactory, nameof(dictionaryFactory));
         DictionaryFactory = dictionaryFactory;
     }
 
@@ -27,7 +27,7 @@ public class ManyToOneDictionaryIndexerMapT<TKey, TValue> : IDictionaryIndexerMa
     /// <inheritdoc/>
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
+        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
         DictionaryFactory.Begin(Values.Count);
         try

@@ -19,8 +19,8 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// </summary>
     public ManyToOneEnumerableMap(ICellsReaderFactory readerFactory, IEnumerableFactory<TElement> enumerableFactory)
     {
-        ArgumentNullException.ThrowIfNull(readerFactory);
-        ArgumentNullException.ThrowIfNull(enumerableFactory);
+        ThrowHelpers.ThrowIfNull(readerFactory, nameof(readerFactory));
+        ThrowHelpers.ThrowIfNull(enumerableFactory, nameof(enumerableFactory));
 
         _readerFactory = readerFactory;
         EnumerableFactory = enumerableFactory;
@@ -34,7 +34,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
         get => _readerFactory;
         set
         {
-            ArgumentNullException.ThrowIfNull(value);
+            ThrowHelpers.ThrowIfNull(value, nameof(value));
             _readerFactory = value;
         }
     }
@@ -60,7 +60,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// <inheritdoc />
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
+        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
         var cellsReader = _factoryCache.GetOrAdd(sheet, s => _readerFactory.GetCellsReader(s));
 
@@ -109,10 +109,10 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithElementMap(Func<IValuePipeline<TElement>, IValuePipeline<TElement>> elementMap)
     {
-        ArgumentNullException.ThrowIfNull(elementMap);
+        ThrowHelpers.ThrowIfNull(elementMap, nameof(elementMap));
 
         var result = elementMap((IValuePipeline<TElement>)Pipeline);
-        ArgumentNullException.ThrowIfNull(result, nameof(elementMap));
+        ThrowHelpers.ThrowIfNull(result, nameof(elementMap));
         Pipeline = result;
         return this;
     }
@@ -190,7 +190,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithSeparators(params IEnumerable<char> separators)
     {
-        ArgumentNullException.ThrowIfNull(separators);
+        ThrowHelpers.ThrowIfNull(separators, nameof(separators));
         return WithSeparators(separators as char[] ?? separators.ToArray());
     }
 
@@ -225,7 +225,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithSeparators(params IEnumerable<string> separators)
     {
-        ArgumentNullException.ThrowIfNull(separators);
+        ThrowHelpers.ThrowIfNull(separators, nameof(separators));
         return WithSeparators(separators as string[] ?? separators.ToArray());
     }
 }

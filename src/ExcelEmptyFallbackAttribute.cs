@@ -9,7 +9,7 @@ public sealed class ExcelEmptyFallbackAttribute : Attribute
     /// <summary>
     /// Gets the type of the <see cref="IFallbackItem"/>.
     /// </summary>
-    public Type Type { get; init; }
+    public Type Type { get; }
 
     /// <summary>
     /// The constructor arguments for the <see cref="IFallbackItem"/>.
@@ -22,7 +22,7 @@ public sealed class ExcelEmptyFallbackAttribute : Attribute
     /// <param name="fallbackType">The type of the <see cref="IFallbackItem"/>.</param>
     public ExcelEmptyFallbackAttribute(Type fallbackType)
     {
-        ArgumentNullException.ThrowIfNull(fallbackType);
+        ThrowHelpers.ThrowIfNull(fallbackType, nameof(fallbackType));
         if (fallbackType.IsAbstract || fallbackType.IsInterface)
         {
             throw new ArgumentException("Fallback type cannot be abstract or an interface", nameof(fallbackType));

@@ -8,6 +8,13 @@ namespace ExcelMapper.Utilities;
 
 internal static class ReflectionUtilities
 {
+#if !NET5_0_OR_GREATER
+    public static bool IsAssignableTo(this Type type, Type targetType)
+    {
+        return targetType.GetTypeInfo().IsAssignableFrom(type.GetTypeInfo());
+    }
+#endif
+
     public static bool ImplementsInterface(this Type type, Type interfaceType)
     {
         return type.GetTypeInfo().ImplementedInterfaces.Any(t => t == interfaceType);

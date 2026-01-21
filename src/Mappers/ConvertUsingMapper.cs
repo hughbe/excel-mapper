@@ -23,7 +23,7 @@ public class ConvertUsingMapper : ICellMapper
     /// <param name="converter">The delegate used to map the value of a cell to an object</param>
     public ConvertUsingMapper(ConvertUsingMapperDelegate converter)
     {
-        ArgumentNullException.ThrowIfNull(converter);
+        ThrowHelpers.ThrowIfNull(converter, nameof(converter));
         Converter = converter;
     }
 

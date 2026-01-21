@@ -6,12 +6,12 @@ internal static class ColumnUtilities
 {
     public static void ValidateColumnIndex(int columnIndex, [CallerArgumentExpression(nameof(columnIndex))] string? paramName = null)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(columnIndex, paramName);
+        ThrowHelpers.ThrowIfNegative(columnIndex, paramName);
     }
 
     public static void ValidateColumnIndices(IReadOnlyList<int> columnIndices, [CallerArgumentExpression(nameof(columnIndices))] string? paramName = null)
     {
-        ArgumentNullException.ThrowIfNull(columnIndices, paramName);
+        ThrowHelpers.ThrowIfNull(columnIndices, paramName);
         if (columnIndices.Count == 0)
         {
             throw new ArgumentException("Column indices cannot be empty.", paramName);
@@ -20,19 +20,19 @@ internal static class ColumnUtilities
 
         foreach (var columnIndex in columnIndices)
         {
-            ArgumentOutOfRangeException.ThrowIfNegative(columnIndex, paramName);
+            ThrowHelpers.ThrowIfNegative(columnIndex, paramName);
         }
     }
 
     public static void ValidateColumnName(string columnName, [CallerArgumentExpression(nameof(columnName))] string? paramName = null)
     {
-        ArgumentNullException.ThrowIfNull(columnName, paramName);
-        ArgumentException.ThrowIfNullOrEmpty(columnName, paramName);
+        ThrowHelpers.ThrowIfNull(columnName, paramName);
+        ThrowHelpers.ThrowIfNullOrEmpty(columnName, paramName);
     }
 
     public static void ValidateColumnNames(IReadOnlyList<string> columnNames, [CallerArgumentExpression(nameof(columnNames))] string? paramName = null)
     {
-        ArgumentNullException.ThrowIfNull(columnNames, paramName);
+        ThrowHelpers.ThrowIfNull(columnNames, paramName);
         if (columnNames.Count == 0)
         {
             throw new ArgumentException("Column names cannot be empty.", paramName);
@@ -45,13 +45,13 @@ internal static class ColumnUtilities
                 throw new ArgumentException("Column names cannot contain null values.", paramName);
             }
 
-            ArgumentException.ThrowIfNullOrEmpty(columnName, paramName);
+            ThrowHelpers.ThrowIfNullOrEmpty(columnName, paramName);
         }
     }
 
     public static bool TryGetColumnIndex(ExcelSheet sheet, string columnName, StringComparison comparison, out int columnIndex)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
+        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
         if (sheet.Heading == null)
         {
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");

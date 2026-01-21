@@ -34,7 +34,7 @@ public static class IManyToOneMapExtensions
     /// <returns>The map that invoked this method.</returns>
     public static TMap WithColumnNames<TMap>(this TMap map, params IEnumerable<string> columnNames) where TMap : IManyToOneMap
     {
-        ArgumentNullException.ThrowIfNull(columnNames);
+        ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
         return map.WithColumnNames([.. columnNames]);
     }
 
@@ -47,7 +47,7 @@ public static class IManyToOneMapExtensions
     /// <returns>The map that invoked this method.</returns>
     public static TMap WithColumnNames<TMap>(this TMap map, IEnumerable<string> columnNames, StringComparison comparison) where TMap : IManyToOneMap
     {
-        ArgumentNullException.ThrowIfNull(columnNames);
+        ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
         return map.WithColumnNames([.. columnNames], comparison);
     }
 
@@ -77,7 +77,7 @@ public static class IManyToOneMapExtensions
     /// <returns>The map that invoked this method.</returns>
     public static TMap WithColumnIndices<TMap>(this TMap map, params IEnumerable<int> columnIndices) where TMap : IManyToOneMap
     {
-        ArgumentNullException.ThrowIfNull(columnIndices);
+        ThrowHelpers.ThrowIfNull(columnIndices, nameof(columnIndices));
         return map.WithColumnIndices([.. columnIndices]);
     }
 
@@ -90,7 +90,7 @@ public static class IManyToOneMapExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithReaderFactory<TMap>(this TMap map, ICellsReaderFactory readerFactory) where TMap : IManyToOneMap
     {
-        ArgumentNullException.ThrowIfNull(readerFactory);
+        ThrowHelpers.ThrowIfNull(readerFactory, nameof(readerFactory));
         map.ReaderFactory = readerFactory;
         return map;
     }

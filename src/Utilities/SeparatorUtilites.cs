@@ -6,7 +6,7 @@ internal static class SeparatorUtilities
 {
     public static void ValidateSeparators(string[] separators, [CallerArgumentExpression(nameof(separators))] string? paramName = null)
     {
-        ArgumentNullException.ThrowIfNull(separators, paramName);
+        ThrowHelpers.ThrowIfNull(separators, paramName);
         if (separators.Length == 0)
         {
             throw new ArgumentException("Separators cannot be empty.", paramName);
@@ -23,7 +23,7 @@ internal static class SeparatorUtilities
 
     public static void ValidateSeparators(char[] separators, [CallerArgumentExpression(nameof(separators))] string? paramName = null)
     {
-        ArgumentNullException.ThrowIfNull(separators, paramName);
+        ThrowHelpers.ThrowIfNull(separators, paramName);
         if (separators.Length == 0)
         {
             throw new ArgumentException("Separators cannot be empty.", paramName);

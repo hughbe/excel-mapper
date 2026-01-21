@@ -13,7 +13,7 @@ public class ManyToOneMultidimensionalIndexerMapT<TValue> : IMultidimensionalInd
 {
     public ManyToOneMultidimensionalIndexerMapT(IMultidimensionalArrayFactory<TValue> arrayFactory)
     {
-        ArgumentNullException.ThrowIfNull(arrayFactory);
+        ThrowHelpers.ThrowIfNull(arrayFactory, nameof(arrayFactory));
         ArrayFactory = arrayFactory;
     }
 
@@ -51,7 +51,7 @@ public class ManyToOneMultidimensionalIndexerMapT<TValue> : IMultidimensionalInd
     /// <inheritdoc/>
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
+        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
         var lengths = GetLengths();
         if (lengths.Length == 0)

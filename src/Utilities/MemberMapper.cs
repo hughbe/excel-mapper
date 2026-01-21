@@ -5,6 +5,7 @@ using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
 using ExcelMapper.Readers;
 using ExcelMapper.Transformers;
+using ExcelMapper.Utilities;
 
 namespace ExcelMapper.Utilities;
 
@@ -197,7 +198,7 @@ internal static class MemberMapper
             IEqualityComparer<string>? comparer = null;
             if (member.GetCustomAttribute<ExcelMappingDictionaryComparerAttribute>() is { } comparerAttribute)
             {
-                comparer = StringComparer.FromComparison(comparerAttribute.Comparison);
+                comparer = StringComparerUtilities.FromComparison(comparerAttribute.Comparison);
             }
 
             // If the member has a ExcelMappingDictionaryBehavior attribute, get the behavior.

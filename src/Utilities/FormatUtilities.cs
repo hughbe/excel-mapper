@@ -6,7 +6,7 @@ internal static class FormatUtilities
 {
     public static void ValidateFormats(string[] formats, [CallerArgumentExpression(nameof(formats))] string? paramName = null)
     {
-        ArgumentNullException.ThrowIfNull(formats, paramName);
+        ThrowHelpers.ThrowIfNull(formats, paramName);
         if (formats.Length == 0)
         {
             throw new ArgumentException("Formats cannot be empty.", paramName);

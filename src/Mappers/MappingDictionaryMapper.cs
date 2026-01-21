@@ -23,7 +23,7 @@ public class MappingDictionaryMapper<T> : ICellMapper
     /// <param name="behavior">Whether or not a failure to match is an error.</param>
     public MappingDictionaryMapper(IDictionary<string, T> mappingDictionary, IEqualityComparer<string>? comparer, MappingDictionaryMapperBehavior behavior)
     {
-        ArgumentNullException.ThrowIfNull(mappingDictionary);
+        ThrowHelpers.ThrowIfNull(mappingDictionary, nameof(mappingDictionary));
         EnumUtilities.ValidateIsDefined(behavior);
 
         MappingDictionary = new Dictionary<string, T>(mappingDictionary, comparer);

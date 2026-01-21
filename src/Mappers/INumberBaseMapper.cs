@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿#if NET7_0_OR_GREATER
+using System.Globalization;
 using System.Numerics;
 
 namespace ExcelMapper.Mappers;
@@ -59,3 +60,4 @@ public class INumberBaseMapper<T> : INumberStyleCellMapper where T : INumberBase
         }
     }
 }
+#endif

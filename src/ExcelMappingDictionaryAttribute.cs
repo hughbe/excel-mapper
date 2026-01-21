@@ -25,7 +25,7 @@ public sealed class ExcelMappingDictionaryAttribute : Attribute
     /// </summary>
     public ExcelMappingDictionaryAttribute(string value, object? mappedValue)
     {
-        ArgumentException.ThrowIfNullOrEmpty(value);
+        ThrowHelpers.ThrowIfNullOrEmpty(value, nameof(value));
         Value = value;
         MappedValue = mappedValue;
     }

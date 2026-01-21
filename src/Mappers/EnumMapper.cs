@@ -32,7 +32,7 @@ public class EnumMapper : ICellMapper
     /// <param name="ignoreCase">A flag indicating whether enum parsing is case insensitive.</param>
     public EnumMapper(Type enumType, bool ignoreCase)
     {
-        ArgumentNullException.ThrowIfNull(enumType);
+        ThrowHelpers.ThrowIfNull(enumType, nameof(enumType));
 
         if (!enumType.GetTypeInfo().IsEnum)
         {

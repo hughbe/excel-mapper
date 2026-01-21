@@ -25,7 +25,7 @@ public class ExcelClassMap : IMap
     /// <param name="emptyValueStrategy">The default strategy to use when the value of a cell is empty.</param>
     public ExcelClassMap(Type type, FallbackStrategy emptyValueStrategy)
     {
-        ArgumentNullException.ThrowIfNull(type);
+        ThrowHelpers.ThrowIfNull(type, nameof(type));
         EnumUtilities.ValidateIsDefined(emptyValueStrategy);
 
         Type = type;

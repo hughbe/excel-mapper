@@ -54,7 +54,7 @@ public sealed class ColumnNamesReaderFactory : ICellReaderFactory, ICellsReaderF
     /// <inheritdoc/>
     public ICellsReader? GetCellsReader(ExcelSheet sheet)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
+        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
         if (sheet.Heading == null)
         {
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");

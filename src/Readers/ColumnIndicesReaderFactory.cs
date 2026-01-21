@@ -24,7 +24,7 @@ public sealed class ColumnIndicesReaderFactory : ICellReaderFactory, ICellsReade
     /// <inheritdoc/>
     public ICellReader? GetCellReader(ExcelSheet sheet)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
+        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
         foreach (var columnIndex in ColumnIndices)
         {
@@ -40,7 +40,7 @@ public sealed class ColumnIndicesReaderFactory : ICellReaderFactory, ICellsReade
     /// <inheritdoc/>
     public ICellsReader? GetCellsReader(ExcelSheet sheet)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
+        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
         foreach (var columnIndex in ColumnIndices)
         {
             if (columnIndex >= sheet.NumberOfColumns)

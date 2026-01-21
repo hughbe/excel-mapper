@@ -9,7 +9,7 @@ public sealed class ExcelMapperAttribute : Attribute
     /// <summary>
     /// Gets the type of the <see cref="ICellMapper"/>.
     /// </summary>
-    public Type Type { get; init; }
+    public Type Type { get; }
 
     /// <summary>
     /// The constructor arguments for the <see cref="ICellMapper"/>.
@@ -22,7 +22,7 @@ public sealed class ExcelMapperAttribute : Attribute
     /// <param name="mapperType">The type of the <see cref="ICellMapper"/>.</param>
     public ExcelMapperAttribute(Type mapperType)
     {
-        ArgumentNullException.ThrowIfNull(mapperType);
+        ThrowHelpers.ThrowIfNull(mapperType, nameof(mapperType));
         if (mapperType.IsAbstract || mapperType.IsInterface)
         {
             throw new ArgumentException("Mapper type cannot be abstract or an interface", nameof(mapperType));

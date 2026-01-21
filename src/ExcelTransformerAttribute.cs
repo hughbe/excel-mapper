@@ -9,7 +9,7 @@ public sealed class ExcelTransformerAttribute : Attribute
     /// <summary>
     /// Gets the type of the <see cref="ICellTransformer"/>.
     /// </summary>
-    public Type Type { get; init; }
+    public Type Type { get; }
 
     /// <summary>
     /// The constructor arguments for the <see cref="ICellTransformer"/>.
@@ -22,7 +22,7 @@ public sealed class ExcelTransformerAttribute : Attribute
     /// <param name="transformerType">The type of the <see cref="ICellTransformer"/>.</param>
     public ExcelTransformerAttribute(Type transformerType)
     {
-        ArgumentNullException.ThrowIfNull(transformerType);
+        ThrowHelpers.ThrowIfNull(transformerType, nameof(transformerType));
         if (transformerType.IsAbstract || transformerType.IsInterface)
         {
             throw new ArgumentException("Transformer type cannot be abstract or an interface", nameof(transformerType));

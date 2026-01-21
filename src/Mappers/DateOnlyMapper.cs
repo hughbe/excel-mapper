@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿#if NET6_0_OR_GREATER
+using System.Globalization;
 
 namespace ExcelMapper.Mappers;
 
@@ -55,3 +56,4 @@ public class DateOnlyMapper : ICellMapper, IFormatsCellMapper
         }
     }
 }
+#endif

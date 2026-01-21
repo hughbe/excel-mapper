@@ -14,7 +14,7 @@ public class FixedValueFallbackFactory : IFallbackItem
 
     public FixedValueFallbackFactory(Func<object?> factory)
     {
-        ArgumentNullException.ThrowIfNull(factory);
+        ThrowHelpers.ThrowIfNull(factory, nameof(factory));
         Factory = factory;
     }
 

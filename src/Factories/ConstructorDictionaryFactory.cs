@@ -25,7 +25,7 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
     /// <exception cref="ArgumentException">Thrown when the dictionary type is invalid or unsupported.</exception>
     public ConstructorDictionaryFactory(Type dictionaryType)
     {
-        ArgumentNullException.ThrowIfNull(dictionaryType);
+        ThrowHelpers.ThrowIfNull(dictionaryType, nameof(dictionaryType));
         if (dictionaryType.IsInterface)
         {
             throw new ArgumentException("Interface dictionary types cannot be created. Use IDictionaryTImplementingFactory instead.", nameof(dictionaryType));
@@ -43,7 +43,7 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ThrowHelpers.ThrowIfNegative(count, nameof(count));
 
         if (_items is not null)
         {

@@ -18,7 +18,7 @@ public class RegexColumnMatcher : IExcelColumnMatcher
     /// <param name="regex">The regular expression used to match column names.</param>
     public RegexColumnMatcher(Regex regex)
     {
-        ArgumentNullException.ThrowIfNull(regex);
+        ThrowHelpers.ThrowIfNull(regex, nameof(regex));
 
         Regex = regex;
     }
@@ -26,7 +26,7 @@ public class RegexColumnMatcher : IExcelColumnMatcher
     /// <inheritdoc/>
     public bool ColumnMatches(ExcelSheet sheet, int columnIndex)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
+        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
         if (sheet.Heading == null)
         {
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");

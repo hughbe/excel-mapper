@@ -18,7 +18,7 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>
     /// <param name="readerFactory">The factory used to create cell readers for the mapped column.</param>
     public OneToOneMap(ICellReaderFactory readerFactory)
     {
-        ArgumentNullException.ThrowIfNull(readerFactory);
+        ThrowHelpers.ThrowIfNull(readerFactory, nameof(readerFactory));
         _readerFactory = readerFactory;
     }
 
@@ -30,7 +30,7 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>
         get => _readerFactory;
         set
         {
-            ArgumentNullException.ThrowIfNull(value);
+            ThrowHelpers.ThrowIfNull(value, nameof(value));
             _readerFactory = value;
         }
     }

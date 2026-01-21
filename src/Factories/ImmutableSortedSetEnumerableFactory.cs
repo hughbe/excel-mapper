@@ -14,7 +14,7 @@ public class ImmutableSortedSetEnumerableFactory<T> : IEnumerableFactory<T>
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ThrowHelpers.ThrowIfNegative(count, nameof(count));
 
         if (_builder is not null)
         {

@@ -20,8 +20,8 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
     /// <param name="valuePipeline">The map that maps the value of a single cell to an object of the element type of the property or field.</param>
     public ManyToOneDictionaryMap(ICellsReaderFactory readerFactory, IDictionaryFactory<TKey, TValue> dictionaryFactory)
     {
-        ArgumentNullException.ThrowIfNull(readerFactory);
-        ArgumentNullException.ThrowIfNull(dictionaryFactory);
+        ThrowHelpers.ThrowIfNull(readerFactory, nameof(readerFactory));
+        ThrowHelpers.ThrowIfNull(dictionaryFactory, nameof(dictionaryFactory));
 
         _readerFactory = readerFactory;
         DictionaryFactory = dictionaryFactory;
@@ -47,7 +47,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
         get => _readerFactory;
         set
         {
-            ArgumentNullException.ThrowIfNull(value);
+            ThrowHelpers.ThrowIfNull(value, nameof(value));
             _readerFactory = value;
         }
     }
@@ -62,7 +62,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
     /// <inheritdoc/>
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
+        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
         if (sheet.Heading == null)
         {
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
@@ -122,10 +122,10 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
     /// <returns>The map that invoked this method.</returns>
     public ManyToOneDictionaryMap<TKey, TValue> WithValueMap(Func<IValuePipeline<TValue>, IValuePipeline<TValue>> valueMap)
     {
-        ArgumentNullException.ThrowIfNull(valueMap);
+        ThrowHelpers.ThrowIfNull(valueMap, nameof(valueMap));
 
         var result = valueMap((IValuePipeline<TValue>)Pipeline);
-        ArgumentNullException.ThrowIfNull(result, nameof(valueMap));
+        ThrowHelpers.ThrowIfNull(result, nameof(valueMap));
         Pipeline = result;
 
         return this;

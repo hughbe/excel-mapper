@@ -32,10 +32,10 @@ public static class ExcelImporterUtils
     /// <exception cref="ArgumentException">Thrown when <paramref name="namespaceString"/> is empty or no class maps are found in the namespace.</exception>
     public static IEnumerable<ExcelClassMap> RegisterClassMapsInNamespace(this ExcelImporter importer, Assembly assembly, string namespaceString)
     {
-        ArgumentNullException.ThrowIfNull(assembly);
+        ThrowHelpers.ThrowIfNull(assembly, nameof(assembly));
 
-        ArgumentNullException.ThrowIfNull(namespaceString);
-        ArgumentException.ThrowIfNullOrEmpty(namespaceString);
+        ThrowHelpers.ThrowIfNull(namespaceString, nameof(namespaceString));
+        ThrowHelpers.ThrowIfNullOrEmpty(namespaceString, nameof(namespaceString));
 
         var classMapTypes = assembly
             .GetTypes()

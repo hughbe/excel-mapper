@@ -13,7 +13,7 @@ public class ListEnumerableFactory<T> : IEnumerableFactory<T>
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ThrowHelpers.ThrowIfNegative(count, nameof(count));
 
         if (_items is not null)
         {
@@ -33,7 +33,7 @@ public class ListEnumerableFactory<T> : IEnumerableFactory<T>
     /// <inheritdoc/>
     public void Set(int index, T? item)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(index, nameof(index));
+        ThrowHelpers.ThrowIfNegative(index, nameof(index));
         EnsureMapping();
 
         // Grow the list if necessary.

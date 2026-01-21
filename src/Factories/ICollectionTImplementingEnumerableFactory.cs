@@ -21,7 +21,7 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
     /// <exception cref="ArgumentException">Thrown when the collection type is invalid or unsupported.</exception>
     public ICollectionTImplementingEnumerableFactory(Type collectionType)
     {
-        ArgumentNullException.ThrowIfNull(collectionType);
+        ThrowHelpers.ThrowIfNull(collectionType, nameof(collectionType));
         if (collectionType.IsInterface)
         {
             throw new ArgumentException($"Interface collection types cannot be created. Use {nameof(ListEnumerableFactory<T>)} instead.", nameof(collectionType));
@@ -49,7 +49,7 @@ public class ICollectionTImplementingEnumerableFactory<T> : IEnumerableFactory<T
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ThrowHelpers.ThrowIfNegative(count, nameof(count));
 
         if (_items is not null)
         {

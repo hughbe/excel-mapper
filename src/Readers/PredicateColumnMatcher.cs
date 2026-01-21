@@ -16,14 +16,14 @@ public class PredicateColumnMatcher : IExcelColumnMatcher
     /// <param name="predicate">The predicate used to match column names.</param>
     public PredicateColumnMatcher(Func<string, bool> predicate)
     {
-        ArgumentNullException.ThrowIfNull(predicate);
+        ThrowHelpers.ThrowIfNull(predicate, nameof(predicate));
         Predicate = predicate;
     }
 
     /// <inheritdoc/>
     public bool ColumnMatches(ExcelSheet sheet, int columnIndex)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
+        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
         if (sheet.Heading == null)
         {
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");

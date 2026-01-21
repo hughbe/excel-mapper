@@ -25,7 +25,7 @@ public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesPr
         get => _readerFactory;
         set
         {
-            ArgumentNullException.ThrowIfNull(value);
+            ThrowHelpers.ThrowIfNull(value, nameof(value));
             _readerFactory = value;
         }
     }
@@ -37,7 +37,7 @@ public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesPr
     /// <param name="readerFactory">The ICellReaderFactory that reads the string value of the cell before it is split.</param>
     public SplitReaderFactory(ICellReaderFactory readerFactory)
     {
-        ArgumentNullException.ThrowIfNull(readerFactory);
+        ThrowHelpers.ThrowIfNull(readerFactory, nameof(readerFactory));
         _readerFactory = readerFactory;
     }
 
@@ -82,7 +82,7 @@ public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesPr
         if (_readerFactory is IColumnNameProviderCellReaderFactory nameProvider)
         {
             var columnName = nameProvider.GetColumnName(sheet);
-            if (!string.IsNullOrEmpty(columnName))
+            if (columnName != null && columnName != string.Empty)
             {
                 return [columnName];
             }

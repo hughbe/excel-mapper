@@ -15,7 +15,7 @@ public class ImmutableSortedDictionaryFactory<TKey, TValue> : IDictionaryFactory
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ThrowHelpers.ThrowIfNegative(count, nameof(count));
 
         if (_builder is not null)
         {
@@ -28,7 +28,7 @@ public class ImmutableSortedDictionaryFactory<TKey, TValue> : IDictionaryFactory
     /// <inheritdoc/>
     public void Add(TKey key, TValue? value)
     {
-        ArgumentNullException.ThrowIfNull(key);
+        ThrowHelpers.ThrowIfNull(key, nameof(key));
         EnsureMapping();
         _builder.Add(key, value);
     }

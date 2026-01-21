@@ -61,8 +61,8 @@ public class ExcelHeading
     /// <returns>The name of the column at the given zero-based index.</returns>
     public string GetColumnName(int columnIndex)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(columnIndex);
-        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(columnIndex, ColumnNames.Count);
+        ThrowHelpers.ThrowIfNegative(columnIndex, nameof(columnIndex));
+        ThrowHelpers.ThrowIfGreaterThanOrEqual(columnIndex, ColumnNames.Count, nameof(columnIndex));
         return ColumnNames[columnIndex];
     }
 
@@ -74,7 +74,7 @@ public class ExcelHeading
     /// <returns>The zero-based index of the column with the given name.</returns>
     public int GetColumnIndex(string columnName)
     {
-        ArgumentNullException.ThrowIfNull(columnName);
+        ThrowHelpers.ThrowIfNull(columnName, nameof(columnName));
 
         if (!NameMapping.TryGetValue(columnName, out int index))
         {
@@ -93,7 +93,7 @@ public class ExcelHeading
     /// <returns>Whether or not the column exists.</returns>
     public bool TryGetColumnIndex(string columnName, out int index)
     {
-        ArgumentNullException.ThrowIfNull(columnName);
+        ThrowHelpers.ThrowIfNull(columnName, nameof(columnName));
         return NameMapping.TryGetValue(columnName, out index);
     }
 
@@ -105,7 +105,7 @@ public class ExcelHeading
     /// <returns>The zero-based index of the column with the given name.</returns>
     public int GetFirstColumnMatchingIndex(Func<string, bool> predicate)
     {
-        ArgumentNullException.ThrowIfNull(predicate);
+        ThrowHelpers.ThrowIfNull(predicate, nameof(predicate));
         var key = NameMapping.Keys.FirstOrDefault(predicate);
 
         if (key == null)
@@ -125,7 +125,7 @@ public class ExcelHeading
     /// <returns>Whether or not the column exists.</returns>
     public bool TryGetFirstColumnMatchingIndex(Func<string, bool> predicate, out int index)
     {
-        ArgumentNullException.ThrowIfNull(predicate);
+        ThrowHelpers.ThrowIfNull(predicate, nameof(predicate));
 
         string? key = NameMapping.Keys.FirstOrDefault(predicate);
         if (key == null)

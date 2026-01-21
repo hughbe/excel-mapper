@@ -1,4 +1,5 @@
-﻿namespace ExcelMapper.Mappers;
+﻿#if NET7_0_OR_GREATER
+namespace ExcelMapper.Mappers;
 
 /// <summary>
 /// A mapper that tries to map the value of a cell to an IParsable object using IParsable.Parse.
@@ -25,3 +26,4 @@ public class ParsableMapper<TParse> : ICellMapper where TParse : IParsable<TPars
         }
     }
 }
+#endif

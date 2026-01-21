@@ -33,17 +33,17 @@ public struct ExcelRange
     /// <param name="columnEnd">The inclusive end index of the column range.</param>
     public ExcelRange(int rowStart, int? rowEnd, int columnStart, int? columnEnd)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(rowStart);
+        ThrowHelpers.ThrowIfNegative(rowStart, nameof(rowStart));
         if (rowEnd.HasValue)
         {
-            ArgumentOutOfRangeException.ThrowIfNegative(rowEnd.Value, nameof(rowEnd));
-            ArgumentOutOfRangeException.ThrowIfGreaterThan(rowStart, rowEnd.Value, nameof(rowStart));
+            ThrowHelpers.ThrowIfNegative(rowEnd.Value, nameof(rowEnd));
+            ThrowHelpers.ThrowIfGreaterThan(rowStart, rowEnd.Value, nameof(rowStart));
         }
-        ArgumentOutOfRangeException.ThrowIfNegative(columnStart);
+        ThrowHelpers.ThrowIfNegative(columnStart, nameof(columnStart));
         if (columnEnd.HasValue)
         {
-            ArgumentOutOfRangeException.ThrowIfNegative(columnEnd.Value, nameof(columnEnd));
-            ArgumentOutOfRangeException.ThrowIfGreaterThan(columnStart, columnEnd.Value, nameof(columnStart));
+            ThrowHelpers.ThrowIfNegative(columnEnd.Value, nameof(columnEnd));
+            ThrowHelpers.ThrowIfGreaterThan(columnStart, columnEnd.Value, nameof(columnStart));
         }
 
         Rows = rowEnd.HasValue ? rowStart..(rowEnd.Value + 1) : rowStart..;
@@ -74,7 +74,7 @@ public struct ExcelRange
     /// <exception cref="ArgumentException">Thrown when <paramref name="address"/> is empty or has an invalid format.</exception>
     public static ExcelRange Parse(string address)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(address);
+        ThrowHelpers.ThrowIfNullOrWhiteSpace(address);
 
         var span = address.AsSpan().Trim();
         int colonIndex = span.IndexOf(':');
@@ -111,7 +111,7 @@ public struct ExcelRange
                 
                 if (startColumn > endColumn)
                 {
-                    throw new ArgumentException($"Invalid Excel address: start column '{start}' is after end column '{end}'.", nameof(address));
+                    throw new ArgumentException($"Invalid Excel address: start column '{start.ToString()}' is after end column '{end.ToString()}'." , nameof(address));
                 }
 
                 return new ExcelRange(
@@ -127,7 +127,7 @@ public struct ExcelRange
                 
                 if (startRow > endRow)
                 {
-                    throw new ArgumentException($"Invalid Excel address: start row '{start}' is after end row '{end}'.", nameof(address));
+                    throw new ArgumentException($"Invalid Excel address: start row '{start.ToString()}' is after end row '{end.ToString()}'.", nameof(address));
                 }
 
                 return new ExcelRange(
@@ -221,7 +221,7 @@ public struct ExcelRange
         if (!int.TryParse(rowString.ToString(), out int rowNumber) || rowNumber < 1)
 #endif
         {
-            throw new ArgumentException($"Invalid row number: '{rowString}'. Row numbers must be positive integers.", "address");
+            throw new ArgumentException($"Invalid row number: '{rowString.ToString()}'. Row numbers must be positive integers.", "address");
         }
 
         // Convert from 1-based Excel row to 0-based index
@@ -241,7 +241,7 @@ public struct ExcelRange
             char upper = char.ToUpperInvariant(c);
             if (!char.IsLetter(upper))
             {
-                throw new ArgumentException($"Invalid column letters: '{columnString}'. Column must contain only letters.", "address");
+                throw new ArgumentException($"Invalid column letters: '{columnString.ToString()}'. Column must contain only letters.", "address");
             }
             column = column * 26 + (upper - 'A' + 1);
         }
@@ -270,7 +270,7 @@ public struct ExcelRange
 
         if (firstDigitIndex == -1 || firstDigitIndex == 0)
         {
-            throw new ArgumentException($"Invalid cell reference: '{cellReference}'. Expected format like 'A1'.", "address");
+            throw new ArgumentException($"Invalid cell reference: '{cellReference.ToString()}'. Expected format like 'A1'.", "address");
         }
 
         ReadOnlySpan<char> columnPart = cellReference[..firstDigitIndex];

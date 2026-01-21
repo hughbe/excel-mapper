@@ -24,7 +24,7 @@ public class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFacto
     /// <exception cref="ArgumentException">Thrown when the collection type is invalid or unsupported.</exception>
     public ReadOnlyObservableCollectionEnumerableFactory(Type collectionType)
     {
-        ArgumentNullException.ThrowIfNull(collectionType);
+        ThrowHelpers.ThrowIfNull(collectionType, nameof(collectionType));
         if (collectionType.IsAbstract)
         {
             throw new ArgumentException("Abstract collection types cannot be created.", nameof(collectionType));
@@ -38,7 +38,7 @@ public class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFacto
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ThrowHelpers.ThrowIfNegative(count, nameof(count));
 
         if (_items is not null)
         {
@@ -58,7 +58,7 @@ public class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFacto
     /// <inheritdoc/>
     public void Set(int index, T? item)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(index);
+        ThrowHelpers.ThrowIfNegative(index, nameof(index));
         EnsureMapping();
 
         // Grow the list if necessary.

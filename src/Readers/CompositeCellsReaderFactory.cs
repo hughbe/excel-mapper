@@ -18,7 +18,7 @@ public class CompositeCellsReaderFactory : ICellReaderFactory, ICellsReaderFacto
     /// <exception cref="ArgumentException">Thrown when the factories array is empty or contains null values.</exception>
     public CompositeCellsReaderFactory(params IReadOnlyList<ICellReaderFactory> factories)
     {
-        ArgumentNullException.ThrowIfNull(factories, nameof(factories));
+        ThrowHelpers.ThrowIfNull(factories, nameof(factories));
         if (factories.Count == 0)
         {
             throw new ArgumentException("At least one factory must be provided.", nameof(factories));
@@ -78,7 +78,7 @@ public class CompositeCellsReaderFactory : ICellReaderFactory, ICellsReaderFacto
             if (factory is IColumnNameProviderCellReaderFactory nameProviderFactory)
             {
                 var columnName = nameProviderFactory.GetColumnName(sheet);
-                if (!string.IsNullOrEmpty(columnName))
+                if (columnName != null && columnName != string.Empty)
                 {
                     return columnName;
                 }
@@ -115,7 +115,7 @@ public class CompositeCellsReaderFactory : ICellReaderFactory, ICellsReaderFacto
             if (factory is IColumnNameProviderCellReaderFactory namesProviderFactory)
             {
                 var columnName = namesProviderFactory.GetColumnName(sheet);
-                if (!string.IsNullOrEmpty(columnName))
+                if (columnName != null && columnName != string.Empty)
                 {
                     names.Add(columnName);
                 }

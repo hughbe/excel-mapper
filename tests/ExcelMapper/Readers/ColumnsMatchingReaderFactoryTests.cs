@@ -283,7 +283,11 @@ public class ColumnsMatchingReaderFactoryTests
 
         public CustomColumnMatcher(Func<int, bool> match)
         {
-            ArgumentNullException.ThrowIfNull(match);
+            if (match is null)
+            {
+                throw new ArgumentNullException(nameof(match));
+            }
+
             _match = match;
         }
 

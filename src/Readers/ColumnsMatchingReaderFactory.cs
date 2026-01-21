@@ -16,14 +16,14 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
     /// <param name="matcher">The matcher used to identify which columns to read.</param>
     public ColumnsMatchingReaderFactory(IExcelColumnMatcher matcher)
     {
-        ArgumentNullException.ThrowIfNull(matcher);
+        ThrowHelpers.ThrowIfNull(matcher, nameof(matcher));
         Matcher = matcher;
     }
 
     /// <inheritdoc/>
     public ICellReader? GetCellReader(ExcelSheet sheet)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
+        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
         for (var columnIndex = 0; columnIndex < sheet.NumberOfColumns; columnIndex++)
         {
@@ -39,7 +39,7 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
     /// <inheritdoc/>
     public ICellsReader? GetCellsReader(ExcelSheet sheet)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
+        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
         var indices = new List<int>();
         for (var columnIndex = 0; columnIndex < sheet.NumberOfColumns; columnIndex++)
@@ -61,7 +61,7 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
     /// <inheritdoc/>
     public IReadOnlyList<string>? GetColumnNames(ExcelSheet sheet)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
+        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
         if (sheet.Heading == null)
         {
             return null;
@@ -82,7 +82,7 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
     /// <inheritdoc/>
     public IReadOnlyList<int> GetColumnIndices(ExcelSheet sheet)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
+        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
         var indices = new List<int>();
         for (var columnIndex = 0; columnIndex < sheet.NumberOfColumns; columnIndex++)

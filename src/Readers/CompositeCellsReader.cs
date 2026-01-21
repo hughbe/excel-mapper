@@ -25,7 +25,7 @@ public class CompositeCellsReader : ICellsReader
     /// <exception cref="ArgumentException">Thrown when the readers list is empty or contains null values.</exception>
     public CompositeCellsReader(params IReadOnlyList<ICellReader> readers)
     {
-        ArgumentNullException.ThrowIfNull(readers);
+        ThrowHelpers.ThrowIfNull(readers, nameof(readers));
         if (readers.Count == 0)
         {
             throw new ArgumentException("At least one reader must be provided.", nameof(readers));

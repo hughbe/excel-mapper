@@ -17,7 +17,7 @@ public class ChangeTypeMapper : ICellMapper
     /// <param name="type">The type of the IConvertible object to map the value of a cell to.</param>
     public ChangeTypeMapper(Type type)
     {
-        ArgumentNullException.ThrowIfNull(type);
+        ThrowHelpers.ThrowIfNull(type, nameof(type));
 
         if (!type.ImplementsInterface(typeof(IConvertible)))
         {

@@ -16,14 +16,14 @@ public sealed class ColumnIndexReaderFactory : ICellReaderFactory, IColumnIndexP
     /// <param name="columnIndex">The zero-based index of the column to read.</param>
     public ColumnIndexReaderFactory(int columnIndex)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(columnIndex);
+        ThrowHelpers.ThrowIfNegative(columnIndex, nameof(columnIndex));
         ColumnIndex = columnIndex;
     }
 
     /// <inheritdoc/>
     public ICellReader? GetCellReader(ExcelSheet sheet)
     {
-        ArgumentNullException.ThrowIfNull(sheet);
+        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
         if (ColumnIndex >= sheet.NumberOfColumns)
         {
             return null;

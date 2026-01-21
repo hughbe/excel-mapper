@@ -42,14 +42,31 @@ public class CharSplitReaderFactory : SplitReaderFactory
             return -1;
         }
 
+#if NET8_0_OR_GREATER
         return value.AsSpan().Count(Separators[0]) + 1;
+#else
+        int count = 0;
+        ReadOnlySpan<char> span = value.AsSpan();
+        int index = 0;
+        while ((index = span.IndexOf(Separators[0])) >= 0)
+        {
+            count++;
+            span = span.Slice(index + 1);
+        }
+
+        return count + 1;
+#endif
     }
 
     /// <inheritdoc/>
     protected override (int Advance, int ValueStart, int ValueLength) GetNextValue(ReadOnlySpan<char> remaining)
     {
         var separator = Separators[0];
+#if NET5_0_OR_GREATER
         var trimEntries = Options.HasFlag(StringSplitOptions.TrimEntries);
+#else
+        bool trimEntries = Options.HasFlag((StringSplitOptions)2);
+#endif
 
         while (true)
         {

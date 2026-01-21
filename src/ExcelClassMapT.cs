@@ -156,6 +156,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ISet<TElement>>> expression)
         => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
 
+#if NET5_0_OR_GREATER
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map Collection.
@@ -165,6 +166,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map for the given property or field.</returns>
     public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlySet<TElement>>> expression)
         => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+#endif
 
 #if NET9_0_OR_GREATER
     /// <summary>
@@ -333,7 +335,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map that invoked this method.</returns>
     public ExcelClassMap<T> WithClassMap(Action<ExcelClassMap<T>> classMapFactory)
     {
-        ArgumentNullException.ThrowIfNull(classMapFactory);
+        ThrowHelpers.ThrowIfNull(classMapFactory, nameof(classMapFactory));
 
         classMapFactory(this);
         return this;
@@ -347,7 +349,7 @@ public class ExcelClassMap<T> : ExcelClassMap
     /// <returns>The map that invoked this method.</returns>
     public ExcelClassMap<T> WithClassMap(ExcelClassMap<T> classMap)
     {
-        ArgumentNullException.ThrowIfNull(classMap);
+        ThrowHelpers.ThrowIfNull(classMap, nameof(classMap));
         if (classMap == this)
         {
             return this;

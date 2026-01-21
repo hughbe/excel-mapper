@@ -15,7 +15,7 @@ public class ArrayEnumerableFactory<T> : IEnumerableFactory<T>
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ThrowHelpers.ThrowIfNegative(count, nameof(count));
 
         if (_items is not null)
         {
@@ -36,9 +36,9 @@ public class ArrayEnumerableFactory<T> : IEnumerableFactory<T>
     /// <inheritdoc/>
     public void Set(int index, T? item)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(index);
+        ThrowHelpers.ThrowIfNegative(index, nameof(index));
         EnsureMapping();
-        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(index, _items.Length);
+        ThrowHelpers.ThrowIfGreaterThanOrEqual(index, _items.Length, nameof(index));
 
         _items[index] = item;
     }

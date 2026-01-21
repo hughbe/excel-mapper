@@ -13,14 +13,14 @@ public class MultidimensionalArrayFactory<T> : IMultidimensionalArrayFactory<T>
     /// <inheritdoc/>
     public void Begin(int[] lengths)
     {
-        ArgumentNullException.ThrowIfNull(lengths);
+        ThrowHelpers.ThrowIfNull(lengths, nameof(lengths));
         if (lengths.Length == 0)
         {
             throw new ArgumentException("Lengths cannot be empty.", nameof(lengths));
         }
         foreach (var length in lengths)
         {
-            ArgumentOutOfRangeException.ThrowIfNegative(length, nameof(lengths));
+            ThrowHelpers.ThrowIfNegative(length, nameof(lengths));
         }
 
         if (_items is not null)
@@ -34,14 +34,14 @@ public class MultidimensionalArrayFactory<T> : IMultidimensionalArrayFactory<T>
     /// <inheritdoc/>
     public void Set(int[] indices, T? item)
     {
-        ArgumentNullException.ThrowIfNull(indices);
+        ThrowHelpers.ThrowIfNull(indices, nameof(indices));
         if (indices.Length == 0)
         {
             throw new ArgumentException("Indices cannot be empty.", nameof(indices));
         }
         foreach (var index in indices)
         {
-            ArgumentOutOfRangeException.ThrowIfNegative(index, nameof(indices));
+            ThrowHelpers.ThrowIfNegative(index, nameof(indices));
         }
 
         EnsureMapping();

@@ -3,6 +3,9 @@ using System.Collections.Frozen;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+#if NET7_0_OR_GREATER
+using System.Diagnostics;
+#endif
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
@@ -126,8 +129,10 @@ public static class AutoMapper
         typeof(DateTime),
         typeof(DateTimeOffset),
         typeof(TimeSpan),
+#if NET6_0_OR_GREATER
         typeof(DateOnly),
         typeof(TimeOnly),
+#endif
         typeof(Uri)
     }.ToFrozenSet();
 
@@ -150,8 +155,10 @@ public static class AutoMapper
                 Type t when t == typeof(DateTime) => new DateTimeMapper(),
                 Type t when t == typeof(DateTimeOffset) => new DateTimeOffsetMapper(),
                 Type t when t == typeof(TimeSpan) => new TimeSpanMapper(),
+#if NET6_0_OR_GREATER
                 Type t when t == typeof(DateOnly) => new DateOnlyMapper(),
                 Type t when t == typeof(TimeOnly) => new TimeOnlyMapper(),
+#endif
                 Type t when t == typeof(Uri) => new UriMapper(),
                 _ => throw new NotImplementedException("Unexpected mutable mapper type."),
             });
@@ -185,23 +192,27 @@ public static class AutoMapper
         else if (CanConstructObject(type))
         {
             // Check for types implementing INumberBase<T>.
+#if NET7_0_OR_GREATER
             if (type.ImplementsGenericInterface(typeof(INumberBase<>), out var numberBaseInterfaceType))
             {
                 mappers.Add((ICellMapper)Activator.CreateInstance(typeof(INumberBaseMapper<>).MakeGenericType(numberBaseInterfaceType))!);
                 return true;
             }
+#endif
             // Check for types implementing IConvertible.
-            else if (type.ImplementsInterface(typeof(IConvertible)))
+            if (type.ImplementsInterface(typeof(IConvertible)))
             {
                 mappers.Add(new ChangeTypeMapper(type));
                 return true;
             }
             // Check for types implementing IParsable<T>.
+#if NET7_0_OR_GREATER
             else if (type.ImplementsGenericInterface(typeof(IParsable<>), out var parsableInterfaceType))
             {
                 mappers.Add((ICellMapper)Activator.CreateInstance(typeof(ParsableMapper<>).MakeGenericType(parsableInterfaceType))!);
                 return true;
             }
+#endif
         }
 
         return false;

@@ -29,7 +29,7 @@ public class ExcelColumnMatchingAttribute : Attribute
     /// <param name="matcherType">The type of the <see cref="IExcelColumnMatcher"/>.</param>
     public ExcelColumnMatchingAttribute(Type matcherType)
     {
-        ArgumentNullException.ThrowIfNull(matcherType);
+        ThrowHelpers.ThrowIfNull(matcherType, nameof(matcherType));
         if (matcherType.IsAbstract || matcherType.IsInterface)
         {
             throw new ArgumentException("Matcher type cannot be abstract or an interface", nameof(matcherType));
@@ -49,8 +49,8 @@ public class ExcelColumnMatchingAttribute : Attribute
     /// <param name="options">A bitwise combination of the enumeration values that modify the regular expression.</param>
     public ExcelColumnMatchingAttribute(string pattern, RegexOptions options = RegexOptions.None)
     {
-        ArgumentNullException.ThrowIfNull(pattern);
-        ArgumentException.ThrowIfNullOrEmpty(pattern);
+        ThrowHelpers.ThrowIfNull(pattern, nameof(pattern));
+        ThrowHelpers.ThrowIfNullOrEmpty(pattern, nameof(pattern));
 
         Type = typeof(RegexColumnMatcher);
         ConstructorArguments = [new Regex(pattern, options)];

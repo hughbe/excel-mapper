@@ -14,7 +14,7 @@ public class DictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> 
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ThrowHelpers.ThrowIfNegative(count, nameof(count));
 
         if (_items is not null)
         {
@@ -27,7 +27,7 @@ public class DictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> 
     /// <inheritdoc/>
     public void Add(TKey key, TValue? value)
     {
-        ArgumentNullException.ThrowIfNull(key);
+        ThrowHelpers.ThrowIfNull(key, nameof(key));
         EnsureMapping();
         _items.Add(key, value);
     }

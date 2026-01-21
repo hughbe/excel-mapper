@@ -22,8 +22,8 @@ public class ExcelPropertyMap
     /// <exception cref="ArgumentException"></exception>
     public ExcelPropertyMap(MemberInfo member, IMap map)
     {
-        ArgumentNullException.ThrowIfNull(member);
-        ArgumentNullException.ThrowIfNull(map);
+        ThrowHelpers.ThrowIfNull(member, nameof(member));
+        ThrowHelpers.ThrowIfNull(map, nameof(map));
 
         Member = member;
         Map = map;

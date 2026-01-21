@@ -90,7 +90,7 @@ public class ExcelSheet
         get => _dataRange.Rows.Start.Value;
         set
         {
-            ArgumentOutOfRangeException.ThrowIfNegative(value);
+            ThrowHelpers.ThrowIfNegative(value, nameof(value));
             if (!HasHeading)
             {
                 throw new InvalidOperationException("The sheet has no heading.");
@@ -216,12 +216,12 @@ public class ExcelSheet
         {
             throw new ExcelMappingException($"The underlying reader is closed.");
         }
-        ArgumentOutOfRangeException.ThrowIfNegative(startIndex);
+        ThrowHelpers.ThrowIfNegative(startIndex, nameof(startIndex));
         if (HasHeading)
         {
-            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(startIndex, HeadingIndex, nameof(startIndex));
+            ThrowHelpers.ThrowIfLessThanOrEqual(startIndex, HeadingIndex, nameof(startIndex));
         }
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ThrowHelpers.ThrowIfNegative(count, nameof(count));
 
         // Read the heading if we haven't already - this validates the sheet structure
         if (HasHeading && Heading == null)

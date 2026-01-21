@@ -102,8 +102,8 @@ public struct ReadCellResult
     /// <param name="preserveFormatting">Whether or not to preserve formatting when reading string values.</param>
     public ReadCellResult(int columnIndex, IExcelDataReader reader, bool preserveFormatting)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(columnIndex);
-        ArgumentNullException.ThrowIfNull(reader);
+        ThrowHelpers.ThrowIfNegative(columnIndex, nameof(columnIndex));
+        ThrowHelpers.ThrowIfNull(reader, nameof(reader));
 
         ColumnIndex = columnIndex;
         Reader = reader;
@@ -117,7 +117,7 @@ public struct ReadCellResult
     /// <param name="stringValue">The string value of the cell.</param>
     public ReadCellResult(int columnIndex, string? stringValue, bool preserveFormatting)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(columnIndex);
+        ThrowHelpers.ThrowIfNegative(columnIndex, nameof(columnIndex));
 
         ColumnIndex = columnIndex;
         _stringValue = stringValue;

@@ -43,19 +43,36 @@ public class StringSplitReaderFactory : SplitReaderFactory
         }
 
         var separator = Separators[0];
+#if NET8_0_OR_GREATER
         return value.AsSpan().Count(separator.AsSpan()) + 1;
+#else
+        int count = 0;
+        ReadOnlySpan<char> span = value.AsSpan();
+        int index = 0;
+        while ((index = span.IndexOf(separator.AsSpan())) >= 0)
+        {
+            count++;
+            span = span.Slice(index + separator.Length);
+        }
+
+        return count + 1;
+#endif
     }
 
     /// <inheritdoc/>
     protected override (int Advance, int ValueStart, int ValueLength) GetNextValue(ReadOnlySpan<char> remaining)
     {
         var separator = Separators[0];
-        bool trimEntries = Options.HasFlag(StringSplitOptions.TrimEntries);
+#if NET5_0_OR_GREATER
+        var trimEntries = Options.HasFlag(StringSplitOptions.TrimEntries);
+#else
+        var trimEntries = Options.HasFlag((StringSplitOptions)2);
+#endif
 
         while (true)
         {
             // Get the index of the next separator.
-            int separatorIndex = remaining.IndexOf(separator);
+            var separatorIndex = remaining.IndexOf(separator.AsSpan());
             
             if (separatorIndex >= 0)
             {

@@ -24,7 +24,7 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
     /// <exception cref="ArgumentException">Thrown when the set type is invalid or unsupported.</exception>
     public ConstructorSetEnumerableFactory(Type setType)
     {
-        ArgumentNullException.ThrowIfNull(setType);
+        ThrowHelpers.ThrowIfNull(setType, nameof(setType));
         if (setType.IsInterface)
         {
             throw new ArgumentException("Interface set types cannot be created. Use HashSetEnumerableFactory instead.", nameof(setType));
@@ -43,14 +43,18 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ThrowHelpers.ThrowIfNegative(count, nameof(count));
 
         if (_items is not null)
         {
             throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         _items = new HashSet<T?>(count);
+#else
+        _items = new HashSet<T?>();
+#endif
     }
 
     /// <inheritdoc/>

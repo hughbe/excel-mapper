@@ -24,7 +24,7 @@ public class ExcelImporterConfiguration
         get => _maxColumnsPerSheet;
         set
         {
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value);
+            ThrowHelpers.ThrowIfNegativeOrZero(value);
             _maxColumnsPerSheet = value;
         }
     }
@@ -52,7 +52,7 @@ public class ExcelImporterConfiguration
     /// <returns>True if a class map exists for the given type, else false.</returns>
     public bool TryGetClassMap(Type classType, [NotNullWhen(true)] out IMap? classMap)
     {
-        ArgumentNullException.ThrowIfNull(classType);
+        ThrowHelpers.ThrowIfNull(classType, nameof(classType));
 
         return ClassMaps.TryGetValue(classType, out classMap);
     }
@@ -82,7 +82,7 @@ public class ExcelImporterConfiguration
     /// <param name="classMapFactory">A factory that configures and returns the class map to use.</param>
     public void RegisterClassMap<T>(Action<ExcelClassMap<T>> classMapFactory)
     {
-        ArgumentNullException.ThrowIfNull(classMapFactory);
+        ThrowHelpers.ThrowIfNull(classMapFactory, nameof(classMapFactory));
 
         var classMapInstance = new ExcelClassMap<T>();
         classMapFactory(classMapInstance);
@@ -95,7 +95,7 @@ public class ExcelImporterConfiguration
     /// <param name="classMap">The class map to use.</param>
     public void RegisterClassMap(ExcelClassMap classMap)
     {
-        ArgumentNullException.ThrowIfNull(classMap);
+        ThrowHelpers.ThrowIfNull(classMap, nameof(classMap));
 
         RegisterClassMap(classMap.Type, classMap);
     }
@@ -146,8 +146,8 @@ public class ExcelImporterConfiguration
     /// <param name="classMap">The class map to use.</param>
     public void RegisterClassMap(Type classType, IMap classMap)
     {
-        ArgumentNullException.ThrowIfNull(classType);
-        ArgumentNullException.ThrowIfNull(classMap);
+        ThrowHelpers.ThrowIfNull(classType, nameof(classType));
+        ThrowHelpers.ThrowIfNull(classMap, nameof(classMap));
 
         ValidateMap(classMap);
         
