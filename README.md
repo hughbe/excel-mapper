@@ -81,6 +81,24 @@ That's it! ExcelMapper automatically maps columns to properties by name.
 dotnet add package ExcelDataReader.Mapping
 ```
 
+### Required on .NET Core / .NET 5+: register code pages
+
+ExcelDataReader reads files using the Windows-1252 encoding, which is not available by default on .NET Core and .NET 5+. Before creating your first `ExcelImporter`, register the code pages encoding provider **once** at application startup:
+
+```csharp
+using System.Text;
+
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+```
+
+Without this, creating an `ExcelImporter` (for any file type, including `.xlsx` and `.csv`) throws:
+
+```
+System.NotSupportedException: No data is available for encoding 1252.
+```
+
+On .NET 8 the provider is built in, so no extra package is needed. This is not required on .NET Framework.
+
 ## Basic Usage
 
 ### Simple Example
@@ -2102,6 +2120,8 @@ foreach (var sheet in importer.ReadSheets())
 - **Any type implementing `IParsable<T>`** (.NET 7+) - automatically supported
 - **Any type implementing `IConvertible`** - automatically supported
 
+> **Note:** Fractional numeric cells mapped to integer types are truncated on .NET 8+ and rounded on older runtimes. See [Fractional Numbers Mapped to Integer Properties](#fractional-numbers-mapped-to-integer-properties).
+
 ### Collection Types
 - `T[]`, `List<T>`, `IList<T>`, `ICollection<T>`, `IEnumerable<T>`
 - `HashSet<T>`, `ISet<T>`, `FrozenSet<T>`, `ImmutableHashSet<T>`
@@ -2224,6 +2244,16 @@ using var importer = new ExcelImporter("employees.csv");
 
 ## Common Issues & Troubleshooting
 
+### "No data is available for encoding 1252"
+
+**Problem**: `NotSupportedException: No data is available for encoding 1252` is thrown when creating an `ExcelImporter`.
+
+**Solution**: Register the code pages encoding provider once at startup. See [Installation](#required-on-net-core--net-5-register-code-pages).
+
+```csharp
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+```
+
 ### Column Not Found
 
 **Problem**: `ExcelMappingException: Could not find column 'ColumnName'`
@@ -2322,6 +2352,29 @@ public class EmployeeMap : ExcelClassMap<Employee>
             });
     }
 }
+```
+
+### Fractional Numbers Mapped to Integer Properties
+
+**Problem**: A numeric cell such as `2.7` is mapped to an `int`, `long`, `byte` etc. property and no error is thrown, but the value is not what you expect.
+
+Excel stores every number as a floating-point value, so a cell holding `2.7` is read as the `double` `2.7`. What happens next depends on which build of ExcelMapper your application uses, which NuGet picks from your target framework:
+
+| Your application targets | ExcelMapper build used | Conversion of a fractional number to an integer type | `2.7` → `int` | `3.5` → `int` |
+|--------------------------|------------------------|------------------------------------------------------|---------------|---------------|
+| .NET 8 or later | `net8.0` | **Truncates** towards zero (`INumberBase<T>.CreateChecked`) | `2` | `3` |
+| .NET 7 or earlier, .NET Framework, .NET Standard | `netstandard2.0` / `netstandard2.1` | **Rounds** to nearest, halves to even (`Convert.ChangeType`) | `3` | `4` |
+
+In both cases the fractional part is discarded without an exception. The conversion only fails if the value is out of range for the type, which is reported as an invalid value (for example `1E+20` mapped to `int`). Cells that contain text rather than a number (for example every cell in a CSV file) are parsed as strings instead, so `"2.7"` **does** fail to map to an `int`.
+
+**Solutions**:
+```csharp
+// Option 1: Map to a floating-point or decimal property and convert in your code
+public decimal Quantity { get; set; }
+
+// Option 2: Take control of the conversion with a custom converter
+Map(e => e.Quantity)
+    .WithConverter(value => (int)Math.Round(double.Parse(value), MidpointRounding.AwayFromZero));
 ```
 
 ### Case Sensitivity Issues
