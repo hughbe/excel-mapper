@@ -1209,4 +1209,52 @@ public class ExcelSheetTests
         var rows = sheet.ReadRows<StringValue>().ToList();
         Assert.NotEmpty(rows);
     }
+
+    [Fact]
+    public void ReadRows_BlankLinesSkippedDataRangeEndsInBlankRows_DoesNotReadPastRange()
+    {
+        using var importer = Helpers.GetImporter("BlankLines.xlsx");
+        importer.Configuration.SkipBlankLines = true;
+        var sheet = importer.ReadSheet();
+        // Rows 0-5: heading, blank, "A", blank, "B", blank. Rows 6+ must not be read.
+        sheet.DataRange = new ExcelRange(0..6, Range.All);
+
+        BlankLinesClass[] rows = [.. sheet.ReadRows<BlankLinesClass>()];
+        Assert.Equal(2, rows.Length);
+        Assert.Equal("A", rows[0].StringValue);
+        Assert.Equal("B", rows[1].StringValue);
+        Assert.True(sheet.CurrentRowIndex <= 5);
+    }
+
+    [Fact]
+    public void ReadRows_IndexCountCalledTwice_RewindsToStartIndex()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+
+        Assert.Equal(new string?[] { "value", "  value  " }, sheet.ReadRows<StringValue>(1, 2).Select(p => p.Value).ToArray());
+        Assert.Equal(new string?[] { "value", "  value  " }, sheet.ReadRows<StringValue>(1, 2).Select(p => p.Value).ToArray());
+        Assert.Equal(new string?[] { "  value  ", null }, sheet.ReadRows<StringValue>(2, 2).Select(p => p.Value).ToArray());
+        Assert.Equal(new string?[] { "value" }, sheet.ReadRows<StringValue>(1, 1).Select(p => p.Value).ToArray());
+    }
+
+    [Fact]
+    public void ReadRows_IndexCountAfterReadingAllRows_RewindsToStartIndex()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+
+        Assert.Equal(4, sheet.ReadRows<StringValue>().Count());
+        Assert.Equal(new string?[] { "value", "  value  " }, sheet.ReadRows<StringValue>(1, 2).Select(p => p.Value).ToArray());
+    }
+
+    [Fact]
+    public void Visibility_Csv_ReturnsVisible()
+    {
+        using var stream = Helpers.GetResource("Primitives.csv");
+        using var importer = new ExcelImporter(stream, ExcelImporterFileType.Csv);
+        var sheet = importer.ReadSheet();
+
+        Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
+    }
 }

@@ -24,7 +24,8 @@ public class ExcelSheet
     {
         Reader = reader;
         Name = reader.Name;
-        if (reader.VisibleState == "visible")
+        // CSV readers have no concept of sheet visibility and return a null state.
+        if (reader.VisibleState is null || reader.VisibleState == "visible")
         {
             Visibility = ExcelSheetVisibility.Visible;
         }
@@ -204,7 +205,8 @@ public class ExcelSheet
     /// <summary>
     /// Maps each row within the range specified to an object using a registered mapping. If no map is registered for this
     /// type then the type will be automapped. This method will read the sheet's heading if the sheet has
-    /// a heading and the heading has not yet been read.
+    /// a heading and the heading has not yet been read. If rows beyond <paramref name="startIndex"/> have
+    /// already been read, the sheet is rewound so the requested range is returned.
     /// </summary>
     /// <param name="startIndex">The zero-based index from the first row of the document (including the header) of the range of rows to map from.</param>
     /// <param name="count">The number of rows to read and map.</param>
@@ -227,6 +229,14 @@ public class ExcelSheet
         if (HasHeading && Heading == null)
         {
             ReadHeading();
+        }
+
+        // The underlying reader is forward-only. If we have already read past the start index,
+        // rewind so that the requested rows are returned rather than whatever follows.
+        if (startIndex - 1 < CurrentRowIndex)
+        {
+            Importer.SheetIndex = -1;
+            CurrentRowIndex = -1;
         }
 
         // Skip to the start index
@@ -330,7 +340,8 @@ public class ExcelSheet
         ReadUpTo(CurrentRowIndex);
 
         // Check if we've reached the end of the data range.
-        if (CurrentRowIndex + 1 >= _dataRange.Rows.End.GetOffset(Reader.RowCount))
+        var endRowIndex = _dataRange.Rows.End.GetOffset(Reader.RowCount);
+        if (CurrentRowIndex + 1 >= endRowIndex)
         {
             return false;
         }
@@ -357,6 +368,12 @@ public class ExcelSheet
 
             while (RowEmpty())
             {
+                // Don't skip past the end of the data range.
+                if (CurrentRowIndex + 1 >= endRowIndex)
+                {
+                    return false;
+                }
+
                 if (!Reader.Read())
                 {
                     return false;
