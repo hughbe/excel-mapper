@@ -615,6 +615,8 @@ public class ReadCellResultTests
 
         public double RowHeight => throw new NotImplementedException();
 
+        public CellRange Dimension => throw new NotImplementedException();
+
         public int Depth => throw new NotImplementedException();
 
         public bool IsClosed => throw new NotImplementedException();
@@ -673,6 +675,8 @@ public class ReadCellResultTests
         public Func<int, string> GetNumberFormatStringAction { get; set; } = null!;
 
         public string GetNumberFormatString(int i) => GetNumberFormatStringAction != null ? GetNumberFormatStringAction(i) : throw new NotImplementedException();
+
+        public string GetNumberFormatString(int i, IFormatProvider provider) => throw new NotImplementedException();
 
         public int GetOrdinal(string name) => throw new NotImplementedException();
 

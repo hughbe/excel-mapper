@@ -204,6 +204,8 @@ public class TimeSpanMapperTests
 
         public double RowHeight => throw new NotImplementedException();
 
+        public CellRange Dimension => throw new NotImplementedException();
+
         public int Depth => throw new NotImplementedException();
 
         public bool IsClosed => throw new NotImplementedException();
@@ -260,6 +262,8 @@ public class TimeSpanMapperTests
         public int GetNumberFormatIndex(int i) => throw new NotImplementedException();
 
         public string GetNumberFormatString(int i) => throw new NotImplementedException();
+
+        public string GetNumberFormatString(int i, IFormatProvider provider) => throw new NotImplementedException();
 
         public int GetOrdinal(string name) => throw new NotImplementedException();
 
