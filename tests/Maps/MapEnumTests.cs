@@ -1,3 +1,4 @@
+using System.Linq;
 ﻿using System.ComponentModel;
 
 namespace ExcelMapper.Tests;
@@ -742,5 +743,68 @@ public class MapEnumTests
 
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidDescriptionNullableEnumClass>());
+    }
+
+    public enum DefinedEnum
+    {
+        Zero = 0,
+        One = 1
+    }
+
+    [Flags]
+    public enum DefinedFlags
+    {
+        None = 0,
+        A = 1,
+        B = 2
+    }
+
+    private class DefinedEnumRow
+    {
+        public DefinedEnum Value { get; set; }
+    }
+
+    private class DefinedFlagsRow
+    {
+        public DefinedFlags Value { get; set; }
+    }
+
+    [Theory]
+    [InlineData("0", DefinedEnum.Zero)]
+    [InlineData("1", DefinedEnum.One)]
+    [InlineData("One", DefinedEnum.One)]
+    public void ReadRow_DefinedEnumValue_Success(string value, DefinedEnum expected)
+    {
+        using var importer = Helpers.GetCsvImporter($"Value\n{value}\n");
+        Assert.Equal(expected, importer.ReadSheet().ReadRows<DefinedEnumRow>().Single().Value);
+    }
+
+    [Theory]
+    [InlineData("2")]
+    [InlineData("99")]
+    [InlineData("-1")]
+    public void ReadRow_UndefinedEnumNumber_ThrowsExcelMappingException(string value)
+    {
+        using var importer = Helpers.GetCsvImporter($"Value\n{value}\n");
+        var sheet = importer.ReadSheet();
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<DefinedEnumRow>().ToArray());
+    }
+
+    [Theory]
+    [InlineData("0", DefinedFlags.None)]
+    [InlineData("3", DefinedFlags.A | DefinedFlags.B)]
+    [InlineData("\"A, B\"", DefinedFlags.A | DefinedFlags.B)]
+    public void ReadRow_DefinedFlagsCombination_Success(string value, DefinedFlags expected)
+    {
+        using var importer = Helpers.GetCsvImporter($"Value\n{value}\n");
+        Assert.Equal(expected, importer.ReadSheet().ReadRows<DefinedFlagsRow>().Single().Value);
+    }
+
+    [Fact]
+    public void ReadRow_UndefinedFlagsBits_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\n4\n");
+        var sheet = importer.ReadSheet();
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<DefinedFlagsRow>().ToArray());
     }
 }

@@ -532,7 +532,7 @@ public class ExcelSheetTests
         sheet.ReadHeading();
 
         var rows = sheet.ReadRows<string[]>().ToArray();
-        Assert.Equal(new string?[] { "1", "a", "True" }, rows[0]);
+        Assert.Equal(new string?[] { "a", "True", "Government" }, rows[0]);
         Assert.Equal(4, sheet.CurrentRowIndex);
 
         Assert.NotNull(sheet.Heading);
@@ -1256,5 +1256,97 @@ public class ExcelSheetTests
         var sheet = importer.ReadSheet();
 
         Assert.Equal(ExcelSheetVisibility.Visible, sheet.Visibility);
+    }
+
+    private class NameValueRow
+    {
+        public string? Name { get; set; }
+        public string? Value { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_CustomDataRangeColumnsStartAutoMapped_ReadsNamedColumns()
+    {
+        using var importer = Helpers.GetCsvImporter("Junk,Name,Value\nj1,n1,v1\nj2,n2,v2\n");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(Range.All, 1..);
+
+        var rows = sheet.ReadRows<NameValueRow>().ToArray();
+        Assert.Equal(["n1", "n2"], rows.Select(r => r.Name));
+        Assert.Equal(["v1", "v2"], rows.Select(r => r.Value));
+    }
+
+    [Fact]
+    public void ReadRows_CustomDataRangeColumnsStartInvalidValue_ReportsCorrectColumn()
+    {
+        using var importer = Helpers.GetCsvImporter("Junk,Value\n1,invalid\n");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(Range.All, 1..);
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<IntValueRow>().ToArray());
+        Assert.Equal(1, ex.ColumnIndex);
+        Assert.Contains("\"invalid\"", ex.Message);
+        Assert.Contains("column \"Value\"", ex.Message);
+    }
+
+    private class IntValueRow
+    {
+        public int Value { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_NoHeadingCustomDataRangeRowsStart_SkipsPrecedingRows()
+    {
+        using var importer = Helpers.GetCsvImporter("skip0\nskip1\nkeep1\nkeep2\n");
+        importer.Configuration.RegisterClassMap<NameValueRow>(c => c.Map(p => p.Name).WithColumnIndex(0));
+        var sheet = importer.ReadSheet();
+        sheet.HasHeading = false;
+        sheet.DataRange = new ExcelRange(2.., Range.All);
+
+        var rows = sheet.ReadRows<NameValueRow>().ToArray();
+        Assert.Equal(["keep1", "keep2"], rows.Select(r => r.Name));
+    }
+
+    [Fact]
+    public void ReadRows_NoHeadingCustomDataRangeRowsStartPastEnd_ReturnsEmpty()
+    {
+        using var importer = Helpers.GetCsvImporter("a\nb\n");
+        importer.Configuration.RegisterClassMap<NameValueRow>(c => c.Map(p => p.Name).WithColumnIndex(0));
+        var sheet = importer.ReadSheet();
+        sheet.HasHeading = false;
+        sheet.DataRange = new ExcelRange(5.., Range.All);
+
+        Assert.Empty(sheet.ReadRows<NameValueRow>());
+    }
+
+    [Fact]
+    public void ReadRows_SkipBlankLinesCustomDataRangeColumns_IgnoresColumnsOutsideRange()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Value,Note\nn1,v1,\n,,note\nn2,v2,\n");
+        importer.Configuration.SkipBlankLines = true;
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(Range.All, 0..2);
+
+        var rows = sheet.ReadRows<NameValueRow>().ToArray();
+        Assert.Equal(["n1", "n2"], rows.Select(r => r.Name));
+    }
+
+    private class MatchingRow
+    {
+        public string[] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_ColumnsMatchingCustomDataRangeColumns_MatchesColumnsInRange()
+    {
+        using var importer = Helpers.GetCsvImporter("A1,Skip,A2,A3\n1,x,2,3\n");
+        importer.Configuration.RegisterClassMap<MatchingRow>(c => c
+            .Map(p => p.Values)
+            .WithColumnsMatching(new ExcelMapper.Readers.PredicateColumnMatcher(n => n.StartsWith("A"))));
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(Range.All, 1..3);
+
+        var row = sheet.ReadRows<MatchingRow>().Single();
+        Assert.Equal(["2"], row.Values);
     }
 }

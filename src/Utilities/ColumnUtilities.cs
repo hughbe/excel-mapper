@@ -81,11 +81,12 @@ internal static class ColumnUtilities
         }
         else
         {
-            for (int i = 0; i < sheet.Heading.ColumnNames.Count; i++)
+            var columnNames = sheet.Heading.ColumnNames;
+            for (int i = 0; i < columnNames.Count; i++)
             {
-                if (string.Equals(sheet.Heading.GetColumnName(i), columnName, comparison))
+                if (string.Equals(columnNames[i], columnName, comparison))
                 {
-                    columnIndex = i;
+                    columnIndex = i + sheet.Heading.ColumnOffset;
                     return true;
                 }
             }
@@ -93,5 +94,20 @@ internal static class ColumnUtilities
 
         columnIndex = -1;
         return false;
+    }
+
+    /// <summary>
+    /// Gets the zero-based start (inclusive) and end (exclusive) indices in the sheet of the
+    /// columns that can be mapped. If the sheet has a heading, this is the columns in the
+    /// heading (i.e. the columns in the data range). Otherwise this is every column.
+    /// </summary>
+    public static (int Start, int End) GetColumnRange(ExcelSheet sheet)
+    {
+        if (sheet.Heading is { } heading)
+        {
+            return (heading.ColumnOffset, heading.ColumnOffset + heading.ColumnNames.Count);
+        }
+
+        return (0, sheet.NumberOfColumns);
     }
 }

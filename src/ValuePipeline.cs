@@ -102,4 +102,26 @@ public class ValuePipeline : IValuePipeline
 
         return finalResult?.Value;
     }
+
+    /// <summary>
+    /// Converts the result of <see cref="GetPropertyValue"/> to <typeparamref name="T"/>, throwing an
+    /// <see cref="ExcelMappingException"/> rather than a <see cref="NullReferenceException"/> if the
+    /// value is null and <typeparamref name="T"/> is a non-nullable value type.
+    /// </summary>
+    internal static T CastValue<T>(object? value, ExcelSheet sheet, int rowIndex, int columnIndex, MemberInfo? member)
+    {
+        if (value is null)
+        {
+            // default(T) is only non-null for non-nullable value types.
+            if (default(T) is not null)
+            {
+                var memberDescription = member is null ? string.Empty : $" to member \"{member.Name}\"";
+                throw new ExcelMappingException($"Cannot assign null{memberDescription} of type \"{typeof(T)}\". Consider adding a fallback or making the type nullable.", sheet, rowIndex, columnIndex);
+            }
+
+            return default!;
+        }
+
+        return (T)value;
+    }
 }

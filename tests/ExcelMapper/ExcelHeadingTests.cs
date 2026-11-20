@@ -277,4 +277,48 @@ public class ExcelHeadingTests
         Assert.False(heading.TryGetFirstColumnMatchingIndex(e => e == columnName, out int index));
         Assert.Equal(-1, index);
     }
+
+    [Fact]
+    public void GetColumnIndex_CustomDataRangeColumnsStart_ReturnsSheetIndex()
+    {
+        using var importer = Helpers.GetCsvImporter("Junk,Name,Value\n1,2,3\n");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(Range.All, 1..);
+        var heading = sheet.ReadHeading();
+
+        Assert.Equal(["Name", "Value"], heading.ColumnNames);
+        Assert.Equal(1, heading.GetColumnIndex("Name"));
+        Assert.Equal(2, heading.GetColumnIndex("Value"));
+        Assert.Equal("Name", heading.GetColumnName(1));
+        Assert.Equal("Value", heading.GetColumnName(2));
+        Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => heading.GetColumnName(0));
+        Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => heading.GetColumnName(3));
+        Assert.False(heading.TryGetColumnIndex("Junk", out _));
+        Assert.Equal(1, heading.GetFirstColumnMatchingIndex(_ => true));
+    }
+
+    [Fact]
+    public void GetFirstColumnMatchingIndex_NotAlphabetical_ReturnsFirstColumnInOrder()
+    {
+        using var importer = Helpers.GetCsvImporter("Zeta,Alpha,Beta\n1,2,3\n");
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
+
+        Assert.Equal(0, heading.GetFirstColumnMatchingIndex(_ => true));
+        Assert.True(heading.TryGetFirstColumnMatchingIndex(_ => true, out var index));
+        Assert.Equal(0, index);
+        Assert.Equal(2, heading.GetFirstColumnMatchingIndex(n => n.StartsWith("B")));
+    }
+
+    [Fact]
+    public void GetFirstColumnMatchingIndex_DuplicatedColumn_MatchesOriginalName()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Name\n1,2\n");
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
+
+        // The second column is stored internally as "Name_2" but should be matched as "Name".
+        Assert.False(heading.TryGetFirstColumnMatchingIndex(n => n == "Name_2", out _));
+        Assert.Equal(0, heading.GetFirstColumnMatchingIndex(n => n == "Name"));
+    }
 }

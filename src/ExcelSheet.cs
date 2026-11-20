@@ -172,6 +172,12 @@ public class ExcelSheet
     /// type then the type will be automapped. This method will read the sheet's heading if the sheet has
     /// a heading and the heading has not yet been read.
     /// </summary>
+    /// <remarks>
+    /// Reading is forward-only: rows are read from the current position of the sheet. Rows that have
+    /// already been read (for example by a previous call to this method or <see cref="ReadRow{T}"/>)
+    /// are not returned again, so calling this method after all rows have been read returns an empty
+    /// sequence. Use <see cref="ReadRows{T}(int, int)"/> to re-read a specific range of rows.
+    /// </remarks>
     /// <typeparam name="T">The type of the object to map each row to.</typeparam>
     /// <returns>A list of objects of type T mapped from each row in the sheet.</returns>
     public IEnumerable<T> ReadRows<T>()
@@ -293,7 +299,7 @@ public class ExcelSheet
     /// </summary>
     /// <typeparam name="T">The type of the object to map a single row to.</typeparam>
     /// <param name="value">An object of type T mapped from a single row in the sheet.</param>
-    /// <returns>False if there are no more rows in the sheet or the row cannot be mapped to an object, else false.</returns>
+    /// <returns>False if there are no more rows in the sheet or the row cannot be mapped to an object, else true.</returns>
     public bool TryReadRow<T>([NotNullWhen(true)] out T? value)
     {
         if (!MoveToNextRow())
@@ -346,15 +352,33 @@ public class ExcelSheet
             return false;
         }
 
+        // Skip any rows before the start of the data range. If the sheet has a heading, the
+        // heading row is the start of the data range and has already been read.
+        var startRowIndex = _dataRange.Rows.Start.GetOffset(Reader.RowCount);
+        if (CurrentRowIndex + 1 < startRowIndex)
+        {
+            if (startRowIndex >= endRowIndex)
+            {
+                return false;
+            }
+
+            ReadUpTo(startRowIndex - 1);
+        }
+
         // Read the next row.
         Reader.Read();
         CurrentRowIndex++;
 
         if (Importer.Configuration.SkipBlankLines)
         {
+            // Only consider the columns in the data range when checking for blank rows.
+            var fieldCount = Reader.FieldCount;
+            var startColumnIndex = Math.Min(_dataRange.Columns.Start.GetOffset(fieldCount), fieldCount);
+            var endColumnIndex = Math.Min(_dataRange.Columns.End.GetOffset(fieldCount), fieldCount);
+
             bool RowEmpty()
             {
-                for (int i = 0; i < Reader.FieldCount; i++)
+                for (int i = startColumnIndex; i < endColumnIndex; i++)
                 {
                     var value = Reader.GetValue(i);
                     if (value is not null && !(value is string stringValue && string.IsNullOrEmpty(stringValue)))

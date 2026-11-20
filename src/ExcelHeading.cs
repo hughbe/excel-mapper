@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace ExcelMapper;
@@ -40,12 +41,21 @@ public class ExcelHeading
                 } while (nameMapping.ContainsKey(mappingKey));
             }
 
-            nameMapping.Add(mappingKey, columnIndex);
+            // Store the index of the column in the sheet (not relative to the data range) so
+            // that it can be passed directly to the underlying reader.
+            nameMapping.Add(mappingKey, columnIndex + offset);
         }
 
+        ColumnOffset = offset;
         ColumnNames = columnNames;
         NameMapping = nameMapping;
     }
+
+    /// <summary>
+    /// Gets the zero-based index in the sheet of the first column in the heading. This is
+    /// non-zero if the data range of the sheet does not start at the first column.
+    /// </summary>
+    internal int ColumnOffset { get; }
 
     /// <summary>
     /// Gets the list of all column names in the heading.
@@ -55,19 +65,34 @@ public class ExcelHeading
     private SortedList<string, int> NameMapping { get; }
 
     /// <summary>
-    /// Gets the name of the column at the given zero-based index.
+    /// Gets the name of the column at the given zero-based index in the sheet.
     /// </summary>
-    /// <param name="columnIndex">The zero-based index to get the name of.</param>
+    /// <param name="columnIndex">The zero-based index in the sheet of the column to get the name of.
+    /// If the sheet's data range does not start at the first column, this is not the same as the
+    /// index into <see cref="ColumnNames"/>.</param>
     /// <returns>The name of the column at the given zero-based index.</returns>
     public string GetColumnName(int columnIndex)
     {
-        ThrowHelpers.ThrowIfNegative(columnIndex, nameof(columnIndex));
-        ThrowHelpers.ThrowIfGreaterThanOrEqual(columnIndex, ColumnNames.Count, nameof(columnIndex));
-        return ColumnNames[columnIndex];
+        ThrowHelpers.ThrowIfLessThan(columnIndex, ColumnOffset, nameof(columnIndex));
+        ThrowHelpers.ThrowIfGreaterThanOrEqual(columnIndex, ColumnOffset + ColumnNames.Count, nameof(columnIndex));
+        return ColumnNames[columnIndex - ColumnOffset];
+    }
+
+    internal bool TryGetColumnName(int columnIndex, [NotNullWhen(true)] out string? columnName)
+    {
+        var relativeIndex = columnIndex - ColumnOffset;
+        if (relativeIndex < 0 || relativeIndex >= ColumnNames.Count)
+        {
+            columnName = null;
+            return false;
+        }
+
+        columnName = ColumnNames[relativeIndex];
+        return true;
     }
 
     /// <summary>
-    /// Gets the zero-based index of the column with the given name. This method throws an ExcelMappingException
+    /// Gets the zero-based index in the sheet of the column with the given name. This method throws an ExcelMappingException
     /// if the column does not exist.
     /// </summary>
     /// <param name="columnName">The name of the column to get the zero-based index of.</param>
@@ -86,7 +111,7 @@ public class ExcelHeading
     }
 
     /// <summary>
-    /// Tries to get the zero-based index of the column with the given name.
+    /// Tries to get the zero-based index in the sheet of the column with the given name.
     /// </summary>
     /// <param name="columnName">The name of the column to get the zero-based index of.</param>
     /// <param name="index">The zero-based index of the column with the given name.</param>
@@ -105,16 +130,13 @@ public class ExcelHeading
     /// <returns>The zero-based index of the column with the given name.</returns>
     public int GetFirstColumnMatchingIndex(Func<string, bool> predicate)
     {
-        ThrowHelpers.ThrowIfNull(predicate, nameof(predicate));
-        var key = NameMapping.Keys.FirstOrDefault(predicate);
-
-        if (key == null)
+        if (!TryGetFirstColumnMatchingIndex(predicate, out var index))
         {
-            var foundColumns = string.Join(", ", NameMapping.Keys.Select(static c => $"\"{c}\""));
+            var foundColumns = string.Join(", ", ColumnNames.Select(static c => $"\"{c}\""));
             throw new ExcelMappingException($"No Columns found matching predicate from [{foundColumns}]");
         }
 
-        return NameMapping[key];
+        return index;
     }
 
     /// <summary>
@@ -127,14 +149,18 @@ public class ExcelHeading
     {
         ThrowHelpers.ThrowIfNull(predicate, nameof(predicate));
 
-        string? key = NameMapping.Keys.FirstOrDefault(predicate);
-        if (key == null)
+        // Search in column order (not the sorted lookup order) and match against the
+        // original column names (not the de-duplicated lookup keys).
+        for (var i = 0; i < ColumnNames.Count; i++)
         {
-            index = -1;
-            return false;
+            if (predicate(ColumnNames[i]))
+            {
+                index = i + ColumnOffset;
+                return true;
+            }
         }
 
-        index = NameMapping[key];
-        return true;
+        index = -1;
+        return false;
     }
 }

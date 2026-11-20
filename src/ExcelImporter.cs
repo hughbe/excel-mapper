@@ -224,7 +224,8 @@ public class ExcelImporter : IDisposable
 
         while (TryReadSheet(out ExcelSheet? currentSheet))
         {
-            if (currentSheet.Name == sheetName)
+            // Excel sheet names are case-insensitive.
+            if (string.Equals(currentSheet.Name, sheetName, StringComparison.OrdinalIgnoreCase))
             {
                 ResetReader();
                 sheet = currentSheet;

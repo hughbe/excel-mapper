@@ -433,7 +433,6 @@ public class ExcelImporterTests
 
     [Theory]
     [InlineData("")]
-    [InlineData("empty")]
     [InlineData(" Empty ")]
     [InlineData("invalid")]
     [InlineData("  \r \t  ")]
@@ -505,9 +504,24 @@ public class ExcelImporterTests
     }
 
     [Theory]
+    [InlineData("empty")]
+    [InlineData("EMPTY")]
+    [InlineData("eMpTy")]
+    public void ReadSheet_SheetNameDifferentCase_ReturnsSheet(string sheetName)
+    {
+        // Excel sheet names are case-insensitive.
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet(sheetName);
+        Assert.Equal("Empty", sheet.Name);
+        Assert.Equal(1, sheet.Index);
+
+        Assert.True(importer.TryReadSheet(sheetName, out var trySheet));
+        Assert.Equal("Empty", trySheet.Name);
+    }
+
+    [Theory]
     [InlineData(null)]
     [InlineData("")]
-    [InlineData("empty")]
     [InlineData(" Empty ")]
     [InlineData("invalid")]
     [InlineData("  \r \t  ")]

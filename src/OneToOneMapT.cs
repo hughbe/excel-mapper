@@ -82,7 +82,8 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>
             throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
         }
 
-        result = (T)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, readResult, PreserveFormatting, member)!;
+        var value = ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, readResult, PreserveFormatting, member);
+        result = ValuePipeline.CastValue<T>(value, sheet, rowIndex, readResult.ColumnIndex, member)!;
         return true;
     }
 

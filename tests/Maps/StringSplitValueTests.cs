@@ -1,3 +1,4 @@
+using System.Linq;
 ﻿namespace ExcelMapper.Tests;
 
 public class StringSplitValueTests
@@ -735,5 +736,44 @@ public class StringSplitValueTests
 
         MissingColumnRow row = sheet.ReadRow<MissingColumnRow>();
         Assert.Null(row.MissingValue);
+    }
+
+    private class TrailingSeparatorArray
+    {
+        public string?[]? Values { get; set; }
+    }
+
+    private class TrailingSeparatorList
+    {
+        public List<string?>? Values { get; set; }
+    }
+
+    [Fact]
+    public void ReadRow_TrailingSeparator_ArrayAndListAgree()
+    {
+        const string Csv = "Values\n\"a,b,\"\n";
+
+        using var arrayImporter = Helpers.GetCsvImporter(Csv);
+        var array = arrayImporter.ReadSheet().ReadRows<TrailingSeparatorArray>().Single().Values;
+
+        using var listImporter = Helpers.GetCsvImporter(Csv);
+        var list = listImporter.ReadSheet().ReadRows<TrailingSeparatorList>().Single().Values;
+
+        // The trailing empty value is included (as with string.Split) and mapped through the
+        // empty fallback, which is null for strings.
+        Assert.Equal(new string?[] { "a", "b", null }, array!.AsEnumerable());
+        Assert.Equal(new string?[] { "a", "b", null }, list!.AsEnumerable());
+    }
+
+    [Fact]
+    public void ReadRow_EmptyStringCell_ArrayAndListAreEmpty()
+    {
+        const string Csv = "Values,Other\n,x\n";
+
+        using var arrayImporter = Helpers.GetCsvImporter(Csv);
+        Assert.Empty(arrayImporter.ReadSheet().ReadRows<TrailingSeparatorArray>().Single().Values!);
+
+        using var listImporter = Helpers.GetCsvImporter(Csv);
+        Assert.Empty(listImporter.ReadSheet().ReadRows<TrailingSeparatorList>().Single().Values!);
     }
 }

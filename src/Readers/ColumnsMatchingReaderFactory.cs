@@ -25,7 +25,8 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
-        for (var columnIndex = 0; columnIndex < sheet.NumberOfColumns; columnIndex++)
+        var (startColumnIndex, endColumnIndex) = ColumnUtilities.GetColumnRange(sheet);
+        for (var columnIndex = startColumnIndex; columnIndex < endColumnIndex; columnIndex++)
         {
             if (Matcher.ColumnMatches(sheet, columnIndex))
             {
@@ -42,7 +43,8 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
         var indices = new List<int>();
-        for (var columnIndex = 0; columnIndex < sheet.NumberOfColumns; columnIndex++)
+        var (startColumnIndex, endColumnIndex) = ColumnUtilities.GetColumnRange(sheet);
+        for (var columnIndex = startColumnIndex; columnIndex < endColumnIndex; columnIndex++)
         {
             if (Matcher.ColumnMatches(sheet, columnIndex))
             {
@@ -68,7 +70,8 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
         }
 
         var names = new List<string>();
-        for (var columnIndex = 0; columnIndex < sheet.NumberOfColumns; columnIndex++)
+        var (startColumnIndex, endColumnIndex) = ColumnUtilities.GetColumnRange(sheet);
+        for (var columnIndex = startColumnIndex; columnIndex < endColumnIndex; columnIndex++)
         {
             if (Matcher.ColumnMatches(sheet, columnIndex))
             {
@@ -85,7 +88,8 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
         var indices = new List<int>();
-        for (var columnIndex = 0; columnIndex < sheet.NumberOfColumns; columnIndex++)
+        var (startColumnIndex, endColumnIndex) = ColumnUtilities.GetColumnRange(sheet);
+        for (var columnIndex = startColumnIndex; columnIndex < endColumnIndex; columnIndex++)
         {
             if (Matcher.ColumnMatches(sheet, columnIndex))
             {

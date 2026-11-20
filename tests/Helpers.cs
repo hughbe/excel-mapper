@@ -17,6 +17,21 @@ public static class Helpers
 
     public static string GetResourcePath(string name) => Path.GetFullPath(Path.Combine("Resources", name));
 
+    public static ExcelImporter GetCsvImporter(string content)
+    {
+        EnsureInitialized();
+        return new ExcelImporter(new MemoryStream(Encoding.UTF8.GetBytes(content)), ExcelImporterFileType.Csv);
+    }
+
+    private static void EnsureInitialized()
+    {
+        if (!Initialized)
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            Initialized = true;
+        }
+    }
+
     public static Stream GetResource(string name)
     {
         if (!Initialized)

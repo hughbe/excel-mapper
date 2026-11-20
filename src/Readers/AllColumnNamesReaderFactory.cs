@@ -37,7 +37,9 @@ public sealed class AllColumnNamesReaderFactory : ICellsReaderFactory
             var columnName = columnNames[i];
             if (!string.IsNullOrWhiteSpace(columnName))
             {
-                indices[index++] = sheet.Heading.GetColumnIndex(columnName);
+                // Use the position of the column rather than looking it up by name so that
+                // duplicated column names each map to their own column.
+                indices[index++] = i + sheet.Heading.ColumnOffset;
             }
         }
 
