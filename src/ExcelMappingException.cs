@@ -74,6 +74,12 @@ public class ExcelMappingException : Exception
     /// </summary>
     public int ColumnIndex { get; } = -1;
 
+    /// <summary>
+    /// The Excel address (for example "B11") of the cell that was being read, or null if the
+    /// row or column is not known.
+    /// </summary>
+    public string? CellAddress => RowIndex >= 0 && ColumnIndex >= 0 ? ExcelRange.GetCellAddress(RowIndex, ColumnIndex) : null;
+
     internal static ExcelMappingException CreateForNoSuchColumn(ExcelSheet sheet, int rowIndex, object readerFactory, MemberInfo? member)
     {
         if (readerFactory is IColumnNameProviderCellReaderFactory columnNameProvider)
@@ -112,23 +118,39 @@ public class ExcelMappingException : Exception
 
     private static string GetMessage(string message, ExcelSheet? sheet, int rowIndex, int columnIndex)
     {
-        string position = string.Empty;
-        if (columnIndex != -1)
+        string columnDescription = string.Empty;
+        if (columnIndex >= 0)
         {
-            // The column may lie outside the heading's data range, in which case fall back to
-            // reporting its position rather than throwing while building the message.
+            // The column may lie outside the heading's data range, in which case only report
+            // its cell address rather than throwing while building the message.
             if (sheet != null && sheet.HasHeading
                 && (sheet.Heading ?? sheet.ReadHeading()).TryGetColumnName(columnIndex, out var columnName))
             {
-                position = $" in column \"{columnName}\"";
-            }
-            else
-            {
-                position = $" in position \"{columnIndex}\"";
+                columnDescription = $" in column \"{columnName}\"";
             }
         }
 
-        return $"{message}{position} on row {rowIndex} in sheet \"{sheet?.Name}\".";
+        // Report the location as Excel shows it: a cell address such as "B11" if the column is
+        // known, otherwise a one-based row number.
+        string location;
+        if (rowIndex >= 0 && columnIndex >= 0)
+        {
+            location = $" at cell {ExcelRange.GetCellAddress(rowIndex, columnIndex)}";
+        }
+        else if (rowIndex >= 0)
+        {
+            location = $" on row {rowIndex + 1}";
+        }
+        else if (columnIndex >= 0)
+        {
+            location = $" in column {ExcelRange.GetColumnLetters(columnIndex)}";
+        }
+        else
+        {
+            location = string.Empty;
+        }
+
+        return $"{message}{columnDescription}{location} in sheet \"{sheet?.Name}\".";
     }
 
     private static ExcelMappingException CreateForMultipleColumnNames(ExcelSheet sheet, int rowIndex, MemberInfo? member, IReadOnlyList<string> columnNames)

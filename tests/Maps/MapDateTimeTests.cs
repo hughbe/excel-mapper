@@ -426,7 +426,7 @@ public class MapDateTimeTests
         // Valid cell value.
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<DateTimeValueInt>(1, 1).ToArray());
         Assert.IsType<FormatException>(ex.InnerException);
-        Assert.Equal($"Cannot assign \"{new DateTime(2025, 01, 01, 1, 1, 1)}\" to member \"Value\" of type \"System.Int32\" in column \"Date\" on row 1 in sheet \"Sheet1\".", ex.Message);
+        Assert.Equal($"Cannot assign \"{new DateTime(2025, 01, 01, 1, 1, 1)}\" to member \"Value\" of type \"System.Int32\" in column \"Date\" at cell A2 in sheet \"Sheet1\".", ex.Message);
     }
 
     private class DateTimeValueInt

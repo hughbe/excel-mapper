@@ -236,7 +236,109 @@ public class ExcelRangeTests
     public void TryParse_InvalidAddress_ReturnsFalse(string? address)
     {
         Assert.False(ExcelRange.TryParse(address!, out var range));
-        Assert.Equal(0..0, range.Rows);
-        Assert.Equal(0..0, range.Columns);
+        Assert.Equal(Range.All, range.Rows);
+        Assert.Equal(Range.All, range.Columns);
+    }
+
+    [Fact]
+    public void Default_IsAllRowsAndColumns()
+    {
+        ExcelRange range = default;
+        Assert.Equal(Range.All, range.Rows);
+        Assert.Equal(Range.All, range.Columns);
+        Assert.Equal(new ExcelRange(), range);
+    }
+
+    public static IEnumerable<object[]> AbsoluteAndLimitAddress_Data()
+    {
+        yield return new object[] { "$A$1", 0..1, 0..1 };
+        yield return new object[] { "$B5", 4..5, 1..2 };
+        yield return new object[] { "B$5", 4..5, 1..2 };
+        yield return new object[] { "$A$1:$C$10", 0..10, 0..3 };
+        yield return new object[] { "$A:$C", Range.All, 0..3 };
+        yield return new object[] { "$2:$5", 1..5, Range.All };
+        yield return new object[] { "xfd1048576", 1048575..1048576, 16383..16384 };
+        yield return new object[] { "A:XFD", Range.All, 0..16384 };
+        yield return new object[] { "1:1048576", 0..1048576, Range.All };
+    }
+
+    [Theory]
+    [MemberData(nameof(AbsoluteAndLimitAddress_Data))]
+    public void Parse_AbsoluteAndLimitAddress_ReturnsExpected(string address, Range expectedRows, Range expectedColumns)
+    {
+        var range = ExcelRange.Parse(address);
+        Assert.Equal(expectedRows, range.Rows);
+        Assert.Equal(expectedColumns, range.Columns);
+
+        Assert.True(ExcelRange.TryParse(address, out var tryRange));
+        Assert.Equal(range, tryRange);
+    }
+
+    [Theory]
+    // Non-ASCII letters.
+    [InlineData("\u00C91")]
+    [InlineData("A\u00C91")]
+    [InlineData("\u00C9:F")]
+    // Beyond the limits of an Excel worksheet.
+    [InlineData("XFE1")]
+    [InlineData("AAAAAAAAAAAAAAAAAAAA1")]
+    [InlineData("A1048577")]
+    [InlineData("A:XFE")]
+    [InlineData("1:1048577")]
+    // Signs and misplaced absolute markers.
+    [InlineData("A+1")]
+    [InlineData("1:+5")]
+    [InlineData("$")]
+    [InlineData("$$A1")]
+    [InlineData("A$$1")]
+    [InlineData("A1$")]
+    public void Parse_InvalidExtendedAddress_ThrowsArgumentException(string address)
+    {
+        Assert.Throws<ArgumentException>("address", () => ExcelRange.Parse(address));
+        Assert.False(ExcelRange.TryParse(address, out var range));
+        Assert.Equal(new ExcelRange(), range);
+    }
+
+    [Theory]
+    [InlineData("A1")]
+    [InlineData("B2:C5")]
+    [InlineData("AB2:AC3")]
+    [InlineData("D:D")]
+    [InlineData("A:XFD")]
+    [InlineData("3:7")]
+    [InlineData("XFD1048576")]
+    public void ToString_Address_RoundTrips(string address)
+    {
+        var range = ExcelRange.Parse(address);
+        Assert.Equal(address, range.ToString());
+        Assert.Equal(range, ExcelRange.Parse(range.ToString()));
+    }
+
+    [Fact]
+    public void ToString_NotAnAddress_DescribesRanges()
+    {
+        Assert.Equal($"Rows: {Range.All}, Columns: {Range.All}", new ExcelRange().ToString());
+        Assert.Equal($"Rows: {2..}, Columns: {1..3}", new ExcelRange(2.., 1..3).ToString());
+        Assert.Equal($"Rows: {0..0}, Columns: {0..1}", new ExcelRange(0..0, 0..1).ToString());
+    }
+
+    [Fact]
+    public void Equals_Invoke_ReturnsExpected()
+    {
+        var range = new ExcelRange(1..5, 2..3);
+        var same = ExcelRange.Parse("C2:C5");
+        var different = new ExcelRange(1..5, 2..4);
+
+        Assert.True(range.Equals(same));
+        Assert.True(range.Equals((object)same));
+        Assert.True(range == same);
+        Assert.False(range != same);
+        Assert.Equal(range.GetHashCode(), same.GetHashCode());
+
+        Assert.False(range.Equals(different));
+        Assert.False(range == different);
+        Assert.True(range != different);
+        Assert.False(range.Equals(null));
+        Assert.False(range.Equals("C2:C5"));
     }
 }
