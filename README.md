@@ -1232,6 +1232,27 @@ This is especially useful for:
 
 ## Error Handling
 
+### Error Messages and Cell Locations
+
+When a cell can't be mapped, `ExcelMappingException` reports where the problem is the way Excel shows it: a cell address when the column is known, otherwise a one-based row number.
+
+```csharp
+try
+{
+    var employees = sheet.ReadRows<Employee>().ToArray();
+}
+catch (ExcelMappingException ex)
+{
+    // "Cannot assign "abc" to member "YearsOfService" of type "System.Int32"
+    //  in column "YearsOfService" at cell C3 in sheet "Employees"."
+    Console.WriteLine(ex.Message);
+
+    Console.WriteLine(ex.CellAddress); // "C3" (null if the row or column is unknown)
+    Console.WriteLine(ex.RowIndex);    // 2 (zero-based)
+    Console.WriteLine(ex.ColumnIndex); // 2 (zero-based)
+}
+```
+
 ### Nullable Types and Fallbacks
 
 By default:
@@ -1989,7 +2010,12 @@ sheet.DataRange = new ExcelRange("A:C");  // All rows, columns A-C
 
 // Row ranges  
 sheet.DataRange = new ExcelRange("5:20");  // Rows 5-20, all columns
+
+// Absolute references are accepted too
+sheet.DataRange = new ExcelRange("$B$2:$D$10");  // Same as "B2:D10"
 ```
+
+Column letters are case-insensitive. Address strings must stay within the limits of an Excel worksheet (rows 1 to 1,048,576 and columns A to XFD). For larger CSV files, use the `Range` or index-based constructors instead.
 
 **Important Notes:**
 - `DataRange` must be set **before** calling `ReadHeading()` or `ReadRows()`
@@ -2033,6 +2059,15 @@ if (ExcelRange.TryParse("A1:B10", out var range2))
 {
     sheet.DataRange = range2;
 }
+
+// ToString returns the Excel address when the range can be written as one
+Console.WriteLine(ExcelRange.Parse("$B$2:$D$10")); // "B2:D10"
+
+// Ranges compare by value
+Console.WriteLine(ExcelRange.Parse("A:C") == new ExcelRange(Range.All, 0..3)); // True
+
+// default(ExcelRange) means every row and column, the same as new ExcelRange()
+sheet.DataRange = default;
 ```
 
 ## Performance Tips
@@ -2521,9 +2556,10 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
    {
        public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member)
        {
-           throw new InvalidOperationException(
-               $"Invalid data in row {rowIndex}, column {readResult.ColumnName}: {readResult.StringValue}"
-           );
+           throw new ExcelMappingException(
+               $"Invalid data \"{readResult.StringValue}\" for {member?.Name}",
+               sheet, rowIndex, readResult.ColumnIndex, exception);
+           // Message: Invalid data "abc" for Salary in column "Salary" at cell D5 in sheet "Employees".
        }
    }
    ```
@@ -2570,6 +2606,13 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 - `TryParse(string, out ExcelRange)` - Try parse Excel address string (returns bool)
 - `Rows` - Row range (System.Range)
 - `Columns` - Column range (System.Range)
+- `ToString()` - Excel address such as "A1:B10", "A:C" or "1:5" when the range can be written as one
+- Equality: `Equals`, `==` and `!=` compare rows and columns; `default(ExcelRange)` means all rows and columns
+
+**`ExcelMappingException`** - Thrown when a sheet or cell can't be mapped
+- `CellAddress` - Excel address of the cell, such as "B11" (null if unknown)
+- `RowIndex` / `ColumnIndex` - Zero-based row and column of the cell (-1 if unknown)
+- `Sheet` - The sheet being read
 
 **`ExcelImporterConfiguration`** - Configuration settings
 - `RegisterClassMap<T>()` - Register type-specific mapping
