@@ -1,5 +1,6 @@
 using System.Reflection;
 using ExcelMapper.Fallbacks;
+using ExcelMapper.Transformers;
 
 namespace ExcelMapper;
 
@@ -74,7 +75,16 @@ public class ValuePipeline : IValuePipeline
         var transformers = pipeline.Transformers;
         for (int i = 0; i < transformers.Count; i++)
         {
-            readResult = new ReadCellResult(readResult.ColumnIndex, transformers[i].TransformStringValue(sheet, rowIndex, readResult), preserveFormatting);
+            var transformer = transformers[i];
+
+            // Trimming only changes text. Skip it for other values, such as dates and numbers,
+            // so that they keep their type rather than being converted to a string and parsed again.
+            if (transformer is TrimStringCellTransformer && !preserveFormatting && readResult.GetValue() is not (string or null))
+            {
+                continue;
+            }
+
+            readResult = new ReadCellResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult), preserveFormatting);
         }
 
         if (readResult.IsEmpty() && pipeline.EmptyFallback != null)

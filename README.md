@@ -82,23 +82,29 @@ That's it! ExcelMapper automatically maps columns to properties by name.
 dotnet add package ExcelDataReader.Mapping
 ```
 
-### Required on .NET Core / .NET 5+: register code pages
+### Code page encodings
 
-ExcelDataReader reads files using the Windows-1252 encoding, which is not available by default on .NET Core and .NET 5+. Before creating your first `ExcelImporter`, register the code pages encoding provider **once** at application startup:
+ExcelDataReader needs code page encodings such as Windows-1252, which aren't available by default on .NET Core and .NET 5+. `ExcelImporter` registers them automatically (`Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)`), so no setup is needed. Registering them yourself as well is harmless.
+
+### Reader options
+
+Options for the underlying ExcelDataReader reader, such as a password, CSV separators or a fallback encoding, can be passed to the constructor:
 
 ```csharp
-using System.Text;
+using ExcelDataReader;
 
-Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+// A password-protected workbook
+using var importer = new ExcelImporter("secret.xlsx", ExcelImporterFileType.Excel,
+    new ExcelReaderConfiguration { Password = "password" });
+
+// A CSV file that uses semicolons, read as Windows-1252 if it has no byte order mark
+using var csvImporter = new ExcelImporter(stream, ExcelImporterFileType.Csv,
+    new ExcelReaderConfiguration
+    {
+        AutodetectSeparators = [';'],
+        FallbackEncoding = Encoding.GetEncoding(1252)
+    });
 ```
-
-Without this, creating an `ExcelImporter` (for any file type, including `.xlsx` and `.csv`) throws:
-
-```
-System.NotSupportedException: No data is available for encoding 1252.
-```
-
-On .NET 8 the provider is built in, so no extra package is needed. This is not required on .NET Framework.
 
 ## Basic Usage
 
@@ -308,6 +314,7 @@ ExcelMapper automatically maps **public properties and fields** by matching colu
 - Only **public instance fields** are auto-mapped
 - Static members, other read-only properties, and indexers are ignored
 - Use `[ExcelIgnore]` to exclude specific properties/fields
+- Set `importer.Configuration.IgnoreSeparatorsInColumnNames = true` to match `FirstName` to columns such as "First Name", "first_name" or "First-Name" (exact matches are preferred)
 
 **Example:**
 
@@ -636,6 +643,8 @@ public class EmployeeMap : ExcelClassMap<Employee>
     }
 }
 ```
+
+Trimming only affects text. Cells that Excel stores as dates or numbers keep their type, so `[ExcelTrimString]` can be combined with `[ExcelFormats]` or number styles safely.
 
 #### Date and Time Formats
 
@@ -2357,14 +2366,13 @@ public class FlexibleData
 ExcelMapper supports CSV files in addition to Excel formats:
 
 ```csharp
-// Specify CSV file type explicitly
+// CSV files must be opened with ExcelImporterFileType.Csv
 using var importer = new ExcelImporter("employees.csv", ExcelImporterFileType.Csv);
 var sheet = importer.ReadSheet();
 var employees = sheet.ReadRows<Employee>();
-
-// Or let ExcelDataReader auto-detect (may work for .csv extension)
-using var importer = new ExcelImporter("employees.csv");
 ```
+
+Comma, semicolon, tab, pipe and `#` separators are detected automatically. To use a specific separator or encoding, pass an `ExcelReaderConfiguration` (see [Reader options](#reader-options)).
 
 **Supported file formats:**
 - `.xlsx` - Excel 2007+ (Office Open XML)
@@ -2372,15 +2380,15 @@ using var importer = new ExcelImporter("employees.csv");
 - `.xlsb` - Excel Binary Workbook
 - `.csv` - Comma-separated values
 
-**Note:** For CSV files, it's recommended to explicitly specify `ExcelImporterFileType.Csv` to ensure proper parsing.
+**Note:** `new ExcelImporter(path)` only detects Excel formats. Opening a CSV file without `ExcelImporterFileType.Csv` throws a `HeaderException`.
 
 ## Common Issues & Troubleshooting
 
 ### "No data is available for encoding 1252"
 
-**Problem**: `NotSupportedException: No data is available for encoding 1252` is thrown when creating an `ExcelImporter`.
+**Problem**: `NotSupportedException: No data is available for encoding 1252` is thrown when creating an ExcelDataReader reader.
 
-**Solution**: Register the code pages encoding provider once at startup. See [Installation](#required-on-net-core--net-5-register-code-pages).
+**Solution**: `ExcelImporter` registers code page encodings automatically. If you create an `IExcelDataReader` yourself (for example to pass to `new ExcelImporter(reader)`) before creating any `ExcelImporter`, register them first:
 
 ```csharp
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -2388,7 +2396,9 @@ Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 ### Column Not Found
 
-**Problem**: `ExcelMappingException: Could not find column 'ColumnName'`
+**Problem**: `ExcelMappingException: Could not read value for member "FirstName" for column "FirstName" on row 2 in sheet "Sheet1".`
+
+If a column's name only differs by spaces, underscores, hyphens or dots, the message suggests it, for example `Did you mean column "First Name"?`.
 
 **Solutions**:
 ```csharp
@@ -2412,6 +2422,10 @@ public class Employee
     [ExcelColumnMatching(@"dept.*", RegexOptions.IgnoreCase)]
     public string Department { get; set; }
 }
+
+// Option 4: Ignore spaces, underscores, hyphens and dots in column names,
+// so FirstName matches "First Name", "first_name" or "First-Name"
+importer.Configuration.IgnoreSeparatorsInColumnNames = true;
 ```
 
 ### Empty Cell Handling
@@ -2716,6 +2730,7 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 - `RegisterClassMap<T>(Action<ExcelClassMap<T>>)` - Inline lambda configuration
 - `TryGetClassMap<T>()` - Check if map exists
 - `SkipBlankLines` - Skip empty rows (default: false)
+- `IgnoreSeparatorsInColumnNames` - Ignore spaces, underscores, hyphens and dots when matching column names (default: false)
 - `MaxColumnsPerSheet` - Security limit (default: 10,000)
 - `ValidateDataAnnotations` - Enable data annotations validation (default: false)
 
@@ -2746,7 +2761,7 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 | `[ExcelTrimString]` | Auto-trim whitespace |
 | `[ExcelFormats("format1", "format2")]` | Parse dates/times with specific formats |
 | `[ExcelNumberStyle(NumberStyles.AllowThousands)]` | Control numeric parsing (thousands, currency, etc.) |
-| `[ExcelUri(UriKind.RelativeOrAbsolute)]` | Specify URI kind (RelativeOrAbsolute, Relative, or RelativeOrRelativeOrAbsolute) |
+| `[ExcelUri(UriKind.RelativeOrAbsolute)]` | Specify URI kind (Absolute, Relative, or RelativeOrAbsolute) |
 | `[ExcelSeparators(';', ',')]` | Split cell value with custom separators |
 | `[ExcelTransformer(typeof(Transformer))]` | Apply custom transformer |
 | `[ExcelMappingDictionary("key", value)]` | Map string value to enum/object (multiple allowed) |

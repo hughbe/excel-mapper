@@ -140,6 +140,8 @@ public class ExcelSheet
 
     private ExcelImporter Importer { get; }
 
+    internal ExcelImporterConfiguration Configuration => Importer.Configuration;
+
     private IExcelDataReader Reader { get; }
 
     /// <summary>
