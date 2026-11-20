@@ -1,4 +1,5 @@
-﻿namespace ExcelMapper.Tests;
+using System.Linq;
+namespace ExcelMapper.Tests;
  
 public class ExcelMappingExceptionTests
 {
@@ -44,7 +45,7 @@ public class ExcelMappingExceptionTests
         sheet.ReadHeading();
 
         var exception = new ExcelMappingException("Message", sheet, 10, 1);
-        Assert.Equal("Message in column \"StringValue\" on row 10 in sheet \"Primitives\".", exception.Message);
+        Assert.Equal("Message in column \"StringValue\" at cell B11 in sheet \"Primitives\".", exception.Message);
         Assert.Null(exception.InnerException);
         Assert.Same(sheet, exception.Sheet);
         Assert.Equal(10, exception.RowIndex);
@@ -57,10 +58,68 @@ public class ExcelMappingExceptionTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         var sheet = importer.ReadSheet();
         var exception = new ExcelMappingException("Message", sheet, 10, 1);
-        Assert.Equal("Message in column \"StringValue\" on row 10 in sheet \"Primitives\".", exception.Message);
+        Assert.Equal("Message in column \"StringValue\" at cell B11 in sheet \"Primitives\".", exception.Message);
         Assert.Null(exception.InnerException);
         Assert.Same(sheet, exception.Sheet);
         Assert.Equal(10, exception.RowIndex);
         Assert.Equal(1, exception.ColumnIndex);
+    }
+
+    [Fact]
+    public void Ctor_Message_SheetNoHeading_RowIndex_ColumnIndex()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.HasHeading = false;
+
+        var exception = new ExcelMappingException("Message", sheet, 0, 27);
+        Assert.Equal("Message at cell AB1 in sheet \"Primitives\".", exception.Message);
+        Assert.Equal("AB1", exception.CellAddress);
+    }
+
+    [Fact]
+    public void Ctor_Message_SheetColumnOutsideHeading_ReportsCellAddress()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        var exception = new ExcelMappingException("Message", sheet, 4, 100);
+        Assert.Equal("Message at cell CW5 in sheet \"Primitives\".", exception.Message);
+        Assert.Equal("CW5", exception.CellAddress);
+    }
+
+    [Fact]
+    public void Ctor_Message_SheetNoColumn_ReportsOneBasedRow()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet();
+
+        var exception = new ExcelMappingException("Message", sheet, 0, -1);
+        Assert.Equal("Message on row 1 in sheet \"Primitives\".", exception.Message);
+        Assert.Null(exception.CellAddress);
+    }
+
+    [Fact]
+    public void CellAddress_FromReadRows_IsExcelAddress()
+    {
+        using var importer = Helpers.GetCsvImporter("Junk,Value\n1,2\n3,invalid\n");
+        var sheet = importer.ReadSheet();
+
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<IntValueRow>().ToArray());
+        Assert.Equal("B3", exception.CellAddress);
+        Assert.Contains("in column \"Value\" at cell B3 in sheet", exception.Message);
+    }
+
+    private class IntValueRow
+    {
+        public int Value { get; set; }
+    }
+
+    [Fact]
+    public void CellAddress_Default_IsNull()
+    {
+        Assert.Null(new ExcelMappingException().CellAddress);
+        Assert.Null(new ExcelMappingException("message").CellAddress);
     }
 }
