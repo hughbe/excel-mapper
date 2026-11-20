@@ -25,14 +25,13 @@ public class UriMapper : ICellMapper
     {
         var stringValue = readResult.GetString();
 
-        try
+        var uriKind = UriKind;
+        if (stringValue is not null && Uri.TryCreate(stringValue, uriKind, out var uri))
         {
-            var uri = new Uri(stringValue!, UriKind);
             return CellMapperResult.Success(uri);
         }
-        catch (Exception exception)
-        {
-            return CellMapperResult.Invalid(exception);
-        }
+
+        // Only create the exception (by parsing again) if it is needed.
+        return MapperUtilities.InvalidFromParse(() => new Uri(stringValue!, uriKind));
     }
 }
