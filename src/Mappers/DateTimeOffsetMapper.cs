@@ -44,14 +44,22 @@ public class DateTimeOffsetMapper : IFormatsCellMapper
         }
         
         var stringValue = readResult.GetString();
+        var formats = Formats;
+        var provider = Provider;
+        var style = Style;
         try
         {
-            var result = DateTimeOffset.ParseExact(stringValue!, Formats, Provider, Style);
-            return CellMapperResult.Success(result);
+            if (DateTimeOffset.TryParseExact(stringValue, formats, provider, style, out var result))
+            {
+                return CellMapperResult.Success(result);
+            }
         }
         catch (Exception exception)
         {
             return CellMapperResult.Invalid(exception);
         }
+
+        // Only create the exception (by parsing again) if it is needed.
+        return MapperUtilities.InvalidFromParse(() => DateTimeOffset.ParseExact(stringValue!, formats, provider, style));
     }
 }

@@ -36,28 +36,39 @@ public class INumberBaseMapper<T> : INumberStyleCellMapper where T : INumberBase
         }
 
         // Fallback to parsing from string.
-        var stringValue = readResult.GetString().AsSpan();
-
-        // If this is hex.
-        if (Style.HasFlag(NumberStyles.AllowHexSpecifier))
-        {
-            // Remove 0x or &H prefix if present.
-            if (stringValue.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ||
-                stringValue.StartsWith("&H", StringComparison.OrdinalIgnoreCase))
-            {
-                stringValue = stringValue[2..];
-            }
-        }
+        var stringValue = readResult.GetString();
+        var style = Style;
+        var provider = Provider;
 
         try
         {
-            var result = T.Parse(stringValue, Style, Provider);
-            return CellMapperResult.Success(result);
+            if (T.TryParse(GetNumberSpan(stringValue, style), style, provider, out var result))
+            {
+                return CellMapperResult.Success(result);
+            }
         }
         catch (Exception exception)
         {
+            // TryParse throws for invalid styles.
             return CellMapperResult.Invalid(exception);
         }
+
+        // Only create the exception (by parsing again) if it is needed.
+        return MapperUtilities.InvalidFromParse(() => T.Parse(GetNumberSpan(stringValue, style), style, provider));
+    }
+
+    private static ReadOnlySpan<char> GetNumberSpan(string? stringValue, NumberStyles style)
+    {
+        var span = stringValue.AsSpan();
+
+        // If this is hex, remove a 0x or &H prefix if present.
+        if ((style & NumberStyles.AllowHexSpecifier) != 0 &&
+            (span.StartsWith("0x", StringComparison.OrdinalIgnoreCase) || span.StartsWith("&H", StringComparison.OrdinalIgnoreCase)))
+        {
+            span = span[2..];
+        }
+
+        return span;
     }
 }
 #endif

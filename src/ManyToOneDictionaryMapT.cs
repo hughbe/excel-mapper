@@ -100,7 +100,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
                         // Get the column name for the current value
                         var elementKey = sheet.Heading.GetColumnName(valueResult.ColumnIndex);
                         // Convert the string key to TKey
-                        TKey? convertedKey = (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
+                        TKey? convertedKey = elementKey is TKey key ? key : (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
                         if (convertedKey != null)
                         {
                             var elementValue = ValuePipeline.CastValue<TValue>(ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, valueResult, PreserveFormatting, member), sheet, rowIndex, valueResult.ColumnIndex, member);

@@ -10,10 +10,13 @@ public readonly struct CellMapperResult
     /// </summary>
     public object? Value { get; }
 
+    // Either an Exception, or a Func<Exception> that creates one when it's first needed.
+    private readonly object? _exception;
+
     /// <summary>
     /// The exception that occurred during mapping, if any.
     /// </summary>
-    public Exception? Exception { get; }
+    public Exception? Exception => _exception as Exception ?? (_exception as Func<Exception>)?.Invoke();
 
     /// <summary>
     /// The action to take based on the result of mapping.
@@ -28,8 +31,14 @@ public readonly struct CellMapperResult
     internal CellMapperResult(object? value, Exception? exception, HandleAction action)
     {
         Value = value;
-        Exception = exception;
+        _exception = exception;
         Action = action;
+    }
+
+    private CellMapperResult(Func<Exception> exceptionFactory)
+    {
+        _exception = exceptionFactory;
+        Action = HandleAction.ErrorAndContinueMapping;
     }
 
     /// <summary>
@@ -55,6 +64,18 @@ public readonly struct CellMapperResult
     /// successful.
     /// </summary>
     public static CellMapperResult Invalid(Exception exception) => new(null, exception, HandleAction.ErrorAndContinueMapping);
+
+    /// <summary>
+    /// The value was invalid. The InvalidFallback will be invoked if no other value mappers are
+    /// successful. The exception describing why is only created if it is needed, which avoids the
+    /// cost of creating (or throwing and catching) an exception when a fallback value is used.
+    /// </summary>
+    /// <param name="exceptionFactory">Creates the exception describing why the value was invalid.</param>
+    public static CellMapperResult Invalid(Func<Exception> exceptionFactory)
+    {
+        ThrowHelpers.ThrowIfNull(exceptionFactory, nameof(exceptionFactory));
+        return new(exceptionFactory);
+    }
 
     /// <summary>
     /// Specifies what to do with the result of mapping.

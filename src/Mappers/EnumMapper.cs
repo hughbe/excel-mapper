@@ -48,14 +48,25 @@ public class EnumMapper : ICellMapper
     {
         var stringValue = readResult.GetString();
 
+        var enumType = EnumType;
+        var ignoreCase = IgnoreCase;
+#if NETSTANDARD2_0
         try
         {
-            var result = Enum.Parse(EnumType, stringValue!, IgnoreCase);
-            return CellMapperResult.Success(result);
+            return CellMapperResult.Success(Enum.Parse(enumType, stringValue!, ignoreCase));
         }
         catch (Exception exception)
         {
             return CellMapperResult.Invalid(exception);
         }
+#else
+        if (Enum.TryParse(enumType, stringValue, ignoreCase, out var result))
+        {
+            return CellMapperResult.Success(result!);
+        }
+
+        // Only create the exception (by parsing again) if it is needed.
+        return MapperUtilities.InvalidFromParse(() => Enum.Parse(enumType, stringValue!, ignoreCase));
+#endif
     }
 }

@@ -28,16 +28,13 @@ public class BoolMapper : ICellMapper
             return CellMapperResult.Success(s_boxedFalse);
         }
 
-        try
+        if (bool.TryParse(stringValue, out var result))
         {
-            // Discarding stringValue nullability warning.
-            // If null - CellMapperResult.Invalid with ArgumentNullException will be returned
-            var result = bool.Parse(stringValue!);
-            return CellMapperResult.Success(result);
+            return CellMapperResult.Success(result ? s_boxedTrue : s_boxedFalse);
         }
-        catch (Exception exception)
-        {
-            return CellMapperResult.Invalid(exception);
-        }
+
+        // Only create the exception (by parsing again) if it is needed. If stringValue is null this
+        // is an ArgumentNullException.
+        return MapperUtilities.InvalidFromParse(() => bool.Parse(stringValue!));
     }
 }

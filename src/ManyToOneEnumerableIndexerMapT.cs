@@ -30,6 +30,18 @@ public class ManyToOneEnumerableIndexerMapT<TValue> : IEnumerableIndexerMap
     /// <inheritdoc/>
     public Dictionary<int, IMap> Values { get; } = [];
 
+    private int GetLength()
+    {
+        // The collection must be large enough for the largest index.
+        var length = Values.Count;
+        foreach (var index in Values.Keys)
+        {
+            length = Math.Max(length, index + 1);
+        }
+
+        return length;
+    }
+
     /// <inheritdoc/>
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
@@ -37,7 +49,7 @@ public class ManyToOneEnumerableIndexerMapT<TValue> : IEnumerableIndexerMap
 
         lock (_buildLock)
         {
-            EnumerableFactory.Begin(Math.Max(Values.Count > 0 ? Values.Max(x => x.Key + 1) : 0, Values.Count));
+            EnumerableFactory.Begin(GetLength());
             try
             {
                 foreach (var map in Values)
