@@ -204,7 +204,7 @@ public class PreserveFormattingTests
         
         // Empty cell value.
         var row2 = sheet.ReadRow<StringsValue>();
-        Assert.Equal(new string?[] { null }, row2.Value);
+        Assert.Empty(row2.Value);
         
         // Default cell value.
         var row3 = sheet.ReadRow<StringsValue>();
@@ -225,7 +225,7 @@ public class PreserveFormattingTests
         
         // Empty cell value.
         var row2 = sheet.ReadRow<PreserveFormattingStringsValue>();
-        Assert.Equal(new string?[] { null }, row2.Value);
+        Assert.Empty(row2.Value);
         
         // Default cell value.
         var row3 = sheet.ReadRow<PreserveFormattingStringsValue>();
@@ -247,7 +247,7 @@ public class PreserveFormattingTests
         
         // Empty cell value.
         var row2 = sheet.ReadRow<PreserveFormattingStringsValue>();
-        Assert.Equal(new string?[] { null }, row2.Value);
+        Assert.Empty(row2.Value);
         
         // Default cell value.
         var row3 = sheet.ReadRow<PreserveFormattingStringsValue>();

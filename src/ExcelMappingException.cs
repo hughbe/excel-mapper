@@ -115,11 +115,12 @@ public class ExcelMappingException : Exception
         string position = string.Empty;
         if (columnIndex != -1)
         {
-            if (sheet != null && sheet.HasHeading)
+            // The column may lie outside the heading's data range, in which case fall back to
+            // reporting its position rather than throwing while building the message.
+            if (sheet != null && sheet.HasHeading
+                && (sheet.Heading ?? sheet.ReadHeading()).TryGetColumnName(columnIndex, out var columnName))
             {
-                var heading = sheet.Heading ?? sheet.ReadHeading();
-
-                position = $" in column \"{heading.GetColumnName(columnIndex)}\"";
+                position = $" in column \"{columnName}\"";
             }
             else
             {

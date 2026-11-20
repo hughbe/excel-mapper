@@ -245,7 +245,7 @@ public class MapInvalidFallbackAttributeTests
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidValueIntNullClass>());
 
         // Invalid cell value.
-        Assert.Throws<NullReferenceException>(() => sheet.ReadRow<InvalidValueIntNullClass>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidValueIntNullClass>());
     }
 
     public class InvalidValueIntNullClass
@@ -298,7 +298,7 @@ public class MapInvalidFallbackAttributeTests
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidValueIntNullClass>());
 
         // Invalid cell value.
-        Assert.Throws<NullReferenceException>(() => sheet.ReadRow<InvalidValueIntNullClass>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidValueIntNullClass>());
     }
 
     [Fact]

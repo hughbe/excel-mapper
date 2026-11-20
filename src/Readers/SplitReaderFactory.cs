@@ -112,6 +112,8 @@ public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesPr
         private ReadCellResult _readResult;
         private int _currentIndex;
         private int _position;
+        // Whether there are more values to return when splitting without allocating an array.
+        private bool _hasMore;
 
         public bool Start(IExcelDataReader reader, bool preserveFormatting, out int count)
         {
@@ -127,15 +129,19 @@ public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesPr
 
             _readResult = readResult;
 
+            // An empty cell contains no values.
             var stringValue = readResult.GetString();
-            if (stringValue == null)
+            if (string.IsNullOrEmpty(stringValue))
             {
                 count = 0;
+                _hasMore = false;
                 return true;
             }
 
+            _hasMore = true;
+
             // Try to avoid splitting if possible
-            int directCount = Splitter.GetCount(stringValue);
+            int directCount = Splitter.GetCount(stringValue!);
             if (directCount >= 0)
             {
                 count = directCount;
@@ -143,7 +149,7 @@ public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesPr
             }
 
             // Fall back to splitting
-            _values = Splitter.GetValues(stringValue);
+            _values = Splitter.GetValues(stringValue!);
             count = _values.Length;
             return true;
         }
@@ -153,12 +159,23 @@ public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesPr
             _currentIndex++;
             if (_values == null)
             {
-                if (!string.IsNullOrEmpty(_readResult.StringValue) && _position < _readResult.StringValue!.Length)
+                // Keep going until the last segment has been returned. This includes an empty
+                // final segment after a trailing separator, matching string.Split and the count
+                // returned from Start.
+                if (_hasMore)
                 {
-                    var remaining = _readResult.StringValue.AsSpan(_position);
+                    var stringValue = _readResult.StringValue!;
+                    var remaining = stringValue.AsSpan(_position);
                     var (advance, valueStart, valueLength) = Splitter.GetNextValue(remaining);
-                    var value = _readResult.StringValue!.Substring(_position + valueStart, valueLength);
-                    _position += advance >= 0 ? advance : remaining.Length;
+                    var value = stringValue.Substring(_position + valueStart, valueLength);
+                    if (advance >= 0)
+                    {
+                        _position += advance;
+                    }
+                    else
+                    {
+                        _hasMore = false;
+                    }
 
                     result = new ReadCellResult(_readResult.ColumnIndex, value, _readResult.PreserveFormatting);
                     return true;
@@ -182,6 +199,7 @@ public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesPr
             _currentIndex = -1;
             _values = null;
             _position = 0;
+            _hasMore = false;
         }
     }
 }

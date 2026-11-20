@@ -94,7 +94,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
                     TKey? convertedKey = (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
                     if (convertedKey != null)
                     {
-                        var elementValue = (TValue)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, valueResult, PreserveFormatting, member)!;
+                        var elementValue = ValuePipeline.CastValue<TValue>(ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, valueResult, PreserveFormatting, member), sheet, rowIndex, valueResult.ColumnIndex, member);
                         DictionaryFactory.Add(convertedKey, elementValue);
                     }
                 }

@@ -127,7 +127,7 @@ public class MapWithInvalidFallbackTests
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IntValue>());
 
         // Invalid cell value.
-        Assert.Throws<NullReferenceException>(() => sheet.ReadRow<IntValue>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IntValue>());
     }
 
     [Fact]

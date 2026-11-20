@@ -240,7 +240,7 @@ public class MapEmptyFallbackAttributeTests
         Assert.Equal(2, row1.Value);
 
         // Empty cell value.
-        Assert.Throws<NullReferenceException>(() => sheet.ReadRow<EmptyValueIntNullClass>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EmptyValueIntNullClass>());
 
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EmptyValueIntNullClass>());
@@ -293,7 +293,7 @@ public class MapEmptyFallbackAttributeTests
         Assert.Equal(2, row1.Value);
 
         // Empty cell value.
-        Assert.Throws<NullReferenceException>(() => sheet.ReadRow<EmptyValueIntNullClass>());
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EmptyValueIntNullClass>());
 
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EmptyValueIntNullClass>());

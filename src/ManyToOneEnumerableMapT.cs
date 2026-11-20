@@ -82,7 +82,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
             {
                 while (cellsReader.TryGetNext(out var result))
                 {
-                    var elementValue = (TElement?)ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, result, PreserveFormatting, member);
+                    var elementValue = ValuePipeline.CastValue<TElement>(ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, result, PreserveFormatting, member), sheet, rowIndex, result.ColumnIndex, member);
                     EnumerableFactory.Add(elementValue);
                 }
             }

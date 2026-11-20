@@ -64,6 +64,18 @@ internal static class ThrowHelpers
 #endif
     }
 
+    public static void ThrowIfLessThan(int value, int minValue, [CallerArgumentExpression(nameof(value))] string? paramName = null)
+    {
+#if NET6_0_OR_GREATER
+        ArgumentOutOfRangeException.ThrowIfLessThan(value, minValue, paramName);
+#else
+        if (value < minValue)
+        {
+            throw new ArgumentOutOfRangeException(paramName, $"Value cannot be less than {minValue}.");
+        }
+#endif
+    }
+
     public static void ThrowIfLessThanOrEqual(int value, int minValue, [CallerArgumentExpression(nameof(value))] string? paramName = null)
     {
 #if NET6_0_OR_GREATER
