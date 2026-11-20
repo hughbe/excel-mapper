@@ -347,6 +347,7 @@ public class MatchingMapTests
         importer.Configuration.RegisterClassMap<SimpleColumnMatchingClassMap>();
 
         var sheet = importer.ReadSheet();
+        sheet.HasHeading = false;
 
         var row1 = sheet.ReadRow<StringValue>();
         Assert.Equal("Int Value", row1.Value);

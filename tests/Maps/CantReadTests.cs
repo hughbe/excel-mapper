@@ -99,6 +99,7 @@ public class CantReadTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         var sheet = importer.ReadSheet();
+        sheet.HasHeading = false;
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchColumnMatchingPropertyClass>());
         Assert.StartsWith($"Could not read value for member \"Member\" (no columns matching)", ex.Message);
@@ -135,6 +136,7 @@ public class CantReadTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         var sheet = importer.ReadSheet();
+        sheet.HasHeading = false;
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NoSuchColumnMatchingFieldClass>());
         Assert.StartsWith($"Could not read value for member \"Member\" (no columns matching)", ex.Message);

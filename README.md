@@ -260,6 +260,8 @@ if (sheet.TryReadRow<Employee>(out var row2))
 }
 ```
 
+Like `ReadRows`, these read the heading first if the sheet has one and it hasn't been read yet, so the heading row is never mapped as data.
+
 ### Skip Blank Lines
 
 ```csharp
@@ -1131,7 +1133,9 @@ The fluent API provides extensive configuration options:
 - `.WithColumnNames("Name1", "Name2")` - Try multiple column names in order
 - `.WithColumnIndices(0, 1, 2)` - Try multiple indices in order
 - `.WithColumnNameMatching(name => name.Contains("Total"))` - Use predicate
+- `.WithColumnNameMatching(new Regex("total", RegexOptions.IgnoreCase))` - Use regular expression
 - `.WithColumnMatching(matcher)` - Use custom `IExcelColumnMatcher`
+- `.WithColumnsMatching(predicate)`, `.WithColumnsMatching(regex)` or `.WithColumnsMatching(matcher)` - Read every matching column into a collection
 
 **Behavior:**
 - `.MakeOptional()` - Don't throw if column is missing
@@ -1668,6 +1672,13 @@ public class Employee
 }
 ```
 
+The fluent API accepts a predicate or a regular expression:
+
+```csharp
+Map(e => e.QuarterlyScores).WithColumnsMatching(name => name.StartsWith("Q"));
+Map(e => e.QuarterlyScores).WithColumnsMatching(new Regex(@"Q\d+.*Score", RegexOptions.IgnoreCase));
+```
+
 #### Fluent Collection Mapping
 
 ```csharp
@@ -1993,6 +2004,20 @@ sheet.HasHeading = false;  // Disable header row
 
 var employees = sheet.ReadRows<Employee>();
 ```
+
+Types that don't look up columns by name can be auto-mapped without a heading. Primitives are read from the first column, and members can use `[ExcelColumnIndex]`:
+
+```csharp
+public record Employee(
+    [property: ExcelColumnIndex(0)] string Name,
+    [property: ExcelColumnIndex(1)] string Department);
+
+sheet.HasHeading = false;
+var employees = sheet.ReadRows<Employee>();  // No class map needed
+var ids = otherSheet.ReadRows<int>();        // Reads the first column
+```
+
+Auto-mapping a type whose members are matched by column name throws an `ExcelMappingException` on a sheet without a heading.
 
 ### Headers Not in First Row
 
@@ -2718,8 +2743,9 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 - `.WithColumnNames("Name1", "Name2")` - Try multiple names
 - `.WithColumnIndex(0)` - Map by index
 - `.WithColumnIndices(0, 1, 2)` - Try multiple indices
-- `.WithColumnNameMatching(predicate)` - Use predicate
+- `.WithColumnNameMatching(predicate)` / `.WithColumnNameMatching(regex)` - Use predicate or regular expression
 - `.WithColumnMatching(matcher)` - Custom matcher
+- `.WithColumnsMatching(predicate | regex | matcher)` - All matching columns (collections and dictionaries)
 
 **Behavior:**
 - `.MakeOptional()` - Don't throw if missing
