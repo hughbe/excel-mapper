@@ -45,6 +45,14 @@ public class ExcelImporterConfiguration
     /// </summary>
     public bool ValidateDataAnnotations { get; set; }
 
+    /// <summary>
+    /// Gets or sets whether spaces, underscores, hyphens and dots are ignored when a column can't be
+    /// found by its exact name. For example, a property named <c>FirstName</c> then matches a column
+    /// named "First Name", "first_name" or "First-Name". Exact matches are always preferred.
+    /// Default is false.
+    /// </summary>
+    public bool IgnoreSeparatorsInColumnNames { get; set; }
+
 
     internal ExcelImporterConfiguration() { }
 

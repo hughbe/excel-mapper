@@ -42,6 +42,8 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
     <PackageReference Include="System.Collections.Immutable" Version="9.0.9" />
+    <!-- Code page encodings are built in on .NET 8. -->
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.9" />
   </ItemGroup>
 
   <ItemGroup>

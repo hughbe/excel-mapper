@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Text;
 using ExcelDataReader;
 
 namespace ExcelMapper;
@@ -32,6 +33,14 @@ public class ExcelImporter : IDisposable
 
     internal int SheetIndex { get; set; } = -1;
 
+    static ExcelImporter()
+    {
+        // ExcelDataReader needs code page encodings (such as Windows-1252) to read .xls files and
+        // CSV files, but .NET Core and later don't include them by default. Registering the
+        // provider is global, safe to do more than once, and doesn't change the default encoding.
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+    }
+
     /// <summary>
     /// Constructs an importer that reads an Excel file from a path.
     /// </summary>
@@ -45,7 +54,18 @@ public class ExcelImporter : IDisposable
     /// </summary>
     /// <param name="path">A path to the file to read.</param>
     /// <param name="fileType">The type of file.</param>
-    public ExcelImporter(string path, ExcelImporterFileType fileType)
+    public ExcelImporter(string path, ExcelImporterFileType fileType) : this(path, fileType, null)
+    {
+    }
+
+    /// <summary>
+    /// Constructs an importer that reads an Excel or csv file from a path, with options for the
+    /// underlying ExcelDataReader reader such as a password, CSV separators or a fallback encoding.
+    /// </summary>
+    /// <param name="path">A path to the file to read.</param>
+    /// <param name="fileType">The type of file.</param>
+    /// <param name="readerConfiguration">Options for the underlying reader, or null for the defaults.</param>
+    public ExcelImporter(string path, ExcelImporterFileType fileType, ExcelReaderConfiguration? readerConfiguration)
     {
         ThrowHelpers.ThrowIfNull(path, nameof(path));
 
@@ -53,12 +73,7 @@ public class ExcelImporter : IDisposable
         try
         {
             stream = File.OpenRead(path);
-            Reader = fileType switch
-            {
-                ExcelImporterFileType.Excel => ExcelReaderFactory.CreateReader(stream),
-                ExcelImporterFileType.Csv => ExcelReaderFactory.CreateCsvReader(stream),
-                _ => throw new ArgumentException($"Invalid value \"{fileType}\".", nameof(fileType))
-            };
+            Reader = CreateReader(stream, fileType, readerConfiguration);
             _ownedStream = stream;
             stream = null; // Transfer ownership - prevent disposal in catch block
         }
@@ -83,17 +98,30 @@ public class ExcelImporter : IDisposable
     /// </summary>
     /// <param name="stream">A stream containing the file to read.</param>
     /// <param name="fileType">The type of file.</param>
-    public ExcelImporter(Stream stream, ExcelImporterFileType fileType)
+    public ExcelImporter(Stream stream, ExcelImporterFileType fileType) : this(stream, fileType, null)
+    {
+    }
+
+    /// <summary>
+    /// Constructs an importer that reads an Excel or csv file from a stream, with options for the
+    /// underlying ExcelDataReader reader such as a password, CSV separators or a fallback encoding.
+    /// </summary>
+    /// <param name="stream">A stream containing the file to read.</param>
+    /// <param name="fileType">The type of file.</param>
+    /// <param name="readerConfiguration">Options for the underlying reader, or null for the defaults.</param>
+    public ExcelImporter(Stream stream, ExcelImporterFileType fileType, ExcelReaderConfiguration? readerConfiguration)
     {
         ThrowHelpers.ThrowIfNull(stream, nameof(stream));
 
-        Reader = fileType switch
-        {
-            ExcelImporterFileType.Excel => ExcelReaderFactory.CreateReader(stream),
-            ExcelImporterFileType.Csv => ExcelReaderFactory.CreateCsvReader(stream),
-            _ => throw new ArgumentException($"Invalid value \"{fileType}\".", nameof(fileType))
-        };
+        Reader = CreateReader(stream, fileType, readerConfiguration);
     }
+
+    private static IExcelDataReader CreateReader(Stream stream, ExcelImporterFileType fileType, ExcelReaderConfiguration? readerConfiguration) => fileType switch
+    {
+        ExcelImporterFileType.Excel => ExcelReaderFactory.CreateReader(stream, readerConfiguration),
+        ExcelImporterFileType.Csv => ExcelReaderFactory.CreateCsvReader(stream, readerConfiguration),
+        _ => throw new ArgumentException($"Invalid value \"{fileType}\".", nameof(fileType))
+    };
 
     /// <summary>
     /// Constructs an importer that reads an Excel file from an existing data reader.

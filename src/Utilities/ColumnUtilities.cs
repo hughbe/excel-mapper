@@ -57,11 +57,68 @@ internal static class ColumnUtilities
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
         }
 
+        if (TryGetExactColumnIndex(sheet, sheet.Heading, columnName, comparison, out columnIndex))
+        {
+            return true;
+        }
+
+        // Optionally fall back to ignoring separators, for example matching "First Name" to FirstName.
+        if (sheet.Configuration.IgnoreSeparatorsInColumnNames)
+        {
+            var normalizedName = RemoveSeparators(columnName);
+            var columnNames = sheet.Heading.ColumnNames;
+            for (int i = 0; i < columnNames.Count; i++)
+            {
+                if (string.Equals(RemoveSeparators(columnNames[i]), normalizedName, comparison))
+                {
+                    columnIndex = i + sheet.Heading.ColumnOffset;
+                    return true;
+                }
+            }
+        }
+
+        columnIndex = -1;
+        return false;
+    }
+
+    private static bool IsSeparator(char c) => char.IsWhiteSpace(c) || c == '_' || c == '-' || c == '.';
+
+    internal static string RemoveSeparators(string value)
+    {
+        var hasSeparator = false;
+        foreach (var c in value)
+        {
+            if (IsSeparator(c))
+            {
+                hasSeparator = true;
+                break;
+            }
+        }
+
+        if (!hasSeparator)
+        {
+            return value;
+        }
+
+        var builder = new System.Text.StringBuilder(value.Length);
+        foreach (var c in value)
+        {
+            if (!IsSeparator(c))
+            {
+                builder.Append(c);
+            }
+        }
+
+        return builder.ToString();
+    }
+
+    private static bool TryGetExactColumnIndex(ExcelSheet sheet, ExcelHeading heading, string columnName, StringComparison comparison, out int columnIndex)
+    {
         // ExcelSheet.TryGetColumnIndex defaults to OrdinalIgnoreCase.
         // Ordinal comparison can be optimised by ensuring the column name is in the correct case.
         if (comparison == StringComparison.OrdinalIgnoreCase || comparison == StringComparison.Ordinal)
         {
-            if (!sheet.Heading.TryGetColumnIndex(columnName, out columnIndex))
+            if (!heading.TryGetColumnIndex(columnName, out columnIndex))
             {
                 return false;
             }
@@ -69,7 +126,7 @@ internal static class ColumnUtilities
             if (comparison != StringComparison.OrdinalIgnoreCase)
             {
                 // Verify that the comparison matches.
-                var actualName = sheet.Heading.GetColumnName(columnIndex);
+                var actualName = heading.GetColumnName(columnIndex);
                 if (!string.Equals(actualName, columnName, comparison))
                 {
                     columnIndex = -1;
@@ -81,12 +138,12 @@ internal static class ColumnUtilities
         }
         else
         {
-            var columnNames = sheet.Heading.ColumnNames;
+            var columnNames = heading.ColumnNames;
             for (int i = 0; i < columnNames.Count; i++)
             {
                 if (string.Equals(columnNames[i], columnName, comparison))
                 {
-                    columnIndex = i + sheet.Heading.ColumnOffset;
+                    columnIndex = i + heading.ColumnOffset;
                     return true;
                 }
             }
