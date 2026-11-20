@@ -338,8 +338,7 @@ public class ExcelSheet
                 throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\".");
             }
 
-            classMap = map;
-            Importer.Configuration.RegisterClassMap(typeof(T), classMap);
+            classMap = Importer.Configuration.RegisterAutoMappedClassMap(typeof(T), map);
         }
 
         var result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out var valueObject);
