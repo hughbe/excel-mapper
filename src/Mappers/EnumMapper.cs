@@ -51,15 +51,6 @@ public class EnumMapper : ICellMapper
         try
         {
             var result = Enum.Parse(EnumType, stringValue!, IgnoreCase);
-
-            // Enum.Parse accepts any number, even if it isn't a defined value (or, for flags
-            // enums, a combination of defined values). Such values format as a number.
-            var formatted = result.ToString() ?? string.Empty;
-            if (formatted.Length > 0 && (char.IsDigit(formatted[0]) || formatted[0] == '-'))
-            {
-                return CellMapperResult.Invalid(new ArgumentException($"Value \"{stringValue}\" is not defined in enum {EnumType}."));
-            }
-
             return CellMapperResult.Success(result);
         }
         catch (Exception exception)
