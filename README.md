@@ -49,6 +49,7 @@ That's it! ExcelMapper automatically maps columns to properties by name.
 - [Reading Rows](#reading-rows)
 - [Mapping Strategies](#mapping-strategies)
   - [Automatic Mapping](#automatic-mapping)
+  - [Records and Constructors](#records-and-constructors)
   - [Attribute-Based Mapping](#attribute-based-mapping)
   - [Fluent API Mapping](#fluent-api-mapping)
 - [Error Handling](#error-handling)
@@ -301,10 +302,11 @@ ExcelMapper supports three approaches to mapping Excel rows to objects.
 ExcelMapper automatically maps **public properties and fields** by matching column names. Column name matching is **case-insensitive by default** using `StringComparison.OrdinalIgnoreCase`.
 
 **Important:** 
-- Only **public instance properties with setters** are auto-mapped
+- Only **public instance properties with setters** are auto-mapped, plus read-only properties that match a constructor parameter (see [Records and Constructors](#records-and-constructors))
 - Only **public instance fields** are auto-mapped
-- Static members, read-only properties, and indexers are ignored
+- Static members, other read-only properties, and indexers are ignored
 - Use `[ExcelIgnore]` to exclude specific properties/fields
+
 **Example:**
 
 | Name          | Department  | Position        | HireDate   | Salary | Active |
@@ -330,6 +332,59 @@ var employees = sheet.ReadRows<Employee>().ToArray();
 Console.WriteLine(employees[0].Name);       // Alice Johnson
 Console.WriteLine(employees[0].Position);   // Senior Engineer
 Console.WriteLine(employees[1].Salary);     // 78000
+```
+
+### Records and Constructors
+
+Types without a public parameterless constructor, such as positional records or classes with get-only properties, are created through a constructor:
+
+| Name          | Department  | Salary |
+|---------------|-------------|--------|
+| Alice Johnson | Engineering | 95000  |
+
+```csharp
+public record Employee(string Name, string Department, decimal Salary);
+
+public class Product
+{
+    public Product(string name, decimal price)
+    {
+        Name = name;
+        Price = price;
+    }
+
+    public string Name { get; }
+    public decimal Price { get; }
+    public string Label => $"{Name} ({Price:C})";  // Computed, not mapped
+}
+
+var employees = sheet.ReadRows<Employee>().ToArray();
+```
+
+How the constructor is chosen and called:
+- Each parameter is matched to a mapped property or field with the same name (case-insensitive) and a compatible type
+- Every parameter must match a mapped member or have a default value; the public constructor matching the most members is used
+- Mapped members that aren't constructor parameters are set afterwards, so a record can have extra settable properties
+- If an optional column is missing (for example `[property: ExcelOptional]` on a record parameter), the parameter's default value is used
+- Read-only properties can be mapped only if they match a constructor parameter
+- If the constructor throws, an `ExcelMappingException` is thrown with the original exception as `InnerException`
+
+Column attributes go on the generated property of a positional record:
+
+```csharp
+public record Employee(
+    [property: ExcelColumnName("Full Name")] string Name,
+    [property: ExcelOptional] decimal Salary = 0);
+```
+
+Records and get-only classes work with the fluent API as well:
+
+```csharp
+importer.Configuration.RegisterClassMap<Product>(map =>
+{
+    map.Map(p => p.Name).WithColumnName("Product Name");
+    map.Map(p => p.Price).WithColumnName("Unit Price");
+});
 ```
 
 ### Attribute-Based Mapping
@@ -2218,14 +2273,14 @@ public class EventMap : ExcelClassMap<Event>
 
 ### Complex Types
 - Classes with public properties/fields
-- Record types (C# 9+)
+- Record types (C# 9+) and classes or structs with get-only properties set through a constructor
 - Nested objects
 - `ExpandoObject` for dynamic scenarios
 
 **Record Type Example:**
 
 ```csharp
-// Records work seamlessly with ExcelMapper
+// Records are created through their constructor (see Records and Constructors)
 public record Employee(string Name, string Department, decimal Salary);
 
 using var importer = new ExcelImporter("employees.xlsx");

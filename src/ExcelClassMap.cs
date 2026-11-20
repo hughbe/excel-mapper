@@ -42,12 +42,14 @@ public class ExcelClassMap : IMap
     /// <summary>
     /// Gets the collection of property maps.
     /// </summary>
-    public Collection<ExcelPropertyMap> Properties { get; } = new NonNullCollection<ExcelPropertyMap>();
+    public Collection<ExcelPropertyMap> Properties { get; } = new PropertyMapCollection();
 
     /// <summary>
     /// Gets the default strategy to use when the value of a cell is empty.
     /// </summary>
     public FallbackStrategy EmptyValueStrategy { get; private protected set; }
+
+    private ConstructionPlan? _constructionPlan;
 
     /// <inheritdoc/>
     public virtual bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
@@ -58,17 +60,200 @@ public class ExcelClassMap : IMap
             return _valueMap.TryGetValue(sheet, rowIndex, reader, member, out result);
         }
 
-        // Otherwise, create an instance of the object and populate its properties.
-        var instance = Activator.CreateInstance(Type)!;
-        foreach (var property in Properties)
+        var plan = GetConstructionPlan();
+        if (plan.Constructor is null)
         {
+            // Create an instance of the object and populate its properties.
+            var instance = Activator.CreateInstance(Type)!;
+            foreach (var property in Properties)
+            {
+                if (property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out var value))
+                {
+                    property.SetValueFactory(instance, value);
+                }
+            }
+
+            result = instance;
+            return true;
+        }
+
+        result = CreateUsingConstructor(plan, sheet, rowIndex, reader);
+        return true;
+    }
+
+    private object CreateUsingConstructor(ConstructionPlan plan, ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+    {
+        // Read every member first, as constructor arguments must be known before the object exists.
+        var count = Properties.Count;
+        var values = new object?[count];
+        var hasValues = new bool[count];
+        var arguments = (object?[])plan.DefaultArguments.Clone();
+        for (int i = 0; i < count; i++)
+        {
+            var property = Properties[i];
             if (property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out var value))
             {
-                property.SetValueFactory(instance, value);
+                var parameterIndex = plan.PropertyParameterIndices[i];
+                if (parameterIndex >= 0)
+                {
+                    arguments[parameterIndex] = value;
+                }
+                else
+                {
+                    values[i] = value;
+                    hasValues[i] = true;
+                }
             }
         }
 
-        result = instance;
-        return true;
+        object instance;
+        try
+        {
+            instance = plan.Constructor!.Invoke(arguments);
+        }
+        catch (TargetInvocationException ex) when (ex.InnerException is not null)
+        {
+            throw new ExcelMappingException($"Could not create an instance of type \"{Type}\": {ex.InnerException.Message}", sheet, rowIndex, -1, ex.InnerException);
+        }
+
+        // Set any members that weren't passed to the constructor.
+        for (int i = 0; i < count; i++)
+        {
+            if (hasValues[i])
+            {
+                Properties[i].SetValueFactory(instance, values[i]!);
+            }
+        }
+
+        return instance;
+    }
+
+    private ConstructionPlan GetConstructionPlan()
+    {
+        var properties = (PropertyMapCollection)Properties;
+        var plan = _constructionPlan;
+        if (plan is null || plan.Version != properties.Version)
+        {
+            plan = CreateConstructionPlan(properties.Version);
+            _constructionPlan = plan;
+        }
+
+        return plan;
+    }
+
+    private ConstructionPlan CreateConstructionPlan(int version)
+    {
+        var hasReadOnlyMember = false;
+        foreach (var property in Properties)
+        {
+            if (property.IsReadOnly)
+            {
+                hasReadOnlyMember = true;
+                break;
+            }
+        }
+
+        // Prefer a parameterless constructor and setting members, unless a member can only be
+        // set through a constructor.
+        if (!hasReadOnlyMember && ConstructorUtilities.HasParameterlessConstructor(Type))
+        {
+            return new ConstructionPlan(version, null, [], []);
+        }
+
+        if (Type.IsInterface || Type.IsAbstract)
+        {
+            throw new ExcelMappingException($"Cannot create an instance of type \"{Type}\" as it is an interface or abstract class.");
+        }
+
+        var members = new MemberInfo[Properties.Count];
+        for (int i = 0; i < members.Length; i++)
+        {
+            members[i] = Properties[i].Member;
+        }
+
+        var constructor = ConstructorUtilities.FindConstructor(Type, members, out var parameterMemberIndices);
+        if (constructor is null)
+        {
+            throw new ExcelMappingException(
+                $"Cannot create an instance of type \"{Type}\". It needs a public parameterless constructor, or a public " +
+                "constructor whose parameters each match a mapped property or field (by name and type) or have a default value.");
+        }
+
+        var propertyParameterIndices = new int[members.Length];
+        for (int i = 0; i < propertyParameterIndices.Length; i++)
+        {
+            propertyParameterIndices[i] = -1;
+        }
+        var parameters = constructor.GetParameters();
+        var defaultArguments = new object?[parameters.Length];
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            if (parameterMemberIndices[i] >= 0)
+            {
+                propertyParameterIndices[parameterMemberIndices[i]] = i;
+            }
+
+            // Reflection passes a zero-initialized value for null value type arguments.
+            defaultArguments[i] = parameters[i].HasDefaultValue ? parameters[i].DefaultValue : null;
+        }
+
+        for (int i = 0; i < members.Length; i++)
+        {
+            if (propertyParameterIndices[i] == -1 && Properties[i].IsReadOnly)
+            {
+                throw new ExcelMappingException($"Property \"{members[i].Name}\" of type \"{Type}\" is read-only and is not a parameter of the constructor {constructor}.");
+            }
+        }
+
+        return new ConstructionPlan(version, constructor, propertyParameterIndices, defaultArguments);
+    }
+
+    private sealed class ConstructionPlan(int version, ConstructorInfo? constructor, int[] propertyParameterIndices, object?[] defaultArguments)
+    {
+        public int Version { get; } = version;
+
+        /// <summary>
+        /// The constructor to call, or null to use the parameterless constructor.
+        /// </summary>
+        public ConstructorInfo? Constructor { get; } = constructor;
+
+        /// <summary>
+        /// For each property map, the index of the constructor parameter it is passed to, or -1.
+        /// </summary>
+        public int[] PropertyParameterIndices { get; } = propertyParameterIndices;
+
+        public object?[] DefaultArguments { get; } = defaultArguments;
+    }
+
+    /// <summary>
+    /// A collection of property maps that tracks changes so the construction plan can be updated.
+    /// </summary>
+    private sealed class PropertyMapCollection : NonNullCollection<ExcelPropertyMap>
+    {
+        public int Version { get; private set; }
+
+        protected override void InsertItem(int index, ExcelPropertyMap item)
+        {
+            base.InsertItem(index, item);
+            Version++;
+        }
+
+        protected override void SetItem(int index, ExcelPropertyMap item)
+        {
+            base.SetItem(index, item);
+            Version++;
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            base.RemoveItem(index);
+            Version++;
+        }
+
+        protected override void ClearItems()
+        {
+            base.ClearItems();
+            Version++;
+        }
     }
 }
