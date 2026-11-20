@@ -11,6 +11,11 @@ namespace ExcelMapper;
 /// </summary>
 public class ManyToOneMultidimensionalIndexerMapT<TValue> : IMultidimensionalIndexerMap
 {
+    // Factories build one value at a time, so a map shared between importers (for example
+    // a class map instance registered in several importers used concurrently) must not
+    // build two values at once.
+    private readonly object _buildLock = new();
+
     public ManyToOneMultidimensionalIndexerMapT(IMultidimensionalArrayFactory<TValue> arrayFactory)
     {
         ThrowHelpers.ThrowIfNull(arrayFactory, nameof(arrayFactory));
@@ -60,23 +65,26 @@ public class ManyToOneMultidimensionalIndexerMapT<TValue> : IMultidimensionalInd
             return false;
         }
 
-        ArrayFactory.Begin(lengths);
-        try
+        lock (_buildLock)
         {
-            foreach (var map in Values)
+            ArrayFactory.Begin(lengths);
+            try
             {
-                if (map.Value.TryGetValue(sheet, rowIndex, reader, member, out var elementValue))
+                foreach (var map in Values)
                 {
-                    ArrayFactory.Set(map.Key, (TValue)elementValue);
+                    if (map.Value.TryGetValue(sheet, rowIndex, reader, member, out var elementValue))
+                    {
+                        ArrayFactory.Set(map.Key, (TValue)elementValue);
+                    }
                 }
-            }
 
-            value = ArrayFactory.End();
-            return true;
-        }
-        finally
-        {
-            ArrayFactory.Reset();
+                value = ArrayFactory.End();
+                return true;
+            }
+            finally
+            {
+                ArrayFactory.Reset();
+            }
         }
     }
 }

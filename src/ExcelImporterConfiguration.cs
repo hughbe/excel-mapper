@@ -11,6 +11,10 @@ public class ExcelImporterConfiguration
 {
     private ConcurrentDictionary<Type, IMap> ClassMaps { get; } = new();
 
+    // Types whose maps were created by auto-mapping rather than registered by the user. These can be
+    // replaced by a map the user registers later.
+    private ConcurrentDictionary<Type, IMap> AutoMappedClassMaps { get; } = new();
+
     private int _maxColumnsPerSheet = 10000;
 
     /// <summary>
@@ -153,7 +157,30 @@ public class ExcelImporterConfiguration
         
         if (!ClassMaps.TryAdd(classType, classMap))
         {
+            // A map created implicitly by auto-mapping (for example by an earlier call to ReadRows)
+            // can be replaced by one the user registers.
+            if (AutoMappedClassMaps.TryRemove(classType, out var autoMappedClassMap) &&
+                ClassMaps.TryUpdate(classType, classMap, autoMappedClassMap))
+            {
+                return;
+            }
+
             throw new ExcelMappingException($"Class map already exists for type \"{classType.FullName}\"");
         }
+    }
+
+    /// <summary>
+    /// Registers a map created by auto-mapping. Unlike a map registered by the user, this can be
+    /// replaced by a later call to RegisterClassMap.
+    /// </summary>
+    internal IMap RegisterAutoMappedClassMap(Type classType, IMap classMap)
+    {
+        var registered = ClassMaps.GetOrAdd(classType, classMap);
+        if (ReferenceEquals(registered, classMap))
+        {
+            AutoMappedClassMaps[classType] = classMap;
+        }
+
+        return registered;
     }
 }
