@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using ExcelMapper.Readers;
 
 namespace ExcelMapper;
@@ -28,6 +29,17 @@ public static class IOneToOneMapExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithColumnMatching<TMap>(this TMap map, IExcelColumnMatcher matcher) where TMap : IOneToOneMap
         => map.WithReaderFactory(new ColumnsMatchingReaderFactory(matcher));
+
+    /// <summary>
+    /// Sets the reader of the map to read the value of a single cell for the first column whose name
+    /// matches a regular expression.
+    /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="regex">The regular expression that the column name must match.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static TMap WithColumnNameMatching<TMap>(this TMap map, Regex regex) where TMap : IOneToOneMap
+        => map.WithColumnMatching(new RegexColumnMatcher(regex));
 
     /// <summary>
     /// Sets the reader of the map to read the value of a single cell contained in the column with

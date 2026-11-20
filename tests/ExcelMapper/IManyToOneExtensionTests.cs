@@ -156,7 +156,7 @@ public class IManyToOneMapExtensionsTests
         var columnIndices = new int[] { 0, 1 };
         var map = new CustomManyToOneMap().WithColumnNames("ColumnNames");
 
-        Assert.Throws<ArgumentNullException>("matcher", () => map.WithColumnsMatching(null!));
+        Assert.Throws<ArgumentNullException>("matcher", () => map.WithColumnsMatching((IExcelColumnMatcher)null!));
     }
 
     [Fact]

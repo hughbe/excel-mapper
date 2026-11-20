@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using ExcelMapper.Readers;
 
 namespace ExcelMapper;
@@ -59,6 +60,24 @@ public static class IManyToOneMapExtensions
     /// <returns>The map that invoked this method.</returns>
     public static TMap WithColumnsMatching<TMap>(this TMap map, IExcelColumnMatcher matcher) where TMap : IManyToOneMap
         => map.WithReaderFactory(new ColumnsMatchingReaderFactory(matcher));
+
+    /// <summary>
+    /// Sets the reader of the map to read the values of one or more cells contained
+    /// in the columns whose names match a predicate.
+    /// </summary>
+    /// <param name="predicate">A predicate which returns whether a column name matches.</param>
+    /// <returns>The map that invoked this method.</returns>
+    public static TMap WithColumnsMatching<TMap>(this TMap map, Func<string, bool> predicate) where TMap : IManyToOneMap
+        => map.WithColumnsMatching(new PredicateColumnMatcher(predicate));
+
+    /// <summary>
+    /// Sets the reader of the map to read the values of one or more cells contained
+    /// in the columns whose names match a regular expression.
+    /// </summary>
+    /// <param name="regex">The regular expression that column names must match.</param>
+    /// <returns>The map that invoked this method.</returns>
+    public static TMap WithColumnsMatching<TMap>(this TMap map, Regex regex) where TMap : IManyToOneMap
+        => map.WithColumnsMatching(new RegexColumnMatcher(regex));
 
     /// <summary>
     /// Sets the reader of the map to read the values of one or more cells contained
