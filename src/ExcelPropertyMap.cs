@@ -30,23 +30,36 @@ public class ExcelPropertyMap
 
         if (member is PropertyInfo property)
         {
-            // Property must have a setter.
-            if (!property.CanWrite)
-            {
-                throw new ArgumentException($"Property \"{member.Name}\" is read-only.", nameof(member));
-            }
-            // Property must be an instance property.
-            if (property.SetMethod!.IsStatic)
-            {
-                throw new ArgumentException($"Property \"{member.Name}\" cannot be static.", nameof(member));
-            }
             // Property must not be an indexer.
             if (property.GetIndexParameters().Length > 0)
             {
                 throw new ArgumentException($"Property \"{member.Name}\" is an indexer and cannot be mapped.", nameof(member));
             }
 
-            SetValueFactory = property.SetValue;
+            if (property.CanWrite)
+            {
+                // Property must be an instance property.
+                if (property.SetMethod!.IsStatic)
+                {
+                    throw new ArgumentException($"Property \"{member.Name}\" cannot be static.", nameof(member));
+                }
+
+                SetValueFactory = property.SetValue;
+            }
+            else
+            {
+                // A read-only property can only be mapped if its value can be passed to a
+                // constructor parameter with the same name (for example a positional record).
+                var type = property.ReflectedType ?? property.DeclaringType!;
+                if (property.GetMethod is null || property.GetMethod.IsStatic ||
+                    !ConstructorUtilities.IsConstructorParameter(type, property.Name, property.PropertyType))
+                {
+                    throw new ArgumentException($"Property \"{member.Name}\" is read-only and does not match a constructor parameter.", nameof(member));
+                }
+
+                IsReadOnly = true;
+                SetValueFactory = (_, _) => throw new InvalidOperationException($"Property \"{member.Name}\" is read-only and can only be set through a constructor parameter.");
+            }
         }
         else if (member is FieldInfo field)
         {
@@ -67,6 +80,12 @@ public class ExcelPropertyMap
     /// Gets the delegate used to set the value of the member.
     /// </summary>
     public MemberSetValueDelegate SetValueFactory { get; }
+
+    /// <summary>
+    /// Gets whether the member is a read-only property that is set through a constructor parameter
+    /// rather than <see cref="SetValueFactory"/>.
+    /// </summary>
+    public bool IsReadOnly { get; }
 
     /// <summary>
     /// Gets the map used to map the member.

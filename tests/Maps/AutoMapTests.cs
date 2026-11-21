@@ -288,22 +288,28 @@ public class AutoMapTests
     }
 
     [Fact]
-    public void ReadRow_AutoMappedClassWithConstructor_ThrowsExcelMappingException()
+    public void ReadRow_AutoMappedClassWithConstructor_Success()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ClassWithConstructor>());
+        var row = sheet.ReadRow<ClassWithConstructor>();
+        Assert.Equal("value", row.Value);
+        Assert.True(row.ConstructorCalled);
     }
 
     private class ClassWithConstructor
     {
         public string Value { get; set; } = default!;
 
+        public bool ConstructorCalled { get; }
+
         public ClassWithConstructor(string value)
         {
+            Value = value;
+            ConstructorCalled = true;
         }
     }
 

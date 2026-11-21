@@ -49,6 +49,7 @@ That's it! ExcelMapper automatically maps columns to properties by name.
 - [Reading Rows](#reading-rows)
 - [Mapping Strategies](#mapping-strategies)
   - [Automatic Mapping](#automatic-mapping)
+  - [Records and Constructors](#records-and-constructors)
   - [Attribute-Based Mapping](#attribute-based-mapping)
   - [Fluent API Mapping](#fluent-api-mapping)
 - [Error Handling](#error-handling)
@@ -301,10 +302,11 @@ ExcelMapper supports three approaches to mapping Excel rows to objects.
 ExcelMapper automatically maps **public properties and fields** by matching column names. Column name matching is **case-insensitive by default** using `StringComparison.OrdinalIgnoreCase`.
 
 **Important:** 
-- Only **public instance properties with setters** are auto-mapped
+- Only **public instance properties with setters** are auto-mapped, plus read-only properties that match a constructor parameter (see [Records and Constructors](#records-and-constructors))
 - Only **public instance fields** are auto-mapped
-- Static members, read-only properties, and indexers are ignored
+- Static members, other read-only properties, and indexers are ignored
 - Use `[ExcelIgnore]` to exclude specific properties/fields
+
 **Example:**
 
 | Name          | Department  | Position        | HireDate   | Salary | Active |
@@ -330,6 +332,59 @@ var employees = sheet.ReadRows<Employee>().ToArray();
 Console.WriteLine(employees[0].Name);       // Alice Johnson
 Console.WriteLine(employees[0].Position);   // Senior Engineer
 Console.WriteLine(employees[1].Salary);     // 78000
+```
+
+### Records and Constructors
+
+Types without a public parameterless constructor, such as positional records or classes with get-only properties, are created through a constructor:
+
+| Name          | Department  | Salary |
+|---------------|-------------|--------|
+| Alice Johnson | Engineering | 95000  |
+
+```csharp
+public record Employee(string Name, string Department, decimal Salary);
+
+public class Product
+{
+    public Product(string name, decimal price)
+    {
+        Name = name;
+        Price = price;
+    }
+
+    public string Name { get; }
+    public decimal Price { get; }
+    public string Label => $"{Name} ({Price:C})";  // Computed, not mapped
+}
+
+var employees = sheet.ReadRows<Employee>().ToArray();
+```
+
+How the constructor is chosen and called:
+- Each parameter is matched to a mapped property or field with the same name (case-insensitive) and a compatible type
+- Every parameter must match a mapped member or have a default value; the public constructor matching the most members is used
+- Mapped members that aren't constructor parameters are set afterwards, so a record can have extra settable properties
+- If an optional column is missing (for example `[property: ExcelOptional]` on a record parameter), the parameter's default value is used
+- Read-only properties can be mapped only if they match a constructor parameter
+- If the constructor throws, an `ExcelMappingException` is thrown with the original exception as `InnerException`
+
+Column attributes go on the generated property of a positional record:
+
+```csharp
+public record Employee(
+    [property: ExcelColumnName("Full Name")] string Name,
+    [property: ExcelOptional] decimal Salary = 0);
+```
+
+Records and get-only classes work with the fluent API as well:
+
+```csharp
+importer.Configuration.RegisterClassMap<Product>(map =>
+{
+    map.Map(p => p.Name).WithColumnName("Product Name");
+    map.Map(p => p.Price).WithColumnName("Unit Price");
+});
 ```
 
 ### Attribute-Based Mapping
@@ -1232,6 +1287,27 @@ This is especially useful for:
 
 ## Error Handling
 
+### Error Messages and Cell Locations
+
+When a cell can't be mapped, `ExcelMappingException` reports where the problem is the way Excel shows it: a cell address when the column is known, otherwise a one-based row number.
+
+```csharp
+try
+{
+    var employees = sheet.ReadRows<Employee>().ToArray();
+}
+catch (ExcelMappingException ex)
+{
+    // "Cannot assign "abc" to member "YearsOfService" of type "System.Int32"
+    //  in column "YearsOfService" at cell C3 in sheet "Employees"."
+    Console.WriteLine(ex.Message);
+
+    Console.WriteLine(ex.CellAddress); // "C3" (null if the row or column is unknown)
+    Console.WriteLine(ex.RowIndex);    // 2 (zero-based)
+    Console.WriteLine(ex.ColumnIndex); // 2 (zero-based)
+}
+```
+
 ### Nullable Types and Fallbacks
 
 By default:
@@ -1989,7 +2065,12 @@ sheet.DataRange = new ExcelRange("A:C");  // All rows, columns A-C
 
 // Row ranges  
 sheet.DataRange = new ExcelRange("5:20");  // Rows 5-20, all columns
+
+// Absolute references are accepted too
+sheet.DataRange = new ExcelRange("$B$2:$D$10");  // Same as "B2:D10"
 ```
+
+Column letters are case-insensitive. Address strings must stay within the limits of an Excel worksheet (rows 1 to 1,048,576 and columns A to XFD). For larger CSV files, use the `Range` or index-based constructors instead.
 
 **Important Notes:**
 - `DataRange` must be set **before** calling `ReadHeading()` or `ReadRows()`
@@ -2033,6 +2114,15 @@ if (ExcelRange.TryParse("A1:B10", out var range2))
 {
     sheet.DataRange = range2;
 }
+
+// ToString returns the Excel address when the range can be written as one
+Console.WriteLine(ExcelRange.Parse("$B$2:$D$10")); // "B2:D10"
+
+// Ranges compare by value
+Console.WriteLine(ExcelRange.Parse("A:C") == new ExcelRange(Range.All, 0..3)); // True
+
+// default(ExcelRange) means every row and column, the same as new ExcelRange()
+sheet.DataRange = default;
 ```
 
 ## Performance Tips
@@ -2183,14 +2273,14 @@ public class EventMap : ExcelClassMap<Event>
 
 ### Complex Types
 - Classes with public properties/fields
-- Record types (C# 9+)
+- Record types (C# 9+) and classes or structs with get-only properties set through a constructor
 - Nested objects
 - `ExpandoObject` for dynamic scenarios
 
 **Record Type Example:**
 
 ```csharp
-// Records work seamlessly with ExcelMapper
+// Records are created through their constructor (see Records and Constructors)
 public record Employee(string Name, string Department, decimal Salary);
 
 using var importer = new ExcelImporter("employees.xlsx");
@@ -2521,9 +2611,10 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
    {
        public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member)
        {
-           throw new InvalidOperationException(
-               $"Invalid data in row {rowIndex}, column {readResult.ColumnName}: {readResult.StringValue}"
-           );
+           throw new ExcelMappingException(
+               $"Invalid data \"{readResult.StringValue}\" for {member?.Name}",
+               sheet, rowIndex, readResult.ColumnIndex, exception);
+           // Message: Invalid data "abc" for Salary in column "Salary" at cell D5 in sheet "Employees".
        }
    }
    ```
@@ -2570,6 +2661,13 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 - `TryParse(string, out ExcelRange)` - Try parse Excel address string (returns bool)
 - `Rows` - Row range (System.Range)
 - `Columns` - Column range (System.Range)
+- `ToString()` - Excel address such as "A1:B10", "A:C" or "1:5" when the range can be written as one
+- Equality: `Equals`, `==` and `!=` compare rows and columns; `default(ExcelRange)` means all rows and columns
+
+**`ExcelMappingException`** - Thrown when a sheet or cell can't be mapped
+- `CellAddress` - Excel address of the cell, such as "B11" (null if unknown)
+- `RowIndex` / `ColumnIndex` - Zero-based row and column of the cell (-1 if unknown)
+- `Sheet` - The sheet being read
 
 **`ExcelImporterConfiguration`** - Configuration settings
 - `RegisterClassMap<T>()` - Register type-specific mapping

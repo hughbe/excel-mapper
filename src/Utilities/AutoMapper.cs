@@ -791,7 +791,7 @@ public static class AutoMapper
     private static bool TryCreateObjectMap<T>(FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ExcelClassMap<T>? classMap, HashSet<Type>? typeStack)
     {
         Type type = typeof(T);
-        if (!CanConstructObject(type))
+        if (!CanConstructObjectMap(type))
         {
             classMap = null;
             return false;
@@ -813,7 +813,7 @@ public static class AutoMapper
             // Process properties
             foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                if (!ShouldAutoMapProperty(property))
+                if (!ShouldAutoMapProperty(type, property))
                 {
                     continue;
                 }
@@ -900,28 +900,52 @@ public static class AutoMapper
         return true;
     }
 
-    private static bool ShouldAutoMapProperty(PropertyInfo property)
+    private static bool ShouldAutoMapProperty(Type type, PropertyInfo property)
     {
-        // Property must have a setter.
-        if (!property.CanWrite)
-        {
-            return false;
-        }
-        // Property must be a public instance property.
-        if (!property.SetMethod!.IsPublic || property.SetMethod.IsStatic)
-        {
-            return false;
-        }
-
         // Property must not be an indexer.
         if (property.GetIndexParameters().Length > 0)
         {
             return false;
         }
 
-        // Otherwise, this property can be mapped.
-        return true;
+        // Property must have a public instance setter...
+        if (property.CanWrite && property.SetMethod!.IsPublic && !property.SetMethod.IsStatic)
+        {
+            return true;
+        }
+
+        // ...or be a read-only property that is set through a constructor parameter, for example
+        // a positional record or a class with get-only properties.
+        return !property.CanWrite
+            && property.GetMethod is { IsPublic: true, IsStatic: false }
+            && CanUseConstructorParameters(type)
+            && ConstructorUtilities.IsConstructorParameter(type, property.Name, property.PropertyType);
     }
+
+    /// <summary>
+    /// Gets whether an object map can create instances of the type, either through a parameterless
+    /// constructor or a constructor whose parameters match its properties and fields.
+    /// </summary>
+    private static bool CanConstructObjectMap(Type type)
+    {
+        if (CanConstructObject(type))
+        {
+            return true;
+        }
+
+        if (type.IsInterface || type.IsAbstract || !CanUseConstructorParameters(type))
+        {
+            return false;
+        }
+
+        return ConstructorUtilities.FindConstructor(type, ConstructorUtilities.GetReadableMembers(type), out _) is not null;
+    }
+
+    /// <summary>
+    /// Collections (such as Dictionary or BitArray) are mapped by the collection logic, so their
+    /// constructor parameters (such as "comparer" or "length") must not be treated as members.
+    /// </summary>
+    private static bool CanUseConstructorParameters(Type type) => !typeof(IEnumerable).IsAssignableFrom(type);
 
     private static FallbackStrategy GetEmptyValueStrategy(IMap map)
     {
