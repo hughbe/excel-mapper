@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace ExcelMapper;
@@ -20,6 +21,10 @@ public class ExcelPropertyMap
     /// <param name="member"></param>
     /// <param name="map"></param>
     /// <exception cref="ArgumentException"></exception>
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification =
+        "Only read-only properties check the constructors of their type, which is the type of the class map " +
+        "they're added to, and ExcelClassMap keeps that type's public constructors. If they were removed anyway, " +
+        "this throws an ArgumentException rather than mapping incorrectly.")]
     public ExcelPropertyMap(MemberInfo member, IMap map)
     {
         ThrowHelpers.ThrowIfNull(member, nameof(member));

@@ -6,6 +6,8 @@ using ExcelMapper.Readers;
 
 namespace ExcelMapper.Utilities;
 
+[RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+[RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
 internal static class ExpressionAutoMapper
 {
     private static Stack<IMappedExpression> BuildExpressionStack(Expression expression)
@@ -364,6 +366,8 @@ internal interface IMappedExpression
     ICellsReaderFactory? GetDefaultCellsReaderFactory();
 }
 
+[RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+[RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
 internal class MappedParameterExpression : IMappedExpression
 {
     [ExcludeFromCodeCoverage]
@@ -387,6 +391,8 @@ internal class MappedParameterExpression : IMappedExpression
     public ICellsReaderFactory? GetDefaultCellsReaderFactory() => AutoMapper.s_allColumnNamesReaderFactory;
 }
 
+[RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+[RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
 internal class MappedMemberExpression : IMappedExpression
 {
     public Type Type { get; }
@@ -415,6 +421,8 @@ internal class MappedMemberExpression : IMappedExpression
     public ICellsReaderFactory? GetDefaultCellsReaderFactory() => MemberMapper.GetDefaultCellsReaderFactory(Member);
 }
 
+[RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+[RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
 internal class MappedEnumerableIndexerExpression : IMappedExpression
 {
     public Type Type { get; }
@@ -472,6 +480,8 @@ internal class MappedEnumerableIndexerExpression : IMappedExpression
     public ICellsReaderFactory? GetDefaultCellsReaderFactory() => null;
 }
 
+[RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+[RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
 internal class MappedMultidimensionalArrayIndexerExpression : IMappedExpression
 {
     public Type Type { get; }
@@ -514,6 +524,8 @@ internal class MappedMultidimensionalArrayIndexerExpression : IMappedExpression
     public ICellsReaderFactory? GetDefaultCellsReaderFactory() => null;
 }
 
+[RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+[RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
 internal class MappedDictionaryIndexerExpression : IMappedExpression
 {
     public Type Type { get; }

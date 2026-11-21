@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 namespace ExcelMapper;
 
 /// <summary>
@@ -9,6 +10,7 @@ public sealed class ExcelTransformerAttribute : Attribute
     /// <summary>
     /// Gets the type of the <see cref="ICellTransformer"/>.
     /// </summary>
+    [DynamicallyAccessedMembers(TrimmingConstants.ActivatedType)]
     public Type Type { get; }
 
     /// <summary>
@@ -20,7 +22,7 @@ public sealed class ExcelTransformerAttribute : Attribute
     /// Initializes a new instance of <see cref="ExcelTransformerAttribute"/> with the specified transformer.
     /// </summary>
     /// <param name="transformerType">The type of the <see cref="ICellTransformer"/>.</param>
-    public ExcelTransformerAttribute(Type transformerType)
+    public ExcelTransformerAttribute([DynamicallyAccessedMembers(TrimmingConstants.ActivatedType)] Type transformerType)
     {
         ThrowHelpers.ThrowIfNull(transformerType, nameof(transformerType));
         if (transformerType.IsAbstract || transformerType.IsInterface)

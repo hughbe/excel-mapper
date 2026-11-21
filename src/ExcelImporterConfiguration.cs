@@ -102,7 +102,7 @@ public class ExcelImporterConfiguration
     /// object.
     /// </summary> <typeparam name="T">The type of the class to map.</typeparam>
     /// <param name="classMapFactory">A factory that configures and returns the class map to use.</param>
-    public void RegisterClassMap<T>(Action<ExcelClassMap<T>> classMapFactory)
+    public void RegisterClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Action<ExcelClassMap<T>> classMapFactory)
     {
         ThrowHelpers.ThrowIfNull(classMapFactory, nameof(classMapFactory));
 

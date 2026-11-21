@@ -13,6 +13,7 @@ public class AddEnumerableFactory<T> : IEnumerableFactory<T>
     /// <summary>
     /// Gets the type of collection that this factory creates.
     /// </summary>
+    [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
     public Type CollectionType { get; }
     private object? _items;
     private readonly MethodInfo _addMethod;
@@ -22,7 +23,7 @@ public class AddEnumerableFactory<T> : IEnumerableFactory<T>
     /// </summary>
     /// <param name="collectionType">The type of collection to create.</param>
     /// <exception cref="ArgumentException">Thrown when the collection type is invalid or unsupported.</exception>
-    public AddEnumerableFactory(Type collectionType)
+    public AddEnumerableFactory([DynamicallyAccessedMembers(TrimmingConstants.CollectionType)] Type collectionType)
     {
         ThrowHelpers.ThrowIfNull(collectionType, nameof(collectionType));
         if (collectionType.IsInterface)

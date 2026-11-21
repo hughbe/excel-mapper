@@ -13,6 +13,7 @@ public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<T
     /// <summary>
     /// Gets the type of dictionary that this factory creates.
     /// </summary>
+    [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
     public Type DictionaryType { get; }
     private IDictionary? _items;
 
@@ -21,7 +22,7 @@ public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<T
     /// </summary>
     /// <param name="dictionaryType">The type of dictionary to create.</param>
     /// <exception cref="ArgumentException">Thrown when the dictionary type is invalid or unsupported.</exception>
-    public IDictionaryImplementingFactory(Type dictionaryType)
+    public IDictionaryImplementingFactory([DynamicallyAccessedMembers(TrimmingConstants.CollectionType)] Type dictionaryType)
     {
         ThrowHelpers.ThrowIfNull(dictionaryType, nameof(dictionaryType));
         if (dictionaryType.IsInterface)

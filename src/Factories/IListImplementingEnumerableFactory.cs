@@ -12,6 +12,7 @@ public class IListImplementingEnumerableFactory<T> : IEnumerableFactory<T>
     /// <summary>
     /// Gets the type of list that this factory creates.
     /// </summary>
+    [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
     public Type ListType { get; }
     private IList? _items;
 
@@ -20,7 +21,7 @@ public class IListImplementingEnumerableFactory<T> : IEnumerableFactory<T>
     /// </summary>
     /// <param name="listType">The type of list to create.</param>
     /// <exception cref="ArgumentException">Thrown when the list type is invalid or unsupported.</exception>
-    public IListImplementingEnumerableFactory(Type listType)
+    public IListImplementingEnumerableFactory([DynamicallyAccessedMembers(TrimmingConstants.CollectionType)] Type listType)
     {
         ThrowHelpers.ThrowIfNull(listType, nameof(listType));
         if (listType.IsInterface)

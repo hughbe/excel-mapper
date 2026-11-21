@@ -183,7 +183,9 @@ public class ExcelSheet
     /// </remarks>
     /// <typeparam name="T">The type of the object to map each row to.</typeparam>
     /// <returns>A list of objects of type T mapped from each row in the sheet.</returns>
-    public IEnumerable<T> ReadRows<T>()
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
     {
         if (Reader.IsClosed)
         {
@@ -203,7 +205,9 @@ public class ExcelSheet
     /// <summary>
     /// Iterator method for reading rows. Separated from ReadRows to enable eager validation.
     /// </summary>
-    private IEnumerable<T> ReadRowsIterator<T>()
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    private IEnumerable<T> ReadRowsIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
     {
         while (TryReadRow(out T? row))
         {
@@ -221,7 +225,9 @@ public class ExcelSheet
     /// <param name="count">The number of rows to read and map.</param>
     /// <typeparam name="T">The type of the object to map each row to.</typeparam>
     /// <returns>A list of objects of type T mapped from each row within the range specified.</returns>
-    public IEnumerable<T> ReadRows<T>(int startIndex, int count)
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int startIndex, int count)
     {
         if (Reader.IsClosed)
         {
@@ -264,7 +270,9 @@ public class ExcelSheet
     /// <summary>
     /// Iterator method for reading a range of rows. Separated from ReadRows to enable eager validation.
     /// </summary>
-    private IEnumerable<T> ReadRowsRangeIterator<T>(int startIndex, int count)
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    private IEnumerable<T> ReadRowsRangeIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int startIndex, int count)
     {
         for (int i = 0; i < count; i++)
         {
@@ -285,7 +293,9 @@ public class ExcelSheet
     /// </summary>
     /// <typeparam name="T">The type of the object to map a single row to.</typeparam>
     /// <returns>An object of type T mapped from a single row in the sheet.</returns>
-    public T ReadRow<T>()
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public T ReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
     {
         if (!TryReadRow<T>(out var value))
         {
@@ -303,7 +313,9 @@ public class ExcelSheet
     /// <typeparam name="T">The type of the object to map a single row to.</typeparam>
     /// <param name="value">An object of type T mapped from a single row in the sheet.</param>
     /// <returns>False if there are no more rows in the sheet or the row cannot be mapped to an object, else true.</returns>
-    public bool TryReadRow<T>([NotNullWhen(true)] out T? value)
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public bool TryReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>([NotNullWhen(true)] out T? value)
     {
         if (!AdvanceToNextRow())
         {
@@ -325,7 +337,9 @@ public class ExcelSheet
     /// </remarks>
     /// <typeparam name="T">The type of the object to map each row to.</typeparam>
     /// <returns>The result of mapping each row in the sheet.</returns>
-    public IEnumerable<ExcelRowResult<T>> ReadRowResults<T>()
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public IEnumerable<ExcelRowResult<T>> ReadRowResults<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
     {
         if (Reader.IsClosed)
         {
@@ -341,7 +355,9 @@ public class ExcelSheet
         return ReadRowResultsIterator<T>();
     }
 
-    private IEnumerable<ExcelRowResult<T>> ReadRowResultsIterator<T>()
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    private IEnumerable<ExcelRowResult<T>> ReadRowResultsIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
     {
         // Reuse one list for every row: valid rows (usually most of them) then don't allocate, and
         // only rows with errors get their own copy.
@@ -402,7 +418,9 @@ public class ExcelSheet
         return MoveToNextRow();
     }
 
-    private bool MapCurrentRow<T>([NotNullWhen(true)] out T? value)
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    private bool MapCurrentRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>([NotNullWhen(true)] out T? value)
     {
         var classMap = GetOrCreateClassMap<T>();
 
@@ -457,7 +475,9 @@ public class ExcelSheet
         return result;
     }
 
-    private IMap GetOrCreateClassMap<T>()
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    private IMap GetOrCreateClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
     {
         if (!Importer.Configuration.TryGetClassMap<T>(out var classMap))
         {
@@ -483,7 +503,9 @@ public class ExcelSheet
     /// if it has not been read yet.
     /// </summary>
     /// <typeparam name="T">The type that rows will be mapped to.</typeparam>
-    public void ValidateHeading<T>()
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public void ValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
     {
         if (!TryValidateHeading<T>(out var problems))
         {
@@ -500,7 +522,9 @@ public class ExcelSheet
     /// <param name="problems">A description of each missing column, such as
     /// <c>column "Salary" (member Salary)</c>. Empty if none are missing.</param>
     /// <returns>True if every required column is present, else false.</returns>
-    public bool TryValidateHeading<T>(out IReadOnlyList<string> problems)
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public bool TryValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(out IReadOnlyList<string> problems)
     {
         if (Reader.IsClosed)
         {

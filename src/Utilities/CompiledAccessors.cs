@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -104,10 +105,18 @@ internal static class CompiledAccessors
     /// Gets a delegate that creates an instance of a type with a public parameterless constructor, or
     /// a struct.
     /// </summary>
-    public static Func<object> GetParameterlessConstructor(Type type)
-        => s_parameterlessConstructors.GetOrAdd(type, static t => CreateParameterlessConstructor(t));
+    public static Func<object> GetParameterlessConstructor([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type)
+    {
+        if (!s_parameterlessConstructors.TryGetValue(type, out var constructor))
+        {
+            // Not a GetOrAdd lambda: the trimming annotation on the type doesn't flow into lambdas.
+            constructor = s_parameterlessConstructors.GetOrAdd(type, CreateParameterlessConstructor(type));
+        }
 
-    private static Func<object> CreateParameterlessConstructor(Type type)
+        return constructor;
+    }
+
+    private static Func<object> CreateParameterlessConstructor([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type)
     {
         if (!CanCompile || type.IsAbstract || type.IsInterface || (!type.IsValueType && type.GetConstructor(Type.EmptyTypes) is null))
         {

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 ﻿using System.Linq;
 using System.Reflection;
 
@@ -16,6 +17,7 @@ public static class ExcelImporterUtils
     /// <returns>A collection of registered class maps.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="namespaceString"/> is null.</exception>
     /// <exception cref="ArgumentException">Thrown when <paramref name="namespaceString"/> is empty or no class maps are found in the namespace.</exception>
+    [RequiresUnreferencedCode("Finds class maps by scanning the assembly's types and creates them through reflection, so the trimmer may remove them. Register class maps directly with RegisterClassMap instead.")]
     public static IEnumerable<ExcelClassMap> RegisterClassMapsInNamespace(this ExcelImporter importer, string namespaceString)
     {
         return RegisterClassMapsInNamespace(importer, Assembly.GetCallingAssembly(), namespaceString);
@@ -30,6 +32,7 @@ public static class ExcelImporterUtils
     /// <returns>A collection of registered class maps.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="assembly"/> or <paramref name="namespaceString"/> is null.</exception>
     /// <exception cref="ArgumentException">Thrown when <paramref name="namespaceString"/> is empty or no class maps are found in the namespace.</exception>
+    [RequiresUnreferencedCode("Finds class maps by scanning the assembly's types and creates them through reflection, so the trimmer may remove them. Register class maps directly with RegisterClassMap instead.")]
     public static IEnumerable<ExcelClassMap> RegisterClassMapsInNamespace(this ExcelImporter importer, Assembly assembly, string namespaceString)
     {
         ThrowHelpers.ThrowIfNull(assembly, nameof(assembly));

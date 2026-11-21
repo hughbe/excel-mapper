@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 namespace ExcelMapper;
 
 /// <summary>
@@ -9,6 +10,7 @@ public sealed class ExcelInvalidFallbackAttribute : Attribute
     /// <summary>
     /// Gets the type of the <see cref="IFallbackItem"/>.
     /// </summary>
+    [DynamicallyAccessedMembers(TrimmingConstants.ActivatedType)]
     public Type Type { get; }
 
     /// <summary>
@@ -20,7 +22,7 @@ public sealed class ExcelInvalidFallbackAttribute : Attribute
     /// Initializes a new instance of <see cref="ExcelInvalidFallbackAttribute"/> with the specified transformer.
     /// </summary>
     /// <param name="fallbackType">The type of the <see cref="IFallbackItem"/>.</param>
-    public ExcelInvalidFallbackAttribute(Type fallbackType)
+    public ExcelInvalidFallbackAttribute([DynamicallyAccessedMembers(TrimmingConstants.ActivatedType)] Type fallbackType)
     {
         ThrowHelpers.ThrowIfNull(fallbackType, nameof(fallbackType));
         if (fallbackType.IsAbstract || fallbackType.IsInterface)

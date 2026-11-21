@@ -22,6 +22,8 @@ namespace ExcelMapper.Utilities;
 /// Provides automatic mapping functionality for Excel cells to .NET types.
 /// This class automatically configures mappers, transformers, and fallback strategies based on type information and attributes.
 /// </summary>
+[RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+[RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
 public static class AutoMapper
 {
     internal static OneToOneMap<T>? CreateOneToOneMap<T>(MemberInfo? member, ICellReaderFactory defaultCellReaderFactory, FallbackStrategy emptyValueStrategy, bool isAutoMapping)

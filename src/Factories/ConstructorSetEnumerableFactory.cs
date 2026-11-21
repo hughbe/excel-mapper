@@ -12,6 +12,7 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
     /// <summary>
     /// Gets the type of set that this factory creates.
     /// </summary>
+    [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
     public Type SetType { get; }
     private readonly ConstructorInfo _constructor;
 
@@ -22,7 +23,7 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
     /// </summary>
     /// <param name="setType">The type of set to create.</param>
     /// <exception cref="ArgumentException">Thrown when the set type is invalid or unsupported.</exception>
-    public ConstructorSetEnumerableFactory(Type setType)
+    public ConstructorSetEnumerableFactory([DynamicallyAccessedMembers(TrimmingConstants.CollectionType)] Type setType)
     {
         ThrowHelpers.ThrowIfNull(setType, nameof(setType));
         if (setType.IsInterface)

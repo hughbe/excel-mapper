@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace ExcelMapper.Utilities;
@@ -11,7 +12,7 @@ internal static class ConstructorUtilities
     /// <summary>
     /// Gets whether the type can be created without passing any constructor arguments.
     /// </summary>
-    public static bool HasParameterlessConstructor(Type type)
+    public static bool HasParameterlessConstructor([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type)
         => type.IsValueType || type.GetConstructor(Type.EmptyTypes) is not null;
 
     /// <summary>
@@ -28,7 +29,7 @@ internal static class ConstructorUtilities
     /// Gets whether a public constructor of the type has a parameter that a member with the given
     /// name and type could be passed to.
     /// </summary>
-    public static bool IsConstructorParameter(Type type, string memberName, Type memberType)
+    public static bool IsConstructorParameter([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, string memberName, Type memberType)
     {
         foreach (var constructor in type.GetConstructors())
         {
@@ -58,7 +59,7 @@ internal static class ConstructorUtilities
     /// <param name="parameterMemberIndices">For each parameter of the returned constructor, the index
     /// of the matching member in <paramref name="members"/>, or -1 if the default value is used.</param>
     /// <returns>The best matching constructor, or null if there is none.</returns>
-    public static ConstructorInfo? FindConstructor(Type type, IReadOnlyList<MemberInfo> members, out int[] parameterMemberIndices)
+    public static ConstructorInfo? FindConstructor([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, IReadOnlyList<MemberInfo> members, out int[] parameterMemberIndices)
     {
         ConstructorInfo? bestConstructor = null;
         int[] bestIndices = [];
@@ -120,7 +121,7 @@ internal static class ConstructorUtilities
     /// Gets the public instance properties and fields of a type whose values could be passed to a
     /// constructor.
     /// </summary>
-    public static List<MemberInfo> GetReadableMembers(Type type)
+    public static List<MemberInfo> GetReadableMembers([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] Type type)
     {
         var members = new List<MemberInfo>();
         foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))

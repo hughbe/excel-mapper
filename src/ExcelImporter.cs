@@ -163,7 +163,9 @@ public class ExcelImporter : IDisposable
     /// <param name="fileType">The type of file.</param>
     /// <param name="configure">Configures the importer before reading, for example to register a class map.</param>
     /// <returns>The mapped rows.</returns>
-    public static List<T> ReadRows<T>(string path, ExcelImporterFileType fileType = ExcelImporterFileType.Excel, Action<ExcelImporterConfiguration>? configure = null)
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public static List<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(string path, ExcelImporterFileType fileType = ExcelImporterFileType.Excel, Action<ExcelImporterConfiguration>? configure = null)
     {
         using var importer = new ExcelImporter(path, fileType);
         return ReadRows<T>(importer, configure);
@@ -180,13 +182,17 @@ public class ExcelImporter : IDisposable
     /// <param name="fileType">The type of file.</param>
     /// <param name="configure">Configures the importer before reading, for example to register a class map.</param>
     /// <returns>The mapped rows.</returns>
-    public static List<T> ReadRows<T>(Stream stream, ExcelImporterFileType fileType = ExcelImporterFileType.Excel, Action<ExcelImporterConfiguration>? configure = null)
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public static List<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Stream stream, ExcelImporterFileType fileType = ExcelImporterFileType.Excel, Action<ExcelImporterConfiguration>? configure = null)
     {
         using var importer = new ExcelImporter(stream, fileType);
         return ReadRows<T>(importer, configure);
     }
 
-    private static List<T> ReadRows<T>(ExcelImporter importer, Action<ExcelImporterConfiguration>? configure)
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    private static List<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelImporter importer, Action<ExcelImporterConfiguration>? configure)
     {
         configure?.Invoke(importer.Configuration);
         return [.. importer.ReadSheet().ReadRows<T>()];

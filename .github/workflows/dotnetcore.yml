@@ -61,3 +61,20 @@ jobs:
         dotnet-version: 8.0.x
     - name: Test against the ${{ matrix.library-target-framework }} build
       run: dotnet test tests --configuration Release --verbosity normal -p:LibraryTargetFramework=${{ matrix.library-target-framework }}
+
+  # Publish and run a trimmed app that maps rows, to check the trimming annotations keep what
+  # mapping needs. The library build itself fails on trimming and AOT analyzer warnings.
+  test-trimming:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Publish trimmed
+      run: dotnet publish tests/TrimmingTests --configuration Release --runtime linux-x64 --output trimming-out
+    - name: Run
+      run: ./trimming-out/TrimmingTests

@@ -15,13 +15,13 @@ internal static class ReflectionUtilities
     }
 #endif
 
-    public static bool ImplementsInterface(this Type type, Type interfaceType)
+    public static bool ImplementsInterface([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type type, Type interfaceType)
     {
         return type.GetTypeInfo().ImplementedInterfaces.Any(t => t == interfaceType);
     }
 
     public static bool ImplementsGenericInterface(
-        this Type type,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type type,
         Type genericInterfaceType,
         [NotNullWhen(true)] out Type? elementType)
     {
@@ -86,7 +86,7 @@ internal static class ReflectionUtilities
     /// </summary>
     /// <param name="type">The type to get the element type of.</param>
     /// <param name="elementType">The element type or IEnumerable&lt;T&gt; of the given type.</param>
-    public static Type? GetElementTypeOrEnumerableType(this Type type)
+    public static Type? GetElementTypeOrEnumerableType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces | DynamicallyAccessedMemberTypes.PublicMethods)] this Type type)
     {
         // Array type.
         if (type.IsArray)
@@ -116,7 +116,7 @@ internal static class ReflectionUtilities
         return null;
     }
     
-    private static bool TryGetSingleAddParameterType(Type type, [NotNullWhen(true)] out Type? parameterType)
+    private static bool TryGetSingleAddParameterType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type, [NotNullWhen(true)] out Type? parameterType)
     {
         parameterType = null;
         foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Instance))

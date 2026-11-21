@@ -13,6 +13,7 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
     /// <summary>
     /// Gets the type of dictionary that this factory creates.
     /// </summary>
+    [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
     public Type DictionaryType { get; }
     private readonly ConstructorInfo _constructor;
 
@@ -23,7 +24,7 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
     /// </summary>
     /// <param name="dictionaryType">The type of dictionary to create.</param>
     /// <exception cref="ArgumentException">Thrown when the dictionary type is invalid or unsupported.</exception>
-    public ConstructorDictionaryFactory(Type dictionaryType)
+    public ConstructorDictionaryFactory([DynamicallyAccessedMembers(TrimmingConstants.CollectionType)] Type dictionaryType)
     {
         ThrowHelpers.ThrowIfNull(dictionaryType, nameof(dictionaryType));
         if (dictionaryType.IsInterface)

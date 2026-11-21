@@ -5,7 +5,7 @@ Guidance for working on ExcelMapper (NuGet package `ExcelDataReader.Mapping`), a
 ## Layout
 
 - `src/` - the library. Targets `netstandard2.0`, `netstandard2.1` and `net8.0`.
-- `tests/` - xUnit tests (`net8.0`). See [Tests](#tests).
+- `tests/` - xUnit tests (`net8.0`). See [Tests](#tests). `tests/TrimmingTests` is a separate app that CI publishes trimmed and runs.
 - `benchmarks/` - BenchmarkDotNet benchmarks. See [Performance](#performance).
 - `docs/` - user documentation, linked from the README's documentation index. `docs/Architecture.md` explains the map/reader/pipeline design.
 
@@ -26,6 +26,8 @@ Always build `src` in Release before finishing: code must compile for `netstanda
 The netstandard builds are used by .NET Framework and older .NET apps and take different code paths, so run the tests against them too (CI does). Tests of APIs that only exist in the net8.0 build (for example `DateOnly`, `INumberBase<T>` types or `WithNumberStyle`) are wrapped in `#if LIBRARY_NET8`; wrap only the net8-only parts so the rest still runs against netstandard. Note any feature that differs between builds in the changelog's platform notes and `docs/migrating-to-4.0.md`.
 
 ## Code conventions
+
+- The net8.0 build runs the trimming and native AOT analyzers (`IsTrimmable`, `IsAotCompatible`) and fails on their warnings. Annotate new reflection: put `[DynamicallyAccessedMembers]` on `Type` parameters and generic parameters where the caller knows the type (see `TrimmingConstants`), and `[RequiresUnreferencedCode]`/`[RequiresDynamicCode]` on code that discovers types at run time, carried up to the public API. Don't suppress warnings unless the justification is true. Changes to what mapping needs at run time should be checked with the trimmed app in `tests/TrimmingTests` (see [docs/trimming.md](docs/trimming.md)).
 
 - Public types and members have XML doc comments.
 - Validate arguments with `ThrowHelpers` (`ThrowIfNull`, `ThrowIfNegative`, ...) so parameter names match the API.
@@ -95,5 +97,5 @@ Update the docs in the same change as the code:
 ## Pull requests
 
 - One feature or fix per PR, branched from `main`. Avoid stacking PRs on each other's branches: a PR merged into another feature branch doesn't reach `main`.
-- CI (`.github/workflows/dotnetcore.yml`) runs for PRs into `main` only: build, tests with coverage, pack with package validation, and the tests against the netstandard builds.
+- CI (`.github/workflows/dotnetcore.yml`) runs for PRs into `main` only: build, tests with coverage, pack with package validation, the tests against the netstandard builds, and the trimmed test app.
 - PRs are squash-merged.

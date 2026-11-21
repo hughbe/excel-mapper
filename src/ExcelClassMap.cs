@@ -14,7 +14,7 @@ public class ExcelClassMap : IMap
     /// Initializes a new instance of the <see cref="ExcelClassMap"/> class.
     /// </summary>
     /// <param name="type">The type of the object to create.</param>
-    public ExcelClassMap(Type type) : this(type, FallbackStrategy.ThrowIfPrimitive)
+    public ExcelClassMap([DynamicallyAccessedMembers(TrimmingConstants.MappedType)] Type type) : this(type, FallbackStrategy.ThrowIfPrimitive)
     {
     }
 
@@ -23,7 +23,7 @@ public class ExcelClassMap : IMap
     /// </summary>
     /// <param name="type">The type of the object to create.</param>
     /// <param name="emptyValueStrategy">The default strategy to use when the value of a cell is empty.</param>
-    public ExcelClassMap(Type type, FallbackStrategy emptyValueStrategy)
+    public ExcelClassMap([DynamicallyAccessedMembers(TrimmingConstants.MappedType)] Type type, FallbackStrategy emptyValueStrategy)
     {
         ThrowHelpers.ThrowIfNull(type, nameof(type));
         EnumUtilities.ValidateIsDefined(emptyValueStrategy);
@@ -35,6 +35,7 @@ public class ExcelClassMap : IMap
     /// <summary>
     /// Gets the type of the object to create.
     /// </summary>
+    [DynamicallyAccessedMembers(TrimmingConstants.MappedType)]
     public Type Type { get; }
 
     internal IMap? _valueMap;
