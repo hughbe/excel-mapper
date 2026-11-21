@@ -71,22 +71,7 @@ public class ValuePipeline : IValuePipeline
         bool preserveFormatting,
         MemberInfo? member)
     {
-        // Use indexed loops: enumerating an IList through its interface allocates for every cell.
-        var transformers = pipeline.Transformers;
-        for (int i = 0; i < transformers.Count; i++)
-        {
-            var transformer = transformers[i];
-
-            // Trimming only changes text. Skip it for other values, such as dates and numbers,
-            // so that they keep their type rather than being converted to a string and parsed again.
-            if (transformer is TrimStringCellTransformer && !preserveFormatting && readResult.GetValue() is not (string or null))
-            {
-                continue;
-            }
-
-            readResult = new ReadCellResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult), preserveFormatting);
-        }
-
+        readResult = ApplyTransformers(pipeline, sheet, rowIndex, readResult, preserveFormatting);
         if (readResult.IsEmpty() && pipeline.EmptyFallback != null)
         {
             return pipeline.EmptyFallback.PerformFallback(sheet, rowIndex, readResult, null, member);
@@ -111,15 +96,44 @@ public class ValuePipeline : IValuePipeline
 
         if ((finalResult == null || !finalResult.Value.Succeeded) && pipeline.InvalidFallback != null)
         {
-            // Fixed value fallbacks ignore the exception, so don't create it.
-            var fallbackType = pipeline.InvalidFallback.GetType();
-            var exception = fallbackType == typeof(FixedValueFallback) || fallbackType == typeof(FixedValueFallbackFactory)
-                ? null
-                : finalResult?.Exception;
+            var exception = FallbackUsesException(pipeline.InvalidFallback) ? finalResult?.Exception : null;
             return pipeline.InvalidFallback.PerformFallback(sheet, rowIndex, readResult, exception, member);
         }
 
         return finalResult?.Value;
+    }
+
+    /// <summary>
+    /// Applies the pipeline's transformers to a cell.
+    /// </summary>
+    internal static ReadCellResult ApplyTransformers(IValuePipeline pipeline, ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting)
+    {
+        // Use indexed loops: enumerating an IList through its interface allocates for every cell.
+        var transformers = pipeline.Transformers;
+        for (int i = 0; i < transformers.Count; i++)
+        {
+            var transformer = transformers[i];
+
+            // Trimming only changes text. Skip it for other values, such as dates and numbers,
+            // so that they keep their type rather than being converted to a string and parsed again.
+            if (transformer is TrimStringCellTransformer && !preserveFormatting && readResult.GetValue() is not (string or null))
+            {
+                continue;
+            }
+
+            readResult = new ReadCellResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult), preserveFormatting);
+        }
+
+        return readResult;
+    }
+
+    /// <summary>
+    /// Whether an invalid fallback uses the exception. Fixed value fallbacks ignore it, so it isn't created.
+    /// </summary>
+    internal static bool FallbackUsesException(IFallbackItem fallback)
+    {
+        var fallbackType = fallback.GetType();
+        return fallbackType != typeof(FixedValueFallback) && fallbackType != typeof(FixedValueFallbackFactory);
     }
 
     /// <summary>
