@@ -1,0 +1,373 @@
+# Reading Files
+
+Opening workbooks and CSV files, choosing sheets, reading rows, headings and data ranges. See the [documentation index](../README.md#documentation) for other topics.
+
+## Reading Workbooks
+
+Create an `ExcelImporter` to read Excel or CSV files:
+
+```csharp
+// From file path
+using var importer = new ExcelImporter("data.xlsx");
+
+// From stream
+using var stream = File.OpenRead("data.xlsx");
+using var importer = new ExcelImporter(stream);
+
+// CSV file
+using var importer = new ExcelImporter("data.csv", ExcelImporterFileType.Csv);
+
+// From existing IExcelDataReader (for advanced scenarios)
+using var reader = ExcelReaderFactory.CreateReader(stream);
+using var importer = new ExcelImporter(reader);
+```
+
+**Advanced: Access the underlying ExcelDataReader**
+
+```csharp
+using var importer = new ExcelImporter("data.xlsx");
+
+// Access the underlying reader for advanced scenarios
+IExcelDataReader reader = importer.Reader;
+
+// Check number of sheets
+int sheetCount = importer.NumberOfSheets;
+```
+
+## Reading Sheets
+
+### Read All Sheets
+
+```csharp
+foreach (var sheet in importer.ReadSheets())
+{
+    Console.WriteLine($"Sheet: {sheet.Name}");
+    Console.WriteLine($"Visibility: {sheet.Visibility}");  // Visible, Hidden, or VeryHidden
+    Console.WriteLine($"Index: {sheet.Index}");
+    Console.WriteLine($"Columns: {sheet.NumberOfColumns}");
+}
+```
+
+**Sheet Visibility:**
+- `ExcelSheetVisibility.Visible` - Normal visible sheets
+- `ExcelSheetVisibility.Hidden` - Hidden sheets (can be unhidden in Excel)
+- `ExcelSheetVisibility.VeryHidden` - Very hidden sheets (requires VBA to unhide)
+
+### Read Sheets Sequentially
+
+```csharp
+// Throws if no more sheets
+var sheet1 = importer.ReadSheet();
+
+// Returns false if no more sheets
+if (importer.TryReadSheet(out var sheet2))
+{
+    // Process sheet2
+}
+```
+
+### Read Sheet by Name
+
+```csharp
+// Throws if sheet doesn't exist
+var sheet = importer.ReadSheet("Sales Data");
+
+// Returns false if sheet doesn't exist
+if (importer.TryReadSheet("Sales Data", out var salesSheet))
+{
+    // Process sheet
+}
+```
+
+### Read Sheet by Index
+
+```csharp
+// Throws if index is invalid
+var sheet = importer.ReadSheet(0);  // First sheet
+
+// Returns false if index is invalid
+if (importer.TryReadSheet(1, out var secondSheet))
+{
+    // Process sheet
+}
+```
+
+## Reading Rows
+
+### Read All Rows
+
+```csharp
+// Lazy evaluation - rows are read as you iterate
+var rows = sheet.ReadRows<Employee>();
+
+// Or materialize to array
+var employees = sheet.ReadRows<Employee>().ToArray();
+```
+
+### Read Specific Range
+
+```csharp
+// Read 10 rows starting from row index 5 (after header at index 0)
+// Note: startIndex is relative to the beginning of the file, not after the header
+var rows = sheet.ReadRows<Employee>(startIndex: 5, count: 10);
+
+// Example: If header is at row 0, data starts at row 1
+// startIndex: 1 = first data row
+// startIndex: 11 = 11th data row
+```
+
+**Important Notes:**
+- `startIndex` is the zero-based row index from the start of the sheet
+- The `startIndex` must be **after** the header row
+- If `HeadingIndex` is 0 (default), `startIndex` must be at least 1
+- The method will throw `ExcelMappingException` if rows don't exist
+
+### Read Rows Sequentially
+
+```csharp
+// Throws if no more rows
+var row1 = sheet.ReadRow<Employee>();
+
+// Returns false if no more rows
+if (sheet.TryReadRow<Employee>(out var row2))
+{
+    // Process row2
+}
+```
+
+Like `ReadRows`, these read the heading first if the sheet has one and it hasn't been read yet, so the heading row is never mapped as data.
+
+### Skip Blank Lines
+
+```csharp
+// Enable blank line skipping (off by default for performance)
+importer.Configuration.SkipBlankLines = true;
+
+var rows = sheet.ReadRows<Employee>();
+```
+
+### Security: Column Count Limits
+
+To protect against denial-of-service attacks from malicious Excel files with excessive columns, ExcelMapper enforces a maximum column limit per sheet:
+
+```csharp
+using var importer = new ExcelImporter("data.xlsx");
+
+// Default limit is 10,000 columns (sufficient for most use cases)
+Console.WriteLine(importer.Configuration.MaxColumnsPerSheet);  // 10000
+
+// Adjust the limit if needed for legitimate large files
+importer.Configuration.MaxColumnsPerSheet = 20000;
+
+// Or disable the limit entirely (not recommended for untrusted files)
+importer.Configuration.MaxColumnsPerSheet = int.MaxValue;
+```
+
+**Note:** Excel .xlsx files support up to 16,384 columns (XFD). If a sheet exceeds `MaxColumnsPerSheet`, an `ExcelMappingException` is thrown with a clear error message.
+
+**Security Best Practices:**
+- Keep the default limit (10,000) for untrusted/user-uploaded files
+- Only increase the limit when you control the file source
+- Files exceeding the limit will fail immediately before allocating excessive memory
+
+## Special Scenarios
+
+### Sheets Without Headers
+
+Disable header row and use column indices:
+
+|               |            |
+|---------------|------------|
+| Alice Johnson | Engineering|
+| Bob Smith     | Marketing  |
+
+```csharp
+public class Employee
+{
+    public string Name { get; set; }
+    public string Department { get; set; }
+}
+
+public class EmployeeMap : ExcelClassMap<Employee>
+{
+    public EmployeeMap()
+    {
+        Map(e => e.Name).WithColumnIndex(0);
+        Map(e => e.Department).WithColumnIndex(1);
+    }
+}
+
+using var importer = new ExcelImporter("employees.xlsx");
+importer.Configuration.RegisterClassMap<EmployeeMap>();
+
+var sheet = importer.ReadSheet();
+sheet.HasHeading = false;  // Disable header row
+
+var employees = sheet.ReadRows<Employee>();
+```
+
+Types that don't look up columns by name can be auto-mapped without a heading. Primitives are read from the first column, and members can use `[ExcelColumnIndex]`:
+
+```csharp
+public record Employee(
+    [property: ExcelColumnIndex(0)] string Name,
+    [property: ExcelColumnIndex(1)] string Department);
+
+sheet.HasHeading = false;
+var employees = sheet.ReadRows<Employee>();  // No class map needed
+var ids = otherSheet.ReadRows<int>();        // Reads the first column
+```
+
+Auto-mapping a type whose members are matched by column name throws an `ExcelMappingException` on a sheet without a heading.
+
+### Headers Not in First Row
+
+Skip rows before the header:
+
+|                      |             |
+|----------------------|-------------|
+| Employee Report 2025 |             |
+|                      |             |
+| Name                 | Department  |
+| Alice Johnson        | Engineering |
+| Bob Smith            | Marketing   |
+
+```csharp
+public class Employee
+{
+    public string Name { get; set; }
+    public string Department { get; set; }
+}
+
+using var importer = new ExcelImporter("employees.xlsx");
+var sheet = importer.ReadSheet();
+sheet.HeadingIndex = 2;  // Header is on row 3 (zero-based index 2)
+
+var employees = sheet.ReadRows<Employee>();
+```
+
+### Restricting Data Range
+
+Limit which rows and columns are processed using `DataRange`:
+
+|                      |             |            |
+|----------------------|-------------|------------|
+| Employee Report 2025 |             |            |
+| Name                 | Department  | Obsolete   |
+| Alice Johnson        | Engineering | Old Data   |
+| Bob Smith            | Marketing   | Old Data   |
+| Carol White          | Sales       | Old Data   |
+|                      |             |            |
+| Footer: Generated... |             |            |
+
+```csharp
+using var importer = new ExcelImporter("employees.xlsx");
+var sheet = importer.ReadSheet();
+
+// Specify exact row and column ranges (zero-based indices)
+sheet.DataRange = new ExcelRange(
+    rowStart: 1,      // Start at row 2 (after row 0)
+    rowEnd: 4,        // End at row 5 (inclusive)
+    columnStart: 0,   // Start at column A
+    columnEnd: 1      // End at column B (inclusive)
+);
+
+var employees = sheet.ReadRows<Employee>();
+// Will read only rows 2-5, columns A-B
+// Skips header row 0, footer row 6, and column C
+```
+
+**Using Excel-style address notation:**
+
+```csharp
+// Parse Excel address strings like "A1:B10"
+sheet.DataRange = new ExcelRange("B2:D10");  // Columns B-D, rows 2-10
+
+// Single cell
+sheet.DataRange = new ExcelRange("A1");  // Just cell A1
+
+// Column ranges
+sheet.DataRange = new ExcelRange("A:C");  // All rows, columns A-C
+
+// Row ranges  
+sheet.DataRange = new ExcelRange("5:20");  // Rows 5-20, all columns
+
+// Absolute references are accepted too
+sheet.DataRange = new ExcelRange("$B$2:$D$10");  // Same as "B2:D10"
+```
+
+Column letters are case-insensitive. Address strings must stay within the limits of an Excel worksheet (rows 1 to 1,048,576 and columns A to XFD). For larger CSV files, use the `Range` or index-based constructors instead.
+
+**Important Notes:**
+- `DataRange` must be set **before** calling `ReadHeading()` or `ReadRows()`
+- Row indices are zero-based (row 0 = first row)
+- When `HasHeading` is true, the heading row is at `DataRange.Rows.Start`
+- Data rows start **after** the heading row
+- Both row and column ranges are inclusive (start and end indices are included)
+- Use `Range.All` for unbounded ranges (e.g., `new ExcelRange(Range.All, 0..5)`)
+
+**Common Use Cases:**
+
+```csharp
+// Skip header and footer rows
+sheet.DataRange = new ExcelRange("A2:Z100");
+
+// Process only specific columns
+sheet.DataRange = new ExcelRange("B:E");  // Columns B, C, D, E
+
+// Limit data to first 1000 rows
+sheet.DataRange = new ExcelRange(
+    rowStart: 0,
+    rowEnd: 999,
+    columnStart: 0,
+    columnEnd: null  // No column limit
+);
+
+// Complex scenario: Header in row 3, data in rows 4-50, columns C-F
+var sheet = importer.ReadSheet();
+sheet.HeadingIndex = 3;  // Header at row 3
+sheet.DataRange = new ExcelRange("C3:F50");  // Range includes header and data
+```
+
+**Parse and TryParse methods:**
+
+```csharp
+// Parse - throws on invalid format
+var range1 = ExcelRange.Parse("A1:B10");
+
+// TryParse - returns false on invalid format
+if (ExcelRange.TryParse("A1:B10", out var range2))
+{
+    sheet.DataRange = range2;
+}
+
+// ToString returns the Excel address when the range can be written as one
+Console.WriteLine(ExcelRange.Parse("$B$2:$D$10")); // "B2:D10"
+
+// Ranges compare by value
+Console.WriteLine(ExcelRange.Parse("A:C") == new ExcelRange(Range.All, 0..3)); // True
+
+// default(ExcelRange) means every row and column, the same as new ExcelRange()
+sheet.DataRange = default;
+```
+
+## CSV Support
+
+ExcelMapper supports CSV files in addition to Excel formats:
+
+```csharp
+// CSV files must be opened with ExcelImporterFileType.Csv
+using var importer = new ExcelImporter("employees.csv", ExcelImporterFileType.Csv);
+var sheet = importer.ReadSheet();
+var employees = sheet.ReadRows<Employee>();
+```
+
+Comma, semicolon, tab, pipe and `#` separators are detected automatically. To use a specific separator or encoding, pass an `ExcelReaderConfiguration` (see [Reader options](../README.md#reader-options)).
+
+**Supported file formats:**
+- `.xlsx` - Excel 2007+ (Office Open XML)
+- `.xls` - Excel 97-2003 (Binary Format)  
+- `.xlsb` - Excel Binary Workbook
+- `.csv` - Comma-separated values
+
+**Note:** `new ExcelImporter(path)` only detects Excel formats. Opening a CSV file without `ExcelImporterFileType.Csv` throws a `HeaderException`.

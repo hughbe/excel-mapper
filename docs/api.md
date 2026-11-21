@@ -1,0 +1,135 @@
+# API Reference
+
+The main classes, attributes and fluent methods. See the [documentation index](../README.md#documentation) for other topics.
+
+## API Reference
+
+### Core Classes
+
+**`ExcelImporter`** - Main entry point for reading Excel files
+- `ExcelImporter.ReadRows<T>(path or stream, fileType, configure)` - Read every row of the first sheet in one call
+- `ReadSheet()` / `TryReadSheet()` - Read sheets sequentially or by name/index
+- `ReadSheets()` - Enumerate all sheets
+- `Configuration` - Access configuration for registering maps
+- `Reader` - Access underlying `IExcelDataReader` for advanced scenarios
+- `NumberOfSheets` - Get total sheet count
+
+**`ExcelSheet`** - Represents a single worksheet
+- `ReadRows<T>()` - Read all rows as typed objects (lazy evaluation)
+- `ReadRows<T>(startIndex, count)` - Read specific range of rows
+- `ReadRow<T>()` / `TryReadRow<T>()` - Read single row
+- `ReadRowResults<T>()` - Read all rows, reporting every invalid cell instead of throwing
+- `ReadHeading()` - Explicitly read header row
+- `ValidateHeading<T>()` / `TryValidateHeading<T>()` - Check that every column a type needs is present, before reading rows
+- `Name` - Sheet name
+- `Visibility` - Sheet visibility (Visible, Hidden, VeryHidden)
+- `Index` - Zero-based sheet index
+- `NumberOfColumns` - Column count
+- `HasHeading` - Whether sheet has header row (default: true)
+- `HeadingIndex` - Zero-based index of header row (default: 0)
+- `DataRange` - Range of rows and columns to process (default: all)
+- `CurrentRowIndex` - Current row being processed
+
+**`ExcelRange`** - Represents a range of rows and columns
+- Constructor: `new ExcelRange(rowStart, rowEnd, columnStart, columnEnd)` - Create range with explicit indices
+- Constructor: `new ExcelRange(rows, columns)` - Create range with Range objects
+- Constructor: `new ExcelRange(address)` - Create range from Excel address string (e.g., "A1:B10")
+- `Parse(string)` - Parse Excel address string (throws on error)
+- `TryParse(string, out ExcelRange)` - Try parse Excel address string (returns bool)
+- `Rows` - Row range (System.Range)
+- `Columns` - Column range (System.Range)
+- `ToString()` - Excel address such as "A1:B10", "A:C" or "1:5" when the range can be written as one
+- Equality: `Equals`, `==` and `!=` compare rows and columns; `default(ExcelRange)` means all rows and columns
+
+**`ExcelMappingException`** - Thrown when a sheet or cell can't be mapped
+- `CellAddress` - Excel address of the cell, such as "B11" (null if unknown)
+- `ColumnName` - Name of the column being read, or of a column that couldn't be found (null if unknown)
+- `Member` - The property or field being mapped (null if unknown)
+- `RowIndex` / `ColumnIndex` - Zero-based row and column of the cell (-1 if unknown)
+- `Sheet` - The sheet being read
+
+**`ExcelImporterConfiguration`** - Configuration settings
+- `RegisterClassMap<T>()` - Register type-specific mapping. Replaces a map created earlier by auto-mapping; throws if you already registered a map for the type
+- `RegisterClassMap<T>(Action<ExcelClassMap<T>>)` - Inline lambda configuration
+- `TryGetClassMap<T>()` - Check if map exists
+- `SkipBlankLines` - Skip empty rows (default: false)
+- `IgnoreSeparatorsInColumnNames` - Ignore spaces, underscores, hyphens and dots when matching column names (default: false)
+- `Culture` - Culture used to parse text and convert numbers and dates to text (default: null, the current culture)
+- `MaxColumnsPerSheet` - Security limit (default: 10,000)
+- `ValidateDataAnnotations` - Enable data annotations validation (default: false)
+
+**`ExcelClassMap<T>`** - Fluent mapping configuration
+- `Map(expression)` - Map property or field
+- `MapObject<TElement>(expression)` - Map nested object
+- `MapEnumerable<TElement>(expression)` - Map collection
+- `MapDictionary<TKey, TValue>(expression)` - Map dictionary
+
+### Mapping Attributes
+
+| Attribute | Purpose |
+|-----------|---------|
+| `[ExcelColumnName("Name")]` | Map to specific column name (case-insensitive by default) |
+| `[ExcelColumnName("Name", StringComparison.Ordinal)]` | Map to column name with specific comparison mode |
+| `[ExcelColumnNames("Name1", "Name2")]` | Try multiple column names |
+| `[ExcelColumnIndex(0)]` | Map to column by index |
+| `[ExcelColumnLetter("C")]` | Map to column by Excel letter |
+| `[ExcelColumnIndices(0, 1)]` | Try multiple column indices |
+| `[ExcelColumnMatching(@"regex", options)]` | Match columns by pattern |
+| `[ExcelColumnsMatching(typeof(Matcher))]` | Custom column matching |
+| `[ExcelOptional]` | Don't throw if column missing |
+| `[ExcelIgnore]` | Exclude from mapping |
+| `[ExcelDefaultValue(value)]` | Default for empty cells |
+| `[ExcelInvalidValue(value)]` | Default for invalid values |
+| `[ExcelEmptyFallback(typeof(Fallback))]` | Custom empty cell handling |
+| `[ExcelInvalidFallback(typeof(Fallback))]` | Custom invalid value handling |
+| `[ExcelPreserveFormatting]` | Read formatted string |
+| `[ExcelTrimString]` | Auto-trim whitespace |
+| `[ExcelFormats("format1", "format2")]` | Parse dates/times with specific formats |
+| `[ExcelNumberStyle(NumberStyles.AllowThousands)]` | Control numeric parsing (thousands, currency, etc.) |
+| `[ExcelOffset("+00:00")]` | Offset from UTC for `DateTimeOffset` members |
+| `[ExcelUri(UriKind.RelativeOrAbsolute)]` | Specify URI kind (Absolute, Relative, or RelativeOrAbsolute) |
+| `[ExcelSeparators(';', ',')]` | Split cell value with custom separators |
+| `[ExcelTransformer(typeof(Transformer))]` | Apply custom transformer |
+| `[ExcelMappingDictionary("key", value)]` | Map string value to enum/object (multiple allowed) |
+| `[ExcelMappingDictionaryComparer(comparison)]` | Set string comparison for dictionary keys |
+| `[ExcelMappingDictionaryBehavior(behavior)]` | Control required vs optional mapping |
+
+### Fluent API Methods
+
+**Column Selection:**
+- `.WithColumnName("Name")` - Map to specific column
+- `.WithColumnNames("Name1", "Name2")` - Try multiple names
+- `.WithColumnIndex(0)` - Map by index
+- `.WithColumnIndices(0, 1, 2)` - Try multiple indices
+- `.WithColumnNameMatching(predicate)` / `.WithColumnNameMatching(regex)` - Use predicate or regular expression
+- `.WithColumnMatching(matcher)` - Custom matcher
+- `.WithColumnsMatching(predicate | regex | matcher)` - All matching columns (collections and dictionaries)
+
+**Behavior:**
+- `.MakeOptional()` - Don't throw if missing
+- `.WithEmptyFallback(value)` - Default for empty
+- `.WithInvalidFallback(value)` - Default for invalid
+- `.WithValueFallback(value)` - Default for both
+- `.WithConverter(value => ...)` - Custom conversion
+- `.WithFormats("format1", "format2")` - Date/time formats
+- `.WithFormatProvider(IFormatProvider)` - Culture-specific parsing for dates/times/numbers
+- `.WithNumberStyle(NumberStyles)` - Control numeric parsing (thousands, currency, etc.)
+- `.WithUriKind(UriKind)` - Specify URI kind for Uri properties
+- `.WithMapping(dictionary)` - Value mapping
+- `.WithTrim()` - Trim whitespace
+- `.WithTransformers(...)` - Custom transformers
+- `.WithMappers(...)` - Custom mappers
+
+**Collections:**
+- `.WithSeparators(';', ',')` - Split delimiters (char)
+- `.WithSeparators(";", ",")` - Split delimiters (string)
+- `.WithElementMap(m => ...)` - Configure element pipeline
+
+### Extension Interfaces
+
+Implement these for advanced customization:
+
+- `ICellMapper` - Custom type conversion logic
+- `ICellTransformer` - Transform string values before mapping
+- `IFallbackItem` - Custom fallback behavior
+- `IExcelColumnMatcher` - Custom column matching logic
