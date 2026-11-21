@@ -120,26 +120,26 @@ public class ExcelClassMap : IMap
     }
 
     /// <summary>
-    /// Gets the value of a member, for a constructor argument. When the sheet is collecting errors
-    /// (see <see cref="ExcelSheet.ReadRowResults{T}"/>), a mapping error is recorded and the member
-    /// is skipped so that the remaining members are still read.
+    /// Reads a member's value for the row, for a type created through a constructor (see
+    /// <see cref="BoundMember.ReadValue"/>). When the sheet is collecting errors (see
+    /// <see cref="ExcelSheet.ReadRowResults{T}"/>), a mapping error is recorded and the member has no
+    /// value, so that the remaining members are still read.
     /// </summary>
-    private static bool TryGetMemberValue(BoundMember member, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out object? value)
+    private static void ReadMemberValue(BoundMember member, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
     {
-        if (sheet.CollectedErrors is not { } errors)
+        if (errors is null)
         {
-            return member.TryGetValue(sheet, rowIndex, reader, null, out value);
+            member.ReadValue(sheet, rowIndex, reader, null);
+            return;
         }
 
         try
         {
-            return member.TryGetValue(sheet, rowIndex, reader, errors, out value);
+            member.ReadValue(sheet, rowIndex, reader, errors);
         }
         catch (ExcelMappingException exception)
         {
             errors.Add(exception);
-            value = null;
-            return false;
         }
     }
 
@@ -147,32 +147,12 @@ public class ExcelClassMap : IMap
     {
         var errors = sheet.CollectedErrors;
         var errorCount = errors?.Count ?? 0;
-        // Read every member first, as constructor arguments must be known before the object exists.
-        var properties = Properties;
-        var count = properties.Count;
-        var arguments = (object?[])plan.DefaultArguments.Clone();
 
-        // Values for members set after construction. Only allocated if there are any, which there
-        // usually aren't for records.
-        object?[]? values = null;
-        bool[]? hasValues = null;
-        for (int i = 0; i < count; i++)
+        // Read every member first, as constructor arguments must be known before the object exists.
+        // Each member keeps its value until it's passed to the constructor or set.
+        for (int i = 0; i < members.Length; i++)
         {
-            if (TryGetMemberValue(members[i], sheet, rowIndex, reader, out var value))
-            {
-                var parameterIndex = plan.PropertyParameterIndices[i];
-                if (parameterIndex >= 0)
-                {
-                    arguments[parameterIndex] = value;
-                }
-                else
-                {
-                    values ??= new object?[count];
-                    hasValues ??= new bool[count];
-                    values[i] = value;
-                    hasValues[i] = true;
-                }
-            }
+            ReadMemberValue(members[i], sheet, rowIndex, reader, errors);
         }
 
         // When collecting errors, don't call the constructor with arguments that couldn't be read.
@@ -185,7 +165,9 @@ public class ExcelClassMap : IMap
         object instance;
         try
         {
-            instance = plan.InvokeConstructor!(arguments);
+            instance = plan.CreateFromMembers is { } createFromMembers
+                ? createFromMembers(members)
+                : plan.InvokeConstructor!(GetArguments(plan, members));
         }
         catch (Exception ex)
         {
@@ -202,19 +184,33 @@ public class ExcelClassMap : IMap
         }
 
         // Set any members that weren't passed to the constructor.
-        if (hasValues is not null)
+        var properties = Properties;
+        for (int i = 0; i < members.Length; i++)
         {
-            for (int i = 0; i < count; i++)
+            if (plan.PropertyParameterIndices[i] < 0 && members[i].HasValue)
             {
-                if (hasValues[i])
-                {
-                    properties[i].SetValueFactory(instance, values![i]!);
-                }
+                members[i].SetValue(instance, properties[i]);
             }
         }
 
         result = instance;
         return true;
+    }
+
+    // Where constructors can't be compiled: the constructor's arguments as an array.
+    private static object?[] GetArguments(ConstructionPlan plan, BoundMember[] members)
+    {
+        var arguments = (object?[])plan.DefaultArguments.Clone();
+        for (int i = 0; i < members.Length; i++)
+        {
+            var parameterIndex = plan.PropertyParameterIndices[i];
+            if (parameterIndex >= 0 && members[i].HasValue)
+            {
+                arguments[parameterIndex] = members[i].Value;
+            }
+        }
+
+        return arguments;
     }
 
     private ConstructionPlan GetConstructionPlan()
@@ -294,7 +290,22 @@ public class ExcelClassMap : IMap
             }
         }
 
-        return new ConstructionPlan(version, constructor, propertyParameterIndices, defaultArguments) { InvokeConstructor = CompiledAccessors.GetConstructor(constructor) };
+        var boundArguments = new BoundConstructorArgument[parameters.Length];
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            var memberIndex = parameterMemberIndices[i];
+            var typedMethod = memberIndex >= 0 && Properties[memberIndex].Map is IBindableMap bindableMap
+                ? bindableMap.GetArgumentMethod(parameters[i].ParameterType)
+                : null;
+            boundArguments[i] = new BoundConstructorArgument(memberIndex, typedMethod, defaultArguments[i]);
+        }
+
+        var createFromMembers = CompiledAccessors.GetConstructor(constructor, boundArguments);
+        return new ConstructionPlan(version, constructor, propertyParameterIndices, defaultArguments)
+        {
+            CreateFromMembers = createFromMembers,
+            InvokeConstructor = createFromMembers is null ? CompiledAccessors.GetConstructor(constructor) : null,
+        };
     }
 
     private sealed class ConstructionPlan(int version, ConstructorInfo? constructor, int[] propertyParameterIndices, object?[] defaultArguments)
@@ -319,7 +330,13 @@ public class ExcelClassMap : IMap
         public Func<object>? CreateInstance { get; set; }
 
         /// <summary>
-        /// Calls <see cref="Constructor"/> with an array of arguments.
+        /// Calls <see cref="Constructor"/> with the values the bound members read, or null where
+        /// code can't be compiled.
+        /// </summary>
+        public Func<BoundMember[], object>? CreateFromMembers { get; set; }
+
+        /// <summary>
+        /// Calls <see cref="Constructor"/> with an array of arguments, where code can't be compiled.
         /// </summary>
         public Func<object?[], object>? InvokeConstructor { get; set; }
     }
