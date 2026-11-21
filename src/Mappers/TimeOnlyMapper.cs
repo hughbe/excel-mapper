@@ -13,7 +13,10 @@ public class TimeOnlyMapper : ICellMapper, IFormatsCellMapper
     /// <summary>
     /// Gets or sets the date formats used to map the value to a TimeOnly.
     /// This defaults to "t" - the default TimeOnly format.
+    /// While the formats haven't been set, values that don't match also try the culture's long time ("T") and 24-hour times such as "14:30" or "14:30:15".
     /// </summary>
+    private bool _formatsSet;
+
     public string[] Formats
     {
         get => _formats;
@@ -21,6 +24,7 @@ public class TimeOnlyMapper : ICellMapper, IFormatsCellMapper
         {
             FormatUtilities.ValidateFormats(value);
             _formats = value;
+            _formatsSet = true;
         }
     }
 
@@ -67,7 +71,8 @@ public class TimeOnlyMapper : ICellMapper, IFormatsCellMapper
         var style = Style;
         try
         {
-            if (TimeOnly.TryParseExact(stringValue, formats, provider, style, out var result))
+            if (TimeOnly.TryParseExact(stringValue, formats, provider, style, out var result) ||
+                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && TimeOnly.TryParseExact(stringValue, FormatUtilities.GetDefaultTimeOnlyFormats(provider), provider, style, out result)))
             {
                 return CellMapperResult.Success(result);
             }

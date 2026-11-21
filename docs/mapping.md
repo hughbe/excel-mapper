@@ -433,7 +433,18 @@ Trimming only affects text. Cells that Excel stores as dates or numbers keep the
 
 #### Date and Time Formats
 
-Specify custom formats for parsing date, time, and duration types:
+Cells that Excel stores as dates, times or numbers map directly. For dates and times written as **text** (every CSV cell, or text cells in a workbook), these formats are accepted by default, using the importer's [culture](#culture-for-the-whole-importer) (or the current culture):
+
+| Type | Accepted by default | Examples (en-GB) |
+|------|---------------------|------------------|
+| `DateTime`, `DateTimeOffset` | ISO 8601; the culture's date and time (`"G"`), short date and time (`"g"`) and short date (`"d"`) | `2024-03-04`, `2024-03-04T10:30:15Z`, `2024-03-04 10:30`, `04/03/2024 10:30:15`, `04/03/2024` |
+| `DateOnly` | the culture's short date (`"d"`); ISO 8601 | `04/03/2024`, `2024-03-04` |
+| `TimeOnly` | the culture's short time (`"t"`) and long time (`"T"`); 24-hour times | `10:30`, `10:30:15`, `9:05`, `14:30:15.25` |
+| `TimeSpan` | the constant format (`"c"`) | `1:30`, `01:30:00`, `1.02:03:04` |
+
+Text such as `3/4/2024 10:30 AM` matches en-US patterns whether it uses an ordinary space or the narrow no-break space that .NET's own formatting uses on Linux, macOS and recent Windows. A `DateTime` with an offset (`Z`, `+01:00`) is converted to local time, as `DateTime.Parse` does; map to `DateTimeOffset` to keep the offset.
+
+Specify formats to accept exactly those formats and nothing else:
 
 | Event         | EventDate  | StartTime | Duration |
 |---------------|------------|-----------|----------|

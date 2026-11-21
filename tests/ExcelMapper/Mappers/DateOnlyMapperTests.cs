@@ -143,6 +143,42 @@ public class DateOnlyMapperTests
 
 #if LIBRARY_NET8
     [Theory]
+    [InlineData("2024-03-04", "en-GB")]
+    [InlineData("2024-03-04", "en-US")]
+    [InlineData("2024-03-04", "de-DE")]
+    [InlineData("04/03/2024", "en-GB")]
+    [InlineData("3/4/2024", "en-US")]
+    public void Map_DefaultFormatsStringValue_ReturnsSuccess(string stringValue, string culture)
+    {
+        var item = new DateOnlyMapper { Provider = CultureInfo.GetCultureInfo(culture) };
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        Assert.True(result.Succeeded);
+        Assert.Equal(new DateOnly(2024, 3, 4), Assert.IsType<DateOnly>(result.Value));
+        Assert.Null(result.Exception);
+    }
+
+    [Theory]
+    [InlineData("2024-3-4")]
+    [InlineData("2024-03-04T10:30")]
+    [InlineData("1/2")]
+    public void Map_DefaultFormatsInvalidStringValue_ReturnsInvalid(string stringValue)
+    {
+        var item = new DateOnlyMapper { Provider = CultureInfo.GetCultureInfo("en-GB") };
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        Assert.False(result.Succeeded);
+        Assert.IsType<FormatException>(result.Exception);
+    }
+
+    [Fact]
+    public void Map_FormatsSetIsoStringValue_ReturnsInvalid()
+    {
+        var item = new DateOnlyMapper { Formats = ["d"], Provider = CultureInfo.GetCultureInfo("en-US") };
+        var result = item.Map(new ReadCellResult(0, "2024-03-04", preserveFormatting: false));
+        Assert.False(result.Succeeded);
+        Assert.IsType<FormatException>(result.Exception);
+    }
+
+    [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("invalid")]

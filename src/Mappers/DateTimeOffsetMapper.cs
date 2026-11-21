@@ -12,7 +12,10 @@ public class DateTimeOffsetMapper : IFormatsCellMapper
     /// <summary>
     /// Gets or sets the date formats used to map the value to a DateTimeOffset.
     /// This defaults to "G" - the default Excel format.
+    /// While the formats haven't been set, values that don't match also try the culture's short date ("d") and short date and time ("g"), and ISO 8601, such as "2024-03-04" or "2024-03-04T10:30:00+01:00".
     /// </summary>
+    private bool _formatsSet;
+
     public string[] Formats
     {
         get => _formats;
@@ -20,6 +23,7 @@ public class DateTimeOffsetMapper : IFormatsCellMapper
         {
             FormatUtilities.ValidateFormats(value);
             _formats = value;
+            _formatsSet = true;
         }
     }
 
@@ -94,7 +98,8 @@ public class DateTimeOffsetMapper : IFormatsCellMapper
         var style = Style;
         try
         {
-            if (DateTimeOffset.TryParseExact(stringValue, formats, provider, style, out var result))
+            if (DateTimeOffset.TryParseExact(stringValue, formats, provider, style, out var result) ||
+                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateTimeOffset.TryParseExact(stringValue, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, style, out result)))
             {
                 return CellMapperResult.Success(result);
             }

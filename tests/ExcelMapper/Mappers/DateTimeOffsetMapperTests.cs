@@ -122,6 +122,51 @@ public class DateTimeOffsetMapperTests
         Assert.Null(result.Exception);
     }
 
+    public static IEnumerable<object?[]> Map_DefaultFormatsStringValue_TestData()
+    {
+        var localOffset = TimeZoneInfo.Local.GetUtcOffset(new DateTime(2024, 3, 4));
+        yield return new object?[] { "2024-03-04", CultureInfo.GetCultureInfo("en-GB"), new DateTimeOffset(2024, 3, 4, 0, 0, 0, localOffset) };
+        yield return new object?[] { "2024-03-04T10:30:15", CultureInfo.GetCultureInfo("en-GB"), new DateTimeOffset(2024, 3, 4, 10, 30, 15, localOffset) };
+        yield return new object?[] { "2024-03-04 10:30", CultureInfo.GetCultureInfo("en-GB"), new DateTimeOffset(2024, 3, 4, 10, 30, 0, localOffset) };
+        yield return new object?[] { "2024-03-04T10:30:15Z", CultureInfo.GetCultureInfo("en-GB"), new DateTimeOffset(2024, 3, 4, 10, 30, 15, TimeSpan.Zero) };
+        yield return new object?[] { "2024-03-04T10:30:15.5+01:00", CultureInfo.GetCultureInfo("en-GB"), new DateTimeOffset(2024, 3, 4, 10, 30, 15, 500, TimeSpan.FromHours(1)) };
+        yield return new object?[] { "04/03/2024", CultureInfo.GetCultureInfo("en-GB"), new DateTimeOffset(2024, 3, 4, 0, 0, 0, localOffset) };
+        yield return new object?[] { "3/4/2024 10:30 AM", CultureInfo.GetCultureInfo("en-US"), new DateTimeOffset(2024, 3, 4, 10, 30, 0, localOffset) };
+    }
+
+    [Theory]
+    [MemberData(nameof(Map_DefaultFormatsStringValue_TestData))]
+    public void Map_DefaultFormatsStringValue_ReturnsSuccess(string stringValue, IFormatProvider provider, DateTimeOffset expected)
+    {
+        var item = new DateTimeOffsetMapper { Provider = provider };
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        Assert.True(result.Succeeded);
+        Assert.Equal(expected, Assert.IsType<DateTimeOffset>(result.Value));
+        Assert.Equal(expected.Offset, ((DateTimeOffset)result.Value!).Offset);
+        Assert.Null(result.Exception);
+    }
+
+    [Theory]
+    [InlineData("2024-3-4")]
+    [InlineData("10:30")]
+    [InlineData("1/2")]
+    public void Map_DefaultFormatsInvalidStringValue_ReturnsInvalid(string stringValue)
+    {
+        var item = new DateTimeOffsetMapper { Provider = CultureInfo.GetCultureInfo("en-GB") };
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        Assert.False(result.Succeeded);
+        Assert.IsType<FormatException>(result.Exception);
+    }
+
+    [Fact]
+    public void Map_FormatsSetIsoStringValue_ReturnsInvalid()
+    {
+        var item = new DateTimeOffsetMapper { Formats = ["G"], Provider = CultureInfo.GetCultureInfo("en-GB") };
+        var result = item.Map(new ReadCellResult(0, "2024-03-04", preserveFormatting: false));
+        Assert.False(result.Succeeded);
+        Assert.IsType<FormatException>(result.Exception);
+    }
+
     [Theory]
     [InlineData(null)]
     [InlineData("")]

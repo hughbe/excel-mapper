@@ -143,6 +143,53 @@ public class TimeOnlyMapperTests
 
 #if LIBRARY_NET8
     [Theory]
+    [InlineData("14:30", "en-US", 14, 30, 0)]
+    [InlineData("9:05", "en-US", 9, 5, 0)]
+    [InlineData("14:30:15", "en-US", 14, 30, 15)]
+    [InlineData("2:30:15 PM", "en-US", 14, 30, 15)]
+    [InlineData("2:30 PM", "en-US", 14, 30, 0)]
+    [InlineData("14:30:15", "en-GB", 14, 30, 15)]
+    [InlineData("14:30", "en-GB", 14, 30, 0)]
+    public void Map_DefaultFormatsStringValue_ReturnsSuccess(string stringValue, string culture, int hour, int minute, int second)
+    {
+        var item = new TimeOnlyMapper { Provider = CultureInfo.GetCultureInfo(culture) };
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        Assert.True(result.Succeeded);
+        Assert.Equal(new TimeOnly(hour, minute, second), Assert.IsType<TimeOnly>(result.Value));
+        Assert.Null(result.Exception);
+    }
+
+    [Fact]
+    public void Map_DefaultFormatsFractionalSeconds_ReturnsSuccess()
+    {
+        var item = new TimeOnlyMapper { Provider = CultureInfo.GetCultureInfo("en-US") };
+        var result = item.Map(new ReadCellResult(0, "14:30:15.25", preserveFormatting: false));
+        Assert.True(result.Succeeded);
+        Assert.Equal(new TimeOnly(14, 30, 15, 250), Assert.IsType<TimeOnly>(result.Value));
+    }
+
+    [Theory]
+    [InlineData("24:00")]
+    [InlineData("14")]
+    [InlineData("2024-03-04")]
+    public void Map_DefaultFormatsInvalidStringValue_ReturnsInvalid(string stringValue)
+    {
+        var item = new TimeOnlyMapper { Provider = CultureInfo.GetCultureInfo("en-US") };
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        Assert.False(result.Succeeded);
+        Assert.IsType<FormatException>(result.Exception);
+    }
+
+    [Fact]
+    public void Map_FormatsSetTwentyFourHourStringValue_ReturnsInvalid()
+    {
+        var item = new TimeOnlyMapper { Formats = ["t"], Provider = CultureInfo.GetCultureInfo("en-US") };
+        var result = item.Map(new ReadCellResult(0, "14:30", preserveFormatting: false));
+        Assert.False(result.Succeeded);
+        Assert.IsType<FormatException>(result.Exception);
+    }
+
+    [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("invalid")]

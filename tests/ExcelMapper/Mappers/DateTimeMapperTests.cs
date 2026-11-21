@@ -123,6 +123,72 @@ public class DateTimeMapperTests
         Assert.Null(result.Exception);
     }
 
+    public static IEnumerable<object?[]> Map_DefaultFormatsStringValue_TestData()
+    {
+        // ISO 8601.
+        yield return new object?[] { "2024-03-04", CultureInfo.GetCultureInfo("en-GB"), new DateTime(2024, 3, 4) };
+        yield return new object?[] { "2024-03-04", CultureInfo.GetCultureInfo("en-US"), new DateTime(2024, 3, 4) };
+        yield return new object?[] { "2024-03-04T10:30", CultureInfo.GetCultureInfo("en-GB"), new DateTime(2024, 3, 4, 10, 30, 0) };
+        yield return new object?[] { "2024-03-04T10:30:15", CultureInfo.GetCultureInfo("en-GB"), new DateTime(2024, 3, 4, 10, 30, 15) };
+        yield return new object?[] { "2024-03-04T10:30:15.123", CultureInfo.GetCultureInfo("en-GB"), new DateTime(2024, 3, 4, 10, 30, 15, 123) };
+        yield return new object?[] { "2024-03-04 10:30", CultureInfo.GetCultureInfo("en-GB"), new DateTime(2024, 3, 4, 10, 30, 0) };
+        yield return new object?[] { "2024-03-04 10:30:15", CultureInfo.GetCultureInfo("en-GB"), new DateTime(2024, 3, 4, 10, 30, 15) };
+        // Times with an offset are converted to local time, as DateTime.Parse does.
+        yield return new object?[] { "2024-03-04T10:30:15Z", CultureInfo.GetCultureInfo("en-GB"), new DateTime(2024, 3, 4, 10, 30, 15, DateTimeKind.Utc).ToLocalTime() };
+        yield return new object?[] { "2024-03-04T10:30:15+01:00", CultureInfo.GetCultureInfo("en-GB"), new DateTime(2024, 3, 4, 9, 30, 15, DateTimeKind.Utc).ToLocalTime() };
+
+        // The culture's short date and short date and time.
+        yield return new object?[] { "04/03/2024", CultureInfo.GetCultureInfo("en-GB"), new DateTime(2024, 3, 4) };
+        yield return new object?[] { "3/4/2024", CultureInfo.GetCultureInfo("en-US"), new DateTime(2024, 3, 4) };
+        yield return new object?[] { "04.03.2024", CultureInfo.GetCultureInfo("de-DE"), new DateTime(2024, 3, 4) };
+        yield return new object?[] { "04/03/2024 10:30", CultureInfo.GetCultureInfo("en-GB"), new DateTime(2024, 3, 4, 10, 30, 0) };
+        yield return new object?[] { "3/4/2024 10:30 AM", CultureInfo.GetCultureInfo("en-US"), new DateTime(2024, 3, 4, 10, 30, 0) };
+
+        // ICU puts U+202F before AM/PM in en-US patterns; text with an ordinary space still matches.
+        yield return new object?[] { "3/4/2024 10:30:15 AM", CultureInfo.GetCultureInfo("en-US"), new DateTime(2024, 3, 4, 10, 30, 15) };
+        yield return new object?[] { "3/4/2024 10:30:15 PM", CultureInfo.GetCultureInfo("en-US"), new DateTime(2024, 3, 4, 22, 30, 15) };
+        yield return new object?[] { "3/4/2024 10:30:15\u202FAM", CultureInfo.GetCultureInfo("en-US"), new DateTime(2024, 3, 4, 10, 30, 15) };
+
+        // The default format still comes first.
+        yield return new object?[] { "04/03/2024 10:30:15", CultureInfo.GetCultureInfo("en-GB"), new DateTime(2024, 3, 4, 10, 30, 15) };
+    }
+
+    [Theory]
+    [MemberData(nameof(Map_DefaultFormatsStringValue_TestData))]
+    public void Map_DefaultFormatsStringValue_ReturnsSuccess(string stringValue, IFormatProvider provider, DateTime expected)
+    {
+        var item = new DateTimeMapper { Provider = provider };
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        Assert.True(result.Succeeded);
+        Assert.Equal(expected, Assert.IsType<DateTime>(result.Value));
+        Assert.Null(result.Exception);
+    }
+
+    [Theory]
+    [InlineData("2024-3-4")]
+    [InlineData("2024-13-01")]
+    [InlineData("10:30")]
+    [InlineData("1/2")]
+    [InlineData("March 2024")]
+    public void Map_DefaultFormatsInvalidStringValue_ReturnsInvalid(string stringValue)
+    {
+        var item = new DateTimeMapper { Provider = CultureInfo.GetCultureInfo("en-GB") };
+        var result = item.Map(new ReadCellResult(0, stringValue, preserveFormatting: false));
+        Assert.False(result.Succeeded);
+        Assert.Null(result.Value);
+        Assert.IsType<FormatException>(result.Exception);
+    }
+
+    [Fact]
+    public void Map_FormatsSetIsoStringValue_ReturnsInvalid()
+    {
+        // Setting the formats, even to the default, only accepts those formats.
+        var item = new DateTimeMapper { Formats = ["G"], Provider = CultureInfo.GetCultureInfo("en-GB") };
+        var result = item.Map(new ReadCellResult(0, "2024-03-04", preserveFormatting: false));
+        Assert.False(result.Succeeded);
+        Assert.IsType<FormatException>(result.Exception);
+    }
+
     [Theory]
     [InlineData(null)]
     [InlineData("")]
