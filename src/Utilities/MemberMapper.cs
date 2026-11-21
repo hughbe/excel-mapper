@@ -272,7 +272,9 @@ internal static class MemberMapper
         }
     }
 
-    internal static IFallbackItem? GetDefaultEmptyValueFallback(MemberInfo member)
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    internal static IFallbackItem? GetDefaultEmptyValueFallback<T>(MemberInfo member)
     {
         // If the member has a ExcelDefaultValue attribute, add the fallback.
         if (MemberAttributes.Get<ExcelDefaultValueAttribute>(member) is { } defaultValueAttribute)
@@ -283,13 +285,15 @@ internal static class MemberMapper
         // If the member has a ExcelEmptyFallback attribute, add the fallback.
         if (MemberAttributes.Get<ExcelEmptyFallbackAttribute>(member) is { } emptyFallback)
         {
-            return (IFallbackItem)Activator.CreateInstance(emptyFallback.Type, emptyFallback.ConstructorArguments)!;
+            return CreateFallbackItem<T>(Activator.CreateInstance(emptyFallback.Type, emptyFallback.ConstructorArguments)!, member, nameof(ExcelEmptyFallbackAttribute));
         }
 
         return null;
     }
 
-    internal static IFallbackItem? GetDefaultInvalidValueFallback(MemberInfo member)
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    internal static IFallbackItem? GetDefaultInvalidValueFallback<T>(MemberInfo member)
     {
         // If the member has a ExcelInvalidValue attribute, add the fallback.
         if (MemberAttributes.Get<ExcelInvalidValueAttribute>(member) is { } invalidValueAttribute)
@@ -300,10 +304,42 @@ internal static class MemberMapper
         // If the member has a ExcelInvalidFallback attribute, add the fallback.
         if (MemberAttributes.Get<ExcelInvalidFallbackAttribute>(member) is { } invalidFallback)
         {
-            return (IFallbackItem)Activator.CreateInstance(invalidFallback.Type, invalidFallback.ConstructorArguments)!;
+            return CreateFallbackItem<T>(Activator.CreateInstance(invalidFallback.Type, invalidFallback.ConstructorArguments)!, member, nameof(ExcelInvalidFallbackAttribute));
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Creates the fallback for an object given by <see cref="ExcelEmptyFallbackAttribute"/> or
+    /// <see cref="ExcelInvalidFallbackAttribute"/>: an <see cref="IFallbackItem"/>, an
+    /// <see cref="ICellFallback{T}"/>, or for a <c>T?</c> member, an <see cref="ICellFallback{T}"/> of <c>T</c>.
+    /// </summary>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+#if NET5_0_OR_GREATER
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(NullableCellFallback<>))]
+#endif
+    private static IFallbackItem CreateFallbackItem<T>(object fallback, MemberInfo member, string attributeName)
+    {
+        if (fallback is ICellFallback<T> typedFallback)
+        {
+            return new CellFallbackItem<T>(typedFallback);
+        }
+
+        if (Nullable.GetUnderlyingType(typeof(T)) is { } underlyingType &&
+            typeof(ICellFallback<>).MakeGenericType(underlyingType).IsInstanceOfType(fallback))
+        {
+            var nullableFallback = (ICellFallback<T>)Activator.CreateInstance(typeof(NullableCellFallback<>).MakeGenericType(underlyingType), fallback)!;
+            return new CellFallbackItem<T>(nullableFallback);
+        }
+
+        if (fallback is IFallbackItem fallbackItem)
+        {
+            return fallbackItem;
+        }
+
+        throw new ExcelMappingException($"The fallback \"{fallback.GetType()}\" given by {attributeName} on member \"{member.Name}\" doesn't implement ICellFallback<{typeof(T)}>.");
     }
 
     internal static void AddTransformers(IValuePipeline pipeline, MemberInfo member)
@@ -319,8 +355,10 @@ internal static class MemberMapper
         {
             foreach (var transformAttribute in transformAttributes)
             {
-                var transformer = (ICellTransformer)Activator.CreateInstance(transformAttribute.Type, transformAttribute.ConstructorArguments)!;
-                pipeline.Transformers.Add(transformer);
+                var transformer = Activator.CreateInstance(transformAttribute.Type, transformAttribute.ConstructorArguments)!;
+                pipeline.Transformers.Add(transformer is ICellTransformer cellTransformer
+                    ? new CellTransformerAdapter(cellTransformer)
+                    : (Abstractions.ICellTransformer)transformer);
             }
         }
     }

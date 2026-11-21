@@ -1,5 +1,6 @@
 using System.Reflection;
 using ExcelMapper.Abstractions;
+using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
 
 namespace ExcelMapper;
@@ -45,7 +46,7 @@ public class ValuePipeline<T> : ValuePipeline, IValuePipeline<T>
     /// The pipeline as arrays and fields, so that mapping a cell doesn't go through the pipeline's
     /// interfaces. Rebuilt when the pipeline changes.
     /// </summary>
-    private sealed class Plan(int version, ITypedCellMapper<T>?[]? converters, ICellConverter<T>?[]? cellConverters, ICellTransformer[] transformers, IFallbackItem? emptyFallback, IFallbackItem? invalidFallback)
+    private sealed class Plan(int version, ITypedCellMapper<T>?[]? converters, ICellConverter<T>?[]? cellConverters, Abstractions.ICellTransformer[] transformers, IFallbackItem? emptyFallback, IFallbackItem? invalidFallback)
     {
         public int Version { get; } = version;
 
@@ -58,13 +59,18 @@ public class ValuePipeline<T> : ValuePipeline, IValuePipeline<T>
         // if no mapper has one.
         public ICellConverter<T>?[]? CellConverters { get; } = cellConverters;
 
-        public ICellTransformer[] Transformers { get; } = transformers;
+        public Abstractions.ICellTransformer[] Transformers { get; } = transformers;
 
         public IFallbackItem? EmptyFallback { get; } = emptyFallback;
 
         public IFallbackItem? InvalidFallback { get; } = invalidFallback;
 
         public bool InvalidFallbackUsesException { get; } = invalidFallback is not null && FallbackUsesException(invalidFallback);
+
+        // The ICellFallback<T> of each fallback that has one, called without boxing.
+        public ICellFallback<T>? TypedEmptyFallback { get; } = (emptyFallback as CellFallbackItem<T>)?.Fallback;
+
+        public ICellFallback<T>? TypedInvalidFallback { get; } = (invalidFallback as CellFallbackItem<T>)?.Fallback;
     }
 
     private Plan? _plan;
@@ -118,11 +124,16 @@ public class ValuePipeline<T> : ValuePipeline, IValuePipeline<T>
     {
         if (plan.Transformers.Length != 0)
         {
-            readResult = ApplyTransformers(plan.Transformers, sheet, rowIndex, readResult, preserveFormatting);
+            readResult = ApplyTransformers(plan.Transformers, sheet, rowIndex, readResult, preserveFormatting, member);
         }
 
         if (plan.EmptyFallback is { } emptyFallback && readResult.IsEmpty())
         {
+            if (plan.TypedEmptyFallback is { } typedEmptyFallback)
+            {
+                return typedEmptyFallback.Fallback(new CellValue(readResult), new CellContext(sheet, rowIndex, readResult.ColumnIndex, member), null);
+            }
+
             return CastValue<T>(emptyFallback.PerformFallback(sheet, rowIndex, readResult, null, member), sheet, rowIndex, readResult.ColumnIndex, member)!;
         }
 
@@ -178,6 +189,11 @@ public class ValuePipeline<T> : ValuePipeline, IValuePipeline<T>
                     ? invalidConverter.Map(readResult).Exception
                     : CellConversionResult<T>.CreateException(invalidError)
                 : null;
+            if (plan.TypedInvalidFallback is { } typedInvalidFallback)
+            {
+                return typedInvalidFallback.Fallback(new CellValue(readResult), new CellContext(sheet, rowIndex, readResult.ColumnIndex, member), exception);
+            }
+
             return CastValue<T>(invalidFallback.PerformFallback(sheet, rowIndex, readResult, exception, member), sheet, rowIndex, readResult.ColumnIndex, member)!;
         }
 

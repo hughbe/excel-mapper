@@ -11,6 +11,7 @@ public class ExcelInvalidFallbackAttributeTests
     [InlineData(typeof(FixedValueFallback))]
     [InlineData(typeof(ThrowFallback))]
     [InlineData(typeof(NoConstructorInvalidFallback))]
+    [InlineData(typeof(TypedFallback))]
     public void Ctor_Type(Type fallbackType)
     {
         var attribute = new ExcelInvalidFallbackAttribute(fallbackType);
@@ -27,6 +28,7 @@ public class ExcelInvalidFallbackAttributeTests
 
     [Theory]
     [InlineData(typeof(IFallbackItem))]
+    [InlineData(typeof(ICellFallback<int>))]
     [InlineData(typeof(ISubInvalidFallback))]
     [InlineData(typeof(AbstractInvalidFallback))]
     [InlineData(typeof(int))]
@@ -82,5 +84,10 @@ public class ExcelInvalidFallbackAttributeTests
     {
         public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member)
             => throw new NotImplementedException();
+    }
+
+    private sealed class TypedFallback : ICellFallback<int>
+    {
+        public int Fallback(CellValue value, CellContext context, Exception? exception) => 1;
     }
 }

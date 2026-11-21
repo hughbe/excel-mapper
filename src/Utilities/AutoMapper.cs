@@ -79,7 +79,7 @@ public static class AutoMapper
         // Setup the empty fallback - ExcelDefaultValue, ExcelEmptyFallback, etc.
         if (member != null)
         {
-            map.Pipeline.EmptyFallback = MemberMapper.GetDefaultEmptyValueFallback(member);
+            map.Pipeline.EmptyFallback = MemberMapper.GetDefaultEmptyValueFallback<T>(member);
         }
 
         // If no fallback is specified, use the empty value strategy.
@@ -88,7 +88,7 @@ public static class AutoMapper
         // Setup the invalid fallback - ExcelInvalidValue, ExcelInvalidFallback, etc.
         if (member != null)
         {
-            map.Pipeline.InvalidFallback = MemberMapper.GetDefaultInvalidValueFallback(member);
+            map.Pipeline.InvalidFallback = MemberMapper.GetDefaultInvalidValueFallback<T>(member);
         }
         
         // If no fallback is specified, use the throw fallback.

@@ -123,7 +123,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var map = Map(t => t.Value).WithTrim();
         var transformer1 = Assert.Single(map.Transformers);
-        Assert.Same(map, map.WithTransformers([]));
+        Assert.Same(map, map.WithTransformers(Array.Empty<ICellTransformer>()));
         Assert.Empty(map.Transformers);
     }
 
@@ -131,7 +131,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithTransformers_ParamsArrayNullTransformers_ThrowsArgumentNullException()
     {
         var map = Map(t => t.Value);
-        Assert.Throws<ArgumentNullException>("transformers", () => map.WithTransformers(null!));
+        Assert.Throws<ArgumentNullException>("transformers", () => map.WithTransformers((ICellTransformer[])null!));
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var map = Map(t => t.Value).WithTrim();
         var transformer = Assert.Single(map.Transformers);
-        Assert.Throws<ArgumentException>("transformers", () => map.WithTransformers([null!]));
+        Assert.Throws<ArgumentException>("transformers", () => map.WithTransformers(new ICellTransformer[] { null! }));
         Assert.Same(transformer, Assert.Single(map.Transformers));
 
         // Null in middle does not affect existing transformers.
@@ -153,13 +153,13 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.Value).WithTrim();
         var transformer1 = Assert.Single(map.Transformers);
         var transformer2 = new TrimStringCellTransformer();
-        Assert.Same(map, map.WithTransformers((IEnumerable<ICellTransformer>)[transformer2]));
+        Assert.Same(map, map.WithTransformers((IEnumerable<Abstractions.ICellTransformer>)[transformer2]));
         Assert.Equal([transformer2], map.Transformers);
 
         // Multiple.
         var transformer3 = new TrimStringCellTransformer();
         var transformer4 = new TrimStringCellTransformer();
-        Assert.Same(map, map.WithTransformers((IEnumerable<ICellTransformer>)[transformer3, transformer4]));
+        Assert.Same(map, map.WithTransformers((IEnumerable<Abstractions.ICellTransformer>)[transformer3, transformer4]));
         Assert.Equal([transformer3, transformer4], map.Transformers);
     }
 
@@ -168,7 +168,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var map = Map(t => t.Value).WithTrim();
         var transformer1 = Assert.Single(map.Transformers);
-        Assert.Same(map, map.WithTransformers((IEnumerable<ICellTransformer>)[]));
+        Assert.Same(map, map.WithTransformers((IEnumerable<Abstractions.ICellTransformer>)[]));
         Assert.Empty(map.Transformers);
     }
 
@@ -176,7 +176,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     public void WithTransformers_ParamsIEnumerableNullTransformers_ThrowsArgumentNullException()
     {
         var map = Map(t => t.Value);
-        Assert.Throws<ArgumentNullException>("transformers", () => map.WithTransformers((IEnumerable<ICellTransformer>)null!));
+        Assert.Throws<ArgumentNullException>("transformers", () => map.WithTransformers((IEnumerable<Abstractions.ICellTransformer>)null!));
     }
 
     [Fact]
@@ -184,7 +184,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var map = Map(t => t.Value).WithTrim();
         var transformer = Assert.Single(map.Transformers);
-        Assert.Throws<ArgumentException>("transformers", () => map.WithTransformers((IEnumerable<ICellTransformer>)[null!]));
+        Assert.Throws<ArgumentException>("transformers", () => map.WithTransformers((IEnumerable<Abstractions.ICellTransformer>)[null!]));
         Assert.Same(transformer, Assert.Single(map.Transformers));
 
         // Null in middle does not affect existing transformers.
@@ -1370,6 +1370,58 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     {
         var map = Map(t => t.UriValue);
         Assert.Throws<ArgumentOutOfRangeException>("uriKind", () => map.WithUriKind(uriKind));
+    }
+
+    [Fact]
+    public void WithTransformers_CellTransformers_ReplacesTransformers()
+    {
+        var map = Map(t => t.Value).WithTrim();
+        Assert.Same(map, map.WithTransformers(new UpperCellTransformer(), new UpperCellTransformer()));
+        Assert.Equal(2, map.Transformers.Count);
+    }
+
+    [Fact]
+    public void WithTransformers_NullCellTransformers_ThrowsArgumentNullException()
+    {
+        var map = Map(t => t.Value);
+        Assert.Throws<ArgumentNullException>("transformers", () => map.WithTransformers((ICellTransformer[])null!));
+        Assert.Throws<ArgumentException>("transformers", () => map.WithTransformers(new UpperCellTransformer(), null!));
+    }
+
+    [Fact]
+    public void WithEmptyFallback_CellFallback_SetsFallback()
+    {
+        var map = Map(t => t.DateTimeValue);
+        Assert.Same(map, map.WithEmptyFallback(new MinValueFallback()));
+        using var importer = Helpers.GetCsvImporter("A\n1\n");
+        Assert.Equal(DateTime.MinValue, map.EmptyFallback!.PerformFallback(importer.ReadSheet(), 0, new ReadCellResult(0, "", preserveFormatting: false), null, null));
+    }
+
+    [Fact]
+    public void WithInvalidFallback_CellFallback_SetsFallback()
+    {
+        var map = Map(t => t.DateTimeValue);
+        Assert.Same(map, map.WithInvalidFallback(new MinValueFallback()));
+        using var importer = Helpers.GetCsvImporter("A\n1\n");
+        Assert.Equal(DateTime.MinValue, map.InvalidFallback!.PerformFallback(importer.ReadSheet(), 0, new ReadCellResult(0, "x", preserveFormatting: false), null, null));
+    }
+
+    [Fact]
+    public void WithFallback_NullCellFallback_ThrowsArgumentNullException()
+    {
+        var map = Map(t => t.DateTimeValue);
+        Assert.Throws<ArgumentNullException>("fallback", () => map.WithEmptyFallback((ICellFallback<DateTime>)null!));
+        Assert.Throws<ArgumentNullException>("fallback", () => map.WithInvalidFallback((ICellFallback<DateTime>)null!));
+    }
+
+    private sealed class UpperCellTransformer : ICellTransformer
+    {
+        public CellValue Transform(CellValue value, CellContext context) => new(value.Text?.ToUpperInvariant());
+    }
+
+    private sealed class MinValueFallback : ICellFallback<DateTime>
+    {
+        public DateTime Fallback(CellValue value, CellContext context, Exception? exception) => DateTime.MinValue;
     }
 
     [Fact]

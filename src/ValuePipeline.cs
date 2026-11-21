@@ -16,7 +16,7 @@ public class ValuePipeline : IValuePipeline
     /// modifies the string value. This is useful for things like trimming the string value
     /// before mapping it.
     /// </summary>
-    public IList<ICellTransformer> Transformers { get; } = new NonNullCollection<ICellTransformer>();
+    public IList<Abstractions.ICellTransformer> Transformers { get; } = new NonNullCollection<Abstractions.ICellTransformer>();
 
     /// <summary>
     /// Gets the pipeline of items that take the initial string value read from a cell and
@@ -66,7 +66,7 @@ public class ValuePipeline : IValuePipeline
     /// pipeline (see <see cref="OneToOneMap{T}"/>) are rebuilt.
     /// </summary>
     internal int Version
-        => ((NonNullCollection<ICellTransformer>)Transformers).Version + ((NonNullCollection<ICellMapper>)Mappers).Version + _fallbackVersion;
+        => ((NonNullCollection<Abstractions.ICellTransformer>)Transformers).Version + ((NonNullCollection<ICellMapper>)Mappers).Version + _fallbackVersion;
 
     /// <summary>
     /// Processes a cell value through the complete transformation and mapping pipeline to produce a final property value.
@@ -101,7 +101,7 @@ public class ValuePipeline : IValuePipeline
         bool preserveFormatting,
         MemberInfo? member)
     {
-        readResult = ApplyTransformers(pipeline, sheet, rowIndex, readResult, preserveFormatting);
+        readResult = ApplyTransformers(pipeline, sheet, rowIndex, readResult, preserveFormatting, member);
         if (readResult.IsEmpty() && pipeline.EmptyFallback != null)
         {
             return pipeline.EmptyFallback.PerformFallback(sheet, rowIndex, readResult, null, member);
@@ -139,7 +139,7 @@ public class ValuePipeline : IValuePipeline
     /// <summary>
     /// Applies the pipeline's transformers to a cell.
     /// </summary>
-    internal static ReadCellResult ApplyTransformers(IValuePipeline pipeline, ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting)
+    internal static ReadCellResult ApplyTransformers(IValuePipeline pipeline, ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting, MemberInfo? member)
     {
         // Use indexed loops: enumerating an IList through its interface allocates for every cell.
         var transformers = pipeline.Transformers;
@@ -154,7 +154,9 @@ public class ValuePipeline : IValuePipeline
                 continue;
             }
 
-            readResult = new ReadCellResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult), preserveFormatting);
+            readResult = transformer is CellTransformerAdapter cellTransformer
+                ? cellTransformer.Transform(readResult, sheet, rowIndex, member)
+                : new ReadCellResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult), preserveFormatting);
         }
 
         return readResult;
@@ -163,7 +165,7 @@ public class ValuePipeline : IValuePipeline
     /// <summary>
     /// Applies transformers from a plan (see <see cref="OneToOneMap{T}"/>) to a cell.
     /// </summary>
-    internal static ReadCellResult ApplyTransformers(ICellTransformer[] transformers, ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting)
+    internal static ReadCellResult ApplyTransformers(Abstractions.ICellTransformer[] transformers, ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting, MemberInfo? member)
     {
         for (int i = 0; i < transformers.Length; i++)
         {
@@ -175,7 +177,9 @@ public class ValuePipeline : IValuePipeline
                 continue;
             }
 
-            readResult = new ReadCellResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult), preserveFormatting);
+            readResult = transformer is CellTransformerAdapter cellTransformer
+                ? cellTransformer.Transform(readResult, sheet, rowIndex, member)
+                : new ReadCellResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult), preserveFormatting);
         }
 
         return readResult;

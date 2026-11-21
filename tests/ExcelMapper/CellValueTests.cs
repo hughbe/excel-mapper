@@ -20,6 +20,46 @@ public class CellValueTests
     }
 
     [Fact]
+    public void Ctor_Number()
+    {
+        var value = new CellValue(2.5);
+        Assert.Equal(CellKind.Number, value.Kind);
+        Assert.False(value.IsEmpty);
+        Assert.Equal(2.5, value.Number);
+        Assert.Equal(2.5, value.Value);
+        Assert.Equal(2.5.ToString(CultureInfo.CurrentCulture), value.Text);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Ctor_Boolean(bool boolean)
+    {
+        var value = new CellValue(boolean);
+        Assert.Equal(CellKind.Boolean, value.Kind);
+        Assert.Equal(boolean, value.Boolean);
+        Assert.Equal(boolean.ToString(), value.Text);
+    }
+
+    [Fact]
+    public void Ctor_DateTime()
+    {
+        var date = new DateTime(2024, 3, 4);
+        var value = new CellValue(date);
+        Assert.Equal(CellKind.DateTime, value.Kind);
+        Assert.Equal(date, value.DateTime);
+        Assert.Throws<InvalidOperationException>(() => value.Number);
+    }
+
+    [Fact]
+    public void Ctor_TimeSpan()
+    {
+        var value = new CellValue(TimeSpan.FromHours(1));
+        Assert.Equal(CellKind.TimeSpan, value.Kind);
+        Assert.Equal(TimeSpan.FromHours(1), value.TimeSpan);
+    }
+
+    [Fact]
     public void Default_Get_IsEmpty()
     {
         var value = default(CellValue);

@@ -27,8 +27,15 @@ public struct ReadCellResult
     /// </summary>
     public string? GetString()
     {
-        if (Reader == null || _stringValue != null)
+        if (_stringValue != null)
         {
+            return _stringValue;
+        }
+
+        if (Reader == null)
+        {
+            // A value created without a reader, such as a transformer's result.
+            _stringValue = _value?.ToString();
             return _stringValue;
         }
 
@@ -115,6 +122,14 @@ public struct ReadCellResult
     /// </summary>
     /// <param name="columnIndex">The index of the column that contains the cell.</param>
     /// <param name="stringValue">The string value of the cell.</param>
+    // A cell holding a value, such as the result of an ICellTransformer.
+    internal ReadCellResult(int columnIndex, object? value)
+    {
+        ColumnIndex = columnIndex;
+        _value = value;
+        _stringValue = value as string;
+    }
+
     public ReadCellResult(int columnIndex, string? stringValue, bool preserveFormatting)
     {
         ThrowHelpers.ThrowIfNegative(columnIndex, nameof(columnIndex));

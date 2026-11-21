@@ -9,6 +9,7 @@ public class ExcelTransformerAttributeTests
     [InlineData(typeof(CellTransformer))]
     [InlineData(typeof(TrimStringCellTransformer))]
     [InlineData(typeof(NoConstructorCellTransformer))]
+    [InlineData(typeof(ValueTransformer))]
     public void Ctor_Type(Type transformerType)
     {
         var attribute = new ExcelTransformerAttribute(transformerType);
@@ -24,6 +25,7 @@ public class ExcelTransformerAttributeTests
 
 
     [Theory]
+    [InlineData(typeof(Abstractions.ICellTransformer))]
     [InlineData(typeof(ICellTransformer))]
     [InlineData(typeof(ISubCellTransformer))]
     [InlineData(typeof(AbstractCellTransformer))]
@@ -35,16 +37,16 @@ public class ExcelTransformerAttributeTests
         Assert.Throws<ArgumentException>("transformerType", () => new ExcelTransformerAttribute(transformerType));
     }
 
-    private interface ISubCellTransformer : ICellTransformer
+    private interface ISubCellTransformer : Abstractions.ICellTransformer
     {
     }
 
-    private abstract class AbstractCellTransformer : ICellTransformer
+    private abstract class AbstractCellTransformer : Abstractions.ICellTransformer
     {
         public abstract string? TransformStringValue(ExcelSheet sheet, int rowIndex, ReadCellResult readResult);
     }
 
-    private class NoConstructorCellTransformer : ICellTransformer
+    private class NoConstructorCellTransformer : Abstractions.ICellTransformer
     {
         private NoConstructorCellTransformer()
         {
@@ -76,9 +78,14 @@ public class ExcelTransformerAttributeTests
         Assert.Same(value, attribute.ConstructorArguments);
     }
 
-    private class CellTransformer : ICellTransformer
+    private class CellTransformer : Abstractions.ICellTransformer
     {
         public string? TransformStringValue(ExcelSheet sheet, int rowIndex, ReadCellResult readResult)
             => throw new NotImplementedException();
+    }
+
+    private sealed class ValueTransformer : ICellTransformer
+    {
+        public CellValue Transform(CellValue value, CellContext context) => value;
     }
 }

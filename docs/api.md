@@ -91,8 +91,8 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 | `[ExcelExtraColumns]` | Fill a dictionary with the columns no other member reads |
 | `[ExcelDefaultValue(value)]` | Default for empty cells |
 | `[ExcelInvalidValue(value)]` | Default for invalid values |
-| `[ExcelEmptyFallback(typeof(Fallback))]` | Custom empty cell handling |
-| `[ExcelInvalidFallback(typeof(Fallback))]` | Custom invalid value handling |
+| `[ExcelEmptyFallback(typeof(Fallback))]` | Custom empty cell handling (`ICellFallback<T>`) |
+| `[ExcelInvalidFallback(typeof(Fallback))]` | Custom invalid value handling (`ICellFallback<T>`) |
 | `[ExcelPreserveFormatting]` | Read formatted string |
 | `[ExcelTrimString]` | Auto-trim whitespace |
 | `[ExcelFormats("format1", "format2")]` | Parse dates/times with specific formats |
@@ -132,7 +132,8 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 - `.WithOffset(TimeSpan)` - Offset from UTC for `DateTimeOffset` properties (dates in Excel have no time zone)
 - `.WithMapping(dictionary)` - Value mapping
 - `.WithTrim()` - Trim whitespace
-- `.WithTransformers(...)` - Custom transformers
+- `.WithTransformers(...)` - Custom transformers (`ICellTransformer`)
+- `.WithEmptyFallback(ICellFallback<T>)` / `.WithInvalidFallback(ICellFallback<T>)` - Compute the value of empty or invalid cells
 - `.WithMappers(...)` - Custom mappers
 
 **Collections:**
@@ -145,6 +146,8 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 Implement these for advanced customization:
 
 - `ICellConverter<T>` - Convert a cell's value (`CellValue`, with `CellContext`) to `T`, returning a `CellConversionResult<T>`
+- `ICellTransformer` (in the `ExcelMapper` namespace) - Change a cell's value (`CellValue`) before it's converted
+- `ICellFallback<T>` - Give the value of an empty or invalid cell
 - `ICellMapper` - Custom type conversion logic
 - `ICellTransformer` - Transform string values before mapping
 - `IFallbackItem` - Custom fallback behavior

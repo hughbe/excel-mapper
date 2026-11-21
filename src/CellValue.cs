@@ -32,6 +32,45 @@ public readonly struct CellValue
     }
 
     /// <summary>
+    /// Creates a cell value holding a number, as Excel stores numbers.
+    /// </summary>
+    public CellValue(double number)
+    {
+        _cell = new ReadCellResult(0, (object)number);
+    }
+
+    /// <summary>
+    /// Creates a cell value holding <see langword="true"/> or <see langword="false"/>.
+    /// </summary>
+    public CellValue(bool boolean)
+    {
+        _cell = new ReadCellResult(0, (object)boolean);
+    }
+
+    /// <summary>
+    /// Creates a cell value holding a date, or a date and time.
+    /// </summary>
+    public CellValue(DateTime dateTime)
+    {
+        _cell = new ReadCellResult(0, (object)dateTime);
+    }
+
+    /// <summary>
+    /// Creates a cell value holding a duration.
+    /// </summary>
+    public CellValue(TimeSpan timeSpan)
+    {
+        _cell = new ReadCellResult(0, (object)timeSpan);
+    }
+
+    /// <summary>
+    /// The cell this value came from, or a cell holding the value for <paramref name="columnIndex"/>
+    /// if it was created, for example by a transformer.
+    /// </summary>
+    internal ReadCellResult ToReadCellResult(int columnIndex)
+        => _cell.Reader is not null || _cell.ColumnIndex == columnIndex ? _cell : new ReadCellResult(columnIndex, _cell.GetValue());
+
+    /// <summary>
     /// Gets the kind of value the cell holds. With formatting preserved (see
     /// <see cref="ExcelPreserveFormattingAttribute"/>), every cell that isn't empty is
     /// <see cref="CellKind.Text"/>, as it's read as the text Excel shows.

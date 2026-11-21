@@ -47,7 +47,7 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>, IBindableMap
     public IValuePipeline Pipeline { get; } = new ValuePipeline<T>();
 
     /// <inheritdoc />
-    public IList<ICellTransformer> Transformers => Pipeline.Transformers;
+    public IList<Abstractions.ICellTransformer> Transformers => Pipeline.Transformers;
 
     /// <inheritdoc />
     public IList<ICellMapper> Mappers => Pipeline.Mappers;

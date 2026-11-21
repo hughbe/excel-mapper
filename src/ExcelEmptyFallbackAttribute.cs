@@ -29,9 +29,9 @@ public sealed class ExcelEmptyFallbackAttribute : Attribute
         {
             throw new ArgumentException("Fallback type cannot be abstract or an interface", nameof(fallbackType));
         }
-        if (!fallbackType.ImplementsInterface(typeof(IFallbackItem)))
+        if (!fallbackType.ImplementsGenericInterface(typeof(ICellFallback<>), out _) && !fallbackType.ImplementsInterface(typeof(IFallbackItem)))
         {
-            throw new ArgumentException($"Fallback type must implement {nameof(IFallbackItem)}", nameof(fallbackType));
+            throw new ArgumentException($"Fallback type must implement ICellFallback<T> or {nameof(IFallbackItem)}", nameof(fallbackType));
         }
 
         Type = fallbackType;
