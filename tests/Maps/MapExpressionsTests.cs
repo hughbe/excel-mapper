@@ -170,15 +170,15 @@ public class MapExpressionsTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<ObjectClass>();
-        Assert.Equal("2", row1.Value);
+        Assert.Equal(2.0, row1.Value);
 
         // Empty cell value.
         var row2 = sheet.ReadRow<ObjectClass>();
-        Assert.Equal("0", row2.Value);
+        Assert.Equal(0.0, row2.Value);
 
         // Invalid cell value.
         var row3 = sheet.ReadRow<ObjectClass>();
-        Assert.Equal("-1", row3.Value);
+        Assert.Equal(-1.0, row3.Value);
     }
 
     [Fact]
@@ -2325,8 +2325,8 @@ public class MapExpressionsTests
 
         var row = sheet.ReadRow<ArrayListClass>();
         Assert.Equal(2, row.Values.Count);
-        Assert.Equal("1", row.Values[0]);
-        Assert.Equal("2", row.Values[1]);
+        Assert.Equal(1.0, row.Values[0]);
+        Assert.Equal(2.0, row.Values[1]);
     }
 
     private class ArrayListClass
@@ -2348,8 +2348,8 @@ public class MapExpressionsTests
 
         var row = sheet.ReadRow<ArrayListClass>();
         Assert.Equal(2, row.Values.Count);
-        Assert.Equal("2", row.Values[0]);
-        Assert.Equal("3", row.Values[1]);
+        Assert.Equal(2.0, row.Values[0]);
+        Assert.Equal(3.0, row.Values[1]);
     }
 
     [Fact]
@@ -3460,8 +3460,8 @@ public class MapExpressionsTests
 
         var row = sheet.ReadRow<HashtableClass>();
         Assert.Equal(2, row.Values.Count);
-        Assert.Equal("1", row.Values["Column2"]);
-        Assert.Equal("2", row.Values["Column3"]);
+        Assert.Equal(1.0, row.Values["Column2"]);
+        Assert.Equal(2.0, row.Values["Column3"]);
     }
 
     private class HashtableClass
@@ -3483,8 +3483,8 @@ public class MapExpressionsTests
 
         var row = sheet.ReadRow<HashtableClass>();
         Assert.Equal(2, row.Values.Count);
-        Assert.Equal("3", row.Values["Column2"]);
-        Assert.Equal("4", row.Values["Column3"]);
+        Assert.Equal(3.0, row.Values["Column2"]);
+        Assert.Equal(4.0, row.Values["Column3"]);
     }
 
     [Fact]
@@ -3501,8 +3501,8 @@ public class MapExpressionsTests
 
         var row = sheet.ReadRow<HybridDictionaryClass>();
         Assert.Equal(2, row.Values.Count);
-        Assert.Equal("1", row.Values["Column2"]);
-        Assert.Equal("2", row.Values["Column3"]);
+        Assert.Equal(1.0, row.Values["Column2"]);
+        Assert.Equal(2.0, row.Values["Column3"]);
     }
 
     private class HybridDictionaryClass
@@ -3524,8 +3524,8 @@ public class MapExpressionsTests
 
         var row = sheet.ReadRow<HybridDictionaryClass>();
         Assert.Equal(2, row.Values.Count);
-        Assert.Equal("3", row.Values["Column2"]);
-        Assert.Equal("4", row.Values["Column3"]);
+        Assert.Equal(3.0, row.Values["Column2"]);
+        Assert.Equal(4.0, row.Values["Column3"]);
     }
 
     [Fact]
@@ -3542,8 +3542,8 @@ public class MapExpressionsTests
 
         var row = sheet.ReadRow<ListDictionaryClass>();
         Assert.Equal(2, row.Values.Count);
-        Assert.Equal("1", row.Values["Column2"]);
-        Assert.Equal("2", row.Values["Column3"]);
+        Assert.Equal(1.0, row.Values["Column2"]);
+        Assert.Equal(2.0, row.Values["Column3"]);
     }
 
     private class ListDictionaryClass
@@ -3565,8 +3565,8 @@ public class MapExpressionsTests
 
         var row = sheet.ReadRow<ListDictionaryClass>();
         Assert.Equal(2, row.Values.Count);
-        Assert.Equal("3", row.Values["Column2"]);
-        Assert.Equal("4", row.Values["Column3"]);
+        Assert.Equal(3.0, row.Values["Column2"]);
+        Assert.Equal(4.0, row.Values["Column3"]);
     }
 
     [Fact]
@@ -3665,8 +3665,8 @@ public class MapExpressionsTests
 
         var row = sheet.ReadRow<OrderedDictionaryClass>();
         Assert.Equal(2, row.Values.Count);
-        Assert.Equal("1", row.Values["Column2"]);
-        Assert.Equal("2", row.Values["Column3"]);
+        Assert.Equal(1.0, row.Values["Column2"]);
+        Assert.Equal(2.0, row.Values["Column3"]);
     }
 
     private class OrderedDictionaryClass
@@ -3688,8 +3688,8 @@ public class MapExpressionsTests
 
         var row = sheet.ReadRow<OrderedDictionaryClass>();
         Assert.Equal(2, row.Values.Count);
-        Assert.Equal("3", row.Values["Column2"]);
-        Assert.Equal("4", row.Values["Column3"]);
+        Assert.Equal(3.0, row.Values["Column2"]);
+        Assert.Equal(4.0, row.Values["Column3"]);
     }
 
     [Fact]

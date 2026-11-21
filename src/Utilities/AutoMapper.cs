@@ -107,6 +107,7 @@ public static class AutoMapper
     private static readonly ICellMapper s_guidMapper = new GuidMapper();
     private static readonly ICellMapper s_boolMapper = new BoolMapper();
     private static readonly ICellMapper s_stringMapper = new StringMapper();
+    private static readonly ICellMapper s_objectMapper = new ObjectMapper();
     private static readonly ICellMapper s_versionMapper = new VersionMapper();
     internal static readonly ICellReaderFactory s_zeroColumnIndexReaderFactory = new ColumnIndexReaderFactory(0);
     internal static readonly ICellsReaderFactory s_allColumnNamesReaderFactory = new AllColumnNamesReaderFactory();
@@ -118,8 +119,10 @@ public static class AutoMapper
         [typeof(Guid)] = s_guidMapper,
         [typeof(bool)] = s_boolMapper,
         [typeof(string)] = s_stringMapper,
-        [typeof(object)] = s_stringMapper,
-        [typeof(IConvertible)] = s_stringMapper,
+        // object and IConvertible members receive the cell's typed value (a double, DateTime, bool,
+        // string, etc.), not its text.
+        [typeof(object)] = s_objectMapper,
+        [typeof(IConvertible)] = s_objectMapper,
         [typeof(Version)] = s_versionMapper,
     }.ToFrozenDictionary();
 

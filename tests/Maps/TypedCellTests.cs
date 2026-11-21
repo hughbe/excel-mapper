@@ -208,13 +208,54 @@ public class TypedCellTests
     // ---------- object members ----------
 
     [Fact]
-    public void Map_ObjectMembers_ReceiveText()
+    public void Map_ObjectMembers_ReceiveTypedValues()
     {
-        // object members, and object values in dictionaries, receive the cell's text rather than
-        // its typed value. Existing code relies on this, so it is pinned here.
-        Assert.Equal("2.5", Map<object>(2.5));
+        // object members, and object values in dictionaries and untyped collections, receive the
+        // value as Excel stores it.
+        Assert.Equal(2.5, Map<object>(2.5));
+        Assert.Equal(new DateTime(2024, 3, 4), Map<object>(new DateTime(2024, 3, 4)));
+        Assert.Equal(true, Map<object>(true));
+        Assert.Equal("text", Map<object>("text"));
+        Assert.Equal(3.0, Map<object>(new Formula("1+2", 3)));
+        Assert.Null(Map<object>(null));
+        Assert.IsType<double>(Map<IConvertible>(2.5));
 
-        using var importer = Create(["Number"], [2.5]);
-        Assert.Equal("2.5", importer.ReadSheet().ReadRows<Dictionary<string, object>>().Single()["Number"]);
+        using var importer = Create(["Number", "Date", "Flag", "Text"], [2.5, new DateTime(2024, 3, 4), false, "x"]);
+        var row = importer.ReadSheet().ReadRows<Dictionary<string, object>>().Single();
+        Assert.Equal(2.5, row["Number"]);
+        Assert.Equal(new DateTime(2024, 3, 4), row["Date"]);
+        Assert.Equal(false, row["Flag"]);
+        Assert.Equal("x", row["Text"]);
+    }
+
+    public class ObjectRow
+    {
+        public object? Value { get; set; }
+        public string? Text { get; set; }
+    }
+
+    [Fact]
+    public void Map_ObjectMemberWithPreserveFormatting_ReceivesDisplayedText()
+    {
+        using var importer = Create(["Value"], [new Formatted(0.25, "0.00%")]);
+        importer.Configuration.RegisterClassMap<ObjectRow>(c => c.Map(p => p.Value).MakePreserveFormatting());
+        Assert.Equal("25.00%", importer.ReadSheet().ReadRows<ObjectRow>().Single().Value);
+    }
+
+    [Fact]
+    public void Map_StringCollection_ReceivesText()
+    {
+        // StringCollection only accepts strings, so its elements are still converted to text.
+        using var importer = Create(["A", "B"], [1.5, "x"]);
+        var row = importer.ReadSheet().ReadRows<System.Collections.Specialized.StringCollection>().Single();
+        Assert.Equal(["1.5", "x"], row.Cast<string>());
+    }
+
+    [Fact]
+    public void Map_CsvObjectMembers_ReceiveText()
+    {
+        // CSV cells are always text.
+        using var importer = Helpers.GetCsvImporter("Value\n2.5\n");
+        Assert.Equal("2.5", importer.ReadSheet().ReadRows<Holder<object>>().Single().Value);
     }
 }
