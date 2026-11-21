@@ -1,5 +1,4 @@
 using System.Linq;
-using ExcelMapper.Abstractions;
 
 namespace ExcelMapper.Tests;
 
@@ -54,7 +53,7 @@ public class MapCustomColumnMatchingTests
         public CustomEnumerablePropertyClassMap()
         {
             Map(p => p.CustomName)
-                .WithColumnsMatching(new NamesColumnMatcher("Year 2023", "Year 2024"));
+                .WithColumns(new NamesColumnMatcher("Year 2023", "Year 2024"));
         }
     }
 
@@ -133,7 +132,7 @@ public class MapCustomColumnMatchingTests
         public CustomEnumerableFieldClassMap()
         {
             Map(p => p.CustomName)
-                .WithColumnsMatching(new NamesColumnMatcher("Year 2023", "Year 2024"));
+                .WithColumns(new NamesColumnMatcher("Year 2023", "Year 2024"));
         }
     }
 
@@ -194,7 +193,7 @@ public class MapCustomColumnMatchingTests
         public CustomNoMatchingEnumerablePropertyClassMap()
         {
             Map(p => p.CustomName)
-                .WithColumnsMatching(new NamesColumnMatcher("Year 2023", "NoSuchColumn"));
+                .WithColumns(new NamesColumnMatcher("Year 2023", "NoSuchColumn"));
         }
     }
 
@@ -255,7 +254,7 @@ public class MapCustomColumnMatchingTests
         public CustomNoMatchingEnumerableFieldClassMap()
         {
             Map(p => p.CustomName)
-                .WithColumnsMatching(new NamesColumnMatcher("Year 2023", "NoSuchColumn"));
+                .WithColumns(new NamesColumnMatcher("Year 2023", "NoSuchColumn"));
         }
     }
 
@@ -313,7 +312,7 @@ public class MapCustomColumnMatchingTests
         public CustomNoneMatchingEnumerablePropertyClassMap()
         {
             Map(p => p.CustomName)
-                .WithColumnsMatching(new NamesColumnMatcher("NoSuchColumn", "NoSuchColumn"));
+                .WithColumns(new NamesColumnMatcher("NoSuchColumn", "NoSuchColumn"));
         }
     }
 
@@ -371,7 +370,7 @@ public class MapCustomColumnMatchingTests
         public CustomNoneMatchingEnumerableFieldClassMap()
         {
             Map(p => p.CustomName)
-                .WithColumnsMatching(new NamesColumnMatcher("NoSuchColumn", "NoSuchColumn"));
+                .WithColumns(new NamesColumnMatcher("NoSuchColumn", "NoSuchColumn"));
         }
     }
 
@@ -433,7 +432,7 @@ public class MapCustomColumnMatchingTests
         public CustomNoMatchingOptionalEnumerablePropertyClassMap()
         {
             Map(p => p.CustomName)
-                .WithColumnsMatching(new NamesColumnMatcher("Year 2023", "NoSuchColumn"))
+                .WithColumns(new NamesColumnMatcher("Year 2023", "NoSuchColumn"))
                 .MakeOptional();
         }
     }
@@ -495,7 +494,7 @@ public class MapCustomColumnMatchingTests
         public CustomNoMatchingOptionalEnumerableFieldClassMap()
         {
             Map(p => p.CustomName)
-                .WithColumnsMatching(new NamesColumnMatcher("Year 2023", "NoSuchColumn"))
+                .WithColumns(new NamesColumnMatcher("Year 2023", "NoSuchColumn"))
                 .MakeOptional();
         }
     }
@@ -558,7 +557,7 @@ public class MapCustomColumnMatchingTests
         public CustomNoneMatchingOptionalEnumerablePropertyClassMap()
         {
             Map(p => p.CustomName)
-                .WithColumnsMatching(new NamesColumnMatcher("NoSuchColumn", "NoSuchColumn"))
+                .WithColumns(new NamesColumnMatcher("NoSuchColumn", "NoSuchColumn"))
                 .MakeOptional();
         }
     }
@@ -621,13 +620,18 @@ public class MapCustomColumnMatchingTests
         public CustomNoneMatchingOptionalEnumerableFieldClassMap()
         {
             Map(p => p.CustomName)
-                .WithColumnsMatching(new NamesColumnMatcher("NoSuchColumn", "NoSuchColumn"))
+                .WithColumns(new NamesColumnMatcher("NoSuchColumn", "NoSuchColumn"))
                 .MakeOptional();
         }
     }
 
-    private class NamesColumnMatcher : IExcelColumnMatcher
+    private class NamesColumnMatcher : IColumnSelector
     {
+        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
+            => Enumerable.Range(0, sheet.NumberOfColumns).Where(i => ColumnMatches(sheet, i)).ToArray();
+
+        public string Describe(ExcelSheet sheet) => "matching columns";
+
         public string[] ColumnNames { get; }
 
         public NamesColumnMatcher(params string[] columnNames)
@@ -708,7 +712,7 @@ public class MapCustomColumnMatchingTests
         public CustomDictionaryPropertyClassMap()
         {
             Map(o => o.Value)
-                .WithColumnsMatching(new NamesColumnMatcher("Column1", "Column2"));
+                .WithColumns(new NamesColumnMatcher("Column1", "Column2"));
         }
     }
     
@@ -780,7 +784,7 @@ public class MapCustomColumnMatchingTests
         public CustomDictionaryFieldClassMap()
         {
             Map(o => o.Value)
-                .WithColumnsMatching(new NamesColumnMatcher("Column1", "Column2"));
+                .WithColumns(new NamesColumnMatcher("Column1", "Column2"));
         }
     }
     
@@ -844,7 +848,7 @@ public class MapCustomColumnMatchingTests
         public CustomNoMatchingDictionaryPropertyClassMap()
         {
             Map(o => o.Value)
-                .WithColumnsMatching(new NamesColumnMatcher("Column1", "NoSuchColumn"));
+                .WithColumns(new NamesColumnMatcher("Column1", "NoSuchColumn"));
         }
     }
     
@@ -908,7 +912,7 @@ public class MapCustomColumnMatchingTests
         public CustomNoMatchingDictionaryFieldClassMap()
         {
             Map(o => o.Value)
-                .WithColumnsMatching(new NamesColumnMatcher("Column1", "NoSuchColumn"));
+                .WithColumns(new NamesColumnMatcher("Column1", "NoSuchColumn"));
         }
     }
     
@@ -966,7 +970,7 @@ public class MapCustomColumnMatchingTests
         public CustomNoneMatchingDictionaryPropertyClassMap()
         {
             Map(o => o.Value)
-                .WithColumnsMatching(new NamesColumnMatcher("NoSuchColumn", "NoSuchColumn"));
+                .WithColumns(new NamesColumnMatcher("NoSuchColumn", "NoSuchColumn"));
         }
     }
     
@@ -1024,7 +1028,7 @@ public class MapCustomColumnMatchingTests
         public CustomNoneMatchingDictionaryFieldClassMap()
         {
             Map(o => o.Value)
-                .WithColumnsMatching(new NamesColumnMatcher("NoSuchColumn", "NoSuchColumn"));
+                .WithColumns(new NamesColumnMatcher("NoSuchColumn", "NoSuchColumn"));
         }
     }
     
@@ -1089,7 +1093,7 @@ public class MapCustomColumnMatchingTests
         public CustomNoMatchingOptionalDictionaryPropertyClassMap()
         {
             Map(o => o.Value)
-                .WithColumnsMatching(new NamesColumnMatcher("Column1", "NoSuchColumn"))
+                .WithColumns(new NamesColumnMatcher("Column1", "NoSuchColumn"))
                 .MakeOptional();
         }
     }
@@ -1155,7 +1159,7 @@ public class MapCustomColumnMatchingTests
         public CustomNoMatchingOptionalDictionaryFieldClassMap()
         {
             Map(o => o.Value)
-                .WithColumnsMatching(new NamesColumnMatcher("Column1", "NoSuchColumn"))
+                .WithColumns(new NamesColumnMatcher("Column1", "NoSuchColumn"))
                 .MakeOptional();
         }
     }
@@ -1218,7 +1222,7 @@ public class MapCustomColumnMatchingTests
         public CustomNoneMatchingOptionalDictionaryPropertyClassMap()
         {
             Map(o => o.Value)
-                .WithColumnsMatching(new NamesColumnMatcher("NoSuchColumn", "NoSuchColumn"))
+                .WithColumns(new NamesColumnMatcher("NoSuchColumn", "NoSuchColumn"))
                 .MakeOptional();
         }
     }
@@ -1281,7 +1285,7 @@ public class MapCustomColumnMatchingTests
         public CustomNoneMatchingOptionalDictionaryFieldClassMap()
         {
             Map(o => o.Value)
-                .WithColumnsMatching(new NamesColumnMatcher("NoSuchColumn", "NoSuchColumn"))
+                .WithColumns(new NamesColumnMatcher("NoSuchColumn", "NoSuchColumn"))
                 .MakeOptional();
         }
     }

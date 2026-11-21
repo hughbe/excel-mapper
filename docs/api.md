@@ -84,7 +84,7 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 | `[ExcelColumnLetter("C")]` | Map to column by Excel letter |
 | `[ExcelColumnIndices(0, 1)]` | Try multiple column indices |
 | `[ExcelColumnMatching(@"regex", options)]` | Match columns by pattern |
-| `[ExcelColumnsMatching(typeof(Matcher))]` | Custom column matching (`IColumnSelector` or `IExcelColumnMatcher`) |
+| `[ExcelColumnsMatching(typeof(Selector))]` | Custom column matching (`IColumnSelector`) |
 | `[ExcelOptional]` | Don't throw if column missing |
 | `[ExcelIgnore]` | Exclude from mapping |
 | `[ExcelRowNumber]` | Set to the one-based row number instead of reading a column |
@@ -115,8 +115,7 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 - `.WithColumnLetter("C")` - Map by Excel column letter
 - `.WithColumnIndices(0, 1, 2)` - Try multiple indices
 - `.WithColumnNameMatching(predicate)` / `.WithColumnNameMatching(regex)` - Use predicate or regular expression
-- `.WithColumnMatching(matcher)` - Custom matcher
-- `.WithColumnsMatching(predicate | regex | matcher)` - All matching columns (collections and dictionaries)
+- `.WithColumnsMatching(predicate | regex)` - All matching columns (collections and dictionaries)
 - `.WithColumns(IColumnSelector)` - Columns chosen by a selector
 
 **Behavior:**
@@ -153,4 +152,3 @@ Implement these for advanced customization:
 - `ICellMapper` - Custom type conversion logic
 - `ICellTransformer` - Transform string values before mapping
 - `IFallbackItem` - Custom fallback behavior
-- `IExcelColumnMatcher` - Custom column matching logic

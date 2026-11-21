@@ -4,7 +4,7 @@
 /// Factory for getting cell readers for a given sheet.
 /// This is a performance optimization to cache column indices.
 /// </summary>
-public interface ICellReaderFactory
+internal interface ICellReaderFactory
 {
     /// <summary>
     /// Gets a cell reader for the given sheet.

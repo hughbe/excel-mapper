@@ -3,7 +3,7 @@
 /// <summary>
 /// Reads the value of a single cell given the zero-based index of it's column.
 /// </summary>
-public sealed class ColumnIndexReaderFactory : ICellReaderFactory, IColumnIndexProviderCellReaderFactory
+internal sealed class ColumnIndexReaderFactory : ICellReaderFactory, IColumnIndexProviderCellReaderFactory
 {
     /// <summary>
     /// The zero-based index of the column to read.

@@ -4,7 +4,7 @@
 /// Reads the value of a cell and produces multiple values by splitting the string value
 /// using the given separators.
 /// </summary>
-public class StringSplitReaderFactory : SplitReaderFactory
+internal class StringSplitReaderFactory : SplitReaderFactory
 {
     private string[] _separators = [","];
 

@@ -3,7 +3,7 @@
 /// <summary>
 /// Reads the value of a multiples cells given a list of column names or a predicate matching the column name.
 /// </summary>
-public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsReaderFactory, IColumnIndicesProviderCellReaderFactory, IColumnNamesProviderCellReaderFactory
+internal sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsReaderFactory, IColumnNamesProviderCellReaderFactory
 {
     /// <summary>
     /// Gets the matcher used to identify which columns to read.
@@ -82,21 +82,4 @@ public sealed class ColumnsMatchingReaderFactory : ICellReaderFactory, ICellsRea
         return [.. names];
     }
 
-    /// <inheritdoc/>
-    public IReadOnlyList<int> GetColumnIndices(ExcelSheet sheet)
-    {
-        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
-
-        var indices = new List<int>();
-        var (startColumnIndex, endColumnIndex) = ColumnUtilities.GetColumnRange(sheet);
-        for (var columnIndex = startColumnIndex; columnIndex < endColumnIndex; columnIndex++)
-        {
-            if (Matcher.ColumnMatches(sheet, columnIndex))
-            {
-                indices.Add(columnIndex);
-            }
-        }
-
-        return indices;
-    }
 }

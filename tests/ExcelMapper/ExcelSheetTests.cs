@@ -1461,7 +1461,7 @@ public class ExcelSheetTests
         using var importer = Helpers.GetCsvImporter("A1,Skip,A2,A3\n1,x,2,3\n");
         importer.Configuration.RegisterClassMap<MatchingRow>(c => c
             .Map(p => p.Values)
-            .WithColumnsMatching(new ExcelMapper.Readers.PredicateColumnMatcher(n => n.StartsWith("A"))));
+            .WithColumnsMatching(n => n.StartsWith("A")));
         var sheet = importer.ReadSheet();
         sheet.DataRange = new ExcelRange(Range.All, 1..3);
 

@@ -7,7 +7,7 @@ namespace ExcelMapper.Readers;
 /// Reads the value of a cell and produces multiple values by splitting the string value
 /// using the given separators.
 /// </summary>
-public abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesProviderCellReaderFactory, IColumnNamesProviderCellReaderFactory
+internal abstract class SplitReaderFactory : ICellsReaderFactory, IColumnIndicesProviderCellReaderFactory, IColumnNamesProviderCellReaderFactory
 {
     /// <summary>
     /// Gets or sets the options used to split the string value of the cell.

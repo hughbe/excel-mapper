@@ -19,7 +19,7 @@ public class BoundMemberTests
         var sheet = importer.ReadSheet();
         Assert.Equal("1", sheet.ReadRow<Row>().Name);
 
-        nameMap.ReaderFactory = new ColumnNameReaderFactory("B");
+        nameMap.WithColumnName("B");
         Assert.Equal("y", sheet.ReadRow<Row>().Name);
     }
 
@@ -319,7 +319,7 @@ public class BoundMemberTests
         var sheet = importer.ReadSheet();
         Assert.Equal([1, 2], sheet.ReadRow<CollectionRow>().Values);
 
-        valuesMap.ReaderFactory = new ColumnNamesReaderFactory("B", "C");
+        valuesMap.WithColumnNames("B", "C");
         Assert.Equal([5, 6], sheet.ReadRow<CollectionRow>().Values);
     }
 
@@ -338,7 +338,7 @@ public class BoundMemberTests
         var sheet = importer.ReadSheet();
         Assert.Equal(new Dictionary<string, int> { ["A"] = 1 }, sheet.ReadRow<DictionaryRow>().Values);
 
-        valuesMap.ReaderFactory = new ColumnNamesReaderFactory("C");
+        valuesMap.WithColumnNames("C");
         Assert.Equal(new Dictionary<string, int> { ["C"] = 6 }, sheet.ReadRow<DictionaryRow>().Values);
     }
 

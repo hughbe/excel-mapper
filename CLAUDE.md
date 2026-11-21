@@ -54,7 +54,7 @@ Every change comes with tests, structured like the existing ones. There are two 
    - `src/Mappers/ObjectMapper.cs` → `tests/ExcelMapper/Mappers/ObjectMapperTests.cs` (namespace `ExcelMapper.Mappers.Tests`)
    - `src/Abstractions/CellMapperResult.cs` → `tests/ExcelMapper/Abstractions/CellMapperResultTests.cs`
 
-   New public members on an existing type are tested in that type's existing test file (for example a new extension method goes in `IOneToOneMapExtensionsTests`, a new mapper behaviour in that mapper's tests).
+   New public members on an existing type are tested in that type's existing test file (for example a new `OneToOneMap<T>` method goes in `OneToOneMapTTests`, a new extension method in its extension class's tests).
 
    Internal types (no `InternalsVisibleTo`) are tested through the public API.
 

@@ -5,7 +5,7 @@ namespace ExcelMapper.Readers;
 /// <summary>
 /// Matches column names based on a regular expression.
 /// </summary>
-public class RegexColumnMatcher : IExcelColumnMatcher
+internal class RegexColumnMatcher : IExcelColumnMatcher
 {
     /// <summary>
     /// Gets the regular expression used to match column names.

@@ -139,7 +139,7 @@ internal static class MapValidation
     private static bool IsNameBased(object readerFactory) => readerFactory switch
     {
         SplitReaderFactory splitReaderFactory => IsNameBased(splitReaderFactory.ReaderFactory),
-        CompositeCellsReaderFactory compositeReaderFactory => compositeReaderFactory.Factories.Any(IsNameBased),
+        FirstColumnNameReaderFactory compositeReaderFactory => compositeReaderFactory.Factories.Any(IsNameBased),
         _ => readerFactory is IColumnNameProviderCellReaderFactory or IColumnNamesProviderCellReaderFactory,
     };
 

@@ -3,7 +3,7 @@
 /// <summary>
 /// Reads the value of a single cell given the name of it's column.
 /// </summary>
-public sealed class ColumnNameReaderFactory : ICellReaderFactory, IColumnNameProviderCellReaderFactory
+internal sealed class ColumnNameReaderFactory : ICellReaderFactory, IColumnNameProviderCellReaderFactory
 {
     /// <summary>
     /// The name of the column to read.

@@ -1,4 +1,4 @@
-﻿using ExcelMapper.Abstractions;
+﻿using System.Linq;
 
 namespace ExcelMapper.Tests;
 
@@ -469,7 +469,7 @@ public class MatchingMapTests
             int i = 0;
 
             Map(o => o.Value)
-                .WithColumnMatching(new ExcelColumnMatcherWithPredicate(s =>
+                .WithColumns(new ExcelColumnMatcherWithPredicate(s =>
                 {
                     if (s == "Int Value" && i == 0)
                     {
@@ -493,7 +493,7 @@ public class MatchingMapTests
         public SimpleColumnMatchingClassMap()
         {
             Map(o => o.Value)
-                .WithColumnMatching(new ExcelColumnMatcherWithPredicate(s => true));
+                .WithColumns(new ExcelColumnMatcherWithPredicate(s => true));
         }
     }
 
@@ -502,7 +502,7 @@ public class MatchingMapTests
         public NoColumnMatchingClassMap()
         {
             Map(o => o.Value)
-                .WithColumnMatching(new ExcelColumnMatcherWithPredicate(_ => false));
+                .WithColumns(new ExcelColumnMatcherWithPredicate(_ => false));
         }
     }
 
@@ -511,13 +511,18 @@ public class MatchingMapTests
         public NoColumnMatchingOptionalClassMap()
         {
             Map(o => o.Value)
-                .WithColumnMatching(new ExcelColumnMatcherWithPredicate(_ => false))
+                .WithColumns(new ExcelColumnMatcherWithPredicate(_ => false))
                 .MakeOptional();
         }
     }
 
-    private class ExcelColumnMatcherWithPredicate : IExcelColumnMatcher
+    private class ExcelColumnMatcherWithPredicate : IColumnSelector
     {
+        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
+            => Enumerable.Range(0, sheet.NumberOfColumns).Where(i => ColumnMatches(sheet, i)).ToArray();
+
+        public string Describe(ExcelSheet sheet) => "matching columns";
+
         public Func<string, bool> Predicate { get;  }
 
         public ExcelColumnMatcherWithPredicate(Func<string, bool> predicate)
@@ -586,8 +591,13 @@ public class MatchingMapTests
         }
     }
 
-    private class MatchingColumnMatcher : IExcelColumnMatcher
+    private class MatchingColumnMatcher : IColumnSelector
     {
+        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
+            => Enumerable.Range(0, sheet.NumberOfColumns).Where(i => ColumnMatches(sheet, i)).ToArray();
+
+        public string Describe(ExcelSheet sheet) => "matching columns";
+
         public MatchingColumnMatcher()
         {
         }
@@ -610,8 +620,13 @@ public class MatchingMapTests
         }
     }
 
-    private class MatchingArgumentsColumnMatcher : IExcelColumnMatcher
+    private class MatchingArgumentsColumnMatcher : IColumnSelector
     {
+        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
+            => Enumerable.Range(0, sheet.NumberOfColumns).Where(i => ColumnMatches(sheet, i)).ToArray();
+
+        public string Describe(ExcelSheet sheet) => "matching columns";
+
         public int ColumnIndex { get; }
 
         public MatchingArgumentsColumnMatcher(int columnIndex)
@@ -652,8 +667,13 @@ public class MatchingMapTests
         }
     }
 
-    private class NoMatchingColumnMatcher : IExcelColumnMatcher
+    private class NoMatchingColumnMatcher : IColumnSelector
     {
+        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
+            => Enumerable.Range(0, sheet.NumberOfColumns).Where(i => ColumnMatches(sheet, i)).ToArray();
+
+        public string Describe(ExcelSheet sheet) => "matching columns";
+
         public NoMatchingColumnMatcher()
         {
         }

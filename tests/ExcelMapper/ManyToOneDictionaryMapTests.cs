@@ -1,412 +1,132 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using ExcelDataReader;
-using ExcelMapper.Abstractions;
-using ExcelMapper.Readers;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace ExcelMapper.Tests;
 
 public class ManyToOneDictionaryMapTests
 {
+    private const string Csv = "Name,Q1,Q2\na,1,2\n";
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void Optional_Set_GetReturnsExpected(bool value)
+    private static Dictionary<string, int> Read(Func<ManyToOneDictionaryMap<string, int>, ManyToOneDictionaryMap<string, int>> configure, string csv = Csv)
     {
-        var factory = new ColumnNamesReaderFactory("Column");
-        var map = CreateMap(factory);
-        map.Optional = value;
-        Assert.Equal(value, map.Optional);
-
-        // Set same.
-        map.Optional = value;
-        Assert.Equal(value, map.Optional);
-
-        // Set different.
-        map.Optional = !value;
-        Assert.Equal(!value, map.Optional);
+        var classMap = new ExcelClassMap<Row>();
+        var map = classMap.Map(r => r.Values);
+        Assert.Same(map, configure(map));
+        using var importer = Helpers.GetCsvImporter(csv);
+        importer.Configuration.RegisterClassMap(classMap);
+        return importer.ReadSheet().ReadRows<Row>().Single().Values;
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void PreserveFormatting_Set_GetReturnsExpected(bool value)
+    private static ManyToOneDictionaryMap<string, int> CreateMap() => new ExcelClassMap<Row>().Map(r => r.Values);
+
+    [Fact]
+    public void Map_Default_ReturnsExpected()
     {
-        var factory = new ColumnNamesReaderFactory("Column");
-        var map = CreateMap(factory);
-        map.PreserveFormatting = value;
-        Assert.Equal(value, map.PreserveFormatting);
-
-        // Set same.
-        map.PreserveFormatting = value;
-        Assert.Equal(value, map.PreserveFormatting);
-
-        // Set different.
-        map.PreserveFormatting = !value;
-        Assert.Equal(!value, map.PreserveFormatting);
-    }
-
-    public static IEnumerable<object[]> CellValuesReader_Set_TestData()
-    {
-        yield return new object[] { new ColumnNamesReaderFactory("Column") };
-    }
-
-    [Theory]
-    [MemberData(nameof(CellValuesReader_Set_TestData))]
-    public void CellValuesReader_SetValid_GetReturnsExpected(ICellsReaderFactory value)
-    {
-        var factory = new ColumnNamesReaderFactory("Column");
-        var map = CreateMap(factory);
-        map.ReaderFactory = value;
-        Assert.Same(value, map.ReaderFactory);
-
-        // Set same.
-        map.ReaderFactory = value;
-        Assert.Same(value, map.ReaderFactory);
+        var map = CreateMap();
+        Assert.False(map.Optional);
+        Assert.False(map.PreserveFormatting);
+        Assert.NotNull(map.Pipeline);
     }
 
     [Fact]
-    public void CellValuesReader_SetNull_ThrowsArgumentNullException()
+    public void WithColumnNames_Invoke_ReadsColumns()
     {
-        var factory = new ColumnNamesReaderFactory("Column");
-        var map = CreateMap(factory);
-        Assert.Throws<ArgumentNullException>("value", () => map.ReaderFactory = null!);
+        Assert.Equal(new Dictionary<string, int> { ["Q2"] = 2, ["Q1"] = 1 }, Read(m => m.WithColumnNames("Q2", "Q1")));
+        Assert.Equal(new Dictionary<string, int> { ["Q1"] = 1 }, Read(m => m.WithColumnNames(["q1"], StringComparison.OrdinalIgnoreCase)));
+        Assert.Equal(new Dictionary<string, int> { ["Q1"] = 1, ["Q2"] = 2 }, Read(m => m.WithColumnNames((IEnumerable<string>)new List<string> { "Q1", "Q2" })));
+        Assert.Equal(new Dictionary<string, int> { ["Q1"] = 1 }, Read(m => m.WithColumnNames((IEnumerable<string>)new List<string> { "Q1" }, StringComparison.Ordinal)));
+        Assert.Throws<ArgumentNullException>("columnNames", () => CreateMap().WithColumnNames((IReadOnlyList<string>)null!));
+        Assert.Throws<ArgumentNullException>("columnNames", () => CreateMap().WithColumnNames((IEnumerable<string>)null!));
+    }
+
+    [Fact]
+    public void WithColumnsMatching_Invoke_ReadsMatchingColumns()
+    {
+        Assert.Equal(new Dictionary<string, int> { ["Q1"] = 1, ["Q2"] = 2 }, Read(m => m.WithColumnsMatching(n => n.StartsWith("Q"))));
+        Assert.Equal(new Dictionary<string, int> { ["Q2"] = 2 }, Read(m => m.WithColumnsMatching(new Regex("2$"))));
+        Assert.Throws<ArgumentNullException>("predicate", () => CreateMap().WithColumnsMatching((Func<string, bool>)null!));
+        Assert.Throws<ArgumentNullException>("regex", () => CreateMap().WithColumnsMatching((Regex)null!));
+    }
+
+    [Fact]
+    public void WithColumnIndices_Invoke_ReadsColumns()
+    {
+        Assert.Equal(new Dictionary<string, int> { ["Q2"] = 2 }, Read(m => m.WithColumnIndices(2)));
+        Assert.Equal(new Dictionary<string, int> { ["Q1"] = 1, ["Q2"] = 2 }, Read(m => m.WithColumnIndices((IEnumerable<int>)new List<int> { 1, 2 })));
+        Assert.Throws<ArgumentOutOfRangeException>("columnIndices", () => CreateMap().WithColumnIndices(-1));
+    }
+
+    [Fact]
+    public void WithColumns_Invoke_ReadsChosenColumns()
+    {
+        Assert.Equal(new Dictionary<string, int> { ["Q1"] = 1 }, Read(m => m.WithColumns(new PositionsSelector(1))));
+        Assert.Throws<ArgumentNullException>("selector", () => CreateMap().WithColumns(null!));
     }
 
     [Fact]
     public void WithValueMap_ValidMap_Success()
     {
-        var factory = new ColumnNamesReaderFactory("Column");
-        var map = CreateMap(factory);
-
-        var newPipeline = new ValuePipeline<string>();
-        Assert.Same(map, map.WithValueMap(e =>
+        var map = CreateMap();
+        var newPipeline = new ValuePipeline<int>();
+        Assert.Same(map, map.WithValueMap(v =>
         {
-            Assert.Same(e, map.Pipeline);
+            Assert.Same(v, map.Pipeline);
             return newPipeline;
         }));
         Assert.Same(newPipeline, map.Pipeline);
-    }
-
-    [Fact]
-    public void WithValueMap_NullMap_ThrowsArgumentNullException()
-    {
-        var factory = new ColumnNamesReaderFactory("Column");
-        var map = CreateMap(factory);
-
         Assert.Throws<ArgumentNullException>("valueMap", () => map.WithValueMap(null!));
-    }
-
-    [Fact]
-    public void WithValueMap_MapReturnsNull_ThrowsArgumentNullException()
-    {
-        var factory = new ColumnNamesReaderFactory("Column");
-        var map = CreateMap(factory);
-
         Assert.Throws<ArgumentNullException>("valueMap", () => map.WithValueMap(_ => null!));
     }
 
     [Fact]
-    public void TryGetValue_InvokeCanRead_Success()
+    public void MakeOptional_MissingColumns_KeepsValue()
     {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
+        var map = CreateMap();
+        Assert.Same(map, map.MakeOptional());
+        Assert.True(map.Optional);
+        Assert.Same(map, map.MakePreserveFormatting());
+        Assert.True(map.PreserveFormatting);
+        Assert.Equal(new Dictionary<string, int> { ["initial"] = 0 }, Read(m => m.WithColumnNames("Missing").MakeOptional()));
+    }
 
-        var factory = new MockReaderFactory(new MockReader(() => (true, new MockEnumerator([]))));
-        var map = CreateMap(factory);
-        object? result = null;
-        Assert.True(map.TryGetValue(sheet, 0, importer.Reader, null, out result));
-        Assert.Empty(Assert.IsType<Dictionary<string, string>>(result));
+    [Theory]
+    [InlineData("Missing")]
+    [InlineData("Missing1", "Missing2")]
+    public void TryGetValue_MissingColumns_ThrowsExcelMappingException(params string[] columnNames)
+    {
+        var exception = Assert.Throws<ExcelMappingException>(() => Read(m => m.WithColumnNames(columnNames)));
+        Assert.Contains("Missing", exception.Message);
+        Assert.Throws<ExcelMappingException>(() => Read(m => m.WithColumnIndices(10)));
     }
 
     [Fact]
-    public void TryGetValue_InvokeNullSheet_ThrowsArgumentNullException()
+    public void TryGetValue_SheetWithoutHeading_ThrowsExcelMappingException()
     {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var factory = new MockReaderFactory(new MockReader(() => (false, null)));
-        var map = CreateMap(factory);
-        MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
-        object? result = null;
-        Assert.Throws<ArgumentNullException>("sheet", () => map.TryGetValue(null!, 0, importer.Reader, member, out result));
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public void TryGetValue_InvokeSheetWithoutHeadingHasHeading_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var sheet = importer.ReadSheet();
-
-        var factory = new MockReaderFactory(new MockReader(() => (false, null)));
-        var map = CreateMap(factory);
-        MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
-        object? result = null;
-        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public void TryGetValue_InvokeSheetWithoutHeadingHasNoHeading_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var classMap = new ExcelClassMap<Row>();
+        classMap.Map(r => r.Values).WithColumnIndices(1);
+        using var importer = Helpers.GetCsvImporter(Csv);
+        importer.Configuration.RegisterClassMap(classMap);
         var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
-
-        var factory = new MockReaderFactory(new MockReader(() => (false, null)));
-        var map = CreateMap(factory);
-        MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
-        object? result = null;
-        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
-        Assert.Null(result);
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<Row>().ToArray());
     }
 
     [Fact]
-    public void TryGetValue_InvokeCantReadPropertyInfo_ThrowsExcelMappingException()
+    public void TryGetValue_NullSheet_ThrowsArgumentNullException()
     {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        var factory = new MockReaderFactory(new MockReader(() => (false, null)));
-        var map = CreateMap(factory);
-        MemberInfo member = typeof(TestClass).GetProperty(nameof(TestClass.Value))!;
-        object? result = null;
-        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
-        Assert.Null(result);
+        using var importer = Helpers.GetCsvImporter(Csv);
+        Assert.Throws<ArgumentNullException>("sheet", () => CreateMap().TryGetValue(null!, 0, importer.Reader, null, out _));
     }
 
-    [Fact]
-    public void TryGetValue_InvokeCantReadFieldInfo_ThrowsExcelMappingException()
+    public class Row
     {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        var factory = new MockReaderFactory(new MockReader(() => (false, null)));
-        var map = CreateMap(factory);
-        MemberInfo member = typeof(TestClass).GetField(nameof(TestClass._field))!;
-        object? result = null;
-        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
-        Assert.Null(result);
+        public Dictionary<string, int> Values { get; set; } = new() { ["initial"] = 0 };
     }
 
-    [Fact]
-    public void TryGetValue_InvokeCantReadEventInfo_ThrowsExcelMappingException()
+    private sealed class PositionsSelector(params int[] positions) : IColumnSelector
     {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
+        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet) => positions;
 
-        var factory = new MockReaderFactory(new MockReader(() => (false, null)));
-        var map = CreateMap(factory);
-        MemberInfo member = typeof(TestClass).GetEvent(nameof(TestClass.Event))!;
-        object? result = null;
-        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, member, out result));
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public void TryGetValue_InvokeCantReadNullMember_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        var factory = new MockReaderFactory(new MockReader(() => (false, null)));
-        var map = CreateMap(factory);
-        object? result = null;
-        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public void TryGetValue_InvokeCantReadNullMemberIColumnNamesProviderCellReaderFactoryEmpty_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        var factory = new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(s => false));
-        var map = CreateMap(factory);
-        object? result = null;
-        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public void TryGetValue_InvokeCantReadNullMemberIColumnNamesProviderCellReaderFactorySingle_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        var factory = new ColumnNamesReaderFactory("NoSuchColumn");
-        var map = CreateMap(factory);
-        object? result = null;
-        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public void TryGetValue_InvokeCantReadNullMemberIColumnNamesProviderCellReaderFactoryMultiple_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        var factory = new ColumnNamesReaderFactory("NoSuchColumn1", "NoSuchColumn2");
-        var map = CreateMap(factory);
-        object? result = null;
-        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public void TryGetValue_InvokeCantReadNullMemberIColumnIndicesProviderCellReaderFactoryEmpty_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        var factory = new EmptyColumnIndicesReaderFactory();
-        var map = CreateMap(factory);
-        object? result = null;
-        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public void TryGetValue_InvokeCantReadNullMemberIColumnIndicesProviderCellReaderFactorySingle_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        var factory = new ColumnIndicesReaderFactory(10);
-        var map = CreateMap(factory);
-        object? result = null;
-        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public void TryGetValue_InvokeCantReadNullMemberIColumnIndicesProviderCellReaderFactoryMultiple_ThrowsExcelMappingException()
-    {
-        using var importer = Helpers.GetImporter("Strings.xlsx");
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        var factory = new ColumnIndicesReaderFactory(0, 1);
-        var map = CreateMap(factory);
-        object? result = null;
-        Assert.Throws<ExcelMappingException>(() => map.TryGetValue(sheet, 0, importer.Reader, null, out result));
-        Assert.Null(result);
-    }
-
-    private class EmptyColumnIndicesReaderFactory : ICellsReaderFactory, IColumnIndicesProviderCellReaderFactory
-    {
-        public ICellsReader? GetCellsReader(ExcelSheet sheet) => new ColumnIndicesReaderFactory(int.MaxValue).GetCellsReader(sheet);
-
-        public IReadOnlyList<int> GetColumnIndices(ExcelSheet sheet) => [];
-    }
-    
-    private class MockReader : ICellsReader
-    {
-        private IReadCellResultEnumerator? _enumerator;
-        private bool _result;
-
-        public MockReader(Func<(bool, IReadCellResultEnumerator?)> action)
-        {
-            Action = action;
-        }
-
-        public Func<(bool, IReadCellResultEnumerator?)> Action { get; }
-
-        public bool Start(IExcelDataReader reader, bool preserveFormatting, out int count)
-        {
-            var (ret, res) = Action();
-            _result = ret;
-            _enumerator = res;
-            count = _enumerator?.Count ?? 0;
-            return ret;
-        }
-
-        public bool TryGetNext([NotNullWhen(true)] out ReadCellResult result)
-        {
-            if (_enumerator != null && _enumerator.MoveNext())
-            {
-                result = _enumerator.Current;
-                return true;
-            }
-
-            result = default;
-            return false;
-        }
-
-        public void Reset()
-        {
-            _enumerator?.Reset();
-        }
-    }
-
-    private class MockReaderFactory(ICellsReader Reader) : ICellsReaderFactory
-    {
-        public ICellsReader? GetCellsReader(ExcelSheet sheet) => Reader;
-    }
-
-    private class MockEnumerator : IReadCellResultEnumerator
-    {
-        private readonly ReadCellResult[] _results;
-        private int _index = -1;
-
-        public MockEnumerator(ReadCellResult[] results)
-        {
-            _results = results;
-        }
-
-        public ReadCellResult Current => _results[_index];
-
-        object? System.Collections.IEnumerator.Current => Current;
-
-        public int Count => _results.Length;
-
-        public void Dispose()
-        {
-        }
-
-        public bool MoveNext()
-        {
-            _index++;
-            return _index < _results.Length;
-        }
-
-        public void Reset()
-        {
-            _index = -1;
-        }
-    }
-
-    private class TestClass
-    {
-        public string Value { get; set; } = default!;
-#pragma warning disable 0649
-        public string _field = default!;
-#pragma warning restore 0649
-
-        public event EventHandler Event { add { } remove { } }
-    }
-
-    private static ManyToOneDictionaryMap<string, string> CreateMap(ICellsReaderFactory readerFactory)
-    {
-        var map = new ExcelClassMap<CreateMapRow>().Map(r => r.Values);
-        map.ReaderFactory = readerFactory;
-        return map;
-    }
-
-    private class CreateMapRow
-    {
-        public Dictionary<string, string> Values { get; set; } = [];
+        public string Describe(ExcelSheet sheet) => "columns";
     }
 }

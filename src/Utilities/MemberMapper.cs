@@ -22,13 +22,13 @@ internal static class MemberMapper
 
         if (columnNameAttributes.Length > 1)
         {
-            var factories = new ICellReaderFactory[columnNameAttributes.Length];
+            var factories = new ColumnNameReaderFactory[columnNameAttributes.Length];
             for (int i = 0; i < factories.Length; i++)
             {
                 factories[i] = new ColumnNameReaderFactory(columnNameAttributes[i].Name, columnNameAttributes[i].Comparison);
             }
 
-            return new CompositeCellsReaderFactory(factories);
+            return new FirstColumnNameReaderFactory(factories);
         }
 
         var columnNamesAttribute = MemberAttributes.Get<ExcelColumnNamesAttribute>(member);

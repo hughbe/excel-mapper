@@ -100,13 +100,13 @@ Configuration controls mapping behavior and stores registered class maps:
 Each property/field has a corresponding map that defines how to read and convert data:
 
 **`OneToOneMap<T>`**: Maps a single cell to a property
-- Contains `ICellReaderFactory` to create readers
+- Contains an internal `ICellReaderFactory` to create readers
 - Contains `ValuePipeline<T>` for transformation and conversion
 - Supports `Optional` flag for missing columns
 - Supports `PreserveFormatting` to retain Excel formatting
 
 **`ManyToOneEnumerableMap<TElement>`**: Maps multiple cells to a collection
-- Uses `ICellsReaderFactory` for multi-cell reading
+- Uses an internal `ICellsReaderFactory` for multi-cell reading
 - Uses `IEnumerableFactory<TElement>` to construct the target collection type
 - Contains `IValuePipeline<TElement>` for element conversion
 - Supports List, Array, HashSet, ImmutableList, and custom collection types
@@ -153,7 +153,7 @@ Members are set after creating the object with a parameterless constructor, or r
 
 #### Reader Factories
 
-Factories create readers lazily per sheet (for performance):
+Factories (internal) create readers lazily per sheet (for performance). `IColumnSelector` is the public way to choose columns: it's read through `ColumnSelectorReaderFactory`.
 
 **Single Cell Factories** (`ICellReaderFactory`):
 - `ColumnIndexReaderFactory`
@@ -395,12 +395,10 @@ Person.Scores = [95, 87, 92]
 
 ## Extensibility Points
 
-1. **Custom Mappers**: Implement `ICellMapper` for custom type conversions
-2. **Custom Transformers**: Implement `ICellTransformer` for string preprocessing
-3. **Custom Fallbacks**: Implement `IFallbackItem` for custom default value logic
-4. **Custom Factories**: Implement `IEnumerableFactory<T>` or `IDictionaryFactory<TKey, TValue>`
-5. **Custom Readers**: Implement `ICellReader` or `ICellsReader` for custom column reading logic
-6. **Custom Column Matchers**: Implement `IExcelColumnMatcher` for advanced column selection
+1. **Converters**: Implement `ICellConverter<T>` to convert a cell's value to a member's type
+2. **Transformers**: Implement `ICellTransformer` to change a cell's value before it's converted
+3. **Fallbacks**: Implement `ICellFallback<T>` to give the value of empty or invalid cells
+4. **Column selectors**: Implement `IColumnSelector` to choose the columns a member is read from
 
 ## Type System
 

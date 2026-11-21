@@ -12,7 +12,7 @@ namespace ExcelMapper.Readers;
 /// The columns are worked out once per sheet from the class map's other members, including
 /// members of nested objects. Columns with an empty name are skipped.
 /// </remarks>
-public sealed class ExtraColumnsReaderFactory : ICellsReaderFactory
+internal sealed class ExtraColumnsReaderFactory : ICellsReaderFactory
 {
     /// <summary>
     /// Initializes a new instance of <see cref="ExtraColumnsReaderFactory"/>.
@@ -143,14 +143,6 @@ public sealed class ExtraColumnsReaderFactory : ICellsReaderFactory
                     foreach (var columnIndex in columnIndicesReader.ColumnIndices)
                     {
                         usedColumns.Add(columnIndex);
-                    }
-
-                    break;
-
-                case CompositeCellsReader compositeCellsReader:
-                    foreach (var reader in compositeCellsReader.Readers)
-                    {
-                        AddUsedColumns(reader, usedColumns);
                     }
 
                     break;

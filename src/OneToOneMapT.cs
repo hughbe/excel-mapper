@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -17,7 +18,7 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>, IBindableMap
     /// Constructs a one-to-one map with the specified cell reader factory.
     /// </summary>
     /// <param name="readerFactory">The factory used to create cell readers for the mapped column.</param>
-    public OneToOneMap(ICellReaderFactory readerFactory)
+    internal OneToOneMap(ICellReaderFactory readerFactory)
     {
         ThrowHelpers.ThrowIfNull(readerFactory, nameof(readerFactory));
         _readerFactory = readerFactory;
@@ -26,7 +27,7 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>, IBindableMap
     private ICellReaderFactory _readerFactory;
 
     /// <inheritdoc />
-    public ICellReaderFactory ReaderFactory
+    internal ICellReaderFactory ReaderFactory
     {
         get => _readerFactory;
         set
@@ -35,6 +36,12 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>, IBindableMap
             _readerFactory = value;
             ReaderVersion++;
         }
+    }
+
+    ICellReaderFactory IOneToOneMap.ReaderFactory
+    {
+        get => ReaderFactory;
+        set => ReaderFactory = value;
     }
 
     /// <inheritdoc />
@@ -168,4 +175,99 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>, IBindableMap
     /// <returns>The map on which this method was invoked.</returns>
     public OneToOneMap<T> WithInvalidFallback(T? fallbackValue)
         => this.WithInvalidFallbackItem(new FixedValueFallback(fallbackValue));
+
+    /// <summary>
+    /// Reads the member from the column with the given name, ignoring case.
+    /// </summary>
+    /// <param name="columnName">The name of the column.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public OneToOneMap<T> WithColumnName(string columnName)
+        => WithColumnName(columnName, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Reads the member from the column with the given name.
+    /// </summary>
+    /// <param name="columnName">The name of the column.</param>
+    /// <param name="comparison">How column names are compared.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public OneToOneMap<T> WithColumnName(string columnName, StringComparison comparison)
+        => WithReaderFactory(new ColumnNameReaderFactory(columnName, comparison));
+
+    /// <summary>
+    /// Reads the member from the first of the given columns that the sheet has.
+    /// </summary>
+    /// <param name="columnNames">The names of the columns, in order of preference.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public OneToOneMap<T> WithColumnNameMatching(params string[] columnNames)
+        => WithReaderFactory(new ColumnNamesReaderFactory(columnNames));
+
+    /// <summary>
+    /// Reads the member from the first column whose name matches <paramref name="predicate"/>.
+    /// </summary>
+    /// <param name="predicate">Whether a column name matches.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public OneToOneMap<T> WithColumnNameMatching(Func<string, bool> predicate)
+        => WithReaderFactory(new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(predicate)));
+
+    /// <summary>
+    /// Reads the member from the first column whose name matches <paramref name="regex"/>.
+    /// </summary>
+    /// <param name="regex">The regular expression column names are matched against.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public OneToOneMap<T> WithColumnNameMatching(Regex regex)
+        => WithReaderFactory(new ColumnsMatchingReaderFactory(new RegexColumnMatcher(regex)));
+
+    /// <summary>
+    /// Reads the member from the column at the given zero-based index.
+    /// </summary>
+    /// <param name="columnIndex">The zero-based index of the column.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public OneToOneMap<T> WithColumnIndex(int columnIndex)
+        => WithReaderFactory(new ColumnIndexReaderFactory(columnIndex));
+
+    /// <summary>
+    /// Reads the member from the column with the given letter, such as "A" or "AB".
+    /// </summary>
+    /// <param name="columnLetter">The letter of the column.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public OneToOneMap<T> WithColumnLetter(string columnLetter)
+        => WithColumnIndex(ExcelRange.ParseColumnLetters(columnLetter, nameof(columnLetter)));
+
+    /// <summary>
+    /// Reads the member from the first column <paramref name="selector"/> chooses for each sheet.
+    /// </summary>
+    /// <param name="selector">The column selector.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public OneToOneMap<T> WithColumns(IColumnSelector selector)
+    {
+        ThrowHelpers.ThrowIfNull(selector, nameof(selector));
+        return WithReaderFactory(new ColumnSelectorReaderFactory(selector));
+    }
+
+    /// <summary>
+    /// Makes the member optional: if its column is missing, the member keeps its value instead of
+    /// an error being thrown.
+    /// </summary>
+    /// <returns>The map on which this method was invoked.</returns>
+    public OneToOneMap<T> MakeOptional()
+    {
+        Optional = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Reads the cell's value as the text Excel shows, with its number format applied.
+    /// </summary>
+    /// <returns>The map on which this method was invoked.</returns>
+    public OneToOneMap<T> MakePreserveFormatting()
+    {
+        PreserveFormatting = true;
+        return this;
+    }
+
+    private OneToOneMap<T> WithReaderFactory(ICellReaderFactory readerFactory)
+    {
+        ReaderFactory = readerFactory;
+        return this;
+    }
 }

@@ -1660,9 +1660,7 @@ public class AutoMapperTests
         Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<CachedAttributesClass>? second));
 
         static IList<ICellMapper> Mappers(ExcelClassMap<CachedAttributesClass> map, string name)
-            => ((IToOneMap)map.Properties.Single(p => p.Member.Name == name).Map).Pipeline.Mappers;
-        static IMap Map(ExcelClassMap<CachedAttributesClass> map, string name)
-            => map.Properties.Single(p => p.Member.Name == name).Map;
+            => ((IValuePipeline)((dynamic)map.Properties.Single(p => p.Member.Name == name).Map).Pipeline).Mappers;
 
         foreach (var name in new[] { nameof(CachedAttributesClass.Number), nameof(CachedAttributesClass.When), nameof(CachedAttributesClass.Day), nameof(CachedAttributesClass.Size) })
         {
@@ -1681,15 +1679,6 @@ public class AutoMapperTests
         Assert.Equal(["yyyy-MM-dd"], firstFormats);
         Assert.NotSame(firstFormats, secondFormats);
 
-        var firstSplit = (CharSplitReaderFactory)((ManyToOneEnumerableMap<int>)Map(first!, nameof(CachedAttributesClass.Values))).ReaderFactory;
-        var secondSplit = (CharSplitReaderFactory)((ManyToOneEnumerableMap<int>)Map(second!, nameof(CachedAttributesClass.Values))).ReaderFactory;
-        Assert.Equal([';'], firstSplit.Separators);
-        Assert.NotSame(firstSplit.Separators, secondSplit.Separators);
-
-        var firstNames = (ColumnNamesReaderFactory)((ManyToOneEnumerableMap<string>)Map(first!, nameof(CachedAttributesClass.Names))).ReaderFactory;
-        var secondNames = (ColumnNamesReaderFactory)((ManyToOneEnumerableMap<string>)Map(second!, nameof(CachedAttributesClass.Names))).ReaderFactory;
-        Assert.Equal(["A", "B"], firstNames.ColumnNames);
-        Assert.NotSame(firstNames.ColumnNames, secondNames.ColumnNames);
     }
 
     [Fact]

@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -29,7 +30,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     private ICellsReaderFactory _readerFactory;
 
     /// <inheritdoc />
-    public ICellsReaderFactory ReaderFactory
+    internal ICellsReaderFactory ReaderFactory
     {
         get => _readerFactory;
         set
@@ -38,6 +39,12 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
             _readerFactory = value;
             ReaderVersion++;
         }
+    }
+
+    ICellsReaderFactory IManyToOneMap.ReaderFactory
+    {
+        get => ReaderFactory;
+        set => ReaderFactory = value;
     }
 
     /// <inheritdoc />
@@ -269,5 +276,118 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     {
         ThrowHelpers.ThrowIfNull(separators, nameof(separators));
         return WithSeparators(separators as string[] ?? separators.ToArray());
+    }
+
+    /// <summary>
+    /// Reads the collection from the given columns, in order.
+    /// </summary>
+    /// <param name="columnNames">The names of the columns.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public ManyToOneEnumerableMap<TElement> WithColumnNames(params IReadOnlyList<string> columnNames)
+        => WithReaderFactory(new ColumnNamesReaderFactory(columnNames));
+
+    /// <summary>
+    /// Reads the collection from the given columns, in order.
+    /// </summary>
+    /// <param name="columnNames">The names of the columns.</param>
+    /// <param name="comparison">How column names are compared.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public ManyToOneEnumerableMap<TElement> WithColumnNames(IReadOnlyList<string> columnNames, StringComparison comparison)
+        => WithReaderFactory(new ColumnNamesReaderFactory(columnNames, comparison));
+
+    /// <summary>
+    /// Reads the collection from the given columns, in order.
+    /// </summary>
+    /// <param name="columnNames">The names of the columns.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public ManyToOneEnumerableMap<TElement> WithColumnNames(params IEnumerable<string> columnNames)
+    {
+        ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
+        return WithColumnNames([.. columnNames]);
+    }
+
+    /// <summary>
+    /// Reads the collection from the given columns, in order.
+    /// </summary>
+    /// <param name="columnNames">The names of the columns.</param>
+    /// <param name="comparison">How column names are compared.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public ManyToOneEnumerableMap<TElement> WithColumnNames(IEnumerable<string> columnNames, StringComparison comparison)
+    {
+        ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
+        return WithColumnNames([.. columnNames], comparison);
+    }
+
+    /// <summary>
+    /// Reads the collection from every column whose name matches <paramref name="predicate"/>.
+    /// </summary>
+    /// <param name="predicate">Whether a column name matches.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public ManyToOneEnumerableMap<TElement> WithColumnsMatching(Func<string, bool> predicate)
+        => WithReaderFactory(new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(predicate)));
+
+    /// <summary>
+    /// Reads the collection from every column whose name matches <paramref name="regex"/>.
+    /// </summary>
+    /// <param name="regex">The regular expression column names are matched against.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public ManyToOneEnumerableMap<TElement> WithColumnsMatching(Regex regex)
+        => WithReaderFactory(new ColumnsMatchingReaderFactory(new RegexColumnMatcher(regex)));
+
+    /// <summary>
+    /// Reads the collection from the columns at the given zero-based indices, in order.
+    /// </summary>
+    /// <param name="columnIndices">The zero-based indices of the columns.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public ManyToOneEnumerableMap<TElement> WithColumnIndices(params IReadOnlyList<int> columnIndices)
+        => WithReaderFactory(new ColumnIndicesReaderFactory(columnIndices));
+
+    /// <summary>
+    /// Reads the collection from the columns at the given zero-based indices, in order.
+    /// </summary>
+    /// <param name="columnIndices">The zero-based indices of the columns.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public ManyToOneEnumerableMap<TElement> WithColumnIndices(params IEnumerable<int> columnIndices)
+    {
+        ThrowHelpers.ThrowIfNull(columnIndices, nameof(columnIndices));
+        return WithColumnIndices([.. columnIndices]);
+    }
+
+    /// <summary>
+    /// Reads the collection from the columns <paramref name="selector"/> chooses for each sheet, in order.
+    /// </summary>
+    /// <param name="selector">The column selector.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public ManyToOneEnumerableMap<TElement> WithColumns(IColumnSelector selector)
+    {
+        ThrowHelpers.ThrowIfNull(selector, nameof(selector));
+        return WithReaderFactory(new ColumnSelectorReaderFactory(selector));
+    }
+
+    /// <summary>
+    /// Makes the member optional: if its columns are missing, the member keeps its value instead of
+    /// an error being thrown.
+    /// </summary>
+    /// <returns>The map on which this method was invoked.</returns>
+    public ManyToOneEnumerableMap<TElement> MakeOptional()
+    {
+        Optional = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Reads the cells' values as the text Excel shows, with their number formats applied.
+    /// </summary>
+    /// <returns>The map on which this method was invoked.</returns>
+    public ManyToOneEnumerableMap<TElement> MakePreserveFormatting()
+    {
+        PreserveFormatting = true;
+        return this;
+    }
+
+    private ManyToOneEnumerableMap<TElement> WithReaderFactory(ICellsReaderFactory readerFactory)
+    {
+        ReaderFactory = readerFactory;
+        return this;
     }
 }
