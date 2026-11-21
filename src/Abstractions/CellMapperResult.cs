@@ -3,7 +3,7 @@
 /// <summary>
 /// The result of mapping a cell to a value.
 /// </summary>
-public readonly struct CellMapperResult
+internal readonly struct CellMapperResult
 {
     /// <summary>
     /// The mapped value, if any.

@@ -3,7 +3,7 @@
 /// <summary>
 /// A mapper that tries to map the value of a cell to a <see cref="Guid"/>.
 /// </summary>
-public class GuidMapper : ICellMapper, ITypedCellMapper<Guid>, ITypedCellMapper<Guid?>
+internal class GuidMapper : ICellMapper, ITypedCellMapper<Guid>, ITypedCellMapper<Guid?>
 {
     /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult readResult)

@@ -1,17 +1,11 @@
-using System.Reflection;
-using ExcelMapper.Abstractions;
-using ExcelMapper.Fallbacks;
-
 namespace ExcelMapper.Tests;
 
 public class ExcelEmptyFallbackAttributeTests
 {
     [Theory]
     [InlineData(typeof(EmptyFallback))]
-    [InlineData(typeof(FixedValueFallback))]
-    [InlineData(typeof(ThrowFallback))]
     [InlineData(typeof(NoConstructorEmptyFallback))]
-    [InlineData(typeof(TypedFallback))]
+    [InlineData(typeof(MultipleFallback))]
     public void Ctor_Type(Type fallbackType)
     {
         var attribute = new ExcelEmptyFallbackAttribute(fallbackType);
@@ -25,37 +19,35 @@ public class ExcelEmptyFallbackAttributeTests
         Assert.Throws<ArgumentNullException>("fallbackType", () => new ExcelEmptyFallbackAttribute(null!));
     }
 
-
     [Theory]
-    [InlineData(typeof(IFallbackItem))]
     [InlineData(typeof(ICellFallback<int>))]
     [InlineData(typeof(ISubEmptyFallback))]
     [InlineData(typeof(AbstractEmptyFallback))]
     [InlineData(typeof(int))]
     [InlineData(typeof(object))]
+    [InlineData(typeof(ICellTransformer))]
     [InlineData(typeof(ExcelEmptyFallbackAttributeTests))]
     public void Ctor_InvalidFallbackType_ThrowsArgumentException(Type fallbackType)
     {
         Assert.Throws<ArgumentException>("fallbackType", () => new ExcelEmptyFallbackAttribute(fallbackType));
     }
 
-    private interface ISubEmptyFallback : IFallbackItem
+    private interface ISubEmptyFallback : ICellFallback<int>
     {
     }
 
-    private abstract class AbstractEmptyFallback : IFallbackItem
+    private abstract class AbstractEmptyFallback : ICellFallback<int>
     {
-        public abstract object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member);
+        public abstract int Fallback(CellValue value, CellContext context, Exception? exception);
     }
 
-    private class NoConstructorEmptyFallback : IFallbackItem
+    private class NoConstructorEmptyFallback : ICellFallback<int>
     {
         private NoConstructorEmptyFallback()
         {
         }
 
-        public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member)
-            => throw new NotImplementedException();
+        public int Fallback(CellValue value, CellContext context, Exception? exception) => throw new NotImplementedException();
     }
 
     public static IEnumerable<object?[]> ConstructorArguments_Set_TestData()
@@ -80,14 +72,15 @@ public class ExcelEmptyFallbackAttributeTests
         Assert.Same(value, attribute.ConstructorArguments);
     }
 
-    private class EmptyFallback : IFallbackItem
-    {
-        public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member)
-            => throw new NotImplementedException();
-    }
-
-    private sealed class TypedFallback : ICellFallback<int>
+    private sealed class EmptyFallback : ICellFallback<int>
     {
         public int Fallback(CellValue value, CellContext context, Exception? exception) => 1;
+    }
+
+    private sealed class MultipleFallback : ICellFallback<int>, ICellFallback<string>
+    {
+        int ICellFallback<int>.Fallback(CellValue value, CellContext context, Exception? exception) => 1;
+
+        string ICellFallback<string>.Fallback(CellValue value, CellContext context, Exception? exception) => "1";
     }
 }

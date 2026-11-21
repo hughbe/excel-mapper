@@ -53,7 +53,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// <summary>
     /// Gets the map's value pipeline: the map itself, which converts the cell's value.
     /// </summary>
-    public IValuePipeline Pipeline => this;
+    ValuePipeline IToOneMap.Pipeline => this;
 
     /// <inheritdoc />
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
@@ -157,6 +157,24 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// <returns>The map on which this method was invoked.</returns>
     public OneToOneMap<T> WithInvalidFallback(T? fallbackValue)
         => this.WithInvalidFallbackItem(new FixedValueFallback(fallbackValue));
+
+    /// <summary>
+    /// Converts cells with <paramref name="converter"/>, which is given the cell's text. The delegate
+    /// replaces the built-in conversion for the member's type and any earlier converter, so it is used
+    /// for every cell that isn't empty. Empty cells still use the empty fallback, and values the
+    /// delegate throws for use the invalid fallback.
+    /// </summary>
+    /// <param name="converter">The delegate.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public OneToOneMap<T> WithConverter(ConvertUsingSimpleMapperDelegate<T> converter)
+    {
+        ThrowHelpers.ThrowIfNull(converter, nameof(converter));
+
+        // An ICellConverter<T>, so that values are converted without boxing.
+        Mappers.Clear();
+        Mappers.Add(new Mappers.CellConverterMapper<T>(new Mappers.DelegateCellConverter<T>(converter)));
+        return this;
+    }
 
     /// <summary>
     /// Reads the member from the column with the given name, ignoring case.

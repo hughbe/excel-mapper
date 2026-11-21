@@ -1,5 +1,4 @@
 using System.Linq;
-using ExcelMapper.Readers;
 
 namespace ExcelMapper.Tests;
 

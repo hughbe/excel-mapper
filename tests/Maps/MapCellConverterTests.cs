@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using ExcelMapper.Abstractions;
 
 namespace ExcelMapper.Tests;
 
@@ -150,14 +149,13 @@ public class MapCellConverterTests
     [Fact]
     public void ReadRows_WithOtherMapperAfterConverter_PassesContext()
     {
-        // A mapper that isn't a converter means values go through the pipeline as objects: the
+        // A mapping dictionary isn't a converter, so values go through the pipeline as objects: the
         // converter still gets the cell's context.
         using var importer = Helpers.GetCsvImporter("Value\n1\nskip\n");
         var converter = new ContextConverter();
         importer.Configuration.RegisterClassMap<IntRow>(c =>
         {
-            var map = c.Map(r => r.Value).WithConverter(converter);
-            map.Mappers.Add(new SkipMapper());
+            c.Map(r => r.Value).WithConverter(converter).WithMapping(new Dictionary<string, int> { ["skip"] = 0 });
         });
         Assert.Equal([1, 0], importer.ReadSheet().ReadRows<IntRow>().Select(r => r.Value));
         Assert.Equal(["A2", "A3"], converter.Contexts.Select(c => c.CellAddress));
@@ -319,10 +317,6 @@ public class MapCellConverterTests
         }
     }
 
-    private sealed class SkipMapper : ICellMapper
-    {
-        public CellMapperResult Map(ReadCellResult readResult) => readResult.GetString() == "skip" ? CellMapperResult.Success(0) : CellMapperResult.Ignore();
-    }
 
     private sealed class RoundingConverter : ICellConverter<int>
     {

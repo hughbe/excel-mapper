@@ -152,7 +152,7 @@ public class ExcelImporterConfiguration
                 ValidateMap(itemMap.Value);
             }
         }
-        else if (map is IValuePipeline pipeline)
+        else if (map is ValuePipeline pipeline)
         {
             if (pipeline.Mappers.Count == 0)
             {

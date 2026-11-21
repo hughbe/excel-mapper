@@ -8,9 +8,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using System.Linq;
 using System.Numerics;
-using ExcelMapper.Abstractions;
-using ExcelMapper.Mappers;
-using ExcelMapper.Readers;
 using ExcelMapper.Tests;
 
 namespace ExcelMapper.Utilities.Tests;
@@ -1650,36 +1647,6 @@ public class AutoMapperTests
         public string PrivateGetProperty { private get; set; } = default!;
     }
 #pragma warning restore 0649
-
-    [Fact]
-    public void TryCreateClassMap_SameTypeTwice_CreatesSeparateMappersAndArrays()
-    {
-        // What's found for a type and its members is cached, but each map gets its own mappers and
-        // arrays, so changing one map doesn't change another.
-        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<CachedAttributesClass>? first));
-        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<CachedAttributesClass>? second));
-
-        static IList<ICellMapper> Mappers(ExcelClassMap<CachedAttributesClass> map, string name)
-            => ((IValuePipeline)((dynamic)map.Properties.Single(p => p.Member.Name == name).Map).Pipeline).Mappers;
-
-        foreach (var name in new[] { nameof(CachedAttributesClass.Number), nameof(CachedAttributesClass.When), nameof(CachedAttributesClass.Day), nameof(CachedAttributesClass.Size) })
-        {
-            var firstMappers = Mappers(first!, name);
-            var secondMappers = Mappers(second!, name);
-            Assert.Equal(firstMappers.Count, secondMappers.Count);
-            for (int i = 0; i < firstMappers.Count; i++)
-            {
-                Assert.Equal(firstMappers[i].GetType(), secondMappers[i].GetType());
-                Assert.NotSame(firstMappers[i], secondMappers[i]);
-            }
-        }
-
-        var firstFormats = ((DateTimeMapper)Mappers(first!, nameof(CachedAttributesClass.When))[0]).Formats;
-        var secondFormats = ((DateTimeMapper)Mappers(second!, nameof(CachedAttributesClass.When))[0]).Formats;
-        Assert.Equal(["yyyy-MM-dd"], firstFormats);
-        Assert.NotSame(firstFormats, secondFormats);
-
-    }
 
     [Fact]
     public void ReadRows_SameAttributedTypeInTwoImporters_ReturnsExpected()

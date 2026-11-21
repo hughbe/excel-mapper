@@ -3,7 +3,7 @@
 /// <summary>
 /// A mapper that tries to map the value of a cell to a bool.
 /// </summary>
-public class BoolMapper : ICellMapper, ITypedCellMapper<bool>, ITypedCellMapper<bool?>
+internal class BoolMapper : ICellMapper, ITypedCellMapper<bool>, ITypedCellMapper<bool?>
 {
     private static readonly object s_boxedTrue = true;
     private static readonly object s_boxedFalse = false;

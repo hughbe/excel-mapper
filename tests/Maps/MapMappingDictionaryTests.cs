@@ -1,5 +1,4 @@
-﻿using ExcelMapper.Mappers;
-
+﻿
 namespace ExcelMapper.Tests;
 
 public class MapMappingDictionaryTests

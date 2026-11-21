@@ -9,7 +9,7 @@ namespace ExcelMapper;
 /// Reads a single cell of an excel sheet and maps the value of the cell to the
 /// type of the property or field.
 /// </summary>
-public class ValuePipeline<T> : ValuePipeline, IValuePipeline<T>
+public class ValuePipeline<T> : ValuePipeline
 {
     /// <summary>
     /// Maps a cell to a <typeparamref name="T"/>: through the typed converters if every mapper is
@@ -31,7 +31,7 @@ public class ValuePipeline<T> : ValuePipeline, IValuePipeline<T>
     /// Maps a cell to a <typeparamref name="T"/> with any pipeline: <see cref="Map"/> for a
     /// <see cref="ValuePipeline{T}"/>, and otherwise through the pipeline as objects.
     /// </summary>
-    internal static T Map(IValuePipeline pipeline, ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting, MemberInfo? member)
+    internal static T Map(ValuePipeline pipeline, ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting, MemberInfo? member)
     {
         if (pipeline is ValuePipeline<T> typedPipeline)
         {

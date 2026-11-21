@@ -4,7 +4,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to an IParsable object using IParsable.Parse.
 /// </summary>
-public class ParsableMapper<TParse> : ICellMapper where TParse : IParsable<TParse>
+internal class ParsableMapper<TParse> : ICellMapper where TParse : IParsable<TParse>
 {
     /// <summary>
     /// Gets or sets the IFormatProvider used to map the value to the type.

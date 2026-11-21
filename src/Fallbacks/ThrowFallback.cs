@@ -5,7 +5,7 @@ namespace ExcelMapper.Fallbacks;
 /// <summary>
 /// A fallback that throws an ExcelMappingException when falling back.
 /// </summary>
-public class ThrowFallback : IFallbackItem
+internal class ThrowFallback : IFallbackItem
 {
     /// <inheritdoc/>
     public object PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member)

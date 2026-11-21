@@ -3,7 +3,7 @@
 /// <summary>
 /// Transforms the string value of a cell read from Excel.
 /// </summary>
-public interface ICellTransformer
+internal interface ICellTransformer
 {
     /// <summary>
     /// Transforms the string value of a cell read from Excel.

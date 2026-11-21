@@ -35,7 +35,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// </summary>
     public ValuePipeline<TValue> Pipeline { get; private set; } = new ValuePipeline<TValue>();
 
-    IValuePipeline IToOneMap.Pipeline => Pipeline;
+    ValuePipeline IToOneMap.Pipeline => Pipeline;
     
     /// <inheritdoc />
     public bool Optional { get; set; }

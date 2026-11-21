@@ -3,7 +3,7 @@
 /// <summary>
 /// Tries to map the value of a cell to <see cref="Version"/>.
 /// </summary>
-public class VersionMapper : ICellMapper
+internal class VersionMapper : ICellMapper
 {
     /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult readResult)

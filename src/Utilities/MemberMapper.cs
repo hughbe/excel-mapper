@@ -137,19 +137,11 @@ internal static class MemberMapper
 
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    internal static bool AddMappers<T>(IValuePipeline pipeline, MemberInfo member)
+    internal static bool AddMappers<T>(ValuePipeline pipeline, MemberInfo member)
     {
         var addDefaultMappers = true;
 
-        // If the member has ExcelMapper attributes, add the mappers.
-        var mapperAttributes = MemberAttributes.GetMany<ExcelMapperAttribute>(member);
         bool hasMapperAttributes = false;
-        foreach (var mapperAttribute in mapperAttributes)
-        {
-            hasMapperAttributes = true;
-            var mapper = (ICellMapper)Activator.CreateInstance(mapperAttribute.Type, mapperAttribute.ConstructorArguments)!;
-            pipeline.Mappers.Add(mapper);
-        }
 
         // If the member has ExcelConverter attributes, add their converters.
         foreach (var converterAttribute in MemberAttributes.GetMany<ExcelConverterAttribute>(member))
@@ -238,7 +230,7 @@ internal static class MemberMapper
         throw new ExcelMappingException($"The converter \"{converter.GetType()}\" given by ExcelConverterAttribute on member \"{member.Name}\" doesn't implement ICellConverter<{typeof(T)}>.");
     }
 
-    internal static void ModifyMappers(IValuePipeline pipeline, MemberInfo member)
+    internal static void ModifyMappers(ValuePipeline pipeline, MemberInfo member)
     {
         // If the member has a ExcelFormats attribute, modify the mappers.
         if (MemberAttributes.Get<ExcelFormatsAttribute>(member) is { } formatsAttribute)
@@ -316,8 +308,7 @@ internal static class MemberMapper
 
     /// <summary>
     /// Creates the fallback for an object given by <see cref="ExcelEmptyFallbackAttribute"/> or
-    /// <see cref="ExcelInvalidFallbackAttribute"/>: an <see cref="IFallbackItem"/>, an
-    /// <see cref="ICellFallback{T}"/>, or for a <c>T?</c> member, an <see cref="ICellFallback{T}"/> of <c>T</c>.
+    /// <see cref="ExcelInvalidFallbackAttribute"/>: an <see cref="ICellFallback{T}"/>, or for a <c>T?</c> member, an <see cref="ICellFallback{T}"/> of <c>T</c>.
     /// </summary>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
@@ -338,15 +329,10 @@ internal static class MemberMapper
             return new CellFallbackItem<T>(nullableFallback);
         }
 
-        if (fallback is IFallbackItem fallbackItem)
-        {
-            return fallbackItem;
-        }
-
         throw new ExcelMappingException($"The fallback \"{fallback.GetType()}\" given by {attributeName} on member \"{member.Name}\" doesn't implement ICellFallback<{typeof(T)}>.");
     }
 
-    internal static void AddTransformers(IValuePipeline pipeline, MemberInfo member)
+    internal static void AddTransformers(ValuePipeline pipeline, MemberInfo member)
     {
         // If the member has a ExcelTrimString attribute, add the transformer.
         if (MemberAttributes.Get<ExcelTrimStringAttribute>(member) is { } trimStringAttribute)
@@ -360,9 +346,7 @@ internal static class MemberMapper
             foreach (var transformAttribute in transformAttributes)
             {
                 var transformer = Activator.CreateInstance(transformAttribute.Type, transformAttribute.ConstructorArguments)!;
-                pipeline.Transformers.Add(transformer is ICellTransformer cellTransformer
-                    ? new CellTransformerAdapter(cellTransformer)
-                    : (Abstractions.ICellTransformer)transformer);
+                pipeline.Transformers.Add(new CellTransformerAdapter((ICellTransformer)transformer));
             }
         }
     }

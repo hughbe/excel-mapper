@@ -9,7 +9,7 @@ namespace ExcelMapper.Mappers;
 /// A mapper that tries to map the value of a cell to a number base type using the
 /// <see cref="INumberBase{T}"/> interface.
 /// </summary>
-public class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] T> : INumberStyleCellMapper, ITypedCellMapper<T> where T : INumberBase<T>
+internal class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] T> : INumberStyleCellMapper, ITypedCellMapper<T> where T : INumberBase<T>
 {
     /// <summary>
     /// Gets or sets the number styles used when mapping the value of a cell to a number base type.

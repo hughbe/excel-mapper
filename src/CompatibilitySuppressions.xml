@@ -26,9 +26,32 @@
       pipelines are typed. The collection and dictionary maps' Pipeline properties are typed, and
       WithElementMap/WithValueMap take Func<ValuePipeline<T>, ValuePipeline<T>> (CP0002); lambdas
       passed to them compile unchanged.
+    - The old extension types are internal (CP0001): ICellMapper, CellMapperResult, ReadCellResult,
+      Abstractions.ICellTransformer, IFallbackItem, IValuePipeline and IValuePipeline<T>, and the
+      types in ExcelMapper.Mappers, ExcelMapper.Fallbacks and ExcelMapper.Transformers. ICellConverter<T>,
+      ICellTransformer and ICellFallback<T> replace them. The pipelines' Mappers, Transformers,
+      EmptyFallback and InvalidFallback properties and OneToOneMap's Pipeline property are internal
+      (CP0002), so OneToOneMap, ValuePipeline and ValuePipeline<T> no longer implement IValuePipeline
+      (CP0008). [ExcelMapper] is removed (CP0001): use [ExcelConverter]. MappingDictionaryMapperBehavior
+      moved to the ExcelMapper namespace, which changes ExcelMappingDictionaryBehaviorAttribute's
+      signatures (CP0002).
   -->
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.CellMapperResult</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.ICellMapper</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.Abstractions.ICellReader</Target>
     <Left>lib/net8.0/ExcelMapper.dll</Left>
     <Right>lib/net8.0/ExcelMapper.dll</Right>
@@ -57,6 +80,13 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.ICellTransformer</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.Abstractions.IDictionaryFactory`2</Target>
     <Left>lib/net8.0/ExcelMapper.dll</Left>
     <Right>lib/net8.0/ExcelMapper.dll</Right>
@@ -72,6 +102,13 @@
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.Abstractions.IExcelColumnMatcher</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.IFallbackItem</Target>
     <Left>lib/net8.0/ExcelMapper.dll</Left>
     <Right>lib/net8.0/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -107,6 +144,34 @@
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.Abstractions.IToOneMap</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.IValuePipeline</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.IValuePipeline`1</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.ReadCellResult</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.ExcelMapperAttribute</Target>
     <Left>lib/net8.0/ExcelMapper.dll</Left>
     <Right>lib/net8.0/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -302,6 +367,27 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Fallbacks.FixedValueFallback</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Fallbacks.FixedValueFallbackFactory</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Fallbacks.ThrowFallback</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.IColumnIndexProviderCellReaderFactory</Target>
     <Left>lib/net8.0/ExcelMapper.dll</Left>
     <Right>lib/net8.0/ExcelMapper.dll</Right>
@@ -352,6 +438,132 @@
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.IValuePipelineExtensions</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.BoolMapper</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.ChangeTypeMapper</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.ConvertUsingMapper</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.ConvertUsingMapperDelegate</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.DateOnlyMapper</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.DateTimeMapper</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.DateTimeOffsetMapper</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.EnumMapper</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.GuidMapper</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.INumberBaseMapper`1</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.MappingDictionaryMapper`1</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.MappingDictionaryMapperBehavior</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.ParsableMapper`1</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.StringMapper</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.TimeOnlyMapper</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.TimeSpanMapper</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.UriMapper</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.VersionMapper</Target>
     <Left>lib/net8.0/ExcelMapper.dll</Left>
     <Right>lib/net8.0/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -457,6 +669,13 @@
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.Readers.StringSplitReaderFactory</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Transformers.TrimStringCellTransformer</Target>
     <Left>lib/net8.0/ExcelMapper.dll</Left>
     <Right>lib/net8.0/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -470,6 +689,20 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.CellMapperResult</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.ICellMapper</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.Abstractions.ICellReader</Target>
     <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
@@ -498,6 +731,13 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.ICellTransformer</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.Abstractions.IDictionaryFactory`2</Target>
     <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
@@ -513,6 +753,13 @@
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.Abstractions.IExcelColumnMatcher</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.IFallbackItem</Target>
     <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -548,6 +795,34 @@
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.Abstractions.IToOneMap</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.IValuePipeline</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.IValuePipeline`1</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.ReadCellResult</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.ExcelMapperAttribute</Target>
     <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -743,6 +1018,27 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Fallbacks.FixedValueFallback</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Fallbacks.FixedValueFallbackFactory</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Fallbacks.ThrowFallback</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.IColumnIndexProviderCellReaderFactory</Target>
     <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
@@ -793,6 +1089,104 @@
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.IValuePipelineExtensions</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.BoolMapper</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.ChangeTypeMapper</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.ConvertUsingMapper</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.ConvertUsingMapperDelegate</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.DateTimeMapper</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.DateTimeOffsetMapper</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.EnumMapper</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.GuidMapper</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.MappingDictionaryMapper`1</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.MappingDictionaryMapperBehavior</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.StringMapper</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.TimeSpanMapper</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.UriMapper</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.VersionMapper</Target>
     <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -898,6 +1292,13 @@
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.Readers.StringSplitReaderFactory</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Transformers.TrimStringCellTransformer</Target>
     <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -911,6 +1312,20 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.CellMapperResult</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.ICellMapper</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.Abstractions.ICellReader</Target>
     <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
@@ -939,6 +1354,13 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.ICellTransformer</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.Abstractions.IDictionaryFactory`2</Target>
     <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
@@ -954,6 +1376,13 @@
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.Abstractions.IExcelColumnMatcher</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.IFallbackItem</Target>
     <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -989,6 +1418,34 @@
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.Abstractions.IToOneMap</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.IValuePipeline</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.IValuePipeline`1</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Abstractions.ReadCellResult</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.ExcelMapperAttribute</Target>
     <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -1184,6 +1641,27 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Fallbacks.FixedValueFallback</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Fallbacks.FixedValueFallbackFactory</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Fallbacks.ThrowFallback</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.IColumnIndexProviderCellReaderFactory</Target>
     <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
@@ -1234,6 +1712,104 @@
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:ExcelMapper.IValuePipelineExtensions</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.BoolMapper</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.ChangeTypeMapper</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.ConvertUsingMapper</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.ConvertUsingMapperDelegate</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.DateTimeMapper</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.DateTimeOffsetMapper</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.EnumMapper</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.GuidMapper</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.MappingDictionaryMapper`1</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.MappingDictionaryMapperBehavior</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.StringMapper</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.TimeSpanMapper</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.UriMapper</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Mappers.VersionMapper</Target>
     <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -1344,6 +1920,27 @@
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:ExcelMapper.Transformers.TrimStringCellTransformer</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ExcelMappingDictionaryBehaviorAttribute.#ctor(ExcelMapper.Mappers.MappingDictionaryMapperBehavior)</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ExcelMappingDictionaryBehaviorAttribute.get_Behavior</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:ExcelMapper.ManyToOneDictionaryIndexerMapT`2.#ctor(ExcelMapper.Abstractions.IDictionaryFactory{`0,`1})</Target>
     <Left>lib/net8.0/ExcelMapper.dll</Left>
@@ -1478,7 +2075,56 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.get_EmptyFallback</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.get_InvalidFallback</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.get_Mappers</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.get_Pipeline</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:ExcelMapper.OneToOneMap`1.get_ReaderFactory</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.get_Transformers</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.set_EmptyFallback(ExcelMapper.Abstractions.IFallbackItem)</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.set_InvalidFallback(ExcelMapper.Abstractions.IFallbackItem)</Target>
     <Left>lib/net8.0/ExcelMapper.dll</Left>
     <Right>lib/net8.0/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -1495,6 +2141,62 @@
     <Target>M:ExcelMapper.ValuePipeline.#ctor</Target>
     <Left>lib/net8.0/ExcelMapper.dll</Left>
     <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.get_EmptyFallback</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.get_InvalidFallback</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.get_Mappers</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.get_Transformers</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.set_EmptyFallback(ExcelMapper.Abstractions.IFallbackItem)</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.set_InvalidFallback(ExcelMapper.Abstractions.IFallbackItem)</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ExcelMappingDictionaryBehaviorAttribute.#ctor(ExcelMapper.Mappers.MappingDictionaryMapperBehavior)</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ExcelMappingDictionaryBehaviorAttribute.get_Behavior</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
@@ -1632,7 +2334,56 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.get_EmptyFallback</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.get_InvalidFallback</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.get_Mappers</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.get_Pipeline</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:ExcelMapper.OneToOneMap`1.get_ReaderFactory</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.get_Transformers</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.set_EmptyFallback(ExcelMapper.Abstractions.IFallbackItem)</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.set_InvalidFallback(ExcelMapper.Abstractions.IFallbackItem)</Target>
     <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -1649,6 +2400,62 @@
     <Target>M:ExcelMapper.ValuePipeline.#ctor</Target>
     <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.get_EmptyFallback</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.get_InvalidFallback</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.get_Mappers</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.get_Transformers</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.set_EmptyFallback(ExcelMapper.Abstractions.IFallbackItem)</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.set_InvalidFallback(ExcelMapper.Abstractions.IFallbackItem)</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ExcelMappingDictionaryBehaviorAttribute.#ctor(ExcelMapper.Mappers.MappingDictionaryMapperBehavior)</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ExcelMappingDictionaryBehaviorAttribute.get_Behavior</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
@@ -1786,7 +2593,56 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.get_EmptyFallback</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.get_InvalidFallback</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.get_Mappers</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.get_Pipeline</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:ExcelMapper.OneToOneMap`1.get_ReaderFactory</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.get_Transformers</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.set_EmptyFallback(ExcelMapper.Abstractions.IFallbackItem)</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.OneToOneMap`1.set_InvalidFallback(ExcelMapper.Abstractions.IFallbackItem)</Target>
     <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -1801,6 +2657,111 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:ExcelMapper.ValuePipeline.#ctor</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.get_EmptyFallback</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.get_InvalidFallback</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.get_Mappers</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.get_Transformers</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.set_EmptyFallback(ExcelMapper.Abstractions.IFallbackItem)</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline.set_InvalidFallback(ExcelMapper.Abstractions.IFallbackItem)</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:ExcelMapper.OneToOneMap`1</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:ExcelMapper.ValuePipeline</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:ExcelMapper.ValuePipeline`1</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:ExcelMapper.OneToOneMap`1</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:ExcelMapper.ValuePipeline</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:ExcelMapper.ValuePipeline`1</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:ExcelMapper.OneToOneMap`1</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:ExcelMapper.ValuePipeline</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:ExcelMapper.ValuePipeline`1</Target>
     <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>

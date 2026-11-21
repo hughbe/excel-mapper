@@ -454,24 +454,6 @@ public static class OneToOneMapExtensions
 #endif
 
     /// <summary>
-    /// Converts the cells of a nullable member with a delegate that returns its underlying type. The
-    /// delegate replaces the built-in conversion; empty cells still use the empty fallback, which is
-    /// null by default.
-    /// </summary>
-    /// <typeparam name="T">The underlying type of the property or field that the map represents.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <param name="converter">The delegate.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<T?> WithConverter<T>(this OneToOneMap<T?> map, ConvertUsingSimpleMapperDelegate<T> converter) where T : struct
-    {
-        ThrowHelpers.ThrowIfNull(map, nameof(map));
-        ThrowHelpers.ThrowIfNull(converter, nameof(converter));
-        map.Mappers.Clear();
-        map.Mappers.Add(new CellConverterMapper<T?>(new NullableCellConverter<T>(new DelegateCellConverter<T>(converter))));
-        return map;
-    }
-
-    /// <summary>
     /// Converts the cells of a nullable member with a converter for its underlying type. The converter
     /// replaces the built-in conversion; empty cells still use the empty fallback, which is null by default.
     /// </summary>

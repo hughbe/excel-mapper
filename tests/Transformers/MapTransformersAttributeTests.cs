@@ -1,6 +1,4 @@
-﻿using ExcelMapper.Abstractions;
-using ExcelMapper.Transformers;
-
+﻿
 namespace ExcelMapper.Tests;
 
 public class MapTransformersAttributeTests
@@ -76,12 +74,12 @@ public class MapTransformersAttributeTests
 
     private class MultipleStringValue
     {
-        [ExcelTransformer(typeof(TrimStringCellTransformer))]
+        [ExcelTransformer(typeof(TrimTransformer))]
         [ExcelTransformer(typeof(UpperStringCellTransformer), ConstructorArguments = new object[] { true })]
         public string Value { get; set; } = default!;
     }
 
-    private class UpperStringCellTransformer : Abstractions.ICellTransformer
+    private class UpperStringCellTransformer : ICellTransformer
     {
         public bool _isTrimmed;
 
@@ -90,14 +88,19 @@ public class MapTransformersAttributeTests
             _isTrimmed = isTrimmed;
         }
 
-        public string? TransformStringValue(ExcelSheet sheet, int rowIndex, ReadCellResult readResult)
+        public CellValue Transform(CellValue value, CellContext context)
         {
-            var value = readResult.GetString();
+            var text = value.Text;
             if (_isTrimmed)
             {
-                Assert.Equal(value, value?.Trim());
+                Assert.Equal(text, text?.Trim());
             }
-            return value?.ToUpperInvariant();
+            return new CellValue(text?.ToUpperInvariant());
         }
+    }
+
+    private class TrimTransformer : ICellTransformer
+    {
+        public CellValue Transform(CellValue value, CellContext context) => new CellValue(value.Text?.Trim());
     }
 }
