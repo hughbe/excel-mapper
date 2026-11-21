@@ -310,6 +310,20 @@ public readonly struct ExcelRange : IEquatable<ExcelRange>
     /// <summary>
     /// Parses column letters such as "A", "ab" or "$XFD" into a zero-based column index.
     /// </summary>
+    /// <summary>
+    /// Converts Excel column letters such as "A", "c" or "AB" to a zero-based column index.
+    /// </summary>
+    internal static int ParseColumnLetters(string letters, string paramName)
+    {
+        ThrowHelpers.ThrowIfNull(letters, paramName);
+        if (!TryParseColumnLetters(letters.AsSpan().Trim(), out var column))
+        {
+            throw new ArgumentException($"Invalid column letters '{letters}'. Columns must be letters between A and XFD.", paramName);
+        }
+
+        return column;
+    }
+
     private static bool TryParseColumnLetters(ReadOnlySpan<char> columnString, out int column)
     {
         columnString = TrimAbsoluteMarker(columnString);

@@ -75,6 +75,17 @@ public static class IOneToOneMapExtensions
         => map.WithReaderFactory(new ColumnIndexReaderFactory(columnIndex));
 
     /// <summary>
+    /// Sets the reader of the map to read the value of a single cell contained in the column with
+    /// the given Excel letters, such as "A", "C" or "AB".
+    /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="columnLetter">The column's letters. Case-insensitive.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static TMap WithColumnLetter<TMap>(this TMap map, string columnLetter) where TMap : IOneToOneMap
+        => map.WithColumnIndex(ExcelRange.ParseColumnLetters(columnLetter, nameof(columnLetter)));
+
+    /// <summary>
     /// Sets the reader of the map to use a custom cell value reader.
     /// </summary>
     /// <typeparam name="TMap">The type of the map.</typeparam>
