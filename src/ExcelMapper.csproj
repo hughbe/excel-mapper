@@ -19,7 +19,7 @@
     <RepositoryUrl>https://github.com/hughbe/excel-mapper</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>Copyright 2025 (c) Hugh Bellamy. All rights reserved.</Copyright>
+    <Copyright>Copyright 2026 (c) Hugh Bellamy. All rights reserved.</Copyright>
     <PackageTags>excel;mapping;mapper;excel-mapper</PackageTags>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
