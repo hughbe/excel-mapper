@@ -49,6 +49,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Changed
 
+- The inner exception of the `ExcelMappingException` for an invalid number, date, `Guid`, `bool`, enum or `Uri` has ExcelMapper's own message, naming the value, the type and any formats (for example `The value "abc" isn't a valid Int32.`), instead of the .NET parser's message. Its type is unchanged. ([#157](https://github.com/hughbe/excel-mapper/pull/157))
 - Code page encodings are registered automatically; `Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)` is no longer needed. The netstandard builds now depend on `System.Text.Encoding.CodePages`. ([#122](https://github.com/hughbe/excel-mapper/pull/122))
 - Trimming only changes text, so cells Excel stores as dates or numbers keep their type. ([#122](https://github.com/hughbe/excel-mapper/pull/122))
 - Exceptions thrown by a constructor are wrapped in `ExcelMappingException`. ([#118](https://github.com/hughbe/excel-mapper/pull/118))
@@ -78,6 +79,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Compiled setters and constructors, and fewer per-row and per-cell allocations. ([#121](https://github.com/hughbe/excel-mapper/pull/121), [#127](https://github.com/hughbe/excel-mapper/pull/127))
 - `ReadRowResults` costs the same as `ReadRows` for valid data. ([#126](https://github.com/hughbe/excel-mapper/pull/126))
 - Classes whose members each read one column are bound to a sheet once and mapped with typed setters, and reading a cell no longer allocates: about 80% fewer allocations and 18% faster for a 10-member class from CSV, and 75% fewer allocations for typed .xlsx cells. ([#142](https://github.com/hughbe/excel-mapper/pull/142))
+- Invalid cells are about 17 times cheaper when the exception is used without being thrown, as by custom invalid fallbacks and `ReadRowResults`: the exception is created directly instead of by parsing the value again and catching what's thrown. 50,000 rows with a third of them invalid take 24 ms instead of 415 ms. ([#157](https://github.com/hughbe/excel-mapper/pull/157))
 - `WithConverter(value => ...)` converts without boxing: 3 members with converters map 11% faster with 65 fewer bytes per row. ([#155](https://github.com/hughbe/excel-mapper/pull/155))
 - Auto-mapping a type is about 5 times faster: each member's attributes are read once, and the mapper to create for each member type is found once, rather than for every importer. Reading a small file with an auto-mapped 10-member class takes 12 µs instead of 58 µs and allocates 18 KB less. ([#153](https://github.com/hughbe/excel-mapper/pull/153))
 - The reader each map finds for a sheet is kept by the sheet, rather than in a weak table allocated by every map: reading a small file is 7–10% faster and allocates about 4 KB less for a 10-member type. ([#152](https://github.com/hughbe/excel-mapper/pull/152))

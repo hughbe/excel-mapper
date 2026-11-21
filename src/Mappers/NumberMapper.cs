@@ -192,7 +192,22 @@ internal abstract class NumberMapper : INumberStyleCellMapper
     // Separate methods so that closures capturing these values are only allocated for invalid
     // values. Creating the lambdas in Map would allocate a closure for every cell.
     private static CellMapperResult InvalidResult(TypeCode typeCode, string text, NumberStyles style, IFormatProvider? provider)
-        => MapperUtilities.InvalidFromParse(() => Parse(typeCode, text, style, provider));
+        => MapperUtilities.InvalidNumber(text, style, provider, GetType(typeCode), IsInteger(typeCode), canCreateException: true, () => Parse(typeCode, text, style, provider));
+
+    private static Type GetType(TypeCode typeCode) => typeCode switch
+    {
+        TypeCode.SByte => typeof(sbyte),
+        TypeCode.Byte => typeof(byte),
+        TypeCode.Int16 => typeof(short),
+        TypeCode.UInt16 => typeof(ushort),
+        TypeCode.Int32 => typeof(int),
+        TypeCode.UInt32 => typeof(uint),
+        TypeCode.Int64 => typeof(long),
+        TypeCode.UInt64 => typeof(ulong),
+        TypeCode.Single => typeof(float),
+        TypeCode.Double => typeof(double),
+        _ => typeof(decimal),
+    };
 
     private static CellMapperResult NotWholeNumberResult(double value, Type type)
         => CellMapperResult.Invalid(() => new FormatException($"The value {value} is not a whole number, so it can't be converted to {type}."));

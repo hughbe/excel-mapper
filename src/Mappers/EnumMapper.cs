@@ -73,5 +73,8 @@ public class EnumMapper : ICellMapper
     // A separate method so that the closure capturing these values is only allocated for invalid
     // values. Creating the lambda in Map would allocate the closure for every cell.
     private static CellMapperResult InvalidResult(Type enumType, string? stringValue, bool ignoreCase)
-        => MapperUtilities.InvalidFromParse(() => Enum.Parse(enumType, stringValue!, ignoreCase));
+        => stringValue is null || stringValue.Length == 0 || char.IsDigit(stringValue.TrimStart()[0]) || stringValue.TrimStart()[0] is '-' or '+'
+            // Numbers can be out of range (an OverflowException): parse to find out.
+            ? MapperUtilities.InvalidFromParse(() => Enum.Parse(enumType, stringValue!, ignoreCase))
+            : CellMapperResult.Invalid(() => new ArgumentException($"The value \"{stringValue}\" isn't a value of {enumType.Name}."));
 }

@@ -38,5 +38,7 @@ public class UriMapper : ICellMapper
     // A separate method so that the closure capturing these values is only allocated for invalid
     // values. Creating the lambda in Map would allocate the closure for every cell.
     private static CellMapperResult InvalidResult(string? stringValue, UriKind uriKind)
-        => MapperUtilities.InvalidFromParse(() => new Uri(stringValue!, uriKind));
+        => stringValue is null
+            ? MapperUtilities.InvalidFromParse(() => new Uri(stringValue!, uriKind))
+            : CellMapperResult.Invalid(() => new UriFormatException($"The value \"{stringValue}\" isn't a valid {(uriKind == UriKind.RelativeOrAbsolute ? "" : uriKind.ToString().ToLowerInvariant() + " ")}URI."));
 }

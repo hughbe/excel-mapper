@@ -145,6 +145,10 @@ public class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessedMe
     // A separate method so that the closure capturing these values is only allocated for invalid
     // values. Creating the lambda in Map would allocate the closure for every cell.
     private static CellMapperResult InvalidResult(string? stringValue, NumberStyles style, IFormatProvider? provider)
-        => MapperUtilities.InvalidFromParse(() => T.Parse(GetNumberSpan(stringValue, style), style, provider));
+        => MapperUtilities.InvalidNumber(stringValue, style, provider, typeof(T), s_isInteger, s_isBuiltIn, () => T.Parse(GetNumberSpan(stringValue, style), style, provider));
+
+    // Whether T is a built-in number type, whose invalid values' exceptions can be created without
+    // parsing again (see MapperUtilities.InvalidNumber).
+    private static readonly bool s_isBuiltIn = Type.GetTypeCode(typeof(T)) is >= TypeCode.SByte and <= TypeCode.Decimal || typeof(T) == typeof(Int128) || typeof(T) == typeof(UInt128) || typeof(T) == typeof(Half);
 }
 #endif
