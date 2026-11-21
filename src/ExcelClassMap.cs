@@ -108,16 +108,22 @@ public class ExcelClassMap : IMap
             return property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out value);
         }
 
+        var errorCount = errors.Count;
         try
         {
-            return property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out value);
+            if (property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out value) && errors.Count == errorCount)
+            {
+                return true;
+            }
         }
         catch (ExcelMappingException exception)
         {
             errors.Add(exception);
-            value = null;
-            return false;
         }
+
+        // An error was thrown, or recorded without throwing (see ThrowFallback): don't set the member.
+        value = null;
+        return false;
     }
 
     private bool TryCreateUsingConstructor(ConstructionPlan plan, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, [NotNullWhen(true)] out object? result)

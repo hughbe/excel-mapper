@@ -11,11 +11,23 @@ public class ThrowFallback : IFallbackItem
     public object PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member)
     {
         var stringValue = readResult.GetString();
-        if (member == null)
+        var mappingException = member == null
+            ? new ExcelMappingException($"Cannot assign \"{stringValue}\"", sheet, rowIndex, readResult.ColumnIndex, exception)
+            : new ExcelMappingException($"Cannot assign \"{stringValue}\" to member \"{member.Name}\" of type \"{member.MemberType()}\"", sheet, rowIndex, readResult.ColumnIndex, exception);
+
+        // When the sheet is collecting errors (ReadRowResults), record the error rather than
+        // throwing it: throwing and catching an exception for every invalid cell is slow.
+        if (sheet?.CollectedErrors is { } errors)
         {
-            throw new ExcelMappingException($"Cannot assign \"{stringValue}\"", sheet, rowIndex, readResult.ColumnIndex, exception);
+            errors.Add(mappingException);
+            return ErrorRecorded;
         }
 
-        throw new ExcelMappingException($"Cannot assign \"{stringValue}\" to member \"{member.Name}\" of type \"{member.MemberType()}\"", sheet, rowIndex, readResult.ColumnIndex, exception);
+        throw mappingException;
     }
+
+    /// <summary>
+    /// Returned instead of throwing when an error has been recorded. Maps treat it as "no value".
+    /// </summary>
+    internal static readonly object ErrorRecorded = new();
 }

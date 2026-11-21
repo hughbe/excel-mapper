@@ -342,9 +342,11 @@ public class ExcelSheet
 
     private IEnumerable<ExcelRowResult<T>> ReadRowResultsIterator<T>()
     {
+        // Reuse one list for every row: valid rows (usually most of them) then don't allocate, and
+        // only rows with errors get their own copy.
+        var errors = new List<ExcelMappingException>();
         while (AdvanceToNextRow())
         {
-            var errors = new List<ExcelMappingException>();
             T? value;
             bool mapped;
             CollectedErrors = errors;
@@ -357,7 +359,16 @@ public class ExcelSheet
                 CollectedErrors = null;
             }
 
-            yield return new ExcelRowResult<T>(CurrentRowIndex, mapped && errors.Count == 0 ? value : default, errors);
+            if (errors.Count == 0)
+            {
+                yield return new ExcelRowResult<T>(CurrentRowIndex, mapped ? value : default, null);
+            }
+            else
+            {
+                var rowErrors = errors.ToArray();
+                errors.Clear();
+                yield return new ExcelRowResult<T>(CurrentRowIndex, default, rowErrors);
+            }
         }
     }
 

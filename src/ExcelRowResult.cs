@@ -5,13 +5,15 @@ namespace ExcelMapper;
 /// value, or every error that prevented the row from being mapped.
 /// </summary>
 /// <typeparam name="T">The type of the object the row is mapped to.</typeparam>
-public sealed class ExcelRowResult<T>
+public readonly struct ExcelRowResult<T>
 {
-    internal ExcelRowResult(int rowIndex, T? value, IReadOnlyList<ExcelMappingException> errors)
+    private readonly IReadOnlyList<ExcelMappingException>? _errors;
+
+    internal ExcelRowResult(int rowIndex, T? value, IReadOnlyList<ExcelMappingException>? errors)
     {
         RowIndex = rowIndex;
         Value = value;
-        Errors = errors;
+        _errors = errors;
     }
 
     /// <summary>
@@ -28,10 +30,10 @@ public sealed class ExcelRowResult<T>
     /// Gets the errors that prevented the row from being mapped. Empty if the row is valid. Each
     /// error's <see cref="ExcelMappingException.CellAddress"/> gives the cell, where known.
     /// </summary>
-    public IReadOnlyList<ExcelMappingException> Errors { get; }
+    public IReadOnlyList<ExcelMappingException> Errors => _errors ?? Array.Empty<ExcelMappingException>();
 
     /// <summary>
     /// Gets whether the row was mapped without errors.
     /// </summary>
-    public bool IsValid => Errors.Count == 0;
+    public bool IsValid => _errors is null || _errors.Count == 0;
 }
