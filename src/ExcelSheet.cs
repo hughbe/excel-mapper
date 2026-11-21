@@ -843,6 +843,42 @@ public class ExcelSheet
         return sheetColumnIndex < Math.Min(ColumnEnd, NumberOfColumns) ? (int)sheetColumnIndex : -1;
     }
 
+    // Readers created by reader factories for this sheet, so that a column is found once per sheet
+    // rather than for every row. Keyed by the factory instance: a map whose factory is replaced
+    // gets a new reader.
+    private Dictionary<ICellReaderFactory, ICellReader?>? _cellReaders;
+    private Dictionary<ICellsReaderFactory, ICellsReader?>? _cellsReaders;
+
+    /// <summary>
+    /// Gets the reader a factory creates for this sheet, creating it the first time.
+    /// </summary>
+    internal ICellReader? GetCellReader(ICellReaderFactory factory)
+    {
+        _cellReaders ??= new(ReferenceEqualityComparer<ICellReaderFactory>.Instance);
+        if (!_cellReaders.TryGetValue(factory, out var reader))
+        {
+            reader = factory.GetCellReader(this);
+            _cellReaders[factory] = reader;
+        }
+
+        return reader;
+    }
+
+    /// <summary>
+    /// Gets the cells reader a factory creates for this sheet, creating it the first time.
+    /// </summary>
+    internal ICellsReader? GetCellsReader(ICellsReaderFactory factory)
+    {
+        _cellsReaders ??= new(ReferenceEqualityComparer<ICellsReaderFactory>.Instance);
+        if (!_cellsReaders.TryGetValue(factory, out var reader))
+        {
+            reader = factory.GetCellsReader(this);
+            _cellsReaders[factory] = reader;
+        }
+
+        return reader;
+    }
+
     private sealed class BoundClassMap(int version, BoundMember[] members)
     {
         public int Version { get; } = version;
