@@ -173,6 +173,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// with a given name.
     /// </summary>
     /// <param name="columnName">The name of the column containing the cell to split.</param>
+    /// <param name="comparison">The string comparison to use when matching the column name.</param>
     /// <returns>The map that invoked this method.</returns>
     public ManyToOneEnumerableMap<TElement> WithColumnName(string columnName, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
     {

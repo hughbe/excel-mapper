@@ -121,8 +121,7 @@ internal struct ReadCellResult
     /// Constructs an object describing the output of reading the value of a single cell.
     /// </summary>
     /// <param name="columnIndex">The index of the column that contains the cell.</param>
-    /// <param name="stringValue">The string value of the cell.</param>
-    // A cell holding a value, such as the result of an ICellTransformer.
+    /// <param name="value">The cell's value, such as the result of an <see cref="ExcelMapper.ICellTransformer"/>.</param>
     internal ReadCellResult(int columnIndex, object? value)
     {
         ColumnIndex = columnIndex;

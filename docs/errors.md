@@ -279,7 +279,11 @@ public class Employee
     // Culture-aware matching (for non-English characters)
     [ExcelColumnName("Città", StringComparison.CurrentCultureIgnoreCase)]
     public string City { get; set; }
+
+    public EmploymentStatus Status { get; set; }
 }
+
+public enum EmploymentStatus { FullTime, PartTime }
 
 // Enum parsing can also be case-insensitive
 public class EmployeeMap : ExcelClassMap<Employee>

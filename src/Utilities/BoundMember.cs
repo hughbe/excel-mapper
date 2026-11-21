@@ -31,6 +31,10 @@ internal abstract class BoundMember
     /// <summary>
     /// Reads the member's value from the current row and sets it on <paramref name="instance"/>.
     /// </summary>
+    /// <param name="instance">The object whose member is set.</param>
+    /// <param name="sheet">The sheet being read.</param>
+    /// <param name="rowIndex">The index of the row being read.</param>
+    /// <param name="reader">The reader, on the row being read.</param>
     /// <param name="errors">The errors being collected, if any. A member whose value caused an
     /// error isn't set, so that its initial value is kept.</param>
     /// <returns>Whether the member was set.</returns>
@@ -39,8 +43,12 @@ internal abstract class BoundMember
     /// <summary>
     /// Reads the member's value from the current row, for a constructor argument.
     /// </summary>
+    /// <param name="sheet">The sheet being read.</param>
+    /// <param name="rowIndex">The index of the row being read.</param>
+    /// <param name="reader">The reader, on the row being read.</param>
     /// <param name="errors">The errors being collected, if any. Returns false if reading the value
     /// recorded an error.</param>
+    /// <param name="value">The value read.</param>
     /// <returns>Whether there is a value.</returns>
     public abstract bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out object? value);
 
@@ -59,6 +67,9 @@ internal abstract class BoundMember
     /// <see cref="CompiledAccessors.GetConstructor(ConstructorInfo, BoundConstructorArgument[])"/>),
     /// or set with <see cref="SetValue"/>.
     /// </summary>
+    /// <param name="sheet">The sheet being read.</param>
+    /// <param name="rowIndex">The index of the row being read.</param>
+    /// <param name="reader">The reader, on the row being read.</param>
     /// <param name="errors">The errors being collected, if any. There is no value if reading it
     /// recorded an error.</param>
     public void ReadValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)

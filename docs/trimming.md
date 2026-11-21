@@ -17,6 +17,8 @@ ExcelMapper maps rows by reflection: it finds a type's properties, fields and co
 1. Map types whose members are kept: the type passed to `ReadRows<T>` is kept for you. For nested types, keep their members, for example with `[DynamicDependency]`:
 
    ```csharp
+   using System.Diagnostics.CodeAnalysis;
+
    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties, typeof(Address))]
    static void KeepMappedTypes()
    {
@@ -28,6 +30,8 @@ ExcelMapper maps rows by reflection: it finds a type's properties, fields and co
 2. Once you've checked the mapped types are kept, suppress the warnings where you call ExcelMapper:
 
    ```csharp
+   using System.Diagnostics.CodeAnalysis;
+
    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Mapped types are kept: see KeepMappedTypes.")]
    static List<Customer> ReadCustomers(string path) => ExcelImporter.ReadRows<Customer>(path);
    ```

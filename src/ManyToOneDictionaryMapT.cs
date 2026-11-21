@@ -16,10 +16,11 @@ namespace ExcelMapper;
 public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey : notnull
 {
     /// <summary>
-    /// Constructs a map reads one or more values from one or more cells and maps these values as element
-    /// contained by the property or field.
+    /// Constructs a map that reads values from one or more cells and maps them to the values of the
+    /// dictionary assigned to the property or field.
     /// </summary>
-    /// <param name="valuePipeline">The map that maps the value of a single cell to an object of the element type of the property or field.</param>
+    /// <param name="readerFactory">Finds the columns to read.</param>
+    /// <param name="dictionaryFactory">Creates the dictionary.</param>
     internal ManyToOneDictionaryMap(ICellsReaderFactory readerFactory, IDictionaryFactory<TKey, TValue> dictionaryFactory)
     {
         ThrowHelpers.ThrowIfNull(readerFactory, nameof(readerFactory));

@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace ExcelMapper.Utilities;
 
-public static class StringComparerUtilities
+internal static class StringComparerUtilities
 {
     public static StringComparer FromComparison(StringComparison comparisonType)
     {

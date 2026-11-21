@@ -468,7 +468,8 @@ Specify formats to accept exactly those formats and nothing else:
 ```csharp
 public class Event
 {
-    public string Event { get; set; }
+    [ExcelColumnName("Event")]
+    public string Name { get; set; }
     
     [ExcelFormats("yyyy-MM-dd", "dd/MM/yyyy", "MM/dd/yyyy")]
     public DateTime EventDate { get; set; }
@@ -532,7 +533,8 @@ using System.Globalization;
 
 public class Event
 {
-    public string Event { get; set; }
+    [ExcelColumnName("Event")]
+    public string Name { get; set; }
     public DateTime EventDate { get; set; }
     public TimeOnly StartTime { get; set; }
 }
@@ -543,7 +545,7 @@ public class EventMap : ExcelClassMap<Event>
     {
         var germanCulture = new CultureInfo("de-DE");
         
-        Map(e => e.Event);
+        Map(e => e.Name);
         
         Map(e => e.EventDate)
             .WithFormats("dd.MM.yyyy")
@@ -994,7 +996,7 @@ public class EmployeeMap : ExcelClassMap<Employee>
             .WithColumnIndex(2);
 
         Map(e => e.Department)
-            .WithColumnNames("Department", "Dept", "Division")
+            .WithColumnNameMatching("Department", "Dept", "Division")
             .MakeOptional();
     }
 }
@@ -1018,7 +1020,7 @@ importer.Configuration.RegisterClassMap<Employee>(map =>
         .WithColumnIndex(2);
 
     map.Map(e => e.Department)
-        .WithColumnNames("Department", "Dept", "Division")
+        .WithColumnNameMatching("Department", "Dept", "Division")
         .MakeOptional();
 });
 
@@ -1038,8 +1040,7 @@ The fluent API provides extensive configuration options:
 - `.WithColumnName("Column Name")` - Map to specific column by name
 - `.WithColumnIndex(0)` - Map to specific column by zero-based index
 - `.WithColumnLetter("C")` - Map to specific column by Excel letter
-- `.WithColumnNames("Name1", "Name2")` - Try multiple column names in order
-- `.WithColumnIndices(0, 1, 2)` - Try multiple indices in order
+- `.WithColumnNameMatching("Name1", "Name2")` - Read the first of these columns that the sheet has
 - `.WithColumnNameMatching(name => name.Contains("Total"))` - Use predicate
 - `.WithColumnNameMatching(new Regex("total", RegexOptions.IgnoreCase))` - Use regular expression
 - `.WithColumns(selector)` - Use a custom `IColumnSelector`
@@ -1056,7 +1057,7 @@ The fluent API provides extensive configuration options:
 - `.WithConverter(converter)` - Convert with an `ICellConverter<T>`, which gets the typed cell value and its context: see [Custom Converters](#custom-converters)
 - `.WithFormats("yyyy-MM-dd", "dd/MM/yyyy")` - Parse dates, times, durations and formats (`DateTime`, `DateTimeOffset`, `TimeSpan`, `DateOnly`, `TimeOnly`) with specific formats
 - `.WithMapping(dictionary)` - Map string values to enum/object values
-- `.WithElementMap(...)` - Configure element pipeline for collections
+- `.WithElementMap(...)` - Configure how each element of a collection is read
 
 Every method returns the map, so the calls chain in any order, for example `Map(e => e.HireDate).WithFormats("yyyy-MM-dd").MakeOptional()`.
 
@@ -1106,9 +1107,9 @@ public class EmployeeMap : ExcelClassMap<Employee>
         Map(e => e.HireDate)
             .WithFormats("yyyy-MM-dd", "dd/MM/yyyy");
 
-        // Try multiple column names
+        // Read the first of several possible column names
         Map(e => e.Department)
-            .WithColumnNames("Dept", "Department", "Division");
+            .WithColumnNameMatching("Dept", "Department", "Division");
     }
 }
 

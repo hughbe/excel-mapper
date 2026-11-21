@@ -47,7 +47,7 @@ public class ExcelColumnMatchingAttribute : Attribute
     /// <summary>
     /// Initializes a new instance of <see cref="ExcelColumnMatchingAttribute"/> with the specified regex matcher.
     /// </summary>
-    /// <param name="regex">The regular expression pattern to match.</param>
+    /// <param name="pattern">The regular expression pattern to match.</param>
     /// <param name="options">A bitwise combination of the enumeration values that modify the regular expression.</param>
     public ExcelColumnMatchingAttribute(string pattern, RegexOptions options = RegexOptions.None)
     {

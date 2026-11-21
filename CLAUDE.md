@@ -29,7 +29,7 @@ The netstandard builds are used by .NET Framework and older .NET apps and take d
 
 - The net8.0 build runs the trimming and native AOT analyzers (`IsTrimmable`, `IsAotCompatible`) and fails on their warnings. Annotate new reflection: put `[DynamicallyAccessedMembers]` on `Type` parameters and generic parameters where the caller knows the type (see `TrimmingConstants`), and `[RequiresUnreferencedCode]`/`[RequiresDynamicCode]` on code that discovers types at run time, carried up to the public API. Don't suppress warnings unless the justification is true. Changes to what mapping needs at run time should be checked with the trimmed app in `tests/TrimmingTests` (see [docs/trimming.md](docs/trimming.md)).
 
-- Public types and members have XML doc comments.
+- Public types and members have XML doc comments. The documentation ships in the package (IntelliSense), and the build fails on missing or broken doc comments: undocumented public members, wrong `<param>` names, unresolved `cref`s.
 - Validate arguments with `ThrowHelpers` (`ThrowIfNull`, `ThrowIfNegative`, ...) so parameter names match the API.
 - Problems with a file or a mapping throw `ExcelMappingException`. Create it with the sheet, row and column where known so messages include the cell address (`at cell B11`).
 - Nullable reference types are enabled.
@@ -73,7 +73,7 @@ Test helpers:
 - `Helpers.GetImporter("File.xlsx")` opens a file from `tests/Resources`.
 - `Helpers.GetCsvImporter("A,B\n1,2\n")` creates an importer for in-memory CSV (every cell is text).
 - `XlsxBuilder.Create(["Header"], [2.5], [new DateTime(2024, 3, 4)])` builds an in-memory .xlsx with typed cells (numbers, booleans, dates, times, durations, `Formatted`, `Formula`, `Error`), so tests don't need new binary fixtures.
-- Mapper unit tests use a private `MockExcelDataReader` with `GetValueAction` to supply typed cell values; copy it from a neighbouring mapper test file.
+- Internal types (mappers, readers, fallbacks, bindings) are covered by mapping tests in `tests/Maps`, `tests/Fallbacks` and `tests/Transformers`. When a change removes or rewrites tests, compare coverage with `main` (`--collect:"XPlat Code Coverage" --settings coverage.runsettings`) and add mapping tests for anything no longer covered.
 
 ## Performance
 
@@ -94,7 +94,7 @@ Patterns to keep:
 Update the docs in the same change as the code:
 
 - `README.md` - overview, quick start and the documentation index. It is also the NuGet package page, so link to `docs/` pages with absolute GitHub URLs.
-- `docs/*.md` - the topic pages (reading, mapping, types, errors, performance, API reference). Add new attributes and fluent methods to `docs/api.md` as well as the relevant topic page.
+- `docs/*.md` - the topic pages (reading, mapping, types, errors, performance, API reference). Add new attributes and fluent methods to `docs/api.md` as well as the relevant topic page. Code samples use the public API and should compile; check what they claim (defaults, error messages) against the code or a test.
 - `CHANGELOG.md` - add every user-visible change to the top (unreleased) section under Breaking changes, Added, Changed, Fixed or Performance, with a link to the PR.
 - Breaking changes (including behaviour changes, not only API changes) also go in the migration guide for that major version, for example `docs/migrating-to-4.0.md`: who is affected, before/now, and what to do.
 

@@ -205,6 +205,7 @@ internal static class CompiledAccessors
     /// <see cref="BoundMember.ReadValue"/>), without an argument array, and without boxing the
     /// values of members that keep them typed. Returns null where code can't be compiled.
     /// </summary>
+    /// <param name="constructor">The constructor to call.</param>
     /// <param name="arguments">For each parameter, the member whose value it takes, if any, and its
     /// default value for when there is no value.</param>
     public static Func<BoundMember[], object>? GetConstructor(ConstructorInfo constructor, BoundConstructorArgument[] arguments)

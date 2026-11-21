@@ -1107,7 +1107,7 @@ internal static class AutoMapper
     /// Creates a class map for the given type using the given strategy.
     /// </summary>
     /// <param name="emptyValueStrategy">The default strategy to use when the value of a cell is empty.</param>
-    /// <param name="classMap">The class map for the given type.</param>
+    /// <param name="result">The class map for the given type.</param>
     /// <returns>True if the class map could be created, else false.</returns>
     public static bool TryCreateClassMap<T>(FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ExcelClassMap<T>? result)
     {

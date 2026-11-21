@@ -74,96 +74,32 @@ The DescriptionAttribute mapping works automatically with:
 **Important Notes:**
 - Description matching is **case-sensitive**
 - Empty or null descriptions are ignored
-- If a description is not found, the mapper falls back to standard enum name matching
+- If a description is not found, the standard enum name is matched instead
 - Enum values without a `[Description]` attribute can still be mapped using their standard names
 
-
-    [Fact]
-    public void ReadRow_AutoMappedUriKindAttributeRelativeOrAbsolute_ReturnsExpected()
-    {
-        using var importer = Helpers.GetImporter("Uris.xlsx");
-
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        // Valid cell value (absolute URI).
-        var row1 = sheet.ReadRow<UriKindRelativeOrAbsoluteClass>();
-        Assert.Equal(new Uri("http://google.com"), row1.Uri);
-
-        // Empty cell value.
-        var row2 = sheet.ReadRow<UriKindRelativeOrAbsoluteClass>();
-        Assert.Null(row2.Uri);
-
-        // Invalid cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<UriKindRelativeOrAbsoluteClass>());
-    }
-
-    private class UriKindRelativeOrAbsoluteClass
-    {
-        [ExcelUri(UriKind.RelativeOrAbsolute)]
-        public Uri Uri { get; set; } = default!;
-    }
-
-    [Fact]
-    public void ReadRow_DefaultMappedUriKindAttributeRelativeOrAbsolute_ReturnsExpected()
-    {
-        using var importer = Helpers.GetImporter("Uris.xlsx");
-        importer.Configuration.RegisterClassMap<UriKindRelativeOrAbsoluteClass>(c =>
-        {
-            c.Map(u => u.Uri);
-        });
-
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        // Valid cell value (absolute URI).
-        var row1 = sheet.ReadRow<UriKindRelativeOrAbsoluteClass>();
-        Assert.Equal(new Uri("http://google.com"), row1.Uri);
-
-        // Empty cell value.
-        var row2 = sheet.ReadRow<UriKindRelativeOrAbsoluteClass>();
-        Assert.Null(row2.Uri);
-
-        // Invalid cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<UriKindRelativeOrAbsoluteClass>());
-    }
 ### Uri Mapping
 
-ExcelMapper supports mapping cell values to `Uri` objects with configurable URI kind validation:
+ExcelMapper maps cell values to `Uri` objects. By default only **absolute** URIs (such as `https://example.com`) are valid; set the URI kind to accept relative ones:
 
-| Website                   | API Endpoint         | Relative Path    |
-|---------------------------|----------------------|------------------|
-| https://example.com       | /api/v1/users        | ../resources     |
-| https://www.contoso.com   | /api/v1/products     | ./images/logo.png|
-
-```csharp
-public class Resource
-{
-    public Uri Website { get; set; }         // RelativeOrAbsolute URI
-    public Uri ApiEndpoint { get; set; }     // Relative URI
-    public Uri RelativePath { get; set; }    // Relative or absolute
-}
-```
-
-#### Controlling URI Kind
-
-By default, URIs accept any valid format (absolute, relative, or both). You can specify URI kind requirements using either attributes or the fluent API:
+| Website                   | API Endpoint         | Relative Path     |
+|---------------------------|----------------------|-------------------|
+| https://example.com       | /api/v1/users        | ../resources      |
+| https://www.contoso.com   | /api/v1/products     | ./images/logo.png |
 
 **Using Attributes:**
 
 ```csharp
 public class Resource
 {
-    // Require absolute URIs only (e.g., https://example.com)
-    [ExcelUri(UriKind.RelativeOrAbsolute)]
+    // Absolute URIs only (the default), e.g. https://example.com
     public Uri Website { get; set; }
-    
-    // Require relative URIs only (e.g., /api/v1/users)
+
+    // Relative URIs only, e.g. /api/v1/users
     [ExcelUri(UriKind.Relative)]
     public Uri ApiEndpoint { get; set; }
-    
-    // Allow both absolute and relative URIs (default)
-    [ExcelUri(UriKind.RelativeOrRelativeOrAbsolute)]
+
+    // Absolute or relative URIs
+    [ExcelUri(UriKind.RelativeOrAbsolute)]
     public Uri RelativePath { get; set; }
 }
 
@@ -177,17 +113,16 @@ public class ResourceMap : ExcelClassMap<Resource>
 {
     public ResourceMap()
     {
-        // Require absolute URIs only (e.g., https://example.com)
-        Map(r => r.Website)
-            .WithUriKind(UriKind.RelativeOrAbsolute);
-            
-        // Require relative URIs only (e.g., /api/v1/users)
+        // Absolute URIs only (the default)
+        Map(r => r.Website);
+
+        // Relative URIs only
         Map(r => r.ApiEndpoint)
             .WithUriKind(UriKind.Relative);
-            
-        // Allow both absolute and relative URIs (default)
+
+        // Absolute or relative URIs
         Map(r => r.RelativePath)
-            .WithUriKind(UriKind.RelativeOrRelativeOrAbsolute);
+            .WithUriKind(UriKind.RelativeOrAbsolute);
     }
 }
 
@@ -196,9 +131,9 @@ var resources = sheet.ReadRows<Resource>();
 ```
 
 **Available UriKind Options:**
-- `UriKind.RelativeOrAbsolute` - Must be absolute URI (e.g., `https://example.com`)
-- `UriKind.Relative` - Must be relative URI (e.g., `/api/users` or `../path`)
-- `UriKind.RelativeOrRelativeOrAbsolute` (default) - Can be either absolute or relative
+- `UriKind.Absolute` (default) - Must be an absolute URI (e.g., `https://example.com`)
+- `UriKind.Relative` - Must be a relative URI (e.g., `/api/users` or `../path`)
+- `UriKind.RelativeOrAbsolute` - Can be either absolute or relative
 
 **Error Handling:**
 
@@ -208,8 +143,7 @@ public class ResourceMap : ExcelClassMap<Resource>
     public ResourceMap()
     {
         Map(r => r.Website)
-            .WithUriKind(UriKind.RelativeOrAbsolute)
-            .WithInvalidFallback(null);  // Use null for invalid URIs
+            .WithInvalidFallback(null);  // Use null for invalid (such as relative) URIs
     }
 }
 ```
@@ -386,7 +320,7 @@ Map multiple columns to dictionary properties.
 
 ```csharp
 // Maps ALL columns to dictionary
-var rows = sheet.ReadRows<Dictionary<string, string>>();
+var rows = sheet.ReadRows<Dictionary<string, string>>().ToArray();
 Console.WriteLine(rows[0]["Name"]);
 Console.WriteLine(rows[0]["Age"]);
 ```

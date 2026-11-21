@@ -69,9 +69,9 @@ public static class ValuePipelineExtensions
     /// is useful for mapping columns where equivalent data was entered differently.
     /// </summary>
     /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <typeparam name="T">The type of the property or field that the map represents.</typeparam>
+    /// <typeparam name="TValue">The type of the property or field that the map represents.</typeparam>
     /// <param name="map">The map to use.</param>
-    /// <param name="mappingDictionary">A dictionary that maps a fixed string value to a fixed value of T.</param>
+    /// <param name="mappingDictionary">A dictionary that maps a fixed string value to a fixed value of <typeparamref name="TValue"/>.</param>
     /// <param name="comparer">The comparer uses to map fixed string values. This allows for case-insensitive mappings, for example.</param>
     /// <param name="behavior">Whether or not a failure to match is an error.</param>
     /// <returns>The map on which this method was invoked.</returns>
