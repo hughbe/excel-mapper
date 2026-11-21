@@ -76,39 +76,19 @@ public class ExcelClassMap : IMap
         }
 
         var plan = GetConstructionPlan();
+        var members = sheet.GetBoundMembers(this);
         if (plan.Constructor is null)
         {
             // Create an instance of the object and populate its properties.
             var instance = plan.CreateInstance!();
-            if (sheet.GetBoundMembers(this) is { } boundMembers)
-            {
-                MapBoundMembers(boundMembers, instance, sheet, rowIndex, reader);
-            }
-            else
-            {
-                var properties = Properties;
-                for (int i = 0; i < properties.Count; i++)
-                {
-                    var property = properties[i];
-                    if (TryGetMemberValue(property, sheet, rowIndex, reader, out var value))
-                    {
-                        property.SetValueFactory(instance, value!);
-                    }
-                }
-            }
-
+            MapBoundMembers(members, instance, sheet, rowIndex, reader);
             result = instance;
             return true;
         }
 
-        return TryCreateUsingConstructor(plan, sheet, rowIndex, reader, out result);
+        return TryCreateUsingConstructor(plan, members, sheet, rowIndex, reader, out result);
     }
 
-    /// <summary>
-    /// Gets the value of a member. When the sheet is collecting errors (see
-    /// <see cref="ExcelSheet.ReadRowResults{T}"/>), a mapping error is recorded and the member is
-    /// skipped so that the remaining members are still read.
-    /// </summary>
     /// <summary>
     /// Incremented when <see cref="Properties"/> changes, so that members bound to a sheet are bound again.
     /// </summary>
@@ -139,32 +119,31 @@ public class ExcelClassMap : IMap
         }
     }
 
-    private static bool TryGetMemberValue(ExcelPropertyMap property, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out object? value)
+    /// <summary>
+    /// Gets the value of a member, for a constructor argument. When the sheet is collecting errors
+    /// (see <see cref="ExcelSheet.ReadRowResults{T}"/>), a mapping error is recorded and the member
+    /// is skipped so that the remaining members are still read.
+    /// </summary>
+    private static bool TryGetMemberValue(BoundMember member, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out object? value)
     {
         if (sheet.CollectedErrors is not { } errors)
         {
-            return property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out value);
+            return member.TryGetValue(sheet, rowIndex, reader, null, out value);
         }
 
-        var errorCount = errors.Count;
         try
         {
-            if (property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out value) && errors.Count == errorCount)
-            {
-                return true;
-            }
+            return member.TryGetValue(sheet, rowIndex, reader, errors, out value);
         }
         catch (ExcelMappingException exception)
         {
             errors.Add(exception);
+            value = null;
+            return false;
         }
-
-        // An error was thrown, or recorded without throwing (see ThrowFallback): don't set the member.
-        value = null;
-        return false;
     }
 
-    private bool TryCreateUsingConstructor(ConstructionPlan plan, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, [NotNullWhen(true)] out object? result)
+    private bool TryCreateUsingConstructor(ConstructionPlan plan, BoundMember[] members, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, [NotNullWhen(true)] out object? result)
     {
         var errors = sheet.CollectedErrors;
         var errorCount = errors?.Count ?? 0;
@@ -179,8 +158,7 @@ public class ExcelClassMap : IMap
         bool[]? hasValues = null;
         for (int i = 0; i < count; i++)
         {
-            var property = properties[i];
-            if (TryGetMemberValue(property, sheet, rowIndex, reader, out var value))
+            if (TryGetMemberValue(members[i], sheet, rowIndex, reader, out var value))
             {
                 var parameterIndex = plan.PropertyParameterIndices[i];
                 if (parameterIndex >= 0)

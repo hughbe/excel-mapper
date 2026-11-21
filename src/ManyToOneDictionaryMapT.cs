@@ -11,7 +11,7 @@ namespace ExcelMapper;
 /// </summary>
 /// <typeparam name="TKey">The key type of the IDictionary property or field.</typeparam>
 /// <typeparam name="TValue">The value type of the IDictionary property or field.</typeparam>
-public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : notnull
+public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey : notnull
 {
     /// <summary>
     /// Constructs a map reads one or more values from one or more cells and maps these values as element
@@ -50,6 +50,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
             ThrowHelpers.ThrowIfNull(value, nameof(value));
             _readerFactory = value;
             _factoryCache.Clear();
+            ReaderVersion++;
         }
     }
 
@@ -75,8 +76,33 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
         }
 
-        var cellsReader = _factoryCache.GetOrAdd(sheet, _readerFactory, static (s, factory) => factory.GetCellsReader(s));
+        return TryGetValue(GetCellsReader(sheet), sheet, rowIndex, reader, member, out value);
+    }
 
+    /// <summary>
+    /// Incremented when <see cref="ReaderFactory"/> changes, so that readers resolved for a sheet
+    /// (see <see cref="BoundCellsMember"/>) are resolved again.
+    /// </summary>
+    int ICellsMap.ReaderVersion => ReaderVersion;
+
+    internal int ReaderVersion { get; private set; }
+
+    ICellsReader? ICellsMap.GetCellsReader(ExcelSheet sheet) => GetCellsReader(sheet);
+
+    private ICellsReader? GetCellsReader(ExcelSheet sheet)
+        => _factoryCache.GetOrAdd(sheet, _readerFactory, static (s, factory) => factory.GetCellsReader(s));
+
+    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value)
+        => TryGetValue(cellsReader, sheet, rowIndex, reader, member, out value);
+
+    private bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
+    {
+        if (sheet.Heading == null)
+        {
+            throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
+        }
+
+        
         if (cellsReader == null || !cellsReader.Start(reader, PreserveFormatting, out var count))
         {
             if (Optional)

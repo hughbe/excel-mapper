@@ -74,6 +74,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Compiled setters and constructors, and fewer per-row and per-cell allocations. ([#121](https://github.com/hughbe/excel-mapper/pull/121), [#127](https://github.com/hughbe/excel-mapper/pull/127))
 - `ReadRowResults` costs the same as `ReadRows` for valid data. ([#126](https://github.com/hughbe/excel-mapper/pull/126))
 - Classes whose members each read one column are bound to a sheet once and mapped with typed setters, and reading a cell no longer allocates: about 80% fewer allocations and 18% faster for a 10-member class from CSV, and 75% fewer allocations for typed .xlsx cells. ([#142](https://github.com/hughbe/excel-mapper/pull/142))
+- Every class map is bound the same way, including records, nested objects, collections and dictionaries: records are 12% faster with 200 fewer bytes per row. ([#143](https://github.com/hughbe/excel-mapper/pull/143))
 
 ### Platform notes
 

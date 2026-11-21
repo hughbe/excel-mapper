@@ -769,11 +769,11 @@ public class ExcelSheet
 
     private int GetRowCount() => Importer.RowSource.GetRowCount(Index);
 
-    private sealed class BoundClassMap(int version, BoundMember[]? members)
+    private sealed class BoundClassMap(int version, BoundMember[] members)
     {
         public int Version { get; } = version;
 
-        public BoundMember[]? Members { get; } = members;
+        public BoundMember[] Members { get; } = members;
     }
 
     // Class maps bound to this sheet. Rows are usually mapped with one class map at a time, so the
@@ -783,10 +783,9 @@ public class ExcelSheet
     private BoundClassMap? _lastBound;
 
     /// <summary>
-    /// Gets the members of a class map bound to this sheet, or null if the class map has members that
-    /// can't be bound, which are then mapped by the class map itself.
+    /// Gets the members of a class map bound to this sheet.
     /// </summary>
-    internal BoundMember[]? GetBoundMembers(ExcelClassMap classMap)
+    internal BoundMember[] GetBoundMembers(ExcelClassMap classMap)
     {
         var bound = ReferenceEquals(_lastBoundClassMap, classMap) ? _lastBound : null;
         if (bound is null)
@@ -807,19 +806,19 @@ public class ExcelSheet
         return bound.Members;
     }
 
-    private BoundMember[]? Bind(ExcelClassMap classMap)
+    private BoundMember[] Bind(ExcelClassMap classMap)
     {
         var properties = classMap.Properties;
         var members = new BoundMember[properties.Count];
         for (int i = 0; i < members.Length; i++)
         {
             var property = properties[i];
-            if (property.IsReadOnly || property.Map is not IBindableMap bindableMap)
+            members[i] = property.Map switch
             {
-                return null;
-            }
-
-            members[i] = bindableMap.Bind(property, this);
+                IBindableMap bindableMap => bindableMap.Bind(property, this),
+                ICellsMap cellsMap => new BoundCellsMember(cellsMap, property),
+                _ => new BoundMapMember(property),
+            };
         }
 
         return members;

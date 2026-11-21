@@ -27,6 +27,97 @@ internal abstract class BoundMember
     /// error isn't set, so that its initial value is kept.</param>
     /// <returns>Whether the member was set.</returns>
     public abstract bool TryMap(object instance, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors);
+
+    /// <summary>
+    /// Reads the member's value from the current row, for a constructor argument.
+    /// </summary>
+    /// <param name="errors">The errors being collected, if any. Returns false if reading the value
+    /// recorded an error.</param>
+    /// <returns>Whether there is a value.</returns>
+    public abstract bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out object? value);
+}
+
+/// <summary>
+/// Any map bound to a member, mapped through <see cref="IMap.TryGetValue"/>: for example nested
+/// class maps, indexer maps, row numbers and custom maps.
+/// </summary>
+internal sealed class BoundMapMember(ExcelPropertyMap property) : BoundMember
+{
+    public override bool TryMap(object instance, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
+    {
+        if (!TryGetValue(sheet, rowIndex, reader, errors, out var value))
+        {
+            return false;
+        }
+
+        property.SetValueFactory(instance, value!);
+        return true;
+    }
+
+    public override bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out object? value)
+    {
+        var errorCount = errors?.Count ?? 0;
+        if (property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out value) &&
+            (errors is null || errors.Count == errorCount))
+        {
+            return true;
+        }
+
+        value = null;
+        return false;
+    }
+}
+
+/// <summary>
+/// A map that reads several cells (a collection or dictionary) and can be bound to a member: its
+/// cells reader is resolved once for the sheet.
+/// </summary>
+internal interface ICellsMap : IMap
+{
+    int ReaderVersion { get; }
+
+    ICellsReader? GetCellsReader(ExcelSheet sheet);
+
+    bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value);
+}
+
+/// <summary>
+/// An <see cref="ICellsMap"/> bound to a member.
+/// </summary>
+internal sealed class BoundCellsMember(ICellsMap map, ExcelPropertyMap property) : BoundMember
+{
+    private ICellsReader? _cellsReader;
+    private int _readerVersion = -1;
+
+    public override bool TryMap(object instance, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
+    {
+        if (!TryGetValue(sheet, rowIndex, reader, errors, out var value))
+        {
+            return false;
+        }
+
+        property.SetValueFactory(instance, value!);
+        return true;
+    }
+
+    public override bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out object? value)
+    {
+        if (_readerVersion != map.ReaderVersion)
+        {
+            _cellsReader = map.GetCellsReader(sheet);
+            _readerVersion = map.ReaderVersion;
+        }
+
+        var errorCount = errors?.Count ?? 0;
+        if (map.TryGetValue(_cellsReader, sheet, rowIndex, reader, property.Member, out value) &&
+            (errors is null || errors.Count == errorCount))
+        {
+            return true;
+        }
+
+        value = null;
+        return false;
+    }
 }
 
 /// <summary>
@@ -37,7 +128,9 @@ internal sealed class BoundOneToOneMember<T> : BoundMember
 {
     private readonly OneToOneMap<T> _map;
     private readonly MemberInfo _member;
-    private readonly Action<object, T> _setter;
+    // Created on first use: members passed to a constructor (such as get-only properties) are
+    // never set.
+    private Action<object, T>? _setter;
 
     // The cell reader for the sheet, resolved on first use (inside the caller's error handling, as
     // for unbound maps) and again if the map's reader factory changes.
@@ -48,7 +141,6 @@ internal sealed class BoundOneToOneMember<T> : BoundMember
     {
         _map = map;
         _member = property.Member;
-        _setter = CompiledAccessors.GetSetter<T>(property.Member);
     }
 
     public override bool TryMap(object instance, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
@@ -66,7 +158,26 @@ internal sealed class BoundOneToOneMember<T> : BoundMember
             return false;
         }
 
-        _setter(instance, value);
+        (_setter ??= CompiledAccessors.GetSetter<T>(_member))(instance, value);
         return true;
+    }
+
+    public override bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out object? value)
+    {
+        if (_readerVersion != _map.ReaderVersion)
+        {
+            _cellReader = _map.GetCellReader(sheet);
+            _readerVersion = _map.ReaderVersion;
+        }
+
+        var errorCount = errors?.Count ?? 0;
+        if (_map.TryGetObjectValue(_cellReader, sheet, rowIndex, reader, _member, out value) &&
+            (errors is null || errors.Count == errorCount))
+        {
+            return true;
+        }
+
+        value = null;
+        return false;
     }
 }
