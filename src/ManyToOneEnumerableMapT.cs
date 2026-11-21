@@ -56,7 +56,9 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// <summary>
     /// The mapping pipeline for each element in the list.
     /// </summary>
-    public IValuePipeline Pipeline { get; private set; } = new ValuePipeline<TElement>();
+    public ValuePipeline<TElement> Pipeline { get; private set; } = new ValuePipeline<TElement>();
+
+    IValuePipeline IToOneMap.Pipeline => Pipeline;
 
     /// <summary>
     /// The factory for creating and adding elements to the list.
@@ -156,11 +158,11 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// <param name="elementMap">The pipeline that maps the value of a single cell to an object of the element type of the property
     /// or field.</param>
     /// <returns>The map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithElementMap(Func<IValuePipeline<TElement>, IValuePipeline<TElement>> elementMap)
+    public ManyToOneEnumerableMap<TElement> WithElementMap(Func<ValuePipeline<TElement>, ValuePipeline<TElement>> elementMap)
     {
         ThrowHelpers.ThrowIfNull(elementMap, nameof(elementMap));
 
-        var result = elementMap((IValuePipeline<TElement>)Pipeline);
+        var result = elementMap(Pipeline);
         ThrowHelpers.ThrowIfNull(result, nameof(elementMap));
         Pipeline = result;
         return this;

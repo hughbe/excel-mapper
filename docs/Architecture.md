@@ -101,19 +101,19 @@ Each property/field has a corresponding map that defines how to read and convert
 
 **`OneToOneMap<T>`**: Maps a single cell to a property
 - Contains an internal `ICellReaderFactory` to create readers
-- Contains `ValuePipeline<T>` for transformation and conversion
+- Is a `ValuePipeline<T>`, which holds the transformation and conversion
 - Supports `Optional` flag for missing columns
 - Supports `PreserveFormatting` to retain Excel formatting
 
 **`ManyToOneEnumerableMap<TElement>`**: Maps multiple cells to a collection
 - Uses an internal `ICellsReaderFactory` for multi-cell reading
 - Uses `IEnumerableFactory<TElement>` to construct the target collection type
-- Contains `IValuePipeline<TElement>` for element conversion
+- Contains a `ValuePipeline<TElement>` for element conversion
 - Supports List, Array, HashSet, ImmutableList, and custom collection types
 
 **`ManyToOneDictionaryMap<TKey, TValue>`**: Maps multiple cells to a dictionary
 - Keys are derived from column names
-- Values are mapped using `IValuePipeline<TValue>`
+- Values are mapped using a `ValuePipeline<TValue>`
 - Uses `IDictionaryFactory<TKey, TValue>` to construct dictionaries
 - Supports Dictionary, FrozenDictionary, ImmutableDictionary
 

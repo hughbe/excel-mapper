@@ -12,7 +12,7 @@ namespace ExcelMapper;
 /// Maps a member to an Excel column of type T with a one-to-one relationship.
 /// </summary>
 /// <typeparam name="T">The type of the member.</typeparam>
-public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>, IBindableMap
+public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
 {
     /// <summary>
     /// Constructs a one-to-one map with the specified cell reader factory.
@@ -50,28 +50,10 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>, IBindableMap
     /// <inheritdoc />
     public bool PreserveFormatting { get; set; }
 
-    /// <inheritdoc />
-    public IValuePipeline Pipeline { get; } = new ValuePipeline<T>();
-
-    /// <inheritdoc />
-    public IList<Abstractions.ICellTransformer> Transformers => Pipeline.Transformers;
-
-    /// <inheritdoc />
-    public IList<ICellMapper> Mappers => Pipeline.Mappers;
-
-    /// <inheritdoc />
-    public IFallbackItem? EmptyFallback
-    {
-        get => Pipeline.EmptyFallback;
-        set => Pipeline.EmptyFallback = value;
-    }
-
-    /// <inheritdoc />
-    public IFallbackItem? InvalidFallback
-    {
-        get => Pipeline.InvalidFallback;
-        set => Pipeline.InvalidFallback = value;
-    }
+    /// <summary>
+    /// Gets the map's value pipeline: the map itself, which converts the cell's value.
+    /// </summary>
+    public IValuePipeline Pipeline => this;
 
     /// <inheritdoc />
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
@@ -138,7 +120,7 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>, IBindableMap
     }
 
     private T Map(ReadCellResult readResult, ExcelSheet sheet, int rowIndex, MemberInfo? member)
-        => ((ValuePipeline<T>)Pipeline).Map(sheet, rowIndex, readResult, PreserveFormatting, member);
+        => Map(sheet, rowIndex, readResult, PreserveFormatting, member);
 
     /// <inheritdoc/>
     BoundMember IBindableMap.Bind(ExcelPropertyMap property, ExcelSheet sheet) => new BoundOneToOneMember<T>(this, property, sheet);
