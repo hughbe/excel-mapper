@@ -8,7 +8,7 @@ namespace ExcelMapper.Factories;
 /// Constructs a collection by calling the Add method to add items.
 /// </summary>
 /// <typeparam name="T">The type of the collection items.</typeparam>
-public class AddEnumerableFactory<T> : IEnumerableFactory<T>
+public class AddEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
 {
     /// <summary>
     /// Gets the type of collection that this factory creates.
@@ -16,7 +16,8 @@ public class AddEnumerableFactory<T> : IEnumerableFactory<T>
     [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
     public Type CollectionType { get; }
     private object? _items;
-    private readonly MethodInfo _addMethod;
+    private readonly Func<object> _create;
+    private readonly Action<object, T?> _add;
 
     /// <summary>
     /// Constructs a factory that creates collections of the given type.
@@ -44,7 +45,9 @@ public class AddEnumerableFactory<T> : IEnumerableFactory<T>
         }
 
         CollectionType = collectionType;
-        _addMethod = collectionType.GetMethod("Add", [typeof(T)]) ?? throw new ArgumentException($"Type does not have an Add({typeof(T)}) method.", nameof(collectionType));
+        var addMethod = collectionType.GetMethod("Add", [typeof(T)]) ?? throw new ArgumentException($"Type does not have an Add({typeof(T)}) method.", nameof(collectionType));
+        _create = CompiledAccessors.GetParameterlessConstructor(collectionType);
+        _add = CompiledAccessors.GetAction<T?>(addMethod);
     }
 
     /// <inheritdoc/>
@@ -57,14 +60,14 @@ public class AddEnumerableFactory<T> : IEnumerableFactory<T>
             throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
-        _items = Activator.CreateInstance(CollectionType);
+        _items = _create();
     }
 
     /// <inheritdoc/>
     public void Add(T? item)
     {
         EnsureMapping();
-        _addMethod.InvokeUnwrapped(_items, [item]);
+        _add(_items, item);
     }
 
     /// <inheritdoc/>
@@ -90,6 +93,21 @@ public class AddEnumerableFactory<T> : IEnumerableFactory<T>
     }
 
     /// <inheritdoc/>
+    /// <inheritdoc/>
+    object IBindingFactory.CreateForBinding()
+    {
+        var factory = (AddEnumerableFactory<T>)MemberwiseClone();
+        factory.ResetForBinding();
+        return factory;
+    }
+
+    // A binding's copy starts with nothing being built and no buffer of its own. Only drop the
+    // references: the objects may be in use by the map's own factory on another thread.
+    private void ResetForBinding()
+    {
+        _items = null;
+    }
+
     public void Reset()
     {
         _items = null;

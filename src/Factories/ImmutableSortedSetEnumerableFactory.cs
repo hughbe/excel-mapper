@@ -7,7 +7,7 @@ namespace ExcelMapper.Factories;
 /// Constructs an ImmutableSortedSet&lt;T&gt; by using a builder and converting to immutable at the end.
 /// </summary>
 /// <typeparam name="T">The type of the set elements.</typeparam>
-public class ImmutableSortedSetEnumerableFactory<T> : IEnumerableFactory<T>
+public class ImmutableSortedSetEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
 {
     private ImmutableSortedSet<T?>.Builder? _builder;
 
@@ -54,6 +54,21 @@ public class ImmutableSortedSetEnumerableFactory<T> : IEnumerableFactory<T>
     }
 
     /// <inheritdoc/>
+    /// <inheritdoc/>
+    object IBindingFactory.CreateForBinding()
+    {
+        var factory = (ImmutableSortedSetEnumerableFactory<T>)MemberwiseClone();
+        factory.ResetForBinding();
+        return factory;
+    }
+
+    // A binding's copy starts with nothing being built and no buffer of its own. Only drop the
+    // references: the objects may be in use by the map's own factory on another thread.
+    private void ResetForBinding()
+    {
+        _builder = null;
+    }
+
     public void Reset()
     {
         _builder = null;

@@ -8,16 +8,20 @@ namespace ExcelMapper.Factories;
 /// Constructs a collection by passing a list of items to a constructor that accepts IList&lt;T&gt;, IEnumerable&lt;T&gt;, or ICollection.
 /// </summary>
 /// <typeparam name="T">The type of the collection elements.</typeparam>
-public class ConstructorEnumerableFactory<T> : IEnumerableFactory<T>
+public class ConstructorEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
 {
     /// <summary>
     /// Gets the type of collection that this factory creates.
     /// </summary>
     [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
     public Type CollectionType { get; }
-    private readonly ConstructorInfo _constructor;
+    private readonly Func<object, object> _construct;
+
+    // Whether the constructor copies the collection passed to it, so the collection can be reused for the next row.
+    private readonly bool _constructorCopies;
 
     private List<T?>? _items;
+    private List<T?>? _buffer;
 
     /// <summary>
     /// Constructs a factory that creates collections of the given type.
@@ -36,12 +40,14 @@ public class ConstructorEnumerableFactory<T> : IEnumerableFactory<T>
             throw new ArgumentException("Abstract collection types cannot be created.", nameof(collectionType));
         }
 
-        _constructor = collectionType.GetConstructor([typeof(IList<T>)])
+        var constructor = collectionType.GetConstructor([typeof(IList<T>)])
             ?? collectionType.GetConstructor([typeof(IEnumerable<T>)])
             ?? collectionType.GetConstructor([typeof(ICollection)])
             ?? throw new ArgumentException($"Collection type {collectionType} does not have a constructor that takes {nameof(IList<T>)}, {nameof(IEnumerable<T>)} or {nameof(ICollection)}.", nameof(collectionType));
 
         CollectionType = collectionType;
+        _construct = CompiledAccessors.GetConstructor1(constructor);
+        _constructorCopies = CollectionUtilities.ConstructorCopies(collectionType);
     }
 
     /// <inheritdoc/>
@@ -54,7 +60,16 @@ public class ConstructorEnumerableFactory<T> : IEnumerableFactory<T>
             throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
-        _items = new List<T?>(count);
+        if (_buffer is not null)
+        {
+            // The buffer from the previous row: the result is a copy of it, so it can be reused.
+            _items = _buffer;
+            _buffer = null;
+        }
+        else
+        {
+            _items = new List<T?>(count);
+        }
     }
 
     /// <inheritdoc/>
@@ -86,7 +101,7 @@ public class ConstructorEnumerableFactory<T> : IEnumerableFactory<T>
 
         try
         {
-            return _constructor.Invoke([_items]);
+            return _construct(_items);
         }
         finally
         {
@@ -95,8 +110,31 @@ public class ConstructorEnumerableFactory<T> : IEnumerableFactory<T>
     }
 
     /// <inheritdoc/>
+    /// <inheritdoc/>
+    object IBindingFactory.CreateForBinding()
+    {
+        var factory = (ConstructorEnumerableFactory<T>)MemberwiseClone();
+        factory.ResetForBinding();
+        return factory;
+    }
+
+    // A binding's copy starts with nothing being built and no buffer of its own. Only drop the
+    // references: the objects may be in use by the map's own factory on another thread.
+    private void ResetForBinding()
+    {
+        _items = null;
+        _buffer = null;
+    }
+
     public void Reset()
     {
+        if (_items is not null && _constructorCopies)
+        {
+            // Clear the buffer so that it doesn't keep the row's values alive.
+            _items.Clear();
+            _buffer = _items;
+        }
+
         _items = null;
     }
 

@@ -78,7 +78,13 @@ internal interface ICellsMap : IMap
 
     ICellsReader? GetCellsReader(ExcelSheet sheet);
 
-    bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value);
+    /// <summary>
+    /// Creates the map's collection factory for one binding, or null if the factory can't be copied
+    /// (a custom factory), in which case the map's own factory is used under a lock.
+    /// </summary>
+    object? CreateBindingFactory();
+
+    bool TryGetValue(ICellsReader? cellsReader, object? bindingFactory, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value);
 }
 
 /// <summary>
@@ -86,6 +92,7 @@ internal interface ICellsMap : IMap
 /// </summary>
 internal sealed class BoundCellsMember(ICellsMap map, ExcelPropertyMap property) : BoundMember
 {
+    private readonly object? _factory = map.CreateBindingFactory();
     private ICellsReader? _cellsReader;
     private int _readerVersion = -1;
 
@@ -109,7 +116,7 @@ internal sealed class BoundCellsMember(ICellsMap map, ExcelPropertyMap property)
         }
 
         var errorCount = errors?.Count ?? 0;
-        if (map.TryGetValue(_cellsReader, sheet, rowIndex, reader, property.Member, out value) &&
+        if (map.TryGetValue(_cellsReader, _factory, sheet, rowIndex, reader, property.Member, out value) &&
             (errors is null || errors.Count == errorCount))
         {
             return true;

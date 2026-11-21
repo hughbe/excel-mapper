@@ -7,14 +7,14 @@ namespace ExcelMapper.Factories;
 /// Constructs a set by passing a HashSet&lt;T&gt; of items to a constructor that accepts ISet&lt;T&gt;.
 /// </summary>
 /// <typeparam name="T">The type of the set elements.</typeparam>
-public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
+public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
 {
     /// <summary>
     /// Gets the type of set that this factory creates.
     /// </summary>
     [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
     public Type SetType { get; }
-    private readonly ConstructorInfo _constructor;
+    private readonly Func<object, object> _construct;
 
     private HashSet<T?>? _items;
 
@@ -35,10 +35,11 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
             throw new ArgumentException("Abstract set types cannot be created.", nameof(setType));
         }
 
-        _constructor = setType.GetConstructor(new[] { typeof(ISet<T>) })
+        var constructor = setType.GetConstructor(new[] { typeof(ISet<T>) })
             ?? throw new ArgumentException($"Set type {setType} does not have a constructor that takes {nameof(ISet<T?>)}.", nameof(setType));
 
         SetType = setType;
+        _construct = CompiledAccessors.GetConstructor1(constructor);
     }
 
     /// <inheritdoc/>
@@ -79,7 +80,7 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
 
         try
         {
-            return _constructor.Invoke([_items]);
+            return _construct(_items);
         }
         finally
         {
@@ -88,6 +89,21 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
     }
 
     /// <inheritdoc/>
+    /// <inheritdoc/>
+    object IBindingFactory.CreateForBinding()
+    {
+        var factory = (ConstructorSetEnumerableFactory<T>)MemberwiseClone();
+        factory.ResetForBinding();
+        return factory;
+    }
+
+    // A binding's copy starts with nothing being built and no buffer of its own. Only drop the
+    // references: the objects may be in use by the map's own factory on another thread.
+    private void ResetForBinding()
+    {
+        _items = null;
+    }
+
     public void Reset()
     {
         _items = null;

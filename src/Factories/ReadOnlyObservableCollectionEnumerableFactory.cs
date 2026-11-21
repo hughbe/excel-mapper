@@ -8,14 +8,14 @@ namespace ExcelMapper.Factories;
 /// Constructs a ReadOnlyObservableCollection&lt;T&gt; by collecting items in an ObservableCollection and passing it to the constructor.
 /// </summary>
 /// <typeparam name="T">The type of the collection elements.</typeparam>
-public class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFactory<T>
+public class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
 {
     /// <summary>
     /// Gets the type of collection that this factory creates.
     /// </summary>
     [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
     public Type CollectionType { get; }
-    private readonly ConstructorInfo _constructor;
+    private readonly Func<object, object> _construct;
     private ObservableCollection<T?>? _items;
 
     /// <summary>
@@ -31,9 +31,10 @@ public class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFacto
             throw new ArgumentException("Abstract collection types cannot be created.", nameof(collectionType));
         }
 
-        _constructor = collectionType.GetConstructor([typeof(ObservableCollection<T>)])
+        var constructor = collectionType.GetConstructor([typeof(ObservableCollection<T>)])
             ?? throw new ArgumentException($"Collection type {collectionType} does not have a constructor that takes {nameof(ObservableCollection<T>)}.", nameof(collectionType));
         CollectionType = collectionType;
+        _construct = CompiledAccessors.GetConstructor1(constructor);
     }
 
     /// <inheritdoc/>
@@ -78,7 +79,7 @@ public class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFacto
 
         try
         {
-            return _constructor.Invoke([_items]);
+            return _construct(_items);
         }
         finally
         {
@@ -87,6 +88,21 @@ public class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFacto
     }
 
     /// <inheritdoc/>
+    /// <inheritdoc/>
+    object IBindingFactory.CreateForBinding()
+    {
+        var factory = (ReadOnlyObservableCollectionEnumerableFactory<T>)MemberwiseClone();
+        factory.ResetForBinding();
+        return factory;
+    }
+
+    // A binding's copy starts with nothing being built and no buffer of its own. Only drop the
+    // references: the objects may be in use by the map's own factory on another thread.
+    private void ResetForBinding()
+    {
+        _items = null;
+    }
+
     public void Reset()
     {
         _items = null;

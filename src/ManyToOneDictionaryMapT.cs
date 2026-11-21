@@ -92,10 +92,28 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     private ICellsReader? GetCellsReader(ExcelSheet sheet)
         => _factoryCache.GetOrAdd(sheet, _readerFactory, static (s, factory) => factory.GetCellsReader(s));
 
-    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value)
-        => TryGetValue(cellsReader, sheet, rowIndex, reader, member, out value);
+    object? ICellsMap.CreateBindingFactory() => (DictionaryFactory as IBindingFactory)?.CreateForBinding();
+
+    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, object? bindingFactory, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value)
+    {
+        if (bindingFactory is IDictionaryFactory<TKey, TValue> factory)
+        {
+            // The binding's own factory: only used by one sheet, so no lock is needed.
+            return TryGetValue(cellsReader, factory, sheet, rowIndex, reader, member, out value);
+        }
+
+        return TryGetValue(cellsReader, sheet, rowIndex, reader, member, out value);
+    }
 
     private bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
+    {
+        lock (_buildLock)
+        {
+            return TryGetValue(cellsReader, DictionaryFactory, sheet, rowIndex, reader, member, out value);
+        }
+    }
+
+    private bool TryGetValue(ICellsReader? cellsReader, IDictionaryFactory<TKey, TValue> factory, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
         if (sheet.Heading == null)
         {
@@ -114,38 +132,35 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
             throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
         }
 
-        lock (_buildLock)
+        factory.Begin(count);
+        try
         {
-            DictionaryFactory.Begin(count);
             try
             {
-                try
+                while (cellsReader.TryGetNext(out var valueResult))
                 {
-                    while (cellsReader.TryGetNext(out var valueResult))
+                    // Get the column name for the current value
+                    var elementKey = sheet.Heading.GetColumnName(valueResult.ColumnIndex);
+                    // Convert the string key to TKey
+                    TKey? convertedKey = elementKey is TKey key ? key : (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
+                    if (convertedKey != null)
                     {
-                        // Get the column name for the current value
-                        var elementKey = sheet.Heading.GetColumnName(valueResult.ColumnIndex);
-                        // Convert the string key to TKey
-                        TKey? convertedKey = elementKey is TKey key ? key : (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
-                        if (convertedKey != null)
-                        {
-                            var elementValue = ValuePipeline.CastValue<TValue>(ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, valueResult, PreserveFormatting, member), sheet, rowIndex, valueResult.ColumnIndex, member);
-                            DictionaryFactory.Add(convertedKey, elementValue);
-                        }
+                        var elementValue = ValuePipeline.CastValue<TValue>(ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, valueResult, PreserveFormatting, member), sheet, rowIndex, valueResult.ColumnIndex, member);
+                        factory.Add(convertedKey, elementValue);
                     }
                 }
-                finally
-                {
-                    cellsReader.Reset();
-                }
-
-                value = DictionaryFactory.End();
-                return true;
             }
             finally
             {
-                DictionaryFactory.Reset();
+                cellsReader.Reset();
             }
+
+            value = factory.End();
+            return true;
+        }
+        finally
+        {
+            factory.Reset();
         }
     }
 

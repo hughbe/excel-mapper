@@ -7,7 +7,7 @@ namespace ExcelMapper.Factories;
 /// Constructs an array by pre-allocating storage and adding items sequentially.
 /// </summary>
 /// <typeparam name="T">The type of the array elements.</typeparam>
-public class ArrayEnumerableFactory<T> : IEnumerableFactory<T>
+public class ArrayEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
 {
     private int _currentIndex = -1;
     private T?[]? _items;
@@ -59,6 +59,21 @@ public class ArrayEnumerableFactory<T> : IEnumerableFactory<T>
     }
 
     /// <inheritdoc/>
+    /// <inheritdoc/>
+    object IBindingFactory.CreateForBinding()
+    {
+        var factory = (ArrayEnumerableFactory<T>)MemberwiseClone();
+        factory.ResetForBinding();
+        return factory;
+    }
+
+    // A binding's copy starts with nothing being built and no buffer of its own. Only drop the
+    // references: the objects may be in use by the map's own factory on another thread.
+    private void ResetForBinding()
+    {
+        _currentIndex = -1;
+    }
+
     public void Reset()
     {
         _items = null;

@@ -8,16 +8,20 @@ namespace ExcelMapper.Factories;
 /// </summary>
 /// <typeparam name="TKey">The type of the dictionary keys.</typeparam>
 /// <typeparam name="TValue">The type of the dictionary values.</typeparam>
-public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> where TKey : notnull
+public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue>, IBindingFactory where TKey : notnull
 {
     /// <summary>
     /// Gets the type of dictionary that this factory creates.
     /// </summary>
     [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
     public Type DictionaryType { get; }
-    private readonly ConstructorInfo _constructor;
+    private readonly Func<object, object> _construct;
+
+    // Whether the constructor copies the collection passed to it, so the collection can be reused for the next row.
+    private readonly bool _constructorCopies;
 
     private Dictionary<TKey, TValue?>? _items;
+    private Dictionary<TKey, TValue?>? _buffer;
 
     /// <summary>
     /// Constructs a factory that creates dictionaries of the given type.
@@ -36,9 +40,11 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
             throw new ArgumentException("Abstract dictionary types cannot be created.", nameof(dictionaryType));
         }
 
-        _constructor = dictionaryType.GetConstructor([typeof(IDictionary<TKey, TValue>)])
+        var constructor = dictionaryType.GetConstructor([typeof(IDictionary<TKey, TValue>)])
             ?? throw new ArgumentException($"Dictionary type {dictionaryType} does not have a constructor that takes {nameof(IDictionary<TKey, TValue>)}.", nameof(dictionaryType));
         DictionaryType = dictionaryType;
+        _construct = CompiledAccessors.GetConstructor1(constructor);
+        _constructorCopies = CollectionUtilities.ConstructorCopies(dictionaryType);
     }
 
     /// <inheritdoc/>
@@ -51,7 +57,16 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
             throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
-        _items = new Dictionary<TKey, TValue?>(count);
+        if (_buffer is not null)
+        {
+            // The buffer from the previous row: the result is a copy of it, so it can be reused.
+            _items = _buffer;
+            _buffer = null;
+        }
+        else
+        {
+            _items = new Dictionary<TKey, TValue?>(count);
+        }
     }
 
     /// <inheritdoc/>
@@ -68,7 +83,7 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
 
         try
         {
-            return _constructor.Invoke([_items]);
+            return _construct(_items);
         }
         finally
         {
@@ -77,8 +92,31 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
     }
 
     /// <inheritdoc/>
+    /// <inheritdoc/>
+    object IBindingFactory.CreateForBinding()
+    {
+        var factory = (ConstructorDictionaryFactory<TKey, TValue>)MemberwiseClone();
+        factory.ResetForBinding();
+        return factory;
+    }
+
+    // A binding's copy starts with nothing being built and no buffer of its own. Only drop the
+    // references: the objects may be in use by the map's own factory on another thread.
+    private void ResetForBinding()
+    {
+        _items = null;
+        _buffer = null;
+    }
+
     public void Reset()
     {
+        if (_items is not null && _constructorCopies)
+        {
+            // Clear the buffer so that it doesn't keep the row's values alive.
+            _items.Clear();
+            _buffer = _items;
+        }
+
         _items = null;
     }
 

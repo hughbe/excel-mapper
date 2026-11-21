@@ -106,11 +106,11 @@ public class ConstructorSetEnumerableFactoryTests
     {
         var factory = new ConstructorSetEnumerableFactory<int>(typeof(ThrowingConstructorISetT<int>));
         factory.Begin(1);
-        Assert.Throws<TargetInvocationException>(() => factory.End());
+        Assert.Throws<NotImplementedException>(() => factory.End());
 
         // Ensure we can begin again.
         factory.Begin(1);
-        Assert.Throws<TargetInvocationException>(() => factory.End());
+        Assert.Throws<NotImplementedException>(() => factory.End());
     }
 
     [Fact]
