@@ -57,7 +57,21 @@ public class ExcelClassMap : IMap
         // If the map represents a single value, use that map to get the value.
         if (_valueMap is not null)
         {
-            return _valueMap.TryGetValue(sheet, rowIndex, reader, member, out result);
+            if (sheet.CollectedErrors is not { } valueErrors)
+            {
+                return _valueMap.TryGetValue(sheet, rowIndex, reader, member, out result);
+            }
+
+            try
+            {
+                return _valueMap.TryGetValue(sheet, rowIndex, reader, member, out result);
+            }
+            catch (ExcelMappingException exception)
+            {
+                valueErrors.Add(exception);
+                result = null;
+                return false;
+            }
         }
 
         var plan = GetConstructionPlan();
@@ -69,9 +83,9 @@ public class ExcelClassMap : IMap
             for (int i = 0; i < properties.Count; i++)
             {
                 var property = properties[i];
-                if (property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out var value))
+                if (TryGetMemberValue(property, sheet, rowIndex, reader, out var value))
                 {
-                    property.SetValueFactory(instance, value);
+                    property.SetValueFactory(instance, value!);
                 }
             }
 
@@ -79,12 +93,37 @@ public class ExcelClassMap : IMap
             return true;
         }
 
-        result = CreateUsingConstructor(plan, sheet, rowIndex, reader);
-        return true;
+        return TryCreateUsingConstructor(plan, sheet, rowIndex, reader, out result);
     }
 
-    private object CreateUsingConstructor(ConstructionPlan plan, ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+    /// <summary>
+    /// Gets the value of a member. When the sheet is collecting errors (see
+    /// <see cref="ExcelSheet.ReadRowResults{T}"/>), a mapping error is recorded and the member is
+    /// skipped so that the remaining members are still read.
+    /// </summary>
+    private static bool TryGetMemberValue(ExcelPropertyMap property, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out object? value)
     {
+        if (sheet.CollectedErrors is not { } errors)
+        {
+            return property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out value);
+        }
+
+        try
+        {
+            return property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out value);
+        }
+        catch (ExcelMappingException exception)
+        {
+            errors.Add(exception);
+            value = null;
+            return false;
+        }
+    }
+
+    private bool TryCreateUsingConstructor(ConstructionPlan plan, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, [NotNullWhen(true)] out object? result)
+    {
+        var errors = sheet.CollectedErrors;
+        var errorCount = errors?.Count ?? 0;
         // Read every member first, as constructor arguments must be known before the object exists.
         var properties = Properties;
         var count = properties.Count;
@@ -97,7 +136,7 @@ public class ExcelClassMap : IMap
         for (int i = 0; i < count; i++)
         {
             var property = properties[i];
-            if (property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out var value))
+            if (TryGetMemberValue(property, sheet, rowIndex, reader, out var value))
             {
                 var parameterIndex = plan.PropertyParameterIndices[i];
                 if (parameterIndex >= 0)
@@ -114,6 +153,13 @@ public class ExcelClassMap : IMap
             }
         }
 
+        // When collecting errors, don't call the constructor with arguments that couldn't be read.
+        if (errors is not null && errors.Count > errorCount)
+        {
+            result = null;
+            return false;
+        }
+
         object instance;
         try
         {
@@ -122,7 +168,15 @@ public class ExcelClassMap : IMap
         catch (Exception ex)
         {
             var inner = ex is TargetInvocationException { InnerException: { } invocationInner } ? invocationInner : ex;
-            throw new ExcelMappingException($"Could not create an instance of type \"{Type}\": {inner.Message}", sheet, rowIndex, -1, inner);
+            var exception = new ExcelMappingException($"Could not create an instance of type \"{Type}\": {inner.Message}", sheet, rowIndex, -1, inner);
+            if (errors is null)
+            {
+                throw exception;
+            }
+
+            errors.Add(exception);
+            result = null;
+            return false;
         }
 
         // Set any members that weren't passed to the constructor.
@@ -137,7 +191,8 @@ public class ExcelClassMap : IMap
             }
         }
 
-        return instance;
+        result = instance;
+        return true;
     }
 
     private ConstructionPlan GetConstructionPlan()

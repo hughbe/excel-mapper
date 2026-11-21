@@ -1321,6 +1321,30 @@ catch (ExcelMappingException ex)
 }
 ```
 
+### Collecting Errors
+
+`ReadRows` throws at the first cell that can't be mapped. To check a whole file and report every problem, for example in an import screen, use `ReadRowResults`. It records every invalid cell in every row and keeps going:
+
+```csharp
+var results = sheet.ReadRowResults<Employee>().ToList();
+
+var employees = results.Where(r => r.IsValid).Select(r => r.Value!).ToList();
+
+foreach (var result in results.Where(r => !r.IsValid))
+{
+    foreach (var error in result.Errors)
+    {
+        // e.g. "C5: Cannot assign "abc" to member "Salary" of type "System.Decimal" ..."
+        Console.WriteLine($"{error.CellAddress}: {error.Message}");
+    }
+}
+```
+
+- `Value` is the mapped object, or `default` if the row has errors (partially mapped objects are never returned)
+- `Errors` lists every problem in the row: invalid or missing values, exceptions thrown by a constructor, and failed data annotations when `ValidateDataAnnotations` is enabled
+- `RowIndex` is the zero-based row in the sheet; each error's `CellAddress` gives the cell, such as `"C5"`, where known
+- Problems with the mapping itself, such as a type that can't be auto-mapped, still throw immediately
+
 ### Nullable Types and Fallbacks
 
 By default:
@@ -2703,6 +2727,7 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 - `ReadRows<T>()` - Read all rows as typed objects (lazy evaluation)
 - `ReadRows<T>(startIndex, count)` - Read specific range of rows
 - `ReadRow<T>()` / `TryReadRow<T>()` - Read single row
+- `ReadRowResults<T>()` - Read all rows, reporting every invalid cell instead of throwing
 - `ReadHeading()` - Explicitly read header row
 - `Name` - Sheet name
 - `Visibility` - Sheet visibility (Visible, Hidden, VeryHidden)
