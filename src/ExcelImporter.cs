@@ -15,6 +15,15 @@ public class ExcelImporter : IDisposable
     /// </summary>
     public IExcelDataReader Reader { get; }
 
+    private bool? _rowCountExcludesEmptyLines;
+
+    /// <summary>
+    /// Whether the reader's <see cref="IExcelDataReader.RowCount"/> leaves out empty lines, as
+    /// ExcelDataReader's CSV reader does, so rows must be counted by reading them.
+    /// </summary>
+    internal bool RowCountExcludesEmptyLines
+        => _rowCountExcludesEmptyLines ??= Reader.GetType().FullName == "ExcelDataReader.ExcelCsvReader";
+
     /// <summary>
     /// Gets the configuration for the importer to allow customizing the importer. For example you
     /// can register custom class maps and specify whether sheets have a header.
