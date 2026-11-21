@@ -44,6 +44,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Trimming only changes text, so cells Excel stores as dates or numbers keep their type. ([#122](https://github.com/hughbe/excel-mapper/pull/122))
 - Exceptions thrown by a constructor are wrapped in `ExcelMappingException`. ([#118](https://github.com/hughbe/excel-mapper/pull/118))
 - Building an `ExcelMappingException` message no longer reads the sheet's heading. ([#130](https://github.com/hughbe/excel-mapper/pull/130))
+- Numbers are parsed the same way on every build. On the netstandard builds, `[ExcelNumberStyle]` now takes effect (previously it was ignored there), and text is parsed with `NumberStyles.Number`, so thousands separators such as `"1,234"` are accepted for integers as they were on .NET 8. Floating-point types also accept exponents such as `"1E5"` on every build (previously only on netstandard). ([#135](https://github.com/hughbe/excel-mapper/pull/135))
 - Updated ExcelDataReader to 3.9.0 and ExcelNumberFormat to 1.2.0. ([#115](https://github.com/hughbe/excel-mapper/pull/115))
 - The documentation moved from the README into [`docs/`](docs). ([#132](https://github.com/hughbe/excel-mapper/pull/132))
 
@@ -69,7 +70,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 The package contains `net8.0`, `netstandard2.1` and `netstandard2.0` builds. Some features need the `net8.0` build (used by .NET 8 and later):
 
 - Mapping `DateOnly`, `TimeOnly`, `Half`, `Int128`, `UInt128`, `nint`, `nuint`, `BigInteger`, `Complex` and other `IParsable<T>` / `INumberBase<T>` types.
-- `[ExcelNumberStyle]` and `.WithNumberStyle(...)` (the attribute has no effect on the netstandard builds).
+- `.WithNumberStyle(...)` and `.WithFormatProvider(...)` for numeric members (use `[ExcelNumberStyle]` and `ExcelImporterConfiguration.Culture` on the netstandard builds).
 - `.WithFormats(...)` and related methods for `DateOnly` and `TimeOnly`, and mapping `IReadOnlySet<T>` members.
 
 The test suite now also runs against the netstandard builds in CI.

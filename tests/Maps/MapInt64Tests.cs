@@ -305,7 +305,6 @@ public class MapInt64Tests
         public long? Value { get; set; }
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_AutoMappedInt64ValueNumberStyleAttribute_Success()
     {
@@ -344,7 +343,6 @@ public class MapInt64Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeInt64Value>();
         Assert.Equal(10, row9.Value);
     }
-#endif
 
     private class NumberStyleAttributeInt64Value
     {
@@ -354,7 +352,6 @@ public class MapInt64Tests
         public long Value { get; set; }
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_DefaultMappedInt64ValueNumberStyleAttribute_Success()
     {
@@ -397,7 +394,6 @@ public class MapInt64Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeInt64Value>();
         Assert.Equal(10, row9.Value);
     }
-#endif
 
 #if LIBRARY_NET8
     [Fact]
@@ -481,7 +477,6 @@ public class MapInt64Tests
     }
 #endif
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_AutoMappedNullableInt64ValueNumberStyleAttribute_Success()
     {
@@ -520,7 +515,6 @@ public class MapInt64Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeNullableInt64Value>();
         Assert.Equal(10, row9.Value);
     }
-#endif
 
     private class NumberStyleAttributeNullableInt64Value
     {
@@ -530,7 +524,6 @@ public class MapInt64Tests
         public long? Value { get; set; }
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_DefaultMappedNullableInt64ValueNumberStyleAttribute_Success()
     {
@@ -573,7 +566,6 @@ public class MapInt64Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeNullableInt64Value>();
         Assert.Equal(10, row9.Value);
     }
-#endif
 
 #if LIBRARY_NET8
     [Fact]

@@ -201,6 +201,14 @@ public static class AutoMapper
                 mappers.Add((ICellMapper)Activator.CreateInstance(typeof(INumberBaseMapper<>).MakeGenericType(numberBaseInterfaceType))!);
                 return true;
             }
+#else
+            // The netstandard builds don't have INumberBase<T>, so built-in numeric types use a
+            // mapper that behaves the same way (including number styles and format providers).
+            if (NumberMapper.IsSupportedType(type))
+            {
+                mappers.Add(new NumberMapper(type));
+                return true;
+            }
 #endif
             // Check for types implementing IConvertible.
             if (type.ImplementsInterface(typeof(IConvertible)))

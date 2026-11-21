@@ -107,6 +107,7 @@ catch (ExcelMappingException ex)
 - **Trimming**: `[ExcelTrimString]`/`.WithTrim()` no longer turn date and number cells into text, so they keep their type.
 - **`bool`**: "yes" and "no" (any case) are now valid, where they were invalid.
 - **Dates stored as numbers**: a number in a cell without a date format now maps to date and time types (as an Excel serial date) instead of being invalid.
+- **Number parsing is the same on every build**: on .NET Framework and other netstandard runtimes, `[ExcelNumberStyle]` now takes effect (it was silently ignored), and integers accept thousands separators such as `"1,234"`, as on .NET 8. On every build, floating-point types accept exponents such as `"1E5"`. These only accept more input than before, except where an `[ExcelNumberStyle]` attribute on netstandard now restricts what's accepted.
 - **netstandard builds**: argument exceptions now include the parameter name, and `null` passed to string arguments throws `ArgumentNullException` (previously `ArgumentException`), matching the .NET 8 build. The public `CallerArgumentExpressionAttribute` type that 3.x accidentally exposed is gone.
 
 ## You can remove the code page registration
@@ -124,7 +125,7 @@ On .NET Framework, .NET Standard and older .NET apps, the package now brings in 
 The package contains `net8.0`, `netstandard2.1` and `netstandard2.0` builds. If your app targets .NET Framework or .NET before 8, some features aren't available; this is unchanged from 3.x:
 
 - mapping `DateOnly`, `TimeOnly`, `Half`, `Int128`, `UInt128`, `nint`, `nuint`, `BigInteger`, `Complex` and other `IParsable<T>` / `INumberBase<T>` types
-- `[ExcelNumberStyle]` and `.WithNumberStyle(...)` (the attribute has no effect on the netstandard builds)
+- `.WithNumberStyle(...)` and `.WithFormatProvider(...)` for numeric members; on the netstandard builds use `[ExcelNumberStyle]` and `importer.Configuration.Culture` instead
 - `.WithFormats(...)` for `DateOnly` and `TimeOnly`, and `IReadOnlySet<T>` members
 
 ## New in 4.0

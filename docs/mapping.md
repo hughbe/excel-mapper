@@ -565,10 +565,14 @@ public class ProductMap : ExcelClassMap<Product>
 }
 ```
 
+**Default number styles:**
+
+Text is parsed with `NumberStyles.Number` (leading/trailing whitespace and sign, thousands separators and a decimal point), plus `NumberStyles.AllowExponent` for `float`, `double`, `decimal` and other floating-point types so values such as `1E5` parse. This is the same on every build of the library. Cells that Excel stores as numbers aren't parsed, so number styles don't affect them.
+
 **Common NumberStyles Values:**
 
-- `NumberStyles.Integer` - Simple integers (default for integer types)
-- `NumberStyles.Float` - Floating-point numbers (default for float/double)
+- `NumberStyles.Integer` - Simple integers
+- `NumberStyles.Float` - Floating-point numbers with exponents
 - `NumberStyles.Number` - Includes thousands separator and decimal point
 - `NumberStyles.AllowThousands` - Allows thousands separators (e.g., 1,000)
 - `NumberStyles.AllowDecimalPoint` - Allows decimal point (e.g., 123.45)
@@ -579,15 +583,12 @@ public class ProductMap : ExcelClassMap<Product>
 
 **Supported Numeric Types:**
 
-The `ExcelNumberStyle` attribute and `WithNumberStyle()` method work with:
+The `ExcelNumberStyle` attribute works with these types (and their nullable versions) on every build of the library:
 - `int`, `long`, `short`, `byte`, `sbyte`
 - `uint`, `ulong`, `ushort`
 - `float`, `double`, `decimal`
-- `Half` (.NET 5+)
-- `Int128`, `UInt128` (.NET 7+)
-- `BigInteger`
-- `IntPtr` (`nint`), `UIntPtr` (`nuint`)
-- Nullable versions of all above types
+
+On .NET 8 and later (the library's `net8.0` build), it also works with `Half`, `Int128`, `UInt128`, `BigInteger`, `nint` and `nuint`, and the fluent `.WithNumberStyle()` and `.WithFormatProvider()` methods are available for numeric members. On .NET Framework and other netstandard runtimes, use the `[ExcelNumberStyle]` attribute, and set the culture with `importer.Configuration.Culture`.
 
 #### Invalid Value Fallback
 

@@ -218,7 +218,6 @@ public class MapInt16Tests
         Assert.Equal(10, row3.Value);
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_AutoMappedInt16ValueNumberStyleAttribute_Success()
     {
@@ -257,7 +256,6 @@ public class MapInt16Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeInt16Value>();
         Assert.Equal((short)10, row9.Value);
     }
-#endif
 
     private class NumberStyleAttributeInt16Value
     {
@@ -267,7 +265,6 @@ public class MapInt16Tests
         public short Value { get; set; }
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_DefaultMappedInt16ValueNumberStyleAttribute_Success()
     {
@@ -310,7 +307,6 @@ public class MapInt16Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeInt16Value>();
         Assert.Equal((short)10, row9.Value);
     }
-#endif
 
 #if LIBRARY_NET8
     [Fact]
@@ -394,7 +390,6 @@ public class MapInt16Tests
     }
 #endif
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_AutoMappedNullableInt16ValueNumberStyleAttribute_Success()
     {
@@ -433,7 +428,6 @@ public class MapInt16Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeNullableInt16Value>();
         Assert.Equal((short)10, row9.Value);
     }
-#endif
 
     private class NumberStyleAttributeNullableInt16Value
     {
@@ -443,7 +437,6 @@ public class MapInt16Tests
         public short? Value { get; set; }
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_DefaultMappedNullableInt16ValueNumberStyleAttribute_Success()
     {
@@ -486,7 +479,6 @@ public class MapInt16Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeNullableInt16Value>();
         Assert.Equal((short)10, row9.Value);
     }
-#endif
 
     [Fact]
     public void ReadRow_AutoMappedNullableInt16Value_Success()
