@@ -252,8 +252,122 @@ public class MapExtraColumnsTests
         var row = importer.ReadSheet().ReadRows<NestedExtraRow>().Single();
         Assert.Equal("a", row.Name);
         Assert.Equal("X1", row.Details.Code);
-        Assert.Equal("London", row.Details.Extra["City"]);
-        Assert.False(row.Details.Extra.ContainsKey("Code"));
+        Assert.Equal(new Dictionary<string, string?> { ["City"] = "London" }, row.Details.Extra);
+    }
+
+    [Fact]
+    public void ReadRows_CustomMappedDeeplyNestedExtraColumns_ExcludesEveryMembersColumns()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Code,Town,City\na,X1,Leeds,London\n");
+        importer.Configuration.RegisterClassMap<DeepExtraRow>(c =>
+        {
+            c.Map(p => p.Name);
+            c.Map(p => p.Inner.Town);
+            c.Map(p => p.Inner.Details.Code);
+            c.MapExtraColumns(p => p.Inner.Details.Extra);
+        });
+        var row = importer.ReadSheet().ReadRows<DeepExtraRow>().Single();
+        Assert.Equal("a", row.Name);
+        Assert.Equal("Leeds", row.Inner.Town);
+        Assert.Equal("X1", row.Inner.Details.Code);
+        Assert.Equal(new Dictionary<string, string?> { ["City"] = "London" }, row.Inner.Details.Extra);
+    }
+
+    public class DeepExtraRow
+    {
+        public string? Name { get; set; }
+
+        public DeepExtraInner Inner { get; set; } = new();
+    }
+
+    public class DeepExtraInner
+    {
+        public string? Town { get; set; }
+
+        public ExtraDetails Details { get; set; } = new();
+    }
+
+    [Fact]
+    public void ReadRows_SharedNestedClassMapWithExtraColumns_ExcludesEachRootMapsColumns()
+    {
+        // The same nested class map is used by two root maps that read different columns.
+        using var importer = Helpers.GetCsvImporter("Name,Code,City\na,X1,London\nb,X2,Paris\n");
+        var details = new ExcelClassMap<ExtraDetails>();
+        details.Map(p => p.Code);
+        details.MapExtraColumns(p => p.Extra);
+        importer.Configuration.RegisterClassMap<NestedExtraRow>(c =>
+        {
+            c.Map(p => p.Name);
+            c.MapObject(p => p.Details).WithClassMap(details);
+        });
+        importer.Configuration.RegisterClassMap<CityExtraRow>(c =>
+        {
+            c.Map(p => p.City);
+            c.MapObject(p => p.Details).WithClassMap(details);
+        });
+
+        var sheet = importer.ReadSheet();
+        var first = sheet.ReadRow<NestedExtraRow>();
+        Assert.Equal(new Dictionary<string, string?> { ["City"] = "London" }, first.Details.Extra);
+        var second = sheet.ReadRow<CityExtraRow>();
+        Assert.Equal(new Dictionary<string, string?> { ["Name"] = "b" }, second.Details.Extra);
+    }
+
+    public class CityExtraRow
+    {
+        public string? City { get; set; }
+
+        public ExtraDetails Details { get; set; } = new();
+    }
+
+    [Fact]
+    public void ReadRows_AutoMappedNestedExtraColumns_ExcludesTheParentsColumns()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Code,City\na,X1,London\n");
+        var row = importer.ReadSheet().ReadRows<AutoNestedExtraRow>().Single();
+        Assert.Equal("a", row.Name);
+        Assert.Equal("X1", row.Details.Code);
+        Assert.Equal(new Dictionary<string, string?> { ["City"] = "London" }, row.Details.Extra);
+    }
+
+    [Fact]
+    public void ReadRows_AutoMappedDeeplyNestedExtraColumns_ExcludesEveryMembersColumns()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Town,Code,City\na,Leeds,X1,London\n");
+        var row = importer.ReadSheet().ReadRows<AutoDeepExtraRow>().Single();
+        Assert.Equal("a", row.Name);
+        Assert.Equal("Leeds", row.Inner.Town);
+        Assert.Equal("X1", row.Inner.Details.Code);
+        Assert.Equal(new Dictionary<string, string?> { ["City"] = "London" }, row.Inner.Details.Extra);
+    }
+
+    public class AutoNestedExtraRow
+    {
+        public string? Name { get; set; }
+
+        public AutoExtraDetails Details { get; set; } = new();
+    }
+
+    public class AutoDeepExtraRow
+    {
+        public string? Name { get; set; }
+
+        public AutoDeepExtraInner Inner { get; set; } = new();
+    }
+
+    public class AutoDeepExtraInner
+    {
+        public string? Town { get; set; }
+
+        public AutoExtraDetails Details { get; set; } = new();
+    }
+
+    public class AutoExtraDetails
+    {
+        public string? Code { get; set; }
+
+        [ExcelExtraColumns]
+        public Dictionary<string, string?> Extra { get; set; } = [];
     }
 
     public class NestedExtraRow
