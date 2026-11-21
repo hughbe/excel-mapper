@@ -135,6 +135,7 @@ Worth a look while upgrading:
 
 - [Collect every error in a file](errors.md#collecting-errors) with `ReadRowResults`, and [check columns up front](errors.md#checking-columns-before-reading) with `ValidateHeading`.
 - [Find the heading](reading.md#finding-the-heading) of sheets with titles or notes above it with `FindHeading`.
+- [Read part of a sheet](reading.md#reading-part-of-a-sheet), or several tables on one sheet, with `sheet.Region("B3:F20")`.
 - [Records and constructor-only types](mapping.md#records-and-constructors) map without a parameterless constructor.
 - Map by [column letter](mapping.md#column-index-mapping), choose a [culture](mapping.md#culture-for-the-whole-importer) for the whole importer, and set the [offset of `DateTimeOffset` values](types.md#date-and-time-types).
 - `ExcelImporter.ReadRows<T>("file.xlsx")` reads a file in one line.

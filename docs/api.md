@@ -21,6 +21,12 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 - `ReadRowResults<T>()` - Read all rows, reporting every invalid cell instead of throwing
 - `ReadHeading()` - Explicitly read header row
 - `ValidateHeading<T>()` / `TryValidateHeading<T>()` - Check that every column a type needs is present, before reading rows
+- `Region()` / `Region(range)` / `Region("B3:F20")` - A block of the sheet with its own heading, to read part of a sheet or several tables on one sheet
+
+**`ExcelRegion`** - A block of a sheet, read with its own heading (immutable)
+- `ReadRows<T>()`, `ReadRowResults<T>()`, `ValidateHeading<T>()`, `TryValidateHeading<T>()` - As on `ExcelSheet`, reading from the top of the region each time
+- `WithHeadingAt(rowIndex)` / `WithoutHeading()` / `WithHeadingSearch()` - Where the heading is
+- `Sheet`, `Range` - The sheet and block
 - `FindHeading<T>()` / `TryFindHeading<T>()` - Find and read the heading row when there are titles or notes above it
 - `Name` - Sheet name
 - `Visibility` - Sheet visibility (Visible, Hidden, VeryHidden)

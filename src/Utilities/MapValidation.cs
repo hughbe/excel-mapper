@@ -191,7 +191,7 @@ internal static class MapValidation
         if (readerFactory is IColumnIndexProviderCellReaderFactory indexProvider &&
             indexProvider.GetColumnIndex(sheet) is int columnIndex and >= 0)
         {
-            return $"column {ExcelRange.GetColumnLetters(columnIndex)} (index {columnIndex})";
+            return $"column {ExcelRange.GetColumnLetters(sheet.ColumnOffset + columnIndex)} (index {columnIndex})";
         }
 
         if (readerFactory is IColumnNamesProviderCellReaderFactory namesProvider &&
@@ -203,7 +203,7 @@ internal static class MapValidation
         if (readerFactory is IColumnIndicesProviderCellReaderFactory indicesProvider &&
             indicesProvider.GetColumnIndices(sheet) is { Count: > 0 } columnIndices)
         {
-            return $"columns {string.Join(", ", columnIndices.Select(ExcelRange.GetColumnLetters))}";
+            return $"columns {string.Join(", ", columnIndices.Select(i => ExcelRange.GetColumnLetters(sheet.ColumnOffset + i)))}";
         }
 
         return "a matching column";

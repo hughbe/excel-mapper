@@ -267,9 +267,39 @@ var employees = sheet.ReadRows<Employee>();
 - Search more or fewer rows with `FindHeading<T>(maxRows)`. The search starts at `HeadingIndex`, so set it first to skip rows you know aren't the heading.
 - If no row matches, `FindHeading` throws an `ExcelMappingException` naming the closest row and the columns it's missing. `TryFindHeading<T>(out var heading)` returns `false` instead and leaves the sheet as it was.
 
+### Reading Part of a Sheet
+
+Read a block of a sheet, or several tables on one sheet, with regions:
+
+|   | A     | B      | C | D     | E    |
+|---|-------|--------|---|-------|------|
+| 1 | Sales |        |   | Costs |      |
+| 2 | Name  | Amount |   | Name  | Cost |
+| 3 | a     | 1      |   | x     | 10   |
+| 4 | b     | 2      |   | y     | 20   |
+
+```csharp
+var sheet = importer.ReadSheet();
+var sales = sheet.Region("A2:B4").ReadRows<Sale>();
+var costs = sheet.Region("D2:E4").ReadRows<Cost>();
+```
+
+A region's first row is its heading. Change that with:
+
+- `WithHeadingAt(rowIndex)` - the heading is another row of the sheet, inside or above the region. The data is the region's rows after it, so `sheet.Region(new ExcelRange(100..200, Range.All)).WithHeadingAt(0)` reads rows 101 to 200 with the sheet's first row as their heading.
+- `WithoutHeading()` - every row is data, and columns are found by index or letter.
+- `WithHeadingSearch()` (or `WithHeadingSearch(maxRows)`) - the heading is found as by [`FindHeading`](#finding-the-heading), within the region.
+
+Regions also have `ReadRowResults<T>()`, `ValidateHeading<T>()` and `TryValidateHeading<T>()`, which work as on a sheet.
+
+- Regions are immutable, and each read starts at the top of the region. Reading a region doesn't use or change the sheet's own heading, `DataRange` or position, so a region can be read any number of times, alongside other regions and the sheet.
+- A region's address is in the sheet, but columns chosen by position count from the region's first column: in region `B2:C3`, `[ExcelColumnIndex(0)]` and `[ExcelColumnLetter("A")]` are column B, and a position past the region's last column is a missing column. So one type can map tables of the same shape anywhere on a sheet. Error messages give cell addresses in the sheet. (On the sheet itself, positions are always the sheet's, even with `DataRange`.)
+- Blank rows in a region are mapped like other rows unless `SkipBlankLines` is set. A region of columns `A:B` includes rows whose values are all in other columns.
+- The file is read forward only. Reading one region at a time is as fast as reading the sheet; alternating between regions row by row re-reads the file each time.
+
 ### Restricting Data Range
 
-Limit which rows and columns are processed using `DataRange`:
+Limit which rows and columns the sheet itself reads using `DataRange` (to read several blocks, use [regions](#reading-part-of-a-sheet)):
 
 |                      |             |            |
 |----------------------|-------------|------------|
