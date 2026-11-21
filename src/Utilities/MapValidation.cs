@@ -179,6 +179,11 @@ internal static class MapValidation
 
     private static string DescribeColumns(object readerFactory, ExcelSheet sheet)
     {
+        if (readerFactory is ColumnSelectorReaderFactory selectorFactory)
+        {
+            return selectorFactory.Selector.Describe(sheet);
+        }
+
         if (readerFactory is IColumnNameProviderCellReaderFactory nameProvider &&
             nameProvider.GetColumnName(sheet) is { Length: > 0 } columnName)
         {

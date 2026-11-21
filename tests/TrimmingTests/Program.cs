@@ -45,6 +45,12 @@ Check("Cell transformer and fallback", () =>
     return $"{rows.Code}/{rows.Count}";
 }, "AB/-1");
 
+Check("Column selector", () =>
+{
+    var row = ExcelImporter.ReadRows<Selected>(Csv("Name,Amount (GBP),Q1,Q2\na,5,1,2\n"), ExcelImporterFileType.Csv).Single();
+    return $"{row.Amount}/{string.Join(",", row.Quarters)}";
+}, "5/1,2");
+
 Check("Nullable numbers", () =>
 {
     var row = ExcelImporter.ReadRows<Counted>(Csv("Count,Amount\n,2.5\n"), ExcelImporterFileType.Csv).Single();
@@ -212,4 +218,21 @@ public class UpperTransformer : ICellTransformer
 public class MinusOneFallback : ICellFallback<int>
 {
     public int Fallback(CellValue value, CellContext context, Exception? exception) => -1;
+}
+
+public class Selected
+{
+    [ExcelColumnMatching(typeof(PrefixSelector), ConstructorArguments = ["Amount"])]
+    public int Amount { get; set; }
+
+    [ExcelColumnsMatching(typeof(PrefixSelector), ConstructorArguments = ["Q"])]
+    public int[] Quarters { get; set; } = [];
+}
+
+public class PrefixSelector(string prefix) : IColumnSelector
+{
+    public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
+        => sheet.Heading!.ColumnNames.Where(n => n.StartsWith(prefix, StringComparison.Ordinal)).Select(sheet.Heading.GetColumnIndex).ToArray();
+
+    public string Describe(ExcelSheet sheet) => $"columns starting with \"{prefix}\"";
 }

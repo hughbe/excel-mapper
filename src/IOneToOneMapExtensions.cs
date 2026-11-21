@@ -86,6 +86,20 @@ public static class IOneToOneMapExtensions
         => map.WithColumnIndex(ExcelRange.ParseColumnLetters(columnLetter, nameof(columnLetter)));
 
     /// <summary>
+    /// Reads the member from the first column <paramref name="selector"/> chooses for each sheet.
+    /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="selector">The column selector.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static TMap WithColumns<TMap>(this TMap map, IColumnSelector selector) where TMap : IOneToOneMap
+    {
+        ThrowHelpers.ThrowIfNull(selector, nameof(selector));
+        map.ReaderFactory = new ColumnSelectorReaderFactory(selector);
+        return map;
+    }
+
+    /// <summary>
     /// Sets the reader of the map to use a custom cell value reader.
     /// </summary>
     /// <typeparam name="TMap">The type of the map.</typeparam>
