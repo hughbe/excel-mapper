@@ -1,3 +1,5 @@
+// These types are only supported by the library's .NET 7+ build.
+#if LIBRARY_NET8
 using System.Globalization;
 
 namespace ExcelMapper.Tests;
@@ -386,3 +388,4 @@ public class MapIntPtrTests
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeNullableIntPtrValue>());
     }
 }
+#endif

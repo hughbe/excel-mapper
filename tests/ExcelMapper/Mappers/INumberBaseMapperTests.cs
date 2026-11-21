@@ -9,6 +9,7 @@ namespace ExcelMapper.Mappers.Tests;
 
 public class INumberBaseMapperTests
 {
+#if LIBRARY_NET8
     [Fact]
     public void Ctor_Default()
     {
@@ -16,7 +17,9 @@ public class INumberBaseMapperTests
         Assert.Equal(NumberStyles.Number, mapper.Style);
         Assert.Null(mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite)]
     [InlineData(NumberStyles.HexNumber)]
@@ -38,6 +41,7 @@ public class INumberBaseMapperTests
         mapper.Style = NumberStyles.Integer;
         Assert.Equal(NumberStyles.Integer, mapper.Style);
     }
+#endif
 
     public static IEnumerable<object?[]> Provider_Set_GetReturnsExpected_Data()
     {
@@ -46,6 +50,7 @@ public class INumberBaseMapperTests
         yield return new object?[] { null };
     }
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Provider_Set_GetReturnsExpected_Data))]
     public void Provider_Set_GetReturnsExpected(IFormatProvider? value)
@@ -64,7 +69,9 @@ public class INumberBaseMapperTests
         mapper.Provider = null;
         Assert.Null(mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(123.0, 123)]
     [InlineData(0.0, 0)]
@@ -83,7 +90,9 @@ public class INumberBaseMapperTests
         Assert.Equal(new BigInteger(expected), Assert.IsType<BigInteger>(result.Value));
         Assert.Null(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_ValidStringValue_ReturnsSuccess()
     {
@@ -110,7 +119,9 @@ public class INumberBaseMapperTests
         Assert.True(Assert.IsType<BigInteger>(result4.Value) > 0);
         Assert.Null(result4.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData("1,234", NumberStyles.AllowThousands, 1234)]
     [InlineData("(123)", NumberStyles.AllowParentheses, -123)]
@@ -126,7 +137,9 @@ public class INumberBaseMapperTests
         Assert.Equal(new BigInteger(expected), Assert.IsType<BigInteger>(result.Value));
         Assert.Null(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_ValidStringValueWithProvider_ReturnsSuccess()
     {
@@ -154,7 +167,9 @@ public class INumberBaseMapperTests
         Assert.Equal(new BigInteger(1234), Assert.IsType<BigInteger>(result2.Value));
         Assert.Null(result2.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -168,7 +183,9 @@ public class INumberBaseMapperTests
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_Int128_ValidDoubleValue_ReturnsSuccess()
     {
@@ -183,7 +200,9 @@ public class INumberBaseMapperTests
         Assert.Equal((Int128)123, Assert.IsType<Int128>(result.Value));
         Assert.Null(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_Int128_ValidStringValue_ReturnsSuccess()
     {
@@ -193,7 +212,9 @@ public class INumberBaseMapperTests
         Assert.Equal((Int128)123, Assert.IsType<Int128>(result.Value));
         Assert.Null(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_UInt128_ValidDoubleValue_ReturnsSuccess()
     {
@@ -208,7 +229,9 @@ public class INumberBaseMapperTests
         Assert.Equal((UInt128)123, Assert.IsType<UInt128>(result.Value));
         Assert.Null(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_UInt128_ValidStringValue_ReturnsSuccess()
     {
@@ -218,7 +241,9 @@ public class INumberBaseMapperTests
         Assert.Equal((UInt128)123, Assert.IsType<UInt128>(result.Value));
         Assert.Null(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_Half_ValidDoubleValue_ReturnsSuccess()
     {
@@ -233,7 +258,9 @@ public class INumberBaseMapperTests
         Assert.Equal((Half)123.5, Assert.IsType<Half>(result.Value));
         Assert.Null(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_Half_ValidStringValue_ReturnsSuccess()
     {
@@ -243,7 +270,9 @@ public class INumberBaseMapperTests
         Assert.Equal((Half)123.5, Assert.IsType<Half>(result.Value));
         Assert.Null(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_Complex_ValidStringValue_ReturnsSuccess()
     {
@@ -256,7 +285,9 @@ public class INumberBaseMapperTests
         Assert.Equal(4, complexValue.Imaginary);
         Assert.Null(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_DoubleOverflow_ReturnsInvalid()
     {
@@ -271,6 +302,7 @@ public class INumberBaseMapperTests
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);
     }
+#endif
 
     private class MockExcelDataReader : IExcelDataReader
     {
@@ -380,6 +412,7 @@ public class INumberBaseMapperTests
         public void Reset() => throw new NotImplementedException();
     }
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(2.7)]
     [InlineData(-0.5)]
@@ -396,7 +429,9 @@ public class INumberBaseMapperTests
         Assert.False(result.Succeeded);
         Assert.IsType<FormatException>(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(2.0, 2)]
     [InlineData(-3.0, -3)]
@@ -413,7 +448,9 @@ public class INumberBaseMapperTests
         Assert.True(result.Succeeded);
         Assert.Equal(expected, result.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_FractionalDoubleValueToFloatingPoint_ReturnsSuccess()
     {
@@ -428,4 +465,5 @@ public class INumberBaseMapperTests
         var decimalResult = new INumberBaseMapper<decimal>().Map(new ReadCellResult(0, reader, preserveFormatting: false));
         Assert.Equal(2.7m, decimalResult.Value);
     }
+#endif
 }

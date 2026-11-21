@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿// These types are only supported by the library's .NET 7+ build.
+#if LIBRARY_NET8
+using System.Globalization;
 
 namespace ExcelMapper.Tests;
 
@@ -387,3 +389,4 @@ public class MapUInt128Tests
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<NumberStyleAttributeNullableUInt128Value>());
     }
 }
+#endif

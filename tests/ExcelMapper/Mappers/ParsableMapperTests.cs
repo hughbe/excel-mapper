@@ -5,13 +5,16 @@ namespace ExcelMapper.Mappers.Tests;
 
 public class ParsableMapperTests
 {
+#if LIBRARY_NET8
     [Fact]
     public void Ctor_Default()
     {
         var mapper = new ParsableMapper<nint>();
         Assert.Null(mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Provider_Set_GetReturnsExpected()
     {
@@ -30,7 +33,9 @@ public class ParsableMapperTests
         mapper.Provider = null;
         Assert.Null(mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData("123", 123)]
     public void Map_ParsableValue_ReturnsExpected(string stringValue, nint expected)
@@ -41,7 +46,9 @@ public class ParsableMapperTests
         Assert.Equal(expected, Assert.IsType<nint>(result.Value));
         Assert.Null(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -55,4 +62,5 @@ public class ParsableMapperTests
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);
     }
+#endif
 }

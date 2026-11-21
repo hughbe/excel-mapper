@@ -267,6 +267,7 @@ public class MapFloatTests
         Assert.Equal(10, row3.Value);
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedFloatValueAllowThousands_Success()
     {
@@ -294,7 +295,9 @@ public class MapFloatTests
         var row3 = sheet.ReadRow<FloatValue>();
         Assert.Equal(10, row3.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedFloatValueFormatProvider_Success()
     {
@@ -327,6 +330,7 @@ public class MapFloatTests
         var row3 = sheet.ReadRow<FloatValue>();
         Assert.Equal(10, row3.Value);
     }
+#endif
 
     [Fact]
     public void ReadRow_AutoMappedNullableFloatValue_Success()
@@ -453,6 +457,7 @@ public class MapFloatTests
         Assert.Equal(10, row3.Value);
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableFloatValueAllowThousands_Success()
     {
@@ -480,7 +485,9 @@ public class MapFloatTests
         var row3 = sheet.ReadRow<NullableFloatValue>();
         Assert.Equal(10, row3.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableFloatValueFormatProvider_Success()
     {
@@ -513,6 +520,7 @@ public class MapFloatTests
         var row3 = sheet.ReadRow<NullableFloatValue>();
         Assert.Equal(10, row3.Value);
     }
+#endif
 
     private class FloatValue
     {

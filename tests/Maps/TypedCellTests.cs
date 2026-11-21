@@ -65,7 +65,9 @@ public class TypedCellTests
         Assert.IsType<FormatException>(ex.InnerException);
         MapFails<long>(-0.5);
         MapFails<byte>(1.25);
+#if LIBRARY_NET8
         MapFails<System.Numerics.BigInteger>(3.5);
+#endif
         Assert.Null(Map<int?>(null));
     }
 
@@ -184,7 +186,9 @@ public class TypedCellTests
         var date = new DateTime(2024, 3, 4);
         Assert.Equal(date, Map<DateTime>(date));
         Assert.Equal(new DateTime(2024, 3, 4, 5, 6, 7), Map<DateTime>(new DateTime(2024, 3, 4, 5, 6, 7)));
+#if LIBRARY_NET8
         Assert.Equal(new DateOnly(2024, 3, 4), Map<DateOnly>(new DateOnly(2024, 3, 4)));
+#endif
         Assert.Equal(date, Map<DateTimeOffset>(date).DateTime);
         Assert.Equal(date.ToString(), Map<string>(date));
     }
@@ -195,7 +199,9 @@ public class TypedCellTests
         // 45355 is how Excel stores 2024-03-04. Without a date format it is read as a number.
         var serial = new DateTime(2024, 3, 4, 12, 0, 0).ToOADate();
         Assert.Equal(new DateTime(2024, 3, 4, 12, 0, 0), Map<DateTime>(serial));
+#if LIBRARY_NET8
         Assert.Equal(new DateOnly(2024, 3, 4), Map<DateOnly>(serial));
+#endif
         Assert.Equal(new DateTime(2024, 3, 4, 12, 0, 0), Map<DateTimeOffset>(serial).DateTime);
         Assert.Equal(new DateTime(2024, 3, 4), Map<DateTime?>(45355));
     }
@@ -210,17 +216,25 @@ public class TypedCellTests
     [Fact]
     public void Map_TimeCells_Success()
     {
+#if LIBRARY_NET8
         Assert.Equal(new TimeOnly(5, 6, 7), Map<TimeOnly>(new TimeOnly(5, 6, 7)));
+#endif
+#if LIBRARY_NET8
         Assert.Equal(new TimeSpan(5, 6, 7), Map<TimeSpan>(new TimeOnly(5, 6, 7)));
+#endif
         Assert.Equal(TimeSpan.FromHours(30), Map<TimeSpan>(new Duration(TimeSpan.FromHours(30))));
     }
 
     [Fact]
     public void Map_NumberWithoutTimeFormat_IsFractionOfDay()
     {
+#if LIBRARY_NET8
         Assert.Equal(new TimeOnly(6, 0), Map<TimeOnly>(0.25));
+#endif
         Assert.Equal(TimeSpan.FromHours(36), Map<TimeSpan>(1.5));
+#if LIBRARY_NET8
         MapFails<TimeOnly>(1.5);
+#endif
     }
 
     // ---------- Formulas and errors ----------

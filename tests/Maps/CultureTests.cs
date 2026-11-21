@@ -76,6 +76,7 @@ public class CultureTests
         });
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRows_MemberFormatProvider_TakesPrecedenceOverCulture()
     {
@@ -85,6 +86,7 @@ public class CultureTests
 
         Assert.Equal(1.5, importer.ReadSheet().ReadRows<Row>().Single().Amount);
     }
+#endif
 
     private static T WithCulture<T>(CultureInfo culture, Func<T> action)
     {

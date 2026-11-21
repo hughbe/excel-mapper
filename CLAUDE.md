@@ -13,12 +13,17 @@ Guidance for working on ExcelMapper (NuGet package `ExcelDataReader.Mapping`), a
 
 ```bash
 dotnet build src -c Release          # builds all three target frameworks
-dotnet test tests                     # runs the whole suite
+dotnet test tests                     # runs the whole suite against the net8.0 build
+dotnet test tests -p:LibraryTargetFramework=netstandard2.0   # ...and against the netstandard builds
+dotnet test tests -p:LibraryTargetFramework=netstandard2.1
 dotnet test tests --filter "FullyQualifiedName~ExcelRangeTests"
+dotnet pack src -c Release            # also runs package validation (see below)
 ./coverage.sh                         # coverage report in tests/coverage
 ```
 
 Always build `src` in Release before finishing: code must compile for `netstandard2.0`, which lacks newer APIs (for example `init` accessors, `Array.Fill`, `Enum.TryParse(Type, ...)`, span-based `int.TryParse`). Use `#if NET8_0_OR_GREATER` (or similar) where a newer API is needed, and keep behaviour the same on every target. The build should have no warnings.
+
+The netstandard builds are used by .NET Framework and older .NET apps and take different code paths, so run the tests against them too (CI does). Tests of APIs that only exist in the net8.0 build (for example `DateOnly`, `INumberBase<T>` types or `WithNumberStyle`) are wrapped in `#if LIBRARY_NET8`; wrap only the net8-only parts so the rest still runs against netstandard. Note any feature that differs between builds in the changelog's platform notes and `docs/migrating-to-4.0.md`.
 
 ## Code conventions
 
@@ -78,10 +83,17 @@ Update the docs in the same change as the code:
 
 - `README.md` - overview, quick start and the documentation index. It is also the NuGet package page, so link to `docs/` pages with absolute GitHub URLs.
 - `docs/*.md` - the topic pages (reading, mapping, types, errors, performance, API reference). Add new attributes and fluent methods to `docs/api.md` as well as the relevant topic page.
-- Note behaviour changes, and mark breaking changes; bump `PackageVersion` in `src/ExcelMapper.csproj` for releases (major version for breaking changes).
+- `CHANGELOG.md` - add every user-visible change to the top (unreleased) section under Breaking changes, Added, Changed, Fixed or Performance, with a link to the PR.
+- Breaking changes (including behaviour changes, not only API changes) also go in the migration guide for that major version, for example `docs/migrating-to-4.0.md`: who is affected, before/now, and what to do.
+
+## Releases and compatibility
+
+- `PackageVersion` in `src/ExcelMapper.csproj` follows semantic versioning: a major version for breaking changes.
+- Package validation (`EnablePackageValidation`) compares the package with `PackageValidationBaselineVersion` (the last release on NuGet) on every `dotnet pack`, including in CI, and fails on unintended API breaks. Intentional breaks are listed in `src/CompatibilitySuppressions.xml` with a comment explaining why; regenerate it with `dotnet pack src -c Release -p:GenerateCompatibilitySuppressionFile=true`. After publishing a release, move the baseline to it and remove the suppressions it covered.
+- Package validation only sees the API: behaviour changes still need the changelog and migration guide.
 
 ## Pull requests
 
 - One feature or fix per PR, branched from `main`. Avoid stacking PRs on each other's branches: a PR merged into another feature branch doesn't reach `main`.
-- CI (`.github/workflows/dotnetcore.yml`) runs build and tests for PRs into `main` only.
+- CI (`.github/workflows/dotnetcore.yml`) runs for PRs into `main` only: build, tests with coverage, pack with package validation, and the tests against the netstandard builds.
 - PRs are squash-merged.

@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿// These types are only supported by the library's .NET 7+ build.
+#if LIBRARY_NET8
+using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Tests;
 
@@ -332,3 +334,4 @@ public class MapIParsableTests
         Assert.Equal("empty", row3.Value!.Value.ParsedMember);
     }
 }
+#endif

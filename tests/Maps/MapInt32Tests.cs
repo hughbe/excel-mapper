@@ -168,6 +168,7 @@ public class MapInt32Tests
         public int Value { get; set; }
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_AutoMappedInt32ValueNumberStyleAttribute_Success()
     {
@@ -206,6 +207,7 @@ public class MapInt32Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeInt32Value>();
         Assert.Equal(10, row9.Value);
     }
+#endif
 
     private class NumberStyleAttributeInt32Value
     {
@@ -215,6 +217,7 @@ public class MapInt32Tests
         public int Value { get; set; }
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_DefaultMappedInt32ValueNumberStyleAttribute_Success()
     {
@@ -257,7 +260,9 @@ public class MapInt32Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeInt32Value>();
         Assert.Equal(10, row9.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_AutoMappedNullableInt32ValueNumberStyleAttribute_Success()
     {
@@ -296,6 +301,7 @@ public class MapInt32Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeNullableInt32Value>();
         Assert.Equal(10, row9.Value);
     }
+#endif
 
     private class NumberStyleAttributeNullableInt32Value
     {
@@ -305,6 +311,7 @@ public class MapInt32Tests
         public int? Value { get; set; }
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_DefaultMappedNullableInt32ValueNumberStyleAttribute_Success()
     {
@@ -347,6 +354,7 @@ public class MapInt32Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeNullableInt32Value>();
         Assert.Equal(10, row9.Value);
     }
+#endif
 
     [Fact]
     public void ReadRow_DefaultMappedInt32Value_Success()
@@ -398,6 +406,7 @@ public class MapInt32Tests
         Assert.Equal(10, row3.Value);
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedInt32ValueHex_Success()
     {
@@ -443,7 +452,9 @@ public class MapInt32Tests
         var row9 = sheet.ReadRow<Int32Value>();
         Assert.Equal(10, row9.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedInt32ValueFormatProvider_Success()
     {
@@ -475,6 +486,7 @@ public class MapInt32Tests
         var row3 = sheet.ReadRow<Int32Value>();
         Assert.Equal(10, row3.Value);
     }
+#endif
 
     [Fact]
     public void ReadRow_AutoMappedNullableInt32Value_Success()
@@ -552,6 +564,7 @@ public class MapInt32Tests
         Assert.Equal(10, row3.Value);
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableInt32ValueHex_Success()
     {
@@ -597,7 +610,9 @@ public class MapInt32Tests
         var row9 = sheet.ReadRow<NullableInt32Value>();
         Assert.Equal(10, row9.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableInt32ValueFormatProvider_Success()
     {
@@ -629,6 +644,7 @@ public class MapInt32Tests
         var row3 = sheet.ReadRow<NullableInt32Value>();
         Assert.Equal(10, row3.Value);
     }
+#endif
 
     [Fact]
     public void ReadRow_Int32Overflow_ThrowsExcelMappingException()

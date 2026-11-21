@@ -407,6 +407,7 @@ public class MultiMapTests
         Assert.Equal(["1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" ], row1);
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_MultiMap_ReturnsExpected()
     {
@@ -568,6 +569,7 @@ public class MultiMapTests
         Assert.Equal(new string[] { "7", "8" }, row4.CustomObservableCollectionString);
         Assert.Equal(new ObservableCollectionEnum[] { ObservableCollectionEnum.custom, ObservableCollectionEnum.custom }, row4.CustomObservableCollectionEnum);
     }
+#endif
 
     private class MultiMapRow
     {
@@ -662,8 +664,10 @@ public class MultiMapTests
             Map(p => p.ISetString)
                 .WithColumnNames("IListString1", "IListString2");
 
+#if LIBRARY_NET8
             Map(p => p.IReadOnlySetString)
                 .WithColumnNames("IListString1", "IListString2");
+#endif
 
             Map<string>(p => p.Array)
                 .WithColumnNames("ListString1", "ListString2");

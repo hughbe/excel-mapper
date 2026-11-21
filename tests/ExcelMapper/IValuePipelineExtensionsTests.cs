@@ -711,6 +711,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_DateOnlyAutoMappedStringArray_Success(IEnumerable<string> formats)
@@ -723,7 +724,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Same(formatsArray, mapper.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_DateOnlyNotMappedStringArray_Success(IEnumerable<string> formats)
@@ -736,7 +739,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Same(formatsArray, mapper.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_DateOnlyAutoMappedIEnumerableString_Success(ICollection<string> formats)
@@ -747,7 +752,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Equal(formats, mapper.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_DateOnlyNotMappedIEnumerableString_Success(ICollection<string> formats)
@@ -758,7 +765,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Equal(formats, mapper.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void WithFormats_DateOnlyNullFormats_ThrowsArgumentNullException()
     {
@@ -766,7 +775,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void WithFormats_DateOnlyEmptyFormats_ThrowsArgumentException()
     {
@@ -774,7 +785,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void WithFormats_DateOnlyNullValueInFormats_ThrowsArgumentException()
     {
@@ -782,7 +795,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void WithFormats_DateOnlyEmptyValueInFormats_ThrowsArgumentException()
     {
@@ -790,7 +805,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_DateOnlyNullableAutoMappedStringArray_Success(IEnumerable<string> formats)
@@ -803,7 +820,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Same(formatsArray, mapper.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_DateOnlyNullableNotMappedStringArray_Success(IEnumerable<string> formats)
@@ -816,7 +835,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Same(formatsArray, mapper.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_DateOnlyNullableAutoMappedIEnumerableString_Success(ICollection<string> formats)
@@ -827,7 +848,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Equal(formats, mapper.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_DateOnlyNullableNotMappedIEnumerableString_Success(ICollection<string> formats)
@@ -838,7 +861,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Equal(formats, mapper.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void WithFormats_DateOnlyNullableNullFormats_ThrowsArgumentNullException()
     {
@@ -846,7 +871,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void WithFormats_DateOnlyNullableEmptyFormats_ThrowsArgumentException()
     {
@@ -854,7 +881,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void WithFormats_DateOnlyNullableNullValueInFormats_ThrowsArgumentException()
     {
@@ -862,7 +891,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void WithFormats_DateOnlyNullableEmptyValueInFormats_ThrowsArgumentException()
     {
@@ -870,7 +901,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_TimeOnlyAutoMappedStringArray_Success(IEnumerable<string> formats)
@@ -883,7 +916,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Same(formatsArray, mapper.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_TimeOnlyNotMappedStringArray_Success(IEnumerable<string> formats)
@@ -896,7 +931,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Same(formatsArray, mapper.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_TimeOnlyAutoMappedIEnumerableString_Success(ICollection<string> formats)
@@ -907,7 +944,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Equal(formats, mapper.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_TimeOnlyNotMappedIEnumerableString_Success(ICollection<string> formats)
@@ -918,7 +957,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Equal(formats, mapper.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void WithFormats_TimeOnlyNullFormats_ThrowsArgumentNullException()
     {
@@ -926,7 +967,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void WithFormats_TimeOnlyEmptyFormats_ThrowsArgumentException()
     {
@@ -934,7 +977,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void WithFormats_TimeOnlyNullValueInFormats_ThrowsArgumentException()
     {
@@ -942,7 +987,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void WithFormats_TimeOnlyEmptyValueInFormats_ThrowsArgumentException()
     {
@@ -950,7 +997,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_TimeOnlyNullableAutoMappedStringArray_Success(IEnumerable<string> formats)
@@ -963,7 +1012,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Same(formatsArray, mapper.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_TimeOnlyNullableNotMappedStringArray_Success(IEnumerable<string> formats)
@@ -976,7 +1027,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Same(formatsArray, mapper.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_TimeOnlyNullableAutoMappedIEnumerableString_Success(ICollection<string> formats)
@@ -987,7 +1040,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Equal(formats, mapper.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Formats_TestData))]
     public void WithFormats_TimeOnlyNullableNotMappedIEnumerableString_Success(ICollection<string> formats)
@@ -998,7 +1053,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Equal(formats, mapper.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void WithFormats_TimeOnlyNullableNullFormats_ThrowsArgumentNullException()
     {
@@ -1006,7 +1063,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats(null!));
         Assert.Throws<ArgumentNullException>("formats", () => map.WithFormats((IEnumerable<string>)null!));
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void WithFormats_TimeOnlyNullableEmptyFormats_ThrowsArgumentException()
     {
@@ -1014,7 +1073,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string>()));
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void WithFormats_TimeOnlyNullableNullValueInFormats_ThrowsArgumentException()
     {
@@ -1022,7 +1083,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([null!]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { null! }));
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void WithFormats_TimeOnlyNullableEmptyValueInFormats_ThrowsArgumentException()
     {
@@ -1030,6 +1093,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
+#endif
 
     public static IEnumerable<object?[]> FormatProvider_TestData()
     {
@@ -1169,6 +1233,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Same(provider, mapper.Provider);
     }
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_DateOnlyAutoMapped_Success(IFormatProvider? provider)
@@ -1179,7 +1244,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_DateOnlyNotMapped_Success(IFormatProvider? provider)
@@ -1190,7 +1257,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_DateOnlyNullableAutoMapped_Success(IFormatProvider? provider)
@@ -1201,7 +1270,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_DateOnlyNullableNotMapped_Success(IFormatProvider? provider)
@@ -1212,7 +1283,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<DateOnlyMapper>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_TimeOnlyAutoMapped_Success(IFormatProvider? provider)
@@ -1223,7 +1296,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_TimeOnlyNotMapped_Success(IFormatProvider? provider)
@@ -1234,7 +1309,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_TimeOnlyNullableAutoMapped_Success(IFormatProvider? provider)
@@ -1245,7 +1322,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_TimeOnlyNullableNotMapped_Success(IFormatProvider? provider)
@@ -1256,6 +1335,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<TimeOnlyMapper>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
     [Theory]
     [InlineData(UriKind.RelativeOrAbsolute)]
@@ -1593,6 +1673,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentNullException>("fallbackItem", () => map.WithInvalidFallbackItem(null!));
     }
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(NumberStyles.Integer)]
     [InlineData(NumberStyles.HexNumber)]
@@ -1605,7 +1686,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<BigInteger>>().Single();
         Assert.Equal(style, mapper.Style);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(NumberStyles.Integer)]
     [InlineData(NumberStyles.HexNumber)]
@@ -1617,7 +1700,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<BigInteger>>().Single();
         Assert.Equal(style, mapper.Style);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(NumberStyles.Integer)]
     [InlineData(NumberStyles.AllowThousands)]
@@ -1629,7 +1714,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<Int128>>().Single();
         Assert.Equal(style, mapper.Style);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(NumberStyles.Integer)]
     [InlineData(NumberStyles.AllowThousands)]
@@ -1641,7 +1728,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<UInt128>>().Single();
         Assert.Equal(style, mapper.Style);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(NumberStyles.Float)]
     [InlineData(NumberStyles.AllowThousands)]
@@ -1653,7 +1742,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<Half>>().Single();
         Assert.Equal(style, mapper.Style);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(NumberStyles.Integer)]
     [InlineData(NumberStyles.HexNumber)]
@@ -1666,7 +1757,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<BigInteger>>().Single();
         Assert.Equal(style, mapper.Style);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(NumberStyles.Integer)]
     [InlineData(NumberStyles.HexNumber)]
@@ -1678,7 +1771,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<BigInteger>>().Single();
         Assert.Equal(style, mapper.Style);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(NumberStyles.Integer)]
     [InlineData(NumberStyles.AllowThousands)]
@@ -1690,7 +1785,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<Int128>>().Single();
         Assert.Equal(style, mapper.Style);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(NumberStyles.Integer)]
     [InlineData(NumberStyles.AllowThousands)]
@@ -1702,7 +1799,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<UInt128>>().Single();
         Assert.Equal(style, mapper.Style);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(NumberStyles.Float)]
     [InlineData(NumberStyles.AllowThousands)]
@@ -1714,7 +1813,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<Half>>().Single();
         Assert.Equal(style, mapper.Style);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_BigIntegerAutoMapped_Success(IFormatProvider? provider)
@@ -1725,7 +1826,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<BigInteger>>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_BigIntegerNotMapped_Success(IFormatProvider? provider)
@@ -1736,7 +1839,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<BigInteger>>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_Int128AutoMapped_Success(IFormatProvider? provider)
@@ -1747,7 +1852,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<Int128>>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_UInt128AutoMapped_Success(IFormatProvider? provider)
@@ -1758,7 +1865,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<UInt128>>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_HalfAutoMapped_Success(IFormatProvider? provider)
@@ -1769,7 +1878,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<Half>>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_ComplexAutoMapped_Success(IFormatProvider? provider)
@@ -1780,7 +1891,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<Complex>>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_NullableBigIntegerAutoMapped_Success(IFormatProvider? provider)
@@ -1791,7 +1904,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<BigInteger>>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_NullableBigIntegerNotMapped_Success(IFormatProvider? provider)
@@ -1802,7 +1917,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<BigInteger>>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_NullableInt128AutoMapped_Success(IFormatProvider? provider)
@@ -1813,7 +1930,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<Int128>>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_NullableUInt128AutoMapped_Success(IFormatProvider? provider)
@@ -1824,7 +1943,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<UInt128>>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_NullableHalfAutoMapped_Success(IFormatProvider? provider)
@@ -1835,7 +1956,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<Half>>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(FormatProvider_TestData))]
     public void WithFormatProvider_NullableComplexAutoMapped_Success(IFormatProvider? provider)
@@ -1846,6 +1969,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<Complex>>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+#endif
 
     [Theory]
     [InlineData(0)]
