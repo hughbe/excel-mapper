@@ -33,6 +33,12 @@ Check("Enum", () => ExcelImporter.ReadRows<Scheduled>(Csv("Day\nMonday\n"), Exce
 
 Check("Enum description", () => ExcelImporter.ReadRows<Sized>(Csv("Size\nLarge\n"), ExcelImporterFileType.Csv).Single().Size.ToString(), "L");
 
+Check("Cell converter", () =>
+{
+    var row = ExcelImporter.ReadRows<Converted>(Csv("Amount,Maybe\n2k,3k\n"), ExcelImporterFileType.Csv).Single();
+    return $"{row.Amount}/{row.Maybe}";
+}, "2000/3000");
+
 Check("Nullable numbers", () =>
 {
     var row = ExcelImporter.ReadRows<Counted>(Csv("Count,Amount\n,2.5\n"), ExcelImporterFileType.Csv).Single();
@@ -164,4 +170,21 @@ public readonly struct Code(string value) : IParsable<Code>
         result = s is null ? default : new Code(s.ToUpperInvariant());
         return s is not null;
     }
+}
+
+public class Converted
+{
+    [ExcelConverter(typeof(ThousandsConverter))]
+    public int Amount { get; set; }
+
+    [ExcelConverter(typeof(ThousandsConverter))]
+    public int? Maybe { get; set; }
+}
+
+public class ThousandsConverter : ICellConverter<int>
+{
+    public CellConversionResult<int> Convert(CellValue value, CellContext context)
+        => value.Text is { } text && text.EndsWith('k') && int.TryParse(text[..^1], out var thousands)
+            ? CellConversionResult<int>.Success(thousands * 1000)
+            : CellConversionResult<int>.Invalid();
 }

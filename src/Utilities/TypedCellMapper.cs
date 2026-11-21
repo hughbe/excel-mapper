@@ -1,7 +1,7 @@
 namespace ExcelMapper.Utilities;
 
 /// <summary>
-/// The result of <see cref="ICellConverter{T}.Convert"/>, matching <see cref="CellMapperResult.HandleAction"/>.
+/// The result of <see cref="ITypedCellMapper{T}.Convert"/>, matching <see cref="CellMapperResult.HandleAction"/>.
 /// </summary>
 internal enum CellConversion
 {
@@ -23,7 +23,7 @@ internal enum CellConversion
 /// decisions as its <see cref="ICellMapper.Map"/>, which is used to create the exception for an
 /// invalid value when a fallback needs it.
 /// </summary>
-internal interface ICellConverter<T> : ICellMapper
+internal interface ITypedCellMapper<T> : ICellMapper
 {
     CellConversion Convert(ReadCellResult cell, out T value);
 }

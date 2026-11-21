@@ -781,6 +781,58 @@ public class Employee
 
 Both attributes support `ConstructorArguments` property to pass parameters to the fallback item constructor.
 
+#### Custom Converters
+
+To convert cells yourself, implement `ICellConverter<T>` and set it with `[ExcelConverter]` or `.WithConverter(converter)`. The converter replaces the built-in conversion for the member's type:
+
+```csharp
+public class ThousandsConverter : ICellConverter<int>
+{
+    public CellConversionResult<int> Convert(CellValue value, CellContext context)
+    {
+        // Typed cells keep their type: a number cell is a double, not text.
+        if (value.Kind == CellKind.Number)
+        {
+            return CellConversionResult<int>.Success((int)value.Number);
+        }
+
+        var text = value.Text!;
+        if (text.EndsWith("k") && int.TryParse(text[..^1], NumberStyles.Integer, context.FormatProvider, out var thousands))
+        {
+            return CellConversionResult<int>.Success(thousands * 1000);
+        }
+
+        // The exception is only created if it's used, for example by the default invalid fallback.
+        return CellConversionResult<int>.Invalid(() => new FormatException($"\"{text}\" isn't a number of thousands."));
+    }
+}
+
+public class Order
+{
+    [ExcelConverter(typeof(ThousandsConverter))]
+    public int Quantity { get; set; }  // "2k" → 2000
+
+    [ExcelConverter(typeof(ThousandsConverter))]
+    public int? Reorder { get; set; }  // a converter for T also converts T?
+
+    [ExcelSeparators(';')]
+    [ExcelConverter(typeof(ThousandsConverter))]
+    public int[] Batches { get; set; }  // converts each element
+}
+
+// Or with the fluent API
+Map(o => o.Quantity).WithConverter(new ThousandsConverter());
+```
+
+- **`CellValue`** is the cell's value: `Kind` (`Empty`, `Text`, `Number`, `Boolean`, `DateTime`, `TimeSpan` or `Other`), `Text`, `Number`, `Boolean`, `DateTime`, `TimeSpan` and `Value`. Numbers, dates and booleans from Excel files arrive typed; CSV cells are always text.
+- **`CellContext`** says where the cell is: `Sheet`, `RowIndex`, `ColumnIndex`, `CellAddress` (such as `"B11"`), the `Member` being mapped, and the `FormatProvider` to parse with (the importer's [culture](#culture-for-the-whole-importer), if set).
+- **`CellConversionResult<T>`**:
+  - `Success(value)`: the converted value.
+  - `Invalid()`, `Invalid(exception)` or `Invalid(() => exception)`: the member's invalid fallback is used, which by default throws an `ExcelMappingException` whose inner exception is the one given.
+  - `NotHandled`: the next converter is tried. Several `[ExcelConverter]` attributes are tried in order, and if none converts the value, it's invalid.
+- **Empty cells** don't reach the converter: they use the member's empty fallback.
+- **Converters are shared** between rows and threads, so they mustn't change their own state. `[ExcelConverter]` takes `ConstructorArguments` for converters with parameters.
+
 #### Custom Cell Transformers
 
 Transform cell values before mapping using custom transformers:
@@ -963,6 +1015,7 @@ The fluent API provides extensive configuration options:
 
 **Advanced:**
 - `.WithConverter(value => ...)` - Custom conversion delegate. It replaces the built-in conversion for the member's type, so it's used for every cell that isn't empty
+- `.WithConverter(converter)` - Convert with an `ICellConverter<T>`, which gets the typed cell value and its context: see [Custom Converters](#custom-converters)
 - `.WithFormats("yyyy-MM-dd", "dd/MM/yyyy")` - Parse dates, times, durations and formats (`DateTime`, `DateTimeOffset`, `TimeSpan`, `DateOnly`, `TimeOnly`) with specific formats
 - `.WithMapping(dictionary)` - Map string values to enum/object values
 - `.WithElementMap(...)` - Configure element pipeline for collections

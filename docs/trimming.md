@@ -8,7 +8,7 @@ ExcelMapper maps rows by reflection: it finds a type's properties, fields and co
 
 - **The reflection-based APIs are marked** with `[RequiresUnreferencedCode]` and `[RequiresDynamicCode]`: `ReadRows<T>`, `ReadRow<T>`, `TryReadRow<T>`, `ReadRowResults<T>`, `ValidateHeading<T>`, `FindHeading<T>`, the same methods on `ExcelRegion`, `ExcelImporter.ReadRows<T>`, the `ExcelClassMap<T>.Map(...)` methods and `RegisterClassMapsInNamespace`. A trimmed or AOT app gets warnings IL2026 and IL3050 where it calls them, rather than a library that silently stops working.
 - **The type you map is kept.** `ReadRows<T>`, `RegisterClassMap<T>` and `ExcelClassMap<T>` tell the trimmer to keep the public constructors, properties and fields of `T`, so classes and records whose members are numbers, strings, dates, enums, lists or dictionaries map in a trimmed app.
-- **Types given in attributes are kept**: the types in `[ExcelMapper]`, `[ExcelColumnMatching]`, `[ExcelColumnsMatching]`, `[ExcelEmptyFallback]`, `[ExcelInvalidFallback]` and `[ExcelTransformer]`.
+- **Types given in attributes are kept**: the types in `[ExcelConverter]`, `[ExcelMapper]`, `[ExcelColumnMatching]`, `[ExcelColumnsMatching]`, `[ExcelEmptyFallback]`, `[ExcelInvalidFallback]` and `[ExcelTransformer]`.
 - **Nested types aren't kept automatically.** A member whose type is another class (for example `Customer.Address`) needs that type's members kept by the app, or mapping throws `ExcelMappingException` ("Cannot auto-map type").
 - **Native AOT isn't supported yet.** Mapping creates generic types and methods for the member types at run time, which AOT can't guarantee.
 

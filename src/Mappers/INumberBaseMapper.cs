@@ -9,7 +9,7 @@ namespace ExcelMapper.Mappers;
 /// A mapper that tries to map the value of a cell to a number base type using the
 /// <see cref="INumberBase{T}"/> interface.
 /// </summary>
-public class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] T> : INumberStyleCellMapper, ICellConverter<T> where T : INumberBase<T>
+public class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] T> : INumberStyleCellMapper, ITypedCellMapper<T> where T : INumberBase<T>
 {
     /// <summary>
     /// Gets or sets the number styles used when mapping the value of a cell to a number base type.
@@ -104,7 +104,7 @@ public class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessedMe
 
     // A separate method so that the closure capturing these values is only allocated for invalid
     // values. Creating the lambda in Map would allocate the closure for every cell.
-    CellConversion ICellConverter<T>.Convert(ReadCellResult cell, out T value)
+    CellConversion ITypedCellMapper<T>.Convert(ReadCellResult cell, out T value)
     {
         if (cell.GetValue() is double doubleValue)
         {

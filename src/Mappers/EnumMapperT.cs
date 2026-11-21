@@ -4,18 +4,18 @@ namespace ExcelMapper.Mappers;
 
 /// <summary>
 /// An <see cref="EnumMapper"/> for a known enum type, which converts without boxing (see
-/// <see cref="ICellConverter{T}"/>), for members of the enum type and of its nullable type.
+/// <see cref="ITypedCellMapper{T}"/>), for members of the enum type and of its nullable type.
 /// </summary>
-internal sealed class EnumMapper<TEnum> : EnumMapper, ICellConverter<TEnum>, ICellConverter<TEnum?> where TEnum : struct, Enum
+internal sealed class EnumMapper<TEnum> : EnumMapper, ITypedCellMapper<TEnum>, ITypedCellMapper<TEnum?> where TEnum : struct, Enum
 {
     public EnumMapper(bool ignoreCase) : base(typeof(TEnum), ignoreCase)
     {
     }
 
-    CellConversion ICellConverter<TEnum>.Convert(ReadCellResult cell, out TEnum value)
+    CellConversion ITypedCellMapper<TEnum>.Convert(ReadCellResult cell, out TEnum value)
         => Enum.TryParse(cell.GetString(), IgnoreCase, out value) ? CellConversion.Success : CellConversion.Invalid;
 
-    CellConversion ICellConverter<TEnum?>.Convert(ReadCellResult cell, out TEnum? value)
+    CellConversion ITypedCellMapper<TEnum?>.Convert(ReadCellResult cell, out TEnum? value)
     {
         if (Enum.TryParse(cell.GetString(), IgnoreCase, out TEnum result))
         {

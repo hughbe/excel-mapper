@@ -6,7 +6,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a DateOnly.
 /// </summary>
-public class DateOnlyMapper : ICellMapper, IFormatsCellMapper, ICellConverter<DateOnly>, ICellConverter<DateOnly?>
+public class DateOnlyMapper : ICellMapper, IFormatsCellMapper, ITypedCellMapper<DateOnly>, ITypedCellMapper<DateOnly?>
 {
     private string[] _formats = ["d"];
 
@@ -75,7 +75,7 @@ public class DateOnlyMapper : ICellMapper, IFormatsCellMapper, ICellConverter<Da
         return InvalidResult(stringValue, formats, provider, style);
     }
 
-    CellConversion ICellConverter<DateOnly>.Convert(ReadCellResult cell, out DateOnly value)
+    CellConversion ITypedCellMapper<DateOnly>.Convert(ReadCellResult cell, out DateOnly value)
     {
         var cellValue = cell.GetValue();
         if (cellValue is DateTime dateTimeValue || ExcelDateUtilities.TryGetDateTime(cellValue, out dateTimeValue))
@@ -101,9 +101,9 @@ public class DateOnlyMapper : ICellMapper, IFormatsCellMapper, ICellConverter<Da
         }
     }
 
-    CellConversion ICellConverter<DateOnly?>.Convert(ReadCellResult cell, out DateOnly? value)
+    CellConversion ITypedCellMapper<DateOnly?>.Convert(ReadCellResult cell, out DateOnly? value)
     {
-        var conversion = ((ICellConverter<DateOnly>)this).Convert(cell, out var result);
+        var conversion = ((ITypedCellMapper<DateOnly>)this).Convert(cell, out var result);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }

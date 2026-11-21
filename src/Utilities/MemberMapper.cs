@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -130,7 +131,9 @@ internal static class MemberMapper
         return null;
     }
 
-    internal static bool AddMappers(IValuePipeline pipeline, MemberInfo member)
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    internal static bool AddMappers<T>(IValuePipeline pipeline, MemberInfo member)
     {
         var addDefaultMappers = true;
 
@@ -142,6 +145,17 @@ internal static class MemberMapper
             hasMapperAttributes = true;
             var mapper = (ICellMapper)Activator.CreateInstance(mapperAttribute.Type, mapperAttribute.ConstructorArguments)!;
             pipeline.Mappers.Add(mapper);
+        }
+
+        // If the member has ExcelConverter attributes, add their converters.
+        foreach (var converterAttribute in MemberAttributes.GetMany<ExcelConverterAttribute>(member))
+        {
+            var converter = Activator.CreateInstance(converterAttribute.Type, converterAttribute.ConstructorArguments)!;
+            if (CreateConverterMapper<T>(converter, member) is { } converterMapper)
+            {
+                hasMapperAttributes = true;
+                pipeline.Mappers.Add(converterMapper);
+            }
         }
 
         // Since explicit mappers were added, do not add default mappers.
@@ -185,6 +199,39 @@ internal static class MemberMapper
         }
 
         return addDefaultMappers;
+    }
+
+    /// <summary>
+    /// Creates the mapper for a converter given by <see cref="ExcelConverterAttribute"/>: an
+    /// <see cref="ICellConverter{T}"/>, or for a <c>T?</c> member, an <see cref="ICellConverter{T}"/> of <c>T</c>.
+    /// Returns null for a collection that the converter doesn't convert as a whole: it converts the
+    /// collection's elements instead.
+    /// </summary>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+#if NET5_0_OR_GREATER
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(NullableCellConverter<>))]
+#endif
+    private static ICellMapper? CreateConverterMapper<T>(object converter, MemberInfo member)
+    {
+        if (converter is ICellConverter<T> typedConverter)
+        {
+            return new CellConverterMapper<T>(typedConverter);
+        }
+
+        if (Nullable.GetUnderlyingType(typeof(T)) is { } underlyingType &&
+            typeof(ICellConverter<>).MakeGenericType(underlyingType).IsInstanceOfType(converter))
+        {
+            var nullableConverter = (ICellConverter<T>)Activator.CreateInstance(typeof(NullableCellConverter<>).MakeGenericType(underlyingType), converter)!;
+            return new CellConverterMapper<T>(nullableConverter);
+        }
+
+        if (typeof(T) != typeof(string) && typeof(System.Collections.IEnumerable).IsAssignableFrom(typeof(T)))
+        {
+            return null;
+        }
+
+        throw new ExcelMappingException($"The converter \"{converter.GetType()}\" given by ExcelConverterAttribute on member \"{member.Name}\" doesn't implement ICellConverter<{typeof(T)}>.");
     }
 
     internal static void ModifyMappers(IValuePipeline pipeline, MemberInfo member)

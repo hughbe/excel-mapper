@@ -101,6 +101,7 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 | `[ExcelUri(UriKind.RelativeOrAbsolute)]` | Specify URI kind (Absolute, Relative, or RelativeOrAbsolute) |
 | `[ExcelSeparators(';', ',')]` | Split cell value with custom separators |
 | `[ExcelTransformer(typeof(Transformer))]` | Apply custom transformer |
+| `[ExcelConverter(typeof(Converter))]` | Convert with an `ICellConverter<T>`, replacing the built-in conversion |
 | `[ExcelMappingDictionary("key", value)]` | Map string value to enum/object (multiple allowed) |
 | `[ExcelMappingDictionaryComparer(comparison)]` | Set string comparison for dictionary keys |
 | `[ExcelMappingDictionaryBehavior(behavior)]` | Control required vs optional mapping |
@@ -123,6 +124,7 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 - `.WithInvalidFallback(value)` - Default for invalid
 - `.WithValueFallback(value)` - Default for both
 - `.WithConverter(value => ...)` - Custom conversion, replacing the built-in conversion
+- `.WithConverter(ICellConverter<T>)` - Custom conversion with the typed cell value and its context
 - `.WithFormats("format1", "format2")` - Date/time formats
 - `.WithFormatProvider(IFormatProvider)` - Culture-specific parsing for dates/times/numbers
 - `.WithNumberStyle(NumberStyles)` - Control numeric parsing (thousands, currency, etc.)
@@ -142,6 +144,7 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 
 Implement these for advanced customization:
 
+- `ICellConverter<T>` - Convert a cell's value (`CellValue`, with `CellContext`) to `T`, returning a `CellConversionResult<T>`
 - `ICellMapper` - Custom type conversion logic
 - `ICellTransformer` - Transform string values before mapping
 - `IFallbackItem` - Custom fallback behavior

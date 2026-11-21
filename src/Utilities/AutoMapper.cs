@@ -44,7 +44,7 @@ public static class AutoMapper
         var addDefaultMappers = true;
         if (member != null)
         {
-            addDefaultMappers = MemberMapper.AddMappers(map.Pipeline, member);
+            addDefaultMappers = MemberMapper.AddMappers<T>(map.Pipeline, member);
         }
 
         // If no mappers are speciified, try to get a well-known mapper for the type.
