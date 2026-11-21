@@ -75,6 +75,42 @@ internal static class CompiledAccessors
         return Expression.Lambda<MemberSetValueDelegate>(body, instance, value).Compile();
     }
 
+    private static readonly ConcurrentDictionary<(MemberInfo Member, Type ValueType), Delegate> s_typedSetters = new();
+
+    /// <summary>
+    /// Gets a delegate that sets a writable property or field to a <typeparamref name="T"/>, without
+    /// boxing value types. <typeparamref name="T"/> is converted to the member's type as by
+    /// <see cref="GetSetter(MemberInfo)"/> if they differ.
+    /// </summary>
+    public static Action<object, T> GetSetter<T>(MemberInfo member)
+        => (Action<object, T>)s_typedSetters.GetOrAdd((member, typeof(T)), static key => CreateSetter<T>(key.Member));
+
+    private static Action<object, T> CreateSetter<T>(MemberInfo member)
+    {
+        var declaringType = member.DeclaringType!;
+        var memberType = member is PropertyInfo propertyInfo ? propertyInfo.PropertyType : ((FieldInfo)member).FieldType;
+
+        // As for GetSetter, use reflection where expressions can't set the member. This boxes.
+        if (!CanCompile || declaringType.IsValueType || member is FieldInfo { IsInitOnly: true })
+        {
+            var setter = GetSetter(member);
+            return (instance, value) => setter(instance, value!);
+        }
+
+        var instanceParameter = Expression.Parameter(typeof(object), "instance");
+        var valueParameter = Expression.Parameter(typeof(T), "value");
+        var typedInstance = Expression.Convert(instanceParameter, declaringType);
+        Expression typedValue = typeof(T) == memberType
+            ? valueParameter
+            : ConvertValue(Expression.Convert(valueParameter, typeof(object)), memberType);
+
+        Expression body = member is PropertyInfo property
+            ? Expression.Call(typedInstance, property.SetMethod!, typedValue)
+            : Expression.Assign(Expression.Field(typedInstance, (FieldInfo)member), typedValue);
+
+        return Expression.Lambda<Action<object, T>>(body, instanceParameter, valueParameter).Compile();
+    }
+
     /// <summary>
     /// Gets a delegate that calls a constructor with an array of arguments. Null arguments for value
     /// type parameters pass the default value, matching <see cref="ConstructorInfo.Invoke(object[])"/>.

@@ -75,7 +75,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
         }
 
-        var cellsReader = _factoryCache.GetOrAdd(sheet, s => _readerFactory.GetCellsReader(s));
+        var cellsReader = _factoryCache.GetOrAdd(sheet, _readerFactory, static (s, factory) => factory.GetCellsReader(s));
 
         if (cellsReader == null || !cellsReader.Start(reader, PreserveFormatting, out var count))
         {
