@@ -405,18 +405,7 @@ public class ExcelSheet
 
     private bool MapCurrentRow<T>([NotNullWhen(true)] out T? value)
     {
-        if (!Importer.Configuration.TryGetClassMap<T>(out var classMap))
-        {
-            // Sheets without a heading can still be auto-mapped if the map doesn't look up columns by
-            // name, for example primitives (read from the first column) or members with ExcelColumnIndex.
-            // Otherwise reading a named column throws a clear error.
-            if (!AutoMapper.TryCreateClassMap<T>(FallbackStrategy.ThrowIfPrimitive, out var map))
-            {
-                throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\".");
-            }
-
-            classMap = Importer.Configuration.RegisterAutoMappedClassMap(typeof(T), map);
-        }
+        var classMap = GetOrCreateClassMap<T>();
 
         // Map using the configured culture, if any. Mappers without their own format provider use the
         // current culture, so set it for the duration of this row only, not while the caller's code
@@ -467,6 +456,67 @@ public class ExcelSheet
         // valueObject is null if the row couldn't be mapped while collecting errors.
         value = valueObject is null ? default : (T)valueObject;
         return result;
+    }
+
+    private IMap GetOrCreateClassMap<T>()
+    {
+        if (!Importer.Configuration.TryGetClassMap<T>(out var classMap))
+        {
+            // Sheets without a heading can still be auto-mapped if the map doesn't look up columns by
+            // name, for example primitives (read from the first column) or members with ExcelColumnIndex.
+            // Otherwise reading a named column throws a clear error.
+            if (!AutoMapper.TryCreateClassMap<T>(FallbackStrategy.ThrowIfPrimitive, out var map))
+            {
+                throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\".");
+            }
+
+            classMap = Importer.Configuration.RegisterAutoMappedClassMap(typeof(T), map);
+        }
+
+        return classMap;
+    }
+
+    /// <summary>
+    /// Checks that the sheet has every column needed to map rows to <typeparamref name="T"/>, and
+    /// throws an <see cref="ExcelMappingException"/> listing all of the missing columns if not.
+    /// Call this before reading rows to report every missing column at once, rather than one at a
+    /// time when the first row is read. Optional members are not required. This reads the heading
+    /// if it has not been read yet.
+    /// </summary>
+    /// <typeparam name="T">The type that rows will be mapped to.</typeparam>
+    public void ValidateHeading<T>()
+    {
+        if (!TryValidateHeading<T>(out var problems))
+        {
+            throw new ExcelMappingException(
+                $"Sheet \"{Name}\" is missing columns needed to map type \"{typeof(T)}\": {string.Join("; ", problems)}.");
+        }
+    }
+
+    /// <summary>
+    /// Checks that the sheet has every column needed to map rows to <typeparamref name="T"/>.
+    /// Optional members are not required. This reads the heading if it has not been read yet.
+    /// </summary>
+    /// <typeparam name="T">The type that rows will be mapped to.</typeparam>
+    /// <param name="problems">A description of each missing column, such as
+    /// <c>column "Salary" (member Salary)</c>. Empty if none are missing.</param>
+    /// <returns>True if every required column is present, else false.</returns>
+    public bool TryValidateHeading<T>(out IReadOnlyList<string> problems)
+    {
+        if (Reader.IsClosed)
+        {
+            throw new ExcelMappingException($"The underlying reader is closed.");
+        }
+
+        if (HasHeading && Heading == null)
+        {
+            ReadHeading();
+        }
+
+        var foundProblems = new List<string>();
+        MapValidation.FindMissingColumns(GetOrCreateClassMap<T>(), this, null, foundProblems);
+        problems = foundProblems;
+        return foundProblems.Count == 0;
     }
 
     private bool MoveToNextRow()

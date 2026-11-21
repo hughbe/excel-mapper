@@ -1332,6 +1332,30 @@ catch (ExcelMappingException ex)
 }
 ```
 
+### Checking Columns Before Reading
+
+A missing column is otherwise reported when the first row is read, one column at a time. To check every column a type needs before reading any rows, validate the heading:
+
+```csharp
+var sheet = importer.ReadSheet();
+
+// Throws an ExcelMappingException listing every missing column, e.g.
+// Sheet "Employees" is missing columns needed to map type "Employee":
+//   column "Salary" (member Salary); column "Zip" (member Address.Zip).
+sheet.ValidateHeading<Employee>();
+
+// Or get the list without an exception
+if (!sheet.TryValidateHeading<Employee>(out var problems))
+{
+    foreach (var problem in problems)
+    {
+        Console.WriteLine(problem);   // column "Salary" (member Salary)
+    }
+}
+```
+
+Optional members (`[ExcelOptional]`, `.MakeOptional()`) aren't required. Nested objects, collections and indexed members are checked too, and if a column's name differs only by spaces, underscores, hyphens or dots, the problem suggests it, such as `column "Salary", did you mean "Sal-ary"?`. Validating reads the heading but no rows.
+
 ### Collecting Errors
 
 `ReadRows` throws at the first cell that can't be mapped. To check a whole file and report every problem, for example in an import screen, use `ReadRowResults`. It records every invalid cell in every row and keeps going:
@@ -1355,6 +1379,7 @@ foreach (var result in results.Where(r => !r.IsValid))
 - `Errors` lists every problem in the row: invalid or missing values, exceptions thrown by a constructor, and failed data annotations when `ValidateDataAnnotations` is enabled
 - `RowIndex` is the zero-based row in the sheet; each error's `CellAddress` gives the cell, such as `"C5"`, where known
 - Problems with the mapping itself, such as a type that can't be auto-mapped, still throw immediately
+- A missing column is reported on every row, so call `ValidateHeading` first to report missing columns once
 
 ### Nullable Types and Fallbacks
 
@@ -2739,6 +2764,7 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 - `ReadRow<T>()` / `TryReadRow<T>()` - Read single row
 - `ReadRowResults<T>()` - Read all rows, reporting every invalid cell instead of throwing
 - `ReadHeading()` - Explicitly read header row
+- `ValidateHeading<T>()` / `TryValidateHeading<T>()` - Check that every column a type needs is present, before reading rows
 - `Name` - Sheet name
 - `Visibility` - Sheet visibility (Visible, Hidden, VeryHidden)
 - `Index` - Zero-based sheet index
