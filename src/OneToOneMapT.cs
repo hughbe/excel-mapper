@@ -253,34 +253,14 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>, IBindableMap
         return ValuePipeline.CastValue<T>(null, sheet, rowIndex, readResult.ColumnIndex, member)!;
     }
 
-    /// <summary>
-    /// Reads and maps the cell as an object, for a constructor argument. A value that is already a
-    /// <typeparamref name="T"/> is returned as is, rather than unboxed and boxed again.
-    /// </summary>
-    internal bool TryGetObjectValue(ICellReader? cellReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value)
-    {
-        if (cellReader == null || !cellReader.TryGetValue(reader, PreserveFormatting, out var readResult))
-        {
-            if (Optional)
-            {
-                value = null;
-                return false;
-            }
-
-            throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
-        }
-
-        // Constructor arguments are objects, so map through the pipeline as objects: mappers can
-        // return cached boxes (such as for bool) that the typed path would box again.
-        var result = ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, readResult, PreserveFormatting, member);
-        value = result is T && !ReferenceEquals(result, ThrowFallback.ErrorRecorded)
-            ? result
-            : ValuePipeline.CastValue<T>(result, sheet, rowIndex, readResult.ColumnIndex, member);
-        return true;
-    }
-
     /// <inheritdoc/>
     BoundMember IBindableMap.Bind(ExcelPropertyMap property, ExcelSheet sheet) => new BoundOneToOneMember<T>(this, property, sheet);
+
+    /// <inheritdoc/>
+    MethodInfo? IBindableMap.GetArgumentMethod(Type parameterType)
+        => parameterType == typeof(T) ? s_getArgumentMethod ??= new Func<BoundOneToOneMember<T>, T, T>(BoundOneToOneMember<T>.GetValueOrDefault).Method : null;
+
+    private static MethodInfo? s_getArgumentMethod;
 
     /// <summary>
     /// Specifies a fixed fallback to be used if the value of a cell is empty or cannot be mapped.

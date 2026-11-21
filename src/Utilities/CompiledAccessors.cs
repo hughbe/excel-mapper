@@ -196,6 +196,73 @@ internal static class CompiledAccessors
         return Expression.Lambda<Func<object?[], object>>(body, arguments).Compile();
     }
 
+    private static readonly ConcurrentDictionary<BoundConstructorKey, Func<BoundMember[], object>> s_boundConstructors = new();
+
+    private static readonly MethodInfo s_getValueOrDefault = new Func<BoundMember, object?, object?>(BoundMember.GetValueOrDefault).Method;
+
+    /// <summary>
+    /// Gets a delegate that calls a constructor with the values bound members read for the row (see
+    /// <see cref="BoundMember.ReadValue"/>), without an argument array, and without boxing the
+    /// values of members that keep them typed. Returns null where code can't be compiled.
+    /// </summary>
+    /// <param name="arguments">For each parameter, the member whose value it takes, if any, and its
+    /// default value for when there is no value.</param>
+    public static Func<BoundMember[], object>? GetConstructor(ConstructorInfo constructor, BoundConstructorArgument[] arguments)
+    {
+        if (!CanCompile)
+        {
+            return null;
+        }
+
+        var key = new BoundConstructorKey(constructor, arguments);
+        if (!s_boundConstructors.TryGetValue(key, out var result))
+        {
+            result = s_boundConstructors.GetOrAdd(key, CreateConstructor(constructor, arguments));
+        }
+
+        return result;
+    }
+
+    private static Func<BoundMember[], object> CreateConstructor(ConstructorInfo constructor, BoundConstructorArgument[] arguments)
+    {
+        var members = Expression.Parameter(typeof(BoundMember[]), "members");
+        var parameters = constructor.GetParameters();
+        var argumentExpressions = new Expression[parameters.Length];
+        var variables = new List<ParameterExpression>();
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            var parameterType = parameters[i].ParameterType;
+            var argument = arguments[i];
+            var defaultValue = Expression.Constant(argument.DefaultValue, typeof(object));
+            if (argument.MemberIndex < 0)
+            {
+                argumentExpressions[i] = ConvertValue(defaultValue, parameterType);
+                continue;
+            }
+
+            var member = Expression.ArrayIndex(members, Expression.Constant(argument.MemberIndex));
+            if (argument.TypedMethod is { } typedMethod)
+            {
+                argumentExpressions[i] = Expression.Call(
+                    typedMethod,
+                    Expression.Convert(member, typedMethod.GetParameters()[0].ParameterType),
+                    ConvertValue(defaultValue, parameterType));
+            }
+            else
+            {
+                // Read the value once, as converting it checks it for null first.
+                var value = Expression.Variable(typeof(object));
+                variables.Add(value);
+                argumentExpressions[i] = Expression.Block(
+                    Expression.Assign(value, Expression.Call(s_getValueOrDefault, member, defaultValue)),
+                    ConvertValue(value, parameterType));
+            }
+        }
+
+        var body = Expression.Block(variables, Expression.Convert(Expression.New(constructor, argumentExpressions), typeof(object)));
+        return Expression.Lambda<Func<BoundMember[], object>>(body, members).Compile();
+    }
+
     /// <summary>
     /// Gets a delegate that creates an instance of a type with a public parameterless constructor, or
     /// a struct.
@@ -237,4 +304,68 @@ internal static class CompiledAccessors
 
         return converted;
     }
+}
+
+/// <summary>
+/// How a constructor compiled by <see cref="CompiledAccessors.GetConstructor(ConstructorInfo, BoundConstructorArgument[])"/>
+/// gets a parameter's value.
+/// </summary>
+/// <param name="memberIndex">The index of the bound member whose value the parameter takes, or -1
+/// to always pass <paramref name="defaultValue"/>.</param>
+/// <param name="typedMethod">The method that returns the member's value without boxing (see
+/// <see cref="IBindableMap.GetArgumentMethod"/>), or null to read it as an object.</param>
+/// <param name="defaultValue">The value passed when the member has no value. Null passes the
+/// parameter type's default value.</param>
+internal readonly struct BoundConstructorArgument(int memberIndex, MethodInfo? typedMethod, object? defaultValue)
+{
+    public int MemberIndex { get; } = memberIndex;
+
+    public MethodInfo? TypedMethod { get; } = typedMethod;
+
+    public object? DefaultValue { get; } = defaultValue;
+}
+
+/// <summary>
+/// The key for a compiled constructor over bound members: the delegate depends on the constructor
+/// and, for each parameter, which member it takes and whether that member's value is typed. The
+/// default values come from the constructor.
+/// </summary>
+internal sealed class BoundConstructorKey(ConstructorInfo constructor, BoundConstructorArgument[] arguments) : IEquatable<BoundConstructorKey>
+{
+    public bool Equals(BoundConstructorKey? other)
+    {
+        if (other is null || other.Constructor() != constructor || other.Arguments().Length != arguments.Length)
+        {
+            return false;
+        }
+
+        var otherArguments = other.Arguments();
+        for (int i = 0; i < arguments.Length; i++)
+        {
+            if (arguments[i].MemberIndex != otherArguments[i].MemberIndex ||
+                (arguments[i].TypedMethod is null) != (otherArguments[i].TypedMethod is null))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public override bool Equals(object? obj) => Equals(obj as BoundConstructorKey);
+
+    public override int GetHashCode()
+    {
+        var hash = constructor.GetHashCode();
+        foreach (var argument in arguments)
+        {
+            hash = (hash * 31) + (argument.MemberIndex * 2) + (argument.TypedMethod is null ? 0 : 1);
+        }
+
+        return hash;
+    }
+
+    private ConstructorInfo Constructor() => constructor;
+
+    private BoundConstructorArgument[] Arguments() => arguments;
 }

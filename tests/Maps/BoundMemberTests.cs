@@ -174,6 +174,123 @@ public class BoundMemberTests
     }
 
     [Fact]
+    public void ReadRows_RecordWithDefaultsForMissingOptionalColumns_PassesDefaults()
+    {
+        using var importer = Helpers.GetCsvImporter("Name\na\n");
+        var row = importer.ReadSheet().ReadRows<WithDefaults>().Single();
+        Assert.Equal(new WithDefaults("a"), row);
+        Assert.Equal(5, row.Count);
+        Assert.Equal(DayOfWeek.Friday, row.Day);
+        Assert.Equal(2.5m, row.Amount);
+        Assert.Null(row.Maybe);
+    }
+
+    public record WithDefaults(
+        string Name,
+        [property: ExcelOptional] int Count = 5,
+        [property: ExcelOptional] DayOfWeek Day = DayOfWeek.Friday,
+        [property: ExcelOptional] decimal Amount = 2.5m,
+        [property: ExcelOptional] int? Maybe = null);
+
+    [Fact]
+    public void ReadRows_RecordWithMembersSetAfterConstruction_SetsThem()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Age,Score,Tag\na,1,2.5,x\nb,2,3.5,y\n");
+        var rows = importer.ReadSheet().ReadRows<WithSetMembers>().ToArray();
+        Assert.Equal(new WithSetMembers("a", 1) { Score = 2.5, Tag = "x" }, rows[0]);
+        Assert.Equal(new WithSetMembers("b", 2) { Score = 3.5, Tag = "y" }, rows[1]);
+    }
+
+    public record WithSetMembers(string Name, int Age)
+    {
+        public double Score { get; init; }
+        public string? Tag { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_RecordStruct_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Age\na,1\nb,2\n");
+        Assert.Equal([new PointRecord("a", 1), new PointRecord("b", 2)], importer.ReadSheet().ReadRows<PointRecord>());
+    }
+
+    public readonly record struct PointRecord(string Name, int Age);
+
+    [Fact]
+    public void ReadRows_RecordMapTypeDiffersFromParameterType_ConvertsAsBefore()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Age\na,1\n");
+        importer.Configuration.RegisterClassMap<PersonRecord>(c =>
+        {
+            c.Map(r => (object)r.Name);
+            c.Map(r => r.Age);
+            c.Map(r => r.Joined).WithEmptyFallback(null).MakeOptional();
+        });
+        Assert.Equal(new PersonRecord("a", 1, null), importer.ReadSheet().ReadRows<PersonRecord>().Single());
+    }
+
+    [Fact]
+    public void ReadRows_RecordWithNestedRecordAndCollection_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Street,Values\na,High St,1;2\nb,Low St,3\n");
+        var rows = importer.ReadSheet().ReadRows<Outer>().ToArray();
+        Assert.Equal("a", rows[0].Name);
+        Assert.Equal(new Inner("High St"), rows[0].Address);
+        Assert.Equal([1, 2], rows[0].Values);
+        Assert.Equal(new Inner("Low St"), rows[1].Address);
+        Assert.Equal([3], rows[1].Values);
+    }
+
+    public record Outer(string Name, Inner Address, [property: ExcelSeparators(';')] int[] Values);
+
+    public record Inner(string Street);
+
+    [Fact]
+    public void ReadRowResults_RecordErrorThenValidRow_DoesNotReuseValues()
+    {
+        // A member whose value is invalid has no value for that row, and the next row's values are
+        // read afresh.
+        using var importer = Helpers.GetCsvImporter("Name,Age,Joined\na,x,2024-01-02\nb,2,\n");
+        var results = importer.ReadSheet().ReadRowResults<PersonRecord>().ToArray();
+        Assert.False(results[0].IsValid);
+        Assert.Equal(new PersonRecord("b", 2, null), results[1].Value);
+    }
+
+    [Fact]
+    public void ReadRows_RecordConstructorThrows_ThrowsWithInnerException()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Other\n,1\n");
+        var sheet = importer.ReadSheet();
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<Validated>().ToArray());
+        Assert.IsType<ArgumentException>(exception.InnerException);
+    }
+
+    public class Validated
+    {
+        public Validated(string? name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentException("Name is required.", nameof(name));
+            }
+
+            Name = name;
+        }
+
+        public string Name { get; }
+    }
+
+    [Fact]
+    public void ReadRowResults_RecordConstructorThrows_ReportsError()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Other\n,1\nb,2\n");
+        var results = importer.ReadSheet().ReadRowResults<Validated>().ToArray();
+        Assert.False(results[0].IsValid);
+        Assert.IsType<ArgumentException>(Assert.Single(results[0].Errors).InnerException);
+        Assert.Equal("b", results[1].Value!.Name);
+    }
+
+    [Fact]
     public void ReadRows_GetOnlyPropertiesThroughConstructor_ReturnsExpected()
     {
         using var importer = Helpers.GetCsvImporter("Name,Age,Score\na,1,2.5\n");
