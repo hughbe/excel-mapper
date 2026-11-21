@@ -251,6 +251,30 @@ public class ExcelClassMap<T> : ExcelClassMap
         => ExpressionAutoMapper.GetOrCreateObjectMap<T, TElement>(this, expression.Body);
 
     /// <summary>
+    /// Sets a property or field to the number of the row being read instead of reading a column.
+    /// Row numbers are one-based, as Excel shows them, and count every row in the sheet including
+    /// the heading, so they match the rows in error messages.
+    /// </summary>
+    /// <typeparam name="TProperty">The type of the property or field: a numeric type such as
+    /// <see cref="int"/> or <see cref="long"/>, or a nullable numeric type.</typeparam>
+    /// <param name="expression">A MemberExpression reading the property or field.</param>
+    /// <returns>The map for the given property or field.</returns>
+    /// <exception cref="ArgumentException">The property or field is not a numeric type.</exception>
+    public RowNumberMap MapRowNumber<TProperty>(Expression<Func<T, TProperty>> expression)
+        => ExpressionAutoMapper.GetOrCreateRowNumberMap<T, TProperty>(this, expression.Body);
+
+    /// <summary>
+    /// Fills a dictionary property or field with every column in the heading that no other member
+    /// of the same class reads, keyed by column name.
+    /// </summary>
+    /// <typeparam name="TValue">The type of the dictionary's values.</typeparam>
+    /// <param name="expression">A MemberExpression reading a dictionary property or field with
+    /// string keys, such as <see cref="Dictionary{TKey, TValue}"/> or <see cref="System.Dynamic.ExpandoObject"/>.</param>
+    /// <returns>The map for the given property or field. Use it to configure how values are mapped.</returns>
+    public ManyToOneDictionaryMap<string, TValue> MapExtraColumns<TValue>(Expression<Func<T, IEnumerable<KeyValuePair<string, TValue>>>> expression)
+        => ExpressionAutoMapper.GetOrCreateExtraColumnsMap<T, TValue>(this, expression.Body);
+
+    /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map enumerables.
     /// </summary>

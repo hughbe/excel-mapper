@@ -1,4 +1,5 @@
 ﻿using ExcelMapper.Mappers;
+using ExcelMapper.Readers;
 
 namespace ExcelMapper.Tests;
 
@@ -292,6 +293,87 @@ public class ExcelClassMapTTests
     }
 
     [Fact]
+    public void MapRowNumber_FuncExpressionT_Success()
+    {
+        var map = new ExcelClassMap<TestClass>();
+        var result = map.MapRowNumber(p => p.IntValue);
+        Assert.Equal(typeof(int), result.Type);
+        Assert.Single(map.Properties);
+        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.IntValue)), map.Properties[0].Member);
+        Assert.Same(result, map.Properties[0].Map);
+
+        // Map again.
+        var result2 = map.MapRowNumber(p => p.IntValue);
+        Assert.NotSame(result, result2);
+        Assert.Single(map.Properties);
+        Assert.Same(result2, map.Properties[0].Map);
+    }
+
+    [Fact]
+    public void MapRowNumber_NullableMember_Success()
+    {
+        var map = new ExcelClassMap<TestClass>();
+        var result = map.MapRowNumber(p => p.NullableLongValue);
+        Assert.Equal(typeof(long?), result.Type);
+        Assert.Same(result, Assert.Single(map.Properties).Map);
+    }
+
+    [Fact]
+    public void MapRowNumber_NestedMember_Success()
+    {
+        var map = new ExcelClassMap<TestClass>();
+        var result = map.MapRowNumber(p => p.ObjectValue!.Value);
+        var nestedMap = Assert.IsType<ExcelClassMap<ChildClass>>(Assert.Single(map.Properties).Map);
+        Assert.Same(result, Assert.Single(nestedMap.Properties).Map);
+    }
+
+    [Fact]
+    public void MapRowNumber_InvalidMemberType_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<TestClass>();
+        Assert.Throws<ArgumentException>("expression", () => map.MapRowNumber(p => p.StringValue));
+        Assert.Throws<ArgumentException>("expression", () => map.MapRowNumber(p => p.EnumValue));
+        Assert.Throws<ArgumentException>("expression", () => map.MapRowNumber(p => p.DateTimeValue));
+        Assert.Empty(map.Properties);
+    }
+
+    [Fact]
+    public void MapExtraColumns_FuncExpressionT_Success()
+    {
+        var map = new ExcelClassMap<TestClass>();
+        var result = map.MapExtraColumns(p => p.DictionaryValue);
+        Assert.Single(map.Properties);
+        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.DictionaryValue)), map.Properties[0].Member);
+        Assert.Same(result, map.Properties[0].Map);
+        var factory = Assert.IsType<ExtraColumnsReaderFactory>(result.ReaderFactory);
+        Assert.Same(map, factory.ClassMap);
+
+        // Map again.
+        var result2 = map.MapExtraColumns(p => p.DictionaryValue);
+        Assert.NotSame(result, result2);
+        Assert.Single(map.Properties);
+        Assert.Same(result2, map.Properties[0].Map);
+    }
+
+    [Fact]
+    public void MapExtraColumns_NestedMember_Success()
+    {
+        var map = new ExcelClassMap<TestClass>();
+        var result = map.MapExtraColumns(p => p.ObjectValue!.Extra);
+        var nestedMap = Assert.IsType<ExcelClassMap<ChildClass>>(Assert.Single(map.Properties).Map);
+        Assert.Same(result, Assert.Single(nestedMap.Properties).Map);
+        var factory = Assert.IsType<ExtraColumnsReaderFactory>(result.ReaderFactory);
+        Assert.Same(nestedMap, factory.ClassMap);
+    }
+
+    [Fact]
+    public void MapExtraColumns_Parameter_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<Dictionary<string, string>>();
+        Assert.Throws<ArgumentException>("expression", () => map.MapExtraColumns(p => p));
+    }
+
+    [Fact]
     public void WithClassMap_NullClassMap_ThrowsArgumentNullException()
     {
         var map = new ExcelClassMap<TestClass>();
@@ -309,6 +391,8 @@ public class ExcelClassMapTTests
         public TimeSpan TimeSpanValue { get; set; }
         public TimeSpan? NullableTimeSpanValue { get; set; }
         public ChildClass? ObjectValue { get; set; }
+        public long? NullableLongValue { get; set; }
+        public Dictionary<string, string> DictionaryValue { get; set; } = default!;
     }
 
     private enum TestEnum
@@ -320,6 +404,7 @@ public class ExcelClassMapTTests
     private class ChildClass
     {
         public int Value { get; set; }
+        public Dictionary<string, int> Extra { get; set; } = default!;
     }
 
     private class TestClassMap : ExcelClassMap<Helpers.TestClass>

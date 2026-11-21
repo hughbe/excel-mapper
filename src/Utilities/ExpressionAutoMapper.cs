@@ -236,7 +236,106 @@ internal static class ExpressionAutoMapper
             return map;
         }
 
-        return (ManyToOneDictionaryMap<TKey, TValue>)GetOrCreateMap<T, TValue>(classMap, expression, memberMapCreator);
+        var map = (ManyToOneDictionaryMap<TKey, TValue>)GetOrCreateMap<T, TValue>(classMap, expression, memberMapCreator);
+
+        // Honour [ExcelExtraColumns] on a member mapped with Map(...), as auto-mapping does.
+        if (FindOwner(classMap, map, out var member) is { } owner && member is not null && Attribute.IsDefined(member, typeof(ExcelExtraColumnsAttribute)))
+        {
+            map.ReaderFactory = new ExtraColumnsReaderFactory(owner);
+        }
+
+        return map;
+    }
+
+    public static ManyToOneDictionaryMap<string, TValue> GetOrCreateExtraColumnsMap<T, TValue>(ExcelClassMap<T> classMap, Expression expression)
+    {
+        var map = GetOrCreateManyToOneDictionaryMap<T, string, TValue>(classMap, expression);
+        var owner = FindOwner(classMap, map, out _) ?? throw new ArgumentException($"Extra columns can only be mapped to a property or field. Received: {expression}", nameof(expression));
+        map.ReaderFactory = new ExtraColumnsReaderFactory(owner);
+        return map;
+    }
+
+    public static RowNumberMap GetOrCreateRowNumberMap<T, TProperty>(ExcelClassMap<T> classMap, Expression expression)
+    {
+        static IMap memberMapCreator(IMappedExpression finalExpression, FallbackStrategy emptyValueStrategy)
+        {
+            var type = finalExpression is MappedMemberExpression memberExpression ? memberExpression.Type : finalExpression.MappedValueType;
+            if (!RowNumberMap.IsSupportedType(type))
+            {
+                throw new ArgumentException($"Row numbers can't be mapped to type \"{type}\". Use a numeric type such as int or long.", nameof(expression));
+            }
+
+            return new RowNumberMap(type);
+        }
+
+        return (RowNumberMap)GetOrCreateMap<T, TProperty>(classMap, expression, memberMapCreator);
+    }
+
+    /// <summary>
+    /// Finds the class map that has a member mapped by <paramref name="map"/>.
+    /// </summary>
+    private static ExcelClassMap? FindOwner(IMap parentMap, IMap map, out MemberInfo? member)
+    {
+        switch (parentMap)
+        {
+            case ExcelClassMap classMap:
+                foreach (var property in classMap.Properties)
+                {
+                    if (ReferenceEquals(property.Map, map))
+                    {
+                        member = property.Member;
+                        return classMap;
+                    }
+
+                    if (FindOwner(property.Map, map, out member) is { } owner)
+                    {
+                        return owner;
+                    }
+                }
+
+                if (classMap._valueMap is not null)
+                {
+                    return FindOwner(classMap._valueMap, map, out member);
+                }
+
+                break;
+
+            case IEnumerableIndexerMap enumerableIndexerMap:
+                foreach (var value in enumerableIndexerMap.Values.Values)
+                {
+                    if (FindOwner(value, map, out member) is { } owner)
+                    {
+                        return owner;
+                    }
+                }
+
+                break;
+
+            case IMultidimensionalIndexerMap multidimensionalIndexerMap:
+                foreach (var value in multidimensionalIndexerMap.Values.Values)
+                {
+                    if (FindOwner(value, map, out member) is { } owner)
+                    {
+                        return owner;
+                    }
+                }
+
+                break;
+
+            case IDictionaryIndexerMap dictionaryIndexerMap:
+                foreach (var value in dictionaryIndexerMap.Values.Values)
+                {
+                    if (FindOwner(value, map, out member) is { } owner)
+                    {
+                        return owner;
+                    }
+                }
+
+                break;
+        }
+
+        member = null;
+        return null;
     }
 
     public static ExcelClassMap<TElement> GetOrCreateObjectMap<T, TElement>(ExcelClassMap<T> classMap, Expression expression)

@@ -61,6 +61,8 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 **`ExcelClassMap<T>`** - Fluent mapping configuration
 - `Map(expression)` - Map property or field
 - `MapObject<TElement>(expression)` - Map nested object
+- `MapRowNumber(expression)` - Set a numeric member to the row number
+- `MapExtraColumns(expression)` - Fill a dictionary member with the columns no other member reads
 - `MapEnumerable<TElement>(expression)` - Map collection
 - `MapDictionary<TKey, TValue>(expression)` - Map dictionary
 
@@ -78,6 +80,8 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 | `[ExcelColumnsMatching(typeof(Matcher))]` | Custom column matching |
 | `[ExcelOptional]` | Don't throw if column missing |
 | `[ExcelIgnore]` | Exclude from mapping |
+| `[ExcelRowNumber]` | Set to the one-based row number instead of reading a column |
+| `[ExcelExtraColumns]` | Fill a dictionary with the columns no other member reads |
 | `[ExcelDefaultValue(value)]` | Default for empty cells |
 | `[ExcelInvalidValue(value)]` | Default for invalid values |
 | `[ExcelEmptyFallback(typeof(Fallback))]` | Custom empty cell handling |
