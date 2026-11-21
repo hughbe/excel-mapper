@@ -43,6 +43,12 @@ public class DateOnlyMapper : ICellMapper, IFormatsCellMapper
         {
             return CellMapperResult.Success(DateOnly.FromDateTime(dateTimeValue));
         }
+
+        // A number in a cell without a date format is Excel's serial date (days since 1899-12-30).
+        if (ExcelDateUtilities.TryGetDateTime(readResult.GetValue(), out var serialDate))
+        {
+            return CellMapperResult.Success(DateOnly.FromDateTime(serialDate));
+        }
         
         var stringValue = readResult.GetString();
         var formats = Formats;

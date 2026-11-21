@@ -2255,13 +2255,15 @@ The importer itself, and each sheet, should still be used by one thread at a tim
 - **Numeric**: `int`, `long`, `double`, `decimal`, `float`, `byte`, `short`, `uint`, `ulong`, `ushort`, `sbyte`
 - **Extended Numeric**: `Int128`, `UInt128`, `BigInteger`, `Half`, `nint` (IntPtr), `nuint` (UIntPtr), `Complex`
 - **Text**: `string`, `char`
-- **Other**: `bool`, `Guid`, `Uri`, `Version`
+- **Other**: `bool` (Excel booleans, `true`/`false`, `1`/`0` and `yes`/`no`, case-insensitive), `Guid`, `Uri`, `Version`
 - **Enums**: With optional case-insensitive parsing
 - **Nullable versions** of all value types
 - **Any type implementing `IParsable<T>`** (.NET 7+) - automatically supported
 - **Any type implementing `IConvertible`** - automatically supported
 
 > **Note:** Fractional numeric cells mapped to integer types are truncated on .NET 8+ and rounded on older runtimes. See [Fractional Numbers Mapped to Integer Properties](#fractional-numbers-mapped-to-integer-properties).
+
+> **Note:** `object` members, and `object` values in dictionaries and non-generic collections, receive the cell's text (formatted with the current culture for numbers and dates) rather than its typed value.
 
 ### Collection Types
 - `T[]`, `List<T>`, `IList<T>`, `ICollection<T>`, `IEnumerable<T>`
@@ -2274,13 +2276,15 @@ The importer itself, and each sheet, should still be used by one thread at a tim
 
 ExcelMapper has comprehensive support for modern .NET date and time types:
 
-- `DateTime` - Full date and time with timezone support
-- `DateTimeOffset` - Date and time with explicit timezone offset
+- `DateTime` - Date and time
+- `DateTimeOffset` - Date and time with an offset (cells without one use the machine's local offset)
 - `DateOnly` - Date without time (available in .NET 6+)
 - `TimeOnly` - Time without date (available in .NET 6+)
 - `TimeSpan` - Duration/time interval
 
-All support custom format parsing with `.WithFormats()` and culture-specific parsing with `.WithFormatProvider()`.
+Cells that Excel stores as dates, times or durations are mapped directly. Excel stores dates as numbers (the number of days since 1899-12-30), so a number in a cell without a date format is also read as a date: `45355` maps to 2024-03-04 for `DateTime`, `DateTimeOffset` and `DateOnly`. For `TimeOnly` a number is a fraction of a day (`0.25` is 06:00), and for `TimeSpan` it is a number of days (`1.5` is 36 hours). A cell formatted as a time of day can be mapped to `TimeOnly` or `TimeSpan`.
+
+Text cells support custom format parsing with `.WithFormats()` and culture-specific parsing with `.WithFormatProvider()`.
 
 **Example:**
 

@@ -28,6 +28,16 @@ public class BoolMapper : ICellMapper
             return CellMapperResult.Success(s_boxedFalse);
         }
 
+        // Spreadsheets often use "Yes" and "No".
+        if (string.Equals(stringValue, "yes", StringComparison.OrdinalIgnoreCase))
+        {
+            return CellMapperResult.Success(s_boxedTrue);
+        }
+        if (string.Equals(stringValue, "no", StringComparison.OrdinalIgnoreCase))
+        {
+            return CellMapperResult.Success(s_boxedFalse);
+        }
+
         if (bool.TryParse(stringValue, out var result))
         {
             return CellMapperResult.Success(result ? s_boxedTrue : s_boxedFalse);
