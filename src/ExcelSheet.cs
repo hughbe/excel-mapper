@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using ExcelDataReader;
+using ExcelMapper.Readers;
 
 namespace ExcelMapper;
 
@@ -536,8 +537,23 @@ public class ExcelSheet
             classMap = Importer.Configuration.RegisterAutoMappedClassMap(typeof(T), map);
         }
 
+        RootMap = classMap;
+
         return classMap;
     }
+
+    /// <summary>
+    /// The map that rows of this sheet are being mapped with (the class map of the type passed to
+    /// <c>ReadRow</c>, <c>ReadRows</c> or <c>ValidateHeading</c>), as opposed to the nested maps
+    /// of its members. Extra columns exclude every column it reads (see
+    /// <see cref="ExtraColumnsReaderFactory"/>).
+    /// </summary>
+    /// <remarks>
+    /// Members bound to the sheet keep their extra columns reader, which is correct as a nested
+    /// class map belongs to one parent: <c>WithClassMap</c> copies a class map's members rather
+    /// than sharing the map. The reader factory can be shared, so its readers are kept per root map.
+    /// </remarks>
+    internal IMap? RootMap { get; private set; }
 
     /// <summary>
     /// Checks that the sheet has every column needed to map rows to <typeparamref name="T"/>, and
@@ -854,6 +870,10 @@ public class ExcelSheet
     private Dictionary<ICellReaderFactory, ICellReader?>? _cellReaders;
     private Dictionary<ICellsReaderFactory, ICellsReader?>? _cellsReaders;
 
+    // Extra columns depend on the root map as well as the factory, as a nested class map can be
+    // shared between root maps (with WithClassMap).
+    private Dictionary<(ExtraColumnsReaderFactory, IMap?), ICellsReader?>? _extraColumnsReaders;
+
     /// <summary>
     /// Gets the reader a factory creates for this sheet, creating it the first time.
     /// </summary>
@@ -874,11 +894,29 @@ public class ExcelSheet
     /// </summary>
     internal ICellsReader? GetCellsReader(ICellsReaderFactory factory)
     {
+        if (factory is ExtraColumnsReaderFactory extraColumnsFactory)
+        {
+            return GetExtraColumnsReader(extraColumnsFactory);
+        }
+
         _cellsReaders ??= [];
         if (!_cellsReaders.TryGetValue(factory, out var reader))
         {
             reader = factory.GetCellsReader(this);
             _cellsReaders[factory] = reader;
+        }
+
+        return reader;
+    }
+
+    private ICellsReader? GetExtraColumnsReader(ExtraColumnsReaderFactory factory)
+    {
+        _extraColumnsReaders ??= [];
+        var key = (factory, RootMap);
+        if (!_extraColumnsReaders.TryGetValue(key, out var reader))
+        {
+            reader = factory.GetCellsReader(this);
+            _extraColumnsReaders[key] = reader;
         }
 
         return reader;

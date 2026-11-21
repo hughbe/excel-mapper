@@ -4,20 +4,23 @@ using ExcelDataReader;
 namespace ExcelMapper.Readers;
 
 /// <summary>
-/// Reads every column in the heading that no other member of a class map reads. Used by
+/// Reads every column in the heading that no other member of the map being read reads. Used by
 /// <see cref="ExcelExtraColumnsAttribute"/> and
 /// <see cref="ExcelClassMap{T}.MapExtraColumns{TValue}(System.Linq.Expressions.Expression{Func{T, IEnumerable{KeyValuePair{string, TValue}}}})"/>.
 /// </summary>
 /// <remarks>
-/// The columns are worked out once per sheet from the class map's other members, including
-/// members of nested objects. Columns with an empty name are skipped.
+/// The columns are worked out once per sheet from the members of the sheet's root map (see
+/// <see cref="ExcelSheet.RootMap"/>), including members of nested objects at any depth, so a
+/// member of a nested object doesn't get the columns its parent's members read. Columns with an
+/// empty name are skipped.
 /// </remarks>
 internal sealed class ExtraColumnsReaderFactory : ICellsReaderFactory
 {
     /// <summary>
     /// Initializes a new instance of <see cref="ExtraColumnsReaderFactory"/>.
     /// </summary>
-    /// <param name="classMap">The class map whose other members' columns are excluded.</param>
+    /// <param name="classMap">The class map that has the extra columns member. Its members' columns
+    /// are excluded if the sheet isn't being read with a root map.</param>
     /// <exception cref="ArgumentNullException"><paramref name="classMap"/> is <see langword="null"/>.</exception>
     public ExtraColumnsReaderFactory(ExcelClassMap classMap)
     {
@@ -26,7 +29,7 @@ internal sealed class ExtraColumnsReaderFactory : ICellsReaderFactory
     }
 
     /// <summary>
-    /// Gets the class map whose other members' columns are excluded.
+    /// Gets the class map that has the extra columns member.
     /// </summary>
     public ExcelClassMap ClassMap { get; }
 
@@ -40,7 +43,7 @@ internal sealed class ExtraColumnsReaderFactory : ICellsReaderFactory
         }
 
         var usedColumns = new HashSet<int>();
-        AddUsedColumns(ClassMap, sheet, usedColumns);
+        AddUsedColumns(sheet.RootMap ?? ClassMap, sheet, usedColumns);
 
         var heading = sheet.Heading;
         var columnNames = heading.ColumnNames;
