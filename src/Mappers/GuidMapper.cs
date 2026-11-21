@@ -12,12 +12,17 @@ public class GuidMapper : ICellMapper
 
         try
         {
-            var result = Guid.Parse(stringValue!);
-            return CellMapperResult.Success(result);
+            if (Guid.TryParse(stringValue, out var result))
+            {
+                return CellMapperResult.Success(result);
+            }
         }
         catch (Exception exception)
         {
             return CellMapperResult.Invalid(exception);
         }
+
+        // Only create the exception (by parsing again) if it is needed.
+        return MapperUtilities.InvalidFromParse(() => Guid.Parse(stringValue!));
     }
 }

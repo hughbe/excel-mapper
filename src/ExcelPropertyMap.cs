@@ -44,7 +44,7 @@ public class ExcelPropertyMap
                     throw new ArgumentException($"Property \"{member.Name}\" cannot be static.", nameof(member));
                 }
 
-                SetValueFactory = property.SetValue;
+                SetValueFactory = CompiledAccessors.GetSetter(property);
             }
             else
             {
@@ -63,7 +63,7 @@ public class ExcelPropertyMap
         }
         else if (member is FieldInfo field)
         {
-            SetValueFactory = field.SetValue;
+            SetValueFactory = CompiledAccessors.GetSetter(field);
         }
         else
         {

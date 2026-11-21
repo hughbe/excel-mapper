@@ -229,7 +229,8 @@ public static class AutoMapper
         }
         else if (emptyValueStrategy == FallbackStrategy.SetToDefaultValue)
         {
-            return new FixedValueFallbackFactory(() => Activator.CreateInstance(typeof(T)));
+            // T is a non-nullable value type, so the boxed default value can be shared.
+            return new FixedValueFallback(default(T));
         }
 
         // Throw if we can't set to null or default value.
