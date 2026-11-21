@@ -304,6 +304,82 @@ public class ExcelSheet
     /// <returns>False if there are no more rows in the sheet or the row cannot be mapped to an object, else true.</returns>
     public bool TryReadRow<T>([NotNullWhen(true)] out T? value)
     {
+        if (!AdvanceToNextRow())
+        {
+            value = default;
+            return false;
+        }
+
+        return MapCurrentRow(out value);
+    }
+
+    /// <summary>
+    /// Maps each row of the sheet to an object, like <see cref="ReadRows{T}()"/>, but reports invalid
+    /// rows instead of throwing at the first invalid cell. Every cell that can't be mapped is
+    /// recorded, so a single pass over a sheet can report all of its problems.
+    /// </summary>
+    /// <remarks>
+    /// Problems with the mapping itself, such as a type that can't be auto-mapped, still throw.
+    /// Use <see cref="ExcelRowResult{T}.IsValid"/> to find the rows that were mapped successfully.
+    /// </remarks>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <returns>The result of mapping each row in the sheet.</returns>
+    public IEnumerable<ExcelRowResult<T>> ReadRowResults<T>()
+    {
+        if (Reader.IsClosed)
+        {
+            throw new ExcelMappingException($"The underlying reader is closed.");
+        }
+
+        // Read the heading now, as ReadRows does, so that problems with it are reported immediately.
+        if (HasHeading && Heading == null)
+        {
+            ReadHeading();
+        }
+
+        return ReadRowResultsIterator<T>();
+    }
+
+    private IEnumerable<ExcelRowResult<T>> ReadRowResultsIterator<T>()
+    {
+        // Reuse one list for every row: valid rows (usually most of them) then don't allocate, and
+        // only rows with errors get their own copy.
+        var errors = new List<ExcelMappingException>();
+        while (AdvanceToNextRow())
+        {
+            T? value;
+            bool mapped;
+            CollectedErrors = errors;
+            try
+            {
+                mapped = MapCurrentRow(out value);
+            }
+            finally
+            {
+                CollectedErrors = null;
+            }
+
+            if (errors.Count == 0)
+            {
+                yield return new ExcelRowResult<T>(CurrentRowIndex, mapped ? value : default, null);
+            }
+            else
+            {
+                var rowErrors = errors.ToArray();
+                errors.Clear();
+                yield return new ExcelRowResult<T>(CurrentRowIndex, default, rowErrors);
+            }
+        }
+    }
+
+    /// <summary>
+    /// When not null, mapping errors for the current row are added to this list instead of being
+    /// thrown. Set while reading rows with <see cref="ReadRowResults{T}"/>.
+    /// </summary>
+    internal List<ExcelMappingException>? CollectedErrors { get; private set; }
+
+    private bool AdvanceToNextRow()
+    {
         // Read the heading first, as ReadRows does, so that the heading row isn't mapped as data
         // and columns can be found by name.
         if (HasHeading && Heading == null)
@@ -317,19 +393,17 @@ public class ExcelSheet
             ReadUpTo(CurrentRowIndex);
             if (HeadingIndex >= Reader.RowCount)
             {
-                value = default;
                 return false;
             }
 
             ReadHeading();
         }
 
-        if (!MoveToNextRow())
-        {
-            value = default;
-            return false;
-        }
+        return MoveToNextRow();
+    }
 
+    private bool MapCurrentRow<T>([NotNullWhen(true)] out T? value)
+    {
         if (!Importer.Configuration.TryGetClassMap<T>(out var classMap))
         {
             // Sheets without a heading can still be auto-mapped if the map doesn't look up columns by
@@ -347,10 +421,26 @@ public class ExcelSheet
         // If we've been asked to validate with data annotations, do so now.
         if (Importer.Configuration.ValidateDataAnnotations && result && valueObject is not null)
         {
-            Validator.ValidateObject(valueObject, new ValidationContext(valueObject), validateAllProperties: true);
+            if (CollectedErrors is { } errors)
+            {
+                // Report every validation failure rather than only the first.
+                var validationResults = new List<ValidationResult>();
+                if (!Validator.TryValidateObject(valueObject, new ValidationContext(valueObject), validationResults, validateAllProperties: true))
+                {
+                    foreach (var validationResult in validationResults)
+                    {
+                        errors.Add(new ExcelMappingException(validationResult.ErrorMessage ?? "The value is invalid.", this, CurrentRowIndex, -1, new ValidationException(validationResult, null, valueObject)));
+                    }
+                }
+            }
+            else
+            {
+                Validator.ValidateObject(valueObject, new ValidationContext(valueObject), validateAllProperties: true);
+            }
         }
 
-        value = (T?)valueObject;
+        // valueObject is null if the row couldn't be mapped while collecting errors.
+        value = valueObject is null ? default : (T)valueObject;
         return result;
     }
 

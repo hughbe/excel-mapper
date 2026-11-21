@@ -129,6 +129,12 @@ public class ValuePipeline : IValuePipeline
     /// </summary>
     internal static T CastValue<T>(object? value, ExcelSheet sheet, int rowIndex, int columnIndex, MemberInfo? member)
     {
+        // The error for this value has already been recorded (see ThrowFallback).
+        if (ReferenceEquals(value, ThrowFallback.ErrorRecorded))
+        {
+            return default!;
+        }
+
         if (value is null)
         {
             // default(T) is only non-null for non-nullable value types.

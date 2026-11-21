@@ -106,6 +106,39 @@ public class Mapping
     }
 
     [Benchmark]
+    public int RowResultsClass()
+    {
+        using var importer = CreateImporter(_validCsv);
+        int count = 0;
+        foreach (var result in importer.ReadSheet().ReadRowResults<Employee>())
+        {
+            count += result.Value!.Age;
+        }
+
+        return count;
+    }
+
+    [Benchmark]
+    public int RowResultsInvalidValues()
+    {
+        // Half the rows are invalid. Without a fallback, ReadRows would throw at the first.
+        using var importer = CreateImporter(_invalidCsv);
+        int count = 0;
+        foreach (var result in importer.ReadSheet().ReadRowResults<InvalidAgeNoFallback>())
+        {
+            count += result.IsValid ? result.Value!.Age : 0;
+        }
+
+        return count;
+    }
+
+    public class InvalidAgeNoFallback
+    {
+        public string Name { get; set; } = "";
+        public int Age { get; set; }
+    }
+
+    [Benchmark]
     public int AutoMappedRecord()
     {
         using var importer = CreateImporter(_validCsv);
