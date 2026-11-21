@@ -32,6 +32,7 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>
         {
             ThrowHelpers.ThrowIfNull(value, nameof(value));
             _readerFactory = value;
+            _factoryCache.Clear();
         }
     }
 
@@ -64,7 +65,7 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>
         set => Pipeline.InvalidFallback = value;
     }
 
-    private readonly ConcurrentDictionary<ExcelSheet, ICellReader?> _factoryCache = new();
+    private readonly PerSheetCache<ICellReader> _factoryCache = new();
 
     /// <inheritdoc />
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)

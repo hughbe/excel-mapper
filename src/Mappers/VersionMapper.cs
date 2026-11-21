@@ -10,14 +10,12 @@ public class VersionMapper : ICellMapper
     {
         var stringValue = readResult.GetString();
 
-        try
+        if (Version.TryParse(stringValue, out var version))
         {
-            var version = new Version(stringValue!);
             return CellMapperResult.Success(version);
         }
-        catch (Exception exception)
-        {
-            return CellMapperResult.Invalid(exception);
-        }
+
+        // Only create the exception (by parsing again) if it is needed.
+        return MapperUtilities.InvalidFromParse(() => new Version(stringValue!));
     }
 }

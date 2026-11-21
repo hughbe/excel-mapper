@@ -140,6 +140,8 @@ public class ExcelSheet
 
     private ExcelImporter Importer { get; }
 
+    internal ExcelImporterConfiguration Configuration => Importer.Configuration;
+
     private IExcelDataReader Reader { get; }
 
     /// <summary>
@@ -276,7 +278,7 @@ public class ExcelSheet
 
     /// <summary>
     /// Maps a single row of a sheet to an object using a registered mapping. If no map is registered for this
-    /// type then the type will be automapped. This method will not read the sheet's heading if the sheet has a
+    /// type then the type will be automapped. This method will read the sheet's heading if the sheet has a
     /// heading and the heading has not yet been read. This method will throw if mapping fails or there are
     /// no more rows left.
     /// </summary>
@@ -294,7 +296,7 @@ public class ExcelSheet
 
     /// <summary>
     /// Maps a single row of a sheet to an object using a registered mapping. If no map is registered for this
-    /// type then the type will be automapped. This method will not read the sheet's heading if the sheet has a
+    /// type then the type will be automapped. This method will read the sheet's heading if the sheet has a
     /// heading and the heading has not yet been read.
     /// </summary>
     /// <typeparam name="T">The type of the object to map a single row to.</typeparam>
@@ -302,6 +304,26 @@ public class ExcelSheet
     /// <returns>False if there are no more rows in the sheet or the row cannot be mapped to an object, else true.</returns>
     public bool TryReadRow<T>([NotNullWhen(true)] out T? value)
     {
+        // Read the heading first, as ReadRows does, so that the heading row isn't mapped as data
+        // and columns can be found by name.
+        if (HasHeading && Heading == null)
+        {
+            if (Reader.IsClosed)
+            {
+                throw new ExcelMappingException($"The underlying reader is closed.");
+            }
+
+            // A sheet without enough rows for a heading has no rows to read either.
+            ReadUpTo(CurrentRowIndex);
+            if (HeadingIndex >= Reader.RowCount)
+            {
+                value = default;
+                return false;
+            }
+
+            ReadHeading();
+        }
+
         if (!MoveToNextRow())
         {
             value = default;
@@ -310,18 +332,15 @@ public class ExcelSheet
 
         if (!Importer.Configuration.TryGetClassMap<T>(out var classMap))
         {
-            if (!HasHeading)
-            {
-                throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\" as the sheet has no heading.");
-            }
-
+            // Sheets without a heading can still be auto-mapped if the map doesn't look up columns by
+            // name, for example primitives (read from the first column) or members with ExcelColumnIndex.
+            // Otherwise reading a named column throws a clear error.
             if (!AutoMapper.TryCreateClassMap<T>(FallbackStrategy.ThrowIfPrimitive, out var map))
             {
                 throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\".");
             }
 
-            classMap = map;
-            Importer.Configuration.RegisterClassMap(typeof(T), classMap);
+            classMap = Importer.Configuration.RegisterAutoMappedClassMap(typeof(T), map);
         }
 
         var result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out var valueObject);

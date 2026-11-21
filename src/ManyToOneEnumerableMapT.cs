@@ -36,6 +36,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
         {
             ThrowHelpers.ThrowIfNull(value, nameof(value));
             _readerFactory = value;
+            _factoryCache.Clear();
         }
     }
 
@@ -55,7 +56,13 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     /// </summary>
     public IEnumerableFactory<TElement> EnumerableFactory { get; }
 
-    private readonly ConcurrentDictionary<ExcelSheet, ICellsReader?> _factoryCache = new();
+    private readonly PerSheetCache<ICellsReader> _factoryCache = new();
+
+    // Factories build one value at a time, so a map shared between importers (for example
+    // a class map instance registered in several importers used concurrently) must not
+    // build two values at once.
+    private readonly object _buildLock = new();
+
 
     /// <inheritdoc />
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
@@ -75,28 +82,31 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
             throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
         }
 
-        EnumerableFactory.Begin(count);
-        try
+        lock (_buildLock)
         {
+            EnumerableFactory.Begin(count);
             try
             {
-                while (cellsReader.TryGetNext(out var result))
+                try
                 {
-                    var elementValue = ValuePipeline.CastValue<TElement>(ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, result, PreserveFormatting, member), sheet, rowIndex, result.ColumnIndex, member);
-                    EnumerableFactory.Add(elementValue);
+                    while (cellsReader.TryGetNext(out var result))
+                    {
+                        var elementValue = ValuePipeline.CastValue<TElement>(ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, result, PreserveFormatting, member), sheet, rowIndex, result.ColumnIndex, member);
+                        EnumerableFactory.Add(elementValue);
+                    }
                 }
+                finally
+                {
+                    cellsReader.Reset();
+                }
+
+                value = EnumerableFactory.End();
+                return true;
             }
             finally
             {
-                cellsReader.Reset();
+                EnumerableFactory.Reset();
             }
-
-            value = EnumerableFactory.End();
-            return true;
-        }
-        finally
-        {
-            EnumerableFactory.Reset();
         }
     }
 

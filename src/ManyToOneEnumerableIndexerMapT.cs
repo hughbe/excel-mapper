@@ -11,6 +11,11 @@ namespace ExcelMapper;
 /// </summary>
 public class ManyToOneEnumerableIndexerMapT<TValue> : IEnumerableIndexerMap
 {
+    // Factories build one value at a time, so a map shared between importers (for example
+    // a class map instance registered in several importers used concurrently) must not
+    // build two values at once.
+    private readonly object _buildLock = new();
+
     public ManyToOneEnumerableIndexerMapT(IEnumerableFactory<TValue> enumerableFactory)
     {
         ThrowHelpers.ThrowIfNull(enumerableFactory, nameof(enumerableFactory));
@@ -25,28 +30,43 @@ public class ManyToOneEnumerableIndexerMapT<TValue> : IEnumerableIndexerMap
     /// <inheritdoc/>
     public Dictionary<int, IMap> Values { get; } = [];
 
+    private int GetLength()
+    {
+        // The collection must be large enough for the largest index.
+        var length = Values.Count;
+        foreach (var index in Values.Keys)
+        {
+            length = Math.Max(length, index + 1);
+        }
+
+        return length;
+    }
+
     /// <inheritdoc/>
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
-        EnumerableFactory.Begin(Math.Max(Values.Count > 0 ? Values.Max(x => x.Key + 1) : 0, Values.Count));
-        try
+        lock (_buildLock)
         {
-            foreach (var map in Values)
+            EnumerableFactory.Begin(GetLength());
+            try
             {
-                if (map.Value.TryGetValue(sheet, rowIndex, reader, member, out var elementValue))
+                foreach (var map in Values)
                 {
-                    EnumerableFactory.Set(map.Key, (TValue)elementValue);
+                    if (map.Value.TryGetValue(sheet, rowIndex, reader, member, out var elementValue))
+                    {
+                        EnumerableFactory.Set(map.Key, (TValue)elementValue);
+                    }
                 }
-            }
 
-            value = EnumerableFactory.End();
-            return true;
-        }
-        finally
-        {
-            EnumerableFactory.Reset();
+                value = EnumerableFactory.End();
+                return true;
+            }
+            finally
+            {
+                EnumerableFactory.Reset();
+            }
         }
     }
 }

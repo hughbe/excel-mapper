@@ -43,17 +43,31 @@ public class DateOnlyMapper : ICellMapper, IFormatsCellMapper
         {
             return CellMapperResult.Success(DateOnly.FromDateTime(dateTimeValue));
         }
+
+        // A number in a cell without a date format is Excel's serial date (days since 1899-12-30).
+        if (ExcelDateUtilities.TryGetDateTime(readResult.GetValue(), out var serialDate))
+        {
+            return CellMapperResult.Success(DateOnly.FromDateTime(serialDate));
+        }
         
         var stringValue = readResult.GetString();
+        var formats = Formats;
+        var provider = Provider;
+        var style = Style;
         try
         {
-            var result = DateOnly.ParseExact(stringValue!, Formats, Provider, Style);
-            return CellMapperResult.Success(result);
+            if (DateOnly.TryParseExact(stringValue, formats, provider, style, out var result))
+            {
+                return CellMapperResult.Success(result);
+            }
         }
         catch (Exception exception)
         {
             return CellMapperResult.Invalid(exception);
         }
+
+        // Only create the exception (by parsing again) if it is needed.
+        return MapperUtilities.InvalidFromParse(() => DateOnly.ParseExact(stringValue!, formats, provider, style));
     }
 }
 #endif

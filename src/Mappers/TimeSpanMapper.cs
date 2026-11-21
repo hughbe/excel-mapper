@@ -42,16 +42,37 @@ public class TimeSpanMapper : ICellMapper, IFormatsCellMapper
         {
             return CellMapperResult.Success(timeSpanValue);
         }
+
+        // Cells formatted as a time of day (rather than a duration) are read as a DateTime on Excel's
+        // first day.
+        if (readResult.GetValue() is DateTime dateTimeValue && ExcelDateUtilities.IsTimeOfDayOnly(dateTimeValue))
+        {
+            return CellMapperResult.Success(dateTimeValue.TimeOfDay);
+        }
+
+        // A number in a cell without a time format is a number of days, as Excel stores durations.
+        if (readResult.GetValue() is double days && !double.IsNaN(days) && Math.Abs(days) <= TimeSpan.MaxValue.TotalDays)
+        {
+            return CellMapperResult.Success(TimeSpan.FromTicks((long)Math.Round(days * TimeSpan.TicksPerDay)));
+        }
         
         var stringValue = readResult.GetString();
+        var formats = Formats;
+        var provider = Provider;
+        var style = Style;
         try
         {
-            var result = TimeSpan.ParseExact(stringValue!, Formats, Provider, Style);
-            return CellMapperResult.Success(result);
+            if (TimeSpan.TryParseExact(stringValue, formats, provider, style, out var result))
+            {
+                return CellMapperResult.Success(result);
+            }
         }
         catch (Exception exception)
         {
             return CellMapperResult.Invalid(exception);
         }
+
+        // Only create the exception (by parsing again) if it is needed.
+        return MapperUtilities.InvalidFromParse(() => TimeSpan.ParseExact(stringValue!, formats, provider, style));
     }
 }

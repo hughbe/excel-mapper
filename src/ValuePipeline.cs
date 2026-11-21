@@ -1,4 +1,6 @@
 using System.Reflection;
+using ExcelMapper.Fallbacks;
+using ExcelMapper.Transformers;
 
 namespace ExcelMapper;
 
@@ -69,8 +71,19 @@ public class ValuePipeline : IValuePipeline
         bool preserveFormatting,
         MemberInfo? member)
     {
-        foreach (var transformer in pipeline.Transformers)
+        // Use indexed loops: enumerating an IList through its interface allocates for every cell.
+        var transformers = pipeline.Transformers;
+        for (int i = 0; i < transformers.Count; i++)
         {
+            var transformer = transformers[i];
+
+            // Trimming only changes text. Skip it for other values, such as dates and numbers,
+            // so that they keep their type rather than being converted to a string and parsed again.
+            if (transformer is TrimStringCellTransformer && !preserveFormatting && readResult.GetValue() is not (string or null))
+            {
+                continue;
+            }
+
             readResult = new ReadCellResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult), preserveFormatting);
         }
 
@@ -80,9 +93,10 @@ public class ValuePipeline : IValuePipeline
         }
 
         CellMapperResult? finalResult = null;
-        foreach (var mapper in pipeline.Mappers)
+        var mappers = pipeline.Mappers;
+        for (int i = 0; i < mappers.Count; i++)
         {
-            var result = mapper.Map(readResult);
+            var result = mappers[i].Map(readResult);
             if (result.Action != CellMapperResult.HandleAction.IgnoreResultAndContinueMapping)
             {
                 finalResult = result;
@@ -97,7 +111,12 @@ public class ValuePipeline : IValuePipeline
 
         if ((finalResult == null || !finalResult.Value.Succeeded) && pipeline.InvalidFallback != null)
         {
-            return pipeline.InvalidFallback.PerformFallback(sheet, rowIndex, readResult, finalResult?.Exception, member);
+            // Fixed value fallbacks ignore the exception, so don't create it.
+            var fallbackType = pipeline.InvalidFallback.GetType();
+            var exception = fallbackType == typeof(FixedValueFallback) || fallbackType == typeof(FixedValueFallbackFactory)
+                ? null
+                : finalResult?.Exception;
+            return pipeline.InvalidFallback.PerformFallback(sheet, rowIndex, readResult, exception, member);
         }
 
         return finalResult?.Value;

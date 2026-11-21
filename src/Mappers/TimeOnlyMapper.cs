@@ -54,17 +54,31 @@ public class TimeOnlyMapper : ICellMapper, IFormatsCellMapper
         {
             return CellMapperResult.Success(TimeOnly.FromDateTime(dateTimeValue));
         }
+
+        // A number in a cell without a time format is a fraction of a day, for example 0.25 for 06:00.
+        if (readResult.GetValue() is double fractionOfDay && fractionOfDay >= 0 && fractionOfDay < 1)
+        {
+            return CellMapperResult.Success(new TimeOnly((long)Math.Round(fractionOfDay * TimeSpan.TicksPerDay)));
+        }
         
         var stringValue = readResult.GetString();
+        var formats = Formats;
+        var provider = Provider;
+        var style = Style;
         try
         {
-            var result = TimeOnly.ParseExact(stringValue!, Formats, Provider, Style);
-            return CellMapperResult.Success(result);
+            if (TimeOnly.TryParseExact(stringValue, formats, provider, style, out var result))
+            {
+                return CellMapperResult.Success(result);
+            }
         }
         catch (Exception exception)
         {
             return CellMapperResult.Invalid(exception);
         }
+
+        // Only create the exception (by parsing again) if it is needed.
+        return MapperUtilities.InvalidFromParse(() => TimeOnly.ParseExact(stringValue!, formats, provider, style));
     }
 }
 #endif

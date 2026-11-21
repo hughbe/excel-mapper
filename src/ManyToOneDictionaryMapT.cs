@@ -49,6 +49,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
         {
             ThrowHelpers.ThrowIfNull(value, nameof(value));
             _readerFactory = value;
+            _factoryCache.Clear();
         }
     }
 
@@ -57,7 +58,13 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
     /// </summary>
     public IDictionaryFactory<TKey, TValue> DictionaryFactory { get; }
     
-    private readonly ConcurrentDictionary<ExcelSheet, ICellsReader?> _factoryCache = new();
+    private readonly PerSheetCache<ICellsReader> _factoryCache = new();
+
+    // Factories build one value at a time, so a map shared between importers (for example
+    // a class map instance registered in several importers used concurrently) must not
+    // build two values at once.
+    private readonly object _buildLock = new();
+
 
     /// <inheritdoc/>
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
@@ -81,35 +88,38 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap where TKey : n
             throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
         }
 
-        DictionaryFactory.Begin(count);
-        try
+        lock (_buildLock)
         {
+            DictionaryFactory.Begin(count);
             try
             {
-                while (cellsReader.TryGetNext(out var valueResult))
+                try
                 {
-                    // Get the column name for the current value
-                    var elementKey = sheet.Heading.GetColumnName(valueResult.ColumnIndex);
-                    // Convert the string key to TKey
-                    TKey? convertedKey = (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
-                    if (convertedKey != null)
+                    while (cellsReader.TryGetNext(out var valueResult))
                     {
-                        var elementValue = ValuePipeline.CastValue<TValue>(ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, valueResult, PreserveFormatting, member), sheet, rowIndex, valueResult.ColumnIndex, member);
-                        DictionaryFactory.Add(convertedKey, elementValue);
+                        // Get the column name for the current value
+                        var elementKey = sheet.Heading.GetColumnName(valueResult.ColumnIndex);
+                        // Convert the string key to TKey
+                        TKey? convertedKey = elementKey is TKey key ? key : (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
+                        if (convertedKey != null)
+                        {
+                            var elementValue = ValuePipeline.CastValue<TValue>(ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, valueResult, PreserveFormatting, member), sheet, rowIndex, valueResult.ColumnIndex, member);
+                            DictionaryFactory.Add(convertedKey, elementValue);
+                        }
                     }
                 }
+                finally
+                {
+                    cellsReader.Reset();
+                }
+
+                value = DictionaryFactory.End();
+                return true;
             }
             finally
             {
-                cellsReader.Reset();
+                DictionaryFactory.Reset();
             }
-
-            value = DictionaryFactory.End();
-            return true;
-        }
-        finally
-        {
-            DictionaryFactory.Reset();
         }
     }
 

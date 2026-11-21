@@ -64,9 +64,11 @@ public class ExcelClassMap : IMap
         if (plan.Constructor is null)
         {
             // Create an instance of the object and populate its properties.
-            var instance = Activator.CreateInstance(Type)!;
-            foreach (var property in Properties)
+            var instance = plan.CreateInstance!();
+            var properties = Properties;
+            for (int i = 0; i < properties.Count; i++)
             {
+                var property = properties[i];
                 if (property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out var value))
                 {
                     property.SetValueFactory(instance, value);
@@ -84,13 +86,17 @@ public class ExcelClassMap : IMap
     private object CreateUsingConstructor(ConstructionPlan plan, ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
     {
         // Read every member first, as constructor arguments must be known before the object exists.
-        var count = Properties.Count;
-        var values = new object?[count];
-        var hasValues = new bool[count];
+        var properties = Properties;
+        var count = properties.Count;
         var arguments = (object?[])plan.DefaultArguments.Clone();
+
+        // Values for members set after construction. Only allocated if there are any, which there
+        // usually aren't for records.
+        object?[]? values = null;
+        bool[]? hasValues = null;
         for (int i = 0; i < count; i++)
         {
-            var property = Properties[i];
+            var property = properties[i];
             if (property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out var value))
             {
                 var parameterIndex = plan.PropertyParameterIndices[i];
@@ -100,6 +106,8 @@ public class ExcelClassMap : IMap
                 }
                 else
                 {
+                    values ??= new object?[count];
+                    hasValues ??= new bool[count];
                     values[i] = value;
                     hasValues[i] = true;
                 }
@@ -109,19 +117,23 @@ public class ExcelClassMap : IMap
         object instance;
         try
         {
-            instance = plan.Constructor!.Invoke(arguments);
+            instance = plan.InvokeConstructor!(arguments);
         }
-        catch (TargetInvocationException ex) when (ex.InnerException is not null)
+        catch (Exception ex)
         {
-            throw new ExcelMappingException($"Could not create an instance of type \"{Type}\": {ex.InnerException.Message}", sheet, rowIndex, -1, ex.InnerException);
+            var inner = ex is TargetInvocationException { InnerException: { } invocationInner } ? invocationInner : ex;
+            throw new ExcelMappingException($"Could not create an instance of type \"{Type}\": {inner.Message}", sheet, rowIndex, -1, inner);
         }
 
         // Set any members that weren't passed to the constructor.
-        for (int i = 0; i < count; i++)
+        if (hasValues is not null)
         {
-            if (hasValues[i])
+            for (int i = 0; i < count; i++)
             {
-                Properties[i].SetValueFactory(instance, values[i]!);
+                if (hasValues[i])
+                {
+                    properties[i].SetValueFactory(instance, values![i]!);
+                }
             }
         }
 
@@ -157,7 +169,7 @@ public class ExcelClassMap : IMap
         // set through a constructor.
         if (!hasReadOnlyMember && ConstructorUtilities.HasParameterlessConstructor(Type))
         {
-            return new ConstructionPlan(version, null, [], []);
+            return new ConstructionPlan(version, null, [], []) { CreateInstance = CompiledAccessors.GetParameterlessConstructor(Type) };
         }
 
         if (Type.IsInterface || Type.IsAbstract)
@@ -205,7 +217,7 @@ public class ExcelClassMap : IMap
             }
         }
 
-        return new ConstructionPlan(version, constructor, propertyParameterIndices, defaultArguments);
+        return new ConstructionPlan(version, constructor, propertyParameterIndices, defaultArguments) { InvokeConstructor = CompiledAccessors.GetConstructor(constructor) };
     }
 
     private sealed class ConstructionPlan(int version, ConstructorInfo? constructor, int[] propertyParameterIndices, object?[] defaultArguments)
@@ -223,6 +235,16 @@ public class ExcelClassMap : IMap
         public int[] PropertyParameterIndices { get; } = propertyParameterIndices;
 
         public object?[] DefaultArguments { get; } = defaultArguments;
+
+        /// <summary>
+        /// Creates an instance using the parameterless constructor, if <see cref="Constructor"/> is null.
+        /// </summary>
+        public Func<object>? CreateInstance { get; set; }
+
+        /// <summary>
+        /// Calls <see cref="Constructor"/> with an array of arguments.
+        /// </summary>
+        public Func<object?[], object>? InvokeConstructor { get; set; }
     }
 
     /// <summary>

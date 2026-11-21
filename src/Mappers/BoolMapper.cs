@@ -28,16 +28,23 @@ public class BoolMapper : ICellMapper
             return CellMapperResult.Success(s_boxedFalse);
         }
 
-        try
+        // Spreadsheets often use "Yes" and "No".
+        if (string.Equals(stringValue, "yes", StringComparison.OrdinalIgnoreCase))
         {
-            // Discarding stringValue nullability warning.
-            // If null - CellMapperResult.Invalid with ArgumentNullException will be returned
-            var result = bool.Parse(stringValue!);
-            return CellMapperResult.Success(result);
+            return CellMapperResult.Success(s_boxedTrue);
         }
-        catch (Exception exception)
+        if (string.Equals(stringValue, "no", StringComparison.OrdinalIgnoreCase))
         {
-            return CellMapperResult.Invalid(exception);
+            return CellMapperResult.Success(s_boxedFalse);
         }
+
+        if (bool.TryParse(stringValue, out var result))
+        {
+            return CellMapperResult.Success(result ? s_boxedTrue : s_boxedFalse);
+        }
+
+        // Only create the exception (by parsing again) if it is needed. If stringValue is null this
+        // is an ArgumentNullException.
+        return MapperUtilities.InvalidFromParse(() => bool.Parse(stringValue!));
     }
 }
