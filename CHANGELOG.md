@@ -35,6 +35,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - `ExcelRange` equality operators, `ToString()` (an Excel address such as `"A1:B10"`) and `$` absolute references. ([#117](https://github.com/hughbe/excel-mapper/pull/117))
 - `WithColumnsMatching(Func<string, bool>)`, `WithColumnsMatching(Regex)` and `WithColumnNameMatching(Regex)`. ([#119](https://github.com/hughbe/excel-mapper/pull/119))
 - `CellMapperResult.Invalid(Func<Exception>)` for mappers that create exceptions only when needed. ([#121](https://github.com/hughbe/excel-mapper/pull/121))
+- Dates and times written as text (in CSV files, for example) are accepted in more formats by default: ISO 8601 (`2024-03-04`, `2024-03-04T10:30:15Z`) and the culture's short date and short date and time for `DateTime` and `DateTimeOffset`, ISO 8601 for `DateOnly`, and the culture's long time and 24-hour times for `TimeOnly`. Set formats with `[ExcelFormats]` or `WithFormats` to accept only those. ([#139](https://github.com/hughbe/excel-mapper/pull/139))
 - Numbers in cells without a date format map to `DateTime`, `DateTimeOffset` and `DateOnly` (Excel serial dates), `TimeOnly` (fraction of a day) and `TimeSpan` (days); time cells map to `TimeSpan`; `bool` accepts "yes" and "no". ([#123](https://github.com/hughbe/excel-mapper/pull/123))
 - Sheets without a heading can be auto-mapped when columns aren't looked up by name, for example primitives or `[ExcelColumnIndex]` members. ([#119](https://github.com/hughbe/excel-mapper/pull/119))
 - `ExcelMappingException` is thrown, instead of `NullReferenceException`, when an empty value can't be assigned to a non-nullable value type. ([#116](https://github.com/hughbe/excel-mapper/pull/116))
@@ -53,6 +54,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Fixed
 
+- Dates and times with AM/PM written with an ordinary space (`3/4/2024 10:30:15 AM`) were invalid for en-US and similar cultures on ICU-based .NET (Linux, macOS and Windows since .NET 5), whose patterns use a narrow no-break space. ([#139](https://github.com/hughbe/excel-mapper/pull/139))
 - Rows after an empty line in a CSV file were silently dropped, a sheet with empty lines above its heading returned no rows, and row ranges counted from the end of a CSV file (such as `..^1`) were off by the number of empty lines. Empty lines at the end of a CSV file are still ignored. ([#137](https://github.com/hughbe/excel-mapper/pull/137))
 - A `DataRange` ending after the last row of the sheet mapped the last row twice. ([#137](https://github.com/hughbe/excel-mapper/pull/137))
 - A `DataRange` that skips leading columns read values from the wrong columns. ([#116](https://github.com/hughbe/excel-mapper/pull/116))

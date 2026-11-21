@@ -13,7 +13,10 @@ public class DateOnlyMapper : ICellMapper, IFormatsCellMapper
     /// <summary>
     /// Gets or sets the date formats used to map the value to a DateOnly.
     /// This defaults to "d" - the default DateOnly format.
+    /// While the formats haven't been set, values that don't match also try ISO 8601, such as "2024-03-04".
     /// </summary>
+    private bool _formatsSet;
+
     public string[] Formats
     {
         get => _formats;
@@ -21,6 +24,7 @@ public class DateOnlyMapper : ICellMapper, IFormatsCellMapper
         {
             FormatUtilities.ValidateFormats(value);
             _formats = value;
+            _formatsSet = true;
         }
     }
 
@@ -56,7 +60,8 @@ public class DateOnlyMapper : ICellMapper, IFormatsCellMapper
         var style = Style;
         try
         {
-            if (DateOnly.TryParseExact(stringValue, formats, provider, style, out var result))
+            if (DateOnly.TryParseExact(stringValue, formats, provider, style, out var result) ||
+                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateOnly.TryParseExact(stringValue, FormatUtilities.DefaultDateOnlyFormats, provider, style, out result)))
             {
                 return CellMapperResult.Success(result);
             }
