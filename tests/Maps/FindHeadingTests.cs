@@ -295,6 +295,22 @@ public class FindHeadingTests
         Assert.Equal("Alice", sheet.ReadRows<Person>().Single().Name);
     }
 
+    [Theory]
+    [InlineData(49, true)]
+    [InlineData(50, false)]
+    public void FindHeading_Default_SearchesFirst50Rows(int rowsAbove, bool found)
+    {
+        var csv = string.Concat(Enumerable.Repeat("x\n", rowsAbove)) + "Name,Age\nAlice,34\n";
+        using var importer = Helpers.GetCsvImporter(csv);
+        var sheet = importer.ReadSheet();
+        Assert.Equal(found, sheet.TryFindHeading<Person>(out _));
+        if (found)
+        {
+            Assert.Equal(rowsAbove, sheet.HeadingIndex);
+            Assert.Equal("Alice", sheet.ReadRows<Person>().Single().Name);
+        }
+    }
+
     [Fact]
     public void TryFindHeading_NotFound_LeavesSheetUnchanged()
     {

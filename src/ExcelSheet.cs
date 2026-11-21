@@ -542,15 +542,12 @@ public class ExcelSheet
         return foundProblems.Count == 0;
     }
 
-    /// <summary>
-    /// The number of rows that <see cref="FindHeading{T}()"/> and <see cref="TryFindHeading{T}(out ExcelHeading)"/>
-    /// search by default.
-    /// </summary>
-    public const int DefaultHeadingSearchRows = 50;
+    // The number of rows FindHeading and TryFindHeading search by default (documented as 50).
+    private const int DefaultHeadingSearchRows = 50;
 
     /// <summary>
     /// Finds the heading of a sheet with rows above it, such as a title or notes, and reads it. The
-    /// heading is the first row, among the first <see cref="DefaultHeadingSearchRows"/> rows, that
+    /// heading is the first row, among the first 50 rows, that
     /// has every column <typeparamref name="T"/> needs by name and at least one of its columns.
     /// Blank rows are skipped. Rows are then read from the row after the heading.
     /// </summary>

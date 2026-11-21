@@ -1170,7 +1170,6 @@ public class ExcelSheetTests
         Assert.Equal(["Value"], heading.ColumnNames);
         Assert.Equal(0, sheet.HeadingIndex);
         Assert.True(sheet.HasHeading);
-        Assert.Equal(50, ExcelSheet.DefaultHeadingSearchRows);
     }
 
     [Theory]
