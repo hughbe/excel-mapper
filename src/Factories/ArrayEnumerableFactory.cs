@@ -7,7 +7,7 @@ namespace ExcelMapper.Factories;
 /// Constructs an array by pre-allocating storage and adding items sequentially.
 /// </summary>
 /// <typeparam name="T">The type of the array elements.</typeparam>
-public class ArrayEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
+internal sealed class ArrayEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
 {
     private int _currentIndex = -1;
     private T?[]? _items;
@@ -15,13 +15,6 @@ public class ArrayEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ThrowHelpers.ThrowIfNegative(count, nameof(count));
-
-        if (_items is not null)
-        {
-            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
-        }
-
         _items = new T[count];
         _currentIndex = 0;
     }
@@ -29,16 +22,13 @@ public class ArrayEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
     /// <inheritdoc/>
     public void Add(T? item)
     {
-        EnsureMapping();
-        _items[_currentIndex++] = item;
+        _items![_currentIndex++] = item;
     }
 
     /// <inheritdoc/>
     public void Set(int index, T? item)
     {
-        ThrowHelpers.ThrowIfNegative(index, nameof(index));
-        EnsureMapping();
-        ThrowHelpers.ThrowIfGreaterThanOrEqual(index, _items.Length, nameof(index));
+        ThrowHelpers.ThrowIfGreaterThanOrEqual(index, _items!.Length, nameof(index));
 
         _items[index] = item;
     }
@@ -46,11 +36,9 @@ public class ArrayEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
     /// <inheritdoc/>
     public object End()
     {
-        EnsureMapping();
-
         try
         {
-            return _items;
+            return _items!;
         }
         finally
         {
@@ -78,16 +66,5 @@ public class ArrayEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
     {
         _items = null;
         _currentIndex = -1;
-    }
-
-    [MemberNotNull(nameof(_items))]
-    private void EnsureMapping()
-    {
-        if (_items is null)
-        {
-            throw new ExcelMappingException("Has not started mapping.");
-        }
-
-        Debug.Assert(_currentIndex >= 0);
     }
 }

@@ -7,7 +7,7 @@ namespace ExcelMapper.Factories;
 /// Constructs an ImmutableArray&lt;T&gt; by using a builder and converting to immutable at the end.
 /// </summary>
 /// <typeparam name="T">The type of the array elements.</typeparam>
-public class ImmutableArrayEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
+internal sealed class ImmutableArrayEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
 {
     private ImmutableArray<T?>.Builder? _builder;
     private int _currentIndex = -1;
@@ -15,13 +15,6 @@ public class ImmutableArrayEnumerableFactory<T> : IEnumerableFactory<T>, IBindin
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ThrowHelpers.ThrowIfNegative(count, nameof(count));
-
-        if (_builder is not null)
-        {
-            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
-        }
-
         _builder = ImmutableArray.CreateBuilder<T?>(count);
         _builder.Count = count;
         _currentIndex = 0;
@@ -30,28 +23,23 @@ public class ImmutableArrayEnumerableFactory<T> : IEnumerableFactory<T>, IBindin
     /// <inheritdoc/>
     public void Add(T? item)
     {
-        EnsureMapping();
-        _builder[_currentIndex++] = item;
+        _builder![_currentIndex++] = item;
     }
 
     /// <inheritdoc/>
     public void Set(int index, T? item)
     {
-        ThrowHelpers.ThrowIfNegative(index, nameof(index));
-        EnsureMapping();
-        ThrowHelpers.ThrowIfGreaterThanOrEqual(index, _builder.Count, nameof(index));
+        ThrowHelpers.ThrowIfGreaterThanOrEqual(index, _builder!.Count, nameof(index));
         _builder[index] = item;
     }
 
     /// <inheritdoc/>
     public object End()
     {
-        EnsureMapping();
-
         try
         {
             // The builder was created at the final size, so its array becomes the result without a copy.
-            return _builder.Capacity == _builder.Count ? _builder.MoveToImmutable() : _builder.ToImmutable();
+            return _builder!.Capacity == _builder.Count ? _builder.MoveToImmutable() : _builder.ToImmutable();
         }
         finally
         {
@@ -79,14 +67,5 @@ public class ImmutableArrayEnumerableFactory<T> : IEnumerableFactory<T>, IBindin
     public void Reset()
     {
         _builder = null;
-    }
-
-    [MemberNotNull(nameof(_builder))]
-    private void EnsureMapping()
-    {
-        if (_builder is null)
-        {
-            throw new ExcelMappingException("Has not started mapping.");
-        }
     }
 }

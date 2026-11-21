@@ -38,7 +38,8 @@
       frameworks in the package are consistent). Intentional breaks are listed, with reasons, in
       CompatibilitySuppressions.xml; regenerate it with
       dotnet pack -c Release -p:GenerateCompatibilitySuppressionFile=true
-      and update the baseline after each release.
+      (regenerating drops the comments that give the reasons: add them back) and update the
+      baseline after each release.
     -->
     <EnablePackageValidation>true</EnablePackageValidation>
     <PackageValidationBaselineVersion>3.0.3</PackageValidationBaselineVersion>

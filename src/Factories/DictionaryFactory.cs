@@ -7,39 +7,28 @@ namespace ExcelMapper.Factories;
 /// </summary>
 /// <typeparam name="TKey">The type of the dictionary keys.</typeparam>
 /// <typeparam name="TValue">The type of the dictionary values.</typeparam>
-public class DictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue>, IBindingFactory where TKey : notnull
+internal sealed class DictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue>, IBindingFactory where TKey : notnull
 {
     private Dictionary<TKey, TValue?>? _items;
 
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ThrowHelpers.ThrowIfNegative(count, nameof(count));
-
-        if (_items is not null)
-        {
-            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
-        }
-
         _items = new Dictionary<TKey, TValue?>(count);
     }
 
     /// <inheritdoc/>
     public void Add(TKey key, TValue? value)
     {
-        ThrowHelpers.ThrowIfNull(key, nameof(key));
-        EnsureMapping();
-        _items.Add(key, value);
+        _items!.Add(key, value);
     }
 
     /// <inheritdoc/>
     public object End()
     {
-        EnsureMapping();
-
         try
         {
-            return _items;
+            return _items!;
         }
         finally
         {
@@ -66,14 +55,5 @@ public class DictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue>,
     public void Reset()
     {
         _items = null;
-    }
-
-    [MemberNotNull(nameof(_items))]
-    private void EnsureMapping()
-    {
-        if (_items == null)
-        {
-            throw new ExcelMappingException("Has not started mapping.");
-        }
     }
 }

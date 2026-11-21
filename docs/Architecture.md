@@ -303,7 +303,7 @@ Attributes control mapping behavior declaratively:
 
 ### 8. Factory System
 
-Factories create collection instances during mapping:
+Factories (internal) create collection instances during mapping:
 
 #### Enumerable Factories (`IEnumerableFactory<T>`)
 

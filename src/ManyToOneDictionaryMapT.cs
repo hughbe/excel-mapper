@@ -18,7 +18,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// contained by the property or field.
     /// </summary>
     /// <param name="valuePipeline">The map that maps the value of a single cell to an object of the element type of the property or field.</param>
-    public ManyToOneDictionaryMap(ICellsReaderFactory readerFactory, IDictionaryFactory<TKey, TValue> dictionaryFactory)
+    internal ManyToOneDictionaryMap(ICellsReaderFactory readerFactory, IDictionaryFactory<TKey, TValue> dictionaryFactory)
     {
         ThrowHelpers.ThrowIfNull(readerFactory, nameof(readerFactory));
         ThrowHelpers.ThrowIfNull(dictionaryFactory, nameof(dictionaryFactory));
@@ -56,7 +56,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// <summary>
     /// The factory for creating and adding elements to the list.
     /// </summary>
-    public IDictionaryFactory<TKey, TValue> DictionaryFactory { get; }
+    internal IDictionaryFactory<TKey, TValue> DictionaryFactory { get; }
 
     // Factories build one value at a time, so a map shared between importers (for example
     // a class map instance registered in several importers used concurrently) must not

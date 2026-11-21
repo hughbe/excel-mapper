@@ -8,13 +8,8 @@ namespace ExcelMapper.Factories;
 /// </summary>
 /// <typeparam name="TKey">The type of the dictionary keys.</typeparam>
 /// <typeparam name="TValue">The type of the dictionary values.</typeparam>
-public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue>, IBindingFactory where TKey : notnull
+internal sealed class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue>, IBindingFactory where TKey : notnull
 {
-    /// <summary>
-    /// Gets the type of dictionary that this factory creates.
-    /// </summary>
-    [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
-    public Type DictionaryType { get; }
     private readonly Func<object, object> _construct;
 
     // Whether the constructor copies the collection passed to it, so the collection can be reused for the next row.
@@ -30,19 +25,8 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
     /// <exception cref="ArgumentException">Thrown when the dictionary type is invalid or unsupported.</exception>
     public ConstructorDictionaryFactory([DynamicallyAccessedMembers(TrimmingConstants.CollectionType)] Type dictionaryType)
     {
-        ThrowHelpers.ThrowIfNull(dictionaryType, nameof(dictionaryType));
-        if (dictionaryType.IsInterface)
-        {
-            throw new ArgumentException("Interface dictionary types cannot be created. Use IDictionaryTImplementingFactory instead.", nameof(dictionaryType));
-        }
-        if (dictionaryType.IsAbstract)
-        {
-            throw new ArgumentException("Abstract dictionary types cannot be created.", nameof(dictionaryType));
-        }
-
         var constructor = dictionaryType.GetConstructor([typeof(IDictionary<TKey, TValue>)])
             ?? throw new ArgumentException($"Dictionary type {dictionaryType} does not have a constructor that takes {nameof(IDictionary<TKey, TValue>)}.", nameof(dictionaryType));
-        DictionaryType = dictionaryType;
         _construct = CompiledAccessors.GetConstructor1(constructor);
         _constructorCopies = CollectionUtilities.ConstructorCopies(dictionaryType);
     }
@@ -50,13 +34,6 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ThrowHelpers.ThrowIfNegative(count, nameof(count));
-
-        if (_items is not null)
-        {
-            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
-        }
-
         if (_buffer is not null)
         {
             // The buffer from the previous row: the result is a copy of it, so it can be reused.
@@ -72,18 +49,15 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
     /// <inheritdoc/>
     public void Add(TKey key, TValue? value)
     {
-        EnsureMapping();
         _items!.Add(key, value);
     }
 
     /// <inheritdoc/>
     public object End()
     {
-        EnsureMapping();
-
         try
         {
-            return _construct(_items);
+            return _construct(_items!);
         }
         finally
         {
@@ -118,14 +92,5 @@ public class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKe
         }
 
         _items = null;
-    }
-
-    [MemberNotNull(nameof(_items))]
-    private void EnsureMapping()
-    {
-        if (_items == null)
-        {
-            throw new ExcelMappingException("Has not started mapping.");
-        }
     }
 }

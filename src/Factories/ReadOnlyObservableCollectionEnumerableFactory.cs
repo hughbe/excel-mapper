@@ -8,13 +8,8 @@ namespace ExcelMapper.Factories;
 /// Constructs a ReadOnlyObservableCollection&lt;T&gt; by collecting items in an ObservableCollection and passing it to the constructor.
 /// </summary>
 /// <typeparam name="T">The type of the collection elements.</typeparam>
-public class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
+internal sealed class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
 {
-    /// <summary>
-    /// Gets the type of collection that this factory creates.
-    /// </summary>
-    [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
-    public Type CollectionType { get; }
     private readonly Func<object, object> _construct;
     private ObservableCollection<T?>? _items;
 
@@ -25,46 +20,28 @@ public class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFacto
     /// <exception cref="ArgumentException">Thrown when the collection type is invalid or unsupported.</exception>
     public ReadOnlyObservableCollectionEnumerableFactory([DynamicallyAccessedMembers(TrimmingConstants.CollectionType)] Type collectionType)
     {
-        ThrowHelpers.ThrowIfNull(collectionType, nameof(collectionType));
-        if (collectionType.IsAbstract)
-        {
-            throw new ArgumentException("Abstract collection types cannot be created.", nameof(collectionType));
-        }
-
         var constructor = collectionType.GetConstructor([typeof(ObservableCollection<T>)])
             ?? throw new ArgumentException($"Collection type {collectionType} does not have a constructor that takes {nameof(ObservableCollection<T>)}.", nameof(collectionType));
-        CollectionType = collectionType;
         _construct = CompiledAccessors.GetConstructor1(constructor);
     }
 
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ThrowHelpers.ThrowIfNegative(count, nameof(count));
-
-        if (_items is not null)
-        {
-            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
-        }
-
         _items = [];
     }
 
     /// <inheritdoc/>
     public void Add(T? item)
     {
-        EnsureMapping();
-        _items.Add(item);
+        _items!.Add(item);
     }
 
     /// <inheritdoc/>
     public void Set(int index, T? item)
     {
-        ThrowHelpers.ThrowIfNegative(index, nameof(index));
-        EnsureMapping();
-
         // Grow the list if necessary.
-        while (_items.Count <= index)
+        while (_items!.Count <= index)
         {
             _items.Add(default);
         }
@@ -75,11 +52,9 @@ public class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFacto
     /// <inheritdoc/>
     public object End()
     {
-        EnsureMapping();
-
         try
         {
-            return _construct(_items);
+            return _construct(_items!);
         }
         finally
         {
@@ -106,14 +81,5 @@ public class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumerableFacto
     public void Reset()
     {
         _items = null;
-    }
-
-    [MemberNotNull(nameof(_items))]
-    private void EnsureMapping()
-    {
-        if (_items == null)
-        {
-            throw new ExcelMappingException("Has not started mapping.");
-        }
     }
 }

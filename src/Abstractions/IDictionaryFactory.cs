@@ -23,7 +23,7 @@ namespace ExcelMapper.Abstractions;
 /// will throw an <see cref="ExcelMappingException"/>.
 /// </para>
 /// </remarks>
-public interface IDictionaryFactory<TKey, TValue>
+internal interface IDictionaryFactory<TKey, TValue>
 {
     /// <summary>
     /// Begins a new dictionary creation operation with the expected number of entries.

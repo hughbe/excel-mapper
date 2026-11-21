@@ -7,13 +7,8 @@ namespace ExcelMapper.Factories;
 /// Constructs a set by passing a HashSet&lt;T&gt; of items to a constructor that accepts ISet&lt;T&gt;.
 /// </summary>
 /// <typeparam name="T">The type of the set elements.</typeparam>
-public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
+internal sealed class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
 {
-    /// <summary>
-    /// Gets the type of set that this factory creates.
-    /// </summary>
-    [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
-    public Type SetType { get; }
     private readonly Func<object, object> _construct;
 
     private HashSet<T?>? _items;
@@ -25,33 +20,15 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>, IBindin
     /// <exception cref="ArgumentException">Thrown when the set type is invalid or unsupported.</exception>
     public ConstructorSetEnumerableFactory([DynamicallyAccessedMembers(TrimmingConstants.CollectionType)] Type setType)
     {
-        ThrowHelpers.ThrowIfNull(setType, nameof(setType));
-        if (setType.IsInterface)
-        {
-            throw new ArgumentException("Interface set types cannot be created. Use HashSetEnumerableFactory instead.", nameof(setType));
-        }
-        if (setType.IsAbstract)
-        {
-            throw new ArgumentException("Abstract set types cannot be created.", nameof(setType));
-        }
-
         var constructor = setType.GetConstructor(new[] { typeof(ISet<T>) })
             ?? throw new ArgumentException($"Set type {setType} does not have a constructor that takes {nameof(ISet<T?>)}.", nameof(setType));
 
-        SetType = setType;
         _construct = CompiledAccessors.GetConstructor1(constructor);
     }
 
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ThrowHelpers.ThrowIfNegative(count, nameof(count));
-
-        if (_items is not null)
-        {
-            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
-        }
-
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         _items = new HashSet<T?>(count);
 #else
@@ -62,25 +39,21 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>, IBindin
     /// <inheritdoc/>
     public void Add(T? item)
     {
-        EnsureMapping();
-        _items.Add(item);
+        _items!.Add(item);
     }
 
     /// <inheritdoc/>
     public void Set(int index, T? item)
     {
-        EnsureMapping();
         throw new NotSupportedException($"Set is not supported for {nameof(ConstructorSetEnumerableFactory<T>)}.");
     }
 
     /// <inheritdoc/>
     public object End()
     {
-        EnsureMapping();
-
         try
         {
-            return _construct(_items);
+            return _construct(_items!);
         }
         finally
         {
@@ -107,14 +80,5 @@ public class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>, IBindin
     public void Reset()
     {
         _items = null;
-    }
-
-    [MemberNotNull(nameof(_items))]
-    private void EnsureMapping()
-    {
-        if (_items == null)
-        {
-            throw new ExcelMappingException("Has not started mapping.");
-        }
     }
 }

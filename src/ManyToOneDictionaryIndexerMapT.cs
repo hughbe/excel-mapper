@@ -15,7 +15,7 @@ public class ManyToOneDictionaryIndexerMapT<TKey, TValue> : IDictionaryIndexerMa
     // build two values at once.
     private readonly object _buildLock = new();
 
-    public ManyToOneDictionaryIndexerMapT(IDictionaryFactory<TKey, TValue> dictionaryFactory)
+    internal ManyToOneDictionaryIndexerMapT(IDictionaryFactory<TKey, TValue> dictionaryFactory)
     {
         ThrowHelpers.ThrowIfNull(dictionaryFactory, nameof(dictionaryFactory));
         DictionaryFactory = dictionaryFactory;
@@ -24,7 +24,7 @@ public class ManyToOneDictionaryIndexerMapT<TKey, TValue> : IDictionaryIndexerMa
     /// <summary>
     /// The factory for creating and adding elements to the list.
     /// </summary>
-    public IDictionaryFactory<TKey, TValue> DictionaryFactory { get; }
+    internal IDictionaryFactory<TKey, TValue> DictionaryFactory { get; }
 
     /// <inheritdoc/>
     public Dictionary<object, IMap> Values { get; } = [];

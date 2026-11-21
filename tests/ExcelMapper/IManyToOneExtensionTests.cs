@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
 using ExcelMapper.Abstractions;
-using ExcelMapper.Factories;
 using ExcelMapper.Readers;
 
 namespace ExcelMapper.Tests;
@@ -15,8 +14,7 @@ public class IManyToOneMapExtensionsTests
     {
         var columnNames = new string[] { "ColumnName1", "ColumnName2" };
         var factory = new ColumnNamesReaderFactory("Column");
-        var dictionaryFactory = new DictionaryFactory<string, string>();
-        var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory).WithColumnNames("ColumnNames");
+        var map = CreateMap(factory).WithColumnNames("ColumnNames");
         Assert.Same(map, map.WithColumnNames(columnNames));
 
         var valueReader = Assert.IsType<ColumnNamesReaderFactory>(map.ReaderFactory);
@@ -47,8 +45,7 @@ public class IManyToOneMapExtensionsTests
     {
         var columnNames = new string[] { "ColumnName1", "ColumnName2" };
         var factory = new ColumnNamesReaderFactory("Column");
-        var dictionaryFactory = new DictionaryFactory<string, string>();
-        var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory).WithColumnNames("ColumnNames");
+        var map = CreateMap(factory).WithColumnNames("ColumnNames");
         Assert.Same(map, map.WithColumnNames(columnNames, comparison));
 
         var valueReader = Assert.IsType<ColumnNamesReaderFactory>(map.ReaderFactory);
@@ -78,8 +75,7 @@ public class IManyToOneMapExtensionsTests
     public void WithColumnNames_NullColumnNames_ThrowsArgumentNullException()
     {
         var factory = new ColumnNamesReaderFactory("Column");
-        var dictionaryFactory = new DictionaryFactory<string, string>();
-        var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory).WithColumnNames("ColumnNames");
+        var map = CreateMap(factory).WithColumnNames("ColumnNames");
 
         Assert.Throws<ArgumentNullException>("columnNames", () => map.WithColumnNames(null!));
         Assert.Throws<ArgumentNullException>("columnNames", () => map.WithColumnNames(null!, StringComparison.OrdinalIgnoreCase));
@@ -91,8 +87,7 @@ public class IManyToOneMapExtensionsTests
     public void WithColumnNames_EmptyColumnNames_ThrowsArgumentException()
     {
         var factory = new ColumnNamesReaderFactory("Column");
-        var dictionaryFactory = new DictionaryFactory<string, string>();
-        var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory).WithColumnNames("ColumnNames");
+        var map = CreateMap(factory).WithColumnNames("ColumnNames");
 
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([]));
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([], StringComparison.OrdinalIgnoreCase));
@@ -104,8 +99,7 @@ public class IManyToOneMapExtensionsTests
     public void WithColumnNames_NullValueInColumnNames_ThrowsArgumentException()
     {
         var factory = new ColumnNamesReaderFactory("Column");
-        var dictionaryFactory = new DictionaryFactory<string, string>();
-        var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory).WithColumnNames("ColumnNames");
+        var map = CreateMap(factory).WithColumnNames("ColumnNames");
 
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([null!]));
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([null!], StringComparison.OrdinalIgnoreCase));
@@ -117,8 +111,7 @@ public class IManyToOneMapExtensionsTests
     public void WithColumnNames_EmptyValueInColumnNames_ThrowsArgumentException()
     {
         var factory = new ColumnNamesReaderFactory("Column");
-        var dictionaryFactory = new DictionaryFactory<string, string>();
-        var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory).WithColumnNames("ColumnNames");
+        var map = CreateMap(factory).WithColumnNames("ColumnNames");
 
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([""]));
         Assert.Throws<ArgumentException>("columnNames", () => map.WithColumnNames([""], StringComparison.OrdinalIgnoreCase));
@@ -133,8 +126,7 @@ public class IManyToOneMapExtensionsTests
     {
         var columnNames = new string[] { "ColumnName1", "ColumnName2" };
         var factory = new ColumnNamesReaderFactory("Column");
-        var dictionaryFactory = new DictionaryFactory<string, string>();
-        var map = new ManyToOneDictionaryMap<string, string>(factory, dictionaryFactory);
+        var map = CreateMap(factory);
         Assert.Throws<ArgumentOutOfRangeException>("comparison", () => map.WithColumnNames(columnNames, comparison));
         Assert.Throws<ArgumentOutOfRangeException>("comparison", () => map.WithColumnNames((IEnumerable<string>)columnNames, comparison));
     }
@@ -307,5 +299,17 @@ public class IManyToOneMapExtensionsTests
     {
         var map = new CustomManyToOneMap().WithColumnNames("ColumnNames");
         Assert.Throws<ArgumentNullException>("regex", () => map.WithColumnsMatching((System.Text.RegularExpressions.Regex)null!));
+    }
+
+    private static ManyToOneDictionaryMap<string, string> CreateMap(ICellsReaderFactory readerFactory)
+    {
+        var map = new ExcelClassMap<CreateMapRow>().Map(r => r.Values);
+        map.ReaderFactory = readerFactory;
+        return map;
+    }
+
+    private class CreateMapRow
+    {
+        public Dictionary<string, string> Values { get; set; } = [];
     }
 }
