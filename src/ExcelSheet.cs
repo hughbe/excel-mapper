@@ -21,6 +21,20 @@ namespace ExcelMapper;
 /// </remarks>
 public class ExcelSheet
 {
+    /// <summary>
+    /// Creates a sheet for the same worksheet as <paramref name="worksheet"/>, with its own heading
+    /// and position, for reading a region (see <see cref="ExcelRegion"/>).
+    /// </summary>
+    internal ExcelSheet(ExcelSheet worksheet)
+    {
+        Reader = worksheet.Reader;
+        Name = worksheet.Name;
+        Visibility = worksheet.Visibility;
+        Index = worksheet.Index;
+        NumberOfColumns = worksheet.NumberOfColumns;
+        Importer = worksheet.Importer;
+    }
+
     internal ExcelSheet(IExcelDataReader reader, int index, ExcelImporter importer)
     {
         Reader = reader;
@@ -109,6 +123,32 @@ public class ExcelSheet
     }
 
     private ExcelRange _dataRange = new();
+
+    /// <summary>
+    /// Gets a region of the whole worksheet, with the first row as its heading. Unlike reading the
+    /// sheet, reading a region always starts at its top, and doesn't use or change this sheet's
+    /// heading, <see cref="DataRange"/> or position.
+    /// </summary>
+    /// <returns>The region.</returns>
+    public ExcelRegion Region() => new(this, default);
+
+    /// <summary>
+    /// Gets a region of the worksheet, with its first row as its heading. Use regions to read part of
+    /// a sheet, or several tables on one sheet.
+    /// </summary>
+    /// <param name="range">The rows and columns of the region, in worksheet coordinates.</param>
+    /// <returns>The region.</returns>
+    public ExcelRegion Region(ExcelRange range) => new(this, range);
+
+    /// <summary>
+    /// Gets a region of the worksheet, with its first row as its heading. Use regions to read part of
+    /// a sheet, or several tables on one sheet.
+    /// </summary>
+    /// <param name="address">The address of the region, such as "B3:F20", "$B$3:$F$20", "B:F" or "3:20".</param>
+    /// <returns>The region.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="address"/> is null.</exception>
+    /// <exception cref="ArgumentException"><paramref name="address"/> is empty or not a valid address.</exception>
+    public ExcelRegion Region(string address) => new(this, ExcelRange.Parse(address));
 
     /// <summary>
     /// Gets or sets the range of rows and columns that contain data to be mapped. By default this is all rows and columns.
@@ -542,7 +582,7 @@ public class ExcelSheet
     }
 
     // The number of rows FindHeading and TryFindHeading search by default (documented as 50).
-    private const int DefaultHeadingSearchRows = 50;
+    internal const int DefaultHeadingSearchRows = 50;
 
     /// <summary>
     /// Finds the heading of a sheet with rows above it, such as a title or notes, and reads it. The
@@ -616,7 +656,7 @@ public class ExcelSheet
 
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    private bool TryFindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int maxRows, [NotNullWhen(true)] out ExcelHeading? heading, [NotNullWhen(false)] out string? error)
+    internal bool TryFindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int maxRows, [NotNullWhen(true)] out ExcelHeading? heading, [NotNullWhen(false)] out string? error)
     {
         if (Reader.IsClosed)
         {
@@ -718,7 +758,9 @@ public class ExcelSheet
         // Check if we've reached the end of the data range. Only count the rows for ranges
         // relative to the end of the sheet: otherwise read until there are no more rows.
         var rows = _dataRange.Rows;
-        var endRowIndex = rows.End.IsFromEnd && rows.End.Value == 0 ? int.MaxValue : rows.End.GetOffset(GetRowCount());
+        var endRowIndex = !rows.End.IsFromEnd ? rows.End.Value
+            : rows.End.Value == 0 ? int.MaxValue
+            : rows.End.GetOffset(GetRowCount());
         if (CurrentRowIndex + 1 >= endRowIndex)
         {
             return false;
@@ -727,6 +769,11 @@ public class ExcelSheet
         // Skip any rows before the start of the data range. If the sheet has a heading, the
         // heading row is the start of the data range and has already been read.
         var startRowIndex = rows.Start.IsFromEnd ? rows.Start.GetOffset(GetRowCount()) : rows.Start.Value;
+        if (FirstDataRow is { } firstDataRow)
+        {
+            startRowIndex = Math.Max(startRowIndex, firstDataRow.IsFromEnd ? firstDataRow.GetOffset(GetRowCount()) : firstDataRow.Value);
+        }
+
         if (CurrentRowIndex + 1 < startRowIndex)
         {
             if (startRowIndex >= endRowIndex || !TryReadUpTo(startRowIndex - 1))
@@ -768,6 +815,12 @@ public class ExcelSheet
     }
 
     private int GetRowCount() => Importer.RowSource.GetRowCount(Index);
+
+    /// <summary>
+    /// The first row that can be data, if the heading is above the rows to read (see
+    /// <see cref="ExcelRegion.WithHeadingAt(int)"/>). Rows between the heading and this row are skipped.
+    /// </summary>
+    internal Index? FirstDataRow { get; set; }
 
     private sealed class BoundClassMap(int version, BoundMember[] members)
     {

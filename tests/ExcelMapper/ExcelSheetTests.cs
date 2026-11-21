@@ -1161,6 +1161,78 @@ public class ExcelSheetTests
     }
 
     [Fact]
+    public void Region_Invoke_ReturnsWholeWorksheet()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        var region = sheet.Region();
+        Assert.Same(sheet, region.Sheet);
+        Assert.Equal(default, region.Range);
+        Assert.NotSame(region, sheet.Region());
+    }
+
+    public static IEnumerable<object[]> Region_ExcelRange_TestData()
+    {
+        yield return new object[] { new ExcelRange("B3:F20") };
+        yield return new object[] { new ExcelRange(1..5, 0..2) };
+        yield return new object[] { new ExcelRange(..^1, Range.All) };
+    }
+
+    [Theory]
+    [MemberData(nameof(Region_ExcelRange_TestData))]
+    public void Region_ExcelRange_ReturnsExpected(ExcelRange range)
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        var region = sheet.Region(range);
+        Assert.Same(sheet, region.Sheet);
+        Assert.Equal(range, region.Range);
+    }
+
+    [Theory]
+    [InlineData("B3:F20")]
+    [InlineData("$B$3:$F$20")]
+    [InlineData("B:F")]
+    [InlineData("3:20")]
+    public void Region_String_ReturnsExpected(string address)
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        var region = sheet.Region(address);
+        Assert.Same(sheet, region.Sheet);
+        Assert.Equal(new ExcelRange(address), region.Range);
+    }
+
+    [Fact]
+    public void Region_NullAddress_ThrowsArgumentNullException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        Assert.Throws<ArgumentNullException>("address", () => sheet.Region((string)null!));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("A2:B")]
+    [InlineData("invalid")]
+    public void Region_InvalidAddress_ThrowsArgumentException(string address)
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        Assert.Throws<ArgumentException>("address", () => sheet.Region(address));
+    }
+
+    [Fact]
+    public void Region_AfterReadingHeading_DoesNotUseSheetHeading()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+        var values = sheet.Region().ReadRows<StringValue>().Select(v => v.Value).ToArray();
+        Assert.Equal(sheet.ReadRows<StringValue>().Select(v => v.Value).ToArray(), values);
+    }
+
+    [Fact]
     public void FindHeading_Invoke_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");

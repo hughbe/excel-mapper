@@ -31,6 +31,13 @@ Check("Dictionary", () => string.Join(",", ExcelImporter.ReadRows<Dictionary<str
 
 Check("Enum", () => ExcelImporter.ReadRows<Scheduled>(Csv("Day\nMonday\n"), ExcelImporterFileType.Csv).Single().Day.ToString(), "Monday");
 
+Check("Region", () =>
+{
+    using var importer = new ExcelImporter(Csv("Title,,,\n,Ref,Amount,\n,X,10,\n"), ExcelImporterFileType.Csv);
+    var order = importer.ReadSheet().Region("B2:C3").ReadRows<Order>().Single();
+    return $"{order.Total}";
+}, "10");
+
 Check("Nested object", () =>
 {
     KeepNestedTypes();
@@ -81,7 +88,9 @@ public record Item(string Sku, double Price);
 
 public class Order
 {
+    [ExcelColumnNames("Id", "Ref")]
     public string? Id { get; set; }
+    [ExcelColumnNames("Total", "Amount")]
     public decimal Total { get; set; }
 }
 
