@@ -55,6 +55,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Fixed
 
+- Two `ExcelSheet` objects for the same worksheet (for example from calling `ReadSheet(name)` twice) shared the reader's position, so reading from one made the other read the wrong rows, or its heading from the wrong row. Each sheet now keeps its own position. ([#141](https://github.com/hughbe/excel-mapper/pull/141))
 - Dates and times with AM/PM written with an ordinary space (`3/4/2024 10:30:15 AM`) were invalid for en-US and similar cultures on ICU-based .NET (Linux, macOS and Windows since .NET 5), whose patterns use a narrow no-break space. ([#139](https://github.com/hughbe/excel-mapper/pull/139))
 - Rows after an empty line in a CSV file were silently dropped, a sheet with empty lines above its heading returned no rows, and row ranges counted from the end of a CSV file (such as `..^1`) were off by the number of empty lines. Empty lines at the end of a CSV file are still ignored. ([#137](https://github.com/hughbe/excel-mapper/pull/137))
 - A `DataRange` ending after the last row of the sheet mapped the last row twice. ([#137](https://github.com/hughbe/excel-mapper/pull/137))

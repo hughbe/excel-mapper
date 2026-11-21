@@ -15,14 +15,6 @@ public class ExcelImporter : IDisposable
     /// </summary>
     public IExcelDataReader Reader { get; }
 
-    private bool? _rowCountExcludesEmptyLines;
-
-    /// <summary>
-    /// Whether the reader's <see cref="IExcelDataReader.RowCount"/> leaves out empty lines, as
-    /// ExcelDataReader's CSV reader does, so rows must be counted by reading them.
-    /// </summary>
-    internal bool RowCountExcludesEmptyLines
-        => _rowCountExcludesEmptyLines ??= Reader.GetType().FullName == "ExcelDataReader.ExcelCsvReader";
 
     /// <summary>
     /// Gets the configuration for the importer to allow customizing the importer. For example you
@@ -40,7 +32,18 @@ public class ExcelImporter : IDisposable
     /// </summary>
     public int NumberOfSheets => Reader.ResultsCount;
 
+    /// <summary>
+    /// The index of the last sheet returned by <see cref="TryReadSheet(out ExcelSheet)"/>, which reads
+    /// sheets in order, or -1 to start from the first sheet again.
+    /// </summary>
     internal int SheetIndex { get; set; } = -1;
+
+    private RowSource? _rowSource;
+
+    /// <summary>
+    /// Owns the reader's position, shared by every sheet of this importer.
+    /// </summary>
+    internal RowSource RowSource => _rowSource ??= new RowSource(Reader);
 
     static ExcelImporter()
     {
@@ -274,13 +277,9 @@ public class ExcelImporter : IDisposable
         }
 
         sheet = null;
-
-        if (SheetIndex != -1)
+        if (!RowSource.TryMoveToSheet(SheetIndex + 1))
         {
-            if (!Reader.NextResult())
-            {
-                return false;
-            }
+            return false;
         }
 
         SheetIndex++;
@@ -340,20 +339,13 @@ public class ExcelImporter : IDisposable
             return false;
         }
 
-        ResetReader();
-        for (int i = 0; i < sheetIndex; i++)
-        {
-            Reader.NextResult();
-        }
-
+        RowSource.TryMoveToSheet(sheetIndex);
         sheet = new ExcelSheet(Reader, sheetIndex, this);
         ResetReader();
         return true;
     }
 
-    private void ResetReader()
-    {
-        Reader.Reset();
-        SheetIndex = -1;
-    }
+    // Start reading sheets in order from the first sheet again. The reader itself is moved when
+    // it's next needed.
+    private void ResetReader() => SheetIndex = -1;
 }

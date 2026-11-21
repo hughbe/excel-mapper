@@ -250,7 +250,6 @@ public class ExcelSheet
         // rewind so that the requested rows are returned rather than whatever follows.
         if (startIndex - 1 < CurrentRowIndex)
         {
-            Importer.SheetIndex = -1;
             CurrentRowIndex = -1;
         }
 
@@ -633,12 +632,6 @@ public class ExcelSheet
         var startRowIndex = GetHeadingRowIndex();
         var endRowIndex = (int)Math.Min((long)startRowIndex + maxRows, int.MaxValue);
 
-        // Rows are read forward only, so go back to the start if rows have already been read.
-        if (CurrentRowIndex >= startRowIndex)
-        {
-            Importer.SheetIndex = -1;
-        }
-
         var closestRowIndex = -1;
         var closestFound = 0;
         List<string>? closestProblems = null;
@@ -648,7 +641,7 @@ public class ExcelSheet
             {
                 break;
             }
-            if (IsBlankRow(0, Reader.FieldCount))
+            if (Importer.RowSource.IsBlankRow(0, Reader.FieldCount))
             {
                 continue;
             }
@@ -709,7 +702,6 @@ public class ExcelSheet
     private void RewindAfterHeadingSearch()
     {
         // Leave the sheet as it was: the next read starts from the beginning of the sheet again.
-        Importer.SheetIndex = -1;
         CurrentRowIndex = -1;
     }
 
@@ -744,7 +736,7 @@ public class ExcelSheet
         }
 
         // Read the next row.
-        if (!ReadNextRow())
+        if (!TryReadUpTo(CurrentRowIndex + 1))
         {
             return false;
         }
@@ -756,10 +748,10 @@ public class ExcelSheet
             var startColumnIndex = Math.Min(_dataRange.Columns.Start.GetOffset(fieldCount), fieldCount);
             var endColumnIndex = Math.Min(_dataRange.Columns.End.GetOffset(fieldCount), fieldCount);
 
-            while (IsBlankRow(startColumnIndex, endColumnIndex))
+            while (Importer.RowSource.IsBlankRow(startColumnIndex, endColumnIndex))
             {
                 // Don't skip past the end of the data range.
-                if (CurrentRowIndex + 1 >= endRowIndex || !ReadNextRow())
+                if (CurrentRowIndex + 1 >= endRowIndex || !TryReadUpTo(CurrentRowIndex + 1))
                 {
                     return false;
                 }
@@ -775,81 +767,7 @@ public class ExcelSheet
         return start.IsFromEnd ? start.GetOffset(GetRowCount()) : start.Value;
     }
 
-    private int _rowCount = -1;
-
-    /// <summary>
-    /// Gets the number of rows in the sheet, ignoring empty lines at the end of a CSV file.
-    /// </summary>
-    private int GetRowCount()
-    {
-        // The CSV reader's row count leaves out empty lines, so count the rows by reading the rest
-        // of the sheet, once, and then go back to the current row.
-        if (!Importer.RowCountExcludesEmptyLines)
-        {
-            return Reader.RowCount;
-        }
-
-        if (_rowCount == -1)
-        {
-            TryReadUpTo(CurrentRowIndex);
-            var currentRowIndex = CurrentRowIndex;
-            var rowCount = currentRowIndex + 1;
-            while (ReadNextRow())
-            {
-                rowCount = CurrentRowIndex + 1;
-            }
-
-            Importer.SheetIndex = -1;
-            TryReadUpTo(currentRowIndex);
-            _rowCount = rowCount;
-        }
-
-        return _rowCount;
-    }
-
-    /// <summary>
-    /// The number of rows read from the sheet so far that have a value in any column.
-    /// </summary>
-    private int _rowsWithValues;
-
-    /// <summary>
-    /// Reads the next row of the sheet. Returns false at the end of the sheet, including when
-    /// only empty lines remain in a CSV file.
-    /// </summary>
-    private bool ReadNextRow()
-    {
-        if (!Reader.Read())
-        {
-            return false;
-        }
-
-        CurrentRowIndex++;
-        if (!IsBlankRow(0, Reader.FieldCount))
-        {
-            _rowsWithValues++;
-            return true;
-        }
-
-        // The CSV reader's row count leaves out empty lines, so it can be less than the number of
-        // rows read. Every row with a value is counted, so once that many rows with values have
-        // been read, only empty lines remain: treat them as the end of the sheet, as before. For
-        // other readers the row count includes every row, so this is never true.
-        return _rowsWithValues < Reader.RowCount;
-    }
-
-    private bool IsBlankRow(int startColumnIndex, int endColumnIndex)
-    {
-        for (int i = startColumnIndex; i < endColumnIndex; i++)
-        {
-            var value = Reader.GetValue(i);
-            if (value is not null && !(value is string stringValue && string.IsNullOrEmpty(stringValue)))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
+    private int GetRowCount() => Importer.RowSource.GetRowCount(Index);
 
     internal void ReadUpTo(int index)
     {
@@ -859,38 +777,29 @@ public class ExcelSheet
         }
     }
 
+    /// <summary>
+    /// Moves to a row of this sheet, so that its cells can be read. Other sheets of the importer
+    /// share the reader, so this can mean reading forward or rewinding.
+    /// </summary>
     private bool TryReadUpTo(int index)
     {
-        // If we're already on the correct sheet, no need to do anything.
-        if (Importer.SheetIndex != Index)
+        if (Reader.IsClosed)
         {
-            // Read up to the correct sheet.
-            Reader.Reset();
-            Importer.SheetIndex = 0;
-            
-            for (var i = 0; i < Index; i++)
-            {
-                Reader.NextResult();
-                Importer.SheetIndex++;
-            }
-
-            CurrentRowIndex = -1;
-            _rowsWithValues = 0;
+            throw new ExcelMappingException($"The underlying reader is closed.");
         }
 
-        // Read up to the correct row.
-        while (CurrentRowIndex < index)
+        if (!Importer.RowSource.TryMoveTo(Index, index))
         {
-            if (Reader.IsClosed)
-            {
-                throw new ExcelMappingException($"The underlying reader is closed.");
-            }
-            if (!ReadNextRow())
-            {
-                return false;
-            }
+            // The sheet ends before the row: the sheet is on its last row.
+            CurrentRowIndex = Importer.RowSource.LastRowIndex;
+            Importer.SheetIndex = Index;
+            return false;
         }
 
+        // Reading rows of a sheet makes it the importer's current sheet, so ReadSheet() continues
+        // from the sheet after it.
+        Importer.SheetIndex = Index;
+        CurrentRowIndex = index;
         return true;
     }
 }

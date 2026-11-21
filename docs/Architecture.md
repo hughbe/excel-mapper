@@ -55,10 +55,14 @@ var records = sheet.ReadRows<Person>();
 **Key Components**:
 - **`ExcelImporter`**: Main entry point, wraps `IExcelDataReader` from ExcelDataReader library
   - Supports Excel (.xlsx, .xls) and CSV files
-  - Manages sheet navigation and reader state
   - Provides configuration via `ExcelImporterConfiguration`
 
-- **`ExcelSheet`**: Represents a single worksheet
+- **`RowSource`** (internal): Owns the position of the importer's forward-only reader
+  - The only code that calls `Read`, `NextResult` and `Reset`
+  - Sheets ask it for the sheet and row they need; it reads forward or rewinds, so every `ExcelSheet` keeps its own position
+  - Works out row counts and the end of a CSV file, where the reader's own count leaves out empty lines
+
+- **`ExcelSheet`**: Represents a single worksheet and a position in it
   - Manages heading/header row detection
   - Provides row enumeration with `ReadRows<T>()`
   - Supports range-based reading with `ReadRows<T>(startIndex, count)`
