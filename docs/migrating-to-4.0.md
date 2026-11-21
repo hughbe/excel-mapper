@@ -6,11 +6,12 @@ ExcelMapper 4.0 fixes several long-standing bugs and makes mapping more predicta
 
 1. [`object` members now receive typed values](#object-members-receive-typed-values)
 2. [Fractional numbers can't be mapped to integers](#fractional-numbers-cant-be-mapped-to-integers)
-3. [`ReadRow` reads the heading first](#readrow-reads-the-heading-first)
-4. [Error messages use cell addresses](#error-messages-use-cell-addresses)
-5. [Sheet names are case-insensitive](#sheet-names-are-case-insensitive)
-6. [Smaller changes](#smaller-changes)
-7. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
+3. [`WithConverter` replaces the built-in conversion](#withconverter-replaces-the-built-in-conversion)
+4. [`ReadRow` reads the heading first](#readrow-reads-the-heading-first)
+5. [Error messages use cell addresses](#error-messages-use-cell-addresses)
+6. [Sheet names are case-insensitive](#sheet-names-are-case-insensitive)
+7. [Smaller changes](#smaller-changes)
+8. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
 
 ## `object` members receive typed values
 
@@ -55,6 +56,28 @@ Map(e => e.Quantity)
 ```
 
 To find affected rows without stopping at the first one, use `sheet.ReadRowResults<T>()`.
+
+## `WithConverter` replaces the built-in conversion
+
+**Who's affected:** code that calls `WithConverter` on a member whose type ExcelMapper converts itself (numbers, dates, enums, `bool`, `Guid` and so on), expecting the converter to only handle values the built-in conversion can't.
+
+**Before:** the converter was added after the built-in conversion, so whether it ran depended on the member's type. For a number, the converter was skipped whenever the cell was a valid number. For a string, it was used for every cell:
+
+```csharp
+Map(e => e.Quantity).WithConverter(value => int.Parse(value) * 2);  // "3" gave 3, not 6
+Map(e => e.Name).WithConverter(value => value.ToUpperInvariant());  // "a" gave "A"
+```
+
+**Now:** the converter replaces the built-in conversion, and any earlier converter, so it's used for every cell that isn't empty, whatever the type: `"3"` gives `6`. Empty cells still use the empty fallback, and a converter that throws uses the invalid fallback.
+
+**What to do:** if the converter was meant as a fallback for values the built-in conversion can't handle, handle both in the converter:
+
+```csharp
+Map(e => e.Quantity).WithConverter(value =>
+    int.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var quantity)
+        ? quantity
+        : ParseWords(value));
+```
 
 ## `ReadRow` reads the heading first
 

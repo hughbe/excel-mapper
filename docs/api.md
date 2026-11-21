@@ -122,7 +122,7 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 - `.WithEmptyFallback(value)` - Default for empty
 - `.WithInvalidFallback(value)` - Default for invalid
 - `.WithValueFallback(value)` - Default for both
-- `.WithConverter(value => ...)` - Custom conversion
+- `.WithConverter(value => ...)` - Custom conversion, replacing the built-in conversion
 - `.WithFormats("format1", "format2")` - Date/time formats
 - `.WithFormatProvider(IFormatProvider)` - Culture-specific parsing for dates/times/numbers
 - `.WithNumberStyle(NumberStyles)` - Control numeric parsing (thousands, currency, etc.)
