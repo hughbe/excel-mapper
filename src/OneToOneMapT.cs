@@ -56,7 +56,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     ValuePipeline IToOneMap.Pipeline => this;
 
     /// <inheritdoc />
-    public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
+    bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
     {
         if (TryGetValue(GetCellReader(sheet), sheet, rowIndex, reader, member, out var value))
         {

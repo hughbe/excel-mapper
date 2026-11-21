@@ -19,7 +19,7 @@ ExcelMapper reads spreadsheets with [ExcelDataReader](https://github.com/ExcelDa
                            RowSource: the reader's position
 ```
 
-The public API is the importer, sheets and regions, class maps and the fluent methods on their maps, attributes, and four extension points (`ICellConverter<T>`, `ICellTransformer`, `ICellFallback<T>` and `IColumnSelector`). Everything else, including the readers, mappers, fallbacks, collection factories and bindings, is internal, so it can change without breaking users.
+The public API is the importer, sheets and regions, class maps and the fluent methods on their maps, attributes, and four extension points (`ICellConverter<T>`, `ICellTransformer`, `ICellFallback<T>` and `IColumnSelector`). Everything else, including `IMap` (the interface every map implements), `ExcelPropertyMap` (a class map's member and its map), `AutoMapper`, the readers, mappers, fallbacks, collection factories and bindings, is internal, so it can change without breaking users.
 
 ## Reading sheets
 
@@ -35,7 +35,7 @@ The public API is the importer, sheets and regions, class maps and the fluent me
 
 ## Class maps
 
-An `ExcelClassMap<T>` lists the members of `T` to map and a map for each. Class maps are created in one of two ways:
+An `ExcelClassMap<T>` lists the members of `T` to map (its internal `Properties`, each an `ExcelPropertyMap` of a member and its map). Class maps are created in one of two ways:
 
 - **Explicitly**, by deriving from `ExcelClassMap<T>` (or passing a callback to `RegisterClassMap<T>`) and calling `Map(...)`. `ExpressionAutoMapper` (internal) walks the expression: a member (`p => p.Name`), a chain of members (`p => p.Address.City`, which creates nested class maps), or an indexer with a constant argument (`p => p.Values[0]`, `p => p.Scores["Maths"]`, `p => p.Grid[0, 1]`).
 - **Automatically**, the first time a type without a registered map is read. `AutoMapper` finds the public properties and fields, and `MemberMapper` applies the member's attributes (`[ExcelColumnName]`, `[ExcelConverter]`, `[ExcelOptional]`, ...). Explicit maps use the same code to set a member up before the fluent methods change it.
@@ -47,7 +47,7 @@ Each member's map is one of:
 | `OneToOneMap<T>` | Single values: numbers, strings, dates, enums, `object`, and any type with a converter | One cell |
 | `ManyToOneEnumerableMap<TElement>` | Arrays, lists, sets and other collections | Several columns, or one cell split by separators |
 | `ManyToOneDictionaryMap<TKey, TValue>` | Dictionaries, `ExpandoObject` and extra columns (`MapExtraColumns`) | Several columns, keyed by column name |
-| `ManyToOneEnumerableIndexerMap<T>`, `ManyToOneDictionaryIndexerMap<TKey, TValue>`, `ManyToOneMultidimensionalIndexerMap<T>` | Elements mapped one by one: `Map(p => p.Values[0])` | One map per element |
+| `ManyToOneEnumerableIndexerMapT<T>`, `ManyToOneDictionaryIndexerMapT<TKey, TValue>`, `ManyToOneMultidimensionalIndexerMapT<T>` (internal) | Elements mapped one by one: `Map(p => p.Values[0])` | One map per element |
 | `ExcelClassMap<T>` | Nested objects (`Map(p => p.Address)` or auto-mapping) | The nested type's own members |
 | `RowNumberMap` | `[ExcelRowNumber]` and `MapRowNumber` | The row's number |
 
@@ -121,7 +121,7 @@ The net8.0 build is annotated for trimming: the mapped type `T` and the types gi
 
 | Path | Contents |
 |---|---|
-| `src/*.cs` | Public types: importer, sheets, regions, class maps and maps, attributes, extension points, `ValuePipeline<T>` and its fluent extensions |
+| `src/*.cs` | The public types (importer, sheets, regions, class maps and maps, attributes, extension points, `ValuePipeline<T>` and its fluent extensions), and the internal `IMap`, `ExcelPropertyMap` and indexer maps |
 | `src/Readers` | Reader factories and readers (internal) |
 | `src/Mappers`, `src/Transformers`, `src/Fallbacks` | Built-in conversion, transformers and fallbacks, and the adapters for the public extension points (internal) |
 | `src/Factories` | Collection and dictionary factories (internal) |

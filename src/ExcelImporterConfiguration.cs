@@ -10,11 +10,11 @@ namespace ExcelMapper;
 /// </summary>
 public class ExcelImporterConfiguration
 {
-    private ConcurrentDictionary<Type, IMap> ClassMaps { get; } = new();
+    private ConcurrentDictionary<Type, ExcelClassMap> ClassMaps { get; } = new();
 
     // Types whose maps were created by auto-mapping rather than registered by the user. These can be
     // replaced by a map the user registers later.
-    private ConcurrentDictionary<Type, IMap> AutoMappedClassMaps { get; } = new();
+    private ConcurrentDictionary<Type, ExcelClassMap> AutoMappedClassMaps { get; } = new();
 
     private int _maxColumnsPerSheet = 10000;
 
@@ -72,7 +72,7 @@ public class ExcelImporterConfiguration
     /// <param name="classType">The type of the object to get the class map for.</param>
     /// <param name="classMap">The class map for the given type if it exists, else null.</param>
     /// <returns>True if a class map exists for the given type, else false.</returns>
-    public bool TryGetClassMap(Type classType, [NotNullWhen(true)] out IMap? classMap)
+    public bool TryGetClassMap(Type classType, [NotNullWhen(true)] out ExcelClassMap? classMap)
     {
         ThrowHelpers.ThrowIfNull(classType, nameof(classType));
 
@@ -85,7 +85,7 @@ public class ExcelImporterConfiguration
     /// <typeparam name="T">The type of the object to get the class map for.</typeparam>
     /// <param name="classMap">The class map for the given type if it exists, else null.</param>
     /// <returns>True if a class map exists for the given type, else false.</returns>
-    public bool TryGetClassMap<T>([NotNullWhen(true)] out IMap? classMap) => TryGetClassMap(typeof(T), out classMap);
+    public bool TryGetClassMap<T>([NotNullWhen(true)] out ExcelClassMap? classMap) => TryGetClassMap(typeof(T), out classMap);
 
     /// <summary>
     /// Registers a class map of the given type to be used when mapping a row to an object.
@@ -166,7 +166,7 @@ public class ExcelImporterConfiguration
     /// </summary>
     /// <param name="classType">The type of the class.</param>
     /// <param name="classMap">The class map to use.</param>
-    public void RegisterClassMap(Type classType, IMap classMap)
+    public void RegisterClassMap(Type classType, ExcelClassMap classMap)
     {
         ThrowHelpers.ThrowIfNull(classType, nameof(classType));
         ThrowHelpers.ThrowIfNull(classMap, nameof(classMap));
@@ -191,7 +191,7 @@ public class ExcelImporterConfiguration
     /// Registers a map created by auto-mapping. Unlike a map registered by the user, this can be
     /// replaced by a later call to RegisterClassMap.
     /// </summary>
-    internal IMap RegisterAutoMappedClassMap(Type classType, IMap classMap)
+    internal ExcelClassMap RegisterAutoMappedClassMap(Type classType, ExcelClassMap classMap)
     {
         var registered = ClassMaps.GetOrAdd(classType, classMap);
         if (ReferenceEquals(registered, classMap))

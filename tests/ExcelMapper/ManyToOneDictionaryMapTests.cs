@@ -111,13 +111,6 @@ public class ManyToOneDictionaryMapTests
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<Row>().ToArray());
     }
 
-    [Fact]
-    public void TryGetValue_NullSheet_ThrowsArgumentNullException()
-    {
-        using var importer = Helpers.GetCsvImporter(Csv);
-        Assert.Throws<ArgumentNullException>("sheet", () => CreateMap().TryGetValue(null!, 0, importer.Reader, null, out _));
-    }
-
     public class Row
     {
         public Dictionary<string, int> Values { get; set; } = new() { ["initial"] = 0 };

@@ -22,16 +22,9 @@ public sealed class RowNumberMap : IMap
     /// </summary>
     /// <param name="type">The type of the member: a numeric type such as <see cref="int"/> or
     /// <see cref="long"/>, or a nullable numeric type.</param>
-    /// <exception cref="ArgumentNullException"><paramref name="type"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException"><paramref name="type"/> is not a numeric type.</exception>
-    public RowNumberMap(Type type)
+    /// <remarks>Callers check the type with <see cref="IsSupportedType"/>.</remarks>
+    internal RowNumberMap(Type type)
     {
-        ThrowHelpers.ThrowIfNull(type, nameof(type));
-        if (!IsSupportedType(type))
-        {
-            throw new ArgumentException($"Row numbers can't be mapped to type \"{type}\". Use a numeric type such as int or long.", nameof(type));
-        }
-
         Type = type;
         _typeCode = Type.GetTypeCode(type.GetNullableTypeOrThis(out _));
     }
@@ -48,7 +41,7 @@ public sealed class RowNumberMap : IMap
     }
 
     /// <inheritdoc/>
-    public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
+    bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 

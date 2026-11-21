@@ -51,6 +51,10 @@ public class MapRowNumberTests
         Assert.Equal(2d, row.Double);
         Assert.Equal(2m, row.Decimal);
         Assert.Equal(2L, row.Field);
+        Assert.Equal((sbyte)2, row.SByte);
+        Assert.Equal((ushort)2, row.UShort);
+        Assert.Equal(2ul, row.ULong);
+        Assert.Equal(2f, row.Float);
     }
 
     public class OtherTypesRow
@@ -75,6 +79,18 @@ public class MapRowNumberTests
 
         [ExcelRowNumber]
         public long Field;
+
+        [ExcelRowNumber]
+        public sbyte SByte { get; set; }
+
+        [ExcelRowNumber]
+        public ushort UShort { get; set; }
+
+        [ExcelRowNumber]
+        public ulong ULong { get; set; }
+
+        [ExcelRowNumber]
+        public float Float { get; set; }
     }
 
     [Fact]
@@ -239,6 +255,13 @@ public class MapRowNumberTests
         using var importer = Helpers.GetCsvImporter("Name\na\n");
         var sheet = importer.ReadSheet();
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringRowNumberRow>().ToArray());
+    }
+
+    [Fact]
+    public void MapRowNumber_InvalidType_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<StringRowNumberRow>();
+        Assert.Throws<ArgumentException>("expression", () => map.MapRowNumber(r => r.Row));
     }
 
     public class StringRowNumberRow

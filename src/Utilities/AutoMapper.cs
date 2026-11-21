@@ -25,7 +25,7 @@ namespace ExcelMapper.Utilities;
 /// </summary>
 [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
 [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-public static class AutoMapper
+internal static class AutoMapper
 {
     internal static OneToOneMap<T>? CreateOneToOneMap<T>(MemberInfo? member, ICellReaderFactory defaultCellReaderFactory, FallbackStrategy emptyValueStrategy, bool isAutoMapping)
     {

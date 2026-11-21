@@ -3,7 +3,7 @@ namespace ExcelMapper.Abstractions;
 /// <summary>
 /// Map for multidimensional indexer values.
 /// </summary>
-public interface IMultidimensionalIndexerMap : IMap
+internal interface IMultidimensionalIndexerMap : IMap
 {
     /// <summary>
     /// The list of maps.

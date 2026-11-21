@@ -521,9 +521,9 @@ public class ExcelSheet
 
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    private IMap GetOrCreateClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
+    private ExcelClassMap GetOrCreateClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
     {
-        if (!Importer.Configuration.TryGetClassMap<T>(out var classMap))
+        if (!Importer.Configuration.TryGetClassMap(typeof(T), out var classMap))
         {
             // Sheets without a heading can still be auto-mapped if the map doesn't look up columns by
             // name, for example primitives (read from the first column) or members with ExcelColumnIndex.
