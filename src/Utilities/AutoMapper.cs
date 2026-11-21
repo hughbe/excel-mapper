@@ -457,7 +457,7 @@ public static class AutoMapper
         }
 
         // Try ObservableCollection constructor
-        var ctor = listType.GetConstructor([typeof(ObservableCollection<TElement>)]);
+        var ctor = CollectionUtilities.GetConstructorTaking(listType, typeof(ObservableCollection<TElement>));
         if (ctor != null)
         {
             result = new ReadOnlyObservableCollectionEnumerableFactory<TElement>(listType);
@@ -504,18 +504,17 @@ public static class AutoMapper
 
     private static bool TryGetConstructorBasedFactory<TElement>(Type listType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
     {
-        // Check if the type has .ctor(ISet<T>) such as ReadOnlySet.
-        var ctor = listType.GetConstructor([typeof(ISet<TElement>)]);
+        // A constructor that needs a set, such as ReadOnlySet<T>(ISet<T>).
+        var ctor = CollectionUtilities.GetSetConstructor<TElement>(listType);
         if (ctor != null)
         {
             result = new ConstructorSetEnumerableFactory<TElement>(listType);
             return true;
         }
 
-        // Check if the type has .ctor(IList<T>) .ctor(ICollection) or .ctor(IEnumerable<T>) such as ReadOnlyCollection, Queue or Stack.
-        ctor = listType.GetConstructor([typeof(IList<TElement>)])
-            ?? listType.GetConstructor([typeof(IEnumerable<TElement>)])
-            ?? listType.GetConstructor([typeof(ICollection)]);
+        // A constructor that takes the items as a list, such as ReadOnlyCollection<T>(IList<T>),
+        // Queue<T>(IEnumerable<T>) or Stack<T>(IEnumerable<T>).
+        ctor = CollectionUtilities.GetListConstructor<TElement>(listType);
         if (ctor != null)
         {
             result = new ConstructorEnumerableFactory<TElement>(listType);
@@ -837,7 +836,7 @@ public static class AutoMapper
         else
         {
             // Check if the type has .ctor(IDictionary<TKey, TValue>) such as ReadOnlyDictionary<TKey, TValue>.
-            var ctor = dictionaryType.GetConstructor([typeof(IDictionary<TKey, TValue>)]);
+            var ctor = CollectionUtilities.GetConstructorTaking(dictionaryType, typeof(Dictionary<TKey, TValue>));
             if (ctor != null)
             {
                 result = new ConstructorDictionaryFactory<TKey, TValue>(dictionaryType);

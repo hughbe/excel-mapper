@@ -25,10 +25,7 @@ internal sealed class ConstructorEnumerableFactory<T> : IEnumerableFactory<T>, I
     /// <exception cref="ArgumentException">Thrown when the collection type is invalid or unsupported.</exception>
     public ConstructorEnumerableFactory([DynamicallyAccessedMembers(TrimmingConstants.CollectionType)] Type collectionType)
     {
-        var constructor = collectionType.GetConstructor([typeof(IList<T>)])
-            ?? collectionType.GetConstructor([typeof(IEnumerable<T>)])
-            ?? collectionType.GetConstructor([typeof(ICollection)])
-            ?? throw new ArgumentException($"Collection type {collectionType} does not have a constructor that takes {nameof(IList<T>)}, {nameof(IEnumerable<T>)} or {nameof(ICollection)}.", nameof(collectionType));
+        var constructor = CollectionUtilities.GetListConstructor<T>(collectionType)!;
 
         _construct = CompiledAccessors.GetConstructor1(constructor);
         _constructorCopies = CollectionUtilities.ConstructorCopies(collectionType);

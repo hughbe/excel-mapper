@@ -12,11 +12,7 @@ internal sealed class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFa
 {
     private readonly Func<object, object> _construct;
 
-    // Whether the constructor copies the collection passed to it, so the collection can be reused for the next row.
-    private readonly bool _constructorCopies;
-
     private Dictionary<TKey, TValue?>? _items;
-    private Dictionary<TKey, TValue?>? _buffer;
 
     /// <summary>
     /// Constructs a factory that creates dictionaries of the given type.
@@ -25,25 +21,14 @@ internal sealed class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFa
     /// <exception cref="ArgumentException">Thrown when the dictionary type is invalid or unsupported.</exception>
     public ConstructorDictionaryFactory([DynamicallyAccessedMembers(TrimmingConstants.CollectionType)] Type dictionaryType)
     {
-        var constructor = dictionaryType.GetConstructor([typeof(IDictionary<TKey, TValue>)])
-            ?? throw new ArgumentException($"Dictionary type {dictionaryType} does not have a constructor that takes {nameof(IDictionary<TKey, TValue>)}.", nameof(dictionaryType));
+        var constructor = CollectionUtilities.GetConstructorTaking(dictionaryType, typeof(Dictionary<TKey, TValue>))!;
         _construct = CompiledAccessors.GetConstructor1(constructor);
-        _constructorCopies = CollectionUtilities.ConstructorCopies(dictionaryType);
     }
 
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        if (_buffer is not null)
-        {
-            // The buffer from the previous row: the result is a copy of it, so it can be reused.
-            _items = _buffer;
-            _buffer = null;
-        }
-        else
-        {
-            _items = new Dictionary<TKey, TValue?>(count);
-        }
+        _items = new Dictionary<TKey, TValue?>(count);
     }
 
     /// <inheritdoc/>
@@ -55,14 +40,9 @@ internal sealed class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFa
     /// <inheritdoc/>
     public object End()
     {
-        try
-        {
-            return _construct(_items!);
-        }
-        finally
-        {
-            Reset();
-        }
+        var items = _items!;
+        _items = null;
+        return _construct(items);
     }
 
     /// <inheritdoc/>
@@ -79,18 +59,10 @@ internal sealed class ConstructorDictionaryFactory<TKey, TValue> : IDictionaryFa
     private void ResetForBinding()
     {
         _items = null;
-        _buffer = null;
     }
 
     public void Reset()
     {
-        if (_items is not null && _constructorCopies)
-        {
-            // Clear the buffer so that it doesn't keep the row's values alive.
-            _items.Clear();
-            _buffer = _items;
-        }
-
         _items = null;
     }
 }
