@@ -16,6 +16,11 @@ public class VersionMapper : ICellMapper
         }
 
         // Only create the exception (by parsing again) if it is needed.
-        return MapperUtilities.InvalidFromParse(() => new Version(stringValue!));
+        return InvalidResult(stringValue);
     }
+
+    // A separate method so that the closure capturing these values is only allocated for invalid
+    // values. Creating the lambda in Map would allocate the closure for every cell.
+    private static CellMapperResult InvalidResult(string? stringValue)
+        => MapperUtilities.InvalidFromParse(() => new Version(stringValue!));
 }

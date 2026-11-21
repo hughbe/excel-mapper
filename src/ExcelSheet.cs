@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using ExcelDataReader;
 
@@ -417,7 +418,31 @@ public class ExcelSheet
             classMap = Importer.Configuration.RegisterAutoMappedClassMap(typeof(T), map);
         }
 
-        var result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out var valueObject);
+        // Map using the configured culture, if any. Mappers without their own format provider use the
+        // current culture, so set it for the duration of this row only, not while the caller's code
+        // runs between rows. Only switch if it differs, as setting the culture has a small cost.
+        var culture = Importer.Configuration.Culture;
+        var previousCulture = CultureInfo.CurrentCulture;
+        var switchCulture = culture is not null && !ReferenceEquals(culture, previousCulture);
+        bool result;
+        object? valueObject;
+        if (switchCulture)
+        {
+            CultureInfo.CurrentCulture = culture!;
+            try
+            {
+                result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out valueObject);
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = previousCulture;
+            }
+        }
+        else
+        {
+            result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out valueObject);
+        }
+
         // If we've been asked to validate with data annotations, do so now.
         if (Importer.Configuration.ValidateDataAnnotations && result && valueObject is not null)
         {

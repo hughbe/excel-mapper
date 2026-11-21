@@ -45,6 +45,11 @@ public class BoolMapper : ICellMapper
 
         // Only create the exception (by parsing again) if it is needed. If stringValue is null this
         // is an ArgumentNullException.
-        return MapperUtilities.InvalidFromParse(() => bool.Parse(stringValue!));
+        return InvalidResult(stringValue);
     }
+
+    // A separate method so that the closure capturing these values is only allocated for invalid
+    // values. Creating the lambda in Map would allocate the closure for every cell.
+    private static CellMapperResult InvalidResult(string? stringValue)
+        => MapperUtilities.InvalidFromParse(() => bool.Parse(stringValue!));
 }

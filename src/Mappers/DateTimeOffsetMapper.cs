@@ -66,6 +66,11 @@ public class DateTimeOffsetMapper : IFormatsCellMapper
         }
 
         // Only create the exception (by parsing again) if it is needed.
-        return MapperUtilities.InvalidFromParse(() => DateTimeOffset.ParseExact(stringValue!, formats, provider, style));
+        return InvalidResult(stringValue, formats, provider, style);
     }
+
+    // A separate method so that the closure capturing these values is only allocated for invalid
+    // values. Creating the lambda in Map would allocate the closure for every cell.
+    private static CellMapperResult InvalidResult(string? stringValue, string[] formats, IFormatProvider? provider, DateTimeStyles style)
+        => MapperUtilities.InvalidFromParse(() => DateTimeOffset.ParseExact(stringValue!, formats, provider, style));
 }

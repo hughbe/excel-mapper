@@ -27,10 +27,26 @@ public class ChangeTypeMapper : ICellMapper
         Type = type;
     }
 
+    private static bool IsIntegerType(Type type) => Type.GetTypeCode(type) switch
+    {
+        TypeCode.SByte or TypeCode.Byte or TypeCode.Int16 or TypeCode.UInt16 or
+        TypeCode.Int32 or TypeCode.UInt32 or TypeCode.Int64 or TypeCode.UInt64 => true,
+        _ => false
+    };
+
     /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult readResult)
     {
         var value = readResult.GetValue();
+
+        // Excel stores every number as a double. Don't silently round away the fractional part
+        // when mapping to an integer type: "2.7" as text can't be parsed as an int, so neither can 2.7.
+        if (value is double doubleValue && IsIntegerType(Type) && Math.Floor(doubleValue) != doubleValue
+            && !double.IsNaN(doubleValue) && !double.IsInfinity(doubleValue))
+        {
+            return NotWholeNumberResult(doubleValue, Type);
+        }
+
         try
         {
             var result = Convert.ChangeType(value, Type);
@@ -41,4 +57,9 @@ public class ChangeTypeMapper : ICellMapper
             return CellMapperResult.Invalid(exception);
         }
     }
+
+    // A separate method so that the closure capturing these values is only allocated for invalid
+    // values. Creating the lambda in Map would allocate the closure for every cell.
+    private static CellMapperResult NotWholeNumberResult(double value, Type type)
+        => CellMapperResult.Invalid(() => new FormatException($"The value {value} is not a whole number, so it can't be converted to {type}."));
 }

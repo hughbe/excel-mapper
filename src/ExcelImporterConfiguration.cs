@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 
 namespace ExcelMapper;
 
@@ -52,6 +53,15 @@ public class ExcelImporterConfiguration
     /// Default is false.
     /// </summary>
     public bool IgnoreSeparatorsInColumnNames { get; set; }
+
+    /// <summary>
+    /// Gets or sets the culture used to map cells: to parse text into numbers, dates and times,
+    /// and to convert numbers and dates to text. When null (the default), the current culture of
+    /// the thread reading the rows is used. Set this (for example to
+    /// <see cref="CultureInfo.InvariantCulture"/>) so results don't depend on the machine's
+    /// settings. A format provider set on an individual member takes precedence.
+    /// </summary>
+    public CultureInfo? Culture { get; set; }
 
 
     internal ExcelImporterConfiguration() { }
