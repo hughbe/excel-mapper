@@ -22,7 +22,7 @@ namespace ExcelMapper.Abstractions;
 /// will throw an <see cref="ExcelMappingException"/>.
 /// </para>
 /// </remarks>
-public interface IEnumerableFactory<T>
+internal interface IEnumerableFactory<T>
 {
     /// <summary>
     /// Begins a new collection creation operation with the expected number of items.

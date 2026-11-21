@@ -8,6 +8,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Breaking changes
 
+- The collection factories (`ExcelMapper.Factories`, `IEnumerableFactory<T>`, `IDictionaryFactory<TKey, TValue>` and `IMultidimensionalArrayFactory<T>`) are internal, with the collection and dictionary maps' constructors and factory properties: maps are created by `ExcelClassMap<T>.Map(...)`. See [Extension types](docs/migrating-to-4.0.md#extension-types). ([#160](https://github.com/hughbe/excel-mapper/pull/160))
 - `object` and `IConvertible` members, and `object` values in dictionaries, `ExpandoObject` and non-generic collections, receive the value as Excel stores it (`double`, `DateTime`, `bool`, `string`, ...) instead of its text. ([#124](https://github.com/hughbe/excel-mapper/pull/124))
 - `WithConverter` replaces the built-in conversion (and any earlier converter) instead of being tried after it, so the converter is used for every cell that isn't empty, whatever the member's type. Before, it was only used for values the built-in conversion couldn't convert for numbers, dates, enums and most other types, but for every value of strings. ([#154](https://github.com/hughbe/excel-mapper/pull/154))
 - A fractional number (such as `2.7`) mapped to an integer type is invalid instead of being truncated (.NET 8) or rounded (netstandard), matching text cells. ([#127](https://github.com/hughbe/excel-mapper/pull/127))

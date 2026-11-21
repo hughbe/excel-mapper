@@ -16,7 +16,7 @@ public class ManyToOneEnumerableIndexerMapT<TValue> : IEnumerableIndexerMap
     // build two values at once.
     private readonly object _buildLock = new();
 
-    public ManyToOneEnumerableIndexerMapT(IEnumerableFactory<TValue> enumerableFactory)
+    internal ManyToOneEnumerableIndexerMapT(IEnumerableFactory<TValue> enumerableFactory)
     {
         ThrowHelpers.ThrowIfNull(enumerableFactory, nameof(enumerableFactory));
         EnumerableFactory = enumerableFactory;
@@ -25,7 +25,7 @@ public class ManyToOneEnumerableIndexerMapT<TValue> : IEnumerableIndexerMap
     /// <summary>
     /// The factory for creating and adding elements to the list.
     /// </summary>
-    public IEnumerableFactory<TValue> EnumerableFactory { get; }
+    internal IEnumerableFactory<TValue> EnumerableFactory { get; }
 
     /// <inheritdoc/>
     public Dictionary<int, IMap> Values { get; } = [];

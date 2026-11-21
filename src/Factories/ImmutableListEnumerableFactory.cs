@@ -7,38 +7,27 @@ namespace ExcelMapper.Factories;
 /// Constructs an ImmutableList&lt;T&gt; by using a builder and converting to immutable at the end.
 /// </summary>
 /// <typeparam name="T">The type of the list elements.</typeparam>
-public class ImmutableListEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
+internal sealed class ImmutableListEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
 {
     private ImmutableList<T?>.Builder? _builder;
 
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ThrowHelpers.ThrowIfNegative(count, nameof(count));
-
-        if (_builder is not null)
-        {
-            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
-        }
-
         _builder = ImmutableList.CreateBuilder<T?>();
     }
 
     /// <inheritdoc/>
     public void Add(T? item)
     {
-        EnsureMapping();
-        _builder.Add(item);
+        _builder!.Add(item);
     }
 
     /// <inheritdoc/>
     public void Set(int index, T? item)
     {
-        ThrowHelpers.ThrowIfNegative(index, nameof(index));
-        EnsureMapping();
-
         // Grow the list if necessary.
-        while (_builder.Count <= index)
+        while (_builder!.Count <= index)
         {
             _builder.Add(default);
         }
@@ -49,11 +38,9 @@ public class ImmutableListEnumerableFactory<T> : IEnumerableFactory<T>, IBinding
     /// <inheritdoc/>
     public object End()
     {
-        EnsureMapping();
-
         try
         {
-            return _builder.ToImmutable();
+            return _builder!.ToImmutable();
         }
         finally
         {
@@ -80,14 +67,5 @@ public class ImmutableListEnumerableFactory<T> : IEnumerableFactory<T>, IBinding
     public void Reset()
     {
         _builder = null;
-    }
-
-    [MemberNotNull(nameof(_builder))]
-    private void EnsureMapping()
-    {
-        if (_builder is null)
-        {
-            throw new ExcelMappingException("Has not started mapping.");
-        }
     }
 }

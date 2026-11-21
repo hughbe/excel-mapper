@@ -17,7 +17,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// Constructs a map that reads one or more values from one or more cells and maps these values to one
     /// property and field of the type of the property or field.
     /// </summary>
-    public ManyToOneEnumerableMap(ICellsReaderFactory readerFactory, IEnumerableFactory<TElement> enumerableFactory)
+    internal ManyToOneEnumerableMap(ICellsReaderFactory readerFactory, IEnumerableFactory<TElement> enumerableFactory)
     {
         ThrowHelpers.ThrowIfNull(readerFactory, nameof(readerFactory));
         ThrowHelpers.ThrowIfNull(enumerableFactory, nameof(enumerableFactory));
@@ -54,7 +54,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// <summary>
     /// The factory for creating and adding elements to the list.
     /// </summary>
-    public IEnumerableFactory<TElement> EnumerableFactory { get; }
+    internal IEnumerableFactory<TElement> EnumerableFactory { get; }
 
     // Factories build one value at a time, so a map shared between importers (for example
     // a class map instance registered in several importers used concurrently) must not

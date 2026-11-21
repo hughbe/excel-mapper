@@ -16,7 +16,7 @@ public class ManyToOneMultidimensionalIndexerMapT<TValue> : IMultidimensionalInd
     // build two values at once.
     private readonly object _buildLock = new();
 
-    public ManyToOneMultidimensionalIndexerMapT(IMultidimensionalArrayFactory<TValue> arrayFactory)
+    internal ManyToOneMultidimensionalIndexerMapT(IMultidimensionalArrayFactory<TValue> arrayFactory)
     {
         ThrowHelpers.ThrowIfNull(arrayFactory, nameof(arrayFactory));
         ArrayFactory = arrayFactory;
@@ -25,18 +25,13 @@ public class ManyToOneMultidimensionalIndexerMapT<TValue> : IMultidimensionalInd
     /// <summary>
     /// The factory for creating and adding elements to the list.
     /// </summary>
-    public IMultidimensionalArrayFactory<TValue> ArrayFactory { get; }
+    internal IMultidimensionalArrayFactory<TValue> ArrayFactory { get; }
 
     /// <inheritdoc/>
     public Dictionary<int[], IMap> Values { get; } = [];
 
     private int[] GetLengths()
     {
-        if (Values.Count == 0)
-        {
-            return [];
-        }
-
         // Get the rank (number of dimensions) from any key
         int rank = Values.Keys.First().Length;
 
@@ -59,11 +54,6 @@ public class ManyToOneMultidimensionalIndexerMapT<TValue> : IMultidimensionalInd
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
         var lengths = GetLengths();
-        if (lengths.Length == 0)
-        {
-            value = null;
-            return false;
-        }
 
         lock (_buildLock)
         {

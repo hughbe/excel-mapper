@@ -8,7 +8,7 @@ namespace ExcelMapper.Factories;
 /// </summary>
 /// <typeparam name="TKey">The type of the dictionary keys.</typeparam>
 /// <typeparam name="TValue">The type of the dictionary values.</typeparam>
-public class FrozenDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue>, IBindingFactory where TKey : notnull
+internal sealed class FrozenDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue>, IBindingFactory where TKey : notnull
 {
     private Dictionary<TKey, TValue?>? _items;
     private Dictionary<TKey, TValue?>? _buffer;
@@ -16,13 +16,6 @@ public class FrozenDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TV
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ThrowHelpers.ThrowIfNegative(count, nameof(count));
-
-        if (_items is not null)
-        {
-            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
-        }
-
         if (_buffer is not null)
         {
             // The buffer from the previous row: the result is a copy of it, so it can be reused.
@@ -38,19 +31,15 @@ public class FrozenDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TV
     /// <inheritdoc/>
     public void Add(TKey key, TValue? value)
     {
-        ThrowHelpers.ThrowIfNull(key, nameof(key));
-        EnsureMapping();
-        _items.Add(key, value);
+        _items!.Add(key, value);
     }
 
     /// <inheritdoc/>
     public object End()
     {
-        EnsureMapping();
-
         try
         {
-            return _items.ToFrozenDictionary();
+            return _items!.ToFrozenDictionary();
         }
         finally
         {
@@ -85,14 +74,5 @@ public class FrozenDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TV
         }
 
         _items = null;
-    }
-
-    [MemberNotNull(nameof(_items))]
-    private void EnsureMapping()
-    {
-        if (_items == null)
-        {
-            throw new ExcelMappingException("Has not started mapping.");
-        }
     }
 }

@@ -8,39 +8,28 @@ namespace ExcelMapper.Factories;
 /// </summary>
 /// <typeparam name="TKey">The type of the dictionary keys.</typeparam>
 /// <typeparam name="TValue">The type of the dictionary values.</typeparam>
-public class ImmutableDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue>, IBindingFactory where TKey : notnull
+internal sealed class ImmutableDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue>, IBindingFactory where TKey : notnull
 {
     private ImmutableDictionary<TKey, TValue?>.Builder? _builder;
 
     /// <inheritdoc/>
     public void Begin(int count)
     {
-        ThrowHelpers.ThrowIfNegative(count, nameof(count));
-
-        if (_builder is not null)
-        {
-            throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
-        }
-
         _builder = ImmutableDictionary.CreateBuilder<TKey, TValue?>();
     }
 
     /// <inheritdoc/>
     public void Add(TKey key, TValue? value)
     {
-        ThrowHelpers.ThrowIfNull(key, nameof(key));
-        EnsureMapping();
-        _builder.Add(key, value);
+        _builder!.Add(key, value);
     }
 
     /// <inheritdoc/>
     public object End()
     {
-        EnsureMapping();
-
         try
         {
-            return _builder.ToImmutable();
+            return _builder!.ToImmutable();
         }
         finally
         {
@@ -67,14 +56,5 @@ public class ImmutableDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey,
     public void Reset()
     {
         _builder = null;
-    }
-
-    [MemberNotNull(nameof(_builder))]
-    private void EnsureMapping()
-    {
-        if (_builder is null)
-        {
-            throw new ExcelMappingException("Has not started mapping.");
-        }
     }
 }

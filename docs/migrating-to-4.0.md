@@ -1,6 +1,6 @@
 # Migrating to 4.0
 
-ExcelMapper 4.0 fixes several long-standing bugs and makes mapping more predictable. Most code keeps working unchanged: the public API is compatible with 3.0.3 apart from one type the netstandard builds exposed by mistake (checked by package validation), but some **behaviour** changed. This page lists what to check, most commonly affected first. See the [changelog](../CHANGELOG.md) for everything that's new.
+ExcelMapper 4.0 fixes several long-standing bugs and makes mapping more predictable. Most code keeps working unchanged: reading rows, attributes, class maps and the fluent API are source compatible, but some **behaviour** changed, and the low-level extension types are replaced by simpler ones (see [Extension types](#extension-types)). This page lists what to check, most commonly affected first. See the [changelog](../CHANGELOG.md) for everything that's new.
 
 ## Checklist
 
@@ -10,8 +10,9 @@ ExcelMapper 4.0 fixes several long-standing bugs and makes mapping more predicta
 4. [`ReadRow` reads the heading first](#readrow-reads-the-heading-first)
 5. [Error messages use cell addresses](#error-messages-use-cell-addresses)
 6. [Sheet names are case-insensitive](#sheet-names-are-case-insensitive)
-7. [Smaller changes](#smaller-changes)
-8. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
+7. [Extension types](#extension-types)
+8. [Smaller changes](#smaller-changes)
+9. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
 
 ## `object` members receive typed values
 
@@ -119,6 +120,18 @@ catch (ExcelMappingException ex)
 **Who's affected:** workbooks with sheets whose names differ only by case, or code relying on `TryReadSheet("summary", ...)` failing for a sheet named "Summary".
 
 **Now:** `ReadSheet(name)` and `TryReadSheet(name, ...)` ignore case, as Excel does (Excel doesn't allow two sheets whose names differ only by case).
+
+## Extension types
+
+**Who's affected:** code that implements or creates ExcelMapper's low-level types directly, rather than using attributes, class maps and the fluent API.
+
+4.0 has a smaller set of extension points, and the types they replace are internal:
+
+| 3.x | 4.0 |
+|---|---|
+| Collection factories (`ExcelMapper.Factories`, `IEnumerableFactory<T>`, `IDictionaryFactory<TKey, TValue>`, `IMultidimensionalArrayFactory<T>`) and the collection and dictionary maps' constructors | ExcelMapper creates the collection for the member's type. Get a member's map from `ExcelClassMap<T>.Map(...)`. |
+
+**What to do:** if you created a collection or dictionary map with its constructor, map the member with `Map(...)` in a class map instead. To control how values are created, use an [`ICellConverter<T>`](mapping.md#custom-converters).
 
 ## Smaller changes
 

@@ -22,7 +22,7 @@ namespace ExcelMapper.Abstractions;
 /// will throw an <see cref="ExcelMappingException"/>.
 /// </para>
 /// </remarks>
-public interface IMultidimensionalArrayFactory<T>
+internal interface IMultidimensionalArrayFactory<T>
 {
     /// <summary>
     /// Begins a new multidimensional array creation operation with the specified dimensions.
