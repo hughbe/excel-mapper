@@ -210,7 +210,7 @@ public static class AutoMapper
             // mapper that behaves the same way (including number styles and format providers).
             if (NumberMapper.IsSupportedType(type))
             {
-                mappers.Add(new NumberMapper(type));
+                mappers.Add(NumberMapper.Create(type));
                 return true;
             }
 #endif
