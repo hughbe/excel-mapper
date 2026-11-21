@@ -69,7 +69,7 @@ public class MapUsingTests
         importer.Configuration.RegisterClassMap<BuiltInTypes>(c =>
         {
             c.Map(r => r.Number).WithConverter(_ => throw new InvalidOperationException("Not called for empty cells.")).WithEmptyFallback(-1);
-            c.Map(r => r.Nullable).WithConverter(_ => throw new InvalidOperationException("Not called for empty cells."));
+            c.Map(r => r.Nullable).WithConverter((string? _) => throw new InvalidOperationException("Not called for empty cells."));
             c.Map(r => r.When);
             c.Map(r => r.Day);
             c.Map(r => r.Name);
@@ -86,7 +86,7 @@ public class MapUsingTests
         importer.Configuration.RegisterClassMap<BuiltInTypes>(c =>
         {
             c.Map(r => r.Number).WithConverter(_ => throw new FormatException()).WithInvalidFallback(-1);
-            c.Map(r => r.Nullable).WithConverter((string? s) => (int?)int.Parse(s!));
+            c.Map(r => r.Nullable).WithConverter(s => int.Parse(s!));
             c.Map(r => r.When);
             c.Map(r => r.Day);
             c.Map(r => r.Name);

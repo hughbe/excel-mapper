@@ -1059,6 +1059,10 @@ The fluent API provides extensive configuration options:
 - `.WithMapping(dictionary)` - Map string values to enum/object values
 - `.WithElementMap(...)` - Configure element pipeline for collections
 
+Every method returns the map, so the calls chain in any order, for example `Map(e => e.HireDate).WithFormats("yyyy-MM-dd").MakeOptional()`.
+
+For nullable members, converters and fallbacks can work with the underlying type: `Map(e => e.Bonus).WithConverter(value => int.Parse(value))` maps an `int?` member, as do an `ICellConverter<int>` and an `ICellFallback<int>`.
+
 #### Complete Fluent Example
 ```csharp
 public enum EmploymentStatus { FullTime, PartTime, Contract }
