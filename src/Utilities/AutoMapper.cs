@@ -656,6 +656,14 @@ public static class AutoMapper
         return false;
     }
 
+    private static bool TryCreateDictionaryMap(MemberInfo member, Type dictionaryType, Type keyType, Type valueType, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IManyToOneMap? map)
+    {
+        var method = TryCreateDictionaryMapGeneric.MakeGenericMethod(keyType, valueType);
+        var parameters = new object?[] { member, dictionaryType, emptyValueStrategy, true, null };
+        map = (bool)method.InvokeUnwrapped(null, parameters)! ? (IManyToOneMap)parameters[^1]! : null;
+        return map is not null;
+    }
+
     internal static bool TryGetDictionaryKeyValueType(Type dictionaryType, [NotNullWhen(true)] out Type? keyType, [NotNullWhen(true)] out Type? valueType)
     {
         // We should be able to parse anything that implements IEnumerable<KeyValuePair<TKey, TValue>>
@@ -867,6 +875,33 @@ public static class AutoMapper
         {
             classMap = null;
             return true; // Continue processing other members
+        }
+
+        if (Attribute.IsDefined(member, typeof(ExcelRowNumberAttribute)))
+        {
+            if (!RowNumberMap.IsSupportedType(memberType))
+            {
+                throw new ExcelMappingException($"Member \"{member.Name}\" has the ExcelRowNumber attribute, but its type \"{memberType}\" is not a numeric type such as int or long.");
+            }
+
+            map.Properties.Add(new ExcelPropertyMap(member, new RowNumberMap(memberType)));
+            classMap = null;
+            return true;
+        }
+
+        if (Attribute.IsDefined(member, typeof(ExcelExtraColumnsAttribute)))
+        {
+            if (!TryGetDictionaryKeyValueType(memberType, out var keyType, out var valueType) ||
+                keyType != typeof(string) ||
+                !TryCreateDictionaryMap(member, memberType, keyType, valueType, emptyValueStrategy, out var extraColumnsMap))
+            {
+                throw new ExcelMappingException($"Member \"{member.Name}\" has the ExcelExtraColumns attribute, but its type \"{memberType}\" is not a dictionary with string keys.");
+            }
+
+            extraColumnsMap.ReaderFactory = new ExtraColumnsReaderFactory(map);
+            map.Properties.Add(new ExcelPropertyMap(member, extraColumnsMap));
+            classMap = null;
+            return true;
         }
 
         // Infer the mapping for each member (property/field) belonging to the type.

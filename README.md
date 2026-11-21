@@ -14,7 +14,7 @@ Built on top of [ExcelDataReader](https://github.com/ExcelDataReader/ExcelDataRe
 - 🔧 **Extensive customization** - Custom converters, transformers, and fallback strategies
 - 📊 **Multiple mapping strategies** - One-to-one, many-to-one, collections, dictionaries
 - 🏷️ **Attribute-based mapping** - Simple declarative mapping with attributes
-- 🔄 **Flexible column selection** - By name, index, regex pattern, or custom predicate
+- 🔄 **Flexible column selection** - By name, index, regex pattern, or custom predicate; capture row numbers and unmapped columns
 - 🛡️ **Robust error handling** - Optional properties, default values, and custom fallbacks
 - 🚀 **High performance** - Streaming API with lazy evaluation and caching
 - 📦 **Rich type support** - Primitives, enums, DateTime, collections, nested objects, and more

@@ -312,6 +312,74 @@ public class Employee
 }
 ```
 
+#### Row Numbers
+
+Record which row each object came from, for example to report problems back to whoever filled in the spreadsheet:
+
+```csharp
+public class Employee
+{
+    [ExcelRowNumber]
+    public int Row { get; set; }
+
+    public string Name { get; set; }
+}
+
+foreach (var employee in sheet.ReadRows<Employee>())
+{
+    if (string.IsNullOrWhiteSpace(employee.Name))
+    {
+        Console.WriteLine($"Row {employee.Row} has no name");
+    }
+}
+```
+
+Row numbers are one-based, as Excel shows them, and count every row in the sheet: the heading, any rows above it, and blank rows skipped by `SkipBlankLines`. So the first row under a heading in row 1 is row 2, and the numbers match the rows in error messages. The member doesn't read a column, and can be any numeric type (`int`, `long`, `int?`, ...). With the fluent API, use `MapRowNumber`:
+
+```csharp
+importer.Configuration.RegisterClassMap<Employee>(c =>
+{
+    c.MapRowNumber(e => e.Row);
+    c.Map(e => e.Name);
+});
+```
+
+For a positional record, apply the attribute to the property: `record Employee([property: ExcelRowNumber] int Row, string Name)`.
+
+#### Extra Columns
+
+Keep the columns a class doesn't map, keyed by column name:
+
+| Name  | Age | Team    | Desk |
+|-------|-----|---------|------|
+| Alice | 34  | Finance | 4B   |
+
+```csharp
+public class Employee
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+
+    [ExcelExtraColumns]
+    public Dictionary<string, string> Other { get; set; }  // { ["Team"] = "Finance", ["Desk"] = "4B" }
+}
+```
+
+A column is extra if no other member of the class reads it, including members of nested objects, members with `[ExcelColumnName]`, `[ExcelColumnIndex]` and similar attributes, and split collections. Members with `[ExcelIgnore]` don't read a column, so their columns are extra. Columns with an empty name are skipped. The sheet must have a heading.
+
+The member can be any dictionary with string keys that can be mapped to all columns, such as `Dictionary<string, string>`, `IReadOnlyDictionary<string, object>` (values as Excel stores them: `double`, `DateTime`, ...), `Dictionary<string, int>` or `ExpandoObject`. With the fluent API, use `MapExtraColumns`, which also lets you configure how values are mapped:
+
+```csharp
+importer.Configuration.RegisterClassMap<Employee>(c =>
+{
+    c.Map(e => e.Name).WithColumnName("Full Name");
+    c.Map(e => e.Age);
+    c.MapExtraColumns(e => e.Other).WithValueMap(v => v.WithConverter(s => s?.Trim()));
+});
+```
+
+With a class map, only the members in the class map read columns.
+
 #### Preserve Formatting
 
 Read formatted string values instead of raw values:

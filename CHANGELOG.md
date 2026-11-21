@@ -22,6 +22,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 ### Added
 
 - Records and types without a parameterless constructor are created through a constructor whose parameters match mapped members; read-only properties can be mapped through constructor parameters. ([#118](https://github.com/hughbe/excel-mapper/pull/118))
+- `[ExcelRowNumber]` and `MapRowNumber(...)` set a member to the row's number, as Excel shows it; `[ExcelExtraColumns]` and `MapExtraColumns(...)` fill a dictionary with the columns no other member reads. ([#136](https://github.com/hughbe/excel-mapper/pull/136))
 - `ExcelSheet.ReadRowResults<T>()` reports every invalid cell in every row instead of stopping at the first. ([#126](https://github.com/hughbe/excel-mapper/pull/126))
 - `ExcelSheet.ValidateHeading<T>()` and `TryValidateHeading<T>()` report every missing column before reading rows. ([#128](https://github.com/hughbe/excel-mapper/pull/128))
 - `ExcelImporter.ReadRows<T>(path or stream)` reads the first sheet in one call. ([#129](https://github.com/hughbe/excel-mapper/pull/129))
