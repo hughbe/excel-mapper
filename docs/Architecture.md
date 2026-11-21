@@ -138,7 +138,13 @@ Readers extract raw values from Excel cells:
 
 #### Bound members
 
-When every member of a class map reads one column (`OneToOneMap<T>`) and the class is created with a parameterless constructor, the members are bound to the sheet the first time a row is mapped (`ExcelSheet.GetBoundMembers`). Each `BoundOneToOneMember<T>` keeps the member's cell reader for the sheet and a compiled `Action<object, T>` setter, so each row is mapped without cache lookups, and values stay typed from the map to the member. Bindings are kept by the sheet, and rebuilt if the class map's properties or a map's reader factory change. Other class maps (with nested objects, collections, or constructor parameters) map each member through `IMap.TryGetValue`.
+A class map's members are bound to the sheet the first time a row is mapped (`ExcelSheet.GetBoundMembers`), and each row is then mapped through the bound members:
+
+- `BoundOneToOneMember<T>` (one column): keeps the member's cell reader for the sheet and a compiled `Action<object, T>` setter, so values stay typed from the map to the member. For constructor arguments, a value that is already a `T` is passed on without being boxed again.
+- `BoundCellsMember` (collections and dictionaries): keeps the cells reader for the sheet.
+- `BoundMapMember` (anything else, such as nested class maps, indexers, row numbers and custom `IMap`s): maps through `IMap.TryGetValue`.
+
+Members are set after creating the object with a parameterless constructor, or read first and passed to a constructor (records and constructor-only types). Bindings are kept by the sheet, so class maps shared between importers or threads hold no per-sheet state, and are rebuilt if the class map's properties or a map's reader factory change. A member whose value causes an error while errors are collected isn't set, so it keeps its initial value.
 
 #### Reader Factories
 

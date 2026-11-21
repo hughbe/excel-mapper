@@ -11,7 +11,7 @@ namespace ExcelMapper;
 /// Reads multiple cells of an excel sheet and maps the value of the cell to the
 /// type of the property or field.
 /// </summary>
-public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
+public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
 {
     /// <summary>
     /// Constructs a map that reads one or more values from one or more cells and maps these values to one
@@ -37,6 +37,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
             ThrowHelpers.ThrowIfNull(value, nameof(value));
             _readerFactory = value;
             _factoryCache.Clear();
+            ReaderVersion++;
         }
     }
 
@@ -69,8 +70,29 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
-        var cellsReader = _factoryCache.GetOrAdd(sheet, _readerFactory, static (s, factory) => factory.GetCellsReader(s));
+        return TryGetValue(GetCellsReader(sheet), sheet, rowIndex, reader, member, out value);
+    }
 
+    /// <summary>
+    /// Incremented when <see cref="ReaderFactory"/> changes, so that readers resolved for a sheet
+    /// (see <see cref="BoundCellsMember"/>) are resolved again.
+    /// </summary>
+    int ICellsMap.ReaderVersion => ReaderVersion;
+
+    internal int ReaderVersion { get; private set; }
+
+    ICellsReader? ICellsMap.GetCellsReader(ExcelSheet sheet) => GetCellsReader(sheet);
+
+    private ICellsReader? GetCellsReader(ExcelSheet sheet)
+        => _factoryCache.GetOrAdd(sheet, _readerFactory, static (s, factory) => factory.GetCellsReader(s));
+
+    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value)
+        => TryGetValue(cellsReader, sheet, rowIndex, reader, member, out value);
+
+    private bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
+    {
+
+        
         if (cellsReader == null || !cellsReader.Start(reader, PreserveFormatting, out var count))
         {
             if (Optional)
