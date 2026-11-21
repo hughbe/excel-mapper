@@ -17,9 +17,11 @@ namespace ExcelMapper;
 public delegate TValue ConvertUsingSimpleMapperDelegate<out TValue>(string? stringValue);
 
 /// <summary>
-/// Extensions on IValuePipeline to enable fluent "With" method chaining.
+/// Fluent methods for value pipelines: a member's map (<see cref="OneToOneMap{T}"/>) and the
+/// element or value pipelines of collections and dictionaries. Each returns the pipeline it was
+/// called on.
 /// </summary>
-public static class IValuePipelineExtensions
+public static class ValuePipelineExtensions
 {
     /// <summary>
     /// Specifies that the string value of the cell should be trimmed before it is mapped to
@@ -28,7 +30,7 @@ public static class IValuePipelineExtensions
     /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithTrim<TMap>(this TMap map) where TMap : IValuePipeline
+    public static TMap WithTrim<TMap>(this TMap map) where TMap : ValuePipeline
     {
         map.Transformers.Add(new TrimStringCellTransformer());
         return map;
@@ -42,7 +44,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="transformers">The transformers.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithTransformers<TMap>(this TMap map, params ICellTransformer[] transformers) where TMap : IValuePipeline
+    public static TMap WithTransformers<TMap>(this TMap map, params ICellTransformer[] transformers) where TMap : ValuePipeline
     {
         ThrowHelpers.ThrowIfNull(transformers, nameof(transformers));
         foreach (var transformer in transformers)
@@ -70,7 +72,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="transformers">A list of additional custom transformers that will be used to map the value of a cell to a property or field</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithTransformers<TMap>(this TMap map, params Abstractions.ICellTransformer[] transformers) where TMap : IValuePipeline
+    public static TMap WithTransformers<TMap>(this TMap map, params Abstractions.ICellTransformer[] transformers) where TMap : ValuePipeline
         => map.WithTransformers((IEnumerable<Abstractions.ICellTransformer>)transformers);
 
     /// <summary>
@@ -81,7 +83,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="transformers">A list of additional custom transformers that will be used to map the value of a cell to a property or field</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithTransformers<TMap>(this TMap map, params IEnumerable<Abstractions.ICellTransformer> transformers) where TMap : IValuePipeline
+    public static TMap WithTransformers<TMap>(this TMap map, params IEnumerable<Abstractions.ICellTransformer> transformers) where TMap : ValuePipeline
     {
         ThrowHelpers.ThrowIfNull(transformers, nameof(transformers));
 
@@ -113,7 +115,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="mappers">A list of additional custom mappers that will be used to map the value of a cell to a property or field</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithMappers<TMap>(this TMap map, params ICellMapper[] mappers) where TMap : IValuePipeline
+    public static TMap WithMappers<TMap>(this TMap map, params ICellMapper[] mappers) where TMap : ValuePipeline
         => map.WithMappers((IEnumerable<ICellMapper>)mappers);
     
     /// <summary>
@@ -124,7 +126,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="mappers">A list of additional custom mappers that will be used to map the value of a cell to a property or field</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithMappers<TMap>(this TMap map, params IEnumerable<ICellMapper> mappers) where TMap : IValuePipeline
+    public static TMap WithMappers<TMap>(this TMap map, params IEnumerable<ICellMapper> mappers) where TMap : ValuePipeline
     {
         ThrowHelpers.ThrowIfNull(mappers, nameof(mappers));
 
@@ -159,7 +161,7 @@ public static class IValuePipelineExtensions
     /// <param name="comparer">The comparer uses to map fixed string values. This allows for case-insensitive mappings, for example.</param>
     /// <param name="behavior">Whether or not a failure to match is an error.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithMapping<TMap, TValue>(this TMap map, IDictionary<string, TValue> mappingDictionary, IEqualityComparer<string>? comparer = null, MappingDictionaryMapperBehavior behavior = MappingDictionaryMapperBehavior.Optional) where TMap : IValuePipeline<TValue>
+    public static TMap WithMapping<TMap, TValue>(this TMap map, IDictionary<string, TValue> mappingDictionary, IEqualityComparer<string>? comparer = null, MappingDictionaryMapperBehavior behavior = MappingDictionaryMapperBehavior.Optional) where TMap : ValuePipeline<TValue>
     {
         var item = new MappingDictionaryMapper<TValue>(mappingDictionary, comparer, behavior);
         map.Mappers.Add(item);
@@ -173,7 +175,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTime> WithFormats(this IValuePipeline<DateTime> map, params string[] formats)
+    public static ValuePipeline<DateTime> WithFormats(this ValuePipeline<DateTime> map, params string[] formats)
     {
         map.AddFormats<DateTimeMapper>(formats);
         return map;
@@ -186,7 +188,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTime> WithFormats(this IValuePipeline<DateTime> map, params IEnumerable<string> formats)
+    public static ValuePipeline<DateTime> WithFormats(this ValuePipeline<DateTime> map, params IEnumerable<string> formats)
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -199,7 +201,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTime?> WithFormats(this IValuePipeline<DateTime?> map, params string[] formats)
+    public static ValuePipeline<DateTime?> WithFormats(this ValuePipeline<DateTime?> map, params string[] formats)
     {
         map.AddFormats<DateTimeMapper>(formats);
         return map;
@@ -212,7 +214,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTime?> WithFormats(this IValuePipeline<DateTime?> map, params IEnumerable<string> formats)
+    public static ValuePipeline<DateTime?> WithFormats(this ValuePipeline<DateTime?> map, params IEnumerable<string> formats)
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -225,7 +227,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="offset">The offset, a whole number of minutes between -14 and +14 hours.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTimeOffset> WithOffset(this IValuePipeline<DateTimeOffset> map, TimeSpan offset)
+    public static ValuePipeline<DateTimeOffset> WithOffset(this ValuePipeline<DateTimeOffset> map, TimeSpan offset)
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
         map.GetOrAddMapper<DateTimeOffsetMapper>().Offset = offset;
@@ -239,7 +241,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="offset">The offset, a whole number of minutes between -14 and +14 hours.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTimeOffset?> WithOffset(this IValuePipeline<DateTimeOffset?> map, TimeSpan offset)
+    public static ValuePipeline<DateTimeOffset?> WithOffset(this ValuePipeline<DateTimeOffset?> map, TimeSpan offset)
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
         map.GetOrAddMapper<DateTimeOffsetMapper>().Offset = offset;
@@ -253,7 +255,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTimeOffset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTimeOffset> WithFormats(this IValuePipeline<DateTimeOffset> map, params string[] formats)
+    public static ValuePipeline<DateTimeOffset> WithFormats(this ValuePipeline<DateTimeOffset> map, params string[] formats)
     {
         map.AddFormats<DateTimeOffsetMapper>(formats);
         return map;
@@ -266,7 +268,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTimeOffset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTimeOffset> WithFormats(this IValuePipeline<DateTimeOffset> map, params IEnumerable<string> formats)
+    public static ValuePipeline<DateTimeOffset> WithFormats(this ValuePipeline<DateTimeOffset> map, params IEnumerable<string> formats)
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -279,7 +281,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTimeOffset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTimeOffset?> WithFormats(this IValuePipeline<DateTimeOffset?> map, params string[] formats)
+    public static ValuePipeline<DateTimeOffset?> WithFormats(this ValuePipeline<DateTimeOffset?> map, params string[] formats)
     {
         map.AddFormats<DateTimeOffsetMapper>(formats);
         return map;
@@ -292,7 +294,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTimeOffset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTimeOffset?> WithFormats(this IValuePipeline<DateTimeOffset?> map, params IEnumerable<string> formats)
+    public static ValuePipeline<DateTimeOffset?> WithFormats(this ValuePipeline<DateTimeOffset?> map, params IEnumerable<string> formats)
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -305,7 +307,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeSpan.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TimeSpan> WithFormats(this IValuePipeline<TimeSpan> map, params string[] formats)
+    public static ValuePipeline<TimeSpan> WithFormats(this ValuePipeline<TimeSpan> map, params string[] formats)
     {
         map.AddFormats<TimeSpanMapper>(formats);
         return map;
@@ -318,7 +320,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeSpan.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TimeSpan> WithFormats(this IValuePipeline<TimeSpan> map, params IEnumerable<string> formats)
+    public static ValuePipeline<TimeSpan> WithFormats(this ValuePipeline<TimeSpan> map, params IEnumerable<string> formats)
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -331,7 +333,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeSpan.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TimeSpan?> WithFormats(this IValuePipeline<TimeSpan?> map, params string[] formats)
+    public static ValuePipeline<TimeSpan?> WithFormats(this ValuePipeline<TimeSpan?> map, params string[] formats)
     {
         map.AddFormats<TimeSpanMapper>(formats);
         return map;
@@ -344,7 +346,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeSpan.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TimeSpan?> WithFormats(this IValuePipeline<TimeSpan?> map, params IEnumerable<string> formats)
+    public static ValuePipeline<TimeSpan?> WithFormats(this ValuePipeline<TimeSpan?> map, params IEnumerable<string> formats)
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -358,7 +360,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateOnly> WithFormats(this IValuePipeline<DateOnly> map, params string[] formats)
+    public static ValuePipeline<DateOnly> WithFormats(this ValuePipeline<DateOnly> map, params string[] formats)
     {
         map.AddFormats<DateOnlyMapper>(formats);
         return map;
@@ -371,7 +373,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateOnly> WithFormats(this IValuePipeline<DateOnly> map, params IEnumerable<string> formats)
+    public static ValuePipeline<DateOnly> WithFormats(this ValuePipeline<DateOnly> map, params IEnumerable<string> formats)
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -384,7 +386,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateOnly?> WithFormats(this IValuePipeline<DateOnly?> map, params string[] formats)
+    public static ValuePipeline<DateOnly?> WithFormats(this ValuePipeline<DateOnly?> map, params string[] formats)
     {
         map.AddFormats<DateOnlyMapper>(formats);
         return map;
@@ -397,7 +399,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateOnly?> WithFormats(this IValuePipeline<DateOnly?> map, params IEnumerable<string> formats)
+    public static ValuePipeline<DateOnly?> WithFormats(this ValuePipeline<DateOnly?> map, params IEnumerable<string> formats)
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -410,7 +412,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TimeOnly> WithFormats(this IValuePipeline<TimeOnly> map, params string[] formats)
+    public static ValuePipeline<TimeOnly> WithFormats(this ValuePipeline<TimeOnly> map, params string[] formats)
     {
         map.AddFormats<TimeOnlyMapper>(formats);
         return map;
@@ -423,7 +425,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TimeOnly> WithFormats(this IValuePipeline<TimeOnly> map, params IEnumerable<string> formats)
+    public static ValuePipeline<TimeOnly> WithFormats(this ValuePipeline<TimeOnly> map, params IEnumerable<string> formats)
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -436,7 +438,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TimeOnly?> WithFormats(this IValuePipeline<TimeOnly?> map, params string[] formats)
+    public static ValuePipeline<TimeOnly?> WithFormats(this ValuePipeline<TimeOnly?> map, params string[] formats)
     {
         map.AddFormats<TimeOnlyMapper>(formats);
         return map;
@@ -449,7 +451,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TimeOnly?> WithFormats(this IValuePipeline<TimeOnly?> map, params IEnumerable<string> formats)
+    public static ValuePipeline<TimeOnly?> WithFormats(this ValuePipeline<TimeOnly?> map, params IEnumerable<string> formats)
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -470,7 +472,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTime> WithFormatProvider(this IValuePipeline<DateTime> map, IFormatProvider? provider)
+    public static ValuePipeline<DateTime> WithFormatProvider(this ValuePipeline<DateTime> map, IFormatProvider? provider)
     {
         map.AddFormatProvider<DateTimeMapper>(provider);
         return map;
@@ -483,7 +485,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTime?> WithFormatProvider(this IValuePipeline<DateTime?> map, IFormatProvider? provider)
+    public static ValuePipeline<DateTime?> WithFormatProvider(this ValuePipeline<DateTime?> map, IFormatProvider? provider)
     {
         map.AddFormatProvider<DateTimeMapper>(provider);
         return map;
@@ -496,7 +498,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a DateTimeOffset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTimeOffset> WithFormatProvider(this IValuePipeline<DateTimeOffset> map, IFormatProvider? provider)
+    public static ValuePipeline<DateTimeOffset> WithFormatProvider(this ValuePipeline<DateTimeOffset> map, IFormatProvider? provider)
     {
         map.AddFormatProvider<DateTimeOffsetMapper>(provider);
         return map;
@@ -509,7 +511,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a DateTimeOffset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateTimeOffset?> WithFormatProvider(this IValuePipeline<DateTimeOffset?> map, IFormatProvider? provider)
+    public static ValuePipeline<DateTimeOffset?> WithFormatProvider(this ValuePipeline<DateTimeOffset?> map, IFormatProvider? provider)
     {
         map.AddFormatProvider<DateTimeOffsetMapper>(provider);
         return map;
@@ -522,7 +524,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a TimeSpan.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TimeSpan> WithFormatProvider(this IValuePipeline<TimeSpan> map, IFormatProvider? provider)
+    public static ValuePipeline<TimeSpan> WithFormatProvider(this ValuePipeline<TimeSpan> map, IFormatProvider? provider)
     {
         map.AddFormatProvider<TimeSpanMapper>(provider);
         return map;
@@ -535,7 +537,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a TimeSpan.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TimeSpan?> WithFormatProvider(this IValuePipeline<TimeSpan?> map, IFormatProvider? provider)
+    public static ValuePipeline<TimeSpan?> WithFormatProvider(this ValuePipeline<TimeSpan?> map, IFormatProvider? provider)
     {
         map.AddFormatProvider<TimeSpanMapper>(provider);
         return map;
@@ -549,7 +551,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a DateOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateOnly> WithFormatProvider(this IValuePipeline<DateOnly> map, IFormatProvider? provider)
+    public static ValuePipeline<DateOnly> WithFormatProvider(this ValuePipeline<DateOnly> map, IFormatProvider? provider)
     {
         map.AddFormatProvider<DateOnlyMapper>(provider);
         return map;
@@ -562,7 +564,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a DateOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<DateOnly?> WithFormatProvider(this IValuePipeline<DateOnly?> map, IFormatProvider? provider)
+    public static ValuePipeline<DateOnly?> WithFormatProvider(this ValuePipeline<DateOnly?> map, IFormatProvider? provider)
     {
         map.AddFormatProvider<DateOnlyMapper>(provider);
         return map;
@@ -575,7 +577,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a TimeOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TimeOnly> WithFormatProvider(this IValuePipeline<TimeOnly> map, IFormatProvider? provider)
+    public static ValuePipeline<TimeOnly> WithFormatProvider(this ValuePipeline<TimeOnly> map, IFormatProvider? provider)
     {
         map.AddFormatProvider<TimeOnlyMapper>(provider);
         return map;
@@ -588,7 +590,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a TimeOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TimeOnly?> WithFormatProvider(this IValuePipeline<TimeOnly?> map, IFormatProvider? provider)
+    public static ValuePipeline<TimeOnly?> WithFormatProvider(this ValuePipeline<TimeOnly?> map, IFormatProvider? provider)
     {
         map.AddFormatProvider<TimeOnlyMapper>(provider);
         return map;
@@ -611,7 +613,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a numeric type.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<T> WithFormatProvider<T>(this IValuePipeline<T> map, IFormatProvider? provider) where T : INumberBase<T>
+    public static ValuePipeline<T> WithFormatProvider<T>(this ValuePipeline<T> map, IFormatProvider? provider) where T : INumberBase<T>
     {
         var mapper = map.GetOrAddMapper<INumberBaseMapper<T>>();
         mapper.Provider = provider;
@@ -627,7 +629,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a numeric type.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<T?> WithFormatProvider<T>(this IValuePipeline<T?> map, IFormatProvider? provider) where T : struct, INumberBase<T>
+    public static ValuePipeline<T?> WithFormatProvider<T>(this ValuePipeline<T?> map, IFormatProvider? provider) where T : struct, INumberBase<T>
     {
         var mapper = map.GetOrAddMapper<INumberBaseMapper<T>>();
         mapper.Provider = provider;
@@ -643,7 +645,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="style">The number styles to use when mapping the value of a cell to a numeric type.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<T> WithNumberStyle<T>(this IValuePipeline<T> map, NumberStyles style) where T : INumberBase<T>
+    public static ValuePipeline<T> WithNumberStyle<T>(this ValuePipeline<T> map, NumberStyles style) where T : INumberBase<T>
     {
         var mapper = map.GetOrAddMapper<INumberBaseMapper<T>>();
         mapper.Style = style;
@@ -659,7 +661,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="style">The number styles to use when mapping the value of a cell to a numeric type.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<T?> WithNumberStyle<T>(this IValuePipeline<T?> map, NumberStyles style) where T : struct, INumberBase<T>
+    public static ValuePipeline<T?> WithNumberStyle<T>(this ValuePipeline<T?> map, NumberStyles style) where T : struct, INumberBase<T>
     {
         var mapper = map.GetOrAddMapper<INumberBaseMapper<T>>();
         mapper.Style = style;
@@ -676,7 +678,7 @@ public static class IValuePipelineExtensions
     /// <param name="uriKind">The kind of URI to use when mapping the value of a cell to a Uri. Must be a valid UriKind value (Absolute, Relative, or RelativeOrAbsolute).</param>
     /// <returns>The map on which this method was invoked.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="uriKind"/> is not a valid UriKind value.</exception>
-    public static TMap WithUriKind<TMap>(this TMap map, UriKind uriKind) where TMap : IValuePipeline<Uri?>
+    public static TMap WithUriKind<TMap>(this TMap map, UriKind uriKind) where TMap : ValuePipeline<Uri?>
     {
         EnumUtilities.ValidateIsDefined(uriKind);
         var mapper = map.GetOrAddMapper<UriMapper>();
@@ -714,7 +716,7 @@ public static class IValuePipelineExtensions
     public static TMap WithConverter<TMap, TValue>(
         this TMap map,
         ConvertUsingSimpleMapperDelegate<TValue?> converter)
-        where TMap : IValuePipeline<TValue?>
+        where TMap : ValuePipeline<TValue?>
     {
         ThrowHelpers.ThrowIfNull(converter, nameof(converter));
 
@@ -736,7 +738,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="converter">A delegate that is invoked to map the read cell result to the value of a property or field.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithConverter<TMap>(this TMap map, ConvertUsingMapperDelegate converter) where TMap: IValuePipeline
+    public static TMap WithConverter<TMap>(this TMap map, ConvertUsingMapperDelegate converter) where TMap : ValuePipeline
     {
         ThrowHelpers.ThrowIfNull(converter, nameof(converter));
 
@@ -759,7 +761,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="converter">The converter.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithConverter<TMap, TValue>(this TMap map, ICellConverter<TValue> converter) where TMap : IValuePipeline<TValue>
+    public static TMap WithConverter<TMap, TValue>(this TMap map, ICellConverter<TValue> converter) where TMap : ValuePipeline<TValue>
     {
         ThrowHelpers.ThrowIfNull(converter, nameof(converter));
 
@@ -777,7 +779,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="converter">The converter.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static IValuePipeline<TValue?> WithConverter<TValue>(this IValuePipeline<TValue?> map, ICellConverter<TValue> converter) where TValue : struct
+    public static ValuePipeline<TValue?> WithConverter<TValue>(this ValuePipeline<TValue?> map, ICellConverter<TValue> converter) where TValue : struct
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
         ThrowHelpers.ThrowIfNull(converter, nameof(converter));
@@ -793,7 +795,7 @@ public static class IValuePipelineExtensions
     /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithThrowingFallback<TMap>(this TMap map) where TMap : IValuePipeline
+    public static TMap WithThrowingFallback<TMap>(this TMap map) where TMap : ValuePipeline
         => map.WithFallbackItem(new ThrowFallback());
 
     /// <summary>
@@ -803,7 +805,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="value">The value that will be assigned to the property or field if the value of a cell is empty or cannot be mapped.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithValueFallback<TMap>(this TMap map, object? value) where TMap : IValuePipeline
+    public static TMap WithValueFallback<TMap>(this TMap map, object? value) where TMap : ValuePipeline
         => map.WithFallbackItem(new FixedValueFallback(value));
 
     /// <summary>
@@ -813,7 +815,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="fallbackItem">The fallback to be used if the value of a cell is empty or cannot be mapped.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : IValuePipeline
+    public static TMap WithFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : ValuePipeline
     {
         ThrowHelpers.ThrowIfNull(fallbackItem, nameof(fallbackItem));
         map.EmptyFallback = fallbackItem;
@@ -828,7 +830,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell is empty.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithEmptyFallback<TMap>(this TMap map, object? fallbackValue) where TMap : IValuePipeline
+    public static TMap WithEmptyFallback<TMap>(this TMap map, object? fallbackValue) where TMap : ValuePipeline
         => map.WithEmptyFallbackItem(new FixedValueFallback(fallbackValue));
 
     /// <summary>
@@ -839,7 +841,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="fallback">The fallback.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithEmptyFallback<TMap, TValue>(this TMap map, ICellFallback<TValue> fallback) where TMap : IValuePipeline<TValue>
+    public static TMap WithEmptyFallback<TMap, TValue>(this TMap map, ICellFallback<TValue> fallback) where TMap : ValuePipeline<TValue>
     {
         ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
         map.EmptyFallback = new CellFallbackItem<TValue>(fallback);
@@ -854,7 +856,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="fallback">The fallback.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithInvalidFallback<TMap, TValue>(this TMap map, ICellFallback<TValue> fallback) where TMap : IValuePipeline<TValue>
+    public static TMap WithInvalidFallback<TMap, TValue>(this TMap map, ICellFallback<TValue> fallback) where TMap : ValuePipeline<TValue>
     {
         ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
         map.InvalidFallback = new CellFallbackItem<TValue>(fallback);
@@ -868,7 +870,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="fallbackItem">The fallback to be used if the value of a cell is empty.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithEmptyFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : IValuePipeline
+    public static TMap WithEmptyFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : ValuePipeline
     {
         ThrowHelpers.ThrowIfNull(fallbackItem, nameof(fallbackItem));
         map.EmptyFallback = fallbackItem;
@@ -881,7 +883,7 @@ public static class IValuePipelineExtensions
     /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithThrowingEmptyFallback<TMap>(this TMap map) where TMap : IValuePipeline
+    public static TMap WithThrowingEmptyFallback<TMap>(this TMap map) where TMap : ValuePipeline
         => map.WithEmptyFallbackItem(new ThrowFallback());
 
     /// <summary>
@@ -890,7 +892,7 @@ public static class IValuePipelineExtensions
     /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithThrowingInvalidFallback<TMap>(this TMap map) where TMap : IValuePipeline
+    public static TMap WithThrowingInvalidFallback<TMap>(this TMap map) where TMap : ValuePipeline
         => map.WithInvalidFallbackItem(new ThrowFallback());
 
     /// <summary>
@@ -900,7 +902,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell cannot be mapped.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithInvalidFallback<TMap>(this TMap map, object? fallbackValue) where TMap : IValuePipeline
+    public static TMap WithInvalidFallback<TMap>(this TMap map, object? fallbackValue) where TMap : ValuePipeline
         => map.WithInvalidFallbackItem(new FixedValueFallback(fallbackValue));
 
     /// <summary>
@@ -910,7 +912,7 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="fallbackItem">The fallback to be used if the value of a cell cannot be mapped.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithInvalidFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : IValuePipeline
+    public static TMap WithInvalidFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : ValuePipeline
     {
         ThrowHelpers.ThrowIfNull(fallbackItem, nameof(fallbackItem));
         map.InvalidFallback = fallbackItem;

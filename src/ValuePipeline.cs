@@ -11,6 +11,11 @@ namespace ExcelMapper;
 /// </summary>
 public class ValuePipeline : IValuePipeline
 {
+    // Pipelines are typed: see ValuePipeline<T>.
+    private protected ValuePipeline()
+    {
+    }
+
     /// <summary>
     /// Gets the list of objects that take the initial string value read from a cell and
     /// modifies the string value. This is useful for things like trimming the string value

@@ -33,7 +33,9 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// Gets the map that maps the value of a single cell to an object of the element type of the property
     /// or field.
     /// </summary>
-    public IValuePipeline Pipeline { get; private set; } = new ValuePipeline<TValue>();
+    public ValuePipeline<TValue> Pipeline { get; private set; } = new ValuePipeline<TValue>();
+
+    IValuePipeline IToOneMap.Pipeline => Pipeline;
     
     /// <inheritdoc />
     public bool Optional { get; set; }
@@ -176,11 +178,11 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// <param name="valueMap">The pipeline that maps the value of a single cell to an object of the element type of the property
     /// or field.</param>
     /// <returns>The map that invoked this method.</returns>
-    public ManyToOneDictionaryMap<TKey, TValue> WithValueMap(Func<IValuePipeline<TValue>, IValuePipeline<TValue>> valueMap)
+    public ManyToOneDictionaryMap<TKey, TValue> WithValueMap(Func<ValuePipeline<TValue>, ValuePipeline<TValue>> valueMap)
     {
         ThrowHelpers.ThrowIfNull(valueMap, nameof(valueMap));
 
-        var result = valueMap((IValuePipeline<TValue>)Pipeline);
+        var result = valueMap(Pipeline);
         ThrowHelpers.ThrowIfNull(result, nameof(valueMap));
         Pipeline = result;
 

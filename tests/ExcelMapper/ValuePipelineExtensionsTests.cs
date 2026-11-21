@@ -2127,7 +2127,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [Fact]
     public void WithOffset_NullMap_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>("map", () => ((IValuePipeline<DateTimeOffset>)null!).WithOffset(TimeSpan.Zero));
-        Assert.Throws<ArgumentNullException>("map", () => ((IValuePipeline<DateTimeOffset?>)null!).WithOffset(TimeSpan.Zero));
+        Assert.Throws<ArgumentNullException>("map", () => ((ValuePipeline<DateTimeOffset>)null!).WithOffset(TimeSpan.Zero));
+        Assert.Throws<ArgumentNullException>("map", () => ((ValuePipeline<DateTimeOffset?>)null!).WithOffset(TimeSpan.Zero));
     }
 }

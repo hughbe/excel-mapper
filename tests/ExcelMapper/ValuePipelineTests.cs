@@ -9,7 +9,7 @@ public class ValuePipelineTests
     [Fact]
     public void Ctor_Default()
     {
-        var pipeline = new ValuePipeline();
+        var pipeline = new ValuePipeline<string>();
         Assert.Empty(pipeline.Mappers);
         Assert.Empty(pipeline.Transformers);
         Assert.Null(pipeline.EmptyFallback);
@@ -19,7 +19,7 @@ public class ValuePipelineTests
     [Fact]
     public void Mappers_Get_ReturnsExpected()
     {
-        var pipeline = new ValuePipeline();
+        var pipeline = new ValuePipeline<string>();
         var mappers = pipeline.Mappers;
         Assert.Empty(mappers);
         Assert.Same(mappers, pipeline.Mappers);
@@ -28,7 +28,7 @@ public class ValuePipelineTests
     [Fact]
     public void Mappers_AddValidItem_Success()
     {
-        var pipeline = new ValuePipeline();
+        var pipeline = new ValuePipeline<string>();
         var item1 = new BoolMapper();
         var item2 = new BoolMapper();
 
@@ -40,14 +40,14 @@ public class ValuePipelineTests
     [Fact]
     public void Mappers_AddNullItem_ThrowsArgumentNullException()
     {
-        var pipeline = new ValuePipeline();
+        var pipeline = new ValuePipeline<string>();
         Assert.Throws<ArgumentNullException>("item", () => pipeline.Mappers.Add(null!));
     }
 
     [Fact]
     public void Mappers_RemoveValidItem_Success()
     {
-        var pipeline = new ValuePipeline();
+        var pipeline = new ValuePipeline<string>();
         var item1 = new BoolMapper();
         var item2 = new BoolMapper();
         var item3 = new BoolMapper();
@@ -79,7 +79,7 @@ public class ValuePipelineTests
     [Fact]
     public void Mappers_SetValidItem_Success()
     {
-        var pipeline = new ValuePipeline();
+        var pipeline = new ValuePipeline<string>();
         var item1 = new BoolMapper();
         var item2 = new BoolMapper();
         pipeline.Mappers.Add(item1);
@@ -91,7 +91,7 @@ public class ValuePipelineTests
     [Fact]
     public void Mappers_SetNullItem_ThrowsArgumentNullException()
     {
-        var pipeline = new ValuePipeline();
+        var pipeline = new ValuePipeline<string>();
         pipeline.Mappers.Add(new BoolMapper());
         Assert.Throws<ArgumentNullException>("item", () => pipeline.Mappers[0] = null!);
     }
@@ -99,7 +99,7 @@ public class ValuePipelineTests
     [Fact]
     public void Transformers_Get_ReturnsExpected()
     {
-        var pipeline = new ValuePipeline();
+        var pipeline = new ValuePipeline<string>();
         var transformers = pipeline.Transformers;
         Assert.Empty(transformers);
         Assert.Same(transformers, pipeline.Transformers);
@@ -108,7 +108,7 @@ public class ValuePipelineTests
     [Fact]
     public void Transformers_AddValidItem_Success()
     {
-        var pipeline = new ValuePipeline();
+        var pipeline = new ValuePipeline<string>();
         var item1 = new TrimStringCellTransformer();
         var item2 = new TrimStringCellTransformer();
 
@@ -120,14 +120,14 @@ public class ValuePipelineTests
     [Fact]
     public void Transformers_AddNullItem_ThrowsArgumentNullException()
     {
-        var pipeline = new ValuePipeline();
+        var pipeline = new ValuePipeline<string>();
         Assert.Throws<ArgumentNullException>("item", () => pipeline.Transformers.Add(null!));
     }
 
     [Fact]
     public void Transformers_RemoveValidItem_Success()
     {
-        var pipeline = new ValuePipeline();
+        var pipeline = new ValuePipeline<string>();
         var item1 = new TrimStringCellTransformer();
         var item2 = new TrimStringCellTransformer();
         var item3 = new TrimStringCellTransformer();
@@ -159,7 +159,7 @@ public class ValuePipelineTests
     [Fact]
     public void Transformers_SetValidItem_Success()
     {
-        var pipeline = new ValuePipeline();
+        var pipeline = new ValuePipeline<string>();
         var item1 = new TrimStringCellTransformer();
         var item2 = new TrimStringCellTransformer();
         pipeline.Transformers.Add(item1);
@@ -171,7 +171,7 @@ public class ValuePipelineTests
     [Fact]
     public void Transformers_SetNullItem_ThrowsArgumentNullException()
     {
-        var pipeline = new ValuePipeline();
+        var pipeline = new ValuePipeline<string>();
         pipeline.Transformers.Add(new TrimStringCellTransformer());
         Assert.Throws<ArgumentNullException>("item", () => pipeline.Transformers[0] = null!);
     }
@@ -179,7 +179,7 @@ public class ValuePipelineTests
     [Fact]
     public void EmptyFallback_Set_GetReturnsExpected()
     {
-        var pipeline = new ValuePipeline();
+        var pipeline = new ValuePipeline<string>();
 
         // Set non-null value.
         var value = new FixedValueFallback(10);
@@ -198,7 +198,7 @@ public class ValuePipelineTests
     [Fact]
     public void InvalidFallback_Set_GetReturnsExpected()
     {
-        var pipeline = new ValuePipeline();
+        var pipeline = new ValuePipeline<string>();
 
         // Set non-null value.
         var value = new FixedValueFallback(10);
