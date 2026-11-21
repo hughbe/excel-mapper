@@ -146,6 +146,8 @@ importer.Configuration.SkipBlankLines = true;
 var rows = sheet.ReadRows<Employee>();
 ```
 
+Without it, a blank row in the middle of a sheet is mapped like any other row: string and nullable members get `null`, and non-nullable members use their empty-value fallback (or throw). Empty lines at the end of a CSV file are always ignored.
+
 ### Security: Column Count Limits
 
 To protect against denial-of-service attacks from malicious Excel files with excessive columns, ExcelMapper enforces a maximum column limit per sheet:

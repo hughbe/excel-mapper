@@ -50,6 +50,8 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Fixed
 
+- Rows after an empty line in a CSV file were silently dropped, and a sheet with empty lines above its heading returned no rows. Empty lines at the end of a CSV file are still ignored. ([#137](https://github.com/hughbe/excel-mapper/pull/137))
+- A `DataRange` ending after the last row of the sheet mapped the last row twice. ([#137](https://github.com/hughbe/excel-mapper/pull/137))
 - A `DataRange` that skips leading columns read values from the wrong columns. ([#116](https://github.com/hughbe/excel-mapper/pull/116))
 - Column matching threw when the `DataRange` didn't include every column; `GetFirstColumnMatchingIndex` returned the alphabetically first match. ([#116](https://github.com/hughbe/excel-mapper/pull/116))
 - The `DataRange` row start was ignored for sheets without a heading; `SkipBlankLines` checked columns outside the `DataRange`. ([#116](https://github.com/hughbe/excel-mapper/pull/116))

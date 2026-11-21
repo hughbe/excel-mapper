@@ -391,8 +391,7 @@ public class ExcelSheet
             }
 
             // A sheet without enough rows for a heading has no rows to read either.
-            ReadUpTo(CurrentRowIndex);
-            if (HeadingIndex >= Reader.RowCount)
+            if (!TryReadUpTo(HeadingIndex))
             {
                 return false;
             }
@@ -529,8 +528,10 @@ public class ExcelSheet
         // Ensure we're on the correct sheet and row.
         ReadUpTo(CurrentRowIndex);
 
-        // Check if we've reached the end of the data range.
-        var endRowIndex = _dataRange.Rows.End.GetOffset(Reader.RowCount);
+        // Check if we've reached the end of the data range. Only use the reader's row count for
+        // ranges relative to the end of the sheet: it doesn't count empty lines in CSV files.
+        var rows = _dataRange.Rows;
+        var endRowIndex = rows.End.IsFromEnd && rows.End.Value == 0 ? int.MaxValue : rows.End.GetOffset(Reader.RowCount);
         if (CurrentRowIndex + 1 >= endRowIndex)
         {
             return false;
@@ -538,20 +539,20 @@ public class ExcelSheet
 
         // Skip any rows before the start of the data range. If the sheet has a heading, the
         // heading row is the start of the data range and has already been read.
-        var startRowIndex = _dataRange.Rows.Start.GetOffset(Reader.RowCount);
+        var startRowIndex = rows.Start.IsFromEnd ? rows.Start.GetOffset(Reader.RowCount) : rows.Start.Value;
         if (CurrentRowIndex + 1 < startRowIndex)
         {
-            if (startRowIndex >= endRowIndex)
+            if (startRowIndex >= endRowIndex || !TryReadUpTo(startRowIndex - 1))
             {
                 return false;
             }
-
-            ReadUpTo(startRowIndex - 1);
         }
 
         // Read the next row.
-        Reader.Read();
-        CurrentRowIndex++;
+        if (!ReadNextRow())
+        {
+            return false;
+        }
 
         if (Importer.Configuration.SkipBlankLines)
         {
@@ -560,34 +561,57 @@ public class ExcelSheet
             var startColumnIndex = Math.Min(_dataRange.Columns.Start.GetOffset(fieldCount), fieldCount);
             var endColumnIndex = Math.Min(_dataRange.Columns.End.GetOffset(fieldCount), fieldCount);
 
-            bool RowEmpty()
-            {
-                for (int i = startColumnIndex; i < endColumnIndex; i++)
-                {
-                    var value = Reader.GetValue(i);
-                    if (value is not null && !(value is string stringValue && string.IsNullOrEmpty(stringValue)))
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
-            while (RowEmpty())
+            while (IsBlankRow(startColumnIndex, endColumnIndex))
             {
                 // Don't skip past the end of the data range.
-                if (CurrentRowIndex + 1 >= endRowIndex)
+                if (CurrentRowIndex + 1 >= endRowIndex || !ReadNextRow())
                 {
                     return false;
                 }
+            }
+        }
 
-                if (!Reader.Read())
-                {
-                    return false;
-                }
+        return true;
+    }
 
-                CurrentRowIndex++;
+    /// <summary>
+    /// The number of rows read from the sheet so far that have a value in any column.
+    /// </summary>
+    private int _rowsWithValues;
+
+    /// <summary>
+    /// Reads the next row of the sheet. Returns false at the end of the sheet, including when
+    /// only empty lines remain in a CSV file.
+    /// </summary>
+    private bool ReadNextRow()
+    {
+        if (!Reader.Read())
+        {
+            return false;
+        }
+
+        CurrentRowIndex++;
+        if (!IsBlankRow(0, Reader.FieldCount))
+        {
+            _rowsWithValues++;
+            return true;
+        }
+
+        // The CSV reader's row count leaves out empty lines, so it can be less than the number of
+        // rows read. Every row with a value is counted, so once that many rows with values have
+        // been read, only empty lines remain: treat them as the end of the sheet, as before. For
+        // other readers the row count includes every row, so this is never true.
+        return _rowsWithValues < Reader.RowCount;
+    }
+
+    private bool IsBlankRow(int startColumnIndex, int endColumnIndex)
+    {
+        for (int i = startColumnIndex; i < endColumnIndex; i++)
+        {
+            var value = Reader.GetValue(i);
+            if (value is not null && !(value is string stringValue && string.IsNullOrEmpty(stringValue)))
+            {
+                return false;
             }
         }
 
@@ -595,6 +619,14 @@ public class ExcelSheet
     }
 
     internal void ReadUpTo(int index)
+    {
+        if (!TryReadUpTo(index))
+        {
+            throw new ExcelMappingException($"Sheet \"{Name}\" does not have row {index}.");
+        }
+    }
+
+    private bool TryReadUpTo(int index)
     {
         // If we're already on the correct sheet, no need to do anything.
         if (Importer.SheetIndex != Index)
@@ -610,21 +642,22 @@ public class ExcelSheet
             }
 
             CurrentRowIndex = -1;
+            _rowsWithValues = 0;
         }
 
         // Read up to the correct row.
-        for (var i = CurrentRowIndex; i < index; i++)
+        while (CurrentRowIndex < index)
         {
             if (Reader.IsClosed)
             {
                 throw new ExcelMappingException($"The underlying reader is closed.");
             }
-            if (!Reader.Read())
+            if (!ReadNextRow())
             {
-                throw new ExcelMappingException($"Sheet \"{Name}\" does not have row {index}.");
+                return false;
             }
-
-            CurrentRowIndex++;
         }
+
+        return true;
     }
 }

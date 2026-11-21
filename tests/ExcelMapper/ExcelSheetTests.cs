@@ -511,16 +511,17 @@ public class ExcelSheetTests
         sheet.DataRange = new ExcelRange("4:9");
         sheet.ReadHeading();
 
+        // The sheet ends before the range: the last row isn't repeated.
         var rows = sheet.ReadRows<StringValue>();
-        Assert.Equal(new string?[] { "value", "  value  ", null, "value", "value" }, rows.Select(p => p.Value).ToArray());
-        Assert.Equal(8, sheet.CurrentRowIndex);
+        Assert.Equal(new string?[] { "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
+        Assert.Equal(7, sheet.CurrentRowIndex);
 
         Assert.NotNull(sheet.Heading);
         Assert.True(sheet.HasHeading);
 
         // No more rows to read.
         Assert.Empty(sheet.ReadRows<StringValue>());
-        Assert.Equal(8, sheet.CurrentRowIndex);
+        Assert.Equal(7, sheet.CurrentRowIndex);
     }
 
     [Fact]
