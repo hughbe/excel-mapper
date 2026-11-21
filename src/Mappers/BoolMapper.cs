@@ -82,5 +82,5 @@ public class BoolMapper : ICellMapper, ITypedCellMapper<bool>, ITypedCellMapper<
     // A separate method so that the closure capturing these values is only allocated for invalid
     // values. Creating the lambda in Map would allocate the closure for every cell.
     private static CellMapperResult InvalidResult(string? stringValue)
-        => MapperUtilities.InvalidFromParse(() => bool.Parse(stringValue!));
+        => MapperUtilities.InvalidFormat(stringValue, "a valid Boolean", () => bool.Parse(stringValue!));
 }

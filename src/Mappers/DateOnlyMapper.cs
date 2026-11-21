@@ -111,6 +111,6 @@ public class DateOnlyMapper : ICellMapper, IFormatsCellMapper, ITypedCellMapper<
     // A separate method so that the closure capturing these values is only allocated for invalid
     // values. Creating the lambda in Map would allocate the closure for every cell.
     private static CellMapperResult InvalidResult(string? stringValue, string[] formats, IFormatProvider? provider, DateTimeStyles style)
-        => MapperUtilities.InvalidFromParse(() => DateOnly.ParseExact(stringValue!, formats, provider, style));
+        => MapperUtilities.InvalidDate(stringValue, style, "DateOnly", formats, () => DateOnly.ParseExact(stringValue!, formats, provider, style));
 }
 #endif

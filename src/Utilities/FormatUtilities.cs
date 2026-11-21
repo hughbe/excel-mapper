@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 
@@ -127,4 +128,13 @@ internal static class FormatUtilities
             }
         }
     }
+
+    /// <summary>
+    /// Describes the formats a value was parsed with, for the exception for an invalid value: for
+    /// example 'a valid DateTime in the format "yyyy-MM-dd"'.
+    /// </summary>
+    public static string DescribeFormats(string typeName, string[] formats)
+        => formats.Length == 1
+            ? $"a valid {typeName} in the format \"{formats[0]}\""
+            : $"a valid {typeName} in one of the formats {string.Join(", ", formats.Select(f => $"\"{f}\""))}";
 }

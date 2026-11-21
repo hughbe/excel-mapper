@@ -49,5 +49,5 @@ public class GuidMapper : ICellMapper, ITypedCellMapper<Guid>, ITypedCellMapper<
     // A separate method so that the closure capturing these values is only allocated for invalid
     // values. Creating the lambda in Map would allocate the closure for every cell.
     private static CellMapperResult InvalidResult(string? stringValue)
-        => MapperUtilities.InvalidFromParse(() => Guid.Parse(stringValue!));
+        => MapperUtilities.InvalidFormat(stringValue, "a valid Guid", () => Guid.Parse(stringValue!));
 }
