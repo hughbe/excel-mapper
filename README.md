@@ -53,6 +53,8 @@ var employees = sheet.ReadRows<Employee>().ToArray();
 - **[Performance, Thread Safety and Best Practices](https://github.com/hughbe/excel-mapper/blob/main/docs/performance.md)** - Getting the best performance, using ExcelMapper from several threads, and recommended practices.
 - **[API Reference](https://github.com/hughbe/excel-mapper/blob/main/docs/api.md)** - The main classes, attributes and fluent methods.
 - **[Architecture](https://github.com/hughbe/excel-mapper/blob/main/docs/Architecture.md)** - How ExcelMapper works internally.
+- **[Migrating to 4.0](https://github.com/hughbe/excel-mapper/blob/main/docs/migrating-to-4.0.md)** - What to check when upgrading from 3.x.
+- **[Changelog](https://github.com/hughbe/excel-mapper/blob/main/CHANGELOG.md)** - What changed in each version.
 
 ## Installation
 

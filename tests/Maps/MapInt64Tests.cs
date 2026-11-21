@@ -305,6 +305,7 @@ public class MapInt64Tests
         public long? Value { get; set; }
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_AutoMappedInt64ValueNumberStyleAttribute_Success()
     {
@@ -343,6 +344,7 @@ public class MapInt64Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeInt64Value>();
         Assert.Equal(10, row9.Value);
     }
+#endif
 
     private class NumberStyleAttributeInt64Value
     {
@@ -352,6 +354,7 @@ public class MapInt64Tests
         public long Value { get; set; }
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_DefaultMappedInt64ValueNumberStyleAttribute_Success()
     {
@@ -394,7 +397,9 @@ public class MapInt64Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeInt64Value>();
         Assert.Equal(10, row9.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedInt64ValueHex_Success()
     {
@@ -440,7 +445,9 @@ public class MapInt64Tests
         var row9 = sheet.ReadRow<Int64Value>();
         Assert.Equal(10, row9.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedInt64ValueFormatProvider_Success()
     {
@@ -472,7 +479,9 @@ public class MapInt64Tests
         var row3 = sheet.ReadRow<Int64Value>();
         Assert.Equal(10, row3.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_AutoMappedNullableInt64ValueNumberStyleAttribute_Success()
     {
@@ -511,6 +520,7 @@ public class MapInt64Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeNullableInt64Value>();
         Assert.Equal(10, row9.Value);
     }
+#endif
 
     private class NumberStyleAttributeNullableInt64Value
     {
@@ -520,6 +530,7 @@ public class MapInt64Tests
         public long? Value { get; set; }
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_DefaultMappedNullableInt64ValueNumberStyleAttribute_Success()
     {
@@ -562,7 +573,9 @@ public class MapInt64Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeNullableInt64Value>();
         Assert.Equal(10, row9.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableInt64ValueHex_Success()
     {
@@ -608,7 +621,9 @@ public class MapInt64Tests
         var row9 = sheet.ReadRow<NullableInt64Value>();
         Assert.Equal(10, row9.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableInt64ValueFormatProvider_Success()
     {
@@ -640,4 +655,5 @@ public class MapInt64Tests
         var row3 = sheet.ReadRow<NullableInt64Value>();
         Assert.Equal(10, row3.Value);
     }
+#endif
 }

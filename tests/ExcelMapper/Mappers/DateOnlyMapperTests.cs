@@ -8,6 +8,7 @@ namespace ExcelMapper.Mappers.Tests;
 
 public class DateOnlyMapperTests
 {
+#if LIBRARY_NET8
     [Fact]
     public void Ctor_Default()
     {
@@ -16,7 +17,9 @@ public class DateOnlyMapperTests
         Assert.Null(item.Provider);
         Assert.Equal(DateTimeStyles.None, item.Style);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Formats_SetValid_GetReturnsExpected()
     {
@@ -31,35 +34,45 @@ public class DateOnlyMapperTests
         item.Formats = formats;
         Assert.Same(formats, item.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Formats_SetNull_ThrowsArgumentNullException()
     {
         var item = new DateOnlyMapper();
         Assert.Throws<ArgumentNullException>("value", () => item.Formats = null!);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Formats_SetEmpty_ThrowsArgumentException()
     {
         var item = new DateOnlyMapper();
         Assert.Throws<ArgumentException>("value", () => item.Formats = []);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Formats_SetNullValueInValue_ThrowsArgumentException()
     {
         var item = new DateOnlyMapper();
         Assert.Throws<ArgumentException>("value", () => item.Formats = [null!]);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Formats_SetEmptyValueInValue_ThrowsArgumentException()
     {
         var item = new DateOnlyMapper();
         Assert.Throws<ArgumentException>("value", () => item.Formats = [""]);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Provider_Set_GetReturnsExpected()
     {
@@ -78,7 +91,9 @@ public class DateOnlyMapperTests
         item.Provider = null;
         Assert.Null(item.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(DateTimeStyles.AdjustToUniversal)]
     [InlineData((DateTimeStyles)int.MaxValue)]
@@ -94,6 +109,7 @@ public class DateOnlyMapperTests
         item.Style = style;
         Assert.Equal(style, item.Style);
     }
+#endif
 
     public static IEnumerable<object?[]> Map_Valid_TestData()
     {
@@ -106,6 +122,7 @@ public class DateOnlyMapperTests
         yield return new object?[] { new DateOnly(2025, 10, 18).ToString("yyyy-MMMM-dd", frenchCulture), new string[] { "yyyy-MMMM-dd" }, frenchCulture, DateTimeStyles.None, new DateOnly(2025, 10, 18) };
     }
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Map_Valid_TestData))]
     public void Map_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, IFormatProvider? provider, DateTimeStyles style, DateOnly expected)
@@ -122,7 +139,9 @@ public class DateOnlyMapperTests
         Assert.Equal(expected, Assert.IsType<DateOnly>(result.Value));
         Assert.Null(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -136,6 +155,7 @@ public class DateOnlyMapperTests
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);
     }
+#endif
 
     public static IEnumerable<object?[]> Map_ValidDateTimeValue_TestData()
     {
@@ -144,6 +164,7 @@ public class DateOnlyMapperTests
         yield return new object?[] { new DateTime(2025, 10, 18, 7, 57, 46), new string[] { "yyyy-MM-dd", "D" }, null, DateTimeStyles.AllowWhiteSpaces, new DateOnly(2025, 10, 18) };
     }
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Map_ValidDateTimeValue_TestData))]
     public void Map_ValidDateTimeValue_ReturnsSuccess(DateTime dateTimeValue, string[] formats, IFormatProvider? provider, DateTimeStyles style, DateOnly expected)
@@ -165,7 +186,9 @@ public class DateOnlyMapperTests
         Assert.Equal(expected, Assert.IsType<DateOnly>(result.Value));
         Assert.Null(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_InvalidFormats_ThrowsFormatException()
     {
@@ -177,7 +200,9 @@ public class DateOnlyMapperTests
         var result = item.Map(new ReadCellResult(0, new DateOnly(2025, 10, 18).ToString(), preserveFormatting: false));
         Assert.IsType<FormatException>(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_InvalidStyle_ThrowsArgumentException()
     {
@@ -189,6 +214,7 @@ public class DateOnlyMapperTests
         var result = item.Map(new ReadCellResult(0, new DateOnly(2025, 10, 18).ToString(), preserveFormatting: false));
         Assert.IsType<ArgumentException>(result.Exception);
     }
+#endif
 
     private class MockExcelDataReader : IExcelDataReader
     {
@@ -298,6 +324,7 @@ public class DateOnlyMapperTests
         public void Reset() => throw new NotImplementedException();
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_SerialNumberValue_ReturnsSuccess()
     {
@@ -312,7 +339,9 @@ public class DateOnlyMapperTests
         Assert.Equal(new DateOnly(2024, 3, 4), Assert.IsType<DateOnly>(result.Value));
         Assert.Null(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_SerialNumberValueOutOfRange_ReturnsInvalid()
     {
@@ -326,4 +355,5 @@ public class DateOnlyMapperTests
         Assert.False(result.Succeeded);
         Assert.NotNull(result.Exception);
     }
+#endif
 }

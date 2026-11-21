@@ -306,6 +306,7 @@ public class MapByteTests
         public byte? Value { get; set; }
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_AutoMappedByteValueNumberStyleAttribute_Success()
     {
@@ -344,6 +345,7 @@ public class MapByteTests
         var row9 = sheet.ReadRow<NumberStyleAttributeByteValue>();
         Assert.Equal((byte)10, row9.Value);
     }
+#endif
 
     private class NumberStyleAttributeByteValue
     {
@@ -353,6 +355,7 @@ public class MapByteTests
         public byte Value { get; set; }
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_DefaultMappedByteValueNumberStyleAttribute_Success()
     {
@@ -395,7 +398,9 @@ public class MapByteTests
         var row9 = sheet.ReadRow<NumberStyleAttributeByteValue>();
         Assert.Equal((byte)10, row9.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedByteValueHex_Success()
     {
@@ -441,7 +446,9 @@ public class MapByteTests
         var row9 = sheet.ReadRow<ByteValue>();
         Assert.Equal((byte)10, row9.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedByteValueFormatProvider_Success()
     {
@@ -473,7 +480,9 @@ public class MapByteTests
         var row3 = sheet.ReadRow<ByteValue>();
         Assert.Equal((byte)10, row3.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_AutoMappedNullableByteValueNumberStyleAttribute_Success()
     {
@@ -512,6 +521,7 @@ public class MapByteTests
         var row9 = sheet.ReadRow<NumberStyleAttributeNullableByteValue>();
         Assert.Equal((byte)10, row9.Value);
     }
+#endif
 
     private class NumberStyleAttributeNullableByteValue
     {
@@ -521,6 +531,7 @@ public class MapByteTests
         public byte? Value { get; set; }
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_DefaultMappedNullableByteValueNumberStyleAttribute_Success()
     {
@@ -563,7 +574,9 @@ public class MapByteTests
         var row9 = sheet.ReadRow<NumberStyleAttributeNullableByteValue>();
         Assert.Equal((byte)10, row9.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableByteValueHex_Success()
     {
@@ -609,7 +622,9 @@ public class MapByteTests
         var row9 = sheet.ReadRow<NullableByteValue>();
         Assert.Equal((byte)10, row9.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableByteValueFormatProvider_Success()
     {
@@ -641,4 +656,5 @@ public class MapByteTests
         var row3 = sheet.ReadRow<NullableByteValue>();
         Assert.Equal((byte)10, row3.Value);
     }
+#endif
 }

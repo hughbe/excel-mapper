@@ -21,9 +21,14 @@ internal static class ThrowHelpers
 #if NET6_0_OR_GREATER
         ArgumentException.ThrowIfNullOrEmpty(value, paramName);
 #else
-        if (string.IsNullOrEmpty(value))
+        // Match ArgumentException.ThrowIfNullOrEmpty: null is an ArgumentNullException.
+        if (value is null)
         {
-            throw new ArgumentException("Value cannot be null or empty.", paramName);
+            throw new ArgumentNullException(paramName);
+        }
+        if (value.Length == 0)
+        {
+            throw new ArgumentException("The value cannot be an empty string.", paramName);
         }
 #endif
     }
@@ -33,9 +38,14 @@ internal static class ThrowHelpers
 #if NET6_0_OR_GREATER
         ArgumentException.ThrowIfNullOrWhiteSpace(value, paramName);
 #else
+        // Match ArgumentException.ThrowIfNullOrWhiteSpace: null is an ArgumentNullException.
+        if (value is null)
+        {
+            throw new ArgumentNullException(paramName);
+        }
         if (string.IsNullOrWhiteSpace(value))
         {
-            throw new ArgumentException("Value cannot be null or whitespace.", paramName);
+            throw new ArgumentException("The value cannot be an empty string or composed entirely of whitespace.", paramName);
         }
 #endif
     }

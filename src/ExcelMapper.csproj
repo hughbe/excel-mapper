@@ -22,6 +22,15 @@
     <Copyright>Copyright 2026 (c) Hugh Bellamy. All rights reserved.</Copyright>
     <PackageTags>excel;mapping;mapper;excel-mapper</PackageTags>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <!--
+      Check the package against the last release for breaking changes (and that the target
+      frameworks in the package are consistent). Intentional breaks are listed, with reasons, in
+      CompatibilitySuppressions.xml; regenerate it with
+      dotnet pack -c Release -p:GenerateCompatibilitySuppressionFile=true
+      and update the baseline after each release.
+    -->
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <PackageValidationBaselineVersion>3.0.3</PackageValidationBaselineVersion>
   </PropertyGroup>
 
   <ItemGroup>

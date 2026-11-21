@@ -305,6 +305,7 @@ public class MapSByteTests
         public sbyte? Value { get; set; }
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_AutoMappedSByteValueNumberStyleAttribute_Success()
     {
@@ -343,6 +344,7 @@ public class MapSByteTests
         var row9 = sheet.ReadRow<NumberStyleAttributeSByteValue>();
         Assert.Equal((sbyte)10, row9.Value);
     }
+#endif
 
     private class NumberStyleAttributeSByteValue
     {
@@ -352,6 +354,7 @@ public class MapSByteTests
         public sbyte Value { get; set; }
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_DefaultMappedSByteValueNumberStyleAttribute_Success()
     {
@@ -394,7 +397,9 @@ public class MapSByteTests
         var row9 = sheet.ReadRow<NumberStyleAttributeSByteValue>();
         Assert.Equal((sbyte)10, row9.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedSByteValueHex_Success()
     {
@@ -440,7 +445,9 @@ public class MapSByteTests
         var row9 = sheet.ReadRow<SByteValue>();
         Assert.Equal((sbyte)10, row9.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedSByteValueFormatProvider_Success()
     {
@@ -472,7 +479,9 @@ public class MapSByteTests
         var row3 = sheet.ReadRow<SByteValue>();
         Assert.Equal((sbyte)10, row3.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_AutoMappedNullableSByteValueNumberStyleAttribute_Success()
     {
@@ -511,6 +520,7 @@ public class MapSByteTests
         var row9 = sheet.ReadRow<NumberStyleAttributeNullableSByteValue>();
         Assert.Equal((sbyte)10, row9.Value);
     }
+#endif
 
     private class NumberStyleAttributeNullableSByteValue
     {
@@ -520,6 +530,7 @@ public class MapSByteTests
         public sbyte? Value { get; set; }
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_DefaultMappedNullableSByteValueNumberStyleAttribute_Success()
     {
@@ -562,7 +573,9 @@ public class MapSByteTests
         var row9 = sheet.ReadRow<NumberStyleAttributeNullableSByteValue>();
         Assert.Equal((sbyte)10, row9.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableSByteValueHex_Success()
     {
@@ -608,7 +621,9 @@ public class MapSByteTests
         var row9 = sheet.ReadRow<NullableSByteValue>();
         Assert.Equal((sbyte)10, row9.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableSByteValueFormatProvider_Success()
     {
@@ -640,4 +655,5 @@ public class MapSByteTests
         var row3 = sheet.ReadRow<NullableSByteValue>();
         Assert.Equal((sbyte)10, row3.Value);
     }
+#endif
 }

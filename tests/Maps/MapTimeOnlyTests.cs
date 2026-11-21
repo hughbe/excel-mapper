@@ -1,4 +1,6 @@
-﻿namespace ExcelMapper.Tests;
+﻿// These types are only supported by the library's .NET 7+ build.
+#if LIBRARY_NET8
+namespace ExcelMapper.Tests;
 
 public class MapTimeOnlyTests
 {
@@ -355,6 +357,7 @@ public class MapTimeOnlyTests
         public TimeOnly Value { get; set; }
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomFormatsArrayTimeOnly_Success()
     {
@@ -408,12 +411,14 @@ public class MapTimeOnlyTests
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomTimeOnlyValue>());
     }
+#endif
 
     private class CustomTimeOnlyValue
     {
         public TimeOnly CustomValue { get; set; }
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomFormatsEnumerableTimeOnly_Success()
     {
@@ -467,6 +472,7 @@ public class MapTimeOnlyTests
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<CustomTimeOnlyValue>());
     }
+#endif
 
     [Fact]
     public void ReadRow_AutoMappedNullableTimeOnly_Success()
@@ -624,3 +630,4 @@ public class MapTimeOnlyTests
         public TimeOnly? Value { get; set; }
     }
 }
+#endif

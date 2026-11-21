@@ -1,4 +1,6 @@
-﻿namespace ExcelMapper.Tests;
+﻿// These types are only supported by the library's .NET 7+ build.
+#if LIBRARY_NET8
+namespace ExcelMapper.Tests;
 
 public class MapDateOnlyTests
 {
@@ -169,6 +171,7 @@ public class MapDateOnlyTests
         Assert.Equal(new DateOnly(2017, 07, 21), row3.Value);
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomFormatsArrayDateOnly_Success()
     {
@@ -195,12 +198,14 @@ public class MapDateOnlyTests
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateOnlyValue>());
     }
+#endif
 
     private class CustomDateOnlyValue
     {
         public DateOnly CustomValue { get; set; }
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomEnumerableFormatsDateOnly_Success()
     {
@@ -227,6 +232,7 @@ public class MapDateOnlyTests
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateOnlyValue>());
     }
+#endif
 
     [Fact]
     public void ReadRow_AutoMappedNullableDateOnly_Success()
@@ -304,3 +310,4 @@ public class MapDateOnlyTests
         Assert.Equal(new DateOnly(2017, 07, 21), row3.Value);
     }
 }
+#endif

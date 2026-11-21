@@ -39,3 +39,25 @@ jobs:
         path: |
           src/bin/Release/*.nupkg
           src/bin/Release/*.snupkg
+
+  # The package also contains netstandard2.0 and netstandard2.1 builds, which .NET Framework and
+  # older .NET apps use and which take different code paths. Run the tests against those builds too
+  # (on the .NET 8 runtime). Tests of APIs that only exist in the net8.0 build are excluded with
+  # #if LIBRARY_NET8.
+  test-netstandard:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        library-target-framework: [ netstandard2.0, netstandard2.1 ]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Test against the ${{ matrix.library-target-framework }} build
+      run: dotnet test tests --configuration Release --verbosity normal -p:LibraryTargetFramework=${{ matrix.library-target-framework }}

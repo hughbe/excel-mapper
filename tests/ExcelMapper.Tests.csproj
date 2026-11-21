@@ -43,8 +43,19 @@
     </PackageReference>
   </ItemGroup>
 
+  <!--
+    By default the tests use the library's net8.0 build. Set LibraryTargetFramework to run the same
+    tests against another build of the library on the .NET 8 runtime, for example:
+      dotnet test -p:LibraryTargetFramework=netstandard2.0
+    Tests of APIs that only exist in newer builds are excluded with #if LIBRARY_NET8.
+  -->
+  <PropertyGroup>
+    <LibraryTargetFramework Condition="'$(LibraryTargetFramework)' == ''">net8.0</LibraryTargetFramework>
+    <DefineConstants Condition="'$(LibraryTargetFramework)' == 'net8.0'">$(DefineConstants);LIBRARY_NET8</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\src\ExcelMapper.csproj" />
+    <ProjectReference Include="..\src\ExcelMapper.csproj" SetTargetFramework="TargetFramework=$(LibraryTargetFramework)" />
   </ItemGroup>
 
 </Project>

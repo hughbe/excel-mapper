@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿// These types are only supported by the library's .NET 7+ build.
+#if LIBRARY_NET8
+using System.Globalization;
 
 namespace ExcelMapper.Tests;
 
@@ -261,6 +263,7 @@ public class MapHalfTests
         Assert.Equal((Half)10, row3.Value);
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedHalfValueAllowThousands_Success()
     {
@@ -288,7 +291,9 @@ public class MapHalfTests
         var row3 = sheet.ReadRow<HalfValue>();
         Assert.Equal((Half)10, row3.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedHalfValueFormatProvider_Success()
     {
@@ -321,6 +326,7 @@ public class MapHalfTests
         var row3 = sheet.ReadRow<HalfValue>();
         Assert.Equal((Half)10, row3.Value);
     }
+#endif
 
     [Fact]
     public void ReadRow_AutoMappedNullableHalfValue_Success()
@@ -443,6 +449,7 @@ public class MapHalfTests
         Assert.Equal((Half)10, row3.Value);
     }
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableHalfValueAllowThousands_Success()
     {
@@ -470,7 +477,9 @@ public class MapHalfTests
         var row3 = sheet.ReadRow<NullableHalfValue>();
         Assert.Equal((Half)10, row3.Value);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableHalfValueFormatProvider_Success()
     {
@@ -503,6 +512,7 @@ public class MapHalfTests
         var row3 = sheet.ReadRow<NullableHalfValue>();
         Assert.Equal((Half)10, row3.Value);
     }
+#endif
 
     private class HalfValue
     {
@@ -514,3 +524,4 @@ public class MapHalfTests
         public Half? Value { get; set; }
     }
 }
+#endif

@@ -8,6 +8,7 @@ namespace ExcelMapper.Mappers.Tests;
 
 public class TimeOnlyMapperTests
 {
+#if LIBRARY_NET8
     [Fact]
     public void Ctor_Default()
     {
@@ -16,7 +17,9 @@ public class TimeOnlyMapperTests
         Assert.Null(item.Provider);
         Assert.Equal(DateTimeStyles.None, item.Style);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Formats_SetValid_GetReturnsExpected()
     {
@@ -31,35 +34,45 @@ public class TimeOnlyMapperTests
         item.Formats = formats;
         Assert.Same(formats, item.Formats);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Formats_SetNull_ThrowsArgumentNullException()
     {
         var item = new TimeOnlyMapper();
         Assert.Throws<ArgumentNullException>("value", () => item.Formats = null!);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Formats_SetEmpty_ThrowsArgumentException()
     {
         var item = new TimeOnlyMapper();
         Assert.Throws<ArgumentException>("value", () => item.Formats = []);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Formats_SetNullValueInValue_ThrowsArgumentException()
     {
         var item = new TimeOnlyMapper();
         Assert.Throws<ArgumentException>("value", () => item.Formats = [null!]);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Formats_SetEmptyValueInValue_ThrowsArgumentException()
     {
         var item = new TimeOnlyMapper();
         Assert.Throws<ArgumentException>("value", () => item.Formats = [""]);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Provider_Set_GetReturnsExpected()
     {
@@ -78,7 +91,9 @@ public class TimeOnlyMapperTests
         item.Provider = null;
         Assert.Null(item.Provider);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(DateTimeStyles.AdjustToUniversal)]
     [InlineData((DateTimeStyles)int.MaxValue)]
@@ -94,6 +109,7 @@ public class TimeOnlyMapperTests
         item.Style = style;
         Assert.Equal(style, item.Style);
     }
+#endif
 
     public static IEnumerable<object?[]> Map_ValidStringValue_TestData()
     {
@@ -106,6 +122,7 @@ public class TimeOnlyMapperTests
         yield return new object?[] { new TimeOnly(14, 30, 0).ToString("HH:mm:ss", frenchCulture), new string[] { "HH:mm:ss" }, frenchCulture, DateTimeStyles.None, new TimeOnly(14, 30, 0) };
     }
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Map_ValidStringValue_TestData))]
     public void Map_ValidStringValue_ReturnsSuccess(string stringValue, string[] formats, IFormatProvider? provider, DateTimeStyles style, TimeOnly expected)
@@ -122,7 +139,9 @@ public class TimeOnlyMapperTests
         Assert.Equal(expected, Assert.IsType<TimeOnly>(result.Value));
         Assert.Null(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -136,6 +155,7 @@ public class TimeOnlyMapperTests
         Assert.Null(result.Value);
         Assert.NotNull(result.Exception);
     }
+#endif
 
 
     public static IEnumerable<object?[]> Map_ValidTimeSpan_TestData()
@@ -148,6 +168,7 @@ public class TimeOnlyMapperTests
         yield return new object?[] { new TimeSpan(14, 30, 0), new string[] { "T" }, frenchCulture, DateTimeStyles.None, new TimeOnly(14, 30, 0) };
     }
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Map_ValidTimeSpan_TestData))]
     public void Map_ValidTimeSpan_ReturnsSuccess(TimeSpan timeSpanValue, string[] formats, IFormatProvider? provider, DateTimeStyles style, TimeOnly expected)
@@ -169,6 +190,7 @@ public class TimeOnlyMapperTests
         Assert.Equal(expected, Assert.IsType<TimeOnly>(result.Value));
         Assert.Null(result.Exception);
     }
+#endif
 
     public static IEnumerable<object[]> Map_InvalidTimeSpan_TestData()
     {
@@ -176,6 +198,7 @@ public class TimeOnlyMapperTests
         yield return new object[] { TimeOnly.MaxValue.Ticks + 1 };
     }
 
+#if LIBRARY_NET8
     [Theory]
     [MemberData(nameof(Map_InvalidTimeSpan_TestData))]
     public void Map_InvalidTimeSpan_ReturnsInvalid(long ticks)
@@ -192,7 +215,9 @@ public class TimeOnlyMapperTests
         Assert.Null(result.Value);
         Assert.IsType<ArgumentOutOfRangeException>(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_InvalidFormats_ThrowsFormatException()
     {
@@ -204,7 +229,9 @@ public class TimeOnlyMapperTests
         var result = item.Map(new ReadCellResult(0, new TimeOnly(7, 57, 46).ToString(), preserveFormatting: false));
         Assert.IsType<FormatException>(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Fact]
     public void Map_InvalidStyle_ThrowsArgumentException()
     {
@@ -216,6 +243,7 @@ public class TimeOnlyMapperTests
         var result = item.Map(new ReadCellResult(0, new TimeOnly(7, 57, 46).ToString(), preserveFormatting: false));
         Assert.IsType<ArgumentException>(result.Exception);
     }
+#endif
 
     private class MockExcelDataReader : IExcelDataReader
     {
@@ -325,6 +353,7 @@ public class TimeOnlyMapperTests
         public void Reset() => throw new NotImplementedException();
     }
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(0.0, 0, 0)]
     [InlineData(0.25, 6, 0)]
@@ -343,7 +372,9 @@ public class TimeOnlyMapperTests
         Assert.Equal(new TimeOnly(expectedHours, expectedMinutes), Assert.IsType<TimeOnly>(result.Value));
         Assert.Null(result.Exception);
     }
+#endif
 
+#if LIBRARY_NET8
     [Theory]
     [InlineData(1.0)]
     [InlineData(1.5)]
@@ -360,4 +391,5 @@ public class TimeOnlyMapperTests
         Assert.False(result.Succeeded);
         Assert.NotNull(result.Exception);
     }
+#endif
 }
