@@ -139,6 +139,84 @@ public class MapBlankLinesTests
     }
 
     [Fact]
+    public void ReadRows_CsvEmptyLineDataRangeFromEnd_ExcludesLastRows()
+    {
+        // For example, leave out a totals row at the bottom.
+        using var importer = Helpers.GetCsvImporter("Name\na\n\nb\nTotal\n");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(..^1, Range.All);
+        var rows = sheet.ReadRows<StringRow>().ToArray();
+        Assert.Equal(["a", null, "b"], rows.Select(r => r.Name));
+        Assert.Equal(3, sheet.CurrentRowIndex);
+    }
+
+    [Fact]
+    public void ReadRows_CsvEmptyLineDataRangeFromEndSkipBlankLines_ExcludesLastRows()
+    {
+        using var importer = Helpers.GetCsvImporter("Name\na\n\n\nb\nc\nTotal\n");
+        importer.Configuration.SkipBlankLines = true;
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(..^2, Range.All);
+        var rows = sheet.ReadRows<StringRow>().ToArray();
+        Assert.Equal(["a", "b"], rows.Select(r => r.Name));
+    }
+
+    [Fact]
+    public void ReadRows_CsvTrailingEmptyLinesDataRangeFromEnd_IgnoresTrailingEmptyLines()
+    {
+        using var importer = Helpers.GetCsvImporter("Name\na\nb\nTotal\n\n\n");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(..^1, Range.All);
+        var rows = sheet.ReadRows<StringRow>().ToArray();
+        Assert.Equal(["a", "b"], rows.Select(r => r.Name));
+    }
+
+    [Fact]
+    public void ReadRows_CsvEmptyLineDataRangeStartFromEnd_ReturnsLastRows()
+    {
+        using var importer = Helpers.GetCsvImporter("a\n\nb\nc\n");
+        var sheet = importer.ReadSheet();
+        sheet.HasHeading = false;
+        sheet.DataRange = new ExcelRange(^2.., Range.All);
+        var rows = sheet.ReadRows<ColumnIndexRow>().ToArray();
+        Assert.Equal(["b", "c"], rows.Select(r => r.Value));
+    }
+
+    [Fact]
+    public void ReadRows_CsvEmptyLineHeadingFromEnd_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("Report\n\nName\na\nb\n");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(^3.., Range.All);
+        var rows = sheet.ReadRows<StringRow>().ToArray();
+        Assert.Equal(["a", "b"], rows.Select(r => r.Name));
+        Assert.Equal(["Name"], sheet.Heading!.ColumnNames);
+    }
+
+    [Fact]
+    public void ReadRow_CsvEmptyLineDataRangeFromEnd_ReturnsExpected()
+    {
+        // Counting the rows goes back to the current row afterwards.
+        using var importer = Helpers.GetCsvImporter("Name\na\n\nb\nTotal\n");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(..^1, Range.All);
+        Assert.Equal("a", sheet.ReadRow<StringRow>().Name);
+        Assert.Null(sheet.ReadRow<StringRow>().Name);
+        Assert.Equal("b", sheet.ReadRow<StringRow>().Name);
+        Assert.False(sheet.TryReadRow<StringRow>(out _));
+    }
+
+    [Fact]
+    public void ReadRows_XlsxBlankRowsDataRangeFromEnd_ExcludesLastRows()
+    {
+        using var importer = XlsxBuilder.Create(["Name"], ["a"], [null], ["b"], ["Total"]);
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(..^1, Range.All);
+        var rows = sheet.ReadRows<StringRow>().ToArray();
+        Assert.Equal(["a", null, "b"], rows.Select(r => r.Name));
+    }
+
+    [Fact]
     public void ReadRows_CsvQuotedValueWithEmptyLine_ReturnsExpected()
     {
         using var importer = Helpers.GetCsvImporter("Name\n\"x\n\ny\"\nb\n");

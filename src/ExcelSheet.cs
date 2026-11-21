@@ -162,7 +162,7 @@ public class ExcelSheet
         }
 
         // Read up to the heading row.
-        ReadUpTo(HeadingIndex);
+        ReadUpTo(GetHeadingRowIndex());
 
         // Create the heading.
         var heading = new ExcelHeading(Reader, DataRange, Importer.Configuration);
@@ -391,7 +391,7 @@ public class ExcelSheet
             }
 
             // A sheet without enough rows for a heading has no rows to read either.
-            if (!TryReadUpTo(HeadingIndex))
+            if (!TryReadUpTo(GetHeadingRowIndex()))
             {
                 return false;
             }
@@ -528,10 +528,10 @@ public class ExcelSheet
         // Ensure we're on the correct sheet and row.
         ReadUpTo(CurrentRowIndex);
 
-        // Check if we've reached the end of the data range. Only use the reader's row count for
-        // ranges relative to the end of the sheet: it doesn't count empty lines in CSV files.
+        // Check if we've reached the end of the data range. Only count the rows for ranges
+        // relative to the end of the sheet: otherwise read until there are no more rows.
         var rows = _dataRange.Rows;
-        var endRowIndex = rows.End.IsFromEnd && rows.End.Value == 0 ? int.MaxValue : rows.End.GetOffset(Reader.RowCount);
+        var endRowIndex = rows.End.IsFromEnd && rows.End.Value == 0 ? int.MaxValue : rows.End.GetOffset(GetRowCount());
         if (CurrentRowIndex + 1 >= endRowIndex)
         {
             return false;
@@ -539,7 +539,7 @@ public class ExcelSheet
 
         // Skip any rows before the start of the data range. If the sheet has a heading, the
         // heading row is the start of the data range and has already been read.
-        var startRowIndex = rows.Start.IsFromEnd ? rows.Start.GetOffset(Reader.RowCount) : rows.Start.Value;
+        var startRowIndex = rows.Start.IsFromEnd ? rows.Start.GetOffset(GetRowCount()) : rows.Start.Value;
         if (CurrentRowIndex + 1 < startRowIndex)
         {
             if (startRowIndex >= endRowIndex || !TryReadUpTo(startRowIndex - 1))
@@ -572,6 +572,44 @@ public class ExcelSheet
         }
 
         return true;
+    }
+
+    private int GetHeadingRowIndex()
+    {
+        var start = _dataRange.Rows.Start;
+        return start.IsFromEnd ? start.GetOffset(GetRowCount()) : start.Value;
+    }
+
+    private int _rowCount = -1;
+
+    /// <summary>
+    /// Gets the number of rows in the sheet, ignoring empty lines at the end of a CSV file.
+    /// </summary>
+    private int GetRowCount()
+    {
+        // The CSV reader's row count leaves out empty lines, so count the rows by reading the rest
+        // of the sheet, once, and then go back to the current row.
+        if (!Importer.RowCountExcludesEmptyLines)
+        {
+            return Reader.RowCount;
+        }
+
+        if (_rowCount == -1)
+        {
+            TryReadUpTo(CurrentRowIndex);
+            var currentRowIndex = CurrentRowIndex;
+            var rowCount = currentRowIndex + 1;
+            while (ReadNextRow())
+            {
+                rowCount = CurrentRowIndex + 1;
+            }
+
+            Importer.SheetIndex = -1;
+            TryReadUpTo(currentRowIndex);
+            _rowCount = rowCount;
+        }
+
+        return _rowCount;
     }
 
     /// <summary>

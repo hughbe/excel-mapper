@@ -307,6 +307,7 @@ Column letters are case-insensitive. Address strings must stay within the limits
 - Data rows start **after** the heading row
 - Both row and column ranges are inclusive (start and end indices are included)
 - Use `Range.All` for unbounded ranges (e.g., `new ExcelRange(Range.All, 0..5)`)
+- Row ranges counted from the end (`^1`) of a CSV file read the file one extra time to count its rows, as the CSV reader's own row count leaves out empty lines. Empty lines at the end of the file aren't counted
 
 **Common Use Cases:**
 
@@ -316,6 +317,9 @@ sheet.DataRange = new ExcelRange("A2:Z100");
 
 // Process only specific columns
 sheet.DataRange = new ExcelRange("B:E");  // Columns B, C, D, E
+
+// Leave out a totals row at the bottom (rows counted from the end)
+sheet.DataRange = new ExcelRange(..^1, Range.All);
 
 // Limit data to first 1000 rows
 sheet.DataRange = new ExcelRange(
