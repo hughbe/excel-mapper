@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using ExcelMapper.Abstractions;
@@ -315,6 +316,110 @@ public class TypedConverterTests
         public TimeOnly? Time { get; set; }
     }
 #endif
+
+    [Fact]
+    public void ReadRows_EveryNumberTypeText_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("SByte,Byte,Int16,UInt16,Int32,UInt32,Int64,UInt64,Single,Double,Decimal\n-1,2,-3,4,\"-5,000\",6,-7,8,9.5,1e3,11.25\n");
+        var row = importer.ReadSheet().ReadRows<AllNumbers>().Single();
+        Assert.Equal(new AllNumbers { SByte = -1, Byte = 2, Int16 = -3, UInt16 = 4, Int32 = -5000, UInt32 = 6, Int64 = -7, UInt64 = 8, Single = 9.5f, Double = 1000, Decimal = 11.25m }, row);
+    }
+
+    [Fact]
+    public void ReadRows_EveryNumberTypeXlsx_ReturnsExpected()
+    {
+        using var importer = XlsxBuilder.Create(
+            ["SByte", "Byte", "Int16", "UInt16", "Int32", "UInt32", "Int64", "UInt64", "Single", "Double", "Decimal"],
+            [-1.0, 2.0, -3.0, 4.0, -5.0, 6.0, -7.0, 8.0, 9.5, 10.5, 11.25]);
+        var row = importer.ReadSheet().ReadRows<AllNumbers>().Single();
+        Assert.Equal(new AllNumbers { SByte = -1, Byte = 2, Int16 = -3, UInt16 = 4, Int32 = -5, UInt32 = 6, Int64 = -7, UInt64 = 8, Single = 9.5f, Double = 10.5, Decimal = 11.25m }, row);
+    }
+
+    [Theory]
+    [InlineData(300.0, typeof(OverflowException))]
+    [InlineData(-1.0, typeof(OverflowException))]
+    [InlineData(2.5, typeof(FormatException))]
+    public void ReadRows_NumberCellInvalidForType_Throws(double value, Type exceptionType)
+    {
+        using var importer = XlsxBuilder.Create(["Byte"], [value]);
+        var sheet = importer.ReadSheet();
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<ByteRow>().ToArray());
+        Assert.Equal("A2", exception.CellAddress);
+        Assert.IsType(exceptionType, exception.InnerException);
+    }
+
+    [Fact]
+    public void ReadRows_NumberCellInvalidWithFallback_ReturnsFallback()
+    {
+        using var importer = XlsxBuilder.Create(["Byte"], [300.0], [7.0]);
+        importer.Configuration.RegisterClassMap<ByteRow>(c => c.Map(r => r.Byte).WithInvalidFallback((byte)1));
+        Assert.Equal([1, 7], importer.ReadSheet().ReadRows<ByteRow>().Select(r => (int)r.Byte));
+    }
+
+    [Fact]
+    public void ReadRows_NumberStyle_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("Int32,Byte\n0x1F,FF\n");
+        var row = importer.ReadSheet().ReadRows<HexNumbers>().Single();
+        Assert.Equal(31, row.Int32);
+        Assert.Equal(255, row.Byte);
+    }
+
+    public class HexNumbers
+    {
+        [ExcelNumberStyle(NumberStyles.HexNumber)]
+        public int Int32 { get; set; }
+
+        [ExcelNumberStyle(NumberStyles.HexNumber)]
+        public byte Byte { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_NullableNumbers_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("Int64,Decimal\n5,1.5\n,\n");
+        var rows = importer.ReadSheet().ReadRows<NullableNumbers>().ToArray();
+        Assert.Equal(5, rows[0].Int64);
+        Assert.Equal(1.5m, rows[0].Decimal);
+        Assert.Null(rows[1].Int64);
+        Assert.Null(rows[1].Decimal);
+    }
+
+    [Fact]
+    public void ReadRows_NullableNumberInvalid_Throws()
+    {
+        using var importer = Helpers.GetCsvImporter("Int64,Decimal\n,x\n");
+        var sheet = importer.ReadSheet();
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<NullableNumbers>().ToArray());
+        Assert.Equal("B2", exception.CellAddress);
+        Assert.IsType<FormatException>(exception.InnerException);
+    }
+
+    public record AllNumbers
+    {
+        public sbyte SByte { get; set; }
+        public byte Byte { get; set; }
+        public short Int16 { get; set; }
+        public ushort UInt16 { get; set; }
+        public int Int32 { get; set; }
+        public uint UInt32 { get; set; }
+        public long Int64 { get; set; }
+        public ulong UInt64 { get; set; }
+        public float Single { get; set; }
+        public double Double { get; set; }
+        public decimal Decimal { get; set; }
+    }
+
+    public class ByteRow
+    {
+        public byte Byte { get; set; }
+    }
+
+    public class NullableNumbers
+    {
+        public long? Int64 { get; set; }
+        public decimal? Decimal { get; set; }
+    }
 
     public class EnumRow
     {
