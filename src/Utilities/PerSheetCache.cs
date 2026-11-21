@@ -21,16 +21,26 @@ internal sealed class PerSheetCache<T> where T : class
     public T? GetOrAdd(ExcelSheet sheet, Func<ExcelSheet, T?> factory)
     {
         var table = _table;
-        if (table.TryGetValue(sheet, out var entry))
-        {
-            return entry.Value;
-        }
-
-        return table.GetValue(sheet, s => new Entry(factory(s))).Value;
+        return table.TryGetValue(sheet, out var entry) ? entry.Value : Add(table, sheet, factory);
     }
 
     /// <summary>
-    /// Discards every cached value, for example when the factory used to create them changes.
+    /// Gets the value for a sheet, creating it with <paramref name="factory"/> and <paramref name="state"/>
+    /// if needed. Pass a static lambda so that looking up a cached value doesn't allocate.
     /// </summary>
+    public T? GetOrAdd<TState>(ExcelSheet sheet, TState state, Func<ExcelSheet, TState, T?> factory)
+    {
+        var table = _table;
+        return table.TryGetValue(sheet, out var entry) ? entry.Value : Add(table, sheet, state, factory);
+    }
+
+    // Separate methods so the closures are only allocated when a value is created. A lambda that
+    // captures a parameter allocates its closure when the method is entered, even if it isn't used.
+    private static T? Add(ConditionalWeakTable<ExcelSheet, Entry> table, ExcelSheet sheet, Func<ExcelSheet, T?> factory)
+        => table.GetValue(sheet, s => new Entry(factory(s))).Value;
+
+    private static T? Add<TState>(ConditionalWeakTable<ExcelSheet, Entry> table, ExcelSheet sheet, TState state, Func<ExcelSheet, TState, T?> factory)
+        => table.GetValue(sheet, s => new Entry(factory(s, state))).Value;
+
     public void Clear() => _table = new ConditionalWeakTable<ExcelSheet, Entry>();
 }

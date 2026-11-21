@@ -136,6 +136,10 @@ Readers extract raw values from Excel cells:
 - **`ColumnsMatchingReader`**: Reads columns matching a pattern (regex or predicate)
 - **`AllColumnNamesReader`**: Reads all named columns
 
+#### Bound members
+
+When every member of a class map reads one column (`OneToOneMap<T>`) and the class is created with a parameterless constructor, the members are bound to the sheet the first time a row is mapped (`ExcelSheet.GetBoundMembers`). Each `BoundOneToOneMember<T>` keeps the member's cell reader for the sheet and a compiled `Action<object, T>` setter, so each row is mapped without cache lookups, and values stay typed from the map to the member. Bindings are kept by the sheet, and rebuilt if the class map's properties or a map's reader factory change. Other class maps (with nested objects, collections, or constructor parameters) map each member through `IMap.TryGetValue`.
+
 #### Reader Factories
 
 Factories create readers lazily per sheet (for performance):

@@ -69,7 +69,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
-        var cellsReader = _factoryCache.GetOrAdd(sheet, s => _readerFactory.GetCellsReader(s));
+        var cellsReader = _factoryCache.GetOrAdd(sheet, _readerFactory, static (s, factory) => factory.GetCellsReader(s));
 
         if (cellsReader == null || !cellsReader.Start(reader, PreserveFormatting, out var count))
         {

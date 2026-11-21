@@ -769,6 +769,62 @@ public class ExcelSheet
 
     private int GetRowCount() => Importer.RowSource.GetRowCount(Index);
 
+    private sealed class BoundClassMap(int version, BoundMember[]? members)
+    {
+        public int Version { get; } = version;
+
+        public BoundMember[]? Members { get; } = members;
+    }
+
+    // Class maps bound to this sheet. Rows are usually mapped with one class map at a time, so the
+    // last one is kept separately.
+    private Dictionary<ExcelClassMap, BoundClassMap>? _boundClassMaps;
+    private ExcelClassMap? _lastBoundClassMap;
+    private BoundClassMap? _lastBound;
+
+    /// <summary>
+    /// Gets the members of a class map bound to this sheet, or null if the class map has members that
+    /// can't be bound, which are then mapped by the class map itself.
+    /// </summary>
+    internal BoundMember[]? GetBoundMembers(ExcelClassMap classMap)
+    {
+        var bound = ReferenceEquals(_lastBoundClassMap, classMap) ? _lastBound : null;
+        if (bound is null)
+        {
+            _boundClassMaps ??= [];
+            _boundClassMaps.TryGetValue(classMap, out bound);
+        }
+
+        var version = classMap.PropertiesVersion;
+        if (bound is null || bound.Version != version)
+        {
+            bound = new BoundClassMap(version, Bind(classMap));
+            _boundClassMaps![classMap] = bound;
+        }
+
+        _lastBoundClassMap = classMap;
+        _lastBound = bound;
+        return bound.Members;
+    }
+
+    private BoundMember[]? Bind(ExcelClassMap classMap)
+    {
+        var properties = classMap.Properties;
+        var members = new BoundMember[properties.Count];
+        for (int i = 0; i < members.Length; i++)
+        {
+            var property = properties[i];
+            if (property.IsReadOnly || property.Map is not IBindableMap bindableMap)
+            {
+                return null;
+            }
+
+            members[i] = bindableMap.Bind(property, this);
+        }
+
+        return members;
+    }
+
     internal void ReadUpTo(int index)
     {
         if (!TryReadUpTo(index))

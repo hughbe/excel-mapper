@@ -80,13 +80,20 @@ public class ExcelClassMap : IMap
         {
             // Create an instance of the object and populate its properties.
             var instance = plan.CreateInstance!();
-            var properties = Properties;
-            for (int i = 0; i < properties.Count; i++)
+            if (sheet.GetBoundMembers(this) is { } boundMembers)
             {
-                var property = properties[i];
-                if (TryGetMemberValue(property, sheet, rowIndex, reader, out var value))
+                MapBoundMembers(boundMembers, instance, sheet, rowIndex, reader);
+            }
+            else
+            {
+                var properties = Properties;
+                for (int i = 0; i < properties.Count; i++)
                 {
-                    property.SetValueFactory(instance, value!);
+                    var property = properties[i];
+                    if (TryGetMemberValue(property, sheet, rowIndex, reader, out var value))
+                    {
+                        property.SetValueFactory(instance, value!);
+                    }
                 }
             }
 
@@ -102,6 +109,36 @@ public class ExcelClassMap : IMap
     /// <see cref="ExcelSheet.ReadRowResults{T}"/>), a mapping error is recorded and the member is
     /// skipped so that the remaining members are still read.
     /// </summary>
+    /// <summary>
+    /// Incremented when <see cref="Properties"/> changes, so that members bound to a sheet are bound again.
+    /// </summary>
+    internal int PropertiesVersion => ((PropertyMapCollection)Properties).Version;
+
+    private static void MapBoundMembers(BoundMember[] members, object instance, ExcelSheet sheet, int rowIndex, IExcelDataReader reader)
+    {
+        if (sheet.CollectedErrors is not { } errors)
+        {
+            for (int i = 0; i < members.Length; i++)
+            {
+                members[i].TryMap(instance, sheet, rowIndex, reader, null);
+            }
+
+            return;
+        }
+
+        for (int i = 0; i < members.Length; i++)
+        {
+            try
+            {
+                members[i].TryMap(instance, sheet, rowIndex, reader, errors);
+            }
+            catch (ExcelMappingException exception)
+            {
+                errors.Add(exception);
+            }
+        }
+    }
+
     private static bool TryGetMemberValue(ExcelPropertyMap property, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, out object? value)
     {
         if (sheet.CollectedErrors is not { } errors)
