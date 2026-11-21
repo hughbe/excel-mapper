@@ -1,17 +1,11 @@
-using System.Reflection;
-using ExcelMapper.Abstractions;
-using ExcelMapper.Fallbacks;
-
 namespace ExcelMapper.Tests;
 
 public class ExcelInvalidFallbackAttributeTests
 {
     [Theory]
     [InlineData(typeof(InvalidFallback))]
-    [InlineData(typeof(FixedValueFallback))]
-    [InlineData(typeof(ThrowFallback))]
     [InlineData(typeof(NoConstructorInvalidFallback))]
-    [InlineData(typeof(TypedFallback))]
+    [InlineData(typeof(MultipleFallback))]
     public void Ctor_Type(Type fallbackType)
     {
         var attribute = new ExcelInvalidFallbackAttribute(fallbackType);
@@ -25,37 +19,35 @@ public class ExcelInvalidFallbackAttributeTests
         Assert.Throws<ArgumentNullException>("fallbackType", () => new ExcelInvalidFallbackAttribute(null!));
     }
 
-
     [Theory]
-    [InlineData(typeof(IFallbackItem))]
     [InlineData(typeof(ICellFallback<int>))]
     [InlineData(typeof(ISubInvalidFallback))]
     [InlineData(typeof(AbstractInvalidFallback))]
     [InlineData(typeof(int))]
     [InlineData(typeof(object))]
+    [InlineData(typeof(ICellTransformer))]
     [InlineData(typeof(ExcelInvalidFallbackAttributeTests))]
     public void Ctor_InvalidFallbackType_ThrowsArgumentException(Type fallbackType)
     {
         Assert.Throws<ArgumentException>("fallbackType", () => new ExcelInvalidFallbackAttribute(fallbackType));
     }
 
-    private interface ISubInvalidFallback : IFallbackItem
+    private interface ISubInvalidFallback : ICellFallback<int>
     {
     }
 
-    private abstract class AbstractInvalidFallback : IFallbackItem
+    private abstract class AbstractInvalidFallback : ICellFallback<int>
     {
-        public abstract object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member);
+        public abstract int Fallback(CellValue value, CellContext context, Exception? exception);
     }
 
-    private class NoConstructorInvalidFallback : IFallbackItem
+    private class NoConstructorInvalidFallback : ICellFallback<int>
     {
         private NoConstructorInvalidFallback()
         {
         }
 
-        public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member)
-            => throw new NotImplementedException();
+        public int Fallback(CellValue value, CellContext context, Exception? exception) => throw new NotImplementedException();
     }
 
     public static IEnumerable<object?[]> ConstructorArguments_Set_TestData()
@@ -80,14 +72,15 @@ public class ExcelInvalidFallbackAttributeTests
         Assert.Same(value, attribute.ConstructorArguments);
     }
 
-    private class InvalidFallback : IFallbackItem
-    {
-        public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member)
-            => throw new NotImplementedException();
-    }
-
-    private sealed class TypedFallback : ICellFallback<int>
+    private sealed class InvalidFallback : ICellFallback<int>
     {
         public int Fallback(CellValue value, CellContext context, Exception? exception) => 1;
+    }
+
+    private sealed class MultipleFallback : ICellFallback<int>, ICellFallback<string>
+    {
+        int ICellFallback<int>.Fallback(CellValue value, CellContext context, Exception? exception) => 1;
+
+        string ICellFallback<string>.Fallback(CellValue value, CellContext context, Exception? exception) => "1";
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using ExcelMapper.Abstractions;
 
 namespace ExcelMapper.Tests;
 
@@ -122,13 +121,13 @@ public class MapUsingTests
 
     public class AttributeMapped
     {
-        [ExcelMapper(typeof(TimesThreeMapper))]
+        [ExcelConverter(typeof(TimesThreeConverter))]
         public int Number { get; set; }
     }
 
-    public class TimesThreeMapper : ICellMapper
+    public class TimesThreeConverter : ICellConverter<int>
     {
-        public CellMapperResult Map(ReadCellResult readResult) => CellMapperResult.Success(int.Parse(readResult.GetString()!) * 3);
+        public CellConversionResult<int> Convert(CellValue value, CellContext context) => CellConversionResult<int>.Success(int.Parse(value.Text!) * 3);
     }
 
     public class Collections

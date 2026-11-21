@@ -1,5 +1,3 @@
-using ExcelMapper.Abstractions;
-using ExcelMapper.Readers;
 
 namespace ExcelMapper.Tests;
 
@@ -320,7 +318,7 @@ public class CantReadTests
         {
             c.Map(m => m.Member)
                 .WithColumnName("Int Value")
-                .WithMappers(new ExceptionThrowingMapper(exception));
+                .WithConverter(new ExceptionThrowingConverter(exception));
         });
 
         var sheet = importer.ReadSheet();
@@ -342,7 +340,7 @@ public class CantReadTests
         {
             c.Map(m => m.Member)
                 .WithColumnName("Int Value")
-                .WithMappers(new ExceptionThrowingMapper(exception));
+                .WithConverter(new ExceptionThrowingConverter(exception));
         });
 
         var sheet = importer.ReadSheet();
@@ -363,7 +361,7 @@ public class CantReadTests
         {
             c.Map(m => m.Member)
                 .WithColumnName("Int Value")
-                .WithMappers(new ExceptionThrowingMapper(null!));
+                .WithConverter(new ExceptionThrowingConverter(null));
         });
 
         var sheet = importer.ReadSheet();
@@ -384,7 +382,7 @@ public class CantReadTests
         {
             c.Map(m => m.Member)
                 .WithColumnName("Int Value")
-                .WithMappers(new ExceptionThrowingMapper(null!));
+                .WithConverter(new ExceptionThrowingConverter(null));
         });
 
         var sheet = importer.ReadSheet();
@@ -407,11 +405,10 @@ public class CantReadTests
         public int Member { get; set; } = default!;
     }
 
-    private class ExceptionThrowingMapper(Exception exception) : ICellMapper
+    private class ExceptionThrowingConverter(Exception? exception) : ICellConverter<int>
     {
-        private readonly Exception _exception = exception;
-
-        public CellMapperResult Map(ReadCellResult readResult) => CellMapperResult.Invalid(_exception);
+        public CellConversionResult<int> Convert(CellValue value, CellContext context)
+            => exception is null ? CellConversionResult<int>.Invalid() : CellConversionResult<int>.Invalid(exception);
     }
 
     [Fact]
@@ -422,7 +419,7 @@ public class CantReadTests
         {
             var map = c.Map(m => m.Member)
                 .WithColumnName("Int Value")
-                .WithMappers(new IgnoreCellMapper());
+                .WithConverter(new NotHandledConverter());
         });
 
         var sheet = importer.ReadSheet();
@@ -443,7 +440,7 @@ public class CantReadTests
         {
             var map = c.Map(m => m.Member)
                 .WithColumnName("Int Value")
-                .WithMappers(new IgnoreCellMapper());
+                .WithConverter(new NotHandledConverter());
         });
 
         var sheet = importer.ReadSheet();
@@ -456,8 +453,8 @@ public class CantReadTests
         Assert.Equal(0, ex.ColumnIndex);
     }
 
-    private class IgnoreCellMapper : ICellMapper
+    private class NotHandledConverter : ICellConverter<int>
     {
-        public CellMapperResult Map(ReadCellResult readResult) => CellMapperResult.Ignore();
+        public CellConversionResult<int> Convert(CellValue value, CellContext context) => CellConversionResult<int>.NotHandled;
     }
 }

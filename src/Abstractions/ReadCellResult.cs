@@ -7,7 +7,7 @@ namespace ExcelMapper.Abstractions;
 /// <summary>
 /// Metadata about the output of reading the value of a single cell.
 /// </summary>
-public struct ReadCellResult
+internal struct ReadCellResult
 {
     private object? _value;
     private string? _stringValue;

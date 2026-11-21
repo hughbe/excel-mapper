@@ -1,6 +1,4 @@
-﻿using ExcelMapper.Mappers;
-using ExcelMapper.Readers;
-
+﻿
 namespace ExcelMapper.Tests;
 
 public class ExcelClassMapTTests
@@ -50,76 +48,6 @@ public class ExcelClassMapTTests
         Assert.Single(map.Properties);
         Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.StringValue)), map.Properties[0].Member);
         Assert.Same(result2, map.Properties[0].Map);
-    }
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void Map_FuncExpressionTEnumBool_Success(bool ignoreCase)
-    {
-        var map = new ExcelClassMap<TestClass>();
-        var result = map.Map(p => p.EnumValue, ignoreCase);
-        Assert.Single(map.Properties);
-        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.EnumValue)), map.Properties[0].Member);
-        Assert.Same(result, map.Properties[0].Map);
-        var mapper = Assert.IsAssignableFrom<EnumMapper>(Assert.Single(result.Mappers));
-        Assert.Equal(typeof(TestEnum), mapper.EnumType);
-        Assert.Equal(ignoreCase, mapper.IgnoreCase);
-
-        // Map again.
-        var result2 = map.Map(p => p.EnumValue, ignoreCase);
-        Assert.NotSame(result, result2);
-        Assert.Single(map.Properties);
-        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.EnumValue)), map.Properties[0].Member);
-        Assert.Same(result2, map.Properties[0].Map);
-        mapper = Assert.IsAssignableFrom<EnumMapper>(Assert.Single(result2.Mappers));
-        Assert.Equal(typeof(TestEnum), mapper.EnumType);
-        Assert.Equal(ignoreCase, mapper.IgnoreCase);
-
-        // Map opposite.
-        var result3 = map.Map(p => p.EnumValue, !ignoreCase);
-        Assert.NotSame(result2, result3);
-        Assert.Single(map.Properties);
-        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.EnumValue)), map.Properties[0].Member);
-        Assert.Same(result3, map.Properties[0].Map);
-        mapper = Assert.IsAssignableFrom<EnumMapper>(Assert.Single(result3.Mappers));
-        Assert.Equal(typeof(TestEnum), mapper.EnumType);
-        Assert.Equal(!ignoreCase, mapper.IgnoreCase);
-    }
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void Map_FuncExpressionNullableTEnumBool_Success(bool ignoreCase)
-    {
-        var map = new ExcelClassMap<TestClass>();
-        var result = map.Map(p => p.NullableEnumValue, ignoreCase);
-        Assert.Single(map.Properties);
-        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.NullableEnumValue)), map.Properties[0].Member);
-        Assert.Same(result, map.Properties[0].Map);
-        var mapper = Assert.IsAssignableFrom<EnumMapper>(Assert.Single(result.Mappers));
-        Assert.Equal(typeof(TestEnum), mapper.EnumType);
-        Assert.Equal(ignoreCase, mapper.IgnoreCase);
-
-        // Map again.
-        var result2 = map.Map(p => p.NullableEnumValue, ignoreCase);
-        Assert.NotSame(result, result2);
-        Assert.Single(map.Properties);
-        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.NullableEnumValue)), map.Properties[0].Member);
-        Assert.Same(result2, map.Properties[0].Map);
-        mapper = Assert.IsAssignableFrom<EnumMapper>(Assert.Single(result2.Mappers));
-        Assert.Equal(typeof(TestEnum), mapper.EnumType);
-        Assert.Equal(ignoreCase, mapper.IgnoreCase);
-
-        // Map opposite.
-        var result3 = map.Map(p => p.NullableEnumValue, !ignoreCase);
-        Assert.NotSame(result2, result3);
-        Assert.Single(map.Properties);
-        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.NullableEnumValue)), map.Properties[0].Member);
-        Assert.Same(result3, map.Properties[0].Map);
-        mapper = Assert.IsAssignableFrom<EnumMapper>(Assert.Single(result3.Mappers));
-        Assert.Equal(typeof(TestEnum), mapper.EnumType);
-        Assert.Equal(!ignoreCase, mapper.IgnoreCase);
     }
 
     [Fact]

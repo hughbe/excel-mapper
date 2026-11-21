@@ -6,7 +6,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a DateOnly.
 /// </summary>
-public class DateOnlyMapper : ICellMapper, IFormatsCellMapper, ITypedCellMapper<DateOnly>, ITypedCellMapper<DateOnly?>
+internal class DateOnlyMapper : ICellMapper, IFormatsCellMapper, ITypedCellMapper<DateOnly>, ITypedCellMapper<DateOnly?>
 {
     private string[] _formats = ["d"];
 

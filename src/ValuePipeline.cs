@@ -9,7 +9,7 @@ namespace ExcelMapper;
 /// Reads a single cell of an excel sheet and maps the value of the cell to the
 /// type of the property or field.
 /// </summary>
-public class ValuePipeline : IValuePipeline
+public class ValuePipeline
 {
     // Pipelines are typed: see ValuePipeline<T>.
     private protected ValuePipeline()
@@ -21,21 +21,21 @@ public class ValuePipeline : IValuePipeline
     /// modifies the string value. This is useful for things like trimming the string value
     /// before mapping it.
     /// </summary>
-    public IList<Abstractions.ICellTransformer> Transformers { get; } = new NonNullCollection<Abstractions.ICellTransformer>();
+    internal IList<Abstractions.ICellTransformer> Transformers { get; } = new NonNullCollection<Abstractions.ICellTransformer>();
 
     /// <summary>
     /// Gets the pipeline of items that take the initial string value read from a cell and
     /// converts the string value into the type of the property or field. The items form
     /// a pipeline: if a mapper fails to parse or map the cell value, the next item is used.
     /// </summary>
-    public IList<ICellMapper> Mappers { get; } = new NonNullCollection<ICellMapper>();
+    internal IList<ICellMapper> Mappers { get; } = new NonNullCollection<ICellMapper>();
 
     /// <summary>
     /// Gets or sets an object that handles mapping a cell value to a property or field if the value of the
     /// cell is empty. For example, you can provide a fixed value to return if the value of the cell
     /// is empty.
     /// </summary>
-    public IFallbackItem? EmptyFallback
+    internal IFallbackItem? EmptyFallback
     {
         get => _emptyFallback;
         set
@@ -52,7 +52,7 @@ public class ValuePipeline : IValuePipeline
     /// in the mapper pipeline failed to map the value to the property or field. For example, you can
     /// provide a fixed value to return if the value of the cell is invalid.
     /// </summary>
-    public IFallbackItem? InvalidFallback
+    internal IFallbackItem? InvalidFallback
     {
         get => _invalidFallback;
         set
@@ -99,7 +99,7 @@ public class ValuePipeline : IValuePipeline
     /// </list>
     /// </remarks>
     internal static object? GetPropertyValue(
-        IValuePipeline pipeline,
+        ValuePipeline pipeline,
         ExcelSheet sheet,
         int rowIndex,
         ReadCellResult readResult,
@@ -144,7 +144,7 @@ public class ValuePipeline : IValuePipeline
     /// <summary>
     /// Applies the pipeline's transformers to a cell.
     /// </summary>
-    internal static ReadCellResult ApplyTransformers(IValuePipeline pipeline, ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting, MemberInfo? member)
+    internal static ReadCellResult ApplyTransformers(ValuePipeline pipeline, ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting, MemberInfo? member)
     {
         // Use indexed loops: enumerating an IList through its interface allocates for every cell.
         var transformers = pipeline.Transformers;
@@ -176,7 +176,7 @@ public class ValuePipeline : IValuePipeline
         {
             var transformer = transformers[i];
 
-            // Trimming only changes text: see ApplyTransformers(IValuePipeline, ...).
+            // Trimming only changes text: see ApplyTransformers(ValuePipeline, ...).
             if (transformer is TrimStringCellTransformer && !preserveFormatting && readResult.GetValue() is not (string or null))
             {
                 continue;
@@ -195,8 +195,7 @@ public class ValuePipeline : IValuePipeline
     /// </summary>
     internal static bool FallbackUsesException(IFallbackItem fallback)
     {
-        var fallbackType = fallback.GetType();
-        return fallbackType != typeof(FixedValueFallback) && fallbackType != typeof(FixedValueFallbackFactory);
+        return fallback.GetType() != typeof(FixedValueFallback);
     }
 
     /// <summary>

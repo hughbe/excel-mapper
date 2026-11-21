@@ -5,7 +5,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to an enum of a given type.
 /// </summary>
-public class EnumMapper : ICellMapper
+internal class EnumMapper : ICellMapper
 {
     /// <summary>
     /// Gets the type of the enum to map the value of a cell to.
@@ -21,24 +21,9 @@ public class EnumMapper : ICellMapper
     /// Constructs a mapper that tries to map the value of a cell to an enum of a given type.
     /// </summary>
     /// <param name="enumType">The type of the enum to convert the value of a cell to.</param>
-    public EnumMapper(Type enumType) : this(enumType, ignoreCase: false)
-    {
-    }
-
-    /// <summary>
-    /// Constructs a mapper that tries to map the value of a cell to an enum of a given type.
-    /// </summary>
-    /// <param name="enumType">The type of the enum to convert the value of a cell to.</param>
     /// <param name="ignoreCase">A flag indicating whether enum parsing is case insensitive.</param>
     public EnumMapper(Type enumType, bool ignoreCase)
     {
-        ThrowHelpers.ThrowIfNull(enumType, nameof(enumType));
-
-        if (!enumType.GetTypeInfo().IsEnum)
-        {
-            throw new ArgumentException($"Type {enumType} is not an Enum.", nameof(enumType));
-        }
-
         EnumType = enumType;
         IgnoreCase = ignoreCase;
     }

@@ -6,7 +6,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a TimeOnly.
 /// </summary>
-public class TimeOnlyMapper : ICellMapper, IFormatsCellMapper, ITypedCellMapper<TimeOnly>, ITypedCellMapper<TimeOnly?>
+internal class TimeOnlyMapper : ICellMapper, IFormatsCellMapper, ITypedCellMapper<TimeOnly>, ITypedCellMapper<TimeOnly?>
 {
     private string[] _formats = ["t"];
 

@@ -6,7 +6,7 @@ namespace ExcelMapper.Fallbacks;
 /// A fallback that returns a fixed given value when falling back.
 /// </summary>
 /// <param name="value">The fixed value returned when falling back.</param>
-public class FixedValueFallback(object? value) : IFallbackItem
+internal class FixedValueFallback(object? value) : IFallbackItem
 {
     /// <summary>
     /// The fixed value returned when falling back.

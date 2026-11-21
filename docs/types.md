@@ -525,19 +525,17 @@ public class EmployeeMap : ExcelClassMap<Employee>
 }
 ```
 
-### Custom Transformers and Mappers
+### Custom Transformers and Converters
 
-For advanced scenarios, implement `ICellTransformer` or `ICellMapper`:
+For advanced scenarios, implement `ICellTransformer` or `ICellConverter<T>` (see [Custom Converters](mapping.md#custom-converters)):
 
-**ICellTransformer** - Transforms string values before mapping:
+**ICellTransformer** - Changes a cell's value before it's converted:
 
 ```csharp
 public class UpperCaseTransformer : ICellTransformer
 {
-    public string? TransformStringValue(ExcelSheet sheet, int rowIndex, ReadCellResult readResult)
-    {
-        return readResult.StringValue?.ToUpperInvariant();
-    }
+    public CellValue Transform(CellValue value, CellContext context)
+        => value.Kind == CellKind.Text ? new CellValue(value.Text!.ToUpperInvariant()) : value;
 }
 
 public class EmployeeMap : ExcelClassMap<Employee>
@@ -546,43 +544,26 @@ public class EmployeeMap : ExcelClassMap<Employee>
     {
         Map(e => e.Name)
             .WithTransformers(new UpperCaseTransformer());
-            
+
         // Or use the built-in trim transformer
         Map(e => e.Department)
-            .WithTrim();  // Convenience method for TrimStringCellTransformer
+            .WithTrim();
     }
 }
 ```
 
-**ICellMapper** - Custom type conversion logic:
+**ICellConverter<T>** - Custom conversion, used for every cell that isn't empty:
 
 ```csharp
-public class PhoneNumberMapper : ICellMapper
+public class PhoneNumberConverter : ICellConverter<string>
 {
-    public CellMapperResult Map(ReadCellResult readResult)
+    public CellConversionResult<string> Convert(CellValue value, CellContext context)
     {
-        var value = readResult.StringValue;
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return CellMapperResult.Empty();
-        }
-
-        try
-        {
-            // Remove formatting and validate
-            var cleaned = new string(value.Where(char.IsDigit).ToArray());
-            if (cleaned.Length != 10)
-            {
-                return CellMapperResult.Invalid(
-                    new FormatException("Phone number must be 10 digits"));
-            }
-            
-            return CellMapperResult.Success(cleaned);
-        }
-        catch (Exception ex)
-        {
-            return CellMapperResult.Invalid(ex);
-        }
+        // Remove formatting and validate
+        var digits = new string(value.Text!.Where(char.IsDigit).ToArray());
+        return digits.Length == 10
+            ? CellConversionResult<string>.Success(digits)
+            : CellConversionResult<string>.Invalid(() => new FormatException("Phone number must be 10 digits."));
     }
 }
 
@@ -591,24 +572,21 @@ public class ContactMap : ExcelClassMap<Contact>
     public ContactMap()
     {
         Map(e => e.PhoneNumber)
-            .WithMappers(new PhoneNumberMapper());
+            .WithConverter(new PhoneNumberConverter());
     }
 }
 ```
 
-**Chaining Transformers and Mappers:**
+**Chaining Transformers and Converters:** transformers run first, in order, then the converter.
 
 ```csharp
-public class EmployeeMap : ExcelClassMap<Employee>
+public class ContactMap : ExcelClassMap<Contact>
 {
-    public EmployeeMap()
+    public ContactMap()
     {
-        Map(e => e.Name)
-            .WithTransformers(
-                new TrimStringCellTransformer(),
-                new UpperCaseTransformer()
-            )
-            .WithMappers(new CustomStringMapper());
+        Map(e => e.PhoneNumber)
+            .WithTrim()
+            .WithConverter(new PhoneNumberConverter());
     }
 }
 ```

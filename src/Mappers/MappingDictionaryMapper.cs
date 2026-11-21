@@ -3,7 +3,7 @@
 /// <summary>
 /// Tries to map the value of a cell to an object using a mapping dictionary.
 /// </summary>
-public class MappingDictionaryMapper<T> : ICellMapper
+internal class MappingDictionaryMapper<T> : ICellMapper
 {
     /// <summary>
     /// Gets the dictionary used to map the value of a cell to an object.

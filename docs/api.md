@@ -134,7 +134,6 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 - `.WithTrim()` - Trim whitespace
 - `.WithTransformers(...)` - Custom transformers (`ICellTransformer`)
 - `.WithEmptyFallback(ICellFallback<T>)` / `.WithInvalidFallback(ICellFallback<T>)` - Compute the value of empty or invalid cells
-- `.WithMappers(...)` - Custom mappers
 
 **Collections:**
 - `.WithSeparators(';', ',')` - Split delimiters (char)
@@ -149,6 +148,3 @@ Implement these for advanced customization:
 - `ICellTransformer` (in the `ExcelMapper` namespace) - Change a cell's value (`CellValue`) before it's converted
 - `ICellFallback<T>` - Give the value of an empty or invalid cell
 - `IColumnSelector` - Choose the columns a member is read from, once for each sheet
-- `ICellMapper` - Custom type conversion logic
-- `ICellTransformer` - Transform string values before mapping
-- `IFallbackItem` - Custom fallback behavior

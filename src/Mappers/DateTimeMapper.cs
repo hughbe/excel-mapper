@@ -5,7 +5,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a DateTime.
 /// </summary>
-public class DateTimeMapper : ICellMapper, IFormatsCellMapper, ITypedCellMapper<DateTime>, ITypedCellMapper<DateTime?>
+internal class DateTimeMapper : ICellMapper, IFormatsCellMapper, ITypedCellMapper<DateTime>, ITypedCellMapper<DateTime?>
 {
     private string[] _formats = ["G"];
 

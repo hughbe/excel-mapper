@@ -93,8 +93,8 @@ public class MapCellFallbackTests
         using var importer = Helpers.GetCsvImporter("Value,Other\nx,1\n");
         importer.Configuration.RegisterClassMap<IntRow>(c =>
         {
-            var map = c.Map(r => r.Value).WithInvalidFallback(new FixedIntFallback(9));
-            map.Mappers.Add(new IgnoringMapper());
+            // A mapping dictionary isn't a converter, so values go through the pipeline as objects.
+            c.Map(r => r.Value).WithInvalidFallback(new FixedIntFallback(9)).WithMapping(new Dictionary<string, int> { ["y"] = 1 });
         });
         Assert.Equal(9, importer.ReadSheet().ReadRows<IntRow>().Single().Value);
     }
@@ -187,10 +187,6 @@ public class MapCellFallbackTests
         public CellConversionResult<int> Convert(CellValue value, CellContext context) => CellConversionResult<int>.Invalid(() => new FormatException("Not a number."));
     }
 
-    private sealed class IgnoringMapper : Abstractions.ICellMapper
-    {
-        public Abstractions.CellMapperResult Map(Abstractions.ReadCellResult readResult) => Abstractions.CellMapperResult.Ignore();
-    }
 
     public record Call(string Address, string? Text, bool IsEmpty, Exception? Exception, string? Member);
 

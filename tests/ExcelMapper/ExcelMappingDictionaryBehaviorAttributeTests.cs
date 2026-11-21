@@ -1,4 +1,3 @@
-using ExcelMapper.Mappers;
 
 namespace ExcelMapper.Tests;
 

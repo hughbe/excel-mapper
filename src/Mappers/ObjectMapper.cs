@@ -6,7 +6,7 @@ namespace ExcelMapper.Mappers;
 /// <see cref="string"/> for text. If formatting is preserved, the displayed text is returned.
 /// This is used for <see cref="object"/> and <see cref="IConvertible"/> members.
 /// </summary>
-public class ObjectMapper : ICellMapper
+internal class ObjectMapper : ICellMapper
 {
     /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult readResult)

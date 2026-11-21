@@ -94,15 +94,6 @@ public class MapCellTransformerTests
         Assert.Equal(["A", "B"], importer.ReadSheet().ReadRows<ListRow>().Single().Values);
     }
 
-    [Fact]
-    public void ReadRows_ObjectPipeline_Transforms()
-    {
-        // A custom mapper means values go through the pipeline as objects.
-        using var importer = XlsxBuilder.Create(["Name"], ["  abc  "]);
-        importer.Configuration.RegisterClassMap<StringRow>(c => c.Map(r => r.Name).WithTransformers(new TrimTransformer()).WithMappers(new Mappers.StringMapper()));
-        Assert.Equal("abc", importer.ReadSheet().ReadRows<StringRow>().Single().Name);
-    }
-
     public class StringRow
     {
         public string? Name { get; set; }
@@ -125,6 +116,15 @@ public class MapCellTransformerTests
 
         [ExcelTransformer(typeof(FrenchNumberTransformer))]
         public double Amount { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_ObjectPipeline_Transforms()
+    {
+        // A mapping dictionary isn't a converter, so values go through the pipeline as objects.
+        using var importer = XlsxBuilder.Create(["Name"], ["  abc  "]);
+        importer.Configuration.RegisterClassMap<StringRow>(c => c.Map(r => r.Name).WithTransformers(new TrimTransformer()).WithMapping(new Dictionary<string, string> { ["x"] = "y" }));
+        Assert.Equal("abc", importer.ReadSheet().ReadRows<StringRow>().Single().Name);
     }
 
     public class TrimTransformer : ICellTransformer

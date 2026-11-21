@@ -65,92 +65,6 @@ public static class ValuePipelineExtensions
     }
 
     /// <summary>
-    /// Specifies additional custom transformers that will be used to map the value of a cell to
-    /// a property or field.
-    /// </summary>
-    /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <param name="transformers">A list of additional custom transformers that will be used to map the value of a cell to a property or field</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithTransformers<TMap>(this TMap map, params Abstractions.ICellTransformer[] transformers) where TMap : ValuePipeline
-        => map.WithTransformers((IEnumerable<Abstractions.ICellTransformer>)transformers);
-
-    /// <summary>
-    /// Specifies additional custom transformers that will be used to map the value of a cell to
-    /// a property or field.
-    /// </summary>
-    /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <param name="transformers">A list of additional custom transformers that will be used to map the value of a cell to a property or field</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithTransformers<TMap>(this TMap map, params IEnumerable<Abstractions.ICellTransformer> transformers) where TMap : ValuePipeline
-    {
-        ThrowHelpers.ThrowIfNull(transformers, nameof(transformers));
-
-        foreach (var transformer in transformers)
-        {
-            if (transformer == null)
-            {
-                throw new ArgumentException("Transformers cannot contain null values.", nameof(transformers));
-            }
-        }
-
-        // Clear any existing transformers.
-        map.Transformers.Clear();
-
-        // Then, add the new transformers.
-        foreach (var transformer in transformers)
-        {
-            map.Transformers.Add(transformer);
-        }
-
-        return map;
-    }
-
-    /// <summary>
-    /// Specifies additional custom mappers that will be used to map the value of a cell to
-    /// a property or field.
-    /// </summary>
-    /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <param name="mappers">A list of additional custom mappers that will be used to map the value of a cell to a property or field</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithMappers<TMap>(this TMap map, params ICellMapper[] mappers) where TMap : ValuePipeline
-        => map.WithMappers((IEnumerable<ICellMapper>)mappers);
-    
-    /// <summary>
-    /// Specifies additional custom mappers that will be used to map the value of a cell to
-    /// a property or field.
-    /// </summary>
-    /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <param name="mappers">A list of additional custom mappers that will be used to map the value of a cell to a property or field</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithMappers<TMap>(this TMap map, params IEnumerable<ICellMapper> mappers) where TMap : ValuePipeline
-    {
-        ThrowHelpers.ThrowIfNull(mappers, nameof(mappers));
-
-        foreach (var mapper in mappers)
-        {
-            if (mapper == null)
-            {
-                throw new ArgumentException("Mappers cannot contain null values.", nameof(mappers));
-            }
-        }
-
-        // Clear any existing mappers.
-        map.Mappers.Clear();
-
-        // Then, add the new mappers.
-        foreach (var mapper in mappers)
-        {
-            map.Mappers.Add(mapper);
-        }
-
-        return map;
-    }
-
-    /// <summary>
     /// Specifies that the value of a cell should be mapped to a fixed value if it cannot be parsed. This
     /// is useful for mapping columns where equivalent data was entered differently.
     /// </summary>
@@ -458,7 +372,7 @@ public static class ValuePipelineExtensions
     }
 #endif
 
-    private static void AddFormats<TCellMapper>(this IValuePipeline map, string[] formats) where TCellMapper : IFormatsCellMapper, new()
+    private static void AddFormats<TCellMapper>(this ValuePipeline map, string[] formats) where TCellMapper : IFormatsCellMapper, new()
     {
         FormatUtilities.ValidateFormats(formats);
         var mapper = map.GetOrAddMapper<TCellMapper>();
@@ -597,7 +511,7 @@ public static class ValuePipelineExtensions
     }
 #endif
 
-    private static void AddFormatProvider<TCellMapper>(this IValuePipeline map, IFormatProvider? provider) where TCellMapper : IFormatProviderCellMapper, new()
+    private static void AddFormatProvider<TCellMapper>(this ValuePipeline map, IFormatProvider? provider) where TCellMapper : IFormatProviderCellMapper, new()
     {
         var mapper = map.GetOrAddMapper<TCellMapper>();
         mapper.Provider = provider;
@@ -686,7 +600,7 @@ public static class ValuePipelineExtensions
         return map;
     }
 
-    private static TCellMapper GetOrAddMapper<TCellMapper>(this IValuePipeline map) where TCellMapper : ICellMapper, new()
+    private static TCellMapper GetOrAddMapper<TCellMapper>(this ValuePipeline map) where TCellMapper : ICellMapper, new()
     {
         var mapper = map.Mappers
             .OfType<TCellMapper>()
@@ -703,13 +617,13 @@ public static class ValuePipelineExtensions
     /// <summary>
     /// Specifies that the value of a cell should be mapped to a value using the given delegate. This is
     /// useful for specifying custom mapping behaviour for a property or field without having to write
-    /// your own ICellMapper. The delegate replaces the map's mappers, including the built-in conversion
+    /// an <see cref="ICellConverter{T}"/>. The delegate replaces the map's mappers, including the built-in conversion
     /// for the member's type and any earlier converter, so it is used for every cell that isn't empty.
     /// Empty cells still use the empty fallback, and values the delegate throws for use the invalid
     /// fallback.
     /// </summary>
     /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <typeparam name="TMap">The type of the property or field that the map represents.</typeparam>
+    /// <typeparam name="TValue">The type of the property or field that the map represents.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="converter">A delegate that is invoked to map the string value of a cell to the value of a property or field.</param>
     /// <returns>The map on which this method was invoked.</returns>
@@ -723,30 +637,6 @@ public static class ValuePipelineExtensions
         // An ICellConverter<T>, so that values are converted without boxing.
         map.Mappers.Clear();
         map.Mappers.Add(new CellConverterMapper<TValue?>(new DelegateCellConverter<TValue?>(converter)));
-        return map;
-    }
-
-    /// <summary>
-    /// Specifies that the value of a cell should be mapped to a value using the given delegate. This is
-    /// useful for specifying custom mapping behaviour for a property or field without having to write
-    /// your own ICellMapper. The delegate replaces the map's mappers, including the built-in conversion
-    /// for the member's type and any earlier converter, so it is used for every cell that isn't empty.
-    /// Empty cells still use the empty fallback, and values the delegate throws for use the invalid
-    /// fallback.
-    /// </summary>
-    /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <param name="converter">A delegate that is invoked to map the read cell result to the value of a property or field.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithConverter<TMap>(this TMap map, ConvertUsingMapperDelegate converter) where TMap : ValuePipeline
-    {
-        ThrowHelpers.ThrowIfNull(converter, nameof(converter));
-
-        // Replace the built-in conversion, rather than adding to it: otherwise the converter would only
-        // be used for values the built-in conversion can't convert (for example for numbers), but for
-        // every value of other types (such as strings).
-        map.Mappers.Clear();
-        map.Mappers.Add(new ConvertUsingMapper(converter));
         return map;
     }
 
@@ -808,14 +698,7 @@ public static class ValuePipelineExtensions
     public static TMap WithValueFallback<TMap>(this TMap map, object? value) where TMap : ValuePipeline
         => map.WithFallbackItem(new FixedValueFallback(value));
 
-    /// <summary>
-    /// Specifies a custom fallback to be used if the value of a cell is empty or cannot be mapped.
-    /// </summary>
-    /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <param name="fallbackItem">The fallback to be used if the value of a cell is empty or cannot be mapped.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : ValuePipeline
+    internal static TMap WithFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : ValuePipeline
     {
         ThrowHelpers.ThrowIfNull(fallbackItem, nameof(fallbackItem));
         map.EmptyFallback = fallbackItem;
@@ -863,14 +746,7 @@ public static class ValuePipelineExtensions
         return map;
     }
 
-    /// <summary>
-    /// Specifies a custom fallback to be used if the value of a cell is empty.
-    /// </summary>
-    /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <param name="fallbackItem">The fallback to be used if the value of a cell is empty.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithEmptyFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : ValuePipeline
+    internal static TMap WithEmptyFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : ValuePipeline
     {
         ThrowHelpers.ThrowIfNull(fallbackItem, nameof(fallbackItem));
         map.EmptyFallback = fallbackItem;
@@ -905,14 +781,7 @@ public static class ValuePipelineExtensions
     public static TMap WithInvalidFallback<TMap>(this TMap map, object? fallbackValue) where TMap : ValuePipeline
         => map.WithInvalidFallbackItem(new FixedValueFallback(fallbackValue));
 
-    /// <summary>
-    /// Specifies a custom fallback to be used if the value of a cell cannot be mapped.
-    /// </summary>
-    /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <param name="fallbackItem">The fallback to be used if the value of a cell cannot be mapped.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithInvalidFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : ValuePipeline
+    internal static TMap WithInvalidFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : ValuePipeline
     {
         ThrowHelpers.ThrowIfNull(fallbackItem, nameof(fallbackItem));
         map.InvalidFallback = fallbackItem;

@@ -1,8 +1,5 @@
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
-using ExcelMapper.Abstractions;
-using ExcelMapper.Mappers;
 
 namespace ExcelMapper.Tests;
 
@@ -17,16 +14,16 @@ public class TypedConverterTests
     {
         using var importer = Helpers.GetCsvImporter("Value\nabc\n");
         var fallback = new RecordingFallback();
-        importer.Configuration.RegisterClassMap<IntRow>(c => c.Map(r => r.Value).WithInvalidFallbackItem(fallback));
+        importer.Configuration.RegisterClassMap<IntRow>(c => c.Map(r => r.Value).WithInvalidFallback(fallback));
         Assert.Equal(-1, importer.ReadSheet().ReadRows<IntRow>().Single().Value);
         Assert.IsType<FormatException>(fallback.Exception);
     }
 
-    private sealed class RecordingFallback : IFallbackItem
+    private sealed class RecordingFallback : ICellFallback<int>
     {
         public Exception? Exception { get; private set; }
 
-        public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member)
+        public int Fallback(CellValue value, CellContext context, Exception? exception)
         {
             Exception = exception;
             return -1;
@@ -56,41 +53,28 @@ public class TypedConverterTests
     [Fact]
     public void ReadRows_MappersChangedAfterReading_UsesNewMappers()
     {
-        using var importer = Helpers.GetCsvImporter("Value\n1\n2\n");
+        using var importer = Helpers.GetCsvImporter("Value\n1\ntwo\n");
         var map = new ExcelClassMap<IntRow>();
         var valueMap = map.Map(r => r.Value);
         importer.Configuration.RegisterClassMap(map);
         var sheet = importer.ReadSheet();
         Assert.Equal(1, sheet.ReadRow<IntRow>().Value);
 
-        // A custom mapper isn't a typed converter: the member goes back to the pipeline.
-        valueMap.WithMappers(new DoublingMapper());
-        Assert.Equal(4, sheet.ReadRow<IntRow>().Value);
+        // A mapping dictionary isn't a typed converter: the member goes back to the pipeline.
+        valueMap.WithMapping(new Dictionary<string, int> { ["two"] = 2 });
+        Assert.Equal(2, sheet.ReadRow<IntRow>().Value);
     }
 
-    private sealed class DoublingMapper : ICellMapper
-    {
-        public CellMapperResult Map(ReadCellResult readResult) => CellMapperResult.Success(int.Parse(readResult.GetString()!) * 2);
-    }
-
-#if LIBRARY_NET8
     [Fact]
-    public void ReadRows_CustomMapperThenBuiltIn_UsesPipeline()
+    public void ReadRows_BuiltInThenMappingDictionary_UsesPipeline()
     {
-        // A custom mapper that ignores some values, then the built-in one.
-        using var importer = Helpers.GetCsvImporter("Value\nn/a\n3\n");
+        // The built-in mapper, then a mapping dictionary, which isn't a typed converter.
+        using var importer = Helpers.GetCsvImporter("Value\nn/a\n3\nx\n");
         importer.Configuration.RegisterClassMap<IntRow>(c => c.Map(r => r.Value)
-            .WithMappers(new IgnoreNotApplicable(), new INumberBaseMapper<int>())
+            .WithMapping(new Dictionary<string, int> { ["n/a"] = -2 })
             .WithInvalidFallback(0));
-        Assert.Equal([0, 3], importer.ReadSheet().ReadRows<IntRow>().Select(r => r.Value));
+        Assert.Equal([-2, 3, 0], importer.ReadSheet().ReadRows<IntRow>().Select(r => r.Value));
     }
-
-    private sealed class IgnoreNotApplicable : ICellMapper
-    {
-        public CellMapperResult Map(ReadCellResult readResult)
-            => readResult.GetString() == "n/a" ? CellMapperResult.Invalid(new FormatException()) : CellMapperResult.Ignore();
-    }
-#endif
 
     [Fact]
     public void ReadRows_EmptyValues_UseEmptyFallbacks()
@@ -441,6 +425,19 @@ public class TypedConverterTests
     }
 
     [Fact]
+    public void ReadRows_SplitElementsWithMappingDictionary_UsesPipeline()
+    {
+        // A mapping dictionary isn't a typed converter, so the elements go through the pipeline.
+        using var importer = Helpers.GetCsvImporter("Values,Dates\n1;two,\n");
+        importer.Configuration.RegisterClassMap<ElementsRow>(c =>
+        {
+            c.Map(r => r.Values).WithSeparators(';').WithElementMap(e => e.WithMapping(new Dictionary<string, int> { ["two"] = 2 }));
+            c.Map(r => r.Dates).WithSeparators(';');
+        });
+        Assert.Equal([1, 2], importer.ReadSheet().ReadRows<ElementsRow>().Single().Values);
+    }
+
+    [Fact]
     public void ReadRows_SplitElementsWithFallbacks_ReturnsFallbacks()
     {
         using var importer = Helpers.GetCsvImporter("Values,Dates\n1;x;;4,\n");
@@ -450,18 +447,6 @@ public class TypedConverterTests
             c.Map(r => r.Dates).WithSeparators(';');
         });
         Assert.Equal([1, -1, 0, 4], importer.ReadSheet().ReadRows<ElementsRow>().Single().Values);
-    }
-
-    [Fact]
-    public void ReadRows_SplitElementsWithCustomMapper_UsesPipeline()
-    {
-        using var importer = Helpers.GetCsvImporter("Values,Dates\n1;2,\n");
-        importer.Configuration.RegisterClassMap<ElementsRow>(c =>
-        {
-            c.Map(r => r.Values).WithSeparators(';').WithElementMap(e => e.WithMappers(new DoublingMapper()));
-            c.Map(r => r.Dates).WithSeparators(';');
-        });
-        Assert.Equal([2, 4], importer.ReadSheet().ReadRows<ElementsRow>().Single().Values);
     }
 
     [Fact]

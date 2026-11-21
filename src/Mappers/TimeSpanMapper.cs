@@ -5,7 +5,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a TimeSpan.
 /// </summary>
-public class TimeSpanMapper : ICellMapper, IFormatsCellMapper, ITypedCellMapper<TimeSpan>, ITypedCellMapper<TimeSpan?>
+internal class TimeSpanMapper : ICellMapper, IFormatsCellMapper, ITypedCellMapper<TimeSpan>, ITypedCellMapper<TimeSpan?>
 {
     private string[] _formats = ["c"];
 

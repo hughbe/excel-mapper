@@ -3,7 +3,7 @@
 /// <summary>
 /// A mapper that returns the string value of a cell.
 /// </summary>
-public class StringMapper : ICellMapper, ITypedCellMapper<string?>
+internal class StringMapper : ICellMapper, ITypedCellMapper<string?>
 {
     /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult result)

@@ -58,7 +58,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// </summary>
     public ValuePipeline<TElement> Pipeline { get; private set; } = new ValuePipeline<TElement>();
 
-    IValuePipeline IToOneMap.Pipeline => Pipeline;
+    ValuePipeline IToOneMap.Pipeline => Pipeline;
 
     /// <summary>
     /// The factory for creating and adding elements to the list.

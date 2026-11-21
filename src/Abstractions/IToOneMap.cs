@@ -18,5 +18,5 @@ internal interface IToOneMap : IMap
     /// <summary>
     /// The mapping pipeline for the value.
     /// </summary>
-    public IValuePipeline Pipeline { get; }
+    public ValuePipeline Pipeline { get; }
 }

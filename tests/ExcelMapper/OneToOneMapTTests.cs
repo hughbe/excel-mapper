@@ -1,8 +1,6 @@
 ﻿using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
-using ExcelMapper.Abstractions;
-using ExcelMapper.Fallbacks;
 
 namespace ExcelMapper.Tests;
 
@@ -12,32 +10,6 @@ public class OneToOneMapTTests
 
 
 
-
-    [Fact]
-    public void EmptyFallback_Set_GetReturnsExpected()
-    {
-        var map = CreateMap();
-
-        var fallback = new FixedValueFallback(10);
-        map.EmptyFallback = fallback;
-        Assert.Same(fallback, map.EmptyFallback);
-
-        map.EmptyFallback = null;
-        Assert.Null(map.EmptyFallback);
-    }
-
-    [Fact]
-    public void InvalidFallback_Set_GetReturnsExpected()
-    {
-        var map = CreateMap();
-
-        var fallback = new FixedValueFallback(10);
-        map.InvalidFallback = fallback;
-        Assert.Same(fallback, map.InvalidFallback);
-
-        map.InvalidFallback = null;
-        Assert.Null(map.InvalidFallback);
-    }
 
     [Theory]
     [InlineData(true)]
@@ -75,93 +47,7 @@ public class OneToOneMapTTests
         Assert.Equal(!value, map.PreserveFormatting);
     }
 
-    [Theory]
-    [InlineData("abc")]
-    [InlineData(null)]
-    public void WithValueFallback_Invoke_Success(string? value)
-    {
-        var map = CreateMap();
-        Assert.Same(map, map.WithValueFallback(value));
 
-        var emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
-        var invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
-
-        Assert.Same(emptyFallback, invalidFallback);
-        Assert.Equal(value, emptyFallback.Value);
-        Assert.Equal(value, invalidFallback.Value);
-    }
-
-    [Theory]
-    [InlineData("abc")]
-    [InlineData(null)]
-    public void WithValueFallback_InvokeWithFallbacks_Success(string? value)
-    {
-        var map = CreateMap().WithEmptyFallback("Empty").WithInvalidFallback("Invalid");
-        Assert.Same(map, map.WithValueFallback(value));
-
-        var emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
-        var invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
-
-        Assert.Same(emptyFallback, invalidFallback);
-        Assert.Equal(value, emptyFallback.Value);
-        Assert.Equal(value, invalidFallback.Value);
-    }
-    
-
-    [Theory]
-    [InlineData("abc")]
-    [InlineData(null)]
-    public void WithEmptyFallback_Invoke_Success(string? value)
-    {
-        var map = CreateMap();
-        Assert.Same(map, map.WithEmptyFallback(value));
-
-        var emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
-        Assert.Equal(value, emptyFallback.Value);
-    }
-
-    [Theory]
-    [InlineData("abc")]
-    [InlineData(null)]
-    public void WithEmptyFallback_InvokeWithInvalidFallback_Success(string? value)
-    {
-        var map = CreateMap().WithInvalidFallback("Invalid");
-        Assert.Same(map, map.WithEmptyFallback(value));
-
-        var emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
-        Assert.Equal(value, emptyFallback.Value);
-        
-        var invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
-        Assert.Equal("Invalid", invalidFallback.Value);
-    }
-    
-
-    [Theory]
-    [InlineData("abc")]
-    [InlineData(null)]
-    public void WithInvalidFallback_Invoke_Success(string? value)
-    {
-        var map = CreateMap();
-        Assert.Same(map, map.WithInvalidFallback(value));
-
-        var invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
-        Assert.Equal(value, invalidFallback.Value);
-    }
-
-    [Theory]
-    [InlineData("abc")]
-    [InlineData(null)]
-    public void WithInvalidFallback_InvokeWithEmptyFallback_Success(string? value)
-    {
-        var map = CreateMap().WithEmptyFallback("Empty");
-        Assert.Same(map, map.WithInvalidFallback(value));
-
-        var invalidFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.InvalidFallback);
-        Assert.Equal(value, invalidFallback.Value);
-
-        var emptyFallback = Assert.IsType<FixedValueFallback>(map.Pipeline.EmptyFallback);
-        Assert.Equal("Empty", emptyFallback.Value);
-    }
 
     [Fact]
     public void TryGetValue_InvokeCantReadPropertyInfo_ThrowsExcelMappingException()

@@ -1,4 +1,4 @@
-namespace ExcelMapper.Mappers;
+namespace ExcelMapper;
 
 /// <summary>
 /// Defines the behavior of a Dictionary mapper when mapping keys.

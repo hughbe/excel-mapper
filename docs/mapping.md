@@ -803,9 +803,9 @@ public class Employee
 - **`value`** is the cell's value after any transformers, and **`context`** says where the cell is (see [Custom Converters](#custom-converters)).
 - **`exception`** is why the value is invalid, if known. It's null for empty cells.
 - **Throwing** reports the cell as an error: `ReadRowResults` records an `ExcelMappingException` rather than throwing it.
-- **Both attributes** support `ConstructorArguments`, and also accept the older `IFallbackItem` types.
+- **Both attributes** support `ConstructorArguments`.
 
-#### Custom Converters#### Custom Converters
+#### Custom Converters
 
 To convert cells yourself, implement `ICellConverter<T>` and set it with `[ExcelConverter]` or `.WithConverter(converter)`. The converter replaces the built-in conversion for the member's type:
 
@@ -895,9 +895,9 @@ Map(e => e.Name).WithTransformers(new UpperCaseTransformer());
 
 - **Order:** transformers run in order, before the empty check, so a transformer that returns an empty value (`new CellValue((string?)null)`) makes the cell use the empty fallback.
 - **Return values:** return `value` to leave a cell unchanged, or a new `CellValue` holding text, a number, a boolean, a date or a duration.
-- **`[ExcelTransformer]`** supports `ConstructorArguments`, and also accepts the older `Abstractions.ICellTransformer` types.
+- **`[ExcelTransformer]`** supports `ConstructorArguments`.
 
-#### Value Mapping with Attributes#### Value Mapping with Attributes
+#### Value Mapping with Attributes
 
 Map string cell values to specific enum or object values using attributes:
 

@@ -122,17 +122,12 @@ The importer itself, and each sheet, should still be used by one thread at a tim
    public int YearsOfService { get; set; }
    ```
 
-5. **Use meaningful error messages** - Custom fallback items can provide better diagnostics
+5. **Use meaningful error messages** - Custom fallbacks can provide better diagnostics
    ```csharp
-   public class CustomFallback : IFallbackItem
+   public class SalaryFallback : ICellFallback<decimal>
    {
-       public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member)
-       {
-           throw new ExcelMappingException(
-               $"Invalid data \"{readResult.StringValue}\" for {member?.Name}",
-               sheet, rowIndex, readResult.ColumnIndex, exception);
-           // Message: Invalid data "abc" for Salary in column "Salary" at cell D5 in sheet "Employees".
-       }
+       public decimal Fallback(CellValue value, CellContext context, Exception? exception)
+           => throw new ExcelMappingException($"Invalid salary \"{value.Text}\" at cell {context.CellAddress}.", exception);
    }
    ```
 

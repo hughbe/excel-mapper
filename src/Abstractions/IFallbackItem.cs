@@ -5,7 +5,7 @@ namespace ExcelMapper.Abstractions;
 /// <summary>
 /// Defines a fallback item for handling read errors or missing data.
 /// </summary>
-public interface IFallbackItem
+internal interface IFallbackItem
 {
     /// <summary>
     /// Performs the fallback operation.
