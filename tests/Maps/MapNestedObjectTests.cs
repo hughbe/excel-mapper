@@ -243,20 +243,9 @@ public class MapNestedObjectTests
                 _currentIndex++;
 
                 // Format: "<DayOfWeek>DayLabel"
-                var labelReaderFactory = new ColumnNameReaderFactory(prefix + "Label");
-                var startTimeReaderFactory = new ColumnNameReaderFactory(prefix + "Open");
-                var endTimeReaderFactory = new ColumnNameReaderFactory(prefix + "Close");
-
-                var labelReader = labelReaderFactory.GetCellReader(sheet)!;
-                var startTimeReader = startTimeReaderFactory.GetCellReader(sheet)!;
-                var endTimeReader = endTimeReaderFactory.GetCellReader(sheet)!;
-
-                if (!labelReader.TryGetValue(reader, false, out ReadCellResult labelResult) ||
-                    !startTimeReader.TryGetValue(reader, false,  out ReadCellResult startTimeResult) ||
-                    !endTimeReader.TryGetValue(reader, false, out ReadCellResult endTimeResult))
-                {
-                    throw new InvalidOperationException("No such column");
-                }
+                var labelResult = new ReadCellResult(sheet.Heading!.GetColumnIndex(prefix + "Label"), reader, false);
+                var startTimeResult = new ReadCellResult(sheet.Heading.GetColumnIndex(prefix + "Open"), reader, false);
+                var endTimeResult = new ReadCellResult(sheet.Heading.GetColumnIndex(prefix + "Close"), reader, false);
 
                 result.Add(new BusinessHours
                 {

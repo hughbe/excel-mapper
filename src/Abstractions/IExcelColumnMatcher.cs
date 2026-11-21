@@ -3,7 +3,7 @@ namespace ExcelMapper.Abstractions;
 /// <summary>
 /// Matches Excel columns based on custom criteria.
 /// </summary>
-public interface IExcelColumnMatcher
+internal interface IExcelColumnMatcher
 {
     /// <summary>
     /// Determines if the specified column matches the criteria.

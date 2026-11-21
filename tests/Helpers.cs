@@ -43,6 +43,17 @@ public static class Helpers
         return File.OpenRead(GetResourcePath(name));
     }
 
+    /// <summary>
+    /// Creates a map that reads a <typeparamref name="T"/> from the named column, through the public API.
+    /// </summary>
+    public static OneToOneMap<T> CreateMap<T>(string columnName)
+        => new ExcelClassMap<ValueHolder<T>>().Map(h => h.Value).WithColumnName(columnName);
+
+    public class ValueHolder<T>
+    {
+        public T Value { get; set; } = default!;
+    }
+
     public class TestClass
     {
         public string Value { get; set; } = default!;

@@ -6,7 +6,7 @@ namespace ExcelMapper.Readers;
 /// <summary>
 /// Reads a multiple values of all columns in a sheet.
 /// </summary>
-public sealed class AllColumnNamesReaderFactory : ICellsReaderFactory
+internal sealed class AllColumnNamesReaderFactory : ICellsReaderFactory
 {
     /// <inheritdoc/>
     public ICellsReader? GetCellsReader(ExcelSheet sheet)

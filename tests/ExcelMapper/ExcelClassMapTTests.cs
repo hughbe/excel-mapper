@@ -345,8 +345,6 @@ public class ExcelClassMapTTests
         Assert.Single(map.Properties);
         Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.DictionaryValue)), map.Properties[0].Member);
         Assert.Same(result, map.Properties[0].Map);
-        var factory = Assert.IsType<ExtraColumnsReaderFactory>(result.ReaderFactory);
-        Assert.Same(map, factory.ClassMap);
 
         // Map again.
         var result2 = map.MapExtraColumns(p => p.DictionaryValue);
@@ -362,8 +360,6 @@ public class ExcelClassMapTTests
         var result = map.MapExtraColumns(p => p.ObjectValue!.Extra);
         var nestedMap = Assert.IsType<ExcelClassMap<ChildClass>>(Assert.Single(map.Properties).Map);
         Assert.Same(result, Assert.Single(nestedMap.Properties).Map);
-        var factory = Assert.IsType<ExtraColumnsReaderFactory>(result.ReaderFactory);
-        Assert.Same(nestedMap, factory.ClassMap);
     }
 
     [Fact]

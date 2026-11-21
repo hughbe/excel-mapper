@@ -5,7 +5,7 @@ namespace ExcelMapper.Readers;
 /// <summary>
 /// Reads the value of a cell.
 /// </summary>
-public class ColumnIndexReader : ICellReader
+internal class ColumnIndexReader : ICellReader
 {
     /// <summary>
     /// The index of the column to read.

@@ -15,20 +15,20 @@ namespace ExcelMapper;
 public class ExcelColumnMatchingAttribute : Attribute
 {
     /// <summary>
-    /// The type of the <see cref="IExcelColumnMatcher"/>.
+    /// The type of the <see cref="IColumnSelector"/>.
     /// </summary>
     [DynamicallyAccessedMembers(TrimmingConstants.ActivatedType)]
     public Type Type { get; }
 
     /// <summary>
-    /// The constructor arguments for the <see cref="IExcelColumnMatcher"/>.
+    /// The constructor arguments for the <see cref="IColumnSelector"/>.
     /// </summary>
     public object?[]? ConstructorArguments { get; set; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="ExcelColumnMatchingAttribute"/> with the specified matcher.
     /// </summary>
-    /// <param name="matcherType">The type of the <see cref="IExcelColumnMatcher"/>.</param>
+    /// <param name="matcherType">The type of the <see cref="IColumnSelector"/>.</param>
     public ExcelColumnMatchingAttribute([DynamicallyAccessedMembers(TrimmingConstants.ActivatedType)] Type matcherType)
     {
         ThrowHelpers.ThrowIfNull(matcherType, nameof(matcherType));
@@ -36,9 +36,9 @@ public class ExcelColumnMatchingAttribute : Attribute
         {
             throw new ArgumentException("Matcher type cannot be abstract or an interface", nameof(matcherType));
         }
-        if (!matcherType.ImplementsInterface(typeof(IColumnSelector)) && !matcherType.ImplementsInterface(typeof(IExcelColumnMatcher)))
+        if (!matcherType.ImplementsInterface(typeof(IColumnSelector)))
         {
-            throw new ArgumentException($"Matcher type must implement {nameof(IColumnSelector)} or {nameof(IExcelColumnMatcher)}", nameof(matcherType));
+            throw new ArgumentException($"Matcher type must implement {nameof(IColumnSelector)}", nameof(matcherType));
         }
 
         Type = matcherType;

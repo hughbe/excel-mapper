@@ -6,7 +6,7 @@ namespace ExcelMapper.Readers;
 /// <summary>
 /// Reads the value of a cell.
 /// </summary>
-public class ColumnIndicesReader : ICellsReader
+internal class ColumnIndicesReader : ICellsReader
 {
     /// <summary>
     /// Gets the zero-based indices for each column to read.

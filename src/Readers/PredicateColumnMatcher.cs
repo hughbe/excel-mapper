@@ -3,7 +3,7 @@ namespace ExcelMapper.Readers;
 /// <summary>
 /// Matches column names based on a predicate.
 /// </summary>
-public class PredicateColumnMatcher : IExcelColumnMatcher
+internal class PredicateColumnMatcher : IExcelColumnMatcher
 {
     /// <summary>
     /// Gets the predicate used to match column names.

@@ -193,7 +193,7 @@ public class WorkflowScenarioTests
 
         Assert.Equal("a1", sheet.ReadRow<NameClass>().Name);
 
-        nameMap.ReaderFactory = new ColumnNameReaderFactory("B");
+        nameMap.WithColumnName("B");
         Assert.Equal("b2", sheet.ReadRow<NameClass>().Name);
     }
 

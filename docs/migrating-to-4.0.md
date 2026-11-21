@@ -130,8 +130,10 @@ catch (ExcelMappingException ex)
 | 3.x | 4.0 |
 |---|---|
 | Collection factories (`ExcelMapper.Factories`, `IEnumerableFactory<T>`, `IDictionaryFactory<TKey, TValue>`, `IMultidimensionalArrayFactory<T>`) and the collection and dictionary maps' constructors | ExcelMapper creates the collection for the member's type. Get a member's map from `ExcelClassMap<T>.Map(...)`. |
+| Readers and reader factories (`ExcelMapper.Readers`, `ICellReader`, `ICellReaderFactory`, `ICellsReader`, `ICellsReaderFactory`), `IExcelColumnMatcher`, `WithReaderFactory(...)` and `WithColumnMatching(matcher)`/`WithColumnsMatching(matcher)` | [`IColumnSelector`](mapping.md#pattern-matching) with `WithColumns(selector)`, `[ExcelColumnMatching(typeof(...))]` or `[ExcelColumnsMatching(typeof(...))]`. |
+| `IToOneMap`, `IOneToOneMap`, `IManyToOneMap` and the extension classes `IOneToOneMapExtensions`, `IManyToOneMapExtensions` and `IToOneMapExtensions`, `OneToOneMap<T>`'s constructor and the maps' `ReaderFactory` properties | The column methods (`WithColumnName`, `WithColumnNames`, `MakeOptional`, ...) are methods of the maps, so calls to them compile unchanged. Code that took an `IOneToOneMap` should take the map's own type. |
 
-**What to do:** if you created a collection or dictionary map with its constructor, map the member with `Map(...)` in a class map instead. To control how values are created, use an [`ICellConverter<T>`](mapping.md#custom-converters).
+**What to do:** if you created a map with its constructor, map the member with `Map(...)` in a class map instead. To control how values are created, use an [`ICellConverter<T>`](mapping.md#custom-converters). To choose columns in code, implement an [`IColumnSelector`](mapping.md#pattern-matching) instead of a reader factory or `IExcelColumnMatcher`.
 
 ## Smaller changes
 

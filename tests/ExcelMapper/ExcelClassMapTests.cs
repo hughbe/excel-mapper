@@ -1,4 +1,3 @@
-using ExcelMapper.Readers;
 
 namespace ExcelMapper.Tests;
 
@@ -54,9 +53,9 @@ public class ExcelClassMapTests
     public void Properties_AddValidItem_Success()
     {
         var propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Property))!;
-        var map1 = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
+        var map1 = Helpers.CreateMap<int>("Property");
         var propertyMap1 = new ExcelPropertyMap(propertyInfo, map1);
-        var map2 = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
+        var map2 = Helpers.CreateMap<int>("Property");
         var propertyMap2 = new ExcelPropertyMap(propertyInfo, map2);
         var properties = new ExcelClassMap<TestClass>().Properties;
 
@@ -84,9 +83,9 @@ public class ExcelClassMapTests
     public void Properties_InsertValidItem_Success()
     {
         var propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Property))!;
-        var map1 = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
+        var map1 = Helpers.CreateMap<int>("Property");
         var propertyMap1 = new ExcelPropertyMap(propertyInfo, map1);
-        var map2 = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
+        var map2 = Helpers.CreateMap<int>("Property");
         var propertyMap2 = new ExcelPropertyMap(propertyInfo, map2);
         var properties = new ExcelClassMap<TestClass>().Properties;
 
@@ -114,9 +113,9 @@ public class ExcelClassMapTests
     public void Properties_ItemSetValidItem_GetReturnsExpected()
     {
         var propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Property))!;
-        var map1 = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
+        var map1 = Helpers.CreateMap<int>("Property");
         var propertyMap1 = new ExcelPropertyMap(propertyInfo, map1);
-        var map2 = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
+        var map2 = Helpers.CreateMap<int>("Property");
         var propertyMap2 = new ExcelPropertyMap(propertyInfo, map2);
         var properties = new ExcelClassMap<TestClass>().Properties;
         properties.Add(propertyMap1);
@@ -129,7 +128,7 @@ public class ExcelClassMapTests
     public void Properties_ItemSetNull_ThrowsArgumentNullException()
     {
         var propertyInfo = typeof(TestClass).GetProperty(nameof(TestClass.Property))!;
-        var map = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
+        var map = Helpers.CreateMap<int>("Property");
         var propertyMap = new ExcelPropertyMap(propertyInfo, map);
         var properties = new ExcelClassMap<TestClass>().Properties;
         properties.Add(propertyMap);

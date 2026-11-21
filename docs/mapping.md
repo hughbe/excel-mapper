@@ -176,7 +176,7 @@ public class Employee
 
 #### Pattern Matching
 
-Match columns using regex patterns or custom matchers:
+Match columns using regex patterns or custom selectors:
 
 ```csharp
 public class Employee
@@ -225,7 +225,6 @@ Map(e => e.Bonuses).WithColumns(new PrefixSelector("Bonus_"));
 
 - **No columns:** if no column is chosen, the member is missing, as for a column name that isn't found. That throws unless the member is optional.
 - **Regions:** when reading a [region](reading.md#reading-part-of-a-sheet), chosen columns outside it are ignored.
-- **The older `IExcelColumnMatcher`** (`bool IsMatch(string columnName)`) is still accepted by the attributes and `WithColumnMatching`/`WithColumnsMatching`.
 
 #### Column Index Mapping
 
@@ -1043,8 +1042,8 @@ The fluent API provides extensive configuration options:
 - `.WithColumnIndices(0, 1, 2)` - Try multiple indices in order
 - `.WithColumnNameMatching(name => name.Contains("Total"))` - Use predicate
 - `.WithColumnNameMatching(new Regex("total", RegexOptions.IgnoreCase))` - Use regular expression
-- `.WithColumnMatching(matcher)` - Use custom `IExcelColumnMatcher`
-- `.WithColumnsMatching(predicate)`, `.WithColumnsMatching(regex)` or `.WithColumnsMatching(matcher)` - Read every matching column into a collection
+- `.WithColumns(selector)` - Use a custom `IColumnSelector`
+- `.WithColumnsMatching(predicate)` or `.WithColumnsMatching(regex)` - Read every matching column into a collection
 
 **Behavior:**
 - `.MakeOptional()` - Don't throw if column is missing

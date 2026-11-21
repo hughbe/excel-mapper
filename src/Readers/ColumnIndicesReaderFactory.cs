@@ -3,7 +3,7 @@
 /// <summary>
 /// Reads a multiple values of one or more columns given the name of each column.
 /// </summary>
-public sealed class ColumnIndicesReaderFactory : ICellReaderFactory, ICellsReaderFactory, IColumnIndicesProviderCellReaderFactory
+internal sealed class ColumnIndicesReaderFactory : ICellReaderFactory, ICellsReaderFactory, IColumnIndicesProviderCellReaderFactory
 {
     /// <summary>
     /// Gets the zero-based indices for each column to read.

@@ -1,6 +1,4 @@
 using System.Text.RegularExpressions;
-using ExcelMapper.Abstractions;
-using ExcelMapper.Readers;
 
 namespace ExcelMapper.Tests;
 
@@ -9,7 +7,6 @@ public class ExcelColumnsMatchingAttributeTests
     [Theory]
     [InlineData(typeof(ColumnMatcher))]
     [InlineData(typeof(Selector))]
-    [InlineData(typeof(RegexColumnMatcher))]
     [InlineData(typeof(NoConstructorExcelColumnMatcher))]
     public void Ctor_Type(Type matcherType)
     {
@@ -25,7 +22,6 @@ public class ExcelColumnsMatchingAttributeTests
     }
 
     [Theory]
-    [InlineData(typeof(IExcelColumnMatcher))]
     [InlineData(typeof(IColumnSelector))]
     [InlineData(typeof(ISubExcelColumnMatcher))]
     [InlineData(typeof(AbstractExcelColumnMatcher))]
@@ -37,22 +33,27 @@ public class ExcelColumnsMatchingAttributeTests
         Assert.Throws<ArgumentException>("matcherType", () => new ExcelColumnsMatchingAttribute(matcherType));
     }
 
-    private interface ISubExcelColumnMatcher : IExcelColumnMatcher
+    private interface ISubExcelColumnMatcher : IColumnSelector
     {
     }
 
-    private abstract class AbstractExcelColumnMatcher : IExcelColumnMatcher
+    private abstract class AbstractExcelColumnMatcher : IColumnSelector
     {
-        public abstract bool ColumnMatches(ExcelSheet sheet, int columnIndex);
+        public abstract IReadOnlyList<int> SelectColumns(ExcelSheet sheet);
+
+        public abstract string Describe(ExcelSheet sheet);
     }
 
-    private class NoConstructorExcelColumnMatcher : IExcelColumnMatcher
+    private class NoConstructorExcelColumnMatcher : IColumnSelector
     {
         private NoConstructorExcelColumnMatcher()
         {
         }
 
-        public bool ColumnMatches(ExcelSheet sheet, int columnIndex)
+        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
+            => throw new NotImplementedException();
+
+        public string Describe(ExcelSheet sheet)
             => throw new NotImplementedException();
     }
     
@@ -60,7 +61,7 @@ public class ExcelColumnsMatchingAttributeTests
     public void Ctor_String_RegexOptions_Default()
     {
         var attribute = new ExcelColumnsMatchingAttribute(@"Year \d+$");
-        Assert.Equal(typeof(RegexColumnMatcher), attribute.Type);
+        Assert.Equal("RegexColumnMatcher", attribute.Type.Name);
         var regex = Assert.IsType<Regex>(Assert.Single(attribute.ConstructorArguments!));
         Assert.Equal(RegexOptions.None, regex.Options);
         Assert.Matches(regex, "Year 2024");
@@ -71,7 +72,7 @@ public class ExcelColumnsMatchingAttributeTests
     public void Ctor_String_RegexOptions_IgnoreCase()
     {
         var attribute = new ExcelColumnsMatchingAttribute(@"Year \d+$", RegexOptions.IgnoreCase);
-        Assert.Equal(typeof(RegexColumnMatcher), attribute.Type);
+        Assert.Equal("RegexColumnMatcher", attribute.Type.Name);
         var regex = Assert.IsType<Regex>(Assert.Single(attribute.ConstructorArguments!));
         Assert.Equal(RegexOptions.IgnoreCase, regex.Options);
         Assert.Matches(regex, "Year 2024");
@@ -112,9 +113,12 @@ public class ExcelColumnsMatchingAttributeTests
         Assert.Same(value, attribute.ConstructorArguments);
     }
 
-    private class ColumnMatcher : IExcelColumnMatcher
+    private class ColumnMatcher : IColumnSelector
     {
-        public bool ColumnMatches(ExcelSheet sheet, int columnIndex)
+        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
+            => throw new NotImplementedException();
+
+        public string Describe(ExcelSheet sheet)
             => throw new NotImplementedException();
     }
 

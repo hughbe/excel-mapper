@@ -3,7 +3,7 @@ namespace ExcelMapper.Abstractions;
 /// <summary>
 /// Map for to-one relationships.
 /// </summary>
-public interface IToOneMap : IMap
+internal interface IToOneMap : IMap
 {
     /// <summary>
     /// Gets or sets whether an exception should be thrown if the value cannot be found.

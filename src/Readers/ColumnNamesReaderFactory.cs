@@ -3,7 +3,7 @@
 /// <summary>
 /// Reads a multiple values of one or more columns given the name of each column.
 /// </summary>
-public sealed class ColumnNamesReaderFactory : ICellReaderFactory, ICellsReaderFactory, IColumnNamesProviderCellReaderFactory
+internal sealed class ColumnNamesReaderFactory : ICellReaderFactory, ICellsReaderFactory, IColumnNamesProviderCellReaderFactory
 {
     /// <summary>
     /// Gets the names of each column to read.

@@ -3,7 +3,7 @@ namespace ExcelMapper;
 /// <summary>
 /// Provides the column names for a given sheet.
 /// </summary>
-public interface IColumnNamesProviderCellReaderFactory
+internal interface IColumnNamesProviderCellReaderFactory
 {
     /// <summary>
     /// Gets the column names for the given sheet.

@@ -849,8 +849,8 @@ public class ExcelSheet
     }
 
     // Readers created by reader factories for this sheet, so that a column is found once per sheet
-    // rather than for every row. Keyed by the factory instance: a map whose factory is replaced
-    // gets a new reader.
+    // rather than for every row. Keyed by the factory instance (the factories are internal and
+    // don't override Equals): a map whose factory is replaced gets a new reader.
     private Dictionary<ICellReaderFactory, ICellReader?>? _cellReaders;
     private Dictionary<ICellsReaderFactory, ICellsReader?>? _cellsReaders;
 
@@ -859,7 +859,7 @@ public class ExcelSheet
     /// </summary>
     internal ICellReader? GetCellReader(ICellReaderFactory factory)
     {
-        _cellReaders ??= new(ReferenceEqualityComparer<ICellReaderFactory>.Instance);
+        _cellReaders ??= [];
         if (!_cellReaders.TryGetValue(factory, out var reader))
         {
             reader = factory.GetCellReader(this);
@@ -874,7 +874,7 @@ public class ExcelSheet
     /// </summary>
     internal ICellsReader? GetCellsReader(ICellsReaderFactory factory)
     {
-        _cellsReaders ??= new(ReferenceEqualityComparer<ICellsReaderFactory>.Instance);
+        _cellsReaders ??= [];
         if (!_cellsReaders.TryGetValue(factory, out var reader))
         {
             reader = factory.GetCellsReader(this);

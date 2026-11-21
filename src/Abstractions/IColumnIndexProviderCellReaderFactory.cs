@@ -4,7 +4,7 @@ namespace ExcelMapper;
 /// Provides the column index for a given sheet.
 /// This is a performance optimization to cache column indices.
 /// </summary>
-public interface IColumnIndexProviderCellReaderFactory
+internal interface IColumnIndexProviderCellReaderFactory
 {
     /// <summary>
     /// Gets the column index for the given sheet.

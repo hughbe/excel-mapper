@@ -5,7 +5,7 @@ namespace ExcelMapper.Abstractions;
 /// <summary>
 /// Tries to read the value of a single cell.
 /// </summary>
-public interface ICellReader
+internal interface ICellReader
 {
     
     /// <summary>
