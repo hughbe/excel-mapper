@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <Compile Include="../tests/Helpers.cs" />
+    <Compile Include="../tests/XlsxBuilder.cs" />
   </ItemGroup>
 
   <ItemGroup>

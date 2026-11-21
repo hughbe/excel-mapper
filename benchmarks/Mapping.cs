@@ -37,6 +37,38 @@ public class Mapping
 
         _validCsv = Encoding.UTF8.GetBytes(valid.ToString());
         _invalidCsv = Encoding.UTF8.GetBytes(invalid.ToString());
+
+        // Typed number cells, which ExcelDataReader returns as doubles.
+        var rows = new object?[RowCount + 1][];
+        rows[0] = ["Count", "Total", "Ratio"];
+        for (int i = 0; i < RowCount; i++)
+        {
+            rows[i + 1] = [i, (long)i * 1000, i * 0.25];
+        }
+
+        _typedNumbersXlsx = XlsxBuilder.CreateStream(rows).ToArray();
+    }
+
+    private byte[] _typedNumbersXlsx = default!;
+
+    public class Numbers
+    {
+        public int Count { get; set; }
+        public long Total { get; set; }
+        public double Ratio { get; set; }
+    }
+
+    [Benchmark]
+    public long TypedNumbers()
+    {
+        using var importer = new ExcelImporter(new MemoryStream(_typedNumbersXlsx));
+        long sum = 0;
+        foreach (var row in importer.ReadSheet().ReadRows<Numbers>())
+        {
+            sum += row.Count;
+        }
+
+        return sum;
     }
 
     public enum Status

@@ -57,10 +57,44 @@ public class TypedCellTests
     }
 
     [Fact]
-    public void Map_FractionalNumberToInt_Truncates()
+    public void Map_FractionalNumberToInteger_ThrowsExcelMappingException()
     {
-        // Documented in the README: Excel stores numbers as doubles, and .NET 8 truncates them.
-        Assert.Equal(2, Map<int>(2.7));
+        // Excel stores numbers as doubles. The fractional part isn't silently dropped, matching
+        // text cells where "2.7" can't be parsed as an int.
+        var ex = MapFails<int>(2.7);
+        Assert.IsType<FormatException>(ex.InnerException);
+        MapFails<long>(-0.5);
+        MapFails<byte>(1.25);
+        MapFails<System.Numerics.BigInteger>(3.5);
+        Assert.Null(Map<int?>(null));
+    }
+
+    [Fact]
+    public void Map_WholeNumberDoubleToInteger_Success()
+    {
+        Assert.Equal(2, Map<int>(2.0));
+        Assert.Equal(-3L, Map<long>(-3.0));
+        Assert.Equal(1e15, (double)Map<long>(1e15));
+    }
+
+    [Fact]
+    public void Map_FractionalNumberToFloatingPoint_Success()
+    {
+        Assert.Equal(2.7, Map<double>(2.7));
+        Assert.Equal(2.7m, Map<decimal>(2.7));
+    }
+
+    public class FallbackRow
+    {
+        [ExcelInvalidValue(-1)]
+        public int Value { get; set; }
+    }
+
+    [Fact]
+    public void Map_FractionalNumberWithInvalidFallback_UsesFallback()
+    {
+        using var importer = Create(["Value"], [2.7]);
+        Assert.Equal(-1, importer.ReadSheet().ReadRows<FallbackRow>().Single().Value);
     }
 
     [Fact]

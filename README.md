@@ -697,6 +697,17 @@ public class EventMap : ExcelClassMap<Event>
 - `TimeOnly` / `TimeOnly?` (.NET 6+)
 - `TimeSpan` / `TimeSpan?`
 
+#### Culture for the Whole Importer
+
+By default, text is parsed and numbers and dates are converted to text using the current culture of the thread reading the rows, so results can depend on the machine's settings. Set a culture for the whole importer to make them predictable:
+
+```csharp
+using var importer = new ExcelImporter("data.xlsx");
+importer.Configuration.Culture = CultureInfo.InvariantCulture;   // or new CultureInfo("de-DE")
+```
+
+The culture is only used while each row is mapped; your own code between rows keeps its culture. A format provider set on an individual member (see below) takes precedence.
+
 #### Culture-Specific Date and Time Parsing
 
 Specify a format provider (culture) for parsing date, time, and duration types. This is particularly useful when your Excel data uses locale-specific formatting:
@@ -2261,7 +2272,7 @@ The importer itself, and each sheet, should still be used by one thread at a tim
 - **Any type implementing `IParsable<T>`** (.NET 7+) - automatically supported
 - **Any type implementing `IConvertible`** - automatically supported
 
-> **Note:** Fractional numeric cells mapped to integer types are truncated on .NET 8+ and rounded on older runtimes. See [Fractional Numbers Mapped to Integer Properties](#fractional-numbers-mapped-to-integer-properties).
+> **Note:** Fractional numeric cells (such as `2.7`) mapped to integer types are invalid rather than truncated or rounded. See [Fractional Numbers Mapped to Integer Properties](#fractional-numbers-mapped-to-integer-properties).
 
 > **Note:** `object` and `IConvertible` members, and `object` values in dictionaries, `ExpandoObject` and non-generic collections such as `ArrayList`, receive the value as Excel stores it: a `double` for numbers, a `DateTime` for dates, a `bool` for booleans and a `string` for text. With `[ExcelPreserveFormatting]` they receive the displayed text instead. CSV cells are always text. Collections that only accept one type, such as `StringCollection`, convert values to that type.
 
@@ -2506,23 +2517,22 @@ public class EmployeeMap : ExcelClassMap<Employee>
 
 ### Fractional Numbers Mapped to Integer Properties
 
-**Problem**: A numeric cell such as `2.7` is mapped to an `int`, `long`, `byte` etc. property and no error is thrown, but the value is not what you expect.
+**Problem**: A numeric cell such as `2.7` mapped to an `int`, `long`, `byte` etc. property throws an `ExcelMappingException`.
 
-Excel stores every number as a floating-point value, so a cell holding `2.7` is read as the `double` `2.7`. What happens next depends on which build of ExcelMapper your application uses, which NuGet picks from your target framework:
+Excel stores every number as a floating-point value, so a cell holding `2.7` is read as the `double` `2.7`. ExcelMapper doesn't silently drop or round the fractional part: the cell is invalid, just as the text `"2.7"` can't be parsed as an `int`. Whole numbers such as `2.0` map normally. This is the same on every runtime.
 
-| Your application targets | ExcelMapper build used | Conversion of a fractional number to an integer type | `2.7` → `int` | `3.5` → `int` |
-|--------------------------|------------------------|------------------------------------------------------|---------------|---------------|
-| .NET 8 or later | `net8.0` | **Truncates** towards zero (`INumberBase<T>.CreateChecked`) | `2` | `3` |
-| .NET 7 or earlier, .NET Framework, .NET Standard | `netstandard2.0` / `netstandard2.1` | **Rounds** to nearest, halves to even (`Convert.ChangeType`) | `3` | `4` |
-
-In both cases the fractional part is discarded without an exception. The conversion only fails if the value is out of range for the type, which is reported as an invalid value (for example `1E+20` mapped to `int`). Cells that contain text rather than a number (for example every cell in a CSV file) are parsed as strings instead, so `"2.7"` **does** fail to map to an `int`.
+> **Changed in 4.0:** earlier versions truncated (`2.7` → `2`) on .NET 8 and rounded (`2.7` → `3`) on older runtimes, without an error.
 
 **Solutions**:
 ```csharp
-// Option 1: Map to a floating-point or decimal property and convert in your code
+// Option 1: Map to a floating-point or decimal property
 public decimal Quantity { get; set; }
 
-// Option 2: Take control of the conversion with a custom converter
+// Option 2: Use a fallback value for fractional (and other invalid) values
+[ExcelInvalidValue(0)]
+public int Quantity { get; set; }
+
+// Option 3: Take control of the conversion with a custom converter
 Map(e => e.Quantity)
     .WithConverter(value => (int)Math.Round(double.Parse(value), MidpointRounding.AwayFromZero));
 ```
@@ -2735,6 +2745,7 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 - `TryGetClassMap<T>()` - Check if map exists
 - `SkipBlankLines` - Skip empty rows (default: false)
 - `IgnoreSeparatorsInColumnNames` - Ignore spaces, underscores, hyphens and dots when matching column names (default: false)
+- `Culture` - Culture used to parse text and convert numbers and dates to text (default: null, the current culture)
 - `MaxColumnsPerSheet` - Security limit (default: 10,000)
 - `ValidateDataAnnotations` - Enable data annotations validation (default: false)
 

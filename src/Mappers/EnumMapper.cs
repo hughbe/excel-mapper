@@ -66,7 +66,12 @@ public class EnumMapper : ICellMapper
         }
 
         // Only create the exception (by parsing again) if it is needed.
-        return MapperUtilities.InvalidFromParse(() => Enum.Parse(enumType, stringValue!, ignoreCase));
+        return InvalidResult(enumType, stringValue, ignoreCase);
 #endif
     }
+
+    // A separate method so that the closure capturing these values is only allocated for invalid
+    // values. Creating the lambda in Map would allocate the closure for every cell.
+    private static CellMapperResult InvalidResult(Type enumType, string? stringValue, bool ignoreCase)
+        => MapperUtilities.InvalidFromParse(() => Enum.Parse(enumType, stringValue!, ignoreCase));
 }
