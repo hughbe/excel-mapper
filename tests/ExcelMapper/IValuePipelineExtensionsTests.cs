@@ -1373,6 +1373,33 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     }
 
     [Fact]
+    public void WithConverter_Simple_ReplacesBuiltInMappers()
+    {
+        var map = Map(t => t.DateTimeValue);
+        Assert.NotEmpty(map.Mappers);
+        map.WithConverter(_ => DateTime.MinValue);
+        Assert.IsType<ConvertUsingMapper>(Assert.Single(map.Mappers));
+    }
+
+    [Fact]
+    public void WithConverter_Advanced_ReplacesBuiltInMappers()
+    {
+        var map = Map(t => t.DateTimeValue);
+        map.WithConverter(_ => CellMapperResult.Success(DateTime.MinValue));
+        Assert.IsType<ConvertUsingMapper>(Assert.Single(map.Mappers));
+    }
+
+    [Fact]
+    public void WithConverter_CalledTwice_UsesLastConverter()
+    {
+        var map = Map(t => t.Value);
+        map.WithConverter(_ => "first");
+        map.WithConverter(_ => "second");
+        var mapper = Assert.IsType<ConvertUsingMapper>(Assert.Single(map.Mappers));
+        Assert.Equal("second", mapper.Converter(new ReadCellResult(0, "x", preserveFormatting: false)).Value);
+    }
+
+    [Fact]
     public void WithConverter_SuccessConverterSimple_ReturnsExpected()
     {
         var map = Map(t => t.Value);

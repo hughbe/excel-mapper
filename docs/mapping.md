@@ -962,7 +962,7 @@ The fluent API provides extensive configuration options:
 - `.WithValueFallback(value)` - Use default value for both empty and invalid
 
 **Advanced:**
-- `.WithConverter(value => ...)` - Custom conversion delegate
+- `.WithConverter(value => ...)` - Custom conversion delegate. It replaces the built-in conversion for the member's type, so it's used for every cell that isn't empty
 - `.WithFormats("yyyy-MM-dd", "dd/MM/yyyy")` - Parse dates, times, durations and formats (`DateTime`, `DateTimeOffset`, `TimeSpan`, `DateOnly`, `TimeOnly`) with specific formats
 - `.WithMapping(dictionary)` - Map string values to enum/object values
 - `.WithElementMap(...)` - Configure element pipeline for collections

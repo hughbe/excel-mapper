@@ -673,7 +673,10 @@ public static class IValuePipelineExtensions
     /// <summary>
     /// Specifies that the value of a cell should be mapped to a value using the given delegate. This is
     /// useful for specifying custom mapping behaviour for a property or field without having to write
-    /// your own ICellMapper.
+    /// your own ICellMapper. The delegate replaces the map's mappers, including the built-in conversion
+    /// for the member's type and any earlier converter, so it is used for every cell that isn't empty.
+    /// Empty cells still use the empty fallback, and values the delegate throws for use the invalid
+    /// fallback.
     /// </summary>
     /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <typeparam name="TMap">The type of the property or field that the map represents.</typeparam>
@@ -706,7 +709,10 @@ public static class IValuePipelineExtensions
     /// <summary>
     /// Specifies that the value of a cell should be mapped to a value using the given delegate. This is
     /// useful for specifying custom mapping behaviour for a property or field without having to write
-    /// your own ICellMapper.
+    /// your own ICellMapper. The delegate replaces the map's mappers, including the built-in conversion
+    /// for the member's type and any earlier converter, so it is used for every cell that isn't empty.
+    /// Empty cells still use the empty fallback, and values the delegate throws for use the invalid
+    /// fallback.
     /// </summary>
     /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
@@ -716,8 +722,11 @@ public static class IValuePipelineExtensions
     {
         ThrowHelpers.ThrowIfNull(converter, nameof(converter));
 
-        var item = new ConvertUsingMapper(converter);
-        map.Mappers.Add(item);
+        // Replace the built-in conversion, rather than adding to it: otherwise the converter would only
+        // be used for values the built-in conversion can't convert (for example for numbers), but for
+        // every value of other types (such as strings).
+        map.Mappers.Clear();
+        map.Mappers.Add(new ConvertUsingMapper(converter));
         return map;
     }
 

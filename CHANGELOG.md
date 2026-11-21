@@ -9,6 +9,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 ### Breaking changes
 
 - `object` and `IConvertible` members, and `object` values in dictionaries, `ExpandoObject` and non-generic collections, receive the value as Excel stores it (`double`, `DateTime`, `bool`, `string`, ...) instead of its text. ([#124](https://github.com/hughbe/excel-mapper/pull/124))
+- `WithConverter` replaces the built-in conversion (and any earlier converter) instead of being tried after it, so the converter is used for every cell that isn't empty, whatever the member's type. Before, it was only used for values the built-in conversion couldn't convert for numbers, dates, enums and most other types, but for every value of strings. ([#154](https://github.com/hughbe/excel-mapper/pull/154))
 - A fractional number (such as `2.7`) mapped to an integer type is invalid instead of being truncated (.NET 8) or rounded (netstandard), matching text cells. ([#127](https://github.com/hughbe/excel-mapper/pull/127))
 - `ReadRow` and `TryReadRow` read the heading first if it hasn't been read, like `ReadRows`, instead of mapping the heading row as data. ([#119](https://github.com/hughbe/excel-mapper/pull/119))
 - Sheet names are matched case-insensitively by `ReadSheet(name)` and `TryReadSheet(name, ...)`, as in Excel. ([#116](https://github.com/hughbe/excel-mapper/pull/116))
