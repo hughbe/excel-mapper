@@ -14,6 +14,12 @@ namespace ExcelMapper;
 /// position) or other regions.
 /// </para>
 /// <para>
+/// Columns chosen by position (such as <see cref="ExcelColumnIndexAttribute"/> or
+/// <see cref="ExcelColumnLetterAttribute"/>) count from the region's first column, so one type can
+/// map tables of the same shape anywhere on a sheet. Addresses and error messages use the sheet's
+/// rows and columns.
+/// </para>
+/// <para>
 /// The importer reads the file forward only. Reading one region at a time is as fast as reading the
 /// sheet; alternating between regions row by row re-reads the file each time.
 /// </para>
@@ -179,6 +185,12 @@ public sealed class ExcelRegion
     private ExcelSheet CreateSheet()
     {
         var sheet = new ExcelSheet(Sheet);
+
+        // Columns chosen by position count from the region's first column, and stop at its last.
+        var columnCount = Sheet.NumberOfColumns;
+        sheet.ColumnOffset = Math.Min(Range.Columns.Start.GetOffset(columnCount), columnCount);
+        sheet.ColumnEnd = Math.Max(sheet.ColumnOffset, Math.Min(Range.Columns.End.GetOffset(columnCount), columnCount));
+
         switch (_headingKind)
         {
             case HeadingKind.None:

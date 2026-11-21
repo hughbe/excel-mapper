@@ -24,12 +24,8 @@ public sealed class ColumnIndexReaderFactory : ICellReaderFactory, IColumnIndexP
     public ICellReader? GetCellReader(ExcelSheet sheet)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
-        if (ColumnIndex >= sheet.NumberOfColumns)
-        {
-            return null;
-        }
-
-        return new ColumnIndexReader(ColumnIndex);
+        var columnIndex = sheet.ToSheetColumn(ColumnIndex);
+        return columnIndex == -1 ? null : new ColumnIndexReader(columnIndex);
     }
 
     /// <inheritdoc/>

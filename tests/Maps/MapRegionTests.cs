@@ -105,22 +105,93 @@ public class MapRegionTests
     }
 
     [Fact]
-    public void ReadRows_WithoutHeadingSubRegion_ColumnIndexesAreWorksheetPositions()
+    public void ReadRows_WithoutHeadingSubRegion_ColumnPositionsCountFromRegion()
     {
-        // As with DataRange, column indexes are positions in the worksheet, not in the region.
+        // Column 0 (letter A) is the region's first column, so one type maps any table of that shape.
         using var importer = Helpers.GetCsvImporter("x,a,1\nx,b,2\nx,c,3\n");
-        var rows = importer.ReadSheet().Region("B2:C3").WithoutHeading().ReadRows<PositionalFromB>().ToArray();
+        var rows = importer.ReadSheet().Region("B2:C3").WithoutHeading().ReadRows<Positional>().ToArray();
         Assert.Equal(["b", "c"], rows.Select(r => r.Name));
         Assert.Equal([2, 3], rows.Select(r => r.Amount));
     }
 
-    public class PositionalFromB
+    [Fact]
+    public void ReadRows_TwoTablesWithoutHeadings_ShareOneType()
     {
-        [ExcelColumnLetter("B")]
+        using var importer = Helpers.GetCsvImporter("a,1,,x,10\nb,2,,y,20\n");
+        var sheet = importer.ReadSheet();
+        var left = sheet.Region("A1:B2").WithoutHeading().ReadRows<Positional>().ToArray();
+        var right = sheet.Region("D1:E2").WithoutHeading().ReadRows<Positional>().ToArray();
+        Assert.Equal(["a", "b"], left.Select(r => r.Name));
+        Assert.Equal(["x", "y"], right.Select(r => r.Name));
+        Assert.Equal([10, 20], right.Select(r => r.Amount));
+    }
+
+    [Fact]
+    public void ReadRows_ColumnLettersCountFromRegion()
+    {
+        using var importer = Helpers.GetCsvImporter("x,Name,Amount\nx,a,1\n");
+        var row = importer.ReadSheet().Region("B1:C2").ReadRows<ByLetter>().Single();
+        Assert.Equal("a", row.Name);
+        Assert.Equal(1, row.Amount);
+    }
+
+    public class ByLetter
+    {
+        [ExcelColumnLetter("A")]
         public string? Name { get; set; }
 
-        [ExcelColumnIndex(2)]
+        [ExcelColumnLetter("B")]
         public int Amount { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_ColumnIndicesCountFromRegion()
+    {
+        using var importer = Helpers.GetCsvImporter("x,1,2,3\n");
+        var row = importer.ReadSheet().Region("B1:D1").WithoutHeading().ReadRows<Indices>().Single();
+        Assert.Equal([1, 3], row.Values);
+    }
+
+    public class Indices
+    {
+        [ExcelColumnIndices(0, 2)]
+        public int[] Values { get; set; } = [];
+    }
+
+    [Fact]
+    public void ReadRows_ColumnPositionPastRegion_IsMissing()
+    {
+        // The worksheet has column D, but the region stops at C.
+        using var importer = Helpers.GetCsvImporter("a,1,x,y\n");
+        var region = importer.ReadSheet().Region("B1:C1").WithoutHeading();
+        Assert.Throws<ExcelMappingException>(() => region.ReadRows<ThirdColumn>().ToArray());
+        Assert.False(region.TryValidateHeading<ThirdColumn>(out var problems));
+        Assert.Contains("column D (index 2)", Assert.Single(problems));
+    }
+
+    public class ThirdColumn
+    {
+        [ExcelColumnIndex(2)]
+        public string? Value { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_ErrorAddressForColumnPosition_IsInWorksheet()
+    {
+        using var importer = Helpers.GetCsvImporter("x,a,bad\n");
+        var region = importer.ReadSheet().Region("B1:C1").WithoutHeading();
+        var exception = Assert.Throws<ExcelMappingException>(() => region.ReadRows<Positional>().ToArray());
+        Assert.Equal("C1", exception.CellAddress);
+    }
+
+    [Fact]
+    public void ReadRows_SheetColumnPositionsUnchanged()
+    {
+        // Positions on the sheet itself (and with DataRange) are still worksheet positions.
+        using var importer = Helpers.GetCsvImporter("a,1\nb,2\n");
+        var sheet = importer.ReadSheet();
+        sheet.HasHeading = false;
+        Assert.Equal(["a", "b"], sheet.ReadRows<Positional>().Select(r => r.Name));
     }
 
     [Fact]

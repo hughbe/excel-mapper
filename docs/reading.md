@@ -293,7 +293,7 @@ A region's first row is its heading. Change that with:
 Regions also have `ReadRowResults<T>()`, `ValidateHeading<T>()` and `TryValidateHeading<T>()`, which work as on a sheet.
 
 - Regions are immutable, and each read starts at the top of the region. Reading a region doesn't use or change the sheet's own heading, `DataRange` or position, so a region can be read any number of times, alongside other regions and the sheet.
-- Addresses and column indexes are positions in the sheet, not in the region: in region `B2:C3`, `[ExcelColumnIndex(0)]` is column A. Error messages give cell addresses in the sheet.
+- A region's address is in the sheet, but columns chosen by position count from the region's first column: in region `B2:C3`, `[ExcelColumnIndex(0)]` and `[ExcelColumnLetter("A")]` are column B, and a position past the region's last column is a missing column. So one type can map tables of the same shape anywhere on a sheet. Error messages give cell addresses in the sheet. (On the sheet itself, positions are always the sheet's, even with `DataRange`.)
 - Blank rows in a region are mapped like other rows unless `SkipBlankLines` is set. A region of columns `A:B` includes rows whose values are all in other columns.
 - The file is read forward only. Reading one region at a time is as fast as reading the sheet; alternating between regions row by row re-reads the file each time.
 

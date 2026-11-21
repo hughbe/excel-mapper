@@ -28,9 +28,10 @@ public sealed class ColumnIndicesReaderFactory : ICellReaderFactory, ICellsReade
 
         foreach (var columnIndex in ColumnIndices)
         {
-            if (columnIndex < sheet.NumberOfColumns)
+            var sheetColumnIndex = sheet.ToSheetColumn(columnIndex);
+            if (sheetColumnIndex != -1)
             {
-                return new ColumnIndexReader(columnIndex);
+                return new ColumnIndexReader(sheetColumnIndex);
             }
         }
 
@@ -41,15 +42,17 @@ public sealed class ColumnIndicesReaderFactory : ICellReaderFactory, ICellsReade
     public ICellsReader? GetCellsReader(ExcelSheet sheet)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
-        foreach (var columnIndex in ColumnIndices)
+        var sheetColumnIndices = new int[ColumnIndices.Count];
+        for (int i = 0; i < sheetColumnIndices.Length; i++)
         {
-            if (columnIndex >= sheet.NumberOfColumns)
+            sheetColumnIndices[i] = sheet.ToSheetColumn(ColumnIndices[i]);
+            if (sheetColumnIndices[i] == -1)
             {
                 return null;
             }
         }
 
-        return new ColumnIndicesReader(ColumnIndices);
+        return new ColumnIndicesReader(sheetColumnIndices);
     }
 
     /// <inheritdoc/>

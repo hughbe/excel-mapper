@@ -822,6 +822,27 @@ public class ExcelSheet
     /// </summary>
     internal Index? FirstDataRow { get; set; }
 
+    /// <summary>
+    /// The position in the worksheet of column 0, for a region (see <see cref="ExcelRegion"/>):
+    /// columns chosen by position count from the region's first column.
+    /// </summary>
+    internal int ColumnOffset { get; set; }
+
+    /// <summary>
+    /// The position in the worksheet just after the last column that can be chosen by position.
+    /// </summary>
+    internal int ColumnEnd { get; set; } = int.MaxValue;
+
+    /// <summary>
+    /// Converts a column position chosen by the user (for example with <see cref="ExcelColumnIndexAttribute"/>)
+    /// to its position in the worksheet, or -1 if the sheet (or region) doesn't have that column.
+    /// </summary>
+    internal int ToSheetColumn(int columnIndex)
+    {
+        var sheetColumnIndex = (long)ColumnOffset + columnIndex;
+        return sheetColumnIndex < Math.Min(ColumnEnd, NumberOfColumns) ? (int)sheetColumnIndex : -1;
+    }
+
     private sealed class BoundClassMap(int version, BoundMember[] members)
     {
         public int Version { get; } = version;

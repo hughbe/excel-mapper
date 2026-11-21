@@ -65,6 +65,7 @@ var records = sheet.ReadRows<Person>();
 - **`ExcelRegion`**: An immutable block of a worksheet with its own heading choice
   - Each read creates a private `ExcelSheet` for the region (sharing the worksheet's identity, with its own `DataRange`, heading and position), so it reuses the sheet's reading, binding and heading code
   - A heading above the region is supported by `ExcelSheet.FirstDataRow`, which skips rows between the heading and the region
+  - Columns chosen by position count from the region's first column: `ExcelSheet.ColumnOffset`/`ColumnEnd` and `ToSheetColumn`, used by the index-based reader factories
 
 - **`ExcelSheet`**: Represents a single worksheet and a position in it
   - Manages heading/header row detection
