@@ -421,6 +421,85 @@ public class TypedConverterTests
         public decimal? Decimal { get; set; }
     }
 
+    [Fact]
+    public void ReadRows_SplitElements_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("Values,Dates\n1;2;3,2024-01-02;2024-03-04\n");
+        var row = importer.ReadSheet().ReadRows<ElementsRow>().Single();
+        Assert.Equal([1, 2, 3], row.Values);
+        Assert.Equal([new DateTime(2024, 1, 2), new DateTime(2024, 3, 4)], row.Dates);
+    }
+
+    [Fact]
+    public void ReadRows_SplitElementInvalid_ThrowsAtCell()
+    {
+        using var importer = Helpers.GetCsvImporter("Values,Dates\n1;x;3,\n");
+        var sheet = importer.ReadSheet();
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<ElementsRow>().ToArray());
+        Assert.Equal("A2", exception.CellAddress);
+        Assert.IsType<FormatException>(exception.InnerException);
+    }
+
+    [Fact]
+    public void ReadRows_SplitElementsWithFallbacks_ReturnsFallbacks()
+    {
+        using var importer = Helpers.GetCsvImporter("Values,Dates\n1;x;;4,\n");
+        importer.Configuration.RegisterClassMap<ElementsRow>(c =>
+        {
+            c.Map(r => r.Values).WithSeparators(';').WithElementMap(e => e.WithInvalidFallback(-1).WithEmptyFallback(0));
+            c.Map(r => r.Dates).WithSeparators(';');
+        });
+        Assert.Equal([1, -1, 0, 4], importer.ReadSheet().ReadRows<ElementsRow>().Single().Values);
+    }
+
+    [Fact]
+    public void ReadRows_SplitElementsWithCustomMapper_UsesPipeline()
+    {
+        using var importer = Helpers.GetCsvImporter("Values,Dates\n1;2,\n");
+        importer.Configuration.RegisterClassMap<ElementsRow>(c =>
+        {
+            c.Map(r => r.Values).WithSeparators(';').WithElementMap(e => e.WithMappers(new DoublingMapper()));
+            c.Map(r => r.Dates).WithSeparators(';');
+        });
+        Assert.Equal([2, 4], importer.ReadSheet().ReadRows<ElementsRow>().Single().Values);
+    }
+
+    [Fact]
+    public void ReadRows_ColumnsToListAndDictionary_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("A,B,C\n1,2.5,3\n");
+        var row = importer.ReadSheet().ReadRows<ColumnsRow>().Single();
+        Assert.Equal([1, 3], row.Values);
+        Assert.Equal(new Dictionary<string, decimal> { ["A"] = 1, ["B"] = 2.5m }, row.Amounts);
+    }
+
+    [Fact]
+    public void ReadRows_DictionaryValueInvalid_ThrowsAtCell()
+    {
+        using var importer = Helpers.GetCsvImporter("A,B,C\n1,x,3\n");
+        var sheet = importer.ReadSheet();
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<ColumnsRow>().ToArray());
+        Assert.Equal("B2", exception.CellAddress);
+    }
+
+    public class ElementsRow
+    {
+        [ExcelSeparators(';')]
+        public int[] Values { get; set; } = [];
+
+        [ExcelSeparators(';')]
+        public List<DateTime> Dates { get; set; } = [];
+    }
+
+    public class ColumnsRow
+    {
+        [ExcelColumnNames("A", "C")]
+        public List<int> Values { get; set; } = [];
+
+        [ExcelColumnNames("A", "B")]
+        public Dictionary<string, decimal> Amounts { get; set; } = [];
+    }
+
     public class EnumRow
     {
         public DayOfWeek Day { get; set; }

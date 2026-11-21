@@ -145,7 +145,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
                     TKey? convertedKey = elementKey is TKey key ? key : (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
                     if (convertedKey != null)
                     {
-                        var elementValue = ValuePipeline.CastValue<TValue>(ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, valueResult, PreserveFormatting, member), sheet, rowIndex, valueResult.ColumnIndex, member);
+                        var elementValue = ValuePipeline<TValue>.Map(Pipeline, sheet, rowIndex, valueResult, PreserveFormatting, member);
                         factory.Add(convertedKey, elementValue);
                     }
                 }
