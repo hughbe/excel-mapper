@@ -145,6 +145,45 @@ public class ExcelImporter : IDisposable
     }
 
     /// <summary>
+    /// Reads every row of the first sheet of an Excel or csv file and maps each row to
+    /// <typeparamref name="T"/>. This is a shortcut for creating an importer, reading the first
+    /// sheet and calling <see cref="ExcelSheet.ReadRows{T}()"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="path">A path to the file to read.</param>
+    /// <param name="fileType">The type of file.</param>
+    /// <param name="configure">Configures the importer before reading, for example to register a class map.</param>
+    /// <returns>The mapped rows.</returns>
+    public static List<T> ReadRows<T>(string path, ExcelImporterFileType fileType = ExcelImporterFileType.Excel, Action<ExcelImporterConfiguration>? configure = null)
+    {
+        using var importer = new ExcelImporter(path, fileType);
+        return ReadRows<T>(importer, configure);
+    }
+
+    /// <summary>
+    /// Reads every row of the first sheet of an Excel or csv stream and maps each row to
+    /// <typeparamref name="T"/>. This is a shortcut for creating an importer, reading the first
+    /// sheet and calling <see cref="ExcelSheet.ReadRows{T}()"/>. As with disposing an importer
+    /// created from a stream, the stream is closed when reading finishes.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="stream">A stream containing the file to read.</param>
+    /// <param name="fileType">The type of file.</param>
+    /// <param name="configure">Configures the importer before reading, for example to register a class map.</param>
+    /// <returns>The mapped rows.</returns>
+    public static List<T> ReadRows<T>(Stream stream, ExcelImporterFileType fileType = ExcelImporterFileType.Excel, Action<ExcelImporterConfiguration>? configure = null)
+    {
+        using var importer = new ExcelImporter(stream, fileType);
+        return ReadRows<T>(importer, configure);
+    }
+
+    private static List<T> ReadRows<T>(ExcelImporter importer, Action<ExcelImporterConfiguration>? configure)
+    {
+        configure?.Invoke(importer.Configuration);
+        return [.. importer.ReadSheet().ReadRows<T>()];
+    }
+
+    /// <summary>
     /// Reads each sheet in the document. Reading is reset at the end of enumeration.
     /// </summary>
     /// <returns>A lazily evaluated list of each sheet in the document.</returns>

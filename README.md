@@ -33,12 +33,16 @@ public class Employee
 }
 
 // Read Excel data
+var employees = ExcelImporter.ReadRows<Employee>("employees.xlsx");
+```
+
+That's it! ExcelMapper automatically maps columns to properties by name. `ExcelImporter.ReadRows` reads the first sheet; for more control (other sheets, ranges, settings), create an importer:
+
+```csharp
 using var importer = new ExcelImporter("employees.xlsx");
 var sheet = importer.ReadSheet();
 var employees = sheet.ReadRows<Employee>().ToArray();
 ```
-
-That's it! ExcelMapper automatically maps columns to properties by name.
 
 ## Table of Contents
 
@@ -533,6 +537,22 @@ public class Employee
 var sheet = importer.ReadSheet();
 sheet.HasHeading = false;  // No header row
 var employees = sheet.ReadRows<Employee>().ToArray();
+```
+
+Or use Excel's column letters, which is the same as the zero-based index (`"A"` is 0, `"C"` is 2):
+
+```csharp
+public class Employee
+{
+    [ExcelColumnLetter("A")]
+    public string Name { get; set; }
+
+    [ExcelColumnLetter("B")]
+    public int Age { get; set; }
+}
+
+// Or with the fluent API
+Map(e => e.Name).WithColumnLetter("A");
 ```
 
 #### Multiple Index Variants
@@ -1150,6 +1170,7 @@ The fluent API provides extensive configuration options:
 **Column Selection:**
 - `.WithColumnName("Column Name")` - Map to specific column by name
 - `.WithColumnIndex(0)` - Map to specific column by zero-based index
+- `.WithColumnLetter("C")` - Map to specific column by Excel letter
 - `.WithColumnNames("Name1", "Name2")` - Try multiple column names in order
 - `.WithColumnIndices(0, 1, 2)` - Try multiple indices in order
 - `.WithColumnNameMatching(name => name.Contains("Total"))` - Use predicate
@@ -2752,6 +2773,7 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 ### Core Classes
 
 **`ExcelImporter`** - Main entry point for reading Excel files
+- `ExcelImporter.ReadRows<T>(path or stream, fileType, configure)` - Read every row of the first sheet in one call
 - `ReadSheet()` / `TryReadSheet()` - Read sheets sequentially or by name/index
 - `ReadSheets()` - Enumerate all sheets
 - `Configuration` - Access configuration for registering maps
@@ -2814,6 +2836,7 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 | `[ExcelColumnName("Name", StringComparison.Ordinal)]` | Map to column name with specific comparison mode |
 | `[ExcelColumnNames("Name1", "Name2")]` | Try multiple column names |
 | `[ExcelColumnIndex(0)]` | Map to column by index |
+| `[ExcelColumnLetter("C")]` | Map to column by Excel letter |
 | `[ExcelColumnIndices(0, 1)]` | Try multiple column indices |
 | `[ExcelColumnMatching(@"regex", options)]` | Match columns by pattern |
 | `[ExcelColumnsMatching(typeof(Matcher))]` | Custom column matching |
