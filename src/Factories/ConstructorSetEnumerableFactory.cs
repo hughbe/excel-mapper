@@ -20,8 +20,7 @@ internal sealed class ConstructorSetEnumerableFactory<T> : IEnumerableFactory<T>
     /// <exception cref="ArgumentException">Thrown when the set type is invalid or unsupported.</exception>
     public ConstructorSetEnumerableFactory([DynamicallyAccessedMembers(TrimmingConstants.CollectionType)] Type setType)
     {
-        var constructor = setType.GetConstructor(new[] { typeof(ISet<T>) })
-            ?? throw new ArgumentException($"Set type {setType} does not have a constructor that takes {nameof(ISet<T?>)}.", nameof(setType));
+        var constructor = CollectionUtilities.GetSetConstructor<T>(setType)!;
 
         _construct = CompiledAccessors.GetConstructor1(constructor);
     }

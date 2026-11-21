@@ -164,4 +164,70 @@ public class MapCollectionBuildingTests
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
     }
+
+    [Fact]
+    public void ReadRows_CollectionsFromConstructorsWithDuplicates_KeepEveryValue()
+    {
+        // Collections built by passing the values to a constructor keep duplicates and order: only a
+        // constructor that needs a set is given one.
+        using var importer = Helpers.GetCsvImporter("A,B,C\n2,1,2\n3,3,1\n");
+        var rows = importer.ReadSheet().ReadRows<ConstructedCollections>().ToArray();
+        Assert.Equal([[2, 1, 2], [3, 3, 1]], rows.Select(r => r.Queue.ToArray()));
+        Assert.Equal([[2, 1, 2], [1, 3, 3]], rows.Select(r => r.Stack.ToArray()));
+        Assert.Equal([[2, 1, 2], [3, 3, 1]], rows.Select(r => r.ConcurrentQueue.ToArray()));
+        Assert.Equal([[2, 1, 2], [1, 3, 3]], rows.Select(r => r.ConcurrentStack.ToArray()));
+        Assert.Equal([[1, 2, 2], [1, 3, 3]], rows.Select(r => r.ConcurrentBag.OrderBy(v => v).ToArray()));
+        Assert.Equal([[2, 1, 2], [3, 3, 1]], rows.Select(r => r.FromCollection.Values));
+        Assert.Equal([[2, 1, 2], [3, 3, 1]], rows.Select(r => r.FromReadOnlyList.Values));
+        Assert.Equal([[2, 1], [3, 1]], rows.Select(r => r.FromSet.Values));
+    }
+
+    public class ConstructedCollections
+    {
+        [ExcelColumnNames("A", "B", "C")]
+        public Queue<int> Queue { get; set; } = new();
+
+        [ExcelColumnNames("A", "B", "C")]
+        public Stack<int> Stack { get; set; } = new();
+
+        [ExcelColumnNames("A", "B", "C")]
+        public ConcurrentQueue<int> ConcurrentQueue { get; set; } = new();
+
+        [ExcelColumnNames("A", "B", "C")]
+        public ConcurrentStack<int> ConcurrentStack { get; set; } = new();
+
+        [ExcelColumnNames("A", "B", "C")]
+        public ConcurrentBag<int> ConcurrentBag { get; set; } = new();
+
+        [ExcelColumnNames("A", "B", "C")]
+        public FromCollectionType FromCollection { get; set; } = new([]);
+
+        [ExcelColumnNames("A", "B", "C")]
+        public FromReadOnlyListType FromReadOnlyList { get; set; } = new([]);
+
+        [ExcelColumnNames("A", "B", "C")]
+        public FromSetType FromSet { get; set; } = new(new HashSet<int>());
+    }
+
+    // Collections with only a constructor that takes the values.
+    public class FromCollectionType(ICollection<int> values) : IEnumerable<int>
+    {
+        public int[] Values { get; } = [.. values];
+        public IEnumerator<int> GetEnumerator() => ((IEnumerable<int>)Values).GetEnumerator();
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    public class FromReadOnlyListType(IReadOnlyList<int> values) : IEnumerable<int>
+    {
+        public int[] Values { get; } = [.. values];
+        public IEnumerator<int> GetEnumerator() => ((IEnumerable<int>)Values).GetEnumerator();
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    public class FromSetType(ISet<int> values) : IEnumerable<int>
+    {
+        public int[] Values { get; } = [.. values];
+        public IEnumerator<int> GetEnumerator() => ((IEnumerable<int>)Values).GetEnumerator();
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    }
 }

@@ -20,8 +20,7 @@ internal sealed class ReadOnlyObservableCollectionEnumerableFactory<T> : IEnumer
     /// <exception cref="ArgumentException">Thrown when the collection type is invalid or unsupported.</exception>
     public ReadOnlyObservableCollectionEnumerableFactory([DynamicallyAccessedMembers(TrimmingConstants.CollectionType)] Type collectionType)
     {
-        var constructor = collectionType.GetConstructor([typeof(ObservableCollection<T>)])
-            ?? throw new ArgumentException($"Collection type {collectionType} does not have a constructor that takes {nameof(ObservableCollection<T>)}.", nameof(collectionType));
+        var constructor = CollectionUtilities.GetConstructorTaking(collectionType, typeof(ObservableCollection<T>))!;
         _construct = CompiledAccessors.GetConstructor1(constructor);
     }
 
