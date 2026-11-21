@@ -14,7 +14,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomNamesEnumerablePropertyClass>();
-        Assert.Equal(["1", "2"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0, 2.0 }, row1.CustomName);
     }
 
     [Fact]
@@ -27,7 +27,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomNamesEnumerablePropertyClass>();
-        Assert.Equal(["1", "2"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0, 2.0 }, row1.CustomName);
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EnumerablePropertyClass>();
-        Assert.Equal(["1", "2"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0, 2.0 }, row1.CustomName);
     }
 
     private class CustomNamesEnumerablePropertyClass
@@ -80,7 +80,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomNamesEnumerableFieldClass>();
-        Assert.Equal(["1", "2"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0, 2.0 }, row1.CustomName);
     }
 
     [Fact]
@@ -93,7 +93,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomNamesEnumerableFieldClass>();
-        Assert.Equal(["1", "2"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0, 2.0 }, row1.CustomName);
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EnumerableFieldClass>();
-        Assert.Equal(["1", "2"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0, 2.0 }, row1.CustomName);
     }
 
     private class EnumerableFieldClass
@@ -146,7 +146,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoMatchingCustomNamesEnumerablePropertyClass>();
-        Assert.Equal(["1"], row1.CustomName);   
+        Assert.Equal(new object?[] { 1.0 }, row1.CustomName);
     }
 
     [Fact]
@@ -159,7 +159,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoMatchingCustomNamesEnumerablePropertyClass>();
-        Assert.Equal(["1"], row1.CustomName);   
+        Assert.Equal(new object?[] { 1.0 }, row1.CustomName);
     }
 
     [Fact]
@@ -172,7 +172,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EnumerablePropertyClass>();
-        Assert.Equal(["1"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0 }, row1.CustomName);
     }
 
     private class NoMatchingCustomNamesEnumerablePropertyClass
@@ -207,7 +207,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoMatchingCustomNamesEnumerableFieldClass>();
-        Assert.Equal(["1"], row1.CustomName);   
+        Assert.Equal(new object?[] { 1.0 }, row1.CustomName);
     }
 
     [Fact]
@@ -220,7 +220,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoMatchingCustomNamesEnumerableFieldClass>();
-        Assert.Equal(["1"], row1.CustomName);   
+        Assert.Equal(new object?[] { 1.0 }, row1.CustomName);
     }
 
     [Fact]
@@ -233,7 +233,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EnumerableFieldClass>();
-        Assert.Equal(["1"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0 }, row1.CustomName);
     }
 
     private class NoMatchingCustomNamesEnumerableFieldClass
@@ -384,7 +384,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoMatchingOptionalCustomNamesEnumerablePropertyClass>();
-        Assert.Equal(["1"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0 }, row1.CustomName);
     }
 
     [Fact]
@@ -397,7 +397,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoMatchingOptionalCustomNamesEnumerablePropertyClass>();
-        Assert.Equal(["1"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0 }, row1.CustomName);
     }
 
     [Fact]
@@ -410,7 +410,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EnumerablePropertyClass>();
-        Assert.Equal(["1"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0 }, row1.CustomName);
     }
 
     private class NoMatchingOptionalCustomNamesEnumerablePropertyClass
@@ -447,7 +447,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoMatchingOptionalCustomNamesEnumerableFieldClass>();
-        Assert.Equal(["1"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0 }, row1.CustomName);
     }
     [Fact]
     public void ReadRows_DefaultMappedNoMatchingOptionalCustomNamesEnumerableField_Success()
@@ -459,7 +459,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<NoMatchingOptionalCustomNamesEnumerableFieldClass>();
-        Assert.Equal(["1"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0 }, row1.CustomName);
     }
 
     [Fact]
@@ -472,7 +472,7 @@ public class MapCustomColumnMatchingTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EnumerableFieldClass>();
-        Assert.Equal(["1"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0 }, row1.CustomName);
     }
 
     private class NoMatchingOptionalCustomNamesEnumerableFieldClass
