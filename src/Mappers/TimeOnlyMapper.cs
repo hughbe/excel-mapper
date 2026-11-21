@@ -6,7 +6,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a TimeOnly.
 /// </summary>
-public class TimeOnlyMapper : ICellMapper, IFormatsCellMapper
+public class TimeOnlyMapper : ICellMapper, IFormatsCellMapper, ICellConverter<TimeOnly>, ICellConverter<TimeOnly?>
 {
     private string[] _formats = ["t"];
 
@@ -84,6 +84,59 @@ public class TimeOnlyMapper : ICellMapper, IFormatsCellMapper
 
         // Only create the exception (by parsing again) if it is needed.
         return InvalidResult(stringValue, formats, provider, style);
+    }
+
+    CellConversion ICellConverter<TimeOnly>.Convert(ReadCellResult cell, out TimeOnly value)
+    {
+        var cellValue = cell.GetValue();
+        if (cellValue is TimeSpan timeSpanValue)
+        {
+            try
+            {
+                value = TimeOnly.FromTimeSpan(timeSpanValue);
+                return CellConversion.Success;
+            }
+            catch
+            {
+                value = default;
+                return CellConversion.Invalid;
+            }
+        }
+
+        if (cellValue is DateTime dateTimeValue)
+        {
+            value = TimeOnly.FromDateTime(dateTimeValue);
+            return CellConversion.Success;
+        }
+
+        if (cellValue is double fractionOfDay && fractionOfDay >= 0 && fractionOfDay < 1)
+        {
+            value = new TimeOnly((long)Math.Round(fractionOfDay * TimeSpan.TicksPerDay));
+            return CellConversion.Success;
+        }
+
+        var stringValue = cell.GetString();
+        var provider = Provider;
+        var style = Style;
+        try
+        {
+            return TimeOnly.TryParseExact(stringValue, Formats, provider, style, out value) ||
+                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && TimeOnly.TryParseExact(stringValue, FormatUtilities.GetDefaultTimeOnlyFormats(provider), provider, style, out value))
+                ? CellConversion.Success
+                : CellConversion.Invalid;
+        }
+        catch
+        {
+            value = default;
+            return CellConversion.Invalid;
+        }
+    }
+
+    CellConversion ICellConverter<TimeOnly?>.Convert(ReadCellResult cell, out TimeOnly? value)
+    {
+        var conversion = ((ICellConverter<TimeOnly>)this).Convert(cell, out var result);
+        value = conversion == CellConversion.Invalid ? null : result;
+        return conversion;
     }
 
     // A separate method so that the closure capturing these values is only allocated for invalid

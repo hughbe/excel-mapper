@@ -5,7 +5,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a DateTimeOffset.
 /// </summary>
-public class DateTimeOffsetMapper : IFormatsCellMapper
+public class DateTimeOffsetMapper : IFormatsCellMapper, ICellConverter<DateTimeOffset>, ICellConverter<DateTimeOffset?>
 {
     private string[] _formats = ["G"];
 
@@ -111,6 +111,49 @@ public class DateTimeOffsetMapper : IFormatsCellMapper
 
         // Only create the exception (by parsing again) if it is needed.
         return InvalidResult(stringValue, formats, provider, style);
+    }
+
+    CellConversion ICellConverter<DateTimeOffset>.Convert(ReadCellResult cell, out DateTimeOffset value)
+    {
+        var cellValue = cell.GetValue();
+        if (cellValue is DateTime dateTimeValue || ExcelDateUtilities.TryGetDateTime(cellValue, out dateTimeValue))
+        {
+            try
+            {
+                value = Offset is { } offset
+                    ? new DateTimeOffset(DateTime.SpecifyKind(dateTimeValue, DateTimeKind.Unspecified), offset)
+                    : new DateTimeOffset(dateTimeValue);
+                return CellConversion.Success;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                value = default;
+                return CellConversion.Invalid;
+            }
+        }
+
+        var stringValue = cell.GetString();
+        var provider = Provider;
+        var style = Style;
+        try
+        {
+            return DateTimeOffset.TryParseExact(stringValue, Formats, provider, style, out value) ||
+                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateTimeOffset.TryParseExact(stringValue, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, style, out value))
+                ? CellConversion.Success
+                : CellConversion.Invalid;
+        }
+        catch
+        {
+            value = default;
+            return CellConversion.Invalid;
+        }
+    }
+
+    CellConversion ICellConverter<DateTimeOffset?>.Convert(ReadCellResult cell, out DateTimeOffset? value)
+    {
+        var conversion = ((ICellConverter<DateTimeOffset>)this).Convert(cell, out var result);
+        value = conversion == CellConversion.Invalid ? null : result;
+        return conversion;
     }
 
     // A separate method so that the closure capturing these values is only allocated for invalid

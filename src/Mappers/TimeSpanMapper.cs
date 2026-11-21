@@ -5,7 +5,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a TimeSpan.
 /// </summary>
-public class TimeSpanMapper : ICellMapper, IFormatsCellMapper
+public class TimeSpanMapper : ICellMapper, IFormatsCellMapper, ICellConverter<TimeSpan>, ICellConverter<TimeSpan?>
 {
     private string[] _formats = ["c"];
 
@@ -74,6 +74,47 @@ public class TimeSpanMapper : ICellMapper, IFormatsCellMapper
 
         // Only create the exception (by parsing again) if it is needed.
         return InvalidResult(stringValue, formats, provider, style);
+    }
+
+    CellConversion ICellConverter<TimeSpan>.Convert(ReadCellResult cell, out TimeSpan value)
+    {
+        var cellValue = cell.GetValue();
+        if (cellValue is TimeSpan timeSpanValue)
+        {
+            value = timeSpanValue;
+            return CellConversion.Success;
+        }
+
+        if (cellValue is DateTime dateTimeValue && ExcelDateUtilities.IsTimeOfDayOnly(dateTimeValue))
+        {
+            value = dateTimeValue.TimeOfDay;
+            return CellConversion.Success;
+        }
+
+        if (cellValue is double days && !double.IsNaN(days) && Math.Abs(days) <= TimeSpan.MaxValue.TotalDays)
+        {
+            value = TimeSpan.FromTicks((long)Math.Round(days * TimeSpan.TicksPerDay));
+            return CellConversion.Success;
+        }
+
+        try
+        {
+            return TimeSpan.TryParseExact(cell.GetString(), Formats, Provider, Style, out value)
+                ? CellConversion.Success
+                : CellConversion.Invalid;
+        }
+        catch
+        {
+            value = default;
+            return CellConversion.Invalid;
+        }
+    }
+
+    CellConversion ICellConverter<TimeSpan?>.Convert(ReadCellResult cell, out TimeSpan? value)
+    {
+        var conversion = ((ICellConverter<TimeSpan>)this).Convert(cell, out var result);
+        value = conversion == CellConversion.Invalid ? null : result;
+        return conversion;
     }
 
     // A separate method so that the closure capturing these values is only allocated for invalid
