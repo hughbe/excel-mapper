@@ -1,5 +1,6 @@
 using System.Reflection;
 using ExcelDataReader;
+using ExcelMapper.Readers;
 
 namespace ExcelMapper.Utilities;
 
@@ -144,6 +145,9 @@ internal sealed class BoundOneToOneMember<T> : BoundMember
     private ICellReader? _cellReader;
     private int _readerVersion = -1;
 
+    // The column, if the reader is a plain column reader: the cell is then read directly.
+    private int _columnIndex = -1;
+
     public BoundOneToOneMember(OneToOneMap<T> map, ExcelPropertyMap property, ExcelSheet sheet)
     {
         _map = map;
@@ -154,12 +158,14 @@ internal sealed class BoundOneToOneMember<T> : BoundMember
     {
         if (_readerVersion != _map.ReaderVersion)
         {
-            _cellReader = _map.GetCellReader(sheet);
-            _readerVersion = _map.ReaderVersion;
+            Resolve(sheet);
         }
 
         var errorCount = errors?.Count ?? 0;
-        if (!_map.TryGetValue(_cellReader, sheet, rowIndex, reader, _member, out var value) ||
+        var found = _columnIndex >= 0
+            ? _map.TryGetValue(_columnIndex, sheet, rowIndex, reader, _member, out var value)
+            : _map.TryGetValue(_cellReader, sheet, rowIndex, reader, _member, out value);
+        if (!found ||
             (errors is not null && errors.Count != errorCount))
         {
             return false;
@@ -169,12 +175,18 @@ internal sealed class BoundOneToOneMember<T> : BoundMember
         return true;
     }
 
+    private void Resolve(ExcelSheet sheet)
+    {
+        _cellReader = _map.GetCellReader(sheet);
+        _columnIndex = _cellReader is ColumnIndexReader columnIndexReader ? columnIndexReader.ColumnIndex : -1;
+        _readerVersion = _map.ReaderVersion;
+    }
+
     public override bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out object? value)
     {
         if (_readerVersion != _map.ReaderVersion)
         {
-            _cellReader = _map.GetCellReader(sheet);
-            _readerVersion = _map.ReaderVersion;
+            Resolve(sheet);
         }
 
         var errorCount = errors?.Count ?? 0;

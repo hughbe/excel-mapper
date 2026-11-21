@@ -29,14 +29,43 @@ public class ValuePipeline : IValuePipeline
     /// cell is empty. For example, you can provide a fixed value to return if the value of the cell
     /// is empty.
     /// </summary>
-    public IFallbackItem? EmptyFallback { get; set; }
+    public IFallbackItem? EmptyFallback
+    {
+        get => _emptyFallback;
+        set
+        {
+            _emptyFallback = value;
+            _fallbackVersion++;
+        }
+    }
+
+    private IFallbackItem? _emptyFallback;
 
     /// <summary>
     /// Gets or sets an object that handles mapping a cell value to a property or field if all items
     /// in the mapper pipeline failed to map the value to the property or field. For example, you can
     /// provide a fixed value to return if the value of the cell is invalid.
     /// </summary>
-    public IFallbackItem? InvalidFallback { get; set; }
+    public IFallbackItem? InvalidFallback
+    {
+        get => _invalidFallback;
+        set
+        {
+            _invalidFallback = value;
+            _fallbackVersion++;
+        }
+    }
+
+    private IFallbackItem? _invalidFallback;
+
+    private int _fallbackVersion;
+
+    /// <summary>
+    /// Changes whenever the transformers, mappers or fallbacks change, so that plans built from the
+    /// pipeline (see <see cref="OneToOneMap{T}"/>) are rebuilt.
+    /// </summary>
+    internal int Version
+        => ((NonNullCollection<ICellTransformer>)Transformers).Version + ((NonNullCollection<ICellMapper>)Mappers).Version + _fallbackVersion;
 
     /// <summary>
     /// Processes a cell value through the complete transformation and mapping pipeline to produce a final property value.
@@ -116,6 +145,27 @@ public class ValuePipeline : IValuePipeline
 
             // Trimming only changes text. Skip it for other values, such as dates and numbers,
             // so that they keep their type rather than being converted to a string and parsed again.
+            if (transformer is TrimStringCellTransformer && !preserveFormatting && readResult.GetValue() is not (string or null))
+            {
+                continue;
+            }
+
+            readResult = new ReadCellResult(readResult.ColumnIndex, transformer.TransformStringValue(sheet, rowIndex, readResult), preserveFormatting);
+        }
+
+        return readResult;
+    }
+
+    /// <summary>
+    /// Applies transformers from a plan (see <see cref="OneToOneMap{T}"/>) to a cell.
+    /// </summary>
+    internal static ReadCellResult ApplyTransformers(ICellTransformer[] transformers, ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting)
+    {
+        for (int i = 0; i < transformers.Length; i++)
+        {
+            var transformer = transformers[i];
+
+            // Trimming only changes text: see ApplyTransformers(IValuePipeline, ...).
             if (transformer is TrimStringCellTransformer && !preserveFormatting && readResult.GetValue() is not (string or null))
             {
                 continue;

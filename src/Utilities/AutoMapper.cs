@@ -172,7 +172,7 @@ public static class AutoMapper
         // Check for enum types.
         else if (type.IsEnum)
         {
-            mappers.Add(new EnumMapper(type));
+            mappers.Add(EnumMappers.Create(type, ignoreCase: false));
 
             // If enum values have a DescriptionAttribute, create a mapping dictionary for those
             // string values.
@@ -200,7 +200,9 @@ public static class AutoMapper
 #if NET7_0_OR_GREATER
             if (type.ImplementsGenericInterface(typeof(INumberBase<>), out var numberBaseInterfaceType))
             {
-                mappers.Add((ICellMapper)Activator.CreateInstance(typeof(INumberBaseMapper<>).MakeGenericType(numberBaseInterfaceType))!);
+                // Number value types (all the built-in ones) also convert nullable members without boxing.
+                var mapperType = numberBaseInterfaceType.IsValueType ? typeof(StructNumberMapper<>) : typeof(INumberBaseMapper<>);
+                mappers.Add((ICellMapper)Activator.CreateInstance(mapperType.MakeGenericType(numberBaseInterfaceType))!);
                 return true;
             }
 #else

@@ -62,7 +62,7 @@ public class ExcelClassMapTTests
         Assert.Single(map.Properties);
         Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.EnumValue)), map.Properties[0].Member);
         Assert.Same(result, map.Properties[0].Map);
-        var mapper = Assert.IsType<EnumMapper>(Assert.Single(result.Mappers));
+        var mapper = Assert.IsAssignableFrom<EnumMapper>(Assert.Single(result.Mappers));
         Assert.Equal(typeof(TestEnum), mapper.EnumType);
         Assert.Equal(ignoreCase, mapper.IgnoreCase);
 
@@ -72,7 +72,7 @@ public class ExcelClassMapTTests
         Assert.Single(map.Properties);
         Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.EnumValue)), map.Properties[0].Member);
         Assert.Same(result2, map.Properties[0].Map);
-        mapper = Assert.IsType<EnumMapper>(Assert.Single(result2.Mappers));
+        mapper = Assert.IsAssignableFrom<EnumMapper>(Assert.Single(result2.Mappers));
         Assert.Equal(typeof(TestEnum), mapper.EnumType);
         Assert.Equal(ignoreCase, mapper.IgnoreCase);
 
@@ -82,7 +82,7 @@ public class ExcelClassMapTTests
         Assert.Single(map.Properties);
         Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.EnumValue)), map.Properties[0].Member);
         Assert.Same(result3, map.Properties[0].Map);
-        mapper = Assert.IsType<EnumMapper>(Assert.Single(result3.Mappers));
+        mapper = Assert.IsAssignableFrom<EnumMapper>(Assert.Single(result3.Mappers));
         Assert.Equal(typeof(TestEnum), mapper.EnumType);
         Assert.Equal(!ignoreCase, mapper.IgnoreCase);
     }
@@ -97,7 +97,7 @@ public class ExcelClassMapTTests
         Assert.Single(map.Properties);
         Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.NullableEnumValue)), map.Properties[0].Member);
         Assert.Same(result, map.Properties[0].Map);
-        var mapper = Assert.IsType<EnumMapper>(Assert.Single(result.Mappers));
+        var mapper = Assert.IsAssignableFrom<EnumMapper>(Assert.Single(result.Mappers));
         Assert.Equal(typeof(TestEnum), mapper.EnumType);
         Assert.Equal(ignoreCase, mapper.IgnoreCase);
 
@@ -107,7 +107,7 @@ public class ExcelClassMapTTests
         Assert.Single(map.Properties);
         Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.NullableEnumValue)), map.Properties[0].Member);
         Assert.Same(result2, map.Properties[0].Map);
-        mapper = Assert.IsType<EnumMapper>(Assert.Single(result2.Mappers));
+        mapper = Assert.IsAssignableFrom<EnumMapper>(Assert.Single(result2.Mappers));
         Assert.Equal(typeof(TestEnum), mapper.EnumType);
         Assert.Equal(ignoreCase, mapper.IgnoreCase);
 
@@ -117,7 +117,7 @@ public class ExcelClassMapTTests
         Assert.Single(map.Properties);
         Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.NullableEnumValue)), map.Properties[0].Member);
         Assert.Same(result3, map.Properties[0].Map);
-        mapper = Assert.IsType<EnumMapper>(Assert.Single(result3.Mappers));
+        mapper = Assert.IsAssignableFrom<EnumMapper>(Assert.Single(result3.Mappers));
         Assert.Equal(typeof(TestEnum), mapper.EnumType);
         Assert.Equal(!ignoreCase, mapper.IgnoreCase);
     }
