@@ -36,9 +36,9 @@ public class ExcelColumnMatchingAttribute : Attribute
         {
             throw new ArgumentException("Matcher type cannot be abstract or an interface", nameof(matcherType));
         }
-        if (!matcherType.ImplementsInterface(typeof(IExcelColumnMatcher)))
+        if (!matcherType.ImplementsInterface(typeof(IColumnSelector)) && !matcherType.ImplementsInterface(typeof(IExcelColumnMatcher)))
         {
-            throw new ArgumentException($"Matcher type must implement {nameof(IExcelColumnMatcher)}", nameof(matcherType));
+            throw new ArgumentException($"Matcher type must implement {nameof(IColumnSelector)} or {nameof(IExcelColumnMatcher)}", nameof(matcherType));
         }
 
         Type = matcherType;

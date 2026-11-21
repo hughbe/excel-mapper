@@ -8,6 +8,7 @@ public class ExcelColumnsMatchingAttributeTests
 {
     [Theory]
     [InlineData(typeof(ColumnMatcher))]
+    [InlineData(typeof(Selector))]
     [InlineData(typeof(RegexColumnMatcher))]
     [InlineData(typeof(NoConstructorExcelColumnMatcher))]
     public void Ctor_Type(Type matcherType)
@@ -25,6 +26,7 @@ public class ExcelColumnsMatchingAttributeTests
 
     [Theory]
     [InlineData(typeof(IExcelColumnMatcher))]
+    [InlineData(typeof(IColumnSelector))]
     [InlineData(typeof(ISubExcelColumnMatcher))]
     [InlineData(typeof(AbstractExcelColumnMatcher))]
     [InlineData(typeof(int))]
@@ -114,5 +116,12 @@ public class ExcelColumnsMatchingAttributeTests
     {
         public bool ColumnMatches(ExcelSheet sheet, int columnIndex)
             => throw new NotImplementedException();
+    }
+
+    private sealed class Selector : IColumnSelector
+    {
+        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet) => [0];
+
+        public string Describe(ExcelSheet sheet) => "the first column";
     }
 }

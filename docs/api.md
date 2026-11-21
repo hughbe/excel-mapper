@@ -84,7 +84,7 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 | `[ExcelColumnLetter("C")]` | Map to column by Excel letter |
 | `[ExcelColumnIndices(0, 1)]` | Try multiple column indices |
 | `[ExcelColumnMatching(@"regex", options)]` | Match columns by pattern |
-| `[ExcelColumnsMatching(typeof(Matcher))]` | Custom column matching |
+| `[ExcelColumnsMatching(typeof(Matcher))]` | Custom column matching (`IColumnSelector` or `IExcelColumnMatcher`) |
 | `[ExcelOptional]` | Don't throw if column missing |
 | `[ExcelIgnore]` | Exclude from mapping |
 | `[ExcelRowNumber]` | Set to the one-based row number instead of reading a column |
@@ -117,6 +117,7 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 - `.WithColumnNameMatching(predicate)` / `.WithColumnNameMatching(regex)` - Use predicate or regular expression
 - `.WithColumnMatching(matcher)` - Custom matcher
 - `.WithColumnsMatching(predicate | regex | matcher)` - All matching columns (collections and dictionaries)
+- `.WithColumns(IColumnSelector)` - Columns chosen by a selector
 
 **Behavior:**
 - `.MakeOptional()` - Don't throw if missing
@@ -148,6 +149,7 @@ Implement these for advanced customization:
 - `ICellConverter<T>` - Convert a cell's value (`CellValue`, with `CellContext`) to `T`, returning a `CellConversionResult<T>`
 - `ICellTransformer` (in the `ExcelMapper` namespace) - Change a cell's value (`CellValue`) before it's converted
 - `ICellFallback<T>` - Give the value of an empty or invalid cell
+- `IColumnSelector` - Choose the columns a member is read from, once for each sheet
 - `ICellMapper` - Custom type conversion logic
 - `ICellTransformer` - Transform string values before mapping
 - `IFallbackItem` - Custom fallback behavior

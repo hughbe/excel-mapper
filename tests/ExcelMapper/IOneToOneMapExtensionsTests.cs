@@ -226,6 +226,29 @@ public class IOneToOneMapExtensionsTests
     }
 
     [Fact]
+    public void WithColumns_Invoke_SetsReaderFactory()
+    {
+        var map = new CustomOneToOneMap().MakeOptional();
+        Assert.Same(map, map.WithColumns(new FirstColumnSelector()));
+        Assert.NotNull(map.ReaderFactory);
+        Assert.True(map.Optional);
+    }
+
+    [Fact]
+    public void WithColumns_NullSelector_ThrowsArgumentNullException()
+    {
+        var map = new CustomOneToOneMap();
+        Assert.Throws<ArgumentNullException>("selector", () => map.WithColumns(null!));
+    }
+
+    private sealed class FirstColumnSelector : IColumnSelector
+    {
+        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet) => [0];
+
+        public string Describe(ExcelSheet sheet) => "the first column";
+    }
+
+    [Fact]
     public void WithReaderFactory_NullReader_ThrowsArgumentNullException()
     {
         var map = new CustomOneToOneMap();

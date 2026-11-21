@@ -101,6 +101,20 @@ public static class IManyToOneMapExtensions
     }
 
     /// <summary>
+    /// Reads the collection or dictionary from the columns <paramref name="selector"/> chooses for each sheet, in order.
+    /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="selector">The column selector.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static TMap WithColumns<TMap>(this TMap map, IColumnSelector selector) where TMap : IManyToOneMap
+    {
+        ThrowHelpers.ThrowIfNull(selector, nameof(selector));
+        map.ReaderFactory = new ColumnSelectorReaderFactory(selector);
+        return map;
+    }
+
+    /// <summary>
     /// Sets the reader of the map to use a custom cell values reader.
     /// </summary>
     /// <typeparam name="TMap">The type of the map.</typeparam>

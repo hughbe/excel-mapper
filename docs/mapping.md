@@ -189,28 +189,43 @@ public class Employee
 }
 ```
 
-For advanced matching logic, implement `IExcelColumnMatcher`:
+For full control over which columns are read, implement `IColumnSelector`. It's called once for each sheet, and returns the positions of the columns to read (as `ExcelHeading.GetColumnIndex` gives them):
 
 ```csharp
-public class StartsWithMatcher : IExcelColumnMatcher
+public class PrefixSelector : IColumnSelector
 {
     private readonly string _prefix;
 
-    public StartsWithMatcher(string prefix)
-    {
-        _prefix = prefix;
-    }
+    public PrefixSelector(string prefix) => _prefix = prefix;
 
-    public bool IsMatch(string columnName) => columnName.StartsWith(_prefix);
+    public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
+        => sheet.Heading!.ColumnNames
+            .Where(name => name.StartsWith(_prefix))
+            .Select(sheet.Heading.GetColumnIndex)
+            .ToArray();
+
+    // Used in error messages, such as: Could not read value for member "Bonuses" for columns starting with "Bonus_".
+    public string Describe(ExcelSheet sheet) => $"columns starting with \"{_prefix}\"";
 }
 
 public class Employee
 {
-    // Use custom matcher to match columns starting with "Bonus_"
-    [ExcelColumnsMatching(typeof(StartsWithMatcher), ConstructorArguments = new object[] { "Bonus_" })]
-    public decimal TotalBonus { get; set; }
+    // A single value is read from the first column chosen.
+    [ExcelColumnMatching(typeof(PrefixSelector), ConstructorArguments = new object[] { "Salary" })]
+    public decimal Salary { get; set; }
+
+    // A collection or dictionary is read from every column chosen, in order.
+    [ExcelColumnsMatching(typeof(PrefixSelector), ConstructorArguments = new object[] { "Bonus_" })]
+    public decimal[] Bonuses { get; set; }
 }
+
+// Or with the fluent API
+Map(e => e.Bonuses).WithColumns(new PrefixSelector("Bonus_"));
 ```
+
+- **No columns:** if no column is chosen, the member is missing, as for a column name that isn't found. That throws unless the member is optional.
+- **Regions:** when reading a [region](reading.md#reading-part-of-a-sheet), chosen columns outside it are ignored.
+- **The older `IExcelColumnMatcher`** (`bool IsMatch(string columnName)`) is still accepted by the attributes and `WithColumnMatching`/`WithColumnsMatching`.
 
 #### Column Index Mapping
 

@@ -115,6 +115,11 @@ public class ExcelMappingException : Exception
 
     private static ExcelMappingException CreateForNoSuchColumnCore(ExcelSheet sheet, int rowIndex, object readerFactory, MemberInfo? member)
     {
+        if (readerFactory is Readers.ColumnSelectorReaderFactory selectorFactory)
+        {
+            return new ExcelMappingException($"Could not read value for member \"{member?.Name}\" for {selectorFactory.Selector.Describe(sheet)}", sheet, rowIndex, -1);
+        }
+
         if (readerFactory is IColumnNameProviderCellReaderFactory columnNameProvider)
         {
             var columnName = columnNameProvider.GetColumnName(sheet);

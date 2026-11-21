@@ -41,8 +41,10 @@ internal static class MemberMapper
         var columnNameMatchingAttribute = MemberAttributes.Get<ExcelColumnMatchingAttribute>(member);
         if (columnNameMatchingAttribute != null)
         {
-            var matcher = (IExcelColumnMatcher)Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments)!;
-            return new ColumnsMatchingReaderFactory(matcher);
+            var matcher = Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments)!;
+            return matcher is IColumnSelector selector
+                ? new ColumnSelectorReaderFactory(selector)
+                : new ColumnsMatchingReaderFactory((IExcelColumnMatcher)matcher);
         }
 
         var columnIndexAttributes = MemberAttributes.GetMany<ExcelColumnIndexAttribute>(member);
@@ -117,8 +119,10 @@ internal static class MemberMapper
         var columnNameMatchingAttribute = MemberAttributes.Get<ExcelColumnsMatchingAttribute>(member);
         if (columnNameMatchingAttribute != null)
         {
-            var matcher = (IExcelColumnMatcher)Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments)!;
-            return new ColumnsMatchingReaderFactory(matcher);
+            var matcher = Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments)!;
+            return matcher is IColumnSelector selector
+                ? new ColumnSelectorReaderFactory(selector)
+                : new ColumnsMatchingReaderFactory((IExcelColumnMatcher)matcher);
         }
 
         // [ExcelColumnIndices] attributes represents multiple columns.
