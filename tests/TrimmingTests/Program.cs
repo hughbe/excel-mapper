@@ -31,6 +31,16 @@ Check("Dictionary", () => string.Join(",", ExcelImporter.ReadRows<Dictionary<str
 
 Check("Enum", () => ExcelImporter.ReadRows<Scheduled>(Csv("Day\nMonday\n"), ExcelImporterFileType.Csv).Single().Day.ToString(), "Monday");
 
+Check("Enum description", () => ExcelImporter.ReadRows<Sized>(Csv("Size\nLarge\n"), ExcelImporterFileType.Csv).Single().Size.ToString(), "L");
+
+Check("Nullable numbers", () =>
+{
+    var row = ExcelImporter.ReadRows<Counted>(Csv("Count,Amount\n,2.5\n"), ExcelImporterFileType.Csv).Single();
+    return $"{row.Count?.ToString() ?? "null"}/{row.Amount}";
+}, "null/2.5");
+
+Check("Parsable", () => ExcelImporter.ReadRows<Parsed>(Csv("Code\nab\n"), ExcelImporterFileType.Csv).Single().Code.Value, "AB");
+
 Check("Region", () =>
 {
     using var importer = new ExcelImporter(Csv("Title,,,\n,Ref,Amount,\n,X,10,\n"), ExcelImporterFileType.Csv);
@@ -72,6 +82,8 @@ void Check(string name, Func<string> run, string expected)
 }
 
 [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties, typeof(Address))]
+// Member types that are mapped by their interfaces (here IParsable<T>) need their interfaces kept.
+[DynamicDependency(DynamicallyAccessedMemberTypes.Interfaces | DynamicallyAccessedMemberTypes.PublicMethods, typeof(Code))]
 static void KeepNestedTypes()
 {
 }
@@ -115,4 +127,41 @@ public class Customer
 public class Address
 {
     public string? Street { get; set; }
+}
+
+public enum Size
+{
+    [System.ComponentModel.Description("Small")]
+    S,
+    [System.ComponentModel.Description("Large")]
+    L,
+}
+
+public class Sized
+{
+    public Size Size { get; set; }
+}
+
+public class Counted
+{
+    public int? Count { get; set; }
+    public decimal Amount { get; set; }
+}
+
+public class Parsed
+{
+    public Code Code { get; set; }
+}
+
+public readonly struct Code(string value) : IParsable<Code>
+{
+    public string Value { get; } = value;
+
+    public static Code Parse(string s, IFormatProvider? provider) => new(s.ToUpperInvariant());
+
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out Code result)
+    {
+        result = s is null ? default : new Code(s.ToUpperInvariant());
+        return s is not null;
+    }
 }

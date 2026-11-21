@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.Collections.Concurrent;
+using System.Collections;
 using System.Collections.Frozen;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
@@ -176,61 +177,100 @@ public static class AutoMapper
 
             // If enum values have a DescriptionAttribute, create a mapping dictionary for those
             // string values.
-            var descriptions = type.GetFields(BindingFlags.Public | BindingFlags.Static)
-                .Select(f => new
-                {
-                    Field = f,
-                    DescriptionAttribute = f.GetCustomAttribute<DescriptionAttribute>()
-                })
-                .Where(x => x.DescriptionAttribute != null && !string.IsNullOrEmpty(x.DescriptionAttribute.Description))
-                .ToDictionary(
-                    x => x.DescriptionAttribute!.Description,
-                    x => (T)x.Field.GetValue(null)!);
-            if (descriptions.Count > 0)
+            if (!s_enumDescriptions.TryGetValue(typeof(T), out var cachedDescriptions))
             {
+                cachedDescriptions = s_enumDescriptions.GetOrAdd(typeof(T), GetEnumDescriptions<T>(type));
+            }
+
+            var descriptions = (Dictionary<string, T>?)cachedDescriptions;
+            if (descriptions is not null)
+            {
+                // The mapper copies the dictionary.
                 mappers.Add(new MappingDictionaryMapper<T>(descriptions, null, MappingDictionaryMapperBehavior.Optional));
             }
 
             return true;
         }
-        // Check for types implementing interfaces.
-        else if (CanConstructObject(type))
+
+        // Other types, such as numbers and IConvertible or IParsable types: the mapper to create
+        // depends only on the type, so it's found once per type.
+        if (s_mapperFactories.GetOrAdd(type, static t => CreateMapperFactory(t)) is { } createMapper)
         {
-            // Check for types implementing INumberBase<T>.
-#if NET7_0_OR_GREATER
-            if (type.ImplementsGenericInterface(typeof(INumberBase<>), out var numberBaseInterfaceType))
-            {
-                // Number value types (all the built-in ones) also convert nullable members without boxing.
-                var mapperType = numberBaseInterfaceType.IsValueType ? typeof(StructNumberMapper<>) : typeof(INumberBaseMapper<>);
-                mappers.Add((ICellMapper)Activator.CreateInstance(mapperType.MakeGenericType(numberBaseInterfaceType))!);
-                return true;
-            }
-#else
-            // The netstandard builds don't have INumberBase<T>, so built-in numeric types use a
-            // mapper that behaves the same way (including number styles and format providers).
-            if (NumberMapper.IsSupportedType(type))
-            {
-                mappers.Add(NumberMapper.Create(type));
-                return true;
-            }
-#endif
-            // Check for types implementing IConvertible.
-            if (type.ImplementsInterface(typeof(IConvertible)))
-            {
-                mappers.Add(new ChangeTypeMapper(type));
-                return true;
-            }
-            // Check for types implementing IParsable<T>.
-#if NET7_0_OR_GREATER
-            else if (type.ImplementsGenericInterface(typeof(IParsable<>), out var parsableInterfaceType))
-            {
-                mappers.Add((ICellMapper)Activator.CreateInstance(typeof(ParsableMapper<>).MakeGenericType(parsableInterfaceType))!);
-                return true;
-            }
-#endif
+            mappers.Add(createMapper());
+            return true;
         }
 
         return false;
+    }
+
+    // The values of each enum type (or nullable enum type) with a DescriptionAttribute, as a
+    // Dictionary<string, T>, or null if there are none.
+    private static readonly ConcurrentDictionary<Type, object?> s_enumDescriptions = new();
+
+    private static Dictionary<string, T>? GetEnumDescriptions<T>(Type enumType)
+    {
+        var descriptions = enumType.GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Select(f => new
+            {
+                Field = f,
+                DescriptionAttribute = f.GetCustomAttribute<DescriptionAttribute>()
+            })
+            .Where(x => x.DescriptionAttribute != null && !string.IsNullOrEmpty(x.DescriptionAttribute.Description))
+            .ToDictionary(
+                x => x.DescriptionAttribute!.Description,
+                x => (T)x.Field.GetValue(null)!);
+        return descriptions.Count > 0 ? descriptions : null;
+    }
+
+    // For each type, a function that creates its mapper, or null if there isn't a well-known one.
+    private static readonly ConcurrentDictionary<Type, Func<ICellMapper>?> s_mapperFactories = new();
+
+#if NET7_0_OR_GREATER
+    // The mapper types are created by the returned functions, so the trimmer can't see that their
+    // constructors are needed.
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(StructNumberMapper<>))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(INumberBaseMapper<>))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(ParsableMapper<>))]
+#endif
+    private static Func<ICellMapper>? CreateMapperFactory(Type type)
+    {
+        if (!CanConstructObject(type))
+        {
+            return null;
+        }
+
+        // Check for types implementing INumberBase<T>.
+#if NET7_0_OR_GREATER
+        if (type.ImplementsGenericInterface(typeof(INumberBase<>), out var numberBaseInterfaceType))
+        {
+            // Number value types (all the built-in ones) also convert nullable members without boxing.
+            var mapperType = (numberBaseInterfaceType.IsValueType ? typeof(StructNumberMapper<>) : typeof(INumberBaseMapper<>)).MakeGenericType(numberBaseInterfaceType);
+            return () => (ICellMapper)Activator.CreateInstance(mapperType)!;
+        }
+#else
+        // The netstandard builds don't have INumberBase<T>, so built-in numeric types use a
+        // mapper that behaves the same way (including number styles and format providers).
+        if (NumberMapper.IsSupportedType(type))
+        {
+            return () => NumberMapper.Create(type);
+        }
+#endif
+        // Check for types implementing IConvertible.
+        if (type.ImplementsInterface(typeof(IConvertible)))
+        {
+            return () => new ChangeTypeMapper(type);
+        }
+
+#if NET7_0_OR_GREATER
+        // Check for types implementing IParsable<T>.
+        if (type.ImplementsGenericInterface(typeof(IParsable<>), out var parsableInterfaceType))
+        {
+            var mapperType = typeof(ParsableMapper<>).MakeGenericType(parsableInterfaceType);
+            return () => (ICellMapper)Activator.CreateInstance(mapperType)!;
+        }
+#endif
+
+        return null;
     }
 
     private static IFallbackItem CreateEmptyFallback<T>(FallbackStrategy emptyValueStrategy)
@@ -875,13 +915,13 @@ public static class AutoMapper
         [NotNullWhen(false)] out ExcelClassMap<T>? classMap)
     {
         // Ignore members with ExcelIgnoreAttribute.
-        if (Attribute.IsDefined(member, typeof(ExcelIgnoreAttribute)))
+        if (MemberAttributes.IsDefined<ExcelIgnoreAttribute>(member))
         {
             classMap = null;
             return true; // Continue processing other members
         }
 
-        if (Attribute.IsDefined(member, typeof(ExcelRowNumberAttribute)))
+        if (MemberAttributes.IsDefined<ExcelRowNumberAttribute>(member))
         {
             if (!RowNumberMap.IsSupportedType(memberType))
             {
@@ -893,7 +933,7 @@ public static class AutoMapper
             return true;
         }
 
-        if (Attribute.IsDefined(member, typeof(ExcelExtraColumnsAttribute)))
+        if (MemberAttributes.IsDefined<ExcelExtraColumnsAttribute>(member))
         {
             if (!TryGetDictionaryKeyValueType(memberType, out var keyType, out var valueType) ||
                 keyType != typeof(string) ||
@@ -909,17 +949,13 @@ public static class AutoMapper
         }
 
         // Infer the mapping for each member (property/field) belonging to the type.
-        var method = TryAutoMapMemberMethod.MakeGenericMethod(memberType);
-        var parameters = new object?[] { member, emptyValueStrategy, typeStack, null };
-        var result = (bool)method.InvokeUnwrapped(null, parameters)!;
-        if (!result)
+        if (!GetTryAutoMapMember(memberType)(member, emptyValueStrategy, typeStack, out var memberMap))
         {
             classMap = null!;
             return false;
         }
 
-        // Get the out parameter representing the map for the member.
-        map.Properties.Add(new ExcelPropertyMap(member, (IMap)parameters[3]!));
+        map.Properties.Add(new ExcelPropertyMap(member, memberMap));
         classMap = null;
         return true;
     }
@@ -1102,6 +1138,15 @@ public static class AutoMapper
         () => typeof(AutoMapper).GetMethod(nameof(TryAutoMapMember), BindingFlags.NonPublic | BindingFlags.Static)!,
         LazyThreadSafetyMode.PublicationOnly);
     private static MethodInfo TryAutoMapMemberMethod => s_tryAutoMapMemberMethod.Value;
+
+    private delegate bool TryAutoMapMemberDelegate(MemberInfo member, FallbackStrategy emptyValueStrategy, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map);
+
+    // TryAutoMapMember for each member type, so that auto-mapping a type doesn't create and invoke a
+    // generic method for every member.
+    private static readonly ConcurrentDictionary<Type, TryAutoMapMemberDelegate> s_tryAutoMapMember = new();
+
+    private static TryAutoMapMemberDelegate GetTryAutoMapMember(Type memberType)
+        => s_tryAutoMapMember.GetOrAdd(memberType, static t => (TryAutoMapMemberDelegate)TryAutoMapMemberMethod.MakeGenericMethod(t).CreateDelegate(typeof(TryAutoMapMemberDelegate)));
 
     /// <summary>
     /// Creates a map to assign a value to a specific member.

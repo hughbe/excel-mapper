@@ -35,6 +35,10 @@ internal static class EnumMappers
     /// </summary>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+#if NET5_0_OR_GREATER
+    // The mapper type is cached, so the trimmer can't see it's created here.
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(EnumMapper<>))]
+#endif
     public static EnumMapper Create(Type enumType, bool ignoreCase)
     {
         if (!enumType.IsEnum)
@@ -44,6 +48,10 @@ internal static class EnumMappers
         }
 
         // Pass the argument as an array: on netstandard2.0, a bool binds to CreateInstance(Type, bool nonPublic).
-        return (EnumMapper)Activator.CreateInstance(typeof(EnumMapper<>).MakeGenericType(enumType), [ignoreCase])!;
+        var mapperType = s_mapperTypes.GetOrAdd(enumType, static t => typeof(EnumMapper<>).MakeGenericType(t));
+        return (EnumMapper)Activator.CreateInstance(mapperType, [ignoreCase])!;
     }
+
+    // EnumMapper<TEnum> for each enum type, so that it's created once.
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, Type> s_mapperTypes = new();
 }
