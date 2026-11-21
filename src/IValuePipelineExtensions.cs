@@ -191,6 +191,34 @@ public static class IValuePipelineExtensions
     }
 
     /// <summary>
+    /// Specifies the offset from UTC given to cells that Excel stores as dates. Excel dates have no
+    /// time zone, so by default the machine's local offset is used. Use <see cref="TimeSpan.Zero"/> for UTC.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="offset">The offset, a whole number of minutes between -14 and +14 hours.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<DateTimeOffset> WithOffset(this IValuePipeline<DateTimeOffset> map, TimeSpan offset)
+    {
+        ThrowHelpers.ThrowIfNull(map, nameof(map));
+        map.GetOrAddMapper<DateTimeOffsetMapper>().Offset = offset;
+        return map;
+    }
+
+    /// <summary>
+    /// Specifies the offset from UTC given to cells that Excel stores as dates. Excel dates have no
+    /// time zone, so by default the machine's local offset is used. Use <see cref="TimeSpan.Zero"/> for UTC.
+    /// </summary>
+    /// <param name="map">The map to use.</param>
+    /// <param name="offset">The offset, a whole number of minutes between -14 and +14 hours.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<DateTimeOffset?> WithOffset(this IValuePipeline<DateTimeOffset?> map, TimeSpan offset)
+    {
+        ThrowHelpers.ThrowIfNull(map, nameof(map));
+        map.GetOrAddMapper<DateTimeOffsetMapper>().Offset = offset;
+        return map;
+    }
+
+    /// <summary>
     /// Specifies formats used when mapping the value of a cell to a DateTimeOffset. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
