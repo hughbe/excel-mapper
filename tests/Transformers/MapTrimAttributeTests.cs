@@ -56,7 +56,7 @@ public class MapTrimAttributeTests
         importer.Configuration.RegisterClassMap<StringTrimValue>(c =>
         {
             c.Map(o => o.Value)
-                .WithTransformers([]);
+                .WithTransformers(Array.Empty<ICellTransformer>());
         });
 
         var sheet = importer.ReadSheet();

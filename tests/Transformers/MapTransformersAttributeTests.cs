@@ -58,7 +58,7 @@ public class MapTransformersAttributeTests
         importer.Configuration.RegisterClassMap<StringValue>(c =>
         {
             c.Map(o => o.Value)
-                .WithTransformers([]);
+                .WithTransformers(Array.Empty<ICellTransformer>());
         });
 
         var sheet = importer.ReadSheet();
@@ -81,7 +81,7 @@ public class MapTransformersAttributeTests
         public string Value { get; set; } = default!;
     }
 
-    private class UpperStringCellTransformer : ICellTransformer
+    private class UpperStringCellTransformer : Abstractions.ICellTransformer
     {
         public bool _isTrimmed;
 

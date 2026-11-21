@@ -39,6 +39,12 @@ Check("Cell converter", () =>
     return $"{row.Amount}/{row.Maybe}";
 }, "2000/3000");
 
+Check("Cell transformer and fallback", () =>
+{
+    var rows = ExcelImporter.ReadRows<Cleaned>(Csv("Code,Count\nab,x\n"), ExcelImporterFileType.Csv).Single();
+    return $"{rows.Code}/{rows.Count}";
+}, "AB/-1");
+
 Check("Nullable numbers", () =>
 {
     var row = ExcelImporter.ReadRows<Counted>(Csv("Count,Amount\n,2.5\n"), ExcelImporterFileType.Csv).Single();
@@ -187,4 +193,23 @@ public class ThousandsConverter : ICellConverter<int>
         => value.Text is { } text && text.EndsWith('k') && int.TryParse(text[..^1], out var thousands)
             ? CellConversionResult<int>.Success(thousands * 1000)
             : CellConversionResult<int>.Invalid();
+}
+
+public class Cleaned
+{
+    [ExcelTransformer(typeof(UpperTransformer))]
+    public string? Code { get; set; }
+
+    [ExcelInvalidFallback(typeof(MinusOneFallback))]
+    public int? Count { get; set; }
+}
+
+public class UpperTransformer : ICellTransformer
+{
+    public CellValue Transform(CellValue value, CellContext context) => new(value.Text?.ToUpperInvariant());
+}
+
+public class MinusOneFallback : ICellFallback<int>
+{
+    public int Fallback(CellValue value, CellContext context, Exception? exception) => -1;
 }

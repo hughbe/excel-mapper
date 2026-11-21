@@ -750,38 +750,48 @@ catch (ValidationException ex)
 
 #### Advanced Fallback Strategies
 
-For more complex fallback scenarios, use `IFallbackItem` types:
+To compute the value of an empty or invalid cell, implement `ICellFallback<T>` and set it with `[ExcelEmptyFallback]`/`[ExcelInvalidFallback]` or `.WithEmptyFallback(fallback)`/`.WithInvalidFallback(fallback)`:
 
 ```csharp
-public class ThrowFallbackItem : IFallbackItem
+public class AgeFromBirthYearFallback : ICellFallback<int>
 {
-    public object? PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member)
+    public int Fallback(CellValue value, CellContext context, Exception? exception)
     {
-        throw new InvalidOperationException("Custom error message");
+        // Text such as "born 1990" isn't a number: work out the age instead.
+        if (value.Text is { } text && text.StartsWith("born ") && int.TryParse(text[5..], out var year))
+        {
+            return DateTime.Today.Year - year;
+        }
+
+        // Throw to report the cell as an error, as the default invalid fallback does.
+        throw new ExcelMappingException($"Invalid age \"{value.Text}\".", context.Sheet, context.RowIndex, context.ColumnIndex, exception);
     }
+}
+
+public class UnknownYearsFallback(int value) : ICellFallback<int>
+{
+    public int Fallback(CellValue cell, CellContext context, Exception? exception) => value;
 }
 
 public class Employee
 {
     public string Name { get; set; }
 
-    // Throw custom exception when cell is empty
-    [ExcelEmptyFallback(typeof(ThrowFallbackItem))]
+    [ExcelInvalidFallback(typeof(AgeFromBirthYearFallback))]
     public int Age { get; set; }
 
-    // Use fallback with constructor arguments when value is invalid
-    [ExcelInvalidFallback(typeof(DefaultFallbackItem), ConstructorArguments = new object[] { -1 })]
-    public int YearsOfService { get; set; }
+    // A fallback for T also works for T? members.
+    [ExcelEmptyFallback(typeof(UnknownYearsFallback), ConstructorArguments = new object[] { -1 })]
+    public int? YearsOfService { get; set; }
 }
 ```
 
-**Available Fallback Attributes:**
-- `[ExcelEmptyFallback(Type)]` - Handles empty cells using custom `IFallbackItem`
-- `[ExcelInvalidFallback(Type)]` - Handles invalid/unparseable values using custom `IFallbackItem`
+- **`value`** is the cell's value after any transformers, and **`context`** says where the cell is (see [Custom Converters](#custom-converters)).
+- **`exception`** is why the value is invalid, if known. It's null for empty cells.
+- **Throwing** reports the cell as an error: `ReadRowResults` records an `ExcelMappingException` rather than throwing it.
+- **Both attributes** support `ConstructorArguments`, and also accept the older `IFallbackItem` types.
 
-Both attributes support `ConstructorArguments` property to pass parameters to the fallback item constructor.
-
-#### Custom Converters
+#### Custom Converters#### Custom Converters
 
 To convert cells yourself, implement `ICellConverter<T>` and set it with `[ExcelConverter]` or `.WithConverter(converter)`. The converter replaces the built-in conversion for the member's type:
 
@@ -835,15 +845,24 @@ Map(o => o.Quantity).WithConverter(new ThousandsConverter());
 
 #### Custom Cell Transformers
 
-Transform cell values before mapping using custom transformers:
+Change cell values before they're converted with `ICellTransformer`, set with `[ExcelTransformer]` or `.WithTransformers(...)`:
 
 ```csharp
 public class UpperCaseTransformer : ICellTransformer
 {
-    public string? TransformStringValue(ExcelSheet sheet, int rowIndex, ReadCellResult readResult)
-    {
-        return readResult.StringValue?.ToUpperInvariant();
-    }
+    public CellValue Transform(CellValue value, CellContext context)
+        => value.Kind == CellKind.Text ? new CellValue(value.Text!.ToUpperInvariant()) : value;
+}
+
+// A transformer can also return a typed value: "1 234,5" becomes the number 1234.5.
+public class FrenchNumberTransformer : ICellTransformer
+{
+    private static readonly CultureInfo s_french = CultureInfo.GetCultureInfo("fr-FR");
+
+    public CellValue Transform(CellValue value, CellContext context)
+        => value.Kind == CellKind.Text && double.TryParse(value.Text, NumberStyles.Number, s_french, out var number)
+            ? new CellValue(number)
+            : value;
 }
 
 public class Employee
@@ -851,15 +870,20 @@ public class Employee
     [ExcelTransformer(typeof(UpperCaseTransformer))]
     public string Name { get; set; }  // "ALICE JOHNSON"
 
-    // Use built-in trimming transformer
-    [ExcelTransformer(typeof(TrimStringCellTransformer))]
-    public string Department { get; set; }
+    [ExcelTrimString]
+    [ExcelTransformer(typeof(FrenchNumberTransformer))]
+    public double Salary { get; set; }
 }
+
+// Or with the fluent API
+Map(e => e.Name).WithTransformers(new UpperCaseTransformer());
 ```
 
-The `ExcelTransformerAttribute` accepts any type implementing `ICellTransformer` and supports `ConstructorArguments` for parameterized transformers.
+- **Order:** transformers run in order, before the empty check, so a transformer that returns an empty value (`new CellValue((string?)null)`) makes the cell use the empty fallback.
+- **Return values:** return `value` to leave a cell unchanged, or a new `CellValue` holding text, a number, a boolean, a date or a duration.
+- **`[ExcelTransformer]`** supports `ConstructorArguments`, and also accepts the older `Abstractions.ICellTransformer` types.
 
-#### Value Mapping with Attributes
+#### Value Mapping with Attributes#### Value Mapping with Attributes
 
 Map string cell values to specific enum or object values using attributes:
 

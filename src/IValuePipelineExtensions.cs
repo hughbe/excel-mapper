@@ -35,15 +35,32 @@ public static class IValuePipelineExtensions
     }
 
     /// <summary>
-    /// Specifies additional custom transformers that will be used to map the value of a cell to
-    /// a property or field.
+    /// Transforms cells with <paramref name="transformers"/>, in order, before they're converted.
+    /// The transformers replace the map's existing transformers.
     /// </summary>
     /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
-    /// <param name="transformers">A list of additional custom transformers that will be used to map the value of a cell to a property or field</param>
+    /// <param name="transformers">The transformers.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithTransformers<TMap>(this TMap map, params ICellTransformer[] transformers) where TMap : IValuePipeline
-        => map.WithTransformers((IEnumerable<ICellTransformer>)transformers);
+    {
+        ThrowHelpers.ThrowIfNull(transformers, nameof(transformers));
+        foreach (var transformer in transformers)
+        {
+            if (transformer == null)
+            {
+                throw new ArgumentException("Transformers cannot contain null values.", nameof(transformers));
+            }
+        }
+
+        map.Transformers.Clear();
+        foreach (var transformer in transformers)
+        {
+            map.Transformers.Add(new CellTransformerAdapter(transformer));
+        }
+
+        return map;
+    }
 
     /// <summary>
     /// Specifies additional custom transformers that will be used to map the value of a cell to
@@ -53,7 +70,18 @@ public static class IValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="transformers">A list of additional custom transformers that will be used to map the value of a cell to a property or field</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithTransformers<TMap>(this TMap map, params IEnumerable<ICellTransformer> transformers) where TMap : IValuePipeline
+    public static TMap WithTransformers<TMap>(this TMap map, params Abstractions.ICellTransformer[] transformers) where TMap : IValuePipeline
+        => map.WithTransformers((IEnumerable<Abstractions.ICellTransformer>)transformers);
+
+    /// <summary>
+    /// Specifies additional custom transformers that will be used to map the value of a cell to
+    /// a property or field.
+    /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="transformers">A list of additional custom transformers that will be used to map the value of a cell to a property or field</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static TMap WithTransformers<TMap>(this TMap map, params IEnumerable<Abstractions.ICellTransformer> transformers) where TMap : IValuePipeline
     {
         ThrowHelpers.ThrowIfNull(transformers, nameof(transformers));
 
@@ -802,6 +830,36 @@ public static class IValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithEmptyFallback<TMap>(this TMap map, object? fallbackValue) where TMap : IValuePipeline
         => map.WithEmptyFallbackItem(new FixedValueFallback(fallbackValue));
+
+    /// <summary>
+    /// Gives empty cells the value <paramref name="fallback"/> returns.
+    /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
+    /// <typeparam name="TValue">The type of the property or field that the map represents.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="fallback">The fallback.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static TMap WithEmptyFallback<TMap, TValue>(this TMap map, ICellFallback<TValue> fallback) where TMap : IValuePipeline<TValue>
+    {
+        ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
+        map.EmptyFallback = new CellFallbackItem<TValue>(fallback);
+        return map;
+    }
+
+    /// <summary>
+    /// Gives invalid cells the value <paramref name="fallback"/> returns.
+    /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
+    /// <typeparam name="TValue">The type of the property or field that the map represents.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="fallback">The fallback.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static TMap WithInvalidFallback<TMap, TValue>(this TMap map, ICellFallback<TValue> fallback) where TMap : IValuePipeline<TValue>
+    {
+        ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
+        map.InvalidFallback = new CellFallbackItem<TValue>(fallback);
+        return map;
+    }
 
     /// <summary>
     /// Specifies a custom fallback to be used if the value of a cell is empty.

@@ -56,7 +56,7 @@ public class MapWithTransformersTests
         public string Value { get; set; } = default!;
     }
 
-    private class UpperStringCellTransformer : ICellTransformer
+    private class UpperStringCellTransformer : Abstractions.ICellTransformer
     {
         public bool _isTrimmed;
 
