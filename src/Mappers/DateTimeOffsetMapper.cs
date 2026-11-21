@@ -33,6 +33,45 @@ public class DateTimeOffsetMapper : IFormatsCellMapper
     /// </summary>
     public DateTimeStyles Style { get; set; }
 
+    private TimeSpan? _offset;
+
+    /// <summary>
+    /// Gets or sets the offset from UTC given to cells that Excel stores as dates. Excel dates have no
+    /// time zone, so when this is null (the default) the machine's local offset is used, which makes
+    /// results depend on where the code runs. Set to <see cref="TimeSpan.Zero"/> for UTC. Text with
+    /// an explicit offset (for example a "zzz" format) keeps that offset.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">The offset is not a whole number of minutes
+    /// between -14 and +14 hours.</exception>
+    public TimeSpan? Offset
+    {
+        get => _offset;
+        set
+        {
+            if (value is { } offset && (offset.Ticks % TimeSpan.TicksPerMinute != 0 || offset < TimeSpan.FromHours(-14) || offset > TimeSpan.FromHours(14)))
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), offset, "The offset must be a whole number of minutes between -14 and +14 hours.");
+            }
+
+            _offset = value;
+        }
+    }
+
+    private CellMapperResult CreateResult(DateTime dateTime)
+    {
+        try
+        {
+            return CellMapperResult.Success(Offset is { } offset
+                ? new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Unspecified), offset)
+                : new DateTimeOffset(dateTime));
+        }
+        catch (ArgumentOutOfRangeException exception)
+        {
+            // For example, the earliest dates with a positive offset.
+            return CellMapperResult.Invalid(exception);
+        }
+    }
+
     /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult readResult)
     {
@@ -40,13 +79,13 @@ public class DateTimeOffsetMapper : IFormatsCellMapper
         // ExcelDataReader automatically converts these cells to DateTimeOffset.
         if (readResult.GetValue() is DateTime dateTimeOffsetValue)
         {
-            return CellMapperResult.Success(new DateTimeOffset(dateTimeOffsetValue));
+            return CreateResult(dateTimeOffsetValue);
         }
 
         // A number in a cell without a date format is Excel's serial date (days since 1899-12-30).
         if (ExcelDateUtilities.TryGetDateTime(readResult.GetValue(), out var serialDate))
         {
-            return CellMapperResult.Success(new DateTimeOffset(serialDate));
+            return CreateResult(serialDate);
         }
         
         var stringValue = readResult.GetString();

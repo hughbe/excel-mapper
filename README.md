@@ -2360,7 +2360,7 @@ The importer itself, and each sheet, should still be used by one thread at a tim
 ExcelMapper has comprehensive support for modern .NET date and time types:
 
 - `DateTime` - Date and time
-- `DateTimeOffset` - Date and time with an offset (cells without one use the machine's local offset)
+- `DateTimeOffset` - Date and time with an offset. Excel dates have no time zone, so by default they get the machine's local offset; use `[ExcelOffset("+00:00")]` or `.WithOffset(TimeSpan.Zero)` to choose one
 - `DateOnly` - Date without time (available in .NET 6+)
 - `TimeOnly` - Time without date (available in .NET 6+)
 - `TimeSpan` - Duration/time interval
@@ -2389,6 +2389,26 @@ public class EventMap : ExcelClassMap<Event>
     }
 }
 ```
+
+**`DateTimeOffset` offsets:**
+
+Excel stores dates without a time zone. When mapped to a `DateTimeOffset`, they get the machine's local offset by default, so the same file can give different results on different servers. Choose the offset instead:
+
+```csharp
+public class Event
+{
+    [ExcelOffset("+00:00")]          // UTC
+    public DateTimeOffset StartsAt { get; set; }
+
+    [ExcelOffset("-08:00")]
+    public DateTimeOffset? EndsAt { get; set; }
+}
+
+// Or with the fluent API
+Map(e => e.StartsAt).WithOffset(TimeSpan.Zero);
+```
+
+This applies to cells that Excel stores as dates (or as serial numbers). Text that includes an offset, parsed with a format such as `"yyyy-MM-ddTHH:mm:sszzz"`, keeps its own offset.
 
 **Culture-Specific Parsing:**
 
@@ -2854,6 +2874,7 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 | `[ExcelTrimString]` | Auto-trim whitespace |
 | `[ExcelFormats("format1", "format2")]` | Parse dates/times with specific formats |
 | `[ExcelNumberStyle(NumberStyles.AllowThousands)]` | Control numeric parsing (thousands, currency, etc.) |
+| `[ExcelOffset("+00:00")]` | Offset from UTC for `DateTimeOffset` members |
 | `[ExcelUri(UriKind.RelativeOrAbsolute)]` | Specify URI kind (Absolute, Relative, or RelativeOrAbsolute) |
 | `[ExcelSeparators(';', ',')]` | Split cell value with custom separators |
 | `[ExcelTransformer(typeof(Transformer))]` | Apply custom transformer |

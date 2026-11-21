@@ -248,6 +248,14 @@ internal static class MemberMapper
                 mapper.UriKind = uriKindAttribute.UriKind;
             }
         }
+
+        if (member.GetCustomAttribute<ExcelOffsetAttribute>() is { } offsetAttribute)
+        {
+            foreach (var mapper in pipeline.Mappers.OfType<DateTimeOffsetMapper>())
+            {
+                mapper.Offset = offsetAttribute.Offset;
+            }
+        }
     }
 
     internal static IFallbackItem? GetDefaultEmptyValueFallback(MemberInfo member)
