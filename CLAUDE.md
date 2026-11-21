@@ -35,6 +35,16 @@ The netstandard builds are used by .NET Framework and older .NET apps and take d
 - Nullable reference types are enabled.
 - Attributes live in `src/` as `Excel<Name>Attribute.cs`; mappers in `src/Mappers`, readers in `src/Readers`, factories in `src/Factories`, fallbacks in `src/Fallbacks`, internal helpers in `src/Utilities`.
 
+## Public API
+
+Everything public is permanent: package validation flags removing or changing it, and users depend on it. Keep new public surface to what users need.
+
+- Default to `internal` or `private`. Make a type or member public only when users call it, configure it, or implement or extend it, not because it's convenient for tests (tests go through the public API) or might be useful one day.
+- Don't add public `const` fields for defaults or limits. Their values are compiled into callers, so changing them later doesn't reach users until they rebuild. Use a `private const` and state the value in the docs (for example "the first 50 rows"), or, if users need to read or change it, a property or method parameter.
+- Prefer a method parameter or a setting on `ExcelImporterConfiguration` over a new public type for an option, and overloads over optional parameters (adding an optional parameter later is a breaking change).
+- Name new APIs after the existing ones (`FindHeading`/`TryFindHeading`, `ValidateHeading`/`TryValidateHeading`, `Map(...).WithX(...)`), with a `Try` variant when failing is an expected outcome.
+- Validate arguments and give actionable messages: say what was wrong and what to do instead.
+
 ## Tests
 
 Every change comes with tests, structured like the existing ones. There are two layers:

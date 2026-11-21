@@ -134,6 +134,7 @@ The package contains `net8.0`, `netstandard2.1` and `netstandard2.0` builds. If 
 Worth a look while upgrading:
 
 - [Collect every error in a file](errors.md#collecting-errors) with `ReadRowResults`, and [check columns up front](errors.md#checking-columns-before-reading) with `ValidateHeading`.
+- [Find the heading](reading.md#finding-the-heading) of sheets with titles or notes above it with `FindHeading`.
 - [Records and constructor-only types](mapping.md#records-and-constructors) map without a parameterless constructor.
 - Map by [column letter](mapping.md#column-index-mapping), choose a [culture](mapping.md#culture-for-the-whole-importer) for the whole importer, and set the [offset of `DateTimeOffset` values](types.md#date-and-time-types).
 - `ExcelImporter.ReadRows<T>("file.xlsx")` reads a file in one line.
