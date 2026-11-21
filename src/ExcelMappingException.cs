@@ -52,7 +52,12 @@ public class ExcelMappingException : Exception
     /// <param name="columnIndex">The zero-based index of the column in the sheet that is currently being read.</param>
     /// <param name="innerException">The inner exception of the exception.</param>
     public ExcelMappingException(string message, ExcelSheet sheet, int rowIndex, int columnIndex, Exception? innerException)
-        : base(GetMessage(message, sheet, rowIndex, columnIndex), innerException)
+        : this(message, sheet, rowIndex, columnIndex, innerException, hint: null)
+    {
+    }
+
+    private ExcelMappingException(string message, ExcelSheet sheet, int rowIndex, int columnIndex, Exception? innerException, string? hint)
+        : base(GetMessage(message, sheet, rowIndex, columnIndex) + hint, innerException)
     {
         Sheet = sheet;
         RowIndex = rowIndex;
@@ -87,7 +92,7 @@ public class ExcelMappingException : Exception
             var columnName = columnNameProvider.GetColumnName(sheet);
             if (!string.IsNullOrEmpty(columnName))
             {
-                return new ExcelMappingException($"Could not read value for member \"{member?.Name}\" for column \"{columnName}\"", sheet, rowIndex, -1);
+                return new ExcelMappingException($"Could not read value for member \"{member?.Name}\" for column \"{columnName}\"", sheet, rowIndex, -1, null, GetSimilarColumnHint(sheet, columnName!));
             }
         }
         if (readerFactory is IColumnIndexProviderCellReaderFactory columnIndexProvider)
@@ -114,6 +119,30 @@ public class ExcelMappingException : Exception
         }
 
         return new ExcelMappingException($"Could not read value for member \"{member?.Name}\"", sheet, rowIndex, -1);
+    }
+
+    /// <summary>
+    /// Suggests a column whose name only differs by case or by separators (spaces, underscores,
+    /// hyphens and dots), which is a common reason for a column not being found.
+    /// </summary>
+    private static string? GetSimilarColumnHint(ExcelSheet sheet, string columnName)
+    {
+        if (sheet.Heading is null || sheet.Configuration.IgnoreSeparatorsInColumnNames)
+        {
+            return null;
+        }
+
+        var normalizedName = ColumnUtilities.RemoveSeparators(columnName);
+        foreach (var candidate in sheet.Heading.ColumnNames)
+        {
+            if (!string.Equals(candidate, columnName, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(ColumnUtilities.RemoveSeparators(candidate), normalizedName, StringComparison.OrdinalIgnoreCase))
+            {
+                return $" Did you mean column \"{candidate}\"? Use ExcelColumnName or WithColumnName, or set IgnoreSeparatorsInColumnNames in the importer's configuration.";
+            }
+        }
+
+        return null;
     }
 
     private static string GetMessage(string message, ExcelSheet? sheet, int rowIndex, int columnIndex)
