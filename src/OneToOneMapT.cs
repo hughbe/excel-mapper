@@ -107,9 +107,109 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>, IBindableMap
             throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
         }
 
+        if (GetConverters() is { } converters)
+        {
+            value = Convert(converters, sheet, rowIndex, readResult, member);
+            return true;
+        }
+
         var result = ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, readResult, PreserveFormatting, member);
         value = ValuePipeline.CastValue<T>(result, sheet, rowIndex, readResult.ColumnIndex, member)!;
         return true;
+    }
+
+    private sealed class Converters(int version, ICellConverter<T>[]? items)
+    {
+        public int Version { get; } = version;
+
+        public ICellConverter<T>[]? Items { get; } = items;
+    }
+
+    private Converters? _converters;
+
+    /// <summary>
+    /// Gets the mappers as typed converters, or null if any of them isn't one (for example a custom
+    /// mapper), in which case values go through the pipeline as objects. Rebuilt when the mappers change.
+    /// </summary>
+    private ICellConverter<T>[]? GetConverters()
+    {
+        var mappers = (NonNullCollection<ICellMapper>)Pipeline.Mappers;
+        var converters = _converters;
+        if (converters is null || converters.Version != mappers.Version)
+        {
+            converters = new Converters(mappers.Version, CreateConverters(mappers));
+            _converters = converters;
+        }
+
+        return converters.Items;
+    }
+
+    private static ICellConverter<T>[]? CreateConverters(NonNullCollection<ICellMapper> mappers)
+    {
+        var converters = new ICellConverter<T>[mappers.Count];
+        for (int i = 0; i < converters.Length; i++)
+        {
+            if (mappers[i] is not ICellConverter<T> converter)
+            {
+                return null;
+            }
+
+            converters[i] = converter;
+        }
+
+        return converters;
+    }
+
+    /// <summary>
+    /// Maps a cell through the typed converters, with the same rules as
+    /// <see cref="ValuePipeline.GetPropertyValue"/>: transformers, the empty fallback, then the
+    /// converters (a success stops, a success that can be replaced and an invalid value are kept
+    /// until a later result replaces them), then the invalid fallback.
+    /// </summary>
+    private T Convert(ICellConverter<T>[] converters, ExcelSheet sheet, int rowIndex, ReadCellResult readResult, MemberInfo? member)
+    {
+        var pipeline = Pipeline;
+        readResult = ValuePipeline.ApplyTransformers(pipeline, sheet, rowIndex, readResult, PreserveFormatting);
+        if (readResult.IsEmpty() && pipeline.EmptyFallback != null)
+        {
+            return ValuePipeline.CastValue<T>(pipeline.EmptyFallback.PerformFallback(sheet, rowIndex, readResult, null, member), sheet, rowIndex, readResult.ColumnIndex, member)!;
+        }
+
+        var state = CellConversion.NotHandled;
+        T result = default!;
+        var invalidIndex = -1;
+        for (int i = 0; i < converters.Length; i++)
+        {
+            switch (converters[i].Convert(readResult, out var value))
+            {
+                case CellConversion.Success:
+                    return value;
+                case CellConversion.SuccessUnlessReplaced:
+                    state = CellConversion.SuccessUnlessReplaced;
+                    result = value;
+                    break;
+                case CellConversion.Invalid:
+                    state = CellConversion.Invalid;
+                    invalidIndex = i;
+                    break;
+            }
+        }
+
+        if (state == CellConversion.SuccessUnlessReplaced)
+        {
+            return result;
+        }
+
+        if (pipeline.InvalidFallback is { } invalidFallback)
+        {
+            // Create the exception with the mapper's own Map, only if the fallback uses it.
+            var exception = state == CellConversion.Invalid && ValuePipeline.FallbackUsesException(invalidFallback)
+                ? converters[invalidIndex].Map(readResult).Exception
+                : null;
+            return ValuePipeline.CastValue<T>(invalidFallback.PerformFallback(sheet, rowIndex, readResult, exception, member), sheet, rowIndex, readResult.ColumnIndex, member)!;
+        }
+
+        return ValuePipeline.CastValue<T>(null, sheet, rowIndex, readResult.ColumnIndex, member)!;
     }
 
     /// <summary>
@@ -129,6 +229,8 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>, IBindableMap
             throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
         }
 
+        // Constructor arguments are objects, so map through the pipeline as objects: mappers can
+        // return cached boxes (such as for bool) that the typed path would box again.
         var result = ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, readResult, PreserveFormatting, member);
         value = result is T && !ReferenceEquals(result, ThrowFallback.ErrorRecorded)
             ? result

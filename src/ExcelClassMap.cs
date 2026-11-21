@@ -325,34 +325,10 @@ public class ExcelClassMap : IMap
     }
 
     /// <summary>
-    /// A collection of property maps that tracks changes so the construction plan can be updated.
+    /// A collection of property maps. Its <see cref="NonNullCollection{T}.Version"/> tells the
+    /// construction plan and bound members to rebuild when it changes.
     /// </summary>
     private sealed class PropertyMapCollection : NonNullCollection<ExcelPropertyMap>
     {
-        public int Version { get; private set; }
-
-        protected override void InsertItem(int index, ExcelPropertyMap item)
-        {
-            base.InsertItem(index, item);
-            Version++;
-        }
-
-        protected override void SetItem(int index, ExcelPropertyMap item)
-        {
-            base.SetItem(index, item);
-            Version++;
-        }
-
-        protected override void RemoveItem(int index)
-        {
-            base.RemoveItem(index);
-            Version++;
-        }
-
-        protected override void ClearItems()
-        {
-            base.ClearItems();
-            Version++;
-        }
     }
 }

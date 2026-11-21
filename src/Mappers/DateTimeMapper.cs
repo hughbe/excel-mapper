@@ -5,7 +5,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a DateTime.
 /// </summary>
-public class DateTimeMapper : ICellMapper, IFormatsCellMapper
+public class DateTimeMapper : ICellMapper, IFormatsCellMapper, ICellConverter<DateTime>
 {
     private string[] _formats = ["G"];
 
@@ -72,6 +72,37 @@ public class DateTimeMapper : ICellMapper, IFormatsCellMapper
 
         // Only create the exception (by parsing again) if it is needed.
         return InvalidResult(stringValue, formats, provider, style);
+    }
+
+    CellConversion ICellConverter<DateTime>.Convert(ReadCellResult cell, out DateTime value)
+    {
+        var cellValue = cell.GetValue();
+        if (cellValue is DateTime dateTimeValue)
+        {
+            value = dateTimeValue;
+            return CellConversion.Success;
+        }
+
+        if (ExcelDateUtilities.TryGetDateTime(cellValue, out value))
+        {
+            return CellConversion.Success;
+        }
+
+        var stringValue = cell.GetString();
+        var provider = Provider;
+        var style = Style;
+        try
+        {
+            return DateTime.TryParseExact(stringValue, Formats, provider, style, out value) ||
+                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateTime.TryParseExact(stringValue, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, style, out value))
+                ? CellConversion.Success
+                : CellConversion.Invalid;
+        }
+        catch
+        {
+            value = default;
+            return CellConversion.Invalid;
+        }
     }
 
     // A separate method so that the closure capturing these values is only allocated for invalid
