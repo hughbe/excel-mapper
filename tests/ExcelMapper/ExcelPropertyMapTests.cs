@@ -116,4 +116,45 @@ public class PropertyMapTests
             set { }
         }
     }
+
+    [Fact]
+    public void Ctor_WritableProperty_IsReadOnlyFalse()
+    {
+        var member = typeof(ConstructorClass).GetProperty(nameof(ConstructorClass.Writable))!;
+        var map = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
+        var propertyMap = new ExcelPropertyMap(member, map);
+        Assert.False(propertyMap.IsReadOnly);
+    }
+
+    [Fact]
+    public void Ctor_GetOnlyPropertyMatchingConstructorParameter_Success()
+    {
+        var member = typeof(ConstructorClass).GetProperty(nameof(ConstructorClass.Value))!;
+        var map = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
+
+        var propertyMap = new ExcelPropertyMap(member, map);
+        Assert.Same(member, propertyMap.Member);
+        Assert.Same(map, propertyMap.Map);
+        Assert.True(propertyMap.IsReadOnly);
+
+        // The value is passed to the constructor, so it can't be set afterwards.
+        Assert.Throws<InvalidOperationException>(() => propertyMap.SetValueFactory(new ConstructorClass(1), 2));
+    }
+
+    [Fact]
+    public void Ctor_GetOnlyPropertyNotMatchingConstructorParameter_ThrowsArgumentException()
+    {
+        var member = typeof(ConstructorClass).GetProperty(nameof(ConstructorClass.Computed))!;
+        var map = new OneToOneMap<int>(new ColumnNameReaderFactory("Property"));
+        Assert.Throws<ArgumentException>("member", () => new ExcelPropertyMap(member, map));
+    }
+
+    private class ConstructorClass(int value)
+    {
+        public int Value { get; } = value;
+
+        public int Computed => Value * 2;
+
+        public int Writable { get; set; }
+    }
 }

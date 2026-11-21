@@ -243,4 +243,53 @@ public class IOneToOneMapExtensionsTests
         public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
             => throw new NotImplementedException();
     }
+
+    [Theory]
+    [InlineData("A", 0)]
+    [InlineData("c", 2)]
+    [InlineData("AA", 26)]
+    public void WithColumnLetter_ValidColumnLetter_Success(string columnLetter, int expectedIndex)
+    {
+        var map = new CustomOneToOneMap();
+        Assert.Same(map, map.WithColumnLetter(columnLetter));
+
+        var factory = Assert.IsType<ColumnIndexReaderFactory>(map.ReaderFactory);
+        Assert.Equal(expectedIndex, factory.ColumnIndex);
+    }
+
+    [Fact]
+    public void WithColumnLetter_NullColumnLetter_ThrowsArgumentNullException()
+    {
+        var map = new CustomOneToOneMap();
+        Assert.Throws<ArgumentNullException>("columnLetter", () => map.WithColumnLetter(null!));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("1")]
+    [InlineData("A1")]
+    [InlineData("XFE")]
+    public void WithColumnLetter_InvalidColumnLetter_ThrowsArgumentException(string columnLetter)
+    {
+        var map = new CustomOneToOneMap();
+        Assert.Throws<ArgumentException>("columnLetter", () => map.WithColumnLetter(columnLetter));
+    }
+
+    [Fact]
+    public void WithColumnNameMatching_Regex_Success()
+    {
+        var regex = new System.Text.RegularExpressions.Regex("Name");
+        var map = new CustomOneToOneMap();
+        Assert.Same(map, map.WithColumnNameMatching(regex));
+
+        var factory = Assert.IsType<ColumnsMatchingReaderFactory>(map.ReaderFactory);
+        Assert.Same(regex, Assert.IsType<RegexColumnMatcher>(factory.Matcher).Regex);
+    }
+
+    [Fact]
+    public void WithColumnNameMatching_NullRegex_ThrowsArgumentNullException()
+    {
+        var map = new CustomOneToOneMap();
+        Assert.Throws<ArgumentNullException>("regex", () => map.WithColumnNameMatching((System.Text.RegularExpressions.Regex)null!));
+    }
 }

@@ -485,4 +485,80 @@ public class ExcelImporterConfigurationTests
     private class OtherTestMap : ExcelClassMap<int>
     {
     }
+
+    [Fact]
+    public void IgnoreSeparatorsInColumnNames_GetDefault_ReturnsFalse()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        Assert.False(importer.Configuration.IgnoreSeparatorsInColumnNames);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void IgnoreSeparatorsInColumnNames_Set_GetReturnsExpected(bool value)
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        importer.Configuration.IgnoreSeparatorsInColumnNames = value;
+        Assert.Equal(value, importer.Configuration.IgnoreSeparatorsInColumnNames);
+
+        // Set same.
+        importer.Configuration.IgnoreSeparatorsInColumnNames = value;
+        Assert.Equal(value, importer.Configuration.IgnoreSeparatorsInColumnNames);
+
+        // Set different.
+        importer.Configuration.IgnoreSeparatorsInColumnNames = !value;
+        Assert.Equal(!value, importer.Configuration.IgnoreSeparatorsInColumnNames);
+    }
+
+    [Fact]
+    public void Culture_GetDefault_ReturnsNull()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        Assert.Null(importer.Configuration.Culture);
+    }
+
+    public static IEnumerable<object?[]> Culture_Set_TestData()
+    {
+        yield return new object?[] { null };
+        yield return new object?[] { System.Globalization.CultureInfo.InvariantCulture };
+        yield return new object?[] { new System.Globalization.CultureInfo("de-DE") };
+    }
+
+    [Theory]
+    [MemberData(nameof(Culture_Set_TestData))]
+    public void Culture_Set_GetReturnsExpected(System.Globalization.CultureInfo? value)
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        importer.Configuration.Culture = value;
+        Assert.Same(value, importer.Configuration.Culture);
+
+        // Set same.
+        importer.Configuration.Culture = value;
+        Assert.Same(value, importer.Configuration.Culture);
+    }
+
+    public class AutoMappedClass
+    {
+        public string Value { get; set; } = default!;
+    }
+
+    [Fact]
+    public void RegisterClassMap_AfterAutoMapping_ReplacesAutoMappedClassMap()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.ReadRow<AutoMappedClass>();
+        Assert.True(importer.Configuration.TryGetClassMap<AutoMappedClass>(out var autoMappedClassMap));
+
+        var classMap = new ExcelClassMap<AutoMappedClass>();
+        classMap.Map(p => p.Value);
+        importer.Configuration.RegisterClassMap(classMap);
+        Assert.True(importer.Configuration.TryGetClassMap<AutoMappedClass>(out var registeredClassMap));
+        Assert.Same(classMap, registeredClassMap);
+        Assert.NotSame(autoMappedClassMap, registeredClassMap);
+
+        // A class map registered by the user can't be replaced.
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new ExcelClassMap<AutoMappedClass>()));
+    }
 }

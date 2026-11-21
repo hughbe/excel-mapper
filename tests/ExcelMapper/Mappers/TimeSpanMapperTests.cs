@@ -285,4 +285,52 @@ public class TimeSpanMapperTests
 
         public void Reset() => throw new NotImplementedException();
     }
+
+    [Theory]
+    [InlineData(0.0, 0)]
+    [InlineData(0.5, 12)]
+    [InlineData(1.5, 36)]
+    [InlineData(-0.25, -6)]
+    public void Map_NumberOfDaysValue_ReturnsSuccess(double value, int expectedHours)
+    {
+        var reader = new MockExcelDataReader
+        {
+            GetValueAction = (i) => value
+        };
+        var item = new TimeSpanMapper();
+
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.True(result.Succeeded);
+        Assert.Equal(TimeSpan.FromHours(expectedHours), Assert.IsType<TimeSpan>(result.Value));
+        Assert.Null(result.Exception);
+    }
+
+    [Theory]
+    [InlineData(1899, 12, 30)]
+    [InlineData(1899, 12, 31)]
+    public void Map_TimeOfDayDateTimeValue_ReturnsSuccess(int year, int month, int day)
+    {
+        var reader = new MockExcelDataReader
+        {
+            GetValueAction = (i) => new DateTime(year, month, day, 5, 6, 7)
+        };
+        var item = new TimeSpanMapper();
+
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.True(result.Succeeded);
+        Assert.Equal(new TimeSpan(5, 6, 7), Assert.IsType<TimeSpan>(result.Value));
+    }
+
+    [Fact]
+    public void Map_DateTimeValueNotTimeOfDay_ReturnsInvalid()
+    {
+        var reader = new MockExcelDataReader
+        {
+            GetValueAction = (i) => new DateTime(2024, 3, 4, 5, 6, 7)
+        };
+        var item = new TimeSpanMapper();
+
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.False(result.Succeeded);
+    }
 }

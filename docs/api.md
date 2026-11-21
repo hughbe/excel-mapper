@@ -100,6 +100,7 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 - `.WithColumnName("Name")` - Map to specific column
 - `.WithColumnNames("Name1", "Name2")` - Try multiple names
 - `.WithColumnIndex(0)` - Map by index
+- `.WithColumnLetter("C")` - Map by Excel column letter
 - `.WithColumnIndices(0, 1, 2)` - Try multiple indices
 - `.WithColumnNameMatching(predicate)` / `.WithColumnNameMatching(regex)` - Use predicate or regular expression
 - `.WithColumnMatching(matcher)` - Custom matcher
@@ -115,6 +116,7 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 - `.WithFormatProvider(IFormatProvider)` - Culture-specific parsing for dates/times/numbers
 - `.WithNumberStyle(NumberStyles)` - Control numeric parsing (thousands, currency, etc.)
 - `.WithUriKind(UriKind)` - Specify URI kind for Uri properties
+- `.WithOffset(TimeSpan)` - Offset from UTC for `DateTimeOffset` properties (dates in Excel have no time zone)
 - `.WithMapping(dictionary)` - Value mapping
 - `.WithTrim()` - Trim whitespace
 - `.WithTransformers(...)` - Custom transformers

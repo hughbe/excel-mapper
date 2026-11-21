@@ -284,4 +284,137 @@ public class DateTimeOffsetMapperTests
 
         public void Reset() => throw new NotImplementedException();
     }
+
+    [Fact]
+    public void Offset_GetDefault_ReturnsNull()
+    {
+        var item = new DateTimeOffsetMapper();
+        Assert.Null(item.Offset);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(330)]
+    [InlineData(-480)]
+    [InlineData(840)]
+    [InlineData(-840)]
+    public void Offset_Set_GetReturnsExpected(int minutes)
+    {
+        var item = new DateTimeOffsetMapper
+        {
+            Offset = TimeSpan.FromMinutes(minutes)
+        };
+        Assert.Equal(TimeSpan.FromMinutes(minutes), item.Offset);
+
+        // Set same.
+        item.Offset = TimeSpan.FromMinutes(minutes);
+        Assert.Equal(TimeSpan.FromMinutes(minutes), item.Offset);
+
+        // Set null.
+        item.Offset = null;
+        Assert.Null(item.Offset);
+    }
+
+    public static IEnumerable<object[]> Offset_SetInvalid_TestData()
+    {
+        yield return new object[] { TimeSpan.FromHours(15) };
+        yield return new object[] { TimeSpan.FromHours(-15) };
+        yield return new object[] { TimeSpan.FromSeconds(30) };
+    }
+
+    [Theory]
+    [MemberData(nameof(Offset_SetInvalid_TestData))]
+    public void Offset_SetInvalid_ThrowsArgumentOutOfRangeException(TimeSpan value)
+    {
+        var item = new DateTimeOffsetMapper();
+        Assert.Throws<ArgumentOutOfRangeException>("value", () => item.Offset = value);
+        Assert.Null(item.Offset);
+    }
+
+    [Fact]
+    public void Map_DateTimeValueWithOffset_ReturnsSuccess()
+    {
+        var dateTime = new DateTime(2017, 7, 12, 7, 57, 46);
+        var reader = new MockExcelDataReader
+        {
+            GetValueAction = (i) => dateTime
+        };
+        var item = new DateTimeOffsetMapper
+        {
+            Offset = TimeSpan.FromHours(5.5)
+        };
+
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.True(result.Succeeded);
+        var value = Assert.IsType<DateTimeOffset>(result.Value);
+        Assert.Equal(new DateTimeOffset(dateTime, TimeSpan.FromHours(5.5)), value);
+        Assert.Equal(TimeSpan.FromHours(5.5), value.Offset);
+    }
+
+    [Fact]
+    public void Map_UtcDateTimeValueWithOffset_UsesOffset()
+    {
+        var dateTime = new DateTime(2017, 7, 12, 7, 57, 46, DateTimeKind.Utc);
+        var reader = new MockExcelDataReader
+        {
+            GetValueAction = (i) => dateTime
+        };
+        var item = new DateTimeOffsetMapper
+        {
+            Offset = TimeSpan.FromHours(-8)
+        };
+
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.True(result.Succeeded);
+        Assert.Equal(TimeSpan.FromHours(-8), Assert.IsType<DateTimeOffset>(result.Value).Offset);
+    }
+
+    [Fact]
+    public void Map_SerialNumberValue_ReturnsSuccess()
+    {
+        var dateTime = new DateTime(2024, 3, 4, 12, 0, 0);
+        var reader = new MockExcelDataReader
+        {
+            GetValueAction = (i) => dateTime.ToOADate()
+        };
+        var item = new DateTimeOffsetMapper
+        {
+            Offset = TimeSpan.Zero
+        };
+
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.True(result.Succeeded);
+        Assert.Equal(new DateTimeOffset(dateTime, TimeSpan.Zero), result.Value);
+    }
+
+    [Fact]
+    public void Map_MinValueWithPositiveOffset_ReturnsInvalid()
+    {
+        var reader = new MockExcelDataReader
+        {
+            GetValueAction = (i) => DateTime.MinValue
+        };
+        var item = new DateTimeOffsetMapper
+        {
+            Offset = TimeSpan.FromHours(1)
+        };
+
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.False(result.Succeeded);
+        Assert.IsType<ArgumentOutOfRangeException>(result.Exception);
+    }
+
+    [Fact]
+    public void Map_StringValueWithOffsetInText_KeepsTextOffset()
+    {
+        var item = new DateTimeOffsetMapper
+        {
+            Formats = ["yyyy-MM-ddTHH:mm:sszzz"],
+            Offset = TimeSpan.Zero
+        };
+
+        var result = item.Map(new ReadCellResult(0, "2024-03-04T05:06:07+02:00", preserveFormatting: false));
+        Assert.True(result.Succeeded);
+        Assert.Equal(TimeSpan.FromHours(2), Assert.IsType<DateTimeOffset>(result.Value).Offset);
+    }
 }
