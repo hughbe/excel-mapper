@@ -690,20 +690,10 @@ public static class IValuePipelineExtensions
     {
         ThrowHelpers.ThrowIfNull(converter, nameof(converter));
 
-        CellMapperResult actualConverter(ReadCellResult readResult)
-        {
-            try
-            {
-                object? result = converter(readResult.GetString());
-                return CellMapperResult.Success(result);
-            }
-            catch (Exception exception)
-            {
-                return CellMapperResult.Invalid(exception);
-            }
-        }
-
-        return map.WithConverter(actualConverter);
+        // An ICellConverter<T>, so that values are converted without boxing.
+        map.Mappers.Clear();
+        map.Mappers.Add(new CellConverterMapper<TValue?>(new DelegateCellConverter<TValue?>(converter)));
+        return map;
     }
 
     /// <summary>
@@ -727,6 +717,45 @@ public static class IValuePipelineExtensions
         // every value of other types (such as strings).
         map.Mappers.Clear();
         map.Mappers.Add(new ConvertUsingMapper(converter));
+        return map;
+    }
+
+    /// <summary>
+    /// Converts cells with <paramref name="converter"/>. The converter replaces the map's mappers,
+    /// including the built-in conversion for the member's type and any earlier converter, so it is
+    /// used for every cell that isn't empty. Empty cells still use the empty fallback, and values the
+    /// converter returns <see cref="CellConversionResult{T}.Invalid()"/> for use the invalid fallback.
+    /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
+    /// <typeparam name="TValue">The type of the property or field that the map represents.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="converter">The converter.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static TMap WithConverter<TMap, TValue>(this TMap map, ICellConverter<TValue> converter) where TMap : IValuePipeline<TValue>
+    {
+        ThrowHelpers.ThrowIfNull(converter, nameof(converter));
+
+        map.Mappers.Clear();
+        map.Mappers.Add(new CellConverterMapper<TValue>(converter));
+        return map;
+    }
+
+    /// <summary>
+    /// Converts the cells of a nullable member with a converter for its underlying type. The converter
+    /// replaces the map's mappers, as for <see cref="WithConverter{TMap, TValue}(TMap, ICellConverter{TValue})"/>.
+    /// Empty cells still use the empty fallback, which is null by default.
+    /// </summary>
+    /// <typeparam name="TValue">The underlying type of the property or field that the map represents.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <param name="converter">The converter.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static IValuePipeline<TValue?> WithConverter<TValue>(this IValuePipeline<TValue?> map, ICellConverter<TValue> converter) where TValue : struct
+    {
+        ThrowHelpers.ThrowIfNull(map, nameof(map));
+        ThrowHelpers.ThrowIfNull(converter, nameof(converter));
+
+        map.Mappers.Clear();
+        map.Mappers.Add(new CellConverterMapper<TValue?>(new NullableCellConverter<TValue>(converter)));
         return map;
     }
 

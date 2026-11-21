@@ -1373,12 +1373,46 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     }
 
     [Fact]
+    public void WithConverter_CellConverter_ReplacesMappers()
+    {
+        var map = Map(t => t.DateTimeValue);
+        var converter = new FixedConverter<DateTime>(DateTime.MinValue);
+        Assert.Same(map, map.WithConverter(converter));
+        var mapper = Assert.Single(map.Mappers);
+        Assert.Equal(DateTime.MinValue, mapper.Map(new ReadCellResult(0, "x", preserveFormatting: false)).Value);
+    }
+
+    [Fact]
+    public void WithConverter_CellConverterOfUnderlyingType_ReplacesMappers()
+    {
+        var map = Map(t => t.NullableTimeSpanValue);
+        map.WithConverter(new FixedConverter<TimeSpan>(TimeSpan.FromHours(1)));
+        var mapper = Assert.Single(map.Mappers);
+        Assert.Equal(TimeSpan.FromHours(1), mapper.Map(new ReadCellResult(0, "x", preserveFormatting: false)).Value);
+    }
+
+    [Fact]
+    public void WithConverter_NullCellConverter_ThrowsArgumentNullException()
+    {
+        var map = Map(t => t.DateTimeValue);
+        Assert.Throws<ArgumentNullException>("converter", () => map.WithConverter((ICellConverter<DateTime>)null!));
+        var nullableMap = Map(t => t.NullableTimeSpanValue);
+        Assert.Throws<ArgumentNullException>("converter", () => nullableMap.WithConverter((ICellConverter<TimeSpan>)null!));
+    }
+
+    private sealed class FixedConverter<T>(T value) : ICellConverter<T>
+    {
+        public CellConversionResult<T> Convert(CellValue cell, CellContext context) => CellConversionResult<T>.Success(value);
+    }
+
+    [Fact]
     public void WithConverter_Simple_ReplacesBuiltInMappers()
     {
         var map = Map(t => t.DateTimeValue);
         Assert.NotEmpty(map.Mappers);
         map.WithConverter(_ => DateTime.MinValue);
-        Assert.IsType<ConvertUsingMapper>(Assert.Single(map.Mappers));
+        var mapper = Assert.Single(map.Mappers);
+        Assert.Equal(DateTime.MinValue, mapper.Map(new ReadCellResult(0, "2024-01-02", preserveFormatting: false)).Value);
     }
 
     [Fact]
@@ -1395,8 +1429,8 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var map = Map(t => t.Value);
         map.WithConverter(_ => "first");
         map.WithConverter(_ => "second");
-        var mapper = Assert.IsType<ConvertUsingMapper>(Assert.Single(map.Mappers));
-        Assert.Equal("second", mapper.Converter(new ReadCellResult(0, "x", preserveFormatting: false)).Value);
+        var mapper = Assert.Single(map.Mappers);
+        Assert.Equal("second", mapper.Map(new ReadCellResult(0, "x", preserveFormatting: false)).Value);
     }
 
     [Fact]
@@ -1408,9 +1442,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
             Assert.Equal("stringValue", stringValue);
             return "abc";
         }));
-        var mapper = map.Mappers.OfType<ConvertUsingMapper>().Single();
+        var mapper = Assert.Single(map.Mappers);
 
-        var result = mapper.Converter(new ReadCellResult(0, "stringValue", preserveFormatting: false));
+        var result = mapper.Map(new ReadCellResult(0, "stringValue", preserveFormatting: false));
         Assert.True(result.Succeeded);
         Assert.Equal("abc", result.Value);
         Assert.Null(result.Exception);
@@ -1427,9 +1461,9 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 
         var map = Map(t => t.Value);
         Assert.Same(map, map.WithConverter(converter));
-        var mapper = map.Mappers.OfType<ConvertUsingMapper>().Single();
+        var mapper = Assert.Single(map.Mappers);
 
-        var result = mapper.Converter(new ReadCellResult(0, "stringValue", preserveFormatting: false));
+        var result = mapper.Map(new ReadCellResult(0, "stringValue", preserveFormatting: false));
         Assert.False(result.Succeeded);
         Assert.Null(result.Value);
         Assert.IsType<NotSupportedException>(result.Exception);

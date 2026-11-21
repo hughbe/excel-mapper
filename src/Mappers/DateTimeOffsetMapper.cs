@@ -5,7 +5,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a DateTimeOffset.
 /// </summary>
-public class DateTimeOffsetMapper : IFormatsCellMapper, ICellConverter<DateTimeOffset>, ICellConverter<DateTimeOffset?>
+public class DateTimeOffsetMapper : IFormatsCellMapper, ITypedCellMapper<DateTimeOffset>, ITypedCellMapper<DateTimeOffset?>
 {
     private string[] _formats = ["G"];
 
@@ -113,7 +113,7 @@ public class DateTimeOffsetMapper : IFormatsCellMapper, ICellConverter<DateTimeO
         return InvalidResult(stringValue, formats, provider, style);
     }
 
-    CellConversion ICellConverter<DateTimeOffset>.Convert(ReadCellResult cell, out DateTimeOffset value)
+    CellConversion ITypedCellMapper<DateTimeOffset>.Convert(ReadCellResult cell, out DateTimeOffset value)
     {
         var cellValue = cell.GetValue();
         if (cellValue is DateTime dateTimeValue || ExcelDateUtilities.TryGetDateTime(cellValue, out dateTimeValue))
@@ -149,9 +149,9 @@ public class DateTimeOffsetMapper : IFormatsCellMapper, ICellConverter<DateTimeO
         }
     }
 
-    CellConversion ICellConverter<DateTimeOffset?>.Convert(ReadCellResult cell, out DateTimeOffset? value)
+    CellConversion ITypedCellMapper<DateTimeOffset?>.Convert(ReadCellResult cell, out DateTimeOffset? value)
     {
-        var conversion = ((ICellConverter<DateTimeOffset>)this).Convert(cell, out var result);
+        var conversion = ((ITypedCellMapper<DateTimeOffset>)this).Convert(cell, out var result);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }

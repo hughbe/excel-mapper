@@ -202,7 +202,7 @@ internal abstract class NumberMapper : INumberStyleCellMapper
 /// A <see cref="NumberMapper"/> for <typeparamref name="T"/> that converts cells without boxing,
 /// making the same decisions as <see cref="NumberMapper.Map"/>.
 /// </summary>
-internal sealed class NumberMapper<T> : NumberMapper, ICellConverter<T>, ICellConverter<T?> where T : struct
+internal sealed class NumberMapper<T> : NumberMapper, ITypedCellMapper<T>, ITypedCellMapper<T?> where T : struct
 {
     private delegate bool TryParser(string text, NumberStyles style, IFormatProvider? provider, out T result);
 
@@ -254,7 +254,7 @@ internal sealed class NumberMapper<T> : NumberMapper, ICellConverter<T>, ICellCo
         return (Func<double, T>)fromDouble;
     }
 
-    CellConversion ICellConverter<T>.Convert(ReadCellResult cell, out T value)
+    CellConversion ITypedCellMapper<T>.Convert(ReadCellResult cell, out T value)
     {
         var cellValue = cell.GetValue();
         try
@@ -290,9 +290,9 @@ internal sealed class NumberMapper<T> : NumberMapper, ICellConverter<T>, ICellCo
         }
     }
 
-    CellConversion ICellConverter<T?>.Convert(ReadCellResult cell, out T? value)
+    CellConversion ITypedCellMapper<T?>.Convert(ReadCellResult cell, out T? value)
     {
-        var conversion = ((ICellConverter<T>)this).Convert(cell, out var result);
+        var conversion = ((ITypedCellMapper<T>)this).Convert(cell, out var result);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }

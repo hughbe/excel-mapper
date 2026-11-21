@@ -5,7 +5,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a TimeSpan.
 /// </summary>
-public class TimeSpanMapper : ICellMapper, IFormatsCellMapper, ICellConverter<TimeSpan>, ICellConverter<TimeSpan?>
+public class TimeSpanMapper : ICellMapper, IFormatsCellMapper, ITypedCellMapper<TimeSpan>, ITypedCellMapper<TimeSpan?>
 {
     private string[] _formats = ["c"];
 
@@ -76,7 +76,7 @@ public class TimeSpanMapper : ICellMapper, IFormatsCellMapper, ICellConverter<Ti
         return InvalidResult(stringValue, formats, provider, style);
     }
 
-    CellConversion ICellConverter<TimeSpan>.Convert(ReadCellResult cell, out TimeSpan value)
+    CellConversion ITypedCellMapper<TimeSpan>.Convert(ReadCellResult cell, out TimeSpan value)
     {
         var cellValue = cell.GetValue();
         if (cellValue is TimeSpan timeSpanValue)
@@ -110,9 +110,9 @@ public class TimeSpanMapper : ICellMapper, IFormatsCellMapper, ICellConverter<Ti
         }
     }
 
-    CellConversion ICellConverter<TimeSpan?>.Convert(ReadCellResult cell, out TimeSpan? value)
+    CellConversion ITypedCellMapper<TimeSpan?>.Convert(ReadCellResult cell, out TimeSpan? value)
     {
-        var conversion = ((ICellConverter<TimeSpan>)this).Convert(cell, out var result);
+        var conversion = ((ITypedCellMapper<TimeSpan>)this).Convert(cell, out var result);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }

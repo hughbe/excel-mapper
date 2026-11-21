@@ -181,6 +181,11 @@ public class ExcelSheet
 
     private ExcelImporter Importer { get; }
 
+    /// <summary>
+    /// The importer's culture, if set (see <see cref="ExcelImporterConfiguration.Culture"/>).
+    /// </summary>
+    internal System.Globalization.CultureInfo? Culture => Importer.Configuration.Culture;
+
     internal ExcelImporterConfiguration Configuration => Importer.Configuration;
 
     private IExcelDataReader Reader { get; }

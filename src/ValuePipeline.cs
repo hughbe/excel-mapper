@@ -1,5 +1,6 @@
 using System.Reflection;
 using ExcelMapper.Fallbacks;
+using ExcelMapper.Mappers;
 using ExcelMapper.Transformers;
 
 namespace ExcelMapper;
@@ -110,7 +111,10 @@ public class ValuePipeline : IValuePipeline
         var mappers = pipeline.Mappers;
         for (int i = 0; i < mappers.Count; i++)
         {
-            var result = mappers[i].Map(readResult);
+            var mapper = mappers[i];
+            var result = mapper is IContextCellMapper contextMapper
+                ? contextMapper.Map(readResult, sheet, rowIndex, member)
+                : mapper.Map(readResult);
             if (result.Action != CellMapperResult.HandleAction.IgnoreResultAndContinueMapping)
             {
                 finalResult = result;

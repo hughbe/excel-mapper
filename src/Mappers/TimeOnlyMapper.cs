@@ -6,7 +6,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a TimeOnly.
 /// </summary>
-public class TimeOnlyMapper : ICellMapper, IFormatsCellMapper, ICellConverter<TimeOnly>, ICellConverter<TimeOnly?>
+public class TimeOnlyMapper : ICellMapper, IFormatsCellMapper, ITypedCellMapper<TimeOnly>, ITypedCellMapper<TimeOnly?>
 {
     private string[] _formats = ["t"];
 
@@ -86,7 +86,7 @@ public class TimeOnlyMapper : ICellMapper, IFormatsCellMapper, ICellConverter<Ti
         return InvalidResult(stringValue, formats, provider, style);
     }
 
-    CellConversion ICellConverter<TimeOnly>.Convert(ReadCellResult cell, out TimeOnly value)
+    CellConversion ITypedCellMapper<TimeOnly>.Convert(ReadCellResult cell, out TimeOnly value)
     {
         var cellValue = cell.GetValue();
         if (cellValue is TimeSpan timeSpanValue)
@@ -132,9 +132,9 @@ public class TimeOnlyMapper : ICellMapper, IFormatsCellMapper, ICellConverter<Ti
         }
     }
 
-    CellConversion ICellConverter<TimeOnly?>.Convert(ReadCellResult cell, out TimeOnly? value)
+    CellConversion ITypedCellMapper<TimeOnly?>.Convert(ReadCellResult cell, out TimeOnly? value)
     {
-        var conversion = ((ICellConverter<TimeOnly>)this).Convert(cell, out var result);
+        var conversion = ((ITypedCellMapper<TimeOnly>)this).Convert(cell, out var result);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }

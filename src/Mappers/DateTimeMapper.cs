@@ -5,7 +5,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a DateTime.
 /// </summary>
-public class DateTimeMapper : ICellMapper, IFormatsCellMapper, ICellConverter<DateTime>, ICellConverter<DateTime?>
+public class DateTimeMapper : ICellMapper, IFormatsCellMapper, ITypedCellMapper<DateTime>, ITypedCellMapper<DateTime?>
 {
     private string[] _formats = ["G"];
 
@@ -74,7 +74,7 @@ public class DateTimeMapper : ICellMapper, IFormatsCellMapper, ICellConverter<Da
         return InvalidResult(stringValue, formats, provider, style);
     }
 
-    CellConversion ICellConverter<DateTime>.Convert(ReadCellResult cell, out DateTime value)
+    CellConversion ITypedCellMapper<DateTime>.Convert(ReadCellResult cell, out DateTime value)
     {
         var cellValue = cell.GetValue();
         if (cellValue is DateTime dateTimeValue)
@@ -105,9 +105,9 @@ public class DateTimeMapper : ICellMapper, IFormatsCellMapper, ICellConverter<Da
         }
     }
 
-    CellConversion ICellConverter<DateTime?>.Convert(ReadCellResult cell, out DateTime? value)
+    CellConversion ITypedCellMapper<DateTime?>.Convert(ReadCellResult cell, out DateTime? value)
     {
-        var conversion = ((ICellConverter<DateTime>)this).Convert(cell, out var result);
+        var conversion = ((ITypedCellMapper<DateTime>)this).Convert(cell, out var result);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }
