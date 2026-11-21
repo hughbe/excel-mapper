@@ -1347,9 +1347,11 @@ catch (ExcelMappingException ex)
     //  in column "YearsOfService" at cell C3 in sheet "Employees"."
     Console.WriteLine(ex.Message);
 
-    Console.WriteLine(ex.CellAddress); // "C3" (null if the row or column is unknown)
-    Console.WriteLine(ex.RowIndex);    // 2 (zero-based)
-    Console.WriteLine(ex.ColumnIndex); // 2 (zero-based)
+    Console.WriteLine(ex.CellAddress);  // "C3" (null if the row or column is unknown)
+    Console.WriteLine(ex.ColumnName);   // "YearsOfService" (null if unknown)
+    Console.WriteLine(ex.Member?.Name); // "YearsOfService" (the property or field, if known)
+    Console.WriteLine(ex.RowIndex);     // 2 (zero-based)
+    Console.WriteLine(ex.ColumnIndex);  // 2 (zero-based)
 }
 ```
 
@@ -2809,6 +2811,8 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 
 **`ExcelMappingException`** - Thrown when a sheet or cell can't be mapped
 - `CellAddress` - Excel address of the cell, such as "B11" (null if unknown)
+- `ColumnName` - Name of the column being read, or of a column that couldn't be found (null if unknown)
+- `Member` - The property or field being mapped (null if unknown)
 - `RowIndex` / `ColumnIndex` - Zero-based row and column of the cell (-1 if unknown)
 - `Sheet` - The sheet being read
 

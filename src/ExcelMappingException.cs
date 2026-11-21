@@ -62,7 +62,22 @@ public class ExcelMappingException : Exception
         Sheet = sheet;
         RowIndex = rowIndex;
         ColumnIndex = columnIndex;
+        if (columnIndex >= 0 && sheet?.Heading is { } heading && heading.TryGetColumnName(columnIndex, out var columnName))
+        {
+            ColumnName = columnName;
+        }
     }
+
+    /// <summary>
+    /// The name of the column in the heading that was being read, or the name of a column that
+    /// could not be found. Null if the column or the sheet's heading is not known.
+    /// </summary>
+    public string? ColumnName { get; internal set; }
+
+    /// <summary>
+    /// The property or field that was being mapped, if known.
+    /// </summary>
+    public MemberInfo? Member { get; internal set; }
 
     /// <summary>
     /// The sheet that is currently being read.
@@ -86,6 +101,19 @@ public class ExcelMappingException : Exception
     public string? CellAddress => RowIndex >= 0 && ColumnIndex >= 0 ? ExcelRange.GetCellAddress(RowIndex, ColumnIndex) : null;
 
     internal static ExcelMappingException CreateForNoSuchColumn(ExcelSheet sheet, int rowIndex, object readerFactory, MemberInfo? member)
+    {
+        var exception = CreateForNoSuchColumnCore(sheet, rowIndex, readerFactory, member);
+        exception.Member = member;
+        if (exception.ColumnName is null && readerFactory is IColumnNameProviderCellReaderFactory columnNameProvider &&
+            columnNameProvider.GetColumnName(sheet) is { Length: > 0 } columnName)
+        {
+            exception.ColumnName = columnName;
+        }
+
+        return exception;
+    }
+
+    private static ExcelMappingException CreateForNoSuchColumnCore(ExcelSheet sheet, int rowIndex, object readerFactory, MemberInfo? member)
     {
         if (readerFactory is IColumnNameProviderCellReaderFactory columnNameProvider)
         {
@@ -150,10 +178,10 @@ public class ExcelMappingException : Exception
         string columnDescription = string.Empty;
         if (columnIndex >= 0)
         {
-            // The column may lie outside the heading's data range, in which case only report
-            // its cell address rather than throwing while building the message.
-            if (sheet != null && sheet.HasHeading
-                && (sheet.Heading ?? sheet.ReadHeading()).TryGetColumnName(columnIndex, out var columnName))
+            // Only use a heading that has already been read: building an error message must not
+            // move the reader. The column may also lie outside the heading's data range, in which
+            // case only its cell address is reported.
+            if (sheet?.Heading is { } heading && heading.TryGetColumnName(columnIndex, out var columnName))
             {
                 columnDescription = $" in column \"{columnName}\"";
             }

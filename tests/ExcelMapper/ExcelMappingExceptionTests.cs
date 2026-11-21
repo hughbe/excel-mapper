@@ -58,7 +58,11 @@ public class ExcelMappingExceptionTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         var sheet = importer.ReadSheet();
         var exception = new ExcelMappingException("Message", sheet, 10, 1);
-        Assert.Equal("Message in column \"StringValue\" at cell B11 in sheet \"Primitives\".", exception.Message);
+
+        // Creating an exception doesn't read the heading, as that would move the reader.
+        Assert.Equal("Message at cell B11 in sheet \"Primitives\".", exception.Message);
+        Assert.Null(sheet.Heading);
+        Assert.Null(exception.ColumnName);
         Assert.Null(exception.InnerException);
         Assert.Same(sheet, exception.Sheet);
         Assert.Equal(10, exception.RowIndex);
@@ -121,5 +125,77 @@ public class ExcelMappingExceptionTests
     {
         Assert.Null(new ExcelMappingException().CellAddress);
         Assert.Null(new ExcelMappingException("message").CellAddress);
+    }
+
+    [Fact]
+    public void Ctor_Default_MemberAndColumnNameAreNull()
+    {
+        var exception = new ExcelMappingException("message");
+        Assert.Null(exception.Member);
+        Assert.Null(exception.ColumnName);
+    }
+
+    [Fact]
+    public void Ctor_SheetWithReadHeading_SetsColumnName()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+
+        Assert.Equal("StringValue", new ExcelMappingException("Message", sheet, 10, 1).ColumnName);
+        Assert.Null(new ExcelMappingException("Message", sheet, 10, -1).ColumnName);
+        Assert.Null(new ExcelMappingException("Message", sheet, 10, 100).ColumnName);
+    }
+
+    public class Person
+    {
+        public string Name { get; set; } = "";
+        public int Age { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_InvalidValue_SetsMemberAndColumnName()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Age\nAlice,old\n");
+        var sheet = importer.ReadSheet();
+
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<Person>().ToArray());
+        Assert.Equal(nameof(Person.Age), exception.Member!.Name);
+        Assert.Equal(typeof(Person), exception.Member.DeclaringType);
+        Assert.Equal("Age", exception.ColumnName);
+        Assert.Equal("B2", exception.CellAddress);
+    }
+
+    [Fact]
+    public void ReadRows_MissingColumn_SetsMemberAndColumnName()
+    {
+        using var importer = Helpers.GetCsvImporter("Name\nAlice\n");
+        var sheet = importer.ReadSheet();
+
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<Person>().ToArray());
+        Assert.Equal(nameof(Person.Age), exception.Member!.Name);
+        Assert.Equal("Age", exception.ColumnName);
+        Assert.Null(exception.CellAddress);
+    }
+
+    [Fact]
+    public void ReadRows_EmptyValueType_SetsMemberAndColumnName()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Age\nAlice,\n");
+        var sheet = importer.ReadSheet();
+
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<Person>().ToArray());
+        Assert.Equal(nameof(Person.Age), exception.Member!.Name);
+        Assert.Equal("Age", exception.ColumnName);
+    }
+
+    [Fact]
+    public void ReadRowResults_RecordedErrors_SetMemberAndColumnName()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Age\nAlice,old\n");
+        var error = Assert.Single(importer.ReadSheet().ReadRowResults<Person>().Single().Errors);
+        Assert.Equal(nameof(Person.Age), error.Member!.Name);
+        Assert.Equal("Age", error.ColumnName);
+        Assert.Equal("B2", error.CellAddress);
     }
 }

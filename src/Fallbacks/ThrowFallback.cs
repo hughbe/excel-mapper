@@ -13,7 +13,10 @@ public class ThrowFallback : IFallbackItem
         var stringValue = readResult.GetString();
         var mappingException = member == null
             ? new ExcelMappingException($"Cannot assign \"{stringValue}\"", sheet, rowIndex, readResult.ColumnIndex, exception)
-            : new ExcelMappingException($"Cannot assign \"{stringValue}\" to member \"{member.Name}\" of type \"{member.MemberType()}\"", sheet, rowIndex, readResult.ColumnIndex, exception);
+            : new ExcelMappingException($"Cannot assign \"{stringValue}\" to member \"{member.Name}\" of type \"{member.MemberType()}\"", sheet, rowIndex, readResult.ColumnIndex, exception)
+            {
+                Member = member
+            };
 
         // When the sheet is collecting errors (ReadRowResults), record the error rather than
         // throwing it: throwing and catching an exception for every invalid cell is slow.

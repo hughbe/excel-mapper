@@ -141,7 +141,10 @@ public class ValuePipeline : IValuePipeline
             if (default(T) is not null)
             {
                 var memberDescription = member is null ? string.Empty : $" to member \"{member.Name}\"";
-                throw new ExcelMappingException($"Cannot assign null{memberDescription} of type \"{typeof(T)}\". Consider adding a fallback or making the type nullable.", sheet, rowIndex, columnIndex);
+                throw new ExcelMappingException($"Cannot assign null{memberDescription} of type \"{typeof(T)}\". Consider adding a fallback or making the type nullable.", sheet, rowIndex, columnIndex)
+                {
+                    Member = member
+                };
             }
 
             return default!;
