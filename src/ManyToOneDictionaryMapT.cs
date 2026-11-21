@@ -49,7 +49,6 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
         {
             ThrowHelpers.ThrowIfNull(value, nameof(value));
             _readerFactory = value;
-            _factoryCache.Clear();
             ReaderVersion++;
         }
     }
@@ -58,8 +57,6 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// The factory for creating and adding elements to the list.
     /// </summary>
     public IDictionaryFactory<TKey, TValue> DictionaryFactory { get; }
-    
-    private readonly PerSheetCache<ICellsReader> _factoryCache = new();
 
     // Factories build one value at a time, so a map shared between importers (for example
     // a class map instance registered in several importers used concurrently) must not
@@ -90,7 +87,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     ICellsReader? ICellsMap.GetCellsReader(ExcelSheet sheet) => GetCellsReader(sheet);
 
     private ICellsReader? GetCellsReader(ExcelSheet sheet)
-        => _factoryCache.GetOrAdd(sheet, _readerFactory, static (s, factory) => factory.GetCellsReader(s));
+        => sheet.GetCellsReader(_readerFactory);
 
     object? ICellsMap.CreateBindingFactory() => (DictionaryFactory as IBindingFactory)?.CreateForBinding();
 

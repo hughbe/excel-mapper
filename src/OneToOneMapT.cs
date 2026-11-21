@@ -33,7 +33,6 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>, IBindableMap
         {
             ThrowHelpers.ThrowIfNull(value, nameof(value));
             _readerFactory = value;
-            _factoryCache.Clear();
             ReaderVersion++;
         }
     }
@@ -67,8 +66,6 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>, IBindableMap
         set => Pipeline.InvalidFallback = value;
     }
 
-    private readonly PerSheetCache<ICellReader> _factoryCache = new();
-
     /// <inheritdoc />
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
     {
@@ -89,7 +86,7 @@ public class OneToOneMap<T> : IOneToOneMap, IValuePipeline<T>, IBindableMap
     internal int ReaderVersion { get; private set; }
 
     internal ICellReader? GetCellReader(ExcelSheet sheet)
-        => _factoryCache.GetOrAdd(sheet, _readerFactory, static (s, factory) => factory.GetCellReader(s));
+        => sheet.GetCellReader(_readerFactory);
 
     /// <summary>
     /// Reads and maps the cell, returning the value as <typeparamref name="T"/> so that value types

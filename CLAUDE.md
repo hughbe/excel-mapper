@@ -87,7 +87,7 @@ Patterns to keep:
 - Don't throw and catch exceptions for invalid cells: mappers use `TryParse` and `CellMapperResult.Invalid(Func<Exception>)` (or `MapperUtilities.InvalidFromParse`) so the exception is only created if it is read.
 - A lambda that captures locals allocates its closure when the locals' scope is entered, even if the lambda isn't used. Create such lambdas in a separate static method that takes the values as parameters.
 - Use indexed `for` loops over `IList<T>` in per-cell code; `foreach` over an interface allocates an enumerator.
-- Cache per-sheet state in `PerSheetCache<T>` (not a strongly-keyed dictionary), and keep maps safe to share between importers and threads.
+- Keep per-sheet state on the `ExcelSheet` (such as `GetCellReader`/`GetCellsReader` and `GetBoundMembers`), not in a dictionary on a map keyed by sheet: maps outlive sheets and are shared between importers and threads, so they must not hold sheets.
 
 ## Documentation
 
