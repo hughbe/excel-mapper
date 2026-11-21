@@ -79,6 +79,8 @@ if (importer.TryReadSheet("Sales Data", out var salesSheet))
 }
 ```
 
+You can read from several sheets at once, including several `ExcelSheet` objects for the same worksheet: each keeps its own position. The importer reads the file forward only, so going back to an earlier row of a worksheet re-reads it from the start. Reading one sheet's rows at a time (for example with `ToList()`) is fastest; alternating between two sheets row by row works but re-reads the file each time.
+
 ### Read Sheet by Index
 
 ```csharp
