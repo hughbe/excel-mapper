@@ -306,7 +306,6 @@ public class MapUInt32Tests
         public uint? Value { get; set; }
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_AutoMappedUInt32ValueNumberStyleAttribute_Success()
     {
@@ -345,7 +344,6 @@ public class MapUInt32Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeUInt32Value>();
         Assert.Equal(10u, row9.Value);
     }
-#endif
 
     private class NumberStyleAttributeUInt32Value
     {
@@ -355,7 +353,6 @@ public class MapUInt32Tests
         public uint Value { get; set; }
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_DefaultMappedUInt32ValueNumberStyleAttribute_Success()
     {
@@ -398,7 +395,6 @@ public class MapUInt32Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeUInt32Value>();
         Assert.Equal(10u, row9.Value);
     }
-#endif
 
 #if LIBRARY_NET8
     [Fact]
@@ -482,7 +478,6 @@ public class MapUInt32Tests
     }
 #endif
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_AutoMappedNullableUInt32ValueNumberStyleAttribute_Success()
     {
@@ -521,7 +516,6 @@ public class MapUInt32Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeNullableUInt32Value>();
         Assert.Equal(10u, row9.Value);
     }
-#endif
 
     private class NumberStyleAttributeNullableUInt32Value
     {
@@ -531,7 +525,6 @@ public class MapUInt32Tests
         public uint? Value { get; set; }
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_DefaultMappedNullableUInt32ValueNumberStyleAttribute_Success()
     {
@@ -574,7 +567,6 @@ public class MapUInt32Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeNullableUInt32Value>();
         Assert.Equal(10u, row9.Value);
     }
-#endif
 
 #if LIBRARY_NET8
     [Fact]

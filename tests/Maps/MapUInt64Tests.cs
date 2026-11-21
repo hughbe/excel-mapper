@@ -470,7 +470,6 @@ public class MapUInt64Tests
         public ulong? Value { get; set; }
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_AutoMappedUInt64ValueNumberStyleAttribute_Success()
     {
@@ -509,7 +508,6 @@ public class MapUInt64Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeUInt64Value>();
         Assert.Equal(10u, row9.Value);
     }
-#endif
 
     private class NumberStyleAttributeUInt64Value
     {
@@ -519,7 +517,6 @@ public class MapUInt64Tests
         public ulong Value { get; set; }
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_DefaultMappedUInt64ValueNumberStyleAttribute_Success()
     {
@@ -562,9 +559,7 @@ public class MapUInt64Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeUInt64Value>();
         Assert.Equal(10u, row9.Value);
     }
-#endif
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_AutoMappedNullableUInt64ValueNumberStyleAttribute_Success()
     {
@@ -603,7 +598,6 @@ public class MapUInt64Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeNullableUInt64Value>();
         Assert.Equal(10u, row9.Value);
     }
-#endif
 
     private class NumberStyleAttributeNullableUInt64Value
     {
@@ -613,7 +607,6 @@ public class MapUInt64Tests
         public ulong? Value { get; set; }
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_DefaultMappedNullableUInt64ValueNumberStyleAttribute_Success()
     {
@@ -656,5 +649,4 @@ public class MapUInt64Tests
         var row9 = sheet.ReadRow<NumberStyleAttributeNullableUInt64Value>();
         Assert.Equal(10u, row9.Value);
     }
-#endif
 }

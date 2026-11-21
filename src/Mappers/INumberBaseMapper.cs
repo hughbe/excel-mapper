@@ -13,7 +13,15 @@ public class INumberBaseMapper<T> : INumberStyleCellMapper where T : INumberBase
     /// <summary>
     /// Gets or sets the number styles used when mapping the value of a cell to a number base type.
     /// </summary>
-    public NumberStyles Style { get; set; } = NumberStyles.Number;
+    /// <remarks>
+    /// The default is <see cref="NumberStyles.Number"/>, plus <see cref="NumberStyles.AllowExponent"/>
+    /// for floating-point types so that values such as "1E5" can be parsed.
+    /// </remarks>
+    public NumberStyles Style { get; set; } = s_defaultStyle;
+
+    private static readonly NumberStyles s_defaultStyle = typeof(T).ImplementsGenericInterface(typeof(IFloatingPoint<>), out _)
+        ? NumberStyles.Number | NumberStyles.AllowExponent
+        : NumberStyles.Number;
 
     private static readonly bool s_isInteger = IsIntegerType(typeof(T));
 

@@ -466,4 +466,25 @@ public class INumberBaseMapperTests
         Assert.Equal(2.7m, decimalResult.Value);
     }
 #endif
+
+#if LIBRARY_NET8
+    [Fact]
+    public void Style_GetDefault_ReturnsExpected()
+    {
+        Assert.Equal(NumberStyles.Number, new INumberBaseMapper<int>().Style);
+        Assert.Equal(NumberStyles.Number, new INumberBaseMapper<long>().Style);
+        Assert.Equal(NumberStyles.Number | NumberStyles.AllowExponent, new INumberBaseMapper<double>().Style);
+        Assert.Equal(NumberStyles.Number | NumberStyles.AllowExponent, new INumberBaseMapper<float>().Style);
+        Assert.Equal(NumberStyles.Number | NumberStyles.AllowExponent, new INumberBaseMapper<decimal>().Style);
+        Assert.Equal(NumberStyles.Number | NumberStyles.AllowExponent, new INumberBaseMapper<Half>().Style);
+    }
+
+    [Fact]
+    public void Map_ExponentStringValueFloatingPoint_ReturnsSuccess()
+    {
+        var result = new INumberBaseMapper<double>().Map(new ReadCellResult(0, "1E5", preserveFormatting: false));
+        Assert.True(result.Succeeded);
+        Assert.Equal(100000.0, result.Value);
+    }
+#endif
 }
