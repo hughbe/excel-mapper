@@ -379,4 +379,53 @@ public class INumberBaseMapperTests
 
         public void Reset() => throw new NotImplementedException();
     }
+
+    [Theory]
+    [InlineData(2.7)]
+    [InlineData(-0.5)]
+    [InlineData(1e-10)]
+    public void Map_FractionalDoubleValueToInteger_ReturnsInvalid(double value)
+    {
+        var reader = new MockExcelDataReader
+        {
+            GetValueAction = (i) => value
+        };
+        var item = new INumberBaseMapper<int>();
+
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.False(result.Succeeded);
+        Assert.IsType<FormatException>(result.Exception);
+    }
+
+    [Theory]
+    [InlineData(2.0, 2)]
+    [InlineData(-3.0, -3)]
+    [InlineData(0.0, 0)]
+    public void Map_WholeDoubleValueToInteger_ReturnsSuccess(double value, int expected)
+    {
+        var reader = new MockExcelDataReader
+        {
+            GetValueAction = (i) => value
+        };
+        var item = new INumberBaseMapper<int>();
+
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.True(result.Succeeded);
+        Assert.Equal(expected, result.Value);
+    }
+
+    [Fact]
+    public void Map_FractionalDoubleValueToFloatingPoint_ReturnsSuccess()
+    {
+        var reader = new MockExcelDataReader
+        {
+            GetValueAction = (i) => 2.7
+        };
+
+        var doubleResult = new INumberBaseMapper<double>().Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.Equal(2.7, doubleResult.Value);
+
+        var decimalResult = new INumberBaseMapper<decimal>().Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.Equal(2.7m, decimalResult.Value);
+    }
 }

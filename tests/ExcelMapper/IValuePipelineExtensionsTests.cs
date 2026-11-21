@@ -1846,4 +1846,51 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         var mapper = map.Mappers.OfType<INumberBaseMapper<Complex>>().Single();
         Assert.Same(provider, mapper.Provider);
     }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(330)]
+    [InlineData(-480)]
+    public void WithOffset_InvokeDateTimeOffset_Success(int minutes)
+    {
+        var map = Map(t => t.DateTimeOffsetValue);
+        Assert.Same(map, map.WithOffset(TimeSpan.FromMinutes(minutes)));
+
+        var mapper = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Equal(TimeSpan.FromMinutes(minutes), mapper.Offset);
+    }
+
+    [Fact]
+    public void WithOffset_InvokeNullableDateTimeOffset_Success()
+    {
+        var map = Map(t => t.NullableDateTimeOffsetValue);
+        Assert.Same(map, map.WithOffset(TimeSpan.Zero));
+
+        var mapper = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Equal(TimeSpan.Zero, mapper.Offset);
+    }
+
+    [Fact]
+    public void WithOffset_InvokeNotMapped_AddsMapper()
+    {
+        var map = Map(t => t.DateTimeOffsetValue).WithMappers([]);
+        Assert.Same(map, map.WithOffset(TimeSpan.Zero));
+
+        var mapper = map.Mappers.OfType<DateTimeOffsetMapper>().Single();
+        Assert.Equal(TimeSpan.Zero, mapper.Offset);
+    }
+
+    [Fact]
+    public void WithOffset_InvalidOffset_ThrowsArgumentOutOfRangeException()
+    {
+        var map = Map(t => t.DateTimeOffsetValue);
+        Assert.Throws<ArgumentOutOfRangeException>("value", () => map.WithOffset(TimeSpan.FromHours(15)));
+    }
+
+    [Fact]
+    public void WithOffset_NullMap_ThrowsArgumentNullException()
+    {
+        Assert.Throws<ArgumentNullException>("map", () => ((IValuePipeline<DateTimeOffset>)null!).WithOffset(TimeSpan.Zero));
+        Assert.Throws<ArgumentNullException>("map", () => ((IValuePipeline<DateTimeOffset?>)null!).WithOffset(TimeSpan.Zero));
+    }
 }

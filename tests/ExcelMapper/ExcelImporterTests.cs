@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Text;
+using System.IO;
 using System.Linq;
 using ExcelDataReader;
 using ExcelDataReader.Exceptions;
@@ -1195,4 +1196,99 @@ public class ExcelImporterTests
     {
         public string? StringValue { get; set; }
     }
+
+    [Fact]
+    public void Ctor_StreamCsvReaderConfiguration_UsesSeparator()
+    {
+        var configuration = new ExcelReaderConfiguration { AutodetectSeparators = [';'] };
+        using var importer = new ExcelImporter(new MemoryStream(Encoding.UTF8.GetBytes("a,b;c\n1,2;3\n")), ExcelImporterFileType.Csv, configuration);
+
+        var sheet = importer.ReadSheet();
+        Assert.Equal(["a,b", "c"], sheet.ReadHeading().ColumnNames);
+        Assert.Equal(["1,2", "3"], sheet.ReadRow<string[]>());
+    }
+
+    [Fact]
+    public void Ctor_StreamCsvNullReaderConfiguration_UsesDefaults()
+    {
+        using var importer = new ExcelImporter(new MemoryStream(Encoding.UTF8.GetBytes("a,b\n1,2\n")), ExcelImporterFileType.Csv, null);
+        Assert.Equal(["a", "b"], importer.ReadSheet().ReadHeading().ColumnNames);
+    }
+
+    [Fact]
+    public void Ctor_PathReaderConfiguration_Success()
+    {
+        using var importer = new ExcelImporter(Helpers.GetResourcePath("Primitives.xlsx"), ExcelImporterFileType.Excel, new ExcelReaderConfiguration());
+        Assert.Equal("Primitives", importer.ReadSheet().Name);
+    }
+
+    [Fact]
+    public void Ctor_StreamExcelReaderConfiguration_Success()
+    {
+        using var stream = Helpers.GetResource("Primitives.xlsx");
+        using var importer = new ExcelImporter(stream, ExcelImporterFileType.Excel, new ExcelReaderConfiguration());
+        Assert.Equal(3, importer.NumberOfSheets);
+    }
+
+    [Fact]
+    public void Ctor_InvalidFileTypeReaderConfiguration_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>("fileType", () => new ExcelImporter(new MemoryStream(), (ExcelImporterFileType)99, null));
+        Assert.Throws<ArgumentException>("fileType", () => new ExcelImporter(Helpers.GetResourcePath("Primitives.xlsx"), (ExcelImporterFileType)99, null));
+    }
+
+    [Fact]
+    public void Ctor_Any_RegistersCodePageEncodings()
+    {
+        using var importer = Helpers.GetCsvImporter("a\n1\n");
+
+        // Windows-1252 is used by many .xls and CSV files and isn't available on .NET by default.
+        Assert.Equal(1252, Encoding.GetEncoding(1252).CodePage);
+    }
+
+    [Fact]
+    public void StaticReadRows_Path_ReadsFirstSheet()
+    {
+        var rows = ExcelImporter.ReadRows<string[]>(Helpers.GetResourcePath("Primitives.xlsx"));
+        Assert.NotEmpty(rows);
+    }
+
+    [Fact]
+    public void StaticReadRows_PathCsv_Success()
+    {
+        var rows = ExcelImporter.ReadRows<string[]>(Helpers.GetResourcePath("Primitives.csv"), ExcelImporterFileType.Csv);
+        Assert.NotEmpty(rows);
+    }
+
+    [Fact]
+    public void StaticReadRows_StreamWithConfiguration_Success()
+    {
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes("Full Name,Age\nAlice,30\nBob,25\n"));
+        var rows = ExcelImporter.ReadRows<StaticReadRowsPerson>(stream, ExcelImporterFileType.Csv, c =>
+            c.RegisterClassMap<StaticReadRowsPerson>(m =>
+            {
+                m.Map(p => p.Name).WithColumnName("Full Name");
+                m.Map(p => p.Age);
+            }));
+
+        Assert.Equal([new StaticReadRowsPerson("Alice", 30), new StaticReadRowsPerson("Bob", 25)], rows);
+    }
+
+    [Fact]
+    public void StaticReadRows_Stream_ClosesStream()
+    {
+        // Matches disposing an importer created from a stream: ExcelDataReader closes the stream.
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes("Name,Age\nAlice,30\n"));
+        Assert.Single(ExcelImporter.ReadRows<StaticReadRowsPerson>(stream, ExcelImporterFileType.Csv));
+        Assert.False(stream.CanRead);
+    }
+
+    [Fact]
+    public void StaticReadRows_NullArguments_Throw()
+    {
+        Assert.Throws<ArgumentNullException>("path", () => ExcelImporter.ReadRows<StaticReadRowsPerson>((string)null!));
+        Assert.Throws<ArgumentNullException>("stream", () => ExcelImporter.ReadRows<StaticReadRowsPerson>((Stream)null!));
+    }
+
+    public record StaticReadRowsPerson(string Name, int Age);
 }

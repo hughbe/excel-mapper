@@ -324,4 +324,40 @@ public class TimeOnlyMapperTests
 
         public void Reset() => throw new NotImplementedException();
     }
+
+    [Theory]
+    [InlineData(0.0, 0, 0)]
+    [InlineData(0.25, 6, 0)]
+    [InlineData(0.5, 12, 0)]
+    [InlineData(0.75, 18, 0)]
+    public void Map_FractionOfDayValue_ReturnsSuccess(double value, int expectedHours, int expectedMinutes)
+    {
+        var reader = new MockExcelDataReader
+        {
+            GetValueAction = (i) => value
+        };
+        var item = new TimeOnlyMapper();
+
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.True(result.Succeeded);
+        Assert.Equal(new TimeOnly(expectedHours, expectedMinutes), Assert.IsType<TimeOnly>(result.Value));
+        Assert.Null(result.Exception);
+    }
+
+    [Theory]
+    [InlineData(1.0)]
+    [InlineData(1.5)]
+    [InlineData(-0.25)]
+    public void Map_FractionOfDayValueOutOfRange_ReturnsInvalid(double value)
+    {
+        var reader = new MockExcelDataReader
+        {
+            GetValueAction = (i) => value
+        };
+        var item = new TimeOnlyMapper();
+
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.False(result.Succeeded);
+        Assert.NotNull(result.Exception);
+    }
 }

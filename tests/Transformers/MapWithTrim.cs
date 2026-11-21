@@ -29,4 +29,16 @@ public class MapWithTrimTests
     {
         public string Value { get; set; } = default!;
     }
+
+    [Fact]
+    public void ReadRow_DateCellWithFormats_KeepsDate()
+    {
+        // The cell is a real date. Trimming used to turn it into culture-formatted text, which then
+        // failed to parse with the custom format.
+        using var importer = Helpers.GetImporter("DateTimes.xlsx");
+        importer.Configuration.RegisterClassMap<DateTime>(c => c.Map(p => p).WithFormats("yyyy-MM-dd").WithTrim());
+
+        var sheet = importer.ReadSheet();
+        Assert.Equal(new DateTime(2017, 07, 19), sheet.ReadRow<DateTime>());
+    }
 }

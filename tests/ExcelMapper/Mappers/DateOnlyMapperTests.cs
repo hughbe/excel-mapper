@@ -297,4 +297,33 @@ public class DateOnlyMapperTests
 
         public void Reset() => throw new NotImplementedException();
     }
+
+    [Fact]
+    public void Map_SerialNumberValue_ReturnsSuccess()
+    {
+        var reader = new MockExcelDataReader
+        {
+            GetValueAction = (i) => new DateTime(2024, 3, 4, 12, 0, 0).ToOADate()
+        };
+        var item = new DateOnlyMapper();
+
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.True(result.Succeeded);
+        Assert.Equal(new DateOnly(2024, 3, 4), Assert.IsType<DateOnly>(result.Value));
+        Assert.Null(result.Exception);
+    }
+
+    [Fact]
+    public void Map_SerialNumberValueOutOfRange_ReturnsInvalid()
+    {
+        var reader = new MockExcelDataReader
+        {
+            GetValueAction = (i) => 1e10
+        };
+        var item = new DateOnlyMapper();
+
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.False(result.Succeeded);
+        Assert.NotNull(result.Exception);
+    }
 }

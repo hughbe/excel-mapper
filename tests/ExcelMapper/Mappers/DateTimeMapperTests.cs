@@ -284,4 +284,36 @@ public class DateTimeMapperTests
 
         public void Reset() => throw new NotImplementedException();
     }
+
+    [Fact]
+    public void Map_SerialNumberValue_ReturnsSuccess()
+    {
+        var expected = new DateTime(2024, 3, 4, 12, 0, 0);
+        var reader = new MockExcelDataReader
+        {
+            GetValueAction = (i) => expected.ToOADate()
+        };
+        var item = new DateTimeMapper();
+
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.True(result.Succeeded);
+        Assert.Equal(expected, Assert.IsType<DateTime>(result.Value));
+        Assert.Null(result.Exception);
+    }
+
+    [Theory]
+    [InlineData(1e10)]
+    [InlineData(-1e10)]
+    public void Map_SerialNumberValueOutOfRange_ReturnsInvalid(double value)
+    {
+        var reader = new MockExcelDataReader
+        {
+            GetValueAction = (i) => value
+        };
+        var item = new DateTimeMapper();
+
+        var result = item.Map(new ReadCellResult(0, reader, preserveFormatting: false));
+        Assert.False(result.Succeeded);
+        Assert.NotNull(result.Exception);
+    }
 }

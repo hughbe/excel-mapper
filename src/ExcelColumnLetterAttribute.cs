@@ -13,11 +13,10 @@ public class ExcelColumnLetterAttribute : ExcelColumnIndexAttribute
     /// <param name="letter">The column's letters, such as "A", "C" or "AB". Case-insensitive.</param>
     public ExcelColumnLetterAttribute(string letter) : base(ExcelRange.ParseColumnLetters(letter, nameof(letter)))
     {
-        Letter = letter.Trim().ToUpperInvariant();
     }
 
     /// <summary>
-    /// Gets the column's letters, such as "C".
+    /// Gets the column's letters, such as "C". This always matches <see cref="ExcelColumnIndexAttribute.Index"/>.
     /// </summary>
-    public string Letter { get; }
+    public string Letter => ExcelRange.GetColumnLetters(Index);
 }

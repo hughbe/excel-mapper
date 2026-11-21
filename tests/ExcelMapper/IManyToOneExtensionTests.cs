@@ -249,4 +249,40 @@ public class IManyToOneMapExtensionsTests
         public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
             => throw new NotImplementedException();
     }
+
+    [Fact]
+    public void WithColumnsMatching_Predicate_Success()
+    {
+        Func<string, bool> predicate = columnName => columnName.StartsWith("Column");
+        var map = new CustomManyToOneMap().WithColumnNames("ColumnNames");
+        Assert.Same(map, map.WithColumnsMatching(predicate));
+
+        var factory = Assert.IsType<ColumnsMatchingReaderFactory>(map.ReaderFactory);
+        Assert.Same(predicate, Assert.IsType<PredicateColumnMatcher>(factory.Matcher).Predicate);
+    }
+
+    [Fact]
+    public void WithColumnsMatching_NullPredicate_ThrowsArgumentNullException()
+    {
+        var map = new CustomManyToOneMap().WithColumnNames("ColumnNames");
+        Assert.Throws<ArgumentNullException>("predicate", () => map.WithColumnsMatching((Func<string, bool>)null!));
+    }
+
+    [Fact]
+    public void WithColumnsMatching_Regex_Success()
+    {
+        var regex = new System.Text.RegularExpressions.Regex("^Column");
+        var map = new CustomManyToOneMap().WithColumnNames("ColumnNames");
+        Assert.Same(map, map.WithColumnsMatching(regex));
+
+        var factory = Assert.IsType<ColumnsMatchingReaderFactory>(map.ReaderFactory);
+        Assert.Same(regex, Assert.IsType<RegexColumnMatcher>(factory.Matcher).Regex);
+    }
+
+    [Fact]
+    public void WithColumnsMatching_NullRegex_ThrowsArgumentNullException()
+    {
+        var map = new CustomManyToOneMap().WithColumnNames("ColumnNames");
+        Assert.Throws<ArgumentNullException>("regex", () => map.WithColumnsMatching((System.Text.RegularExpressions.Regex)null!));
+    }
 }

@@ -1,4 +1,5 @@
-﻿namespace ExcelMapper.Tests;
+﻿using System.Linq;
+namespace ExcelMapper.Tests;
 
 public class MapTrimAttributeTests
 {
@@ -69,5 +70,23 @@ public class MapTrimAttributeTests
 
         var row3 = sheet.ReadRow<StringTrimValue>();
         Assert.Null(row3.Value);
+    }
+
+    [Fact]
+    public void ReadRows_TrimmedTextAndNumberFromCsv_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Age\n\"  Alice  \",\" 30 \"\n");
+        var row = importer.ReadSheet().ReadRows<TrimmedTextAndNumber>().Single();
+        Assert.Equal("Alice", row.Name);
+        Assert.Equal(30, row.Age);
+    }
+
+    public class TrimmedTextAndNumber
+    {
+        [ExcelTrimString]
+        public string Name { get; set; } = "";
+
+        [ExcelTrimString]
+        public int Age { get; set; }
     }
 }

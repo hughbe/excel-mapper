@@ -433,4 +433,78 @@ public class MapDateTimeOffsetTests
     {
         public int Value { get; set; }
     }
+
+    private static readonly DateTime s_offsetDate = new(2024, 3, 4, 5, 6, 7);
+
+    public class OffsetRow
+    {
+        public DateTimeOffset When { get; set; }
+    }
+
+    public class OffsetNullableRow
+    {
+        public DateTimeOffset? When { get; set; }
+    }
+
+    public class OffsetUtcRow
+    {
+        [ExcelOffset("+00:00")]
+        public DateTimeOffset When { get; set; }
+    }
+
+    public class OffsetNegativeRow
+    {
+        [ExcelOffset("-08:00")]
+        public DateTimeOffset When { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_DateCellDefaultOffset_UsesLocalOffset()
+    {
+        using var importer = XlsxBuilder.Create(["When"], [s_offsetDate]);
+        var when = importer.ReadSheet().ReadRows<OffsetRow>().Single().When;
+        Assert.Equal(s_offsetDate, when.DateTime);
+        Assert.Equal(TimeZoneInfo.Local.GetUtcOffset(s_offsetDate), when.Offset);
+    }
+
+    [Fact]
+    public void ReadRows_DateCellWithOffset_UsesOffset()
+    {
+        using var importer = XlsxBuilder.Create(["When"], [s_offsetDate]);
+        importer.Configuration.RegisterClassMap<OffsetRow>(c => c.Map(p => p.When).WithOffset(TimeSpan.FromHours(5.5)));
+
+        var when = importer.ReadSheet().ReadRows<OffsetRow>().Single().When;
+        Assert.Equal(new DateTimeOffset(s_offsetDate, TimeSpan.FromHours(5.5)), when);
+        Assert.Equal(TimeSpan.FromHours(5.5), when.Offset);
+    }
+
+    [Fact]
+    public void ReadRows_NullableAndSerialNumberWithOffset_UsesOffset()
+    {
+        using var importer = XlsxBuilder.Create(["When"], [s_offsetDate.ToOADate()], [null]);
+        importer.Configuration.RegisterClassMap<OffsetNullableRow>(c => c.Map(p => p.When).WithOffset(TimeSpan.Zero));
+
+        var rows = importer.ReadSheet().ReadRows<OffsetNullableRow>().ToArray();
+        Assert.Equal(new DateTimeOffset(s_offsetDate, TimeSpan.Zero), rows[0].When);
+        Assert.Null(rows[1].When);
+    }
+
+    [Fact]
+    public void ReadRows_ExcelOffsetAttribute_UsesOffset()
+    {
+        using var utc = XlsxBuilder.Create(["When"], [s_offsetDate]);
+        Assert.Equal(new DateTimeOffset(s_offsetDate, TimeSpan.Zero), utc.ReadSheet().ReadRows<OffsetUtcRow>().Single().When);
+
+        using var negative = XlsxBuilder.Create(["When"], [s_offsetDate]);
+        Assert.Equal(new DateTimeOffset(s_offsetDate, TimeSpan.FromHours(-8)), negative.ReadSheet().ReadRows<OffsetNegativeRow>().Single().When);
+    }
+
+    [Fact]
+    public void ReadRows_TextWithOffset_KeepsTextOffset()
+    {
+        using var importer = Helpers.GetCsvImporter("When\n2024-03-04T05:06:07+02:00\n");
+        importer.Configuration.RegisterClassMap<OffsetRow>(c => c.Map(p => p.When).WithOffset(TimeSpan.Zero).WithFormats("yyyy-MM-ddTHH:mm:sszzz"));
+
+        Assert.Equal(TimeSpan.FromHours(2), importer.ReadSheet().ReadRows<OffsetRow>().Single().When.Offset);
+    }
 }
