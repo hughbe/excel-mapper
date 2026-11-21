@@ -199,6 +199,123 @@ public class TypedConverterTests
         Assert.IsType<ArgumentException>(exception.InnerException);
     }
 
+    [Fact]
+    public void ReadRows_DateAndTimeText_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("Duration,Offset\n01:30:00,2024-03-04T10:30:00+01:00\n");
+        var row = importer.ReadSheet().ReadRows<DateAndTimeRow>().Single();
+        Assert.Equal(TimeSpan.FromMinutes(90), row.Duration);
+        Assert.Equal(new DateTimeOffset(2024, 3, 4, 10, 30, 0, TimeSpan.FromHours(1)), row.Offset);
+    }
+
+    [Fact]
+    public void ReadRows_DateAndTimeXlsx_ReturnsExpected()
+    {
+        // Typed cells, and plain numbers: a number of days and a serial date.
+        using var importer = XlsxBuilder.Create(
+            ["Duration", "Offset"],
+            [new XlsxBuilder.Duration(TimeSpan.FromHours(30)), new DateTime(2024, 3, 4, 10, 30, 0)],
+            [0.25, 45000.0]);
+        importer.Configuration.RegisterClassMap<DateAndTimeRow>(c =>
+        {
+            c.Map(r => r.Duration);
+            c.Map(r => r.Offset).WithOffset(TimeSpan.FromHours(2));
+        });
+        var rows = importer.ReadSheet().ReadRows<DateAndTimeRow>().ToArray();
+        Assert.Equal(TimeSpan.FromHours(30), rows[0].Duration);
+        Assert.Equal(new DateTimeOffset(2024, 3, 4, 10, 30, 0, TimeSpan.FromHours(2)), rows[0].Offset);
+        Assert.Equal(TimeSpan.FromHours(6), rows[1].Duration);
+        Assert.Equal(new DateTimeOffset(2023, 3, 15, 0, 0, 0, TimeSpan.FromHours(2)), rows[1].Offset);
+    }
+
+    [Fact]
+    public void ReadRows_DateTimeOffsetOutOfRangeForOffset_Throws()
+    {
+        // The latest Excel date with a negative offset is after DateTimeOffset.MaxValue in UTC.
+        using var importer = XlsxBuilder.Create(["Offset"], [new DateTime(9999, 12, 31, 23, 0, 0)]);
+        importer.Configuration.RegisterClassMap<DateAndTimeRow>(c => c.Map(r => r.Offset).WithOffset(TimeSpan.FromHours(-14)));
+        var sheet = importer.ReadSheet();
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<DateAndTimeRow>().ToArray());
+        Assert.Equal("A2", exception.CellAddress);
+        Assert.IsType<ArgumentOutOfRangeException>(exception.InnerException);
+    }
+
+    [Fact]
+    public void ReadRows_NullableDateAndTime_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("Duration,Offset\n01:00:00,2024-03-04T10:30:00Z\n,\n");
+        var rows = importer.ReadSheet().ReadRows<NullableDateAndTimeRow>().ToArray();
+        Assert.Equal(TimeSpan.FromHours(1), rows[0].Duration);
+        Assert.Equal(new DateTimeOffset(2024, 3, 4, 10, 30, 0, TimeSpan.Zero), rows[0].Offset);
+        Assert.Null(rows[1].Duration);
+        Assert.Null(rows[1].Offset);
+    }
+
+    [Theory]
+    [InlineData("Duration", "A2")]
+    [InlineData("Offset", "B2")]
+    public void ReadRows_NullableDateAndTimeInvalid_Throws(string column, string address)
+    {
+        using var importer = Helpers.GetCsvImporter("Duration,Offset\n" + (column == "Duration" ? "x," : ",x") + "\n");
+        var sheet = importer.ReadSheet();
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<NullableDateAndTimeRow>().ToArray());
+        Assert.Equal(address, exception.CellAddress);
+        Assert.IsType<FormatException>(exception.InnerException);
+    }
+
+    public class DateAndTimeRow
+    {
+        public TimeSpan Duration { get; set; }
+        public DateTimeOffset Offset { get; set; }
+    }
+
+    public class NullableDateAndTimeRow
+    {
+        public TimeSpan? Duration { get; set; }
+        public DateTimeOffset? Offset { get; set; }
+    }
+
+#if LIBRARY_NET8
+    [Fact]
+    public void ReadRows_DateOnlyAndTimeOnly_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("Date,Time\n2024-03-04,14:30\n,\n");
+        var rows = importer.ReadSheet().ReadRows<DateOnlyRow>().ToArray();
+        Assert.Equal(new DateOnly(2024, 3, 4), rows[0].Date);
+        Assert.Equal(new TimeOnly(14, 30), rows[0].Time);
+        Assert.Null(rows[1].Date);
+        Assert.Null(rows[1].Time);
+    }
+
+    [Fact]
+    public void ReadRows_DateOnlyAndTimeOnlyXlsx_ReturnsExpected()
+    {
+        using var importer = XlsxBuilder.Create(["Date", "Time"], [new DateOnly(2024, 3, 4), new TimeOnly(9, 15)], [45000.0, 0.25]);
+        var rows = importer.ReadSheet().ReadRows<DateOnlyRow>().ToArray();
+        Assert.Equal(new DateOnly(2024, 3, 4), rows[0].Date);
+        Assert.Equal(new TimeOnly(9, 15), rows[0].Time);
+        Assert.Equal(new DateOnly(2023, 3, 15), rows[1].Date);
+        Assert.Equal(new TimeOnly(6, 0), rows[1].Time);
+    }
+
+    [Theory]
+    [InlineData("Date", "A2")]
+    [InlineData("Time", "B2")]
+    public void ReadRows_DateOnlyAndTimeOnlyInvalid_Throws(string column, string address)
+    {
+        using var importer = Helpers.GetCsvImporter("Date,Time\n" + (column == "Date" ? "x," : ",x") + "\n");
+        var sheet = importer.ReadSheet();
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<DateOnlyRow>().ToArray());
+        Assert.Equal(address, exception.CellAddress);
+    }
+
+    public class DateOnlyRow
+    {
+        public DateOnly? Date { get; set; }
+        public TimeOnly? Time { get; set; }
+    }
+#endif
+
     public class EnumRow
     {
         public DayOfWeek Day { get; set; }

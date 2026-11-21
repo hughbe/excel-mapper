@@ -6,7 +6,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a DateOnly.
 /// </summary>
-public class DateOnlyMapper : ICellMapper, IFormatsCellMapper
+public class DateOnlyMapper : ICellMapper, IFormatsCellMapper, ICellConverter<DateOnly>, ICellConverter<DateOnly?>
 {
     private string[] _formats = ["d"];
 
@@ -73,6 +73,39 @@ public class DateOnlyMapper : ICellMapper, IFormatsCellMapper
 
         // Only create the exception (by parsing again) if it is needed.
         return InvalidResult(stringValue, formats, provider, style);
+    }
+
+    CellConversion ICellConverter<DateOnly>.Convert(ReadCellResult cell, out DateOnly value)
+    {
+        var cellValue = cell.GetValue();
+        if (cellValue is DateTime dateTimeValue || ExcelDateUtilities.TryGetDateTime(cellValue, out dateTimeValue))
+        {
+            value = DateOnly.FromDateTime(dateTimeValue);
+            return CellConversion.Success;
+        }
+
+        var stringValue = cell.GetString();
+        var provider = Provider;
+        var style = Style;
+        try
+        {
+            return DateOnly.TryParseExact(stringValue, Formats, provider, style, out value) ||
+                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateOnly.TryParseExact(stringValue, FormatUtilities.DefaultDateOnlyFormats, provider, style, out value))
+                ? CellConversion.Success
+                : CellConversion.Invalid;
+        }
+        catch
+        {
+            value = default;
+            return CellConversion.Invalid;
+        }
+    }
+
+    CellConversion ICellConverter<DateOnly?>.Convert(ReadCellResult cell, out DateOnly? value)
+    {
+        var conversion = ((ICellConverter<DateOnly>)this).Convert(cell, out var result);
+        value = conversion == CellConversion.Invalid ? null : result;
+        return conversion;
     }
 
     // A separate method so that the closure capturing these values is only allocated for invalid
