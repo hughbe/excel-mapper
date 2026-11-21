@@ -13,92 +13,59 @@ internal static class MemberMapper
 {
     internal static ICellReaderFactory GetDefaultCellReaderFactory(MemberInfo member)
     {
-        // Check for ExcelColumnName attributes - try to avoid materializing if possible
-        var columnNameAttributes = member.GetCustomAttributes<ExcelColumnNameAttribute>();
-        var enumerator = columnNameAttributes.GetEnumerator();
-        try
+        var columnNameAttributes = MemberAttributes.GetMany<ExcelColumnNameAttribute>(member);
+        if (columnNameAttributes.Length == 1)
         {
-            if (enumerator.MoveNext())
-            {
-                var first = enumerator.Current;
-                if (!enumerator.MoveNext())
-                {
-                    // Only one attribute
-                    return new ColumnNameReaderFactory(first.Name, first.Comparison);
-                }
-                
-                // Multiple attributes - need to materialize remaining
-                // Pre-allocate with small capacity to reduce reallocations (most cases have 2-4 attributes)
-                const int InitialCapacity = 4;
-                var factories = new List<ICellReaderFactory>(capacity: InitialCapacity) 
-                { 
-                    new ColumnNameReaderFactory(first.Name, first.Comparison),
-                    new ColumnNameReaderFactory(enumerator.Current.Name, enumerator.Current.Comparison)
-                };
-                while (enumerator.MoveNext())
-                {
-                    factories.Add(new ColumnNameReaderFactory(enumerator.Current.Name, enumerator.Current.Comparison));
-                }
-                
-                return new CompositeCellsReaderFactory([.. factories]);
-            }
-        }
-        finally
-        {
-            enumerator.Dispose();
+            return new ColumnNameReaderFactory(columnNameAttributes[0].Name, columnNameAttributes[0].Comparison);
         }
 
-        // [ExcelColumnNames] attributes still represents one column, but multiple options.
-        var columnNamesAttribute = member.GetCustomAttribute<ExcelColumnNamesAttribute>();
+        if (columnNameAttributes.Length > 1)
+        {
+            var factories = new ICellReaderFactory[columnNameAttributes.Length];
+            for (int i = 0; i < factories.Length; i++)
+            {
+                factories[i] = new ColumnNameReaderFactory(columnNameAttributes[i].Name, columnNameAttributes[i].Comparison);
+            }
+
+            return new CompositeCellsReaderFactory(factories);
+        }
+
+        var columnNamesAttribute = MemberAttributes.Get<ExcelColumnNamesAttribute>(member);
         if (columnNamesAttribute != null)
         {
-            return new ColumnNamesReaderFactory(columnNamesAttribute.Names, columnNamesAttribute.Comparison);
+            return new ColumnNamesReaderFactory([.. columnNamesAttribute.Names], columnNamesAttribute.Comparison);
         }
 
         // A single [ExcelColumnNameMatching] attributes still represents one column, but multiple options.
-        var columnNameMatchingAttribute = member.GetCustomAttribute<ExcelColumnMatchingAttribute>();
+        var columnNameMatchingAttribute = MemberAttributes.Get<ExcelColumnMatchingAttribute>(member);
         if (columnNameMatchingAttribute != null)
         {
             var matcher = (IExcelColumnMatcher)Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments)!;
             return new ColumnsMatchingReaderFactory(matcher);
         }
 
-        // Check for ExcelColumnIndex attributes - try to avoid materializing if possible
-        var columnIndexAttributes = member.GetCustomAttributes<ExcelColumnIndexAttribute>();
-        var indexEnumerator = columnIndexAttributes.GetEnumerator();
-        try
+        var columnIndexAttributes = MemberAttributes.GetMany<ExcelColumnIndexAttribute>(member);
+        if (columnIndexAttributes.Length == 1)
         {
-            if (indexEnumerator.MoveNext())
-            {
-                var first = indexEnumerator.Current;
-                if (!indexEnumerator.MoveNext())
-                {
-                    // Only one attribute
-                    return new ColumnIndexReaderFactory(first.Index);
-                }
-                
-                // Multiple attributes - need to materialize remaining
-                // Pre-allocate with small capacity to reduce reallocations (most cases have 2-4 attributes)
-                const int InitialCapacity = 4;
-                var indices = new List<int>(capacity: InitialCapacity) { first.Index, indexEnumerator.Current.Index };
-                while (indexEnumerator.MoveNext())
-                {
-                    indices.Add(indexEnumerator.Current.Index);
-                }
-                
-                return new ColumnIndicesReaderFactory([.. indices]);
-            }
+            return new ColumnIndexReaderFactory(columnIndexAttributes[0].Index);
         }
-        finally
+
+        if (columnIndexAttributes.Length > 1)
         {
-            indexEnumerator.Dispose();
+            var indices = new int[columnIndexAttributes.Length];
+            for (int i = 0; i < indices.Length; i++)
+            {
+                indices[i] = columnIndexAttributes[i].Index;
+            }
+
+            return new ColumnIndicesReaderFactory(indices);
         }
 
         // [ExcelColumnIndices] attributes still represents one column, but multiple options.
-        var columnIndicesAttribute = member.GetCustomAttribute<ExcelColumnIndicesAttribute>();
+        var columnIndicesAttribute = MemberAttributes.Get<ExcelColumnIndicesAttribute>(member);
         if (columnIndicesAttribute != null)
         {
-            return new ColumnIndicesReaderFactory(columnIndicesAttribute.Indices);
+            return new ColumnIndicesReaderFactory([.. columnIndicesAttribute.Indices]);
         }
 
         return new ColumnNameReaderFactory(member.Name);
@@ -109,20 +76,20 @@ internal static class MemberMapper
         if (member != null)
         {
             // If the member has a ExcelSeparator attribute, use that separator.
-            if (member.GetCustomAttribute<ExcelSeparatorsAttribute>() is { } separatorsAttribute)
+            if (MemberAttributes.Get<ExcelSeparatorsAttribute>(member) is { } separatorsAttribute)
             {
                 if (separatorsAttribute.StringSeparators is { } stringSeparators)
                 {
                     return new StringSplitReaderFactory(innerReaderFactory)
                     {
-                        Separators = stringSeparators,
+                        Separators = [.. stringSeparators],
                         Options = separatorsAttribute.Options
                     };
                 }
 
                 return new CharSplitReaderFactory(innerReaderFactory)
                 {
-                    Separators = separatorsAttribute.CharSeparators!,
+                    Separators = [.. separatorsAttribute.CharSeparators!],
                     Options = separatorsAttribute.Options
                 };
             }
@@ -139,14 +106,14 @@ internal static class MemberMapper
         }
 
         // [ExcelColumnNames] attributes represent multiple columns.
-        var columnNamesAttribute = member.GetCustomAttribute<ExcelColumnNamesAttribute>();
+        var columnNamesAttribute = MemberAttributes.Get<ExcelColumnNamesAttribute>(member);
         if (columnNamesAttribute != null)
         {
-            return new ColumnNamesReaderFactory(columnNamesAttribute.Names, columnNamesAttribute.Comparison);
+            return new ColumnNamesReaderFactory([.. columnNamesAttribute.Names], columnNamesAttribute.Comparison);
         }
 
         // [ExcelColumnsMatchingAttribute] attributes represent multiple columns.
-        var columnNameMatchingAttribute = member.GetCustomAttribute<ExcelColumnsMatchingAttribute>();
+        var columnNameMatchingAttribute = MemberAttributes.Get<ExcelColumnsMatchingAttribute>(member);
         if (columnNameMatchingAttribute != null)
         {
             var matcher = (IExcelColumnMatcher)Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments)!;
@@ -154,10 +121,10 @@ internal static class MemberMapper
         }
 
         // [ExcelColumnIndices] attributes represents multiple columns.
-        var columnIndicesAttribute = member.GetCustomAttribute<ExcelColumnIndicesAttribute>();
+        var columnIndicesAttribute = MemberAttributes.Get<ExcelColumnIndicesAttribute>(member);
         if (columnIndicesAttribute != null)
         {
-            return new ColumnIndicesReaderFactory(columnIndicesAttribute.Indices);
+            return new ColumnIndicesReaderFactory([.. columnIndicesAttribute.Indices]);
         }
 
         return null;
@@ -168,7 +135,7 @@ internal static class MemberMapper
         var addDefaultMappers = true;
 
         // If the member has ExcelMapper attributes, add the mappers.
-        var mapperAttributes = member.GetCustomAttributes<ExcelMapperAttribute>();
+        var mapperAttributes = MemberAttributes.GetMany<ExcelMapperAttribute>(member);
         bool hasMapperAttributes = false;
         foreach (var mapperAttribute in mapperAttributes)
         {
@@ -184,7 +151,7 @@ internal static class MemberMapper
         }
 
         // If the member has any ExcelMappingDictionary attributes, add a MappingDictionaryMapper.
-        var mappingDictionaryAttributes = member.GetCustomAttributes<ExcelMappingDictionaryAttribute>();
+        var mappingDictionaryAttributes = MemberAttributes.GetMany<ExcelMappingDictionaryAttribute>(member);
         Dictionary<string, object?>? mappingDictionary = null;
         foreach (var mappingDictionaryAttribute in mappingDictionaryAttributes)
         {
@@ -196,14 +163,14 @@ internal static class MemberMapper
         {
             // If the member has a ExcelMappingDictionaryComparer attribute, get the comparer.
             IEqualityComparer<string>? comparer = null;
-            if (member.GetCustomAttribute<ExcelMappingDictionaryComparerAttribute>() is { } comparerAttribute)
+            if (MemberAttributes.Get<ExcelMappingDictionaryComparerAttribute>(member) is { } comparerAttribute)
             {
                 comparer = StringComparerUtilities.FromComparison(comparerAttribute.Comparison);
             }
 
             // If the member has a ExcelMappingDictionaryBehavior attribute, get the behavior.
             var behavior = MappingDictionaryMapperBehavior.Optional;
-            if (member.GetCustomAttribute<ExcelMappingDictionaryBehaviorAttribute>() is { } behaviorAttribute)
+            if (MemberAttributes.Get<ExcelMappingDictionaryBehaviorAttribute>(member) is { } behaviorAttribute)
             {
                 behavior = behaviorAttribute.Behavior;
             }
@@ -223,16 +190,16 @@ internal static class MemberMapper
     internal static void ModifyMappers(IValuePipeline pipeline, MemberInfo member)
     {
         // If the member has a ExcelFormats attribute, modify the mappers.
-        if (member.GetCustomAttribute<ExcelFormatsAttribute>() is { } formatsAttribute)
+        if (MemberAttributes.Get<ExcelFormatsAttribute>(member) is { } formatsAttribute)
         {
             foreach (var mapper in pipeline.Mappers.OfType<IFormatsCellMapper>())
             {
-                mapper.Formats = formatsAttribute.Formats;
+                mapper.Formats = [.. formatsAttribute.Formats];
             }
         }
 
         // If the member has a ExcelNumberStyle attribute, modify the mappers.
-        if (member.GetCustomAttribute<ExcelNumberStyleAttribute>() is { } numberStyleAttribute)
+        if (MemberAttributes.Get<ExcelNumberStyleAttribute>(member) is { } numberStyleAttribute)
         {
             foreach (var mapper in pipeline.Mappers.OfType<INumberStyleCellMapper>())
             {
@@ -241,7 +208,7 @@ internal static class MemberMapper
         }
 
         // If the member has a ExcelUri attribute, modify the mappers.
-        if (member.GetCustomAttribute<ExcelUriAttribute>() is { } uriKindAttribute)
+        if (MemberAttributes.Get<ExcelUriAttribute>(member) is { } uriKindAttribute)
         {
             foreach (var mapper in pipeline.Mappers.OfType<UriMapper>())
             {
@@ -249,7 +216,7 @@ internal static class MemberMapper
             }
         }
 
-        if (member.GetCustomAttribute<ExcelOffsetAttribute>() is { } offsetAttribute)
+        if (MemberAttributes.Get<ExcelOffsetAttribute>(member) is { } offsetAttribute)
         {
             foreach (var mapper in pipeline.Mappers.OfType<DateTimeOffsetMapper>())
             {
@@ -261,13 +228,13 @@ internal static class MemberMapper
     internal static IFallbackItem? GetDefaultEmptyValueFallback(MemberInfo member)
     {
         // If the member has a ExcelDefaultValue attribute, add the fallback.
-        if (member.GetCustomAttribute<ExcelDefaultValueAttribute>() is { } defaultValueAttribute)
+        if (MemberAttributes.Get<ExcelDefaultValueAttribute>(member) is { } defaultValueAttribute)
         {
             return new FixedValueFallback(defaultValueAttribute.Value);
         }
 
         // If the member has a ExcelEmptyFallback attribute, add the fallback.
-        if (member.GetCustomAttribute<ExcelEmptyFallbackAttribute>() is { } emptyFallback)
+        if (MemberAttributes.Get<ExcelEmptyFallbackAttribute>(member) is { } emptyFallback)
         {
             return (IFallbackItem)Activator.CreateInstance(emptyFallback.Type, emptyFallback.ConstructorArguments)!;
         }
@@ -278,13 +245,13 @@ internal static class MemberMapper
     internal static IFallbackItem? GetDefaultInvalidValueFallback(MemberInfo member)
     {
         // If the member has a ExcelInvalidValue attribute, add the fallback.
-        if (member.GetCustomAttribute<ExcelInvalidValueAttribute>() is { } invalidValueAttribute)
+        if (MemberAttributes.Get<ExcelInvalidValueAttribute>(member) is { } invalidValueAttribute)
         {
             return new FixedValueFallback(invalidValueAttribute.Value);
         }
 
         // If the member has a ExcelInvalidFallback attribute, add the fallback.
-        if (member.GetCustomAttribute<ExcelInvalidFallbackAttribute>() is { } invalidFallback)
+        if (MemberAttributes.Get<ExcelInvalidFallbackAttribute>(member) is { } invalidFallback)
         {
             return (IFallbackItem)Activator.CreateInstance(invalidFallback.Type, invalidFallback.ConstructorArguments)!;
         }
@@ -295,13 +262,13 @@ internal static class MemberMapper
     internal static void AddTransformers(IValuePipeline pipeline, MemberInfo member)
     {
         // If the member has a ExcelTrimString attribute, add the transformer.
-        if (member.GetCustomAttribute<ExcelTrimStringAttribute>() is { } trimStringAttribute)
+        if (MemberAttributes.Get<ExcelTrimStringAttribute>(member) is { } trimStringAttribute)
         {
             pipeline.Transformers.Add(new TrimStringCellTransformer());
         }
 
         // If the member has ExcelTransformer attributes, add the transformers.
-        if (member.GetCustomAttributes<ExcelTransformerAttribute>() is { } transformAttributes)
+        if (MemberAttributes.GetMany<ExcelTransformerAttribute>(member) is { } transformAttributes)
         {
             foreach (var transformAttribute in transformAttributes)
             {
@@ -314,12 +281,12 @@ internal static class MemberMapper
     internal static void ApplyMemberAttributes(IToOneMap map, MemberInfo member)
     {
         // If a member has an ExcelOptional attribute, mark it as optional.
-        if (Attribute.IsDefined(member, typeof(ExcelOptionalAttribute)))
+        if (MemberAttributes.IsDefined<ExcelOptionalAttribute>(member))
         {
             map.Optional = true;
         }
         // If a member has an ExcelPreserveFormatting attribute, mark it as preserving formatting.
-        if (Attribute.IsDefined(member, typeof(ExcelPreserveFormattingAttribute)))
+        if (MemberAttributes.IsDefined<ExcelPreserveFormattingAttribute>(member))
         {
             map.PreserveFormatting = true;
         }

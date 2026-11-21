@@ -8,6 +8,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using System.Linq;
 using System.Numerics;
+using ExcelMapper.Abstractions;
+using ExcelMapper.Mappers;
+using ExcelMapper.Readers;
+using ExcelMapper.Tests;
 
 namespace ExcelMapper.Utilities.Tests;
 
@@ -1646,4 +1650,106 @@ public class AutoMapperTests
         public string PrivateGetProperty { private get; set; } = default!;
     }
 #pragma warning restore 0649
+
+    [Fact]
+    public void TryCreateClassMap_SameTypeTwice_CreatesSeparateMappersAndArrays()
+    {
+        // What's found for a type and its members is cached, but each map gets its own mappers and
+        // arrays, so changing one map doesn't change another.
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<CachedAttributesClass>? first));
+        Assert.True(AutoMapper.TryCreateClassMap(FallbackStrategy.ThrowIfPrimitive, out ExcelClassMap<CachedAttributesClass>? second));
+
+        static IList<ICellMapper> Mappers(ExcelClassMap<CachedAttributesClass> map, string name)
+            => ((IToOneMap)map.Properties.Single(p => p.Member.Name == name).Map).Pipeline.Mappers;
+        static IMap Map(ExcelClassMap<CachedAttributesClass> map, string name)
+            => map.Properties.Single(p => p.Member.Name == name).Map;
+
+        foreach (var name in new[] { nameof(CachedAttributesClass.Number), nameof(CachedAttributesClass.When), nameof(CachedAttributesClass.Day), nameof(CachedAttributesClass.Size) })
+        {
+            var firstMappers = Mappers(first!, name);
+            var secondMappers = Mappers(second!, name);
+            Assert.Equal(firstMappers.Count, secondMappers.Count);
+            for (int i = 0; i < firstMappers.Count; i++)
+            {
+                Assert.Equal(firstMappers[i].GetType(), secondMappers[i].GetType());
+                Assert.NotSame(firstMappers[i], secondMappers[i]);
+            }
+        }
+
+        var firstFormats = ((DateTimeMapper)Mappers(first!, nameof(CachedAttributesClass.When))[0]).Formats;
+        var secondFormats = ((DateTimeMapper)Mappers(second!, nameof(CachedAttributesClass.When))[0]).Formats;
+        Assert.Equal(["yyyy-MM-dd"], firstFormats);
+        Assert.NotSame(firstFormats, secondFormats);
+
+        var firstSplit = (CharSplitReaderFactory)((ManyToOneEnumerableMap<int>)Map(first!, nameof(CachedAttributesClass.Values))).ReaderFactory;
+        var secondSplit = (CharSplitReaderFactory)((ManyToOneEnumerableMap<int>)Map(second!, nameof(CachedAttributesClass.Values))).ReaderFactory;
+        Assert.Equal([';'], firstSplit.Separators);
+        Assert.NotSame(firstSplit.Separators, secondSplit.Separators);
+
+        var firstNames = (ColumnNamesReaderFactory)((ManyToOneEnumerableMap<string>)Map(first!, nameof(CachedAttributesClass.Names))).ReaderFactory;
+        var secondNames = (ColumnNamesReaderFactory)((ManyToOneEnumerableMap<string>)Map(second!, nameof(CachedAttributesClass.Names))).ReaderFactory;
+        Assert.Equal(["A", "B"], firstNames.ColumnNames);
+        Assert.NotSame(firstNames.ColumnNames, secondNames.ColumnNames);
+    }
+
+    [Fact]
+    public void ReadRows_SameAttributedTypeInTwoImporters_ReturnsExpected()
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            using var importer = Helpers.GetCsvImporter("Number,When,Day,Size,Values,A,B\n1,2024-03-04,Mon,Large,1;2,a,b\n");
+            var row = importer.ReadSheet().ReadRows<CachedAttributesClass>().Single();
+            Assert.Equal(1, row.Number);
+            Assert.Equal(new DateTime(2024, 3, 4), row.When);
+            Assert.Equal(DayOfWeek.Monday, row.Day);
+            Assert.Equal(DescribedSize.L, row.Size);
+            Assert.Equal([1, 2], row.Values);
+            Assert.Equal(["a", "b"], row.Names);
+        }
+    }
+
+    [Fact]
+    public void ReadRows_InheritedMemberAttributes_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("Renamed\n5\n");
+        Assert.Equal(5, importer.ReadSheet().ReadRows<DerivedAttributesClass>().Single().Value);
+    }
+
+    public class BaseAttributesClass
+    {
+        [ExcelColumnName("Renamed")]
+        public virtual int Value { get; set; }
+    }
+
+    public class DerivedAttributesClass : BaseAttributesClass
+    {
+        public override int Value { get; set; }
+    }
+
+    public enum DescribedSize
+    {
+        [System.ComponentModel.Description("Small")]
+        S,
+        [System.ComponentModel.Description("Large")]
+        L,
+    }
+
+    public class CachedAttributesClass
+    {
+        public int Number { get; set; }
+
+        [ExcelFormats("yyyy-MM-dd")]
+        public DateTime When { get; set; }
+
+        [ExcelMappingDictionary("Mon", DayOfWeek.Monday)]
+        public DayOfWeek Day { get; set; }
+
+        public DescribedSize Size { get; set; }
+
+        [ExcelSeparators(';')]
+        public int[] Values { get; set; } = [];
+
+        [ExcelColumnNames("A", "B")]
+        public string[] Names { get; set; } = [];
+    }
 }
