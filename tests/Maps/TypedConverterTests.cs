@@ -130,6 +130,80 @@ public class TypedConverterTests
         Assert.Equal(new DateTime(2023, 3, 15), rows[1].When);
     }
 
+    [Fact]
+    public void ReadRows_NullableMembers_ReturnsExpected()
+    {
+        var id = Guid.NewGuid();
+        using var importer = Helpers.GetCsvImporter($"Number,Flag,When,Id,Day\n5,yes,2024-03-04,{id},Monday\n,,,,\n");
+        var rows = importer.ReadSheet().ReadRows<NullableRow>().ToArray();
+        Assert.Equal(5, rows[0].Number);
+        Assert.True(rows[0].Flag);
+        Assert.Equal(new DateTime(2024, 3, 4), rows[0].When);
+        Assert.Equal(id, rows[0].Id);
+        Assert.Equal(DayOfWeek.Monday, rows[0].Day);
+        Assert.Null(rows[1].Number);
+        Assert.Null(rows[1].Flag);
+        Assert.Null(rows[1].When);
+        Assert.Null(rows[1].Id);
+        Assert.Null(rows[1].Day);
+    }
+
+    [Theory]
+    [InlineData("Number", "x", "A2")]
+    [InlineData("Flag", "maybe", "B2")]
+    [InlineData("When", "nope", "C2")]
+    [InlineData("Id", "x", "D2")]
+    [InlineData("Day", "Someday", "E2")]
+    public void ReadRows_NullableMemberInvalid_Throws(string column, string value, string address)
+    {
+        var values = new[] { "Number", "Flag", "When", "Id", "Day" }.Select(c => c == column ? value : "").ToArray();
+        using var importer = Helpers.GetCsvImporter("Number,Flag,When,Id,Day\n" + string.Join(",", values) + "\n");
+        var sheet = importer.ReadSheet();
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<NullableRow>().ToArray());
+        Assert.Equal(address, exception.CellAddress);
+    }
+
+    public class NullableRow
+    {
+        public int? Number { get; set; }
+        public bool? Flag { get; set; }
+        public DateTime? When { get; set; }
+        public Guid? Id { get; set; }
+        public DayOfWeek? Day { get; set; }
+    }
+
+    [Theory]
+    [InlineData("Monday", DayOfWeek.Monday)]
+    [InlineData("1", DayOfWeek.Monday)]
+    [InlineData("99", (DayOfWeek)99)]
+    public void ReadRows_Enum_ReturnsExpected(string text, DayOfWeek expected)
+    {
+        using var importer = Helpers.GetCsvImporter($"Day\n{text}\n");
+        Assert.Equal(expected, importer.ReadSheet().ReadRows<EnumRow>().Single().Day);
+    }
+
+    [Fact]
+    public void ReadRows_EnumIgnoreCase_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("Day\nmonday\n");
+        importer.Configuration.RegisterClassMap<EnumRow>(c => c.Map(r => r.Day, ignoreCase: true));
+        Assert.Equal(DayOfWeek.Monday, importer.ReadSheet().ReadRows<EnumRow>().Single().Day);
+    }
+
+    [Fact]
+    public void ReadRows_EnumCaseSensitiveByDefault_Throws()
+    {
+        using var importer = Helpers.GetCsvImporter("Day\nmonday\n");
+        var sheet = importer.ReadSheet();
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<EnumRow>().ToArray());
+        Assert.IsType<ArgumentException>(exception.InnerException);
+    }
+
+    public class EnumRow
+    {
+        public DayOfWeek Day { get; set; }
+    }
+
     public class IntRow
     {
         public int Value { get; set; }

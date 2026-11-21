@@ -3,7 +3,7 @@
 /// <summary>
 /// A mapper that tries to map the value of a cell to a bool.
 /// </summary>
-public class BoolMapper : ICellMapper, ICellConverter<bool>
+public class BoolMapper : ICellMapper, ICellConverter<bool>, ICellConverter<bool?>
 {
     private static readonly object s_boxedTrue = true;
     private static readonly object s_boxedFalse = false;
@@ -70,6 +70,13 @@ public class BoolMapper : ICellMapper, ICellConverter<bool>
         }
 
         return bool.TryParse(stringValue, out value) ? CellConversion.Success : CellConversion.Invalid;
+    }
+
+    CellConversion ICellConverter<bool?>.Convert(ReadCellResult cell, out bool? value)
+    {
+        var conversion = ((ICellConverter<bool>)this).Convert(cell, out var result);
+        value = conversion == CellConversion.Invalid ? null : result;
+        return conversion;
     }
 
     // A separate method so that the closure capturing these values is only allocated for invalid

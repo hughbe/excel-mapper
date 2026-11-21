@@ -3,7 +3,7 @@
 /// <summary>
 /// A mapper that tries to map the value of a cell to a <see cref="Guid"/>.
 /// </summary>
-public class GuidMapper : ICellMapper, ICellConverter<Guid>
+public class GuidMapper : ICellMapper, ICellConverter<Guid>, ICellConverter<Guid?>
 {
     /// <inheritdoc/>
     public CellMapperResult Map(ReadCellResult readResult)
@@ -37,6 +37,13 @@ public class GuidMapper : ICellMapper, ICellConverter<Guid>
             value = default;
             return CellConversion.Invalid;
         }
+    }
+
+    CellConversion ICellConverter<Guid?>.Convert(ReadCellResult cell, out Guid? value)
+    {
+        var conversion = ((ICellConverter<Guid>)this).Convert(cell, out var result);
+        value = conversion == CellConversion.Invalid ? null : result;
+        return conversion;
     }
 
     // A separate method so that the closure capturing these values is only allocated for invalid
