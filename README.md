@@ -2263,7 +2263,7 @@ The importer itself, and each sheet, should still be used by one thread at a tim
 
 > **Note:** Fractional numeric cells mapped to integer types are truncated on .NET 8+ and rounded on older runtimes. See [Fractional Numbers Mapped to Integer Properties](#fractional-numbers-mapped-to-integer-properties).
 
-> **Note:** `object` members, and `object` values in dictionaries and non-generic collections, receive the cell's text (formatted with the current culture for numbers and dates) rather than its typed value.
+> **Note:** `object` and `IConvertible` members, and `object` values in dictionaries, `ExpandoObject` and non-generic collections such as `ArrayList`, receive the value as Excel stores it: a `double` for numbers, a `DateTime` for dates, a `bool` for booleans and a `string` for text. With `[ExcelPreserveFormatting]` they receive the displayed text instead. CSV cells are always text. Collections that only accept one type, such as `StringCollection`, convert values to that type.
 
 ### Collection Types
 - `T[]`, `List<T>`, `IList<T>`, `ICollection<T>`, `IEnumerable<T>`

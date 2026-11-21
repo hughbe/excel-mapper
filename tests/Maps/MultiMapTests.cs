@@ -10,6 +10,9 @@ namespace ExcelMapper.Tests;
 
 public class MultiMapTests
 {
+    // The first row of MultiMap.xlsx as Excel stores it. Untyped collections receive typed values.
+    private static readonly object[] s_typedRow = [1.0, 2.0, 3.0, "a", "b", 1.0, 2.0, true, false, "a", "b", 1.0, 2.0, "1,2,3"];
+
     [Fact]
     public void ReadRow_AutoMappedStringArray_ReturnsExpected()
     {
@@ -47,7 +50,7 @@ public class MultiMapTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<Array>();
-        Assert.Equal(["1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" ], Assert.IsType<object[]>(row1));
+        Assert.Equal(s_typedRow, Assert.IsType<object[]>(row1));
     }
     
     [Fact]
@@ -59,7 +62,7 @@ public class MultiMapTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IEnumerable>();
-        Assert.Equal(new string[] { "1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" }, row1);
+        Assert.Equal(s_typedRow, row1.Cast<object>());
     }
     
     [Fact]
@@ -83,7 +86,7 @@ public class MultiMapTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ICollection>();
-        Assert.Equal(new string[] { "1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" }, row1);
+        Assert.Equal(s_typedRow, row1.Cast<object>());
     }
     
     [Fact]
@@ -119,7 +122,7 @@ public class MultiMapTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<IList>();
-        Assert.Equal(new string[] { "1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" }, row1);
+        Assert.Equal(s_typedRow, row1.Cast<object>());
     }
     
     [Fact]
@@ -155,7 +158,7 @@ public class MultiMapTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<ArrayList>();
-        Assert.Equal(["1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" ], row1);
+        Assert.Equal(s_typedRow, row1.Cast<object>());
     }
     
     [Fact]
@@ -167,7 +170,7 @@ public class MultiMapTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<Queue>();
-        Assert.Equal(["1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" ], row1.Cast<string>());
+        Assert.Equal(s_typedRow, row1.Cast<object>());
     }
     
     [Fact]
@@ -190,7 +193,7 @@ public class MultiMapTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<SubCollectionBase>();
-        Assert.Equal(["1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3" ], row1.Cast<string>());
+        Assert.Equal(s_typedRow, row1.Cast<object>());
     }
 
     private class SubCollectionBase : CollectionBase
@@ -233,7 +236,7 @@ public class MultiMapTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<Stack>();
-        Assert.Equal(new Stack<string>(["1", "2", "3", "a", "b", "1", "2", "True", "False", "a", "b", "1", "2", "1,2,3"]), row1.Cast<string>());
+        Assert.Equal(new Stack<object>(s_typedRow), row1.Cast<object>());
     }
     
     [Fact]
