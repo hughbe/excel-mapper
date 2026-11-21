@@ -125,7 +125,7 @@ public class ExcelMappingException : Exception
     /// Suggests a column whose name only differs by case or by separators (spaces, underscores,
     /// hyphens and dots), which is a common reason for a column not being found.
     /// </summary>
-    private static string? GetSimilarColumnHint(ExcelSheet sheet, string columnName)
+    internal static string? GetSimilarColumnHint(ExcelSheet sheet, string columnName)
     {
         if (sheet.Heading is null || sheet.Configuration.IgnoreSeparatorsInColumnNames)
         {
