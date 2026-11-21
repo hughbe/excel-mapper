@@ -6,13 +6,15 @@ namespace ExcelMapper.Factories;
 /// Constructs a collection by instantiating a type that implements IList&lt;T&gt; and adding items.
 /// </summary>
 /// <typeparam name="T">The type of the collection elements.</typeparam>
-public class IListTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
+public class IListTImplementingEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
 {
     /// <summary>
     /// Gets the type of collection that this factory creates.
     /// </summary>
     [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
     public Type CollectionType { get; }
+
+    private readonly Func<object> _create;
     private IList<T?>? _items;
 
     /// <summary>
@@ -45,6 +47,7 @@ public class IListTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
         }
 
         CollectionType = collectionType;
+        _create = CompiledAccessors.GetParameterlessConstructor(collectionType);
     }
 
     /// <inheritdoc/>
@@ -57,7 +60,7 @@ public class IListTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
             throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
-        _items = (IList<T?>)Activator.CreateInstance(CollectionType)!;
+        _items = (IList<T?>)_create();
     }
 
     /// <inheritdoc/>
@@ -98,6 +101,21 @@ public class IListTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
     }
 
     /// <inheritdoc/>
+    /// <inheritdoc/>
+    object IBindingFactory.CreateForBinding()
+    {
+        var factory = (IListTImplementingEnumerableFactory<T>)MemberwiseClone();
+        factory.ResetForBinding();
+        return factory;
+    }
+
+    // A binding's copy starts with nothing being built and no buffer of its own. Only drop the
+    // references: the objects may be in use by the map's own factory on another thread.
+    private void ResetForBinding()
+    {
+        _items = null;
+    }
+
     public void Reset()
     {
         _items = null;

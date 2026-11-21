@@ -86,13 +86,29 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     private ICellsReader? GetCellsReader(ExcelSheet sheet)
         => _factoryCache.GetOrAdd(sheet, _readerFactory, static (s, factory) => factory.GetCellsReader(s));
 
-    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value)
-        => TryGetValue(cellsReader, sheet, rowIndex, reader, member, out value);
+    object? ICellsMap.CreateBindingFactory() => (EnumerableFactory as IBindingFactory)?.CreateForBinding();
+
+    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, object? bindingFactory, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value)
+    {
+        if (bindingFactory is IEnumerableFactory<TElement> factory)
+        {
+            // The binding's own factory: only used by one sheet, so no lock is needed.
+            return TryGetValue(cellsReader, factory, sheet, rowIndex, reader, member, out value);
+        }
+
+        return TryGetValue(cellsReader, sheet, rowIndex, reader, member, out value);
+    }
 
     private bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
+        lock (_buildLock)
+        {
+            return TryGetValue(cellsReader, EnumerableFactory, sheet, rowIndex, reader, member, out value);
+        }
+    }
 
-        
+    private bool TryGetValue(ICellsReader? cellsReader, IEnumerableFactory<TElement> factory, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
+    {
         if (cellsReader == null || !cellsReader.Start(reader, PreserveFormatting, out var count))
         {
             if (Optional)
@@ -104,31 +120,28 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
             throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
         }
 
-        lock (_buildLock)
+        factory.Begin(count);
+        try
         {
-            EnumerableFactory.Begin(count);
             try
             {
-                try
+                while (cellsReader.TryGetNext(out var result))
                 {
-                    while (cellsReader.TryGetNext(out var result))
-                    {
-                        var elementValue = ValuePipeline.CastValue<TElement>(ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, result, PreserveFormatting, member), sheet, rowIndex, result.ColumnIndex, member);
-                        EnumerableFactory.Add(elementValue);
-                    }
+                    var elementValue = ValuePipeline.CastValue<TElement>(ValuePipeline.GetPropertyValue(Pipeline, sheet, rowIndex, result, PreserveFormatting, member), sheet, rowIndex, result.ColumnIndex, member);
+                    factory.Add(elementValue);
                 }
-                finally
-                {
-                    cellsReader.Reset();
-                }
-
-                value = EnumerableFactory.End();
-                return true;
             }
             finally
             {
-                EnumerableFactory.Reset();
+                cellsReader.Reset();
             }
+
+            value = factory.End();
+            return true;
+        }
+        finally
+        {
+            factory.Reset();
         }
     }
 

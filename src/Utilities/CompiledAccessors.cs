@@ -112,6 +112,65 @@ internal static class CompiledAccessors
     }
 
     /// <summary>
+    /// Gets a delegate that calls a constructor with one argument, without allocating an argument array.
+    /// </summary>
+    public static Func<object, object> GetConstructor1(ConstructorInfo constructor)
+    {
+        if (!CanCompile)
+        {
+            return argument => constructor.Invoke([argument]);
+        }
+
+        var argument = Expression.Parameter(typeof(object), "argument");
+        var parameterType = constructor.GetParameters()[0].ParameterType;
+        var body = Expression.Convert(Expression.New(constructor, Expression.Convert(argument, parameterType)), typeof(object));
+        return Expression.Lambda<Func<object, object>>(body, argument).Compile();
+    }
+
+    /// <summary>
+    /// Gets a delegate that calls an instance method with one argument, such as a collection's
+    /// <c>Add(T)</c>, without boxing value types or allocating an argument array.
+    /// </summary>
+    public static Action<object, T> GetAction<T>(MethodInfo method)
+    {
+        if (!CanCompile || method.DeclaringType!.IsValueType)
+        {
+            return (instance, value) => method.InvokeUnwrapped(instance, [value]);
+        }
+
+        var instance = Expression.Parameter(typeof(object), "instance");
+        var value = Expression.Parameter(typeof(T), "value");
+        var body = Expression.Call(Expression.Convert(instance, method.DeclaringType!), method, ConvertArgument(value, method.GetParameters()[0].ParameterType));
+        return Expression.Lambda<Action<object, T>>(body, instance, value).Compile();
+    }
+
+    /// <summary>
+    /// Gets a delegate that calls an instance method with two arguments, such as a dictionary's
+    /// <c>Add(TKey, TValue)</c>.
+    /// </summary>
+    public static Action<object, T1, T2> GetAction<T1, T2>(MethodInfo method)
+    {
+        if (!CanCompile || method.DeclaringType!.IsValueType)
+        {
+            return (instance, value1, value2) => method.InvokeUnwrapped(instance, [value1, value2]);
+        }
+
+        var instance = Expression.Parameter(typeof(object), "instance");
+        var value1 = Expression.Parameter(typeof(T1), "value1");
+        var value2 = Expression.Parameter(typeof(T2), "value2");
+        var parameters = method.GetParameters();
+        var body = Expression.Call(
+            Expression.Convert(instance, method.DeclaringType!),
+            method,
+            ConvertArgument(value1, parameters[0].ParameterType),
+            ConvertArgument(value2, parameters[1].ParameterType));
+        return Expression.Lambda<Action<object, T1, T2>>(body, instance, value1, value2).Compile();
+    }
+
+    private static Expression ConvertArgument(Expression value, Type parameterType)
+        => value.Type == parameterType ? value : Expression.Convert(value, parameterType);
+
+    /// <summary>
     /// Gets a delegate that calls a constructor with an array of arguments. Null arguments for value
     /// type parameters pass the default value, matching <see cref="ConstructorInfo.Invoke(object[])"/>.
     /// </summary>

@@ -8,7 +8,7 @@ namespace ExcelMapper.Factories;
 /// </summary>
 /// <typeparam name="TKey">The type of the dictionary keys.</typeparam>
 /// <typeparam name="TValue">The type of the dictionary values.</typeparam>
-public class ImmutableDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> where TKey : notnull
+public class ImmutableDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue>, IBindingFactory where TKey : notnull
 {
     private ImmutableDictionary<TKey, TValue?>.Builder? _builder;
 
@@ -49,6 +49,21 @@ public class ImmutableDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey,
     }
 
     /// <inheritdoc/>
+    /// <inheritdoc/>
+    object IBindingFactory.CreateForBinding()
+    {
+        var factory = (ImmutableDictionaryFactory<TKey, TValue>)MemberwiseClone();
+        factory.ResetForBinding();
+        return factory;
+    }
+
+    // A binding's copy starts with nothing being built and no buffer of its own. Only drop the
+    // references: the objects may be in use by the map's own factory on another thread.
+    private void ResetForBinding()
+    {
+        _builder = null;
+    }
+
     public void Reset()
     {
         _builder = null;

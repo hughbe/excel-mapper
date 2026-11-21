@@ -6,13 +6,15 @@ namespace ExcelMapper.Factories;
 /// Constructs a set by instantiating a type that implements ISet&lt;T&gt; and adding items.
 /// </summary>
 /// <typeparam name="T">The type of the set elements.</typeparam>
-public class ISetTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
+public class ISetTImplementingEnumerableFactory<T> : IEnumerableFactory<T>, IBindingFactory
 {
     /// <summary>
     /// Gets the type of set that this factory creates.
     /// </summary>
     [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
     public Type SetType { get; }
+
+    private readonly Func<object> _create;
     private ISet<T?>? _items;
 
     /// <summary>
@@ -41,6 +43,7 @@ public class ISetTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
         }
 
         SetType = setType;
+        _create = CompiledAccessors.GetParameterlessConstructor(setType);
     }
 
     /// <inheritdoc/>
@@ -53,7 +56,7 @@ public class ISetTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
             throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
-        _items = (ISet<T?>)Activator.CreateInstance(SetType)!;
+        _items = (ISet<T?>)_create();
     }
 
     /// <inheritdoc/>
@@ -86,6 +89,21 @@ public class ISetTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
     }
 
     /// <inheritdoc/>
+    /// <inheritdoc/>
+    object IBindingFactory.CreateForBinding()
+    {
+        var factory = (ISetTImplementingEnumerableFactory<T>)MemberwiseClone();
+        factory.ResetForBinding();
+        return factory;
+    }
+
+    // A binding's copy starts with nothing being built and no buffer of its own. Only drop the
+    // references: the objects may be in use by the map's own factory on another thread.
+    private void ResetForBinding()
+    {
+        _items = null;
+    }
+
     public void Reset()
     {
         _items = null;

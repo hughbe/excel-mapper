@@ -9,7 +9,7 @@ namespace ExcelMapper.Factories;
 /// </summary>
 /// <typeparam name="TKey">The type of the dictionary keys.</typeparam>
 /// <typeparam name="TValue">The type of the dictionary values.</typeparam>
-public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> where TKey : notnull
+public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue>, IBindingFactory where TKey : notnull
 {
     /// <summary>
     /// Gets the type of dictionary that this factory creates.
@@ -17,7 +17,8 @@ public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValu
     [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
     public Type DictionaryType { get; }
     private object? _items;
-    private readonly MethodInfo _addMethod;
+    private readonly Func<object> _create;
+    private readonly Action<object, TKey, TValue?> _add;
 
     /// <summary>
     /// Constructs a factory that creates dictionaries of the given type.
@@ -45,7 +46,9 @@ public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValu
         }
 
         DictionaryType = dictionaryType;
-        _addMethod = dictionaryType.GetMethod("Add", [typeof(TKey), typeof(TValue)]) ?? throw new ArgumentException($"Type does not have an Add({typeof(TKey)}, {typeof(TValue)}) method.", nameof(dictionaryType));
+        var addMethod = dictionaryType.GetMethod("Add", [typeof(TKey), typeof(TValue)]) ?? throw new ArgumentException($"Type does not have an Add({typeof(TKey)}, {typeof(TValue)}) method.", nameof(dictionaryType));
+        _create = CompiledAccessors.GetParameterlessConstructor(dictionaryType);
+        _add = CompiledAccessors.GetAction<TKey, TValue?>(addMethod);
     }
 
     /// <inheritdoc/>
@@ -58,14 +61,14 @@ public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValu
             throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
-        _items = Activator.CreateInstance(DictionaryType);
+        _items = _create();
     }
 
     /// <inheritdoc/>
     public void Add(TKey key, TValue? value)
     {
         EnsureMapping();
-        _addMethod.InvokeUnwrapped(_items, [key, value]);
+        _add(_items, key, value);
     }
 
     /// <inheritdoc/>
@@ -84,6 +87,21 @@ public class AddDictionaryFactory<TKey, TValue> : IDictionaryFactory<TKey, TValu
     }
 
     /// <inheritdoc/>
+    /// <inheritdoc/>
+    object IBindingFactory.CreateForBinding()
+    {
+        var factory = (AddDictionaryFactory<TKey, TValue>)MemberwiseClone();
+        factory.ResetForBinding();
+        return factory;
+    }
+
+    // A binding's copy starts with nothing being built and no buffer of its own. Only drop the
+    // references: the objects may be in use by the map's own factory on another thread.
+    private void ResetForBinding()
+    {
+        _items = null;
+    }
+
     public void Reset()
     {
         _items = null;

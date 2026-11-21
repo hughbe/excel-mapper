@@ -8,13 +8,15 @@ namespace ExcelMapper.Factories;
 /// </summary>
 /// <typeparam name="TKey">The type of the dictionary keys.</typeparam>
 /// <typeparam name="TValue">The type of the dictionary values.</typeparam>
-public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue> where TKey : notnull
+public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<TKey, TValue>, IBindingFactory where TKey : notnull
 {
     /// <summary>
     /// Gets the type of dictionary that this factory creates.
     /// </summary>
     [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
     public Type DictionaryType { get; }
+
+    private readonly Func<object> _create;
     private IDictionary? _items;
 
     /// <summary>
@@ -43,6 +45,7 @@ public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<T
         }
 
         DictionaryType = dictionaryType;
+        _create = CompiledAccessors.GetParameterlessConstructor(dictionaryType);
     }
 
     /// <inheritdoc/>
@@ -55,7 +58,7 @@ public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<T
             throw new ExcelMappingException($"Cannot begin mapping until {nameof(End)}() was called.");
         }
 
-        _items = (IDictionary)Activator.CreateInstance(DictionaryType)!;
+        _items = (IDictionary)_create();
     }
 
     /// <inheritdoc/>
@@ -82,6 +85,21 @@ public class IDictionaryImplementingFactory<TKey, TValue> : IDictionaryFactory<T
     }
 
     /// <inheritdoc/>
+    /// <inheritdoc/>
+    object IBindingFactory.CreateForBinding()
+    {
+        var factory = (IDictionaryImplementingFactory<TKey, TValue>)MemberwiseClone();
+        factory.ResetForBinding();
+        return factory;
+    }
+
+    // A binding's copy starts with nothing being built and no buffer of its own. Only drop the
+    // references: the objects may be in use by the map's own factory on another thread.
+    private void ResetForBinding()
+    {
+        _items = null;
+    }
+
     public void Reset()
     {
         _items = null;
