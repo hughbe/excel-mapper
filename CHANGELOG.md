@@ -39,6 +39,8 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Sheets without a heading can be auto-mapped when columns aren't looked up by name, for example primitives or `[ExcelColumnIndex]` members. ([#119](https://github.com/hughbe/excel-mapper/pull/119))
 - `ExcelMappingException` is thrown, instead of `NullReferenceException`, when an empty value can't be assigned to a non-nullable value type. ([#116](https://github.com/hughbe/excel-mapper/pull/116))
 
+- Trimming annotations for the net8.0 build: the type passed to `ReadRows<T>`, `RegisterClassMap<T>` and `ExcelClassMap<T>`, and types given in attributes, are kept by the trimmer, so mapping works in trimmed apps; reflection-based APIs are marked `[RequiresUnreferencedCode]`/`[RequiresDynamicCode]` so trimmed and AOT apps get warnings where they call them. See [Trimming and Native AOT](docs/trimming.md). ([#138](https://github.com/hughbe/excel-mapper/pull/138))
+
 ### Changed
 
 - Code page encodings are registered automatically; `Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)` is no longer needed. The netstandard builds now depend on `System.Text.Encoding.CodePages`. ([#122](https://github.com/hughbe/excel-mapper/pull/122))

@@ -10,7 +10,16 @@ public class MultidimensionalArrayFactory<T> : IMultidimensionalArrayFactory<T>
 {
     private Array? _items;
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="MultidimensionalArrayFactory{T}"/>.
+    /// </summary>
+    [RequiresDynamicCode("Creates multidimensional arrays of T whose rank is only known at run time, which native AOT can't guarantee.")]
+    public MultidimensionalArrayFactory()
+    {
+    }
+
     /// <inheritdoc/>
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "The constructor requires dynamic code.")]
     public void Begin(int[] lengths)
     {
         ThrowHelpers.ThrowIfNull(lengths, nameof(lengths));

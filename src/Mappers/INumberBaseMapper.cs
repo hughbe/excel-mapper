@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 ﻿#if NET7_0_OR_GREATER
 using System.Globalization;
 using System.Numerics;
@@ -8,7 +9,7 @@ namespace ExcelMapper.Mappers;
 /// A mapper that tries to map the value of a cell to a number base type using the
 /// <see cref="INumberBase{T}"/> interface.
 /// </summary>
-public class INumberBaseMapper<T> : INumberStyleCellMapper where T : INumberBase<T>
+public class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] T> : INumberStyleCellMapper where T : INumberBase<T>
 {
     /// <summary>
     /// Gets or sets the number styles used when mapping the value of a cell to a number base type.
@@ -25,7 +26,7 @@ public class INumberBaseMapper<T> : INumberStyleCellMapper where T : INumberBase
 
     private static readonly bool s_isInteger = IsIntegerType(typeof(T));
 
-    private static bool IsIntegerType(Type type)
+    private static bool IsIntegerType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type type)
     {
         foreach (var interfaceType in type.GetInterfaces())
         {

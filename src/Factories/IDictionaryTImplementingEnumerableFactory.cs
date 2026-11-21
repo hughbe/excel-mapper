@@ -12,6 +12,7 @@ public class IDictionaryTImplementingFactory<TKey, TValue> : Abstractions.IDicti
     /// <summary>
     /// Gets the type of dictionary that this factory creates.
     /// </summary>
+    [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
     public Type DictionaryType { get; }
     private IDictionary<TKey, TValue?>? _items;
 
@@ -20,7 +21,7 @@ public class IDictionaryTImplementingFactory<TKey, TValue> : Abstractions.IDicti
     /// </summary>
     /// <param name="dictionaryType">The type of dictionary to create.</param>
     /// <exception cref="ArgumentException">Thrown when the dictionary type is invalid or unsupported.</exception>
-    public IDictionaryTImplementingFactory(Type dictionaryType)
+    public IDictionaryTImplementingFactory([DynamicallyAccessedMembers(TrimmingConstants.CollectionType)] Type dictionaryType)
     {
         ThrowHelpers.ThrowIfNull(dictionaryType, nameof(dictionaryType));
         if (dictionaryType.IsInterface)

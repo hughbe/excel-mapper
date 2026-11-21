@@ -51,6 +51,7 @@ var employees = sheet.ReadRows<Employee>().ToArray();
 - **[Types and Advanced Mapping](https://github.com/hughbe/excel-mapper/blob/main/docs/types.md)** - Supported types, enums, collections, dictionaries, nested objects, custom converters and transformers.
 - **[Errors and Troubleshooting](https://github.com/hughbe/excel-mapper/blob/main/docs/errors.md)** - Error messages, collecting errors, checking columns, fallbacks and common problems.
 - **[Performance, Thread Safety and Best Practices](https://github.com/hughbe/excel-mapper/blob/main/docs/performance.md)** - Getting the best performance, using ExcelMapper from several threads, and recommended practices.
+- **[Trimming and Native AOT](https://github.com/hughbe/excel-mapper/blob/main/docs/trimming.md)** - Using ExcelMapper in trimmed apps, and what is and isn't supported with native AOT.
 - **[API Reference](https://github.com/hughbe/excel-mapper/blob/main/docs/api.md)** - The main classes, attributes and fluent methods.
 - **[Architecture](https://github.com/hughbe/excel-mapper/blob/main/docs/Architecture.md)** - How ExcelMapper works internally.
 - **[Migrating to 4.0](https://github.com/hughbe/excel-mapper/blob/main/docs/migrating-to-4.0.md)** - What to check when upgrading from 3.x.

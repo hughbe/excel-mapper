@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
@@ -16,6 +17,7 @@ public class ExcelColumnsMatchingAttribute : Attribute
     /// <summary>
     /// The type of the <see cref="IExcelColumnMatcher"/>.
     /// </summary>
+    [DynamicallyAccessedMembers(TrimmingConstants.ActivatedType)]
     public Type Type { get; }
 
     /// <summary>
@@ -27,7 +29,7 @@ public class ExcelColumnsMatchingAttribute : Attribute
     /// Initializes a new instance of <see cref="ExcelColumnsMatchingAttribute"/> with the specified matcher.
     /// </summary>
     /// <param name="matcherType">The type of the <see cref="IExcelColumnMatcher"/>.</param>
-    public ExcelColumnsMatchingAttribute(Type matcherType)
+    public ExcelColumnsMatchingAttribute([DynamicallyAccessedMembers(TrimmingConstants.ActivatedType)] Type matcherType)
     {
         ThrowHelpers.ThrowIfNull(matcherType, nameof(matcherType));
         if (matcherType.IsAbstract || matcherType.IsInterface)

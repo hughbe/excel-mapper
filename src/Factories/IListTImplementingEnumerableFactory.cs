@@ -11,6 +11,7 @@ public class IListTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
     /// <summary>
     /// Gets the type of collection that this factory creates.
     /// </summary>
+    [DynamicallyAccessedMembers(TrimmingConstants.CollectionType)]
     public Type CollectionType { get; }
     private IList<T?>? _items;
 
@@ -19,7 +20,7 @@ public class IListTImplementingEnumerableFactory<T> : IEnumerableFactory<T>
     /// </summary>
     /// <param name="collectionType">The type of collection to create.</param>
     /// <exception cref="ArgumentException">Thrown when the collection type is invalid or unsupported.</exception>
-    public IListTImplementingEnumerableFactory(Type collectionType)
+    public IListTImplementingEnumerableFactory([DynamicallyAccessedMembers(TrimmingConstants.CollectionType)] Type collectionType)
     {
         ThrowHelpers.ThrowIfNull(collectionType, nameof(collectionType));
         if (collectionType.IsInterface)

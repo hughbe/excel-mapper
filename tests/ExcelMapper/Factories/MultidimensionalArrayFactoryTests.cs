@@ -3,6 +3,13 @@ namespace ExcelMapper.Factories;
 public class MultidimensionalArrayFactoryTests
 {
     [Fact]
+    public void Ctor_Default()
+    {
+        var factory = new MultidimensionalArrayFactory<int>();
+        Assert.Throws<ExcelMappingException>(() => factory.End());
+    }
+
+    [Fact]
     public void Begin_End_Success()
     {
         var factory = new MultidimensionalArrayFactory<int>();

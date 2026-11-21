@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- The trimming test app is a separate project (see TrimmingTests/TrimmingTests.csproj). -->
+    <Compile Remove="TrimmingTests/**" />
+    <None Remove="TrimmingTests/**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Resources\*.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

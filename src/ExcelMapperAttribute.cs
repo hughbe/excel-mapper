@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 namespace ExcelMapper;
 
 /// <summary>
@@ -9,6 +10,7 @@ public sealed class ExcelMapperAttribute : Attribute
     /// <summary>
     /// Gets the type of the <see cref="ICellMapper"/>.
     /// </summary>
+    [DynamicallyAccessedMembers(TrimmingConstants.ActivatedType)]
     public Type Type { get; }
 
     /// <summary>
@@ -20,7 +22,7 @@ public sealed class ExcelMapperAttribute : Attribute
     /// Initializes a new instance of <see cref="ExcelMapperAttribute"/> with the specified transformer.
     /// </summary>
     /// <param name="mapperType">The type of the <see cref="ICellMapper"/>.</param>
-    public ExcelMapperAttribute(Type mapperType)
+    public ExcelMapperAttribute([DynamicallyAccessedMembers(TrimmingConstants.ActivatedType)] Type mapperType)
     {
         ThrowHelpers.ThrowIfNull(mapperType, nameof(mapperType));
         if (mapperType.IsAbstract || mapperType.IsInterface)

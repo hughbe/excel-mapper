@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 ﻿namespace ExcelMapper.Mappers;
 
 /// <summary>
@@ -15,7 +16,7 @@ public class ChangeTypeMapper : ICellMapper
     /// Convert.ChangeType.
     /// </summary>
     /// <param name="type">The type of the IConvertible object to map the value of a cell to.</param>
-    public ChangeTypeMapper(Type type)
+    public ChangeTypeMapper([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type type)
     {
         ThrowHelpers.ThrowIfNull(type, nameof(type));
 
