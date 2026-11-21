@@ -167,7 +167,7 @@ public class MapCustomColumnIndicesTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomIndicesEnumerablePropertyClass>();
-        Assert.Equal(["1", "2"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0, 2.0 }, row1.CustomName);
     }
 
     [Fact]
@@ -180,7 +180,7 @@ public class MapCustomColumnIndicesTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomIndicesEnumerablePropertyClass>();
-        Assert.Equal(["1", "2"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0, 2.0 }, row1.CustomName);
     }
 
     [Fact]
@@ -193,7 +193,7 @@ public class MapCustomColumnIndicesTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EnumerablePropertyClass>();
-        Assert.Equal(["1", "2"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0, 2.0 }, row1.CustomName);
     }
 
     private class CustomIndicesEnumerablePropertyClass
@@ -233,7 +233,7 @@ public class MapCustomColumnIndicesTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomIndicesEnumerableFieldClass>();
-        Assert.Equal(["1", "2"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0, 2.0 }, row1.CustomName);
     }
 
     [Fact]
@@ -246,7 +246,7 @@ public class MapCustomColumnIndicesTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<CustomIndicesEnumerableFieldClass>();
-        Assert.Equal(["1", "2"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0, 2.0 }, row1.CustomName);
     }
 
     [Fact]
@@ -259,7 +259,7 @@ public class MapCustomColumnIndicesTests
         sheet.ReadHeading();
 
         var row1 = sheet.ReadRow<EnumerableFieldClass>();
-        Assert.Equal(["1", "2"], row1.CustomName);
+        Assert.Equal(new object?[] { 1.0, 2.0 }, row1.CustomName);
     }
 
     private class CustomIndicesEnumerableFieldClass

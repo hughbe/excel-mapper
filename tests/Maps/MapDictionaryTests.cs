@@ -21,22 +21,22 @@ public class MapDictionaryTest
         var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IEnumerable<KeyValuePair<string, object>>>());
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IEnumerable<KeyValuePair<string, object>>>());
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IEnumerable<KeyValuePair<string, object>>>());
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -55,22 +55,22 @@ public class MapDictionaryTest
         var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IEnumerable<KeyValuePair<string, object>>>());
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IEnumerable<KeyValuePair<string, object>>>());
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IEnumerable<KeyValuePair<string, object>>>());
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -118,22 +118,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<IEnumerableKeyValuePairStringObjectClass>();
         Assert.Equal(4, ((Dictionary<string, object>)row1.Value).Count);
         Assert.Equal("a", ((Dictionary<string, object>)row1.Value)["Column1"]);
-        Assert.Equal("1", ((Dictionary<string, object>)row1.Value)["Column2"]);
-        Assert.Equal("2", ((Dictionary<string, object>)row1.Value)["Column3"]);
+        Assert.Equal(1.0, ((Dictionary<string, object>)row1.Value)["Column2"]);
+        Assert.Equal(2.0, ((Dictionary<string, object>)row1.Value)["Column3"]);
         Assert.Null(((Dictionary<string, object>)row1.Value)["Column4"]);
 
         var row2 = sheet.ReadRow<IEnumerableKeyValuePairStringObjectClass>();
         Assert.Equal(4, ((Dictionary<string, object>)row2.Value).Count);
         Assert.Equal("b", ((Dictionary<string, object>)row2.Value)["Column1"]);
-        Assert.Equal("0", ((Dictionary<string, object>)row2.Value)["Column2"]);
-        Assert.Equal("0", ((Dictionary<string, object>)row2.Value)["Column3"]);
+        Assert.Equal(0.0, ((Dictionary<string, object>)row2.Value)["Column2"]);
+        Assert.Equal(0.0, ((Dictionary<string, object>)row2.Value)["Column3"]);
         Assert.Null(((Dictionary<string, object>)row2.Value)["Column4"]);
 
         var row3 = sheet.ReadRow<IEnumerableKeyValuePairStringObjectClass>();
         Assert.Equal(4, ((Dictionary<string, object>)row3.Value).Count);
         Assert.Equal("c", ((Dictionary<string, object>)row3.Value)["Column1"]);
-        Assert.Equal("-2", ((Dictionary<string, object>)row3.Value)["Column2"]);
-        Assert.Equal("-1", ((Dictionary<string, object>)row3.Value)["Column3"]);
+        Assert.Equal(-2.0, ((Dictionary<string, object>)row3.Value)["Column2"]);
+        Assert.Equal(-1.0, ((Dictionary<string, object>)row3.Value)["Column3"]);
         Assert.Null(((Dictionary<string, object>)row3.Value)["Column4"]);
     }
 
@@ -222,22 +222,22 @@ public class MapDictionaryTest
         var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<ICollection<KeyValuePair<string, object>>>());
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<ICollection<KeyValuePair<string, object>>>());
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<ICollection<KeyValuePair<string, object>>>());
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -299,22 +299,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<ICollectionKeyValuePairStringObjectClass>();
         Assert.Equal(4, ((Dictionary<string, object>)row1.Value).Count);
         Assert.Equal("a", ((Dictionary<string, object>)row1.Value)["Column1"]);
-        Assert.Equal("1", ((Dictionary<string, object>)row1.Value)["Column2"]);
-        Assert.Equal("2", ((Dictionary<string, object>)row1.Value)["Column3"]);
+        Assert.Equal(1.0, ((Dictionary<string, object>)row1.Value)["Column2"]);
+        Assert.Equal(2.0, ((Dictionary<string, object>)row1.Value)["Column3"]);
         Assert.Null(((Dictionary<string, object>)row1.Value)["Column4"]);
 
         var row2 = sheet.ReadRow<ICollectionKeyValuePairStringObjectClass>();
         Assert.Equal(4, ((Dictionary<string, object>)row2.Value).Count);
         Assert.Equal("b", ((Dictionary<string, object>)row2.Value)["Column1"]);
-        Assert.Equal("0", ((Dictionary<string, object>)row2.Value)["Column2"]);
-        Assert.Equal("0", ((Dictionary<string, object>)row2.Value)["Column3"]);
+        Assert.Equal(0.0, ((Dictionary<string, object>)row2.Value)["Column2"]);
+        Assert.Equal(0.0, ((Dictionary<string, object>)row2.Value)["Column3"]);
         Assert.Null(((Dictionary<string, object>)row2.Value)["Column4"]);
 
         var row3 = sheet.ReadRow<ICollectionKeyValuePairStringObjectClass>();
         Assert.Equal(4, ((Dictionary<string, object>)row3.Value).Count);
         Assert.Equal("c", ((Dictionary<string, object>)row3.Value)["Column1"]);
-        Assert.Equal("-2", ((Dictionary<string, object>)row3.Value)["Column2"]);
-        Assert.Equal("-1", ((Dictionary<string, object>)row3.Value)["Column3"]);
+        Assert.Equal(-2.0, ((Dictionary<string, object>)row3.Value)["Column2"]);
+        Assert.Equal(-1.0, ((Dictionary<string, object>)row3.Value)["Column3"]);
         Assert.Null(((Dictionary<string, object>)row3.Value)["Column4"]);
     }
 
@@ -403,22 +403,22 @@ public class MapDictionaryTest
         var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IReadOnlyCollection<KeyValuePair<string, object>>>());
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IReadOnlyCollection<KeyValuePair<string, object>>>());
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IReadOnlyCollection<KeyValuePair<string, object>>>());
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -480,22 +480,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<IReadOnlyCollectionKeyValuePairStringObjectClass>();
         Assert.Equal(4, ((Dictionary<string, object>)row1.Value).Count);
         Assert.Equal("a", ((Dictionary<string, object>)row1.Value)["Column1"]);
-        Assert.Equal("1", ((Dictionary<string, object>)row1.Value)["Column2"]);
-        Assert.Equal("2", ((Dictionary<string, object>)row1.Value)["Column3"]);
+        Assert.Equal(1.0, ((Dictionary<string, object>)row1.Value)["Column2"]);
+        Assert.Equal(2.0, ((Dictionary<string, object>)row1.Value)["Column3"]);
         Assert.Null(((Dictionary<string, object>)row1.Value)["Column4"]);
 
         var row2 = sheet.ReadRow<IReadOnlyCollectionKeyValuePairStringObjectClass>();
         Assert.Equal(4, ((Dictionary<string, object>)row2.Value).Count);
         Assert.Equal("b", ((Dictionary<string, object>)row2.Value)["Column1"]);
-        Assert.Equal("0", ((Dictionary<string, object>)row2.Value)["Column2"]);
-        Assert.Equal("0", ((Dictionary<string, object>)row2.Value)["Column3"]);
+        Assert.Equal(0.0, ((Dictionary<string, object>)row2.Value)["Column2"]);
+        Assert.Equal(0.0, ((Dictionary<string, object>)row2.Value)["Column3"]);
         Assert.Null(((Dictionary<string, object>)row2.Value)["Column4"]);
 
         var row3 = sheet.ReadRow<IReadOnlyCollectionKeyValuePairStringObjectClass>();
         Assert.Equal(4, ((Dictionary<string, object>)row3.Value).Count);
         Assert.Equal("c", ((Dictionary<string, object>)row3.Value)["Column1"]);
-        Assert.Equal("-2", ((Dictionary<string, object>)row3.Value)["Column2"]);
-        Assert.Equal("-1", ((Dictionary<string, object>)row3.Value)["Column3"]);
+        Assert.Equal(-2.0, ((Dictionary<string, object>)row3.Value)["Column2"]);
+        Assert.Equal(-1.0, ((Dictionary<string, object>)row3.Value)["Column3"]);
         Assert.Null(((Dictionary<string, object>)row3.Value)["Column4"]);
     }
 
@@ -716,22 +716,22 @@ public class MapDictionaryTest
         var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary>());
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary>());
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary>());
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -750,22 +750,22 @@ public class MapDictionaryTest
         var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary>());
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary>());
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary>());
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -794,22 +794,22 @@ public class MapDictionaryTest
 
         var row1 = Assert.IsType<SubIDictionaryClass>(sheet.ReadRow<SubIDictionaryClass>());
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = Assert.IsType<SubIDictionaryClass>(sheet.ReadRow<SubIDictionaryClass>());
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = Assert.IsType<SubIDictionaryClass>(sheet.ReadRow<SubIDictionaryClass>());
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -862,22 +862,22 @@ public class MapDictionaryTest
 
         var row1 = Assert.IsType<SubIDictionaryClass>(sheet.ReadRow<SubIDictionaryClass>());
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = Assert.IsType<SubIDictionaryClass>(sheet.ReadRow<SubIDictionaryClass>());
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = Assert.IsType<SubIDictionaryClass>(sheet.ReadRow<SubIDictionaryClass>());
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -892,22 +892,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<IDictionaryClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<IDictionaryClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<IDictionaryClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -928,22 +928,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<IDictionaryClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<IDictionaryClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<IDictionaryClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -966,18 +966,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<IDictionaryClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
 
         var row2 = sheet.ReadRow<IDictionaryClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
 
         var row3 = sheet.ReadRow<IDictionaryClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
     }
 
     private class CustomIDictionaryClassMap : ExcelClassMap<IDictionaryClass>
@@ -1000,22 +1000,22 @@ public class MapDictionaryTest
         var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary<string, object>>());
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary<string, object>>());
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary<string, object>>());
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -1034,22 +1034,22 @@ public class MapDictionaryTest
         var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary<string, object>>());
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary<string, object>>());
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IDictionary<string, object>>());
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -1079,22 +1079,22 @@ public class MapDictionaryTest
 
         var row1 = Assert.IsType<SubIDictionaryStringObjectClass>(sheet.ReadRow<SubIDictionaryStringObjectClass>());
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = Assert.IsType<SubIDictionaryStringObjectClass>(sheet.ReadRow<SubIDictionaryStringObjectClass>());
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = Assert.IsType<SubIDictionaryStringObjectClass>(sheet.ReadRow<SubIDictionaryStringObjectClass>());
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -1149,22 +1149,22 @@ public class MapDictionaryTest
 
         var row1 = Assert.IsType<SubIDictionaryStringObjectClass>(sheet.ReadRow<SubIDictionaryStringObjectClass>());
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = Assert.IsType<SubIDictionaryStringObjectClass>(sheet.ReadRow<SubIDictionaryStringObjectClass>());
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = Assert.IsType<SubIDictionaryStringObjectClass>(sheet.ReadRow<SubIDictionaryStringObjectClass>());
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -1179,22 +1179,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<IDictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<IDictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<IDictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -1215,22 +1215,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<IDictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<IDictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<IDictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -1253,18 +1253,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<IDictionaryStringObjectClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
 
         var row2 = sheet.ReadRow<IDictionaryStringObjectClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
 
         var row3 = sheet.ReadRow<IDictionaryStringObjectClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
     }
 
     private class CustomIDictionaryStringObjectClassMap : ExcelClassMap<IDictionaryStringObjectClass>
@@ -1440,22 +1440,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<IReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<IReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<IReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -1476,22 +1476,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<IReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<IReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<IReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -1514,18 +1514,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<IReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
 
         var row2 = sheet.ReadRow<IReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
 
         var row3 = sheet.ReadRow<IReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
     }
 
     private class CustomIReadOnlyDictionaryStringObjectClassMap : ExcelClassMap<IReadOnlyDictionaryStringObjectClass>
@@ -1656,22 +1656,22 @@ public class MapDictionaryTest
         var row1 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IReadOnlyDictionary<string, object>>());
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IReadOnlyDictionary<string, object>>());
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = Assert.IsType<Dictionary<string, object>>(sheet.ReadRow<IReadOnlyDictionary<string, object>>());
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -1686,22 +1686,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<Hashtable>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<Hashtable>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<Hashtable>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -1716,22 +1716,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SubHashtable>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<SubHashtable>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<SubHashtable>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -1750,22 +1750,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<HashtableClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<HashtableClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<HashtableClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -1786,22 +1786,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<HashtableClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<HashtableClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<HashtableClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -1824,18 +1824,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<HashtableClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
 
         var row2 = sheet.ReadRow<HashtableClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
 
         var row3 = sheet.ReadRow<HashtableClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
     }
 
     private class CustomHashtableClassMap : ExcelClassMap<HashtableClass>
@@ -1858,22 +1858,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SubDictionaryBase>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", ((IDictionary)row1)["Column1"]);
-        Assert.Equal("1", ((IDictionary)row1)["Column2"]);
-        Assert.Equal("2", ((IDictionary)row1)["Column3"]);
+        Assert.Equal(1.0, ((IDictionary)row1)["Column2"]);
+        Assert.Equal(2.0, ((IDictionary)row1)["Column3"]);
         Assert.Null(((IDictionary)row1)["Column4"]);
 
         var row2 = sheet.ReadRow<SubDictionaryBase>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", ((IDictionary)row2)["Column1"]);
-        Assert.Equal("0", ((IDictionary)row2)["Column2"]);
-        Assert.Equal("0", ((IDictionary)row2)["Column3"]);
+        Assert.Equal(0.0, ((IDictionary)row2)["Column2"]);
+        Assert.Equal(0.0, ((IDictionary)row2)["Column3"]);
         Assert.Null(((IDictionary)row2)["Column4"]);
 
         var row3 = sheet.ReadRow<SubDictionaryBase>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", ((IDictionary)row3)["Column1"]);
-        Assert.Equal("-2", ((IDictionary)row3)["Column2"]);
-        Assert.Equal("-1", ((IDictionary)row3)["Column3"]);
+        Assert.Equal(-2.0, ((IDictionary)row3)["Column2"]);
+        Assert.Equal(-1.0, ((IDictionary)row3)["Column3"]);
         Assert.Null(((IDictionary)row3)["Column4"]);
     }
 
@@ -1892,22 +1892,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<DictionaryBaseClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", ((IDictionary)row1.Value)["Column1"]);
-        Assert.Equal("1", ((IDictionary)row1.Value)["Column2"]);
-        Assert.Equal("2", ((IDictionary)row1.Value)["Column3"]);
+        Assert.Equal(1.0, ((IDictionary)row1.Value)["Column2"]);
+        Assert.Equal(2.0, ((IDictionary)row1.Value)["Column3"]);
         Assert.Null(((IDictionary)row1.Value)["Column4"]);
 
         var row2 = sheet.ReadRow<DictionaryBaseClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", ((IDictionary)row2.Value)["Column1"]);
-        Assert.Equal("0", ((IDictionary)row2.Value)["Column2"]);
-        Assert.Equal("0", ((IDictionary)row2.Value)["Column3"]);
+        Assert.Equal(0.0, ((IDictionary)row2.Value)["Column2"]);
+        Assert.Equal(0.0, ((IDictionary)row2.Value)["Column3"]);
         Assert.Null(((IDictionary)row2.Value)["Column4"]);
 
         var row3 = sheet.ReadRow<DictionaryBaseClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", ((IDictionary)row3.Value)["Column1"]);
-        Assert.Equal("-2", ((IDictionary)row3.Value)["Column2"]);
-        Assert.Equal("-1", ((IDictionary)row3.Value)["Column3"]);
+        Assert.Equal(-2.0, ((IDictionary)row3.Value)["Column2"]);
+        Assert.Equal(-1.0, ((IDictionary)row3.Value)["Column3"]);
         Assert.Null(((IDictionary)row3.Value)["Column4"]);
     }
 
@@ -1928,22 +1928,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<DictionaryBaseClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", ((IDictionary)row1.Value)["Column1"]);
-        Assert.Equal("1", ((IDictionary)row1.Value)["Column2"]);
-        Assert.Equal("2", ((IDictionary)row1.Value)["Column3"]);
+        Assert.Equal(1.0, ((IDictionary)row1.Value)["Column2"]);
+        Assert.Equal(2.0, ((IDictionary)row1.Value)["Column3"]);
         Assert.Null(((IDictionary)row1.Value)["Column4"]);
 
         var row2 = sheet.ReadRow<DictionaryBaseClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", ((IDictionary)row2.Value)["Column1"]);
-        Assert.Equal("0", ((IDictionary)row2.Value)["Column2"]);
-        Assert.Equal("0", ((IDictionary)row2.Value)["Column3"]);
+        Assert.Equal(0.0, ((IDictionary)row2.Value)["Column2"]);
+        Assert.Equal(0.0, ((IDictionary)row2.Value)["Column3"]);
         Assert.Null(((IDictionary)row2.Value)["Column4"]);
 
         var row3 = sheet.ReadRow<DictionaryBaseClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", ((IDictionary)row3.Value)["Column1"]);
-        Assert.Equal("-2", ((IDictionary)row3.Value)["Column2"]);
-        Assert.Equal("-1", ((IDictionary)row3.Value)["Column3"]);
+        Assert.Equal(-2.0, ((IDictionary)row3.Value)["Column2"]);
+        Assert.Equal(-1.0, ((IDictionary)row3.Value)["Column3"]);
         Assert.Null(((IDictionary)row3.Value)["Column4"]);
     }
 
@@ -1966,18 +1966,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<DictionaryBaseClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", ((IDictionary)row1.Value)["Column2"]);
-        Assert.Equal("2", ((IDictionary)row1.Value)["Column3"]);
+        Assert.Equal(1.0, ((IDictionary)row1.Value)["Column2"]);
+        Assert.Equal(2.0, ((IDictionary)row1.Value)["Column3"]);
 
         var row2 = sheet.ReadRow<DictionaryBaseClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", ((IDictionary)row2.Value)["Column2"]);
-        Assert.Equal("0", ((IDictionary)row2.Value)["Column3"]);
+        Assert.Equal(0.0, ((IDictionary)row2.Value)["Column2"]);
+        Assert.Equal(0.0, ((IDictionary)row2.Value)["Column3"]);
 
         var row3 = sheet.ReadRow<DictionaryBaseClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", ((IDictionary)row3.Value)["Column2"]);
-        Assert.Equal("-1", ((IDictionary)row3.Value)["Column3"]);
+        Assert.Equal(-2.0, ((IDictionary)row3.Value)["Column2"]);
+        Assert.Equal(-1.0, ((IDictionary)row3.Value)["Column3"]);
     }
 
     private class CustomDictionaryBaseClassMap : ExcelClassMap<DictionaryBaseClass>
@@ -2000,22 +2000,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SortedList>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<SortedList>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<SortedList>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -2030,22 +2030,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SubSortedList>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<SubSortedList>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<SubSortedList>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -2064,22 +2064,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SortedListClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<SortedListClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<SortedListClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -2100,22 +2100,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SortedListClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<SortedListClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<SortedListClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -2138,18 +2138,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<SortedListClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
 
         var row2 = sheet.ReadRow<SortedListClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
 
         var row3 = sheet.ReadRow<SortedListClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
     }
 
     private class CustomSortedListClassMap : ExcelClassMap<SortedListClass>
@@ -2172,22 +2172,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<HybridDictionary>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<HybridDictionary>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<HybridDictionary>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -2202,22 +2202,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SubHybridDictionary>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<SubHybridDictionary>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<SubHybridDictionary>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -2236,22 +2236,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<HybridDictionaryClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<HybridDictionaryClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<HybridDictionaryClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -2272,22 +2272,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<HybridDictionaryClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<HybridDictionaryClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<HybridDictionaryClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -2310,18 +2310,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<HybridDictionaryClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
 
         var row2 = sheet.ReadRow<HybridDictionaryClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
 
         var row3 = sheet.ReadRow<HybridDictionaryClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
     }
 
     private class CustomHybridDictionaryClassMap : ExcelClassMap<HybridDictionaryClass>
@@ -2344,22 +2344,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<ListDictionary>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<ListDictionary>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<ListDictionary>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -2374,22 +2374,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SubListDictionary>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<SubListDictionary>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<SubListDictionary>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -2408,22 +2408,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<ListDictionaryClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<ListDictionaryClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<ListDictionaryClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -2444,22 +2444,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<ListDictionaryClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<ListDictionaryClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<ListDictionaryClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -2482,18 +2482,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<ListDictionaryClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
 
         var row2 = sheet.ReadRow<ListDictionaryClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
 
         var row3 = sheet.ReadRow<ListDictionaryClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
     }
 
     private class CustomListDictionaryClassMap : ExcelClassMap<ListDictionaryClass>
@@ -2538,22 +2538,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SubNameObjectCollectionBase>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<SubNameObjectCollectionBase>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<SubNameObjectCollectionBase>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -2578,22 +2578,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<NameObjectCollectionBaseClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<NameObjectCollectionBaseClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<NameObjectCollectionBaseClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -2858,22 +2858,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<OrderedDictionary>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<OrderedDictionary>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<OrderedDictionary>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -2888,22 +2888,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SubOrderedDictionary>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<SubOrderedDictionary>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<SubOrderedDictionary>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -2922,22 +2922,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<OrderedDictionaryClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<OrderedDictionaryClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<OrderedDictionaryClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -2958,22 +2958,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<OrderedDictionaryClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<OrderedDictionaryClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<OrderedDictionaryClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -2996,18 +2996,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<OrderedDictionaryClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
 
         var row2 = sheet.ReadRow<OrderedDictionaryClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
 
         var row3 = sheet.ReadRow<OrderedDictionaryClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
     }
 
     private class CustomOrderedDictionaryClassMap : ExcelClassMap<OrderedDictionaryClass>
@@ -3202,22 +3202,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<Dictionary<string, object>>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<Dictionary<string, object>>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<Dictionary<string, object>>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -3232,22 +3232,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SubDictionary<string, object>>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<SubDictionary<string, object>>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<SubDictionary<string, object>>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -3266,22 +3266,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<DictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<DictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<DictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -3302,22 +3302,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<DictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<DictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<DictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -3340,18 +3340,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<DictionaryStringObjectClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
 
         var row2 = sheet.ReadRow<DictionaryStringObjectClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
 
         var row3 = sheet.ReadRow<DictionaryStringObjectClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
     }
 
     private class CustomDictionaryStringObjectClassMap : ExcelClassMap<DictionaryStringObjectClass>
@@ -3498,22 +3498,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<ConcurrentDictionary<string, object>>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<ConcurrentDictionary<string, object>>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<ConcurrentDictionary<string, object>>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -3528,22 +3528,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SubConcurrentDictionary<string, object>>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<SubConcurrentDictionary<string, object>>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<SubConcurrentDictionary<string, object>>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -3562,22 +3562,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<ConcurrentDictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<ConcurrentDictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<ConcurrentDictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -3598,22 +3598,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<ConcurrentDictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<ConcurrentDictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<ConcurrentDictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -3636,18 +3636,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<ConcurrentDictionaryStringObjectClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
 
         var row2 = sheet.ReadRow<ConcurrentDictionaryStringObjectClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
 
         var row3 = sheet.ReadRow<ConcurrentDictionaryStringObjectClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
     }
 
     private class CustomConcurrentDictionaryStringObjectClassMap : ExcelClassMap<ConcurrentDictionaryStringObjectClass>
@@ -3794,22 +3794,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SortedList<string, object>>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<SortedList<string, object>>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<SortedList<string, object>>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -3824,22 +3824,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SubSortedList<string, object>>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<SubSortedList<string, object>>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<SubSortedList<string, object>>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -3858,22 +3858,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SortedListStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<SortedListStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<SortedListStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -3894,22 +3894,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SortedListStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<SortedListStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<SortedListStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -3932,18 +3932,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<SortedListStringObjectClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
 
         var row2 = sheet.ReadRow<SortedListStringObjectClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
 
         var row3 = sheet.ReadRow<SortedListStringObjectClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
     }
 
     private class CustomSortedListStringObjectClassMap : ExcelClassMap<SortedListStringObjectClass>
@@ -4388,22 +4388,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SortedDictionary<string, object>>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<SortedDictionary<string, object>>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<SortedDictionary<string, object>>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -4418,22 +4418,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SubSortedDictionary<string, object>>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<SubSortedDictionary<string, object>>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<SubSortedDictionary<string, object>>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -4452,22 +4452,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SortedDictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<SortedDictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<SortedDictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -4488,22 +4488,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<SortedDictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<SortedDictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<SortedDictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -4526,18 +4526,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<SortedDictionaryStringObjectClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
 
         var row2 = sheet.ReadRow<SortedDictionaryStringObjectClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
 
         var row3 = sheet.ReadRow<SortedDictionaryStringObjectClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
     }
 
     private class CustomSortedDictionaryStringObjectClassMap : ExcelClassMap<SortedDictionaryStringObjectClass>
@@ -4684,22 +4684,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<ImmutableDictionary<string, object>>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<ImmutableDictionary<string, object>>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<ImmutableDictionary<string, object>>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -4714,22 +4714,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<ImmutableDictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<ImmutableDictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<ImmutableDictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -4750,22 +4750,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<ImmutableDictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<ImmutableDictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<ImmutableDictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -4788,18 +4788,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<ImmutableDictionaryStringObjectClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
 
         var row2 = sheet.ReadRow<ImmutableDictionaryStringObjectClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
 
         var row3 = sheet.ReadRow<ImmutableDictionaryStringObjectClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
     }
 
     private class CustomImmutableDictionaryStringObjectClassMap : ExcelClassMap<ImmutableDictionaryStringObjectClass>
@@ -4946,22 +4946,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<ImmutableSortedDictionary<string, object>>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<ImmutableSortedDictionary<string, object>>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<ImmutableSortedDictionary<string, object>>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -4976,22 +4976,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<ImmutableSortedDictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<ImmutableSortedDictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<ImmutableSortedDictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -5012,22 +5012,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<ImmutableSortedDictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<ImmutableSortedDictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<ImmutableSortedDictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -5050,18 +5050,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<ImmutableSortedDictionaryStringObjectClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
 
         var row2 = sheet.ReadRow<ImmutableSortedDictionaryStringObjectClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
 
         var row3 = sheet.ReadRow<ImmutableSortedDictionaryStringObjectClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
     }
 
     private class CustomImmutableSortedDictionaryStringObjectClassMap : ExcelClassMap<ImmutableSortedDictionaryStringObjectClass>
@@ -5208,22 +5208,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<FrozenDictionary<string, object>>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<FrozenDictionary<string, object>>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<FrozenDictionary<string, object>>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -5238,22 +5238,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<FrozenDictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<FrozenDictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<FrozenDictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -5274,22 +5274,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<FrozenDictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<FrozenDictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<FrozenDictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -5312,18 +5312,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<FrozenDictionaryStringObjectClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
 
         var row2 = sheet.ReadRow<FrozenDictionaryStringObjectClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
 
         var row3 = sheet.ReadRow<FrozenDictionaryStringObjectClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
     }
 
     private class CustomFrozenDictionaryStringObjectClassMap : ExcelClassMap<FrozenDictionaryStringObjectClass>
@@ -5470,22 +5470,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<ReadOnlyDictionary<string, object>>();
         Assert.Equal(4, row1.Count);
         Assert.Equal("a", row1["Column1"]);
-        Assert.Equal("1", row1["Column2"]);
-        Assert.Equal("2", row1["Column3"]);
+        Assert.Equal(1.0, row1["Column2"]);
+        Assert.Equal(2.0, row1["Column3"]);
         Assert.Null(row1["Column4"]);
 
         var row2 = sheet.ReadRow<ReadOnlyDictionary<string, object>>();
         Assert.Equal(4, row2.Count);
         Assert.Equal("b", row2["Column1"]);
-        Assert.Equal("0", row2["Column2"]);
-        Assert.Equal("0", row2["Column3"]);
+        Assert.Equal(0.0, row2["Column2"]);
+        Assert.Equal(0.0, row2["Column3"]);
         Assert.Null(row2["Column4"]);
 
         var row3 = sheet.ReadRow<ReadOnlyDictionary<string, object>>();
         Assert.Equal(4, row3.Count);
         Assert.Equal("c", row3["Column1"]);
-        Assert.Equal("-2", row3["Column2"]);
-        Assert.Equal("-1", row3["Column3"]);
+        Assert.Equal(-2.0, row3["Column2"]);
+        Assert.Equal(-1.0, row3["Column3"]);
         Assert.Null(row3["Column4"]);
     }
 
@@ -5500,22 +5500,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<ReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<ReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<ReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -5536,22 +5536,22 @@ public class MapDictionaryTest
         var row1 = sheet.ReadRow<ReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(4, row1.Value.Count);
         Assert.Equal("a", row1.Value["Column1"]);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
         Assert.Null(row1.Value["Column4"]);
 
         var row2 = sheet.ReadRow<ReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(4, row2.Value.Count);
         Assert.Equal("b", row2.Value["Column1"]);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
         Assert.Null(row2.Value["Column4"]);
 
         var row3 = sheet.ReadRow<ReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(4, row3.Value.Count);
         Assert.Equal("c", row3.Value["Column1"]);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
         Assert.Null(row3.Value["Column4"]);
     }
 
@@ -5574,18 +5574,18 @@ public class MapDictionaryTest
 
         var row1 = sheet.ReadRow<ReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(2, row1.Value.Count);
-        Assert.Equal("1", row1.Value["Column2"]);
-        Assert.Equal("2", row1.Value["Column3"]);
+        Assert.Equal(1.0, row1.Value["Column2"]);
+        Assert.Equal(2.0, row1.Value["Column3"]);
 
         var row2 = sheet.ReadRow<ReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(2, row2.Value.Count);
-        Assert.Equal("0", row2.Value["Column2"]);
-        Assert.Equal("0", row2.Value["Column3"]);
+        Assert.Equal(0.0, row2.Value["Column2"]);
+        Assert.Equal(0.0, row2.Value["Column3"]);
 
         var row3 = sheet.ReadRow<ReadOnlyDictionaryStringObjectClass>();
         Assert.Equal(2, row3.Value.Count);
-        Assert.Equal("-2", row3.Value["Column2"]);
-        Assert.Equal("-1", row3.Value["Column3"]);
+        Assert.Equal(-2.0, row3.Value["Column2"]);
+        Assert.Equal(-1.0, row3.Value["Column3"]);
     }
 
     private class CustomReadOnlyDictionaryStringObjectClassMap : ExcelClassMap<ReadOnlyDictionaryStringObjectClass>

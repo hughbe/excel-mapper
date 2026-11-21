@@ -13,20 +13,20 @@ public class MapExpandoObjectTests
 
         dynamic row1 = sheet.ReadRow<ExpandoObject>();
         Assert.Equal("a", row1.Column1);
-        Assert.Equal("1", row1.Column2);
-        Assert.Equal("2", row1.Column3);
+        Assert.Equal(1.0, row1.Column2);
+        Assert.Equal(2.0, row1.Column3);
         Assert.Null(row1.Column4);
 
         dynamic row2 = sheet.ReadRow<ExpandoObject>();
         Assert.Equal("b", row2.Column1);
-        Assert.Equal("0", row2.Column2);
-        Assert.Equal("0", row2.Column3);
+        Assert.Equal(0.0, row2.Column2);
+        Assert.Equal(0.0, row2.Column3);
         Assert.Null(row2.Column4);
 
         dynamic row3 = sheet.ReadRow<ExpandoObject>();
         Assert.Equal("c", row3.Column1);
-        Assert.Equal("-2", row3.Column2);
-        Assert.Equal("-1", row3.Column3);
+        Assert.Equal(-2.0, row3.Column2);
+        Assert.Equal(-1.0, row3.Column3);
         Assert.Null(row3.Column4);
     }
 
@@ -51,20 +51,20 @@ public class MapExpandoObjectTests
 
         dynamic row1 = sheet.ReadRow<ExpandoObjectClass>().Value;
         Assert.Equal("a", row1.Column1);
-        Assert.Equal("1", row1.Column2);
-        Assert.Equal("2", row1.Column3);
+        Assert.Equal(1.0, row1.Column2);
+        Assert.Equal(2.0, row1.Column3);
         Assert.Null(row1.Column4);
 
         dynamic row2 = sheet.ReadRow<ExpandoObjectClass>().Value;
         Assert.Equal("b", row2.Column1);
-        Assert.Equal("0", row2.Column2);
-        Assert.Equal("0", row2.Column3);
+        Assert.Equal(0.0, row2.Column2);
+        Assert.Equal(0.0, row2.Column3);
         Assert.Null(row2.Column4);
 
         dynamic row3 = sheet.ReadRow<ExpandoObjectClass>().Value;
         Assert.Equal("c", row3.Column1);
-        Assert.Equal("-2", row3.Column2);
-        Assert.Equal("-1", row3.Column3);
+        Assert.Equal(-2.0, row3.Column2);
+        Assert.Equal(-1.0, row3.Column3);
         Assert.Null(row3.Column4);
     }
 
@@ -79,20 +79,20 @@ public class MapExpandoObjectTests
 
         dynamic row1 = sheet.ReadRow<ExpandoObjectClass>().Value;
         Assert.Equal("a", row1.Column1);
-        Assert.Equal("1", row1.Column2);
-        Assert.Equal("2", row1.Column3);
+        Assert.Equal(1.0, row1.Column2);
+        Assert.Equal(2.0, row1.Column3);
         Assert.Null(row1.Column4);
 
         dynamic row2 = sheet.ReadRow<ExpandoObjectClass>().Value;
         Assert.Equal("b", row2.Column1);
-        Assert.Equal("0", row2.Column2);
-        Assert.Equal("0", row2.Column3);
+        Assert.Equal(0.0, row2.Column2);
+        Assert.Equal(0.0, row2.Column3);
         Assert.Null(row2.Column4);
 
         dynamic row3 = sheet.ReadRow<ExpandoObjectClass>().Value;
         Assert.Equal("c", row3.Column1);
-        Assert.Equal("-2", row3.Column2);
-        Assert.Equal("-1", row3.Column3);
+        Assert.Equal(-2.0, row3.Column2);
+        Assert.Equal(-1.0, row3.Column3);
         Assert.Null(row3.Column4);
     }
 
@@ -106,16 +106,16 @@ public class MapExpandoObjectTests
         sheet.ReadHeading();
 
         dynamic row1 = sheet.ReadRow<ExpandoObjectClass>().Value;
-        Assert.Equal("1", row1.Column2);
-        Assert.Equal("2", row1.Column3);
+        Assert.Equal(1.0, row1.Column2);
+        Assert.Equal(2.0, row1.Column3);
 
         dynamic row2 = sheet.ReadRow<ExpandoObjectClass>().Value;
-        Assert.Equal("0", row2.Column2);
-        Assert.Equal("0", row2.Column3);
+        Assert.Equal(0.0, row2.Column2);
+        Assert.Equal(0.0, row2.Column3);
 
         dynamic row3 = sheet.ReadRow<ExpandoObjectClass>().Value;
-        Assert.Equal("-2", row3.Column2);
-        Assert.Equal("-1", row3.Column3);
+        Assert.Equal(-2.0, row3.Column2);
+        Assert.Equal(-1.0, row3.Column3);
     }
 
     private class ExpandoObjectClass

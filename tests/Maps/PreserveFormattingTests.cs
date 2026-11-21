@@ -283,7 +283,7 @@ public class PreserveFormattingTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<Dictionary<string, object?>>();
-        Assert.Equal(new Dictionary<string, object?> { {"Value", "123" } }, row1);
+        Assert.Equal(new Dictionary<string, object?> { {"Value", 123.0 } }, row1);
         
         // Empty cell value.
         var row2 = sheet.ReadRow<Dictionary<string, object?>>();
@@ -304,7 +304,7 @@ public class PreserveFormattingTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<DictionaryValue>();
-        Assert.Equal(new Dictionary<string, object?> { {"Value", "123" } }, row1.Value);
+        Assert.Equal(new Dictionary<string, object?> { {"Value", 123.0 } }, row1.Value);
         
         // Empty cell value.
         var row2 = sheet.ReadRow<DictionaryValue>();

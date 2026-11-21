@@ -103,12 +103,42 @@ internal static class ReflectionUtilities
         // Non-generic interfaces use type object.
         if (type == typeof(IEnumerable) || type.ImplementsInterface(typeof(IEnumerable)))
         {
+            // Some non-generic collections only accept one type, such as StringCollection with
+            // Add(string). Use that type so elements are converted to it.
+            if (!type.IsInterface && TryGetSingleAddParameterType(type, out var addType))
+            {
+                return addType;
+            }
+
             return typeof(object);
         }
 
         return null;
     }
     
+    private static bool TryGetSingleAddParameterType(Type type, [NotNullWhen(true)] out Type? parameterType)
+    {
+        parameterType = null;
+        foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (method.Name != "Add" || method.GetParameters() is not { Length: 1 } parameters)
+            {
+                continue;
+            }
+
+            if (parameterType is not null)
+            {
+                // More than one Add method, so the element type is ambiguous.
+                parameterType = null;
+                return false;
+            }
+
+            parameterType = parameters[0].ParameterType;
+        }
+
+        return parameterType is not null && parameterType != typeof(object);
+    }
+
     [ExcludeFromCodeCoverage]
     public static object InvokeUnwrapped(this MethodInfo method, object? obj, params object?[] parameters)
     {
