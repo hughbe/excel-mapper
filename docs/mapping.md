@@ -379,7 +379,7 @@ public class Employee
 }
 ```
 
-A column is extra if no other member of the class reads it, including members of nested objects, members with `[ExcelColumnName]`, `[ExcelColumnIndex]` and similar attributes, and split collections. Members with `[ExcelIgnore]` don't read a column, so their columns are extra. Columns with an empty name are skipped. The sheet must have a heading.
+A column is extra if no other member of the type being read reads it, including members of nested objects at any depth (an extra columns member on a nested object also leaves out the columns its parent's members read), members with `[ExcelColumnName]`, `[ExcelColumnIndex]` and similar attributes, and split collections. Members with `[ExcelIgnore]` don't read a column, so their columns are extra. Columns with an empty name are skipped. The sheet must have a heading.
 
 The member can be any dictionary with string keys that can be mapped to all columns, such as `Dictionary<string, string>`, `IReadOnlyDictionary<string, object>` (values as Excel stores them: `double`, `DateTime`, ...), `Dictionary<string, int>` or `ExpandoObject`. With the fluent API, use `MapExtraColumns`, which also lets you configure how values are mapped:
 
