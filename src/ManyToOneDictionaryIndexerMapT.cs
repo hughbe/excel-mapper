@@ -10,6 +10,11 @@ namespace ExcelMapper;
 /// </summary>
 public class ManyToOneDictionaryIndexerMapT<TKey, TValue> : IDictionaryIndexerMap where TKey : notnull
 {
+    // Factories build one value at a time, so a map shared between importers (for example
+    // a class map instance registered in several importers used concurrently) must not
+    // build two values at once.
+    private readonly object _buildLock = new();
+
     public ManyToOneDictionaryIndexerMapT(IDictionaryFactory<TKey, TValue> dictionaryFactory)
     {
         ThrowHelpers.ThrowIfNull(dictionaryFactory, nameof(dictionaryFactory));
@@ -29,23 +34,26 @@ public class ManyToOneDictionaryIndexerMapT<TKey, TValue> : IDictionaryIndexerMa
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
-        DictionaryFactory.Begin(Values.Count);
-        try
+        lock (_buildLock)
         {
-            foreach (var map in Values)
+            DictionaryFactory.Begin(Values.Count);
+            try
             {
-                if (map.Value.TryGetValue(sheet, rowIndex, reader, member, out var elementValue))
+                foreach (var map in Values)
                 {
-                    DictionaryFactory.Add((TKey)map.Key, (TValue?)elementValue);
+                    if (map.Value.TryGetValue(sheet, rowIndex, reader, member, out var elementValue))
+                    {
+                        DictionaryFactory.Add((TKey)map.Key, (TValue?)elementValue);
+                    }
                 }
-            }
 
-            value = DictionaryFactory.End();
-            return true;
-        }
-        finally
-        {
-            DictionaryFactory.Reset();
+                value = DictionaryFactory.End();
+                return true;
+            }
+            finally
+            {
+                DictionaryFactory.Reset();
+            }
         }
     }
 }

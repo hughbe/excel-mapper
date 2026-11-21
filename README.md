@@ -2223,6 +2223,23 @@ foreach (var sheet in importer.ReadSheets())
 }
 ```
 
+**Sharing class maps between importers:**
+
+A class map instance can be registered in many importers, including importers used on different threads at the same time. Maps don't keep sheets alive, so a single shared map is safe in a long-running service:
+
+```csharp
+private static readonly EmployeeMap s_employeeMap = new();
+
+public IReadOnlyList<Employee> Import(Stream stream)
+{
+    using var importer = new ExcelImporter(stream);
+    importer.Configuration.RegisterClassMap(s_employeeMap);
+    return importer.ReadSheet().ReadRows<Employee>().ToList();
+}
+```
+
+The importer itself, and each sheet, should still be used by one thread at a time.
+
 ## Supported Types
 
 ### Primitive Types
@@ -2695,7 +2712,7 @@ Console.WriteLine($"Total sheets: {importer.NumberOfSheets}");
 - `Sheet` - The sheet being read
 
 **`ExcelImporterConfiguration`** - Configuration settings
-- `RegisterClassMap<T>()` - Register type-specific mapping
+- `RegisterClassMap<T>()` - Register type-specific mapping. Replaces a map created earlier by auto-mapping; throws if you already registered a map for the type
 - `RegisterClassMap<T>(Action<ExcelClassMap<T>>)` - Inline lambda configuration
 - `TryGetClassMap<T>()` - Check if map exists
 - `SkipBlankLines` - Skip empty rows (default: false)
