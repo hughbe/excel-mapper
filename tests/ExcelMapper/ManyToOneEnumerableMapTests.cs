@@ -200,13 +200,6 @@ public class ManyToOneEnumerableMapTests
         Assert.Throws<ExcelMappingException>(() => ReadQuarters(m => m.WithColumnsMatching(n => n == "Missing")));
     }
 
-    [Fact]
-    public void TryGetValue_NullSheet_ThrowsArgumentNullException()
-    {
-        using var importer = Helpers.GetCsvImporter(Csv);
-        Assert.Throws<ArgumentNullException>("sheet", () => CreateMap().TryGetValue(null!, 0, importer.Reader, null, out _));
-    }
-
     public class IntsRow
     {
         public int[] Values { get; set; } = [];

@@ -43,7 +43,7 @@ public class ExcelClassMap : IMap
     /// <summary>
     /// Gets the collection of property maps.
     /// </summary>
-    public Collection<ExcelPropertyMap> Properties { get; } = new PropertyMapCollection();
+    internal Collection<ExcelPropertyMap> Properties { get; } = new PropertyMapCollection();
 
     /// <summary>
     /// Gets the default strategy to use when the value of a cell is empty.
@@ -53,7 +53,10 @@ public class ExcelClassMap : IMap
     private ConstructionPlan? _constructionPlan;
 
     /// <inheritdoc/>
-    public virtual bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
+    bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
+        => TryGetValue(sheet, rowIndex, reader, member, out result);
+
+    internal bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
     {
         // If the map represents a single value, use that map to get the value.
         if (_valueMap is not null)

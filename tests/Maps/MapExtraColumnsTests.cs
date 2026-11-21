@@ -240,6 +240,37 @@ public class MapExtraColumnsTests
     }
 
     [Fact]
+    public void ReadRows_CustomMappedNestedExtraColumns_ExcludesTheNestedObjectsColumns()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Code,City\na,X1,London\n");
+        importer.Configuration.RegisterClassMap<NestedExtraRow>(c =>
+        {
+            c.Map(p => p.Name);
+            c.Map(p => p.Details.Code);
+            c.MapExtraColumns(p => p.Details.Extra);
+        });
+        var row = importer.ReadSheet().ReadRows<NestedExtraRow>().Single();
+        Assert.Equal("a", row.Name);
+        Assert.Equal("X1", row.Details.Code);
+        Assert.Equal("London", row.Details.Extra["City"]);
+        Assert.False(row.Details.Extra.ContainsKey("Code"));
+    }
+
+    public class NestedExtraRow
+    {
+        public string? Name { get; set; }
+
+        public ExtraDetails Details { get; set; } = new();
+    }
+
+    public class ExtraDetails
+    {
+        public string? Code { get; set; }
+
+        public Dictionary<string, string?> Extra { get; set; } = [];
+    }
+
+    [Fact]
     public void ReadRows_CustomMappedExtraColumnsWithValueMap_ReturnsExpected()
     {
         using var importer = Helpers.GetCsvImporter("Full Name,City\na,london\n");

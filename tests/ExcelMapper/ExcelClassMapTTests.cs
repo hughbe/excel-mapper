@@ -3,51 +3,12 @@ namespace ExcelMapper.Tests;
 
 public class ExcelClassMapTTests
 {
-    [Fact]
-    public void Ctor_Default()
-    {
-        var map = new ExcelClassMap<string>();
-        Assert.Equal(typeof(string), map.Type);
-        Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
-        Assert.Empty(map.Properties);
-        Assert.Same(map.Properties, map.Properties);
-    }
-
-    [Theory]
-    [InlineData(FallbackStrategy.ThrowIfPrimitive)]
-    [InlineData(FallbackStrategy.SetToDefaultValue)]
-    public void Ctor_EmptyValueStrategy(FallbackStrategy emptyValueStrategy)
-    {
-        var map = new ExcelClassMap<string>(emptyValueStrategy);
-        Assert.Equal(emptyValueStrategy, map.EmptyValueStrategy);
-        Assert.Equal(typeof(string), map.Type);
-        Assert.Empty(map.Properties);
-        Assert.Same(map.Properties, map.Properties);
-    }
-
     [Theory]
     [InlineData(FallbackStrategy.ThrowIfPrimitive - 1)]
     [InlineData(FallbackStrategy.SetToDefaultValue + 1)]
     public void Ctor_InvalidEmptyValueStrategy_ThrowsArgumentOutOfRangeException(FallbackStrategy emptyValueStrategy)
     {
         Assert.Throws<ArgumentOutOfRangeException>("emptyValueStrategy", () => new TestClassMap(emptyValueStrategy));
-    }
-
-    [Fact]
-    public void Map_FuncExpressionT_Success()
-    {
-        var map = new ExcelClassMap<TestClass>();
-        var result = map.Map(p => p.StringValue);
-        Assert.Single(map.Properties);
-        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.StringValue)), map.Properties[0].Member);
-        Assert.Same(result, map.Properties[0].Map);
-
-        // Map again.
-        var result2 = map.Map(p => p.StringValue);
-        Assert.NotSame(result, result2);
-        Assert.Single(map.Properties);
-        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.StringValue)), map.Properties[0].Member);
-        Assert.Same(result2, map.Properties[0].Map);
     }
 
     [Fact]
@@ -165,14 +126,6 @@ public class ExcelClassMapTTests
     }
 
     [Fact]
-    public void MapObject_ClassMapFactory_ReturnsExpected()
-    {
-        var map = new TestClassMap(FallbackStrategy.ThrowIfPrimitive);
-        var classMap = map.MapObject(t => t.ObjectValue);
-        Assert.Empty(classMap.Properties);
-    }
-
-    [Fact]
     public void WithClassMap_InvokeClassMapFactory_Success()
     {
         var map = new ExcelClassMap<TestClass>();
@@ -190,104 +143,10 @@ public class ExcelClassMapTTests
     }
 
     [Fact]
-    public void WithClassMap_InvokeClassMap_Success()
-    {
-        var map = new ExcelClassMap<TestClass>();
-        map.Map(p => p.EnumValue);
-        var otherMap = new ExcelClassMap<TestClass>();
-        otherMap.Map(p => p.IntValue);
-        otherMap.Map(p => p.StringValue);
-        Assert.Same(map, map.WithClassMap(otherMap));
-        Assert.Equal(2, map.Properties.Count);
-        Assert.Equal(nameof(TestClass.IntValue), map.Properties[0].Member.Name);
-        Assert.Equal(nameof(TestClass.StringValue), map.Properties[1].Member.Name);
-    }
-
-    [Fact]
-    public void WithClassMap_InvokeClassMapEmpty_Success()
-    {
-        var map = new ExcelClassMap<TestClass>();
-        map.Map(p => p.EnumValue);
-        var otherMap = new ExcelClassMap<TestClass>();
-        Assert.Same(map, map.WithClassMap(otherMap));
-        Assert.Empty(map.Properties);
-    }
-
-    [Fact]
     public void WithClassMap_InvokeSameClassMap_Success()
     {
         var map = new ExcelClassMap<TestClass>();
         Assert.Same(map, map.WithClassMap(map));
-    }
-
-    [Fact]
-    public void MapRowNumber_FuncExpressionT_Success()
-    {
-        var map = new ExcelClassMap<TestClass>();
-        var result = map.MapRowNumber(p => p.IntValue);
-        Assert.Equal(typeof(int), result.Type);
-        Assert.Single(map.Properties);
-        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.IntValue)), map.Properties[0].Member);
-        Assert.Same(result, map.Properties[0].Map);
-
-        // Map again.
-        var result2 = map.MapRowNumber(p => p.IntValue);
-        Assert.NotSame(result, result2);
-        Assert.Single(map.Properties);
-        Assert.Same(result2, map.Properties[0].Map);
-    }
-
-    [Fact]
-    public void MapRowNumber_NullableMember_Success()
-    {
-        var map = new ExcelClassMap<TestClass>();
-        var result = map.MapRowNumber(p => p.NullableLongValue);
-        Assert.Equal(typeof(long?), result.Type);
-        Assert.Same(result, Assert.Single(map.Properties).Map);
-    }
-
-    [Fact]
-    public void MapRowNumber_NestedMember_Success()
-    {
-        var map = new ExcelClassMap<TestClass>();
-        var result = map.MapRowNumber(p => p.ObjectValue!.Value);
-        var nestedMap = Assert.IsType<ExcelClassMap<ChildClass>>(Assert.Single(map.Properties).Map);
-        Assert.Same(result, Assert.Single(nestedMap.Properties).Map);
-    }
-
-    [Fact]
-    public void MapRowNumber_InvalidMemberType_ThrowsArgumentException()
-    {
-        var map = new ExcelClassMap<TestClass>();
-        Assert.Throws<ArgumentException>("expression", () => map.MapRowNumber(p => p.StringValue));
-        Assert.Throws<ArgumentException>("expression", () => map.MapRowNumber(p => p.EnumValue));
-        Assert.Throws<ArgumentException>("expression", () => map.MapRowNumber(p => p.DateTimeValue));
-        Assert.Empty(map.Properties);
-    }
-
-    [Fact]
-    public void MapExtraColumns_FuncExpressionT_Success()
-    {
-        var map = new ExcelClassMap<TestClass>();
-        var result = map.MapExtraColumns(p => p.DictionaryValue);
-        Assert.Single(map.Properties);
-        Assert.Equal(typeof(TestClass).GetProperty(nameof(TestClass.DictionaryValue)), map.Properties[0].Member);
-        Assert.Same(result, map.Properties[0].Map);
-
-        // Map again.
-        var result2 = map.MapExtraColumns(p => p.DictionaryValue);
-        Assert.NotSame(result, result2);
-        Assert.Single(map.Properties);
-        Assert.Same(result2, map.Properties[0].Map);
-    }
-
-    [Fact]
-    public void MapExtraColumns_NestedMember_Success()
-    {
-        var map = new ExcelClassMap<TestClass>();
-        var result = map.MapExtraColumns(p => p.ObjectValue!.Extra);
-        var nestedMap = Assert.IsType<ExcelClassMap<ChildClass>>(Assert.Single(map.Properties).Map);
-        Assert.Same(result, Assert.Single(nestedMap.Properties).Map);
     }
 
     [Fact]

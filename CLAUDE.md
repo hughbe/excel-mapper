@@ -52,7 +52,7 @@ Every change comes with tests, structured like the existing ones. There are two 
 1. **Unit tests in `tests/ExcelMapper/`, one file per public type, mirroring `src/`.** A new public type `src/Foo/BarBaz.cs` gets `tests/ExcelMapper/Foo/BarBazTests.cs` with class `BarBazTests`. For example:
    - `src/ExcelColumnLetterAttribute.cs` → `tests/ExcelMapper/ExcelColumnLetterAttributeTests.cs`
    - `src/CellValue.cs` → `tests/ExcelMapper/CellValueTests.cs`
-   - `src/Utilities/AutoMapper.cs` → `tests/ExcelMapper/Utilities/AutoMapperTests.cs`
+   - `src/ExcelRange.cs` → `tests/ExcelMapper/ExcelRangeTests.cs`
 
    New public members on an existing type are tested in that type's existing test file (for example a new `OneToOneMap<T>` method goes in `OneToOneMapTTests`, a new extension method in its extension class's tests).
 

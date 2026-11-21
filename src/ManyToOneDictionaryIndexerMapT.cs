@@ -8,7 +8,7 @@ namespace ExcelMapper;
 /// A map that reads multiple cells of an excel sheet and maps the values of the cells to
 /// a dictionary property or field by their keys.
 /// </summary>
-public class ManyToOneDictionaryIndexerMapT<TKey, TValue> : IDictionaryIndexerMap where TKey : notnull
+internal class ManyToOneDictionaryIndexerMapT<TKey, TValue> : IDictionaryIndexerMap where TKey : notnull
 {
     // Factories build one value at a time, so a map shared between importers (for example
     // a class map instance registered in several importers used concurrently) must not

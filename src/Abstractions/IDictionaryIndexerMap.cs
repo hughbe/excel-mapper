@@ -3,7 +3,7 @@ namespace ExcelMapper.Abstractions;
 /// <summary>
 /// Map for dictionary indexer values.
 /// </summary>
-public interface IDictionaryIndexerMap : IMap
+internal interface IDictionaryIndexerMap : IMap
 {
     /// <summary>
     /// Gets the values map.

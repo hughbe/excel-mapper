@@ -7,7 +7,7 @@ namespace ExcelMapper;
 /// <summary>
 /// Represents a mapping strategy that reads one or more cells from an Excel sheet and converts them to an object.
 /// </summary>
-public interface IMap
+internal interface IMap
 {
     /// <summary>
     /// Attempts to read and map cell value(s) from the current row to an object.

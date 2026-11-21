@@ -8,47 +8,35 @@ namespace ExcelMapper;
 /// </summary>
 /// <param name="instance">The object instance whose member value should be set.</param>
 /// <param name="value">The value to set on the member.</param>
-public delegate void MemberSetValueDelegate(object instance, object value);
+internal delegate void MemberSetValueDelegate(object instance, object value);
 
 /// <summary>
 /// Maps a member to an Excel column.
 /// </summary>
-public class ExcelPropertyMap
+internal class ExcelPropertyMap
 {
     /// <summary>
     /// Constructs a property map for a member and map.
     /// </summary>
-    /// <param name="member"></param>
-    /// <param name="map"></param>
-    /// <exception cref="ArgumentException"></exception>
+    /// <param name="member">The property or field of the class map's type.</param>
+    /// <param name="map">The map that reads the member's value.</param>
+    /// <exception cref="ArgumentException"><paramref name="member"/> is a read-only property that
+    /// doesn't match a constructor parameter.</exception>
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification =
         "Only read-only properties check the constructors of their type, which is the type of the class map " +
         "they're added to, and ExcelClassMap keeps that type's public constructors. If they were removed anyway, " +
         "this throws an ArgumentException rather than mapping incorrectly.")]
     public ExcelPropertyMap(MemberInfo member, IMap map)
     {
-        ThrowHelpers.ThrowIfNull(member, nameof(member));
-        ThrowHelpers.ThrowIfNull(map, nameof(map));
-
+        // Members come from expressions on the mapped object and from its public instance
+        // properties and fields, so they're never indexers or static.
         Member = member;
         Map = map;
 
         if (member is PropertyInfo property)
         {
-            // Property must not be an indexer.
-            if (property.GetIndexParameters().Length > 0)
-            {
-                throw new ArgumentException($"Property \"{member.Name}\" is an indexer and cannot be mapped.", nameof(member));
-            }
-
             if (property.CanWrite)
             {
-                // Property must be an instance property.
-                if (property.SetMethod!.IsStatic)
-                {
-                    throw new ArgumentException($"Property \"{member.Name}\" cannot be static.", nameof(member));
-                }
-
                 SetValueFactory = CompiledAccessors.GetSetter(property);
             }
             else
@@ -66,13 +54,9 @@ public class ExcelPropertyMap
                 SetValueFactory = (_, _) => throw new InvalidOperationException($"Property \"{member.Name}\" is read-only and can only be set through a constructor parameter.");
             }
         }
-        else if (member is FieldInfo field)
-        {
-            SetValueFactory = CompiledAccessors.GetSetter(field);
-        }
         else
         {
-            throw new ArgumentException($"Member \"{member.Name}\" is not a field or property.", nameof(member));
+            SetValueFactory = CompiledAccessors.GetSetter((FieldInfo)member);
         }
     }
 

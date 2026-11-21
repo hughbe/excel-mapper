@@ -58,7 +58,7 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 **`ExcelImporterConfiguration`** - Configuration settings
 - `RegisterClassMap<T>()` - Register type-specific mapping. Replaces a map created earlier by auto-mapping; throws if you already registered a map for the type
 - `RegisterClassMap<T>(Action<ExcelClassMap<T>>)` - Inline lambda configuration
-- `TryGetClassMap<T>()` - Check if map exists
+- `TryGetClassMap<T>(out ExcelClassMap?)` - Get the class map registered for a type, including one created by auto-mapping
 - `SkipBlankLines` - Skip empty rows (default: false)
 - `IgnoreSeparatorsInColumnNames` - Ignore spaces, underscores, hyphens and dots when matching column names (default: false)
 - `Culture` - Culture used to parse text and convert numbers and dates to text (default: null, the current culture)
