@@ -49,10 +49,10 @@ public class ExtraColumnsReaderFactoryTests
 
         var classMap = new ExcelClassMap<TestClass>();
         classMap.Map(p => p.Value).WithColumnName("b");
-        classMap.Map(p => p.Values).WithColumnNames("D", "C");
+        classMap.Map(p => p.Values!).WithColumnNames("D", "C");
         classMap.Map(p => p.Optional).WithColumnName("Missing").MakeOptional();
-        classMap.MapObject(p => p.Child).Map(c => c.Value).WithColumnIndex(5);
-        var extraMap = classMap.MapExtraColumns(p => p.Extra);
+        classMap.MapObject(p => p.Child!).Map(c => c.Value).WithColumnIndex(5);
+        var extraMap = classMap.MapExtraColumns(p => p.Extra!);
 
         var reader = Assert.IsAssignableFrom<ICellsReader>(extraMap.ReaderFactory.GetCellsReader(sheet));
         Assert.True(reader.Start(importer.Reader, false, out var count));
