@@ -1,4 +1,5 @@
 using System.Linq;
+using ExcelMapper.Readers;
 
 namespace ExcelMapper.Utilities;
 
@@ -64,6 +65,93 @@ internal static class MapValidation
                 }
 
                 return;
+        }
+    }
+
+    /// <summary>
+    /// Counts the columns that a map looks up by name, and how many of them the sheet's heading has.
+    /// Used to find the heading row: columns found by index, and dictionaries of all columns, match
+    /// any row.
+    /// </summary>
+    public static void CountNamedColumns(IMap map, ExcelSheet sheet, ref int lookedUp, ref int found)
+    {
+        switch (map)
+        {
+            case ExcelClassMap classMap:
+                if (classMap._valueMap is not null)
+                {
+                    CountNamedColumns(classMap._valueMap, sheet, ref lookedUp, ref found);
+                    return;
+                }
+
+                var properties = classMap.Properties;
+                for (int i = 0; i < properties.Count; i++)
+                {
+                    CountNamedColumns(properties[i].Map, sheet, ref lookedUp, ref found);
+                }
+
+                return;
+
+            case IOneToOneMap oneToOneMap when IsNameBased(oneToOneMap.ReaderFactory):
+                lookedUp++;
+                if (HasColumn(static (factory, sheet) => ((ICellReaderFactory)factory).GetCellReader(sheet) is not null, oneToOneMap.ReaderFactory, sheet))
+                {
+                    found++;
+                }
+
+                return;
+
+            case IManyToOneMap manyToOneMap when IsNameBased(manyToOneMap.ReaderFactory):
+                lookedUp++;
+                if (HasColumn(static (factory, sheet) => ((ICellsReaderFactory)factory).GetCellsReader(sheet) is not null, manyToOneMap.ReaderFactory, sheet))
+                {
+                    found++;
+                }
+
+                return;
+
+            case IEnumerableIndexerMap enumerableIndexerMap:
+                foreach (var value in enumerableIndexerMap.Values.Values)
+                {
+                    CountNamedColumns(value, sheet, ref lookedUp, ref found);
+                }
+
+                return;
+
+            case IMultidimensionalIndexerMap multidimensionalIndexerMap:
+                foreach (var value in multidimensionalIndexerMap.Values.Values)
+                {
+                    CountNamedColumns(value, sheet, ref lookedUp, ref found);
+                }
+
+                return;
+
+            case IDictionaryIndexerMap dictionaryIndexerMap:
+                foreach (var value in dictionaryIndexerMap.Values.Values)
+                {
+                    CountNamedColumns(value, sheet, ref lookedUp, ref found);
+                }
+
+                return;
+        }
+    }
+
+    private static bool IsNameBased(object readerFactory) => readerFactory switch
+    {
+        SplitReaderFactory splitReaderFactory => IsNameBased(splitReaderFactory.ReaderFactory),
+        CompositeCellsReaderFactory compositeReaderFactory => compositeReaderFactory.Factories.Any(IsNameBased),
+        _ => readerFactory is IColumnNameProviderCellReaderFactory or IColumnNamesProviderCellReaderFactory,
+    };
+
+    private static bool HasColumn(Func<object, ExcelSheet, bool> hasColumn, object readerFactory, ExcelSheet sheet)
+    {
+        try
+        {
+            return hasColumn(readerFactory, sheet);
+        }
+        catch (ExcelMappingException)
+        {
+            return false;
         }
     }
 

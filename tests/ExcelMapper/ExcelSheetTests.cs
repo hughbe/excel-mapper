@@ -1160,6 +1160,53 @@ public class ExcelSheetTests
         Assert.Equal("The underlying reader is closed.", ex.Message);
     }
 
+    [Fact]
+    public void FindHeading_Invoke_ReturnsExpected()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        var heading = sheet.FindHeading<StringValue>();
+        Assert.Same(heading, sheet.Heading);
+        Assert.Equal(["Value"], heading.ColumnNames);
+        Assert.Equal(0, sheet.HeadingIndex);
+        Assert.True(sheet.HasHeading);
+        Assert.Equal(50, ExcelSheet.DefaultHeadingSearchRows);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void FindHeading_InvalidMaxRows_ThrowsArgumentOutOfRangeException(int maxRows)
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        Assert.Throws<ArgumentOutOfRangeException>("maxRows", () => sheet.FindHeading<StringValue>(maxRows));
+        Assert.Throws<ArgumentOutOfRangeException>("maxRows", () => sheet.TryFindHeading<StringValue>(maxRows, out _));
+    }
+
+    [Fact]
+    public void FindHeading_AlreadyReadHeading_ThrowsInvalidOperationException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+        Assert.Throws<InvalidOperationException>(() => sheet.FindHeading<StringValue>());
+        Assert.Throws<InvalidOperationException>(() => sheet.TryFindHeading<StringValue>(out _));
+    }
+
+    [Fact]
+    public void FindHeading_Closed_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        importer.Dispose();
+
+        var ex = Assert.Throws<ExcelMappingException>(() => sheet.FindHeading<StringValue>());
+        Assert.Equal("The underlying reader is closed.", ex.Message);
+        ex = Assert.Throws<ExcelMappingException>(() => sheet.TryFindHeading<StringValue>(out _));
+        Assert.Equal("The underlying reader is closed.", ex.Message);
+    }
+
     private class BlankLinesClass
     {
         public string? StringValue { get; set; }

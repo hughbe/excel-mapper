@@ -542,6 +542,180 @@ public class ExcelSheet
         return foundProblems.Count == 0;
     }
 
+    /// <summary>
+    /// The number of rows that <see cref="FindHeading{T}()"/> and <see cref="TryFindHeading{T}(out ExcelHeading)"/>
+    /// search by default.
+    /// </summary>
+    public const int DefaultHeadingSearchRows = 50;
+
+    /// <summary>
+    /// Finds the heading of a sheet with rows above it, such as a title or notes, and reads it. The
+    /// heading is the first row, among the first <see cref="DefaultHeadingSearchRows"/> rows, that
+    /// has every column <typeparamref name="T"/> needs by name and at least one of its columns.
+    /// Blank rows are skipped. Rows are then read from the row after the heading.
+    /// </summary>
+    /// <remarks>
+    /// The search starts at <see cref="HeadingIndex"/> (the first row by default), and sets
+    /// <see cref="HeadingIndex"/> and <see cref="HasHeading"/>. Columns found by index or letter,
+    /// optional columns and dictionaries of all columns don't identify the heading row, but optional
+    /// columns help choose between rows.
+    /// </remarks>
+    /// <typeparam name="T">The type that rows will be mapped to.</typeparam>
+    /// <returns>The heading.</returns>
+    /// <exception cref="ExcelMappingException">No row has the columns <typeparamref name="T"/> needs; the message
+    /// gives the closest row and its missing columns. Or <typeparamref name="T"/> doesn't look up any column by name.</exception>
+    /// <exception cref="InvalidOperationException">The heading has already been read.</exception>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public ExcelHeading FindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>() => FindHeading<T>(DefaultHeadingSearchRows);
+
+    /// <summary>
+    /// Finds the heading of a sheet with rows above it, such as a title or notes, and reads it. The
+    /// heading is the first row, among the first <paramref name="maxRows"/> rows, that has every
+    /// column <typeparamref name="T"/> needs by name and at least one of its columns.
+    /// </summary>
+    /// <typeparam name="T">The type that rows will be mapped to.</typeparam>
+    /// <param name="maxRows">The number of rows to search, starting at <see cref="HeadingIndex"/>.</param>
+    /// <returns>The heading.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="maxRows"/> is zero or negative.</exception>
+    /// <exception cref="ExcelMappingException">No row has the columns <typeparamref name="T"/> needs; the message
+    /// gives the closest row and its missing columns. Or <typeparamref name="T"/> doesn't look up any column by name.</exception>
+    /// <exception cref="InvalidOperationException">The heading has already been read.</exception>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public ExcelHeading FindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int maxRows)
+    {
+        if (!TryFindHeading<T>(maxRows, out var heading, out var error))
+        {
+            throw new ExcelMappingException(error);
+        }
+
+        return heading;
+    }
+
+    /// <summary>
+    /// Tries to find the heading of a sheet with rows above it, such as a title or notes, and reads it.
+    /// See <see cref="FindHeading{T}()"/>.
+    /// </summary>
+    /// <typeparam name="T">The type that rows will be mapped to.</typeparam>
+    /// <param name="heading">The heading, if found.</param>
+    /// <returns>Whether a heading was found. If not, the sheet is unchanged and reading starts from the beginning again.</returns>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public bool TryFindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>([NotNullWhen(true)] out ExcelHeading? heading)
+        => TryFindHeading<T>(DefaultHeadingSearchRows, out heading, out _);
+
+    /// <summary>
+    /// Tries to find the heading of a sheet with rows above it, such as a title or notes, and reads it.
+    /// See <see cref="FindHeading{T}(int)"/>.
+    /// </summary>
+    /// <typeparam name="T">The type that rows will be mapped to.</typeparam>
+    /// <param name="maxRows">The number of rows to search, starting at <see cref="HeadingIndex"/>.</param>
+    /// <param name="heading">The heading, if found.</param>
+    /// <returns>Whether a heading was found. If not, the sheet is unchanged and reading starts from the beginning again.</returns>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public bool TryFindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int maxRows, [NotNullWhen(true)] out ExcelHeading? heading)
+        => TryFindHeading<T>(maxRows, out heading, out _);
+
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    private bool TryFindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int maxRows, [NotNullWhen(true)] out ExcelHeading? heading, [NotNullWhen(false)] out string? error)
+    {
+        if (Reader.IsClosed)
+        {
+            throw new ExcelMappingException($"The underlying reader is closed.");
+        }
+        ThrowHelpers.ThrowIfNegativeOrZero(maxRows, nameof(maxRows));
+        if (Heading != null)
+        {
+            throw new InvalidOperationException("The heading has already been read.");
+        }
+
+        var classMap = GetOrCreateClassMap<T>();
+        var startRowIndex = GetHeadingRowIndex();
+        var endRowIndex = (int)Math.Min((long)startRowIndex + maxRows, int.MaxValue);
+
+        // Rows are read forward only, so go back to the start if rows have already been read.
+        if (CurrentRowIndex >= startRowIndex)
+        {
+            Importer.SheetIndex = -1;
+        }
+
+        var closestRowIndex = -1;
+        var closestFound = 0;
+        List<string>? closestProblems = null;
+        for (var rowIndex = startRowIndex; rowIndex < endRowIndex; rowIndex++)
+        {
+            if (!TryReadUpTo(rowIndex))
+            {
+                break;
+            }
+            if (IsBlankRow(0, Reader.FieldCount))
+            {
+                continue;
+            }
+
+            // Check the class map's columns against this row as the heading.
+            var candidate = new ExcelHeading(Reader, _dataRange, Importer.Configuration);
+            var lookedUp = 0;
+            var found = 0;
+            List<string>? problems = null;
+            Heading = candidate;
+            try
+            {
+                MapValidation.CountNamedColumns(classMap, this, ref lookedUp, ref found);
+                if (found > 0)
+                {
+                    problems = [];
+                    MapValidation.FindMissingColumns(classMap, this, null, problems);
+                }
+            }
+            finally
+            {
+                Heading = null;
+            }
+
+            if (lookedUp == 0)
+            {
+                RewindAfterHeadingSearch();
+                throw new ExcelMappingException($"Can't find the heading for type \"{typeof(T)}\" as it doesn't look up any column by name. Set {nameof(HeadingIndex)} instead.");
+            }
+
+            if (found > 0 && problems!.Count == 0)
+            {
+                _hasHeading = true;
+                _dataRange = new ExcelRange(rowIndex.._dataRange.Rows.End, _dataRange.Columns);
+                Heading = candidate;
+                heading = candidate;
+                error = null;
+                return true;
+            }
+
+            if (found > closestFound)
+            {
+                closestRowIndex = rowIndex;
+                closestFound = found;
+                closestProblems = problems;
+            }
+        }
+
+        RewindAfterHeadingSearch();
+        heading = null;
+        var searched = $"the first {maxRows} rows{(startRowIndex == 0 ? string.Empty : $" from row {startRowIndex + 1}")} of sheet \"{Name}\"";
+        error = closestRowIndex == -1
+            ? $"Could not find the heading for type \"{typeof(T)}\": none of {searched} has any of its columns."
+            : $"Could not find the heading for type \"{typeof(T)}\" in {searched}. The closest is row {closestRowIndex + 1}, which is missing {string.Join("; ", closestProblems!)}.";
+        return false;
+    }
+
+    private void RewindAfterHeadingSearch()
+    {
+        // Leave the sheet as it was: the next read starts from the beginning of the sheet again.
+        Importer.SheetIndex = -1;
+        CurrentRowIndex = -1;
+    }
+
     private bool MoveToNextRow()
     {
         if (Reader.IsClosed)

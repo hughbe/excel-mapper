@@ -21,6 +21,7 @@ The main classes, attributes and fluent methods. See the [documentation index](.
 - `ReadRowResults<T>()` - Read all rows, reporting every invalid cell instead of throwing
 - `ReadHeading()` - Explicitly read header row
 - `ValidateHeading<T>()` / `TryValidateHeading<T>()` - Check that every column a type needs is present, before reading rows
+- `FindHeading<T>()` / `TryFindHeading<T>()` - Find and read the heading row when there are titles or notes above it
 - `Name` - Sheet name
 - `Visibility` - Sheet visibility (Visible, Hidden, VeryHidden)
 - `Index` - Zero-based sheet index

@@ -248,6 +248,23 @@ sheet.HeadingIndex = 2;  // Header is on row 3 (zero-based index 2)
 var employees = sheet.ReadRows<Employee>();
 ```
 
+#### Finding the heading
+
+If the number of rows above the heading varies between files, let ExcelMapper find it:
+
+```csharp
+var sheet = importer.ReadSheet();
+sheet.FindHeading<Employee>();  // Finds the "Name, Department" row
+
+var employees = sheet.ReadRows<Employee>();
+```
+
+`FindHeading<T>()` reads the heading from the first row, among the first 50, that has every column `T` needs by name and at least one of its columns. Blank rows are skipped, and so are rows with only some of the required columns, such as a title that happens to say "Name". It sets `HeadingIndex`, and reading continues from the row after the heading.
+
+- Columns found by index or letter, optional columns and dictionaries of all columns don't identify the heading row on their own; optional columns count towards a match.
+- Search more or fewer rows with `FindHeading<T>(maxRows)`. The search starts at `HeadingIndex`, so set it first to skip rows you know aren't the heading.
+- If no row matches, `FindHeading` throws an `ExcelMappingException` naming the closest row and the columns it's missing. `TryFindHeading<T>(out var heading)` returns `false` instead and leaves the sheet as it was.
+
 ### Restricting Data Range
 
 Limit which rows and columns are processed using `DataRange`:
