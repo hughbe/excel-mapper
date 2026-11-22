@@ -49,6 +49,7 @@ var block = sheet.ReadRows<Employee>(startIndex: 5, count: 10);
 ```
 
 - Every read method reads the heading first if the sheet has one and it hasn't been read, so the heading row is never mapped as data.
+- `ReadRows<T>()` reads the rows after the sheet's position when it's called, so after `ReadRow` it returns the rest. Its result can be enumerated more than once: each enumeration reads the same rows from the file again, so `rows.Any()` followed by `rows.ToList()` doesn't lose a row. To avoid reading the file twice, call `ToList()` once and use the list.
 - `ReadRows(startIndex, count)` reads rows by their zero-based index in the sheet. With the heading in the first row (index 0), the first data row is index 1. It throws if the rows don't exist.
 - To report every invalid cell instead of stopping at the first, use `ReadRowResults<T>()` (see [Collecting errors](errors.md#collecting-errors)).
 

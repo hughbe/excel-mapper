@@ -1369,6 +1369,99 @@ public class ExcelSheetTests
     }
 
     [Fact]
+    public void ReadRows_EnumeratedTwice_ReturnsSameRows()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+
+        var rows = sheet.ReadRows<StringValue>();
+        var expected = new string?[] { "value", "  value  ", null, "value" };
+        Assert.Equal(expected, rows.Select(p => p.Value).ToArray());
+        Assert.Equal(expected, rows.Select(p => p.Value).ToArray());
+        Assert.Equal(4, sheet.CurrentRowIndex);
+    }
+
+    [Fact]
+    public void ReadRows_AnyThenToList_ReturnsEveryRow()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+
+        var rows = sheet.ReadRows<StringValue>();
+        Assert.True(rows.Any());
+        Assert.Equal(new string?[] { "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToList());
+    }
+
+    [Fact]
+    public void ReadRows_AfterReadRow_EachEnumerationStartsAfterThatRow()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        Assert.Equal("value", sheet.ReadRow<StringValue>().Value);
+
+        // The rows not read when ReadRows was called, however the sheet moves afterwards.
+        var rows = sheet.ReadRows<StringValue>();
+        Assert.Equal("  value  ", sheet.ReadRow<StringValue>().Value);
+        Assert.Equal(new string?[] { "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
+        Assert.Equal(new string?[] { "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
+    }
+
+    [Fact]
+    public void ReadRows_HasHeadingFalseEnumeratedTwice_ReturnsSameRows()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        importer.Configuration.RegisterClassMap<StringValueClassMapColumnIndex>();
+        var sheet = importer.ReadSheet();
+        sheet.HasHeading = false;
+
+        var rows = sheet.ReadRows<StringValue>();
+        var expected = new string?[] { "Value", "value", "  value  ", null, "value" };
+        Assert.Equal(expected, rows.Select(p => p.Value).ToArray());
+        Assert.Equal(expected, rows.Select(p => p.Value).ToArray());
+    }
+
+    [Fact]
+    public void ReadRows_EnumeratedAfterReadingAnotherSheet_ReturnsSameRows()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+        var rows = sheet.ReadRows<StringValue>();
+        Assert.Equal(4, rows.Count());
+
+        // The importer's reader is shared, so reading another sheet moves it.
+        Assert.NotEmpty(importer.ReadSheet(1).ReadRows<Dictionary<string, string>>().ToArray());
+        Assert.Equal(new string?[] { "value", "  value  ", null, "value" }, rows.Select(p => p.Value).ToArray());
+    }
+
+    [Fact]
+    public void ReadRows_IndexCountEnumeratedTwice_ReturnsSameRows()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        var sheet = importer.ReadSheet();
+
+        var rows = sheet.ReadRows<StringValue>(2, 2);
+        Assert.Equal(new string?[] { "  value  ", null }, rows.Select(p => p.Value).ToArray());
+        Assert.Equal(new string?[] { "  value  ", null }, rows.Select(p => p.Value).ToArray());
+    }
+
+    [Fact]
+    public void ReadRowResults_EnumeratedTwice_ReturnsSameRows()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\n1\nx\n3\n");
+        var sheet = importer.ReadSheet();
+
+        var results = sheet.ReadRowResults<IntValue>();
+        Assert.True(results.Any());
+        Assert.Equal(new[] { true, false, true }, results.Select(r => r.IsValid).ToArray());
+        Assert.Equal(new[] { 1, 2, 3 }, results.Select(r => r.RowIndex).ToArray());
+    }
+
+    private class IntValue
+    {
+        public int Value { get; set; }
+    }
+
+    [Fact]
     public void Visibility_Csv_ReturnsVisible()
     {
         using var stream = Helpers.GetResource("Primitives.csv");
