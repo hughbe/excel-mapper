@@ -47,9 +47,9 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap, IBindableMa
     ValuePipeline IToOneMap.Pipeline => this;
 
     /// <inheritdoc />
-    bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? result)
+    bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
     {
-        if (TryGetValue(FindColumn(sheet), sheet, rowIndex, reader, member, out var value))
+        if (TryGetValue(FindColumn(sheet), sheet, rowIndex, reader, member, errors, out var value))
         {
             result = value!;
             return true;
@@ -75,7 +75,7 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap, IBindableMa
     /// column), returning the value as <typeparamref name="T"/> so that value types aren't boxed
     /// again on the way to the member.
     /// </summary>
-    internal bool TryGetValue(int columnIndex, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out T value)
+    internal bool TryGetValue(int columnIndex, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out T value)
     {
         if (columnIndex == -1 || columnIndex >= reader.FieldCount)
         {
@@ -88,12 +88,10 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap, IBindableMa
             throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _columns, member);
         }
 
-        value = Map(new ReadCellResult(columnIndex, reader, PreserveFormatting), sheet, rowIndex, member);
+        value = Map(sheet, rowIndex, new ReadCellResult(columnIndex, reader, PreserveFormatting), PreserveFormatting, member, errors);
         return true;
     }
 
-    private T Map(ReadCellResult readResult, ExcelSheet sheet, int rowIndex, MemberInfo? member)
-        => Map(sheet, rowIndex, readResult, PreserveFormatting, member);
 
     /// <inheritdoc/>
     BoundMember IBindableMap.Bind(ExcelPropertyMap property, ExcelSheet sheet) => new BoundValueMember<T>(this, property, sheet);

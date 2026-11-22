@@ -37,14 +37,14 @@ internal class DictionaryIndexerMap<TKey, TValue> : IParentMap where TKey : notn
 
     string? IParentMap.GetChildPath(string? path, object? key) => $"{path}[\"{key}\"]";
 
-    public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
+    public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
         var items = Builder.Begin(Values.Count);
         foreach (var map in Values)
         {
-            if (map.Value.TryGetValue(sheet, rowIndex, reader, member, out var elementValue))
+            if (map.Value.TryGetValue(sheet, rowIndex, reader, member, errors, out var elementValue))
             {
                 Builder.Add(items, (TKey)map.Key, (TValue?)elementValue);
             }

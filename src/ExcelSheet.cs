@@ -350,7 +350,7 @@ public class ExcelSheet
             return false;
         }
 
-        return MapCurrentRow(out value);
+        return MapCurrentRow(null, out value);
     }
 
     /// <summary>
@@ -388,17 +388,7 @@ public class ExcelSheet
         var errors = new List<ExcelMappingException>();
         while (AdvanceToNextRow())
         {
-            T? value;
-            bool mapped;
-            CollectedErrors = errors;
-            try
-            {
-                mapped = MapCurrentRow(out value);
-            }
-            finally
-            {
-                CollectedErrors = null;
-            }
+            var mapped = MapCurrentRow(errors, out T? value);
 
             if (errors.Count == 0)
             {
@@ -412,12 +402,6 @@ public class ExcelSheet
             }
         }
     }
-
-    /// <summary>
-    /// When not null, mapping errors for the current row are added to this list instead of being
-    /// thrown. Set while reading rows with <see cref="ReadRowResults{T}"/>.
-    /// </summary>
-    internal List<ExcelMappingException>? CollectedErrors { get; private set; }
 
     private bool AdvanceToNextRow()
     {
@@ -441,18 +425,18 @@ public class ExcelSheet
 
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    private bool MapCurrentRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>([NotNullWhen(true)] out T? value)
+    private bool MapCurrentRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(List<ExcelMappingException>? errors, [NotNullWhen(true)] out T? value)
     {
         var classMap = GetOrCreateClassMap<T>();
 
         // The importer's culture, if set, is given to each cell (see ValuePipeline<T>.Map), not set
         // as the thread's culture.
-        var result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out var valueObject);
+        var result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, errors, out var valueObject);
 
         // If we've been asked to validate with data annotations, do so now.
         if (Configuration.ValidateDataAnnotations && result && valueObject is not null)
         {
-            if (CollectedErrors is { } errors)
+            if (errors is not null)
             {
                 // Report every validation failure rather than only the first.
                 var validationResults = new List<ValidationResult>();

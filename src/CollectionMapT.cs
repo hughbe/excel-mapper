@@ -66,11 +66,11 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     internal CollectionBuilder<TElement> Builder { get; }
 
     /// <inheritdoc />
-    bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
+    bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
-        return TryGetValue(GetCellsReader(sheet), sheet, rowIndex, reader, member, out value);
+        return TryGetValue(GetCellsReader(sheet), sheet, rowIndex, reader, member, errors, out value);
     }
 
     /// <summary>
@@ -86,10 +86,10 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     private ICellsReader? GetCellsReader(ExcelSheet sheet)
         => sheet.GetCellsReader(_columns);
 
-    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value)
-        => TryGetValue(cellsReader, sheet, rowIndex, reader, member, out value);
+    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out object? value)
+        => TryGetValue(cellsReader, sheet, rowIndex, reader, member, errors, out value);
 
-    private bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
+    private bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
     {
         if (cellsReader == null || !cellsReader.Start(reader, PreserveFormatting, out var count))
         {
@@ -108,7 +108,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
             var index = 0;
             while (cellsReader.TryGetNext(out var result))
             {
-                var elementValue = Pipeline.Map(sheet, rowIndex, result, PreserveFormatting, member);
+                var elementValue = Pipeline.Map(sheet, rowIndex, result, PreserveFormatting, member, errors);
                 Builder.Add(items, index++, elementValue);
             }
         }
