@@ -157,6 +157,10 @@ ExcelMapper.ExcelColumnsMatchingAttribute.ConstructorArguments.set -> void
 ExcelMapper.ExcelColumnsMatchingAttribute.ExcelColumnsMatchingAttribute(string! pattern, System.Text.RegularExpressions.RegexOptions options = System.Text.RegularExpressions.RegexOptions.None) -> void
 ExcelMapper.ExcelColumnsMatchingAttribute.ExcelColumnsMatchingAttribute(System.Type! matcherType) -> void
 ExcelMapper.ExcelColumnsMatchingAttribute.Type.get -> System.Type!
+ExcelMapper.ExcelConstructor<TOwner>
+ExcelMapper.ExcelConstructorArguments<TOwner>
+ExcelMapper.ExcelConstructorArguments<TOwner>.ExcelConstructorArguments() -> void
+ExcelMapper.ExcelConstructorArguments<TOwner>.Get<T>(int index) -> T
 ExcelMapper.ExcelConverterAttribute
 ExcelMapper.ExcelConverterAttribute.ConstructorArguments.get -> object?[]?
 ExcelMapper.ExcelConverterAttribute.ConstructorArguments.set -> void
@@ -261,6 +265,7 @@ ExcelMapper.ExcelMappingException.ExcelMappingException(string! message, System.
 ExcelMapper.ExcelMappingException.Member.get -> System.Reflection.MemberInfo?
 ExcelMapper.ExcelMappingException.RowIndex.get -> int
 ExcelMapper.ExcelMappingException.Sheet.get -> ExcelMapper.ExcelSheet?
+ExcelMapper.ExcelMemberSetter<TOwner, TValue>
 ExcelMapper.ExcelNumberStyleAttribute
 ExcelMapper.ExcelNumberStyleAttribute.ExcelNumberStyleAttribute(System.Globalization.NumberStyles style) -> void
 ExcelMapper.ExcelNumberStyleAttribute.Style.get -> System.Globalization.NumberStyles
@@ -361,12 +366,14 @@ ExcelMapper.ExcelTrimStringAttribute.ExcelTrimStringAttribute() -> void
 ExcelMapper.ExcelTypeRegistrar
 ExcelMapper.ExcelTypeRegistrar.Array<TElement>() -> void
 ExcelMapper.ExcelTypeRegistrar.Collection<TCollection, TElement>() -> void
+ExcelMapper.ExcelTypeRegistrar.Constructor<TOwner>(System.Type![]! parameterTypes, ExcelMapper.ExcelConstructor<TOwner>! constructor) -> void
 ExcelMapper.ExcelTypeRegistrar.Dictionary<TDictionary, TKey, TValue>() -> void
 ExcelMapper.ExcelTypeRegistrar.Enum<TEnum>() -> void
 ExcelMapper.ExcelTypeRegistrar.Nullable<T>() -> void
 ExcelMapper.ExcelTypeRegistrar.Parsable<T>() -> void
 ExcelMapper.ExcelTypeRegistrar.ParsableClass<T>() -> void
 ExcelMapper.ExcelTypeRegistrar.Row<T>() -> void
+ExcelMapper.ExcelTypeRegistrar.Setter<TOwner, TValue>(string! member, ExcelMapper.ExcelMemberSetter<TOwner, TValue>! setter) -> void
 ExcelMapper.ExcelTypeRegistrar.Type<T>() -> void
 ExcelMapper.ExcelUriKindAttribute
 ExcelMapper.ExcelUriKindAttribute.ExcelUriKindAttribute(System.UriKind uriKind) -> void

@@ -47,7 +47,8 @@ internal sealed class ConstructionPlan<[DynamicallyAccessedMembers(TrimmingConst
     /// </summary>
     public Func<T>? CreateInstance { get; }
 
-    // Calls the constructor with the values the bound members read, or null where code can't be compiled.
+    // Calls the constructor with the values the bound members read: a constructor a mapping context
+    // registered, or a compiled one; null where code can't be compiled.
     private Func<BoundMember<T>[], T>? CreateFromMembers { get; }
 
     // Calls the constructor with an array of arguments, where code can't be compiled.
@@ -96,6 +97,8 @@ internal sealed class ConstructionPlan<[DynamicallyAccessedMembers(TrimmingConst
     /// Decides how to create a <typeparamref name="T"/> with the given members.
     /// </summary>
     /// <exception cref="ExcelMappingException">The type can't be created with these members.</exception>
+    // Keep in sync with the source generator's TypeWalker.AddConstructors, which registers a call
+    // for each constructor this can choose. See "Auto-mapping and the source generator" in CLAUDE.md.
     public static ConstructionPlan<T> Create(IReadOnlyList<ClassMapMember> classMembers)
     {
         var type = typeof(T);
@@ -172,6 +175,21 @@ internal sealed class ConstructionPlan<[DynamicallyAccessedMembers(TrimmingConst
             boundArguments[i] = new BoundConstructorArgument(memberIndex, typedMethod, defaultArguments[i]);
         }
 
-        return new ConstructionPlan<T>(constructor, memberParameterIndices, defaultArguments, CompiledAccessors.GetConstructor<T>(constructor, boundArguments));
+        return new ConstructionPlan<T>(constructor, memberParameterIndices, defaultArguments, GetRegisteredConstructor(parameters, boundArguments) ?? CompiledAccessors.GetConstructor<T>(constructor, boundArguments));
+    }
+
+    // A constructor a mapping context registered: ordinary code, written by the source generator,
+    // which reads its arguments typed.
+    private static Func<BoundMember<T>[], T>? GetRegisteredConstructor(ParameterInfo[] parameters, BoundConstructorArgument[] boundArguments)
+    {
+        var parameterTypes = new Type[parameters.Length];
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            parameterTypes[i] = parameters[i].ParameterType;
+        }
+
+        return RegisteredAccessors.GetConstructor<T>(parameterTypes) is { } constructor
+            ? members => constructor(new ExcelConstructorArguments<T>(members, boundArguments))
+            : null;
     }
 }

@@ -8,12 +8,6 @@ using System.Runtime.CompilerServices;
 namespace ExcelMapper.Binding;
 
 /// <summary>
-/// Sets a member of <paramref name="instance"/>, which is passed by reference so that a struct is
-/// set in place rather than in a copy or a box.
-/// </summary>
-internal delegate void RefSetter<TOwner, in TValue>(ref TOwner instance, TValue value);
-
-/// <summary>
 /// Creates and caches compiled delegates that set members and call constructors, which are much
 /// faster than reflection when called for every cell of every row.
 /// </summary>
@@ -44,13 +38,22 @@ internal static class CompiledAccessors
     /// Gets a delegate that sets a property or field of a <typeparamref name="TOwner"/> to a
     /// <typeparamref name="TValue"/>, without boxing either: a struct is set in place, through the
     /// reference. If <typeparamref name="TValue"/> isn't the member's type, the value is converted to
-    /// it, and null sets a value type to its default value.
+    /// it, and null sets a value type to its default value. A setter an
+    /// <see cref="ExcelMappingContext"/> registered is used if there is one.
     /// </summary>
-    public static RefSetter<TOwner, TValue> GetSetter<TOwner, TValue>(MemberInfo member)
-        => (RefSetter<TOwner, TValue>)s_setters.GetOrAdd((member, typeof(TOwner), typeof(TValue)), static key => CreateSetter<TOwner, TValue>(key.Member));
+    // Keep in sync with the source generator's TypeWalker.AddSetter, which registers a setter for
+    // each member set here. See "Auto-mapping and the source generator" in CLAUDE.md.
+    public static ExcelMemberSetter<TOwner, TValue> GetSetter<TOwner, TValue>(MemberInfo member)
+        => (ExcelMemberSetter<TOwner, TValue>)s_setters.GetOrAdd((member, typeof(TOwner), typeof(TValue)), static key => CreateSetter<TOwner, TValue>(key.Member));
 
-    private static RefSetter<TOwner, TValue> CreateSetter<TOwner, TValue>(MemberInfo member)
+    private static ExcelMemberSetter<TOwner, TValue> CreateSetter<TOwner, TValue>(MemberInfo member)
     {
+        // A setter a mapping context registered: ordinary code, written by the source generator.
+        if (RegisteredAccessors.GetSetter<TOwner, TValue>(member.Name) is { } registered)
+        {
+            return registered;
+        }
+
         var memberType = member.MemberType();
 
         // A read-only property is only mapped when it's a constructor parameter (see
@@ -76,10 +79,10 @@ internal static class CompiledAccessors
             ? Expression.Call(typedInstance, property.SetMethod!, typedValue)
             : Expression.Assign(Expression.Field(typedInstance, (FieldInfo)member), typedValue);
 
-        return Expression.Lambda<RefSetter<TOwner, TValue>>(body, instance, value).Compile();
+        return Expression.Lambda<ExcelMemberSetter<TOwner, TValue>>(body, instance, value).Compile();
     }
 
-    private static RefSetter<TOwner, TValue> CreateReflectionSetter<TOwner, TValue>(MemberInfo member)
+    private static ExcelMemberSetter<TOwner, TValue> CreateReflectionSetter<TOwner, TValue>(MemberInfo member)
     {
         Action<object?, object?> setValue = member is PropertyInfo property ? property.SetValue : ((FieldInfo)member).SetValue;
 

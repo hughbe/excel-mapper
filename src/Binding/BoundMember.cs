@@ -94,7 +94,7 @@ internal abstract class BoundMember<TOwner, TValue>(ClassMapMember member) : Bou
 {
     // Created on first use: members passed to a constructor (such as get-only properties) are
     // never set.
-    private RefSetter<TOwner, TValue>? _setter;
+    private ExcelMemberSetter<TOwner, TValue>? _setter;
 
     // The value read by TryReadValue.
     private TValue _value = default!;
@@ -106,7 +106,7 @@ internal abstract class BoundMember<TOwner, TValue>(ClassMapMember member) : Bou
     /// or reading the value recorded an error.</returns>
     private protected abstract bool TryRead(SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out TValue value);
 
-    private RefSetter<TOwner, TValue> Setter => _setter ??= CompiledAccessors.GetSetter<TOwner, TValue>(Member.Member);
+    private ExcelMemberSetter<TOwner, TValue> Setter => _setter ??= CompiledAccessors.GetSetter<TOwner, TValue>(Member.Member);
 
     public sealed override bool TryMap(ref TOwner instance, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
     {

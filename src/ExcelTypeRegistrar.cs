@@ -118,6 +118,39 @@ public sealed class ExcelTypeRegistrar
         Register(typeof(DictionaryRule<,>), typeof(TKey), typeof(TValue), static () => new DictionaryRule<TKey, TValue>());
     }
 
+    /// <summary>
+    /// Registers how to set a property or field of a <typeparamref name="TOwner"/>, as ordinary
+    /// code, so that it's set without compiling an expression (which native AOT can't) or
+    /// reflection (which boxes values and allocates).
+    /// </summary>
+    /// <typeparam name="TOwner">The type whose member is set.</typeparam>
+    /// <typeparam name="TValue">The member's type.</typeparam>
+    /// <param name="member">The name of the property or field.</param>
+    /// <param name="setter">Sets the member.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="member"/> or <paramref name="setter"/> is null.</exception>
+    public void Setter<TOwner, TValue>(string member, ExcelMemberSetter<TOwner, TValue> setter)
+    {
+        ThrowHelpers.ThrowIfNull(member, nameof(member));
+        ThrowHelpers.ThrowIfNull(setter, nameof(setter));
+        RegisteredAccessors.RegisterSetter(member, setter);
+    }
+
+    /// <summary>
+    /// Registers how to call a public constructor of a <typeparamref name="TOwner"/>, as ordinary
+    /// code, so that types created with constructor parameters (such as records) are created
+    /// without compiling an expression or reflection.
+    /// </summary>
+    /// <typeparam name="TOwner">The type created.</typeparam>
+    /// <param name="parameterTypes">The types of the constructor's parameters, which identify it.</param>
+    /// <param name="constructor">Calls the constructor.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="parameterTypes"/> or <paramref name="constructor"/> is null.</exception>
+    public void Constructor<TOwner>(Type[] parameterTypes, ExcelConstructor<TOwner> constructor)
+    {
+        ThrowHelpers.ThrowIfNull(parameterTypes, nameof(parameterTypes));
+        ThrowHelpers.ThrowIfNull(constructor, nameof(constructor));
+        RegisteredAccessors.RegisterConstructor(parameterTypes, constructor);
+    }
+
 #if NET7_0_OR_GREATER
     /// <summary>
     /// Registers a value type parsed with <see cref="IParsable{TSelf}"/> that isn't a number, mapped
