@@ -5,7 +5,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a DateTimeOffset.
 /// </summary>
-internal class DateTimeOffsetMapper : IFormatsCellMapper, ITypedCellMapper<DateTimeOffset>, ITypedCellMapper<DateTimeOffset?>
+internal sealed class DateTimeOffsetMapper : IFormatsCellMapper, ICellMapper<DateTimeOffset>, ICellMapper<DateTimeOffset?>
 {
     private string[] _formats = ["G"];
 
@@ -61,59 +61,7 @@ internal class DateTimeOffsetMapper : IFormatsCellMapper, ITypedCellMapper<DateT
         }
     }
 
-    private CellMapperResult CreateResult(DateTime dateTime)
-    {
-        try
-        {
-            return CellMapperResult.Success(Offset is { } offset
-                ? new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Unspecified), offset)
-                : new DateTimeOffset(dateTime));
-        }
-        catch (ArgumentOutOfRangeException exception)
-        {
-            // For example, the earliest dates with a positive offset.
-            return CellMapperResult.Invalid(exception);
-        }
-    }
-
-    /// <inheritdoc/>
-    public CellMapperResult Map(ReadCellResult readResult)
-    {
-        // Excel stores dates as numbers (the number of days since 1899-12-30).
-        // ExcelDataReader automatically converts these cells to DateTimeOffset.
-        if (readResult.GetValue() is DateTime dateTimeOffsetValue)
-        {
-            return CreateResult(dateTimeOffsetValue);
-        }
-
-        // A number in a cell without a date format is Excel's serial date (days since 1899-12-30).
-        if (ExcelDateUtilities.TryGetDateTime(readResult.GetValue(), out var serialDate))
-        {
-            return CreateResult(serialDate);
-        }
-        
-        var stringValue = readResult.GetString();
-        var formats = Formats;
-        var provider = Provider;
-        var style = Style;
-        try
-        {
-            if (DateTimeOffset.TryParseExact(stringValue, formats, provider, style, out var result) ||
-                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateTimeOffset.TryParseExact(stringValue, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, style, out result)))
-            {
-                return CellMapperResult.Success(result);
-            }
-        }
-        catch (Exception exception)
-        {
-            return CellMapperResult.Invalid(exception);
-        }
-
-        // Only create the exception (by parsing again) if it is needed.
-        return InvalidResult(stringValue, formats, provider, style);
-    }
-
-    CellConversion ITypedCellMapper<DateTimeOffset>.Convert(ReadCellResult cell, out DateTimeOffset value)
+    CellConversion ICellMapper<DateTimeOffset>.Convert(ReadCellResult cell, out DateTimeOffset value)
     {
         var cellValue = cell.GetValue();
         if (cellValue is DateTime dateTimeValue || ExcelDateUtilities.TryGetDateTime(cellValue, out dateTimeValue))
@@ -149,15 +97,40 @@ internal class DateTimeOffsetMapper : IFormatsCellMapper, ITypedCellMapper<DateT
         }
     }
 
-    CellConversion ITypedCellMapper<DateTimeOffset?>.Convert(ReadCellResult cell, out DateTimeOffset? value)
+    CellConversion ICellMapper<DateTimeOffset?>.Convert(ReadCellResult cell, out DateTimeOffset? value)
     {
-        var conversion = ((ITypedCellMapper<DateTimeOffset>)this).Convert(cell, out var result);
+        var conversion = ((ICellMapper<DateTimeOffset>)this).Convert(cell, out var result);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }
 
-    // A separate method so that the closure capturing these values is only allocated for invalid
-    // values. Creating the lambda in Map would allocate the closure for every cell.
-    private static CellMapperResult InvalidResult(string? stringValue, string[] formats, IFormatProvider? provider, DateTimeStyles style)
-        => MapperUtilities.InvalidDate(stringValue, style, "DateTimeOffset", formats, () => DateTimeOffset.ParseExact(stringValue!, formats, provider, style));
+    public Exception CreateException(ReadCellResult cell)
+    {
+        // A date that can't have the offset, such as the earliest dates with a positive offset.
+        var cellValue = cell.GetValue();
+        if (cellValue is DateTime dateTimeValue || ExcelDateUtilities.TryGetDateTime(cellValue, out dateTimeValue))
+        {
+            var offset = Offset;
+            return MapperUtilities.InvalidFromParse(() => _ = offset is { } value
+                ? new DateTimeOffset(DateTime.SpecifyKind(dateTimeValue, DateTimeKind.Unspecified), value)
+                : new DateTimeOffset(dateTimeValue));
+        }
+
+        var stringValue = cell.GetString();
+        var formats = Formats;
+        var provider = Provider;
+        var style = Style;
+        try
+        {
+            // Parsing throws for some styles, such as invalid combinations.
+            _ = DateTimeOffset.TryParseExact(stringValue, formats, provider, style, out _) ||
+                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateTimeOffset.TryParseExact(stringValue, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, style, out _));
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
+
+        return MapperUtilities.InvalidDate(stringValue, style, "DateTimeOffset", formats, () => DateTimeOffset.ParseExact(stringValue!, formats, provider, style));
+    }
 }

@@ -5,52 +5,49 @@ namespace ExcelMapper.Utilities;
 internal static class MapperUtilities
 {
     /// <summary>
-    /// Returns an invalid result whose exception is created only if it is needed, by running the
-    /// throwing version of a parse that has already failed. This keeps the exact exception (for
-    /// example FormatException or OverflowException), but throwing and catching it is slow, so it's
-    /// only used where the exception can't be created directly (see the other methods).
+    /// Gets the exception for a value that couldn't be parsed by running the throwing version of
+    /// the parse that failed. This keeps the exact exception (for example FormatException or
+    /// OverflowException), but throwing and catching it is slow, so it's only used where the
+    /// exception can't be created directly (see the other methods). Like all of these methods, it's
+    /// only called from <see cref="ICellMapper{T}.CreateException"/>, when the exception is used.
     /// </summary>
-    public static CellMapperResult InvalidFromParse(Action parse)
-        => CellMapperResult.Invalid(() =>
+    public static Exception InvalidFromParse(Action parse)
+    {
+        try
         {
-            try
-            {
-                parse();
-            }
-            catch (Exception exception)
-            {
-                return exception;
-            }
+            parse();
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
 
-            return new FormatException("The value could not be parsed.");
-        });
+        return new FormatException("The value could not be parsed.");
+    }
 
     /// <summary>
-    /// Returns an invalid result whose exception is a <see cref="FormatException"/> created only if
-    /// it is needed, without throwing it: for parsers whose only failure for text is a
+    /// Creates a <see cref="FormatException"/> without throwing it: for parsers whose only failure for text is a
     /// <see cref="FormatException"/>, such as <see cref="Guid.Parse(string)"/>. Null text (which
     /// the parser rejects with an <see cref="ArgumentNullException"/>) uses <paramref name="parse"/>.
     /// </summary>
-    public static CellMapperResult InvalidFormat(string? text, string description, Action parse)
+    public static Exception InvalidFormat(string? text, string description, Action parse)
         => text is null
             ? InvalidFromParse(parse)
-            : CellMapperResult.Invalid(() => new FormatException($"The value \"{text}\" isn't {description}."));
+            : new FormatException($"The value \"{text}\" isn't {description}.");
 
     /// <summary>
-    /// Returns an invalid result for a date or time that couldn't be parsed with
-    /// <paramref name="formats"/>, whose exception is a <see cref="FormatException"/> created only if
-    /// it is needed, without throwing it. Styles other than whitespace can make ParseExact throw an
+    /// Creates the exception for a date or time that couldn't be parsed with
+    /// <paramref name="formats"/>: a <see cref="FormatException"/>, created without throwing it. Styles other than whitespace can make ParseExact throw an
     /// <see cref="ArgumentException"/> instead, so they use <paramref name="parse"/>.
     /// </summary>
-    public static CellMapperResult InvalidDate(string? text, DateTimeStyles style, string typeName, string[] formats, Action parse)
+    public static Exception InvalidDate(string? text, DateTimeStyles style, string typeName, string[] formats, Action parse)
         => (style & ~DateTimeStyles.AllowWhiteSpaces) != 0
             ? InvalidFromParse(parse)
             : InvalidFormat(text, FormatUtilities.DescribeFormats(typeName, formats), parse);
 
     /// <summary>
-    /// Returns an invalid result for a number that couldn't be parsed, whose exception is created
-    /// only if it is needed. It's the exception the type's Parse method throws, created without
-    /// throwing it: an <see cref="OverflowException"/> if the text is a number that is out of range
+    /// Creates the exception for a number that couldn't be parsed: the exception the type's Parse
+    /// method throws, created without throwing it: an <see cref="OverflowException"/> if the text is a number that is out of range
     /// (or isn't whole, for an integer type), and otherwise a <see cref="FormatException"/>. Where
     /// that can't be told without parsing, <paramref name="parse"/> is used.
     /// </summary>
@@ -62,12 +59,16 @@ internal static class MapperUtilities
     /// <param name="canCreateException">Whether the type is a built-in number type, whose Parse
     /// method fails as described.</param>
     /// <param name="parse">Parses the text, to get the exception where it can't be created directly.</param>
-    public static CellMapperResult InvalidNumber(string? text, NumberStyles style, IFormatProvider? provider, Type type, bool isInteger, bool canCreateException, Action parse)
+    public static Exception InvalidNumber(string? text, NumberStyles style, IFormatProvider? provider, Type type, bool isInteger, bool canCreateException, Action parse)
         => !canCreateException || text is null || GetNumberFailure(text, style, provider) is not { } isOverflow
             ? InvalidFromParse(parse)
-            : CellMapperResult.Invalid(() => isOverflow
+            : isOverflow
                 ? new OverflowException($"The value \"{text}\" is too large or too small for {type.Name}{(isInteger ? ", or isn't a whole number" : "")}.")
-                : new FormatException($"The value \"{text}\" isn't a valid {type.Name}."));
+                : new FormatException($"The value \"{text}\" isn't a valid {type.Name}.");
+
+    // The exception for a number in a cell that isn't whole, mapped to an integer type.
+    public static Exception NotWholeNumber(double value, Type type)
+        => new FormatException($"The value {value} is not a whole number, so it can't be converted to {type}.");
 
     // Whether the text a built-in number type's TryParse rejected is a number out of range (true)
     // or not a number (false), or null if that can't be told without parsing.

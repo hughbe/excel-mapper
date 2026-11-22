@@ -478,7 +478,7 @@ public static class OneToOneMapExtensions
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
         ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
-        map.EmptyFallback = new CellFallbackItem<T?>(new NullableCellFallback<T>(fallback));
+        map.EmptyFallback = new NullableCellFallback<T>(fallback);
         return map;
     }
 
@@ -493,7 +493,7 @@ public static class OneToOneMapExtensions
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
         ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
-        map.InvalidFallback = new CellFallbackItem<T?>(new NullableCellFallback<T>(fallback));
+        map.InvalidFallback = new NullableCellFallback<T>(fallback);
         return map;
     }
 }

@@ -8,11 +8,11 @@ namespace ExcelMapper.Mappers;
 /// An <see cref="INumberBaseMapper{T}"/> for a number value type, which also converts without boxing
 /// for members of its nullable type.
 /// </summary>
-internal sealed class StructNumberMapper<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] T> : INumberBaseMapper<T>, ITypedCellMapper<T?> where T : struct, INumberBase<T>
+internal sealed class StructNumberMapper<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] T> : INumberBaseMapper<T>, ICellMapper<T?> where T : struct, INumberBase<T>
 {
-    CellConversion ITypedCellMapper<T?>.Convert(ReadCellResult cell, out T? value)
+    CellConversion ICellMapper<T?>.Convert(ReadCellResult cell, out T? value)
     {
-        var conversion = ((ITypedCellMapper<T>)this).Convert(cell, out var result);
+        var conversion = ((ICellMapper<T>)this).Convert(cell, out var result);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }

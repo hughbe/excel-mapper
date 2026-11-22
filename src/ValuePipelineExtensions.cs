@@ -372,7 +372,7 @@ public static class ValuePipelineExtensions
     }
 #endif
 
-    private static void AddFormats<TCellMapper>(this ValuePipeline map, string[] formats) where TCellMapper : IFormatsCellMapper, new()
+    private static void AddFormats<TCellMapper>(this ValuePipeline map, string[] formats) where TCellMapper : class, IFormatsCellMapper, new()
     {
         FormatUtilities.ValidateFormats(formats);
         var mapper = map.GetOrAddMapper<TCellMapper>();
@@ -511,7 +511,7 @@ public static class ValuePipelineExtensions
     }
 #endif
 
-    private static void AddFormatProvider<TCellMapper>(this ValuePipeline map, IFormatProvider? provider) where TCellMapper : IFormatProviderCellMapper, new()
+    private static void AddFormatProvider<TCellMapper>(this ValuePipeline map, IFormatProvider? provider) where TCellMapper : class, IFormatProviderCellMapper, new()
     {
         var mapper = map.GetOrAddMapper<TCellMapper>();
         mapper.Provider = provider;
@@ -600,15 +600,16 @@ public static class ValuePipelineExtensions
         return map;
     }
 
-    private static TCellMapper GetOrAddMapper<TCellMapper>(this ValuePipeline map) where TCellMapper : ICellMapper, new()
+    // The callers are typed overloads, so the mapper is always one for the pipeline's type.
+    private static TCellMapper GetOrAddMapper<TCellMapper>(this ValuePipeline map) where TCellMapper : class, new()
     {
-        var mapper = map.Mappers
+        var mapper = map.MapperObjects
             .OfType<TCellMapper>()
             .FirstOrDefault();
         if (mapper == null)
         {
             mapper = new TCellMapper();
-            map.Mappers.Add(mapper);
+            map.AddMapper(mapper);
         }
 
         return mapper;
@@ -686,7 +687,10 @@ public static class ValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithThrowingFallback<TMap>(this TMap map) where TMap : ValuePipeline
-        => map.WithFallbackItem(new ThrowFallback());
+    {
+        map.SetThrowingFallback(empty: true, invalid: true);
+        return map;
+    }
 
     /// <summary>
     /// Specifies a fixed fallback to be used if the value of a cell is empty or cannot be mapped.
@@ -696,13 +700,8 @@ public static class ValuePipelineExtensions
     /// <param name="value">The value that will be assigned to the property or field if the value of a cell is empty or cannot be mapped.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithValueFallback<TMap>(this TMap map, object? value) where TMap : ValuePipeline
-        => map.WithFallbackItem(new FixedValueFallback(value));
-
-    internal static TMap WithFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : ValuePipeline
     {
-        ThrowHelpers.ThrowIfNull(fallbackItem, nameof(fallbackItem));
-        map.EmptyFallback = fallbackItem;
-        map.InvalidFallback = fallbackItem;
+        map.SetFixedFallback(value, empty: true, invalid: true);
         return map;
     }
 
@@ -714,7 +713,10 @@ public static class ValuePipelineExtensions
     /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell is empty.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithEmptyFallback<TMap>(this TMap map, object? fallbackValue) where TMap : ValuePipeline
-        => map.WithEmptyFallbackItem(new FixedValueFallback(fallbackValue));
+    {
+        map.SetFixedFallback(fallbackValue, empty: true, invalid: false);
+        return map;
+    }
 
     /// <summary>
     /// Gives empty cells the value <paramref name="fallback"/> returns.
@@ -727,7 +729,7 @@ public static class ValuePipelineExtensions
     public static TMap WithEmptyFallback<TMap, TValue>(this TMap map, ICellFallback<TValue> fallback) where TMap : ValuePipeline<TValue>
     {
         ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
-        map.EmptyFallback = new CellFallbackItem<TValue>(fallback);
+        map.EmptyFallback = fallback;
         return map;
     }
 
@@ -742,14 +744,7 @@ public static class ValuePipelineExtensions
     public static TMap WithInvalidFallback<TMap, TValue>(this TMap map, ICellFallback<TValue> fallback) where TMap : ValuePipeline<TValue>
     {
         ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
-        map.InvalidFallback = new CellFallbackItem<TValue>(fallback);
-        return map;
-    }
-
-    internal static TMap WithEmptyFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : ValuePipeline
-    {
-        ThrowHelpers.ThrowIfNull(fallbackItem, nameof(fallbackItem));
-        map.EmptyFallback = fallbackItem;
+        map.InvalidFallback = fallback;
         return map;
     }
 
@@ -760,7 +755,10 @@ public static class ValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithThrowingEmptyFallback<TMap>(this TMap map) where TMap : ValuePipeline
-        => map.WithEmptyFallbackItem(new ThrowFallback());
+    {
+        map.SetThrowingFallback(empty: true, invalid: false);
+        return map;
+    }
 
     /// <summary>
     /// Specifies that the map should throw an exception if the value of a cell cannot be mapped.
@@ -769,7 +767,10 @@ public static class ValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithThrowingInvalidFallback<TMap>(this TMap map) where TMap : ValuePipeline
-        => map.WithInvalidFallbackItem(new ThrowFallback());
+    {
+        map.SetThrowingFallback(empty: false, invalid: true);
+        return map;
+    }
 
     /// <summary>
     /// Specifies a fixed fallback to be used if the value of a cell cannot be mapped.
@@ -779,12 +780,9 @@ public static class ValuePipelineExtensions
     /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell cannot be mapped.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithInvalidFallback<TMap>(this TMap map, object? fallbackValue) where TMap : ValuePipeline
-        => map.WithInvalidFallbackItem(new FixedValueFallback(fallbackValue));
-
-    internal static TMap WithInvalidFallbackItem<TMap>(this TMap map, IFallbackItem fallbackItem) where TMap : ValuePipeline
     {
-        ThrowHelpers.ThrowIfNull(fallbackItem, nameof(fallbackItem));
-        map.InvalidFallback = fallbackItem;
+        map.SetFixedFallback(fallbackValue, empty: false, invalid: true);
         return map;
     }
+
 }

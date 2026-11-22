@@ -6,7 +6,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a TimeOnly.
 /// </summary>
-internal class TimeOnlyMapper : ICellMapper, IFormatsCellMapper, ITypedCellMapper<TimeOnly>, ITypedCellMapper<TimeOnly?>
+internal sealed class TimeOnlyMapper : IFormatsCellMapper, ICellMapper<TimeOnly>, ICellMapper<TimeOnly?>
 {
     private string[] _formats = ["t"];
 
@@ -38,55 +38,7 @@ internal class TimeOnlyMapper : ICellMapper, IFormatsCellMapper, ITypedCellMappe
     /// </summary>
     public DateTimeStyles Style { get; set; }
 
-    /// <inheritdoc/>
-    public CellMapperResult Map(ReadCellResult readResult)
-    {
-        // Excel stores dates as numbers (the number of days since 1899-12-30).
-        // ExcelDataReader automatically converts these cells to TimeOnly.
-        if (readResult.GetValue() is TimeSpan timeSpanValue)
-        {
-            try
-            {
-                return CellMapperResult.Success(TimeOnly.FromTimeSpan(timeSpanValue));
-            }
-            catch (Exception exception)
-            {
-                return CellMapperResult.Invalid(exception);
-            }
-        }
-        if (readResult.GetValue() is DateTime dateTimeValue)
-        {
-            return CellMapperResult.Success(TimeOnly.FromDateTime(dateTimeValue));
-        }
-
-        // A number in a cell without a time format is a fraction of a day, for example 0.25 for 06:00.
-        if (readResult.GetValue() is double fractionOfDay && fractionOfDay >= 0 && fractionOfDay < 1)
-        {
-            return CellMapperResult.Success(new TimeOnly((long)Math.Round(fractionOfDay * TimeSpan.TicksPerDay)));
-        }
-        
-        var stringValue = readResult.GetString();
-        var formats = Formats;
-        var provider = Provider;
-        var style = Style;
-        try
-        {
-            if (TimeOnly.TryParseExact(stringValue, formats, provider, style, out var result) ||
-                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && TimeOnly.TryParseExact(stringValue, FormatUtilities.GetDefaultTimeOnlyFormats(provider), provider, style, out result)))
-            {
-                return CellMapperResult.Success(result);
-            }
-        }
-        catch (Exception exception)
-        {
-            return CellMapperResult.Invalid(exception);
-        }
-
-        // Only create the exception (by parsing again) if it is needed.
-        return InvalidResult(stringValue, formats, provider, style);
-    }
-
-    CellConversion ITypedCellMapper<TimeOnly>.Convert(ReadCellResult cell, out TimeOnly value)
+    CellConversion ICellMapper<TimeOnly>.Convert(ReadCellResult cell, out TimeOnly value)
     {
         var cellValue = cell.GetValue();
         if (cellValue is TimeSpan timeSpanValue)
@@ -132,16 +84,37 @@ internal class TimeOnlyMapper : ICellMapper, IFormatsCellMapper, ITypedCellMappe
         }
     }
 
-    CellConversion ITypedCellMapper<TimeOnly?>.Convert(ReadCellResult cell, out TimeOnly? value)
+    CellConversion ICellMapper<TimeOnly?>.Convert(ReadCellResult cell, out TimeOnly? value)
     {
-        var conversion = ((ITypedCellMapper<TimeOnly>)this).Convert(cell, out var result);
+        var conversion = ((ICellMapper<TimeOnly>)this).Convert(cell, out var result);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }
 
-    // A separate method so that the closure capturing these values is only allocated for invalid
-    // values. Creating the lambda in Map would allocate the closure for every cell.
-    private static CellMapperResult InvalidResult(string? stringValue, string[] formats, IFormatProvider? provider, DateTimeStyles style)
-        => MapperUtilities.InvalidDate(stringValue, style, "TimeOnly", formats, () => TimeOnly.ParseExact(stringValue!, formats, provider, style));
+    public Exception CreateException(ReadCellResult cell)
+    {
+        // A duration that isn't a time of day.
+        if (cell.GetValue() is TimeSpan timeSpanValue)
+        {
+            return MapperUtilities.InvalidFromParse(() => TimeOnly.FromTimeSpan(timeSpanValue));
+        }
+
+        var stringValue = cell.GetString();
+        var formats = Formats;
+        var provider = Provider;
+        var style = Style;
+        try
+        {
+            // Parsing throws for some styles, such as invalid combinations.
+            _ = TimeOnly.TryParseExact(stringValue, formats, provider, style, out _) ||
+                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && TimeOnly.TryParseExact(stringValue, FormatUtilities.GetDefaultTimeOnlyFormats(provider), provider, style, out _));
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
+
+        return MapperUtilities.InvalidDate(stringValue, style, "TimeOnly", formats, () => TimeOnly.ParseExact(stringValue!, formats, provider, style));
+    }
 }
 #endif

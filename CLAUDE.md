@@ -36,7 +36,7 @@ The netstandard builds are used by .NET Framework and older .NET apps and take d
 - Problems with a file or a mapping throw `ExcelMappingException`. Create it with the sheet, row and column where known so messages include the cell address (`at cell B11`).
 - Nullable reference types are enabled.
 - Attributes live in `src/` as `Excel<Name>Attribute.cs`; mappers in `src/Mappers`, readers in `src/Readers`, factories in `src/Factories`, fallbacks in `src/Fallbacks`, internal helpers in `src/Utilities`. Everything in those folders, and in `src/Abstractions`, is internal.
-- Each value has two paths through `ValuePipeline<T>`: a typed path, used when every mapper is a typed converter (`ITypedCellMapper<T>`) or wraps an `ICellConverter<T>`, which converts without boxing; and an object path, used otherwise (for example with a mapping dictionary, or for `Uri`, `Version`, `IParsable<T>` and `IConvertible` types). Both must give the same results: test a change on both, using `WithMapping(...)` to force the object path (see `tests/Maps/MapObjectPipelineTests.cs`).
+- Values are converted by `ValuePipeline<T>` as `T`, without boxing: mappers implement `ICellMapper<T>` (and `ICellMapper<T?>` for value types, so nullable members share them), fallbacks are `ICellFallback<T>`, and there's no untyped path. A new mapper implements `Convert` and `CreateException` (see `docs/Architecture.md`).
 - Generic types created at run time with `MakeGenericType` need a `[DynamicDependency]` on the method that creates them, or the trimmer removes their constructors (check with the trimmed app).
 - `Type.GetConstructor(types)` also matches constructors whose parameters the types are assignable to (asking for `ISet<T>` finds a constructor taking `IEnumerable<T>`). Use `CollectionUtilities.GetConstructorTaking` where the parameter type must match exactly.
 - Delete code that can't be reached rather than keeping it "just in case": validation that every internal caller already guarantees, unused overloads and constructors. Coverage against `main` (see [Tests](#tests)) shows what's reachable.
@@ -94,7 +94,7 @@ Performance matters: the mapping path runs for every cell of every row. For any 
 
 Patterns to keep:
 
-- Don't throw and catch exceptions for invalid cells: mappers use `TryParse` and `CellMapperResult.Invalid(Func<Exception>)` (or `MapperUtilities.InvalidFromParse`) so the exception is only created if it is read.
+- Don't throw and catch exceptions for invalid cells: mappers use `TryParse` and return `CellConversion.Invalid`, and create the exception in `CreateException`, which is only called if the exception is used (the `MapperUtilities` helpers create it without throwing where they can).
 - A lambda that captures locals allocates its closure when the locals' scope is entered, even if the lambda isn't used. Create such lambdas in a separate static method that takes the values as parameters.
 - Use indexed `for` loops over `IList<T>` in per-cell code; `foreach` over an interface allocates an enumerator.
 - Keep per-sheet state on the `ExcelSheet` (such as `GetCellReader`/`GetCellsReader` and `GetBoundMembers`), not in a dictionary on a map keyed by sheet: maps outlive sheets and are shared between importers and threads, so they must not hold sheets.

@@ -154,7 +154,7 @@ public class ExcelImporterConfiguration
         }
         else if (map is ValuePipeline pipeline)
         {
-            if (pipeline.Mappers.Count == 0)
+            if (pipeline.MapperCount == 0)
             {
                 throw new ExcelMappingException("Cannot register a class map with a property that has no Mappers defined.");
             }

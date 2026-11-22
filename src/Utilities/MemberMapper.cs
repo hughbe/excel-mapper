@@ -137,7 +137,7 @@ internal static class MemberMapper
 
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    internal static bool AddMappers<T>(ValuePipeline pipeline, MemberInfo member)
+    internal static bool AddMappers<T>(ValuePipeline<T> pipeline, MemberInfo member)
     {
         var addDefaultMappers = true;
 
@@ -162,11 +162,11 @@ internal static class MemberMapper
 
         // If the member has any ExcelMappingDictionary attributes, add a MappingDictionaryMapper.
         var mappingDictionaryAttributes = MemberAttributes.GetMany<ExcelMappingDictionaryAttribute>(member);
-        Dictionary<string, object?>? mappingDictionary = null;
+        Dictionary<string, T>? mappingDictionary = null;
         foreach (var mappingDictionaryAttribute in mappingDictionaryAttributes)
         {
-            mappingDictionary ??= new Dictionary<string, object?>();
-            mappingDictionary.Add(mappingDictionaryAttribute.Value, mappingDictionaryAttribute.MappedValue);
+            mappingDictionary ??= new Dictionary<string, T>();
+            mappingDictionary.Add(mappingDictionaryAttribute.Value, GetMappedValue<T>(mappingDictionaryAttribute, member));
         }
 
         if (mappingDictionary != null)
@@ -185,7 +185,7 @@ internal static class MemberMapper
                 behavior = behaviorAttribute.Behavior;
             }
 
-            pipeline.Mappers.Add(new MappingDictionaryMapper<object?>(mappingDictionary, comparer, behavior));
+            pipeline.Mappers.Add(new MappingDictionaryMapper<T>(mappingDictionary, comparer, behavior));
 
             // If the dictionary mapper was added as required, do not add default mappers.
             if (behavior == MappingDictionaryMapperBehavior.Required)
@@ -195,6 +195,23 @@ internal static class MemberMapper
         }
 
         return addDefaultMappers;
+    }
+
+    // Attribute arguments are objects, so the value is checked against the member's type when the
+    // class map is created.
+    private static T GetMappedValue<T>(ExcelMappingDictionaryAttribute attribute, MemberInfo member)
+    {
+        if (attribute.MappedValue is T value)
+        {
+            return value;
+        }
+
+        if (attribute.MappedValue is null && default(T) is null)
+        {
+            return default!;
+        }
+
+        throw new ExcelMappingException($"The value \"{attribute.MappedValue}\" given by ExcelMappingDictionaryAttribute for \"{attribute.Value}\" on member \"{member.Name}\" isn't a {typeof(T)}.");
     }
 
     /// <summary>
@@ -208,7 +225,7 @@ internal static class MemberMapper
 #if NET5_0_OR_GREATER
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(NullableCellConverter<>))]
 #endif
-    private static ICellMapper? CreateConverterMapper<T>(object converter, MemberInfo member)
+    private static ICellMapper<T>? CreateConverterMapper<T>(object converter, MemberInfo member)
     {
         if (converter is ICellConverter<T> typedConverter)
         {
@@ -235,7 +252,7 @@ internal static class MemberMapper
         // If the member has a ExcelFormats attribute, modify the mappers.
         if (MemberAttributes.Get<ExcelFormatsAttribute>(member) is { } formatsAttribute)
         {
-            foreach (var mapper in pipeline.Mappers.OfType<IFormatsCellMapper>())
+            foreach (var mapper in pipeline.MapperObjects.OfType<IFormatsCellMapper>())
             {
                 mapper.Formats = [.. formatsAttribute.Formats];
             }
@@ -244,7 +261,7 @@ internal static class MemberMapper
         // If the member has a ExcelNumberStyle attribute, modify the mappers.
         if (MemberAttributes.Get<ExcelNumberStyleAttribute>(member) is { } numberStyleAttribute)
         {
-            foreach (var mapper in pipeline.Mappers.OfType<INumberStyleCellMapper>())
+            foreach (var mapper in pipeline.MapperObjects.OfType<INumberStyleCellMapper>())
             {
                 mapper.Style = numberStyleAttribute.Style;
             }
@@ -253,7 +270,7 @@ internal static class MemberMapper
         // If the member has a ExcelUri attribute, modify the mappers.
         if (MemberAttributes.Get<ExcelUriAttribute>(member) is { } uriKindAttribute)
         {
-            foreach (var mapper in pipeline.Mappers.OfType<UriMapper>())
+            foreach (var mapper in pipeline.MapperObjects.OfType<UriMapper>())
             {
                 mapper.UriKind = uriKindAttribute.UriKind;
             }
@@ -261,7 +278,7 @@ internal static class MemberMapper
 
         if (MemberAttributes.Get<ExcelOffsetAttribute>(member) is { } offsetAttribute)
         {
-            foreach (var mapper in pipeline.Mappers.OfType<DateTimeOffsetMapper>())
+            foreach (var mapper in pipeline.MapperObjects.OfType<DateTimeOffsetMapper>())
             {
                 mapper.Offset = offsetAttribute.Offset;
             }
@@ -270,18 +287,18 @@ internal static class MemberMapper
 
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    internal static IFallbackItem? GetDefaultEmptyValueFallback<T>(MemberInfo member)
+    internal static ICellFallback<T>? GetDefaultEmptyValueFallback<T>(MemberInfo member)
     {
         // If the member has a ExcelDefaultValue attribute, add the fallback.
         if (MemberAttributes.Get<ExcelDefaultValueAttribute>(member) is { } defaultValueAttribute)
         {
-            return new FixedValueFallback(defaultValueAttribute.Value);
+            return new FixedValueFallback<T>(defaultValueAttribute.Value);
         }
 
         // If the member has a ExcelEmptyFallback attribute, add the fallback.
         if (MemberAttributes.Get<ExcelEmptyFallbackAttribute>(member) is { } emptyFallback)
         {
-            return CreateFallbackItem<T>(Activator.CreateInstance(emptyFallback.Type, emptyFallback.ConstructorArguments)!, member, nameof(ExcelEmptyFallbackAttribute));
+            return CreateFallback<T>(Activator.CreateInstance(emptyFallback.Type, emptyFallback.ConstructorArguments)!, member, nameof(ExcelEmptyFallbackAttribute));
         }
 
         return null;
@@ -289,18 +306,18 @@ internal static class MemberMapper
 
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    internal static IFallbackItem? GetDefaultInvalidValueFallback<T>(MemberInfo member)
+    internal static ICellFallback<T>? GetDefaultInvalidValueFallback<T>(MemberInfo member)
     {
         // If the member has a ExcelInvalidValue attribute, add the fallback.
         if (MemberAttributes.Get<ExcelInvalidValueAttribute>(member) is { } invalidValueAttribute)
         {
-            return new FixedValueFallback(invalidValueAttribute.Value);
+            return new FixedValueFallback<T>(invalidValueAttribute.Value);
         }
 
         // If the member has a ExcelInvalidFallback attribute, add the fallback.
         if (MemberAttributes.Get<ExcelInvalidFallbackAttribute>(member) is { } invalidFallback)
         {
-            return CreateFallbackItem<T>(Activator.CreateInstance(invalidFallback.Type, invalidFallback.ConstructorArguments)!, member, nameof(ExcelInvalidFallbackAttribute));
+            return CreateFallback<T>(Activator.CreateInstance(invalidFallback.Type, invalidFallback.ConstructorArguments)!, member, nameof(ExcelInvalidFallbackAttribute));
         }
 
         return null;
@@ -315,18 +332,17 @@ internal static class MemberMapper
 #if NET5_0_OR_GREATER
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(NullableCellFallback<>))]
 #endif
-    private static IFallbackItem CreateFallbackItem<T>(object fallback, MemberInfo member, string attributeName)
+    private static ICellFallback<T> CreateFallback<T>(object fallback, MemberInfo member, string attributeName)
     {
         if (fallback is ICellFallback<T> typedFallback)
         {
-            return new CellFallbackItem<T>(typedFallback);
+            return typedFallback;
         }
 
         if (Nullable.GetUnderlyingType(typeof(T)) is { } underlyingType &&
             typeof(ICellFallback<>).MakeGenericType(underlyingType).IsInstanceOfType(fallback))
         {
-            var nullableFallback = (ICellFallback<T>)Activator.CreateInstance(typeof(NullableCellFallback<>).MakeGenericType(underlyingType), fallback)!;
-            return new CellFallbackItem<T>(nullableFallback);
+            return (ICellFallback<T>)Activator.CreateInstance(typeof(NullableCellFallback<>).MakeGenericType(underlyingType), fallback)!;
         }
 
         throw new ExcelMappingException($"The fallback \"{fallback.GetType()}\" given by {attributeName} on member \"{member.Name}\" doesn't implement ICellFallback<{typeof(T)}>.");

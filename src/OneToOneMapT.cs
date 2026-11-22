@@ -137,7 +137,10 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// <param name="value">The value that will be assigned to the property or field if the value of a cell is empty or cannot be mapped.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public OneToOneMap<T> WithValueFallback(T? value)
-        => this.WithFallbackItem(new FixedValueFallback(value));
+    {
+        SetFixedFallback(value, empty: true, invalid: true);
+        return this;
+    }
 
     /// <summary>
     /// Specifies a fixed fallback to be used if the value of a cell is empty.
@@ -145,7 +148,10 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell is empty.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public OneToOneMap<T> WithEmptyFallback(T? fallbackValue)
-        => this.WithEmptyFallbackItem(new FixedValueFallback(fallbackValue));
+    {
+        SetFixedFallback(fallbackValue, empty: true, invalid: false);
+        return this;
+    }
 
     /// <summary>
     /// Specifies a fixed fallback to be used if the value of a cell cannot be mapped.
@@ -153,7 +159,10 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell cannot be mapped.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public OneToOneMap<T> WithInvalidFallback(T? fallbackValue)
-        => this.WithInvalidFallbackItem(new FixedValueFallback(fallbackValue));
+    {
+        SetFixedFallback(fallbackValue, empty: false, invalid: true);
+        return this;
+    }
 
     /// <summary>
     /// Converts cells with <paramref name="converter"/>, which is given the cell's text. The delegate

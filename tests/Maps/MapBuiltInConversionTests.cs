@@ -4,10 +4,10 @@ using System.Linq;
 namespace ExcelMapper.Tests;
 
 /// <summary>
-/// Members whose mappers are all built-in typed converters (strings, numbers, dates, bools, GUIDs)
-/// are mapped without boxing. These check that the typed path behaves exactly like the pipeline.
+/// The built-in conversion of numbers, strings, dates, bools and GUIDs, with fallbacks, mapping
+/// dictionaries and changes to a map after reading.
 /// </summary>
-public class TypedConverterTests
+public class MapBuiltInConversionTests
 {
     [Fact]
     public void ReadRows_InvalidValue_CustomFallbackReceivesMappersException()
@@ -38,7 +38,7 @@ public class TypedConverterTests
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<IntRow>().ToArray());
         Assert.Equal("A2", exception.CellAddress);
         Assert.Contains("Cannot assign \"2.5\" to member \"Value\"", exception.Message);
-        // As before the typed path: int.Parse reports a fractional part as an overflow.
+        // int.Parse reports a fractional part as an overflow.
         Assert.IsType<OverflowException>(exception.InnerException);
     }
 
@@ -60,15 +60,14 @@ public class TypedConverterTests
         var sheet = importer.ReadSheet();
         Assert.Equal(1, sheet.ReadRow<IntRow>().Value);
 
-        // A mapping dictionary isn't a typed converter: the member goes back to the pipeline.
+        // The map is read again after it changes.
         valueMap.WithMapping(new Dictionary<string, int> { ["two"] = 2 });
         Assert.Equal(2, sheet.ReadRow<IntRow>().Value);
     }
 
     [Fact]
-    public void ReadRows_BuiltInThenMappingDictionary_UsesPipeline()
+    public void ReadRows_BuiltInThenMappingDictionary_ReturnsExpected()
     {
-        // The built-in mapper, then a mapping dictionary, which isn't a typed converter.
         using var importer = Helpers.GetCsvImporter("Value\nn/a\n3\nx\n");
         importer.Configuration.RegisterClassMap<IntRow>(c => c.Map(r => r.Value)
             .WithMapping(new Dictionary<string, int> { ["n/a"] = -2 })
@@ -425,9 +424,8 @@ public class TypedConverterTests
     }
 
     [Fact]
-    public void ReadRows_SplitElementsWithMappingDictionary_UsesPipeline()
+    public void ReadRows_SplitElementsWithMappingDictionary_ReturnsExpected()
     {
-        // A mapping dictionary isn't a typed converter, so the elements go through the pipeline.
         using var importer = Helpers.GetCsvImporter("Values,Dates\n1;two,\n");
         importer.Configuration.RegisterClassMap<ElementsRow>(c =>
         {

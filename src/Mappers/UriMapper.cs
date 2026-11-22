@@ -1,15 +1,9 @@
-﻿namespace ExcelMapper.Mappers;
+namespace ExcelMapper.Mappers;
 
-/// <summary>
-/// Tries to map the value of a cell to a <see cref="Uri"/>.
-/// </summary>
-internal class UriMapper : ICellMapper
+internal sealed class UriMapper : ICellMapper<Uri?>
 {
     private UriKind _uriKind = UriKind.Absolute;
 
-    /// <summary>
-    /// Gets or sets the kind of URI to create.
-    /// </summary>
     public UriKind UriKind
     {
         get => _uriKind;
@@ -20,23 +14,21 @@ internal class UriMapper : ICellMapper
         }
     }
 
-    /// <inheritdoc/>
-    public CellMapperResult Map(ReadCellResult readResult)
+    public CellConversion Convert(ReadCellResult cell, out Uri? value)
     {
-        var stringValue = readResult.GetString();
-
-        var uriKind = UriKind;
-        if (stringValue is not null && Uri.TryCreate(stringValue, uriKind, out var uri))
+        var stringValue = cell.GetString();
+        if (stringValue is not null && Uri.TryCreate(stringValue, UriKind, out value))
         {
-            return CellMapperResult.Success(uri);
+            return CellConversion.Success;
         }
 
-        // Only create the exception if it is needed.
-        return InvalidResult(stringValue, uriKind);
+        value = null;
+        return CellConversion.Invalid;
     }
 
-    // A separate method so that the closure capturing these values is only allocated for invalid
-    // values. Creating the lambda in Map would allocate the closure for every cell.
-    private static CellMapperResult InvalidResult(string? stringValue, UriKind uriKind)
-        => CellMapperResult.Invalid(() => new UriFormatException($"The value \"{stringValue}\" isn't a valid {(uriKind == UriKind.RelativeOrAbsolute ? "" : uriKind.ToString().ToLowerInvariant() + " ")}URI."));
+    public Exception CreateException(ReadCellResult cell)
+    {
+        var uriKind = UriKind;
+        return new UriFormatException($"The value \"{cell.GetString()}\" isn't a valid {(uriKind == UriKind.RelativeOrAbsolute ? "" : uriKind.ToString().ToLowerInvariant() + " ")}URI.");
+    }
 }

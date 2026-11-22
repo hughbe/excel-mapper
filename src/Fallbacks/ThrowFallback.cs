@@ -1,36 +1,34 @@
-﻿using System.Reflection;
-
 namespace ExcelMapper.Fallbacks;
 
 /// <summary>
-/// A fallback that throws an ExcelMappingException when falling back.
+/// The default invalid fallback, and the empty fallback of non-nullable value types: reports the
+/// cell as an error.
 /// </summary>
-internal class ThrowFallback : IFallbackItem
+internal sealed class ThrowFallback<T> : ICellFallback<T>
 {
-    /// <inheritdoc/>
-    public object PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception? exception, MemberInfo? member)
+    public static ThrowFallback<T> Instance { get; } = new();
+
+    public T Fallback(CellValue value, CellContext context, Exception? exception)
     {
-        var stringValue = readResult.GetString();
+        var member = context.Member;
+        var sheet = context.Sheet;
+        var text = value.Text;
         var mappingException = member == null
-            ? new ExcelMappingException($"Cannot assign \"{stringValue}\"", sheet, rowIndex, readResult.ColumnIndex, exception)
-            : new ExcelMappingException($"Cannot assign \"{stringValue}\" to member \"{member.Name}\" of type \"{member.MemberType()}\"", sheet, rowIndex, readResult.ColumnIndex, exception)
+            ? new ExcelMappingException($"Cannot assign \"{text}\"", sheet, context.RowIndex, context.ColumnIndex, exception)
+            : new ExcelMappingException($"Cannot assign \"{text}\" to member \"{member.Name}\" of type \"{member.MemberType()}\"", sheet, context.RowIndex, context.ColumnIndex, exception)
             {
                 Member = member
             };
 
         // When the sheet is collecting errors (ReadRowResults), record the error rather than
-        // throwing it: throwing and catching an exception for every invalid cell is slow.
+        // throwing it: throwing and catching an exception for every invalid cell is slow. The
+        // member isn't set, as the row has an error.
         if (sheet?.CollectedErrors is { } errors)
         {
             errors.Add(mappingException);
-            return ErrorRecorded;
+            return default!;
         }
 
         throw mappingException;
     }
-
-    /// <summary>
-    /// Returned instead of throwing when an error has been recorded. Maps treat it as "no value".
-    /// </summary>
-    internal static readonly object ErrorRecorded = new();
 }
