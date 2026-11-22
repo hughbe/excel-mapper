@@ -27,9 +27,9 @@ The public API is the importer, sheets and regions, class maps and the fluent me
 |---|---|
 | `ExcelImporter` | Opens a workbook or CSV file and owns its `IExcelDataReader` and `ExcelImporterConfiguration`. `ReadSheet`/`TryReadSheet` return sheets by position or name. |
 | `RowSource` (internal) | Owns the reader's position. The reader is forward-only and shared by every sheet of the importer, so this is the only code that calls `Read`, `NextResult` and `Reset`: sheets ask it for the sheet and row they need, and it reads forward or rewinds. It also counts rows, leaving out the empty lines at the end of CSV files. |
-| `ExcelSheet` | A worksheet and a position in it. Reads the heading (`ReadHeading`, `FindHeading`), then rows (`ReadRows<T>`, `ReadRow<T>`, `ReadRowResults<T>`). It keeps its own position, so two `ExcelSheet` objects for one worksheet don't interfere. Not thread-safe. |
+| `ExcelSheet` | A worksheet and a position in it. Reads the heading (`ReadHeading`, `FindHeading`), then rows (`ReadRows<T>`, `ReadRow<T>`, `ReadRowResults<T>`). It keeps its own position, so two `ExcelSheet` objects for one worksheet don't interfere. Not thread-safe. It holds the heading and data range, and maps rows; the rest is internal: `Worksheet` (what's fixed about the worksheet, such as its name, index and reader), `RowCursor` (the row it's on, and moving to the next row of data), `SheetBindings` (the readers and bound class maps worked out for it) and `HeadingSearch` (`FindHeading`). |
 | `ExcelHeading` | The heading row: column names and their indexes, for finding columns by name (`ColumnUtilities` also matches names without separators when `IgnoreSeparatorsInColumnNames` is set). |
-| `ExcelRegion` | An immutable block of a worksheet with its own heading choice (`WithHeadingAt`, `WithoutHeading`, `WithHeadingSearch`). Each read creates a private `ExcelSheet` for the region, with its own `DataRange`, heading and position, so regions reuse the sheet's reading, binding and heading code. Columns chosen by position count from the region's first column (`ExcelSheet.ColumnOffset` and `ToSheetColumn`). |
+| `ExcelRegion` | An immutable block of a worksheet with its own heading choice (`WithHeadingAt`, `WithoutHeading`, `WithHeadingSearch`). Each read creates a private `ExcelSheet` for the region's `Worksheet`, with its own `DataRange`, heading, cursor and bindings, so regions reuse the sheet's reading, binding and heading code. Converters, column selectors and errors get that sheet, so its heading is the region's. Columns chosen by position count from the region's first column (`ExcelSheet.ColumnOffset` and `ToSheetColumn`). |
 
 `ExcelImporterConfiguration` holds the registered class maps and the settings that apply to every sheet: `Culture` (set as the current culture while a row is mapped, so parsing uses it), `SkipBlankLines`, `ValidateDataAnnotations` and `IgnoreSeparatorsInColumnNames`.
 
@@ -63,9 +63,9 @@ A factory creates a cell reader for a sheet once; the reader then reads the memb
 
 ## Binding
 
-The first time a class map is used with a sheet, `ExcelSheet.GetBoundMembers` binds each member to the sheet:
+The first time a class map is used with a sheet, `ExcelSheet.GetBoundMembers` (through its `SheetBindings`) binds each member to the sheet:
 
-- `BoundOneToOneMember<T>` (single values): keeps the member's cell reader and a compiled `Action<object, T>` setter, so values stay typed from the pipeline to the member, without boxing.
+- `BoundValueMember<T>` (single values): keeps the member's cell reader and a compiled `Action<object, T>` setter, so values stay typed from the pipeline to the member, without boxing.
 - `BoundCellsMember` (collections and dictionaries): keeps the cells reader, and its own copy of the collection factory (`IBindingFactory`), so one sheet's reads don't need a lock.
 - `BoundMapMember` (everything else, such as nested class maps, indexers and row numbers): maps through `IMap.TryGetValue`.
 
@@ -129,7 +129,7 @@ The net8.0 build is annotated for trimming: the mapped type `T` and the types gi
 | `src/Mappers`, `src/Transformers`, `src/Fallbacks` | Built-in conversion, transformers and fallbacks, and the adapters for the public extension points (internal) |
 | `src/Factories` | Collection and dictionary factories (internal) |
 | `src/Abstractions` | The interfaces of the internal types, and the indexer map interfaces |
-| `src/Utilities` | Auto-mapping (`AutoMapper`, `TypeRule`, `CollectionRule`, `DictionaryRule`, `MemberMapper`, `ExpressionAutoMapper`), binding (`BoundMember`), `RowSource`, `CompiledAccessors`, constructor matching and parsing helpers |
+| `src/Utilities` | Auto-mapping (`AutoMapper`, `TypeRule`, `CollectionRule`, `DictionaryRule`, `MemberMapper`, `ExpressionAutoMapper`), binding (`BoundMember`, `SheetBindings`), reading (`RowSource`, `Worksheet`, `RowCursor`, `HeadingSearch`), `CompiledAccessors`, constructor matching and parsing helpers |
 | `tests/ExcelMapper` | Unit tests of public types, one file per type, mirroring `src/` |
 | `tests/Maps`, `tests/Fallbacks`, `tests/Transformers` | Mapping tests, which read spreadsheets and cover the internal types through the public API |
 | `tests/TrimmingTests` | A trimmed app that checks mapping works after trimming |

@@ -283,7 +283,7 @@ public class ExcelImporter : IDisposable
         }
 
         SheetIndex++;
-        sheet = new ExcelSheet(Reader, SheetIndex, this);
+        sheet = new ExcelSheet(new Worksheet(Reader, SheetIndex, this));
         return true;
     }
 
@@ -340,7 +340,7 @@ public class ExcelImporter : IDisposable
         }
 
         RowSource.TryMoveToSheet(sheetIndex);
-        sheet = new ExcelSheet(Reader, sheetIndex, this);
+        sheet = new ExcelSheet(new Worksheet(Reader, sheetIndex, this));
         ResetReader();
         return true;
     }

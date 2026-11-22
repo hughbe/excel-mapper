@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Linq;
 using ExcelDataReader;
 using ExcelMapper.Readers;
 
@@ -23,60 +22,43 @@ namespace ExcelMapper;
 public class ExcelSheet
 {
     /// <summary>
-    /// Creates a sheet for the same worksheet as <paramref name="worksheet"/>, with its own heading
-    /// and position, for reading a region (see <see cref="ExcelRegion"/>).
+    /// Creates a sheet for a worksheet. A region is read with a sheet of its own for the same
+    /// worksheet, with its own heading and position (see <see cref="ExcelRegion"/>).
     /// </summary>
-    internal ExcelSheet(ExcelSheet worksheet)
+    internal ExcelSheet(Worksheet worksheet)
     {
-        Reader = worksheet.Reader;
-        Name = worksheet.Name;
-        Visibility = worksheet.Visibility;
-        Index = worksheet.Index;
-        NumberOfColumns = worksheet.NumberOfColumns;
-        Importer = worksheet.Importer;
+        Worksheet = worksheet;
+        _cursor = new RowCursor(worksheet);
+        _bindings = new SheetBindings(this);
     }
 
-    internal ExcelSheet(IExcelDataReader reader, int index, ExcelImporter importer)
-    {
-        Reader = reader;
-        Name = reader.Name;
-        // CSV readers have no concept of sheet visibility and return a null state.
-        if (reader.VisibleState is null || reader.VisibleState == "visible")
-        {
-            Visibility = ExcelSheetVisibility.Visible;
-        }
-        else if (reader.VisibleState == "hidden")
-        {
-            Visibility = ExcelSheetVisibility.Hidden;
-        }
-        else
-        {
-            Visibility = ExcelSheetVisibility.VeryHidden;
-        }
-        Index = index;
-        NumberOfColumns = reader.FieldCount;
-        Importer = importer;
-    }
+    /// <summary>
+    /// The worksheet, shared with the sheets that regions of it are read with.
+    /// </summary>
+    internal Worksheet Worksheet { get; }
+
+    private readonly RowCursor _cursor;
+    private readonly SheetBindings _bindings;
 
     /// <summary>
     /// Gets the name of the sheet.
     /// </summary>
-    public string Name { get; }
+    public string Name => Worksheet.Name;
 
     /// <summary>
     /// Gets the visibility of the sheet.
     /// </summary>
-    public ExcelSheetVisibility Visibility { get; }
+    public ExcelSheetVisibility Visibility => Worksheet.Visibility;
 
     /// <summary>
     /// Gets the zero-based index of the sheet where 0 is the first sheet in the document.
     /// </summary>
-    public int Index { get; }
+    public int Index => Worksheet.Index;
 
     /// <summary>
     /// Gets the number of columns in the sheet.
     /// </summary>
-    public int NumberOfColumns { get; }
+    public int NumberOfColumns => Worksheet.NumberOfColumns;
 
     private bool _hasHeading = true;
 
@@ -173,23 +155,21 @@ public class ExcelSheet
     /// Gets the heading that was read from the sheet. This will return null if HasHeading is false
     /// or the heading has not been read yet by calling ReadHeading or ReadRows.
     /// </summary>
-    public ExcelHeading? Heading { get; private set; }
+    public ExcelHeading? Heading { get; internal set; }
 
     /// <summary>
     /// Gets the index of the row currently being mapped.
     /// </summary>
-    public int CurrentRowIndex { get; private set; } = -1;
-
-    private ExcelImporter Importer { get; }
+    public int CurrentRowIndex => _cursor.RowIndex;
 
     /// <summary>
     /// The importer's culture, if set (see <see cref="ExcelImporterConfiguration.Culture"/>).
     /// </summary>
-    internal System.Globalization.CultureInfo? Culture => Importer.Configuration.Culture;
+    internal CultureInfo? Culture => Worksheet.Configuration.Culture;
 
-    internal ExcelImporterConfiguration Configuration => Importer.Configuration;
+    internal ExcelImporterConfiguration Configuration => Worksheet.Configuration;
 
-    private IExcelDataReader Reader { get; }
+    private IExcelDataReader Reader => Worksheet.Reader;
 
     /// <summary>
     /// Reads the heading of the sheet including column names and indices.
@@ -208,10 +188,10 @@ public class ExcelSheet
         }
 
         // Read up to the heading row.
-        ReadUpTo(GetHeadingRowIndex());
+        _cursor.MoveTo(_cursor.GetRowIndex(_dataRange.Rows.Start));
 
         // Create the heading.
-        var heading = new ExcelHeading(Reader, DataRange, Importer.Configuration);
+        var heading = new ExcelHeading(Reader, DataRange, Configuration);
         Heading = heading;
         return heading;
     }
@@ -233,10 +213,7 @@ public class ExcelSheet
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
     {
-        if (Reader.IsClosed)
-        {
-            throw new ExcelMappingException($"The underlying reader is closed.");
-        }
+        Worksheet.ThrowIfClosed();
 
         // Read the heading if we haven't already - this validates the sheet structure
         if (HasHeading && Heading == null)
@@ -275,10 +252,7 @@ public class ExcelSheet
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int startIndex, int count)
     {
-        if (Reader.IsClosed)
-        {
-            throw new ExcelMappingException($"The underlying reader is closed.");
-        }
+        Worksheet.ThrowIfClosed();
         ThrowHelpers.ThrowIfNegative(startIndex, nameof(startIndex));
         if (HasHeading)
         {
@@ -296,11 +270,11 @@ public class ExcelSheet
         // rewind so that the requested rows are returned rather than whatever follows.
         if (startIndex - 1 < CurrentRowIndex)
         {
-            CurrentRowIndex = -1;
+            _cursor.Reset();
         }
 
         // Skip to the start index
-        ReadUpTo(startIndex - 1);
+        _cursor.MoveTo(startIndex - 1);
 
         // Handle zero count case.
         if (count == 0)
@@ -386,10 +360,7 @@ public class ExcelSheet
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public IEnumerable<ExcelRowResult<T>> ReadRowResults<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
     {
-        if (Reader.IsClosed)
-        {
-            throw new ExcelMappingException($"The underlying reader is closed.");
-        }
+        Worksheet.ThrowIfClosed();
 
         // Read the heading now, as ReadRows does, so that problems with it are reported immediately.
         if (HasHeading && Heading == null)
@@ -446,13 +417,10 @@ public class ExcelSheet
         // and columns can be found by name.
         if (HasHeading && Heading == null)
         {
-            if (Reader.IsClosed)
-            {
-                throw new ExcelMappingException($"The underlying reader is closed.");
-            }
+            Worksheet.ThrowIfClosed();
 
             // A sheet without enough rows for a heading has no rows to read either.
-            if (!TryReadUpTo(GetHeadingRowIndex()))
+            if (!_cursor.TryMoveTo(_cursor.GetRowIndex(_dataRange.Rows.Start)))
             {
                 return false;
             }
@@ -460,7 +428,7 @@ public class ExcelSheet
             ReadHeading();
         }
 
-        return MoveToNextRow();
+        return _cursor.MoveNext(_dataRange, FirstDataRow);
     }
 
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
@@ -472,7 +440,7 @@ public class ExcelSheet
         // Map using the configured culture, if any. Mappers without their own format provider use the
         // current culture, so set it for the duration of this row only, not while the caller's code
         // runs between rows. Only switch if it differs, as setting the culture has a small cost.
-        var culture = Importer.Configuration.Culture;
+        var culture = Configuration.Culture;
         var previousCulture = CultureInfo.CurrentCulture;
         var switchCulture = culture is not null && !ReferenceEquals(culture, previousCulture);
         bool result;
@@ -495,7 +463,7 @@ public class ExcelSheet
         }
 
         // If we've been asked to validate with data annotations, do so now.
-        if (Importer.Configuration.ValidateDataAnnotations && result && valueObject is not null)
+        if (Configuration.ValidateDataAnnotations && result && valueObject is not null)
         {
             if (CollectedErrors is { } errors)
             {
@@ -522,9 +490,9 @@ public class ExcelSheet
 
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    private ExcelClassMap GetOrCreateClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
+    internal ExcelClassMap GetOrCreateClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
     {
-        if (!Importer.Configuration.TryGetClassMap(typeof(T), out var classMap))
+        if (!Configuration.TryGetClassMap(typeof(T), out var classMap))
         {
             // Sheets without a heading can still be auto-mapped if the map doesn't look up columns by
             // name, for example primitives (read from the first column) or members with ExcelColumnIndex.
@@ -534,7 +502,7 @@ public class ExcelSheet
                 throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\".");
             }
 
-            classMap = Importer.Configuration.RegisterAutoMappedClassMap(typeof(T), map);
+            classMap = Configuration.RegisterAutoMappedClassMap(typeof(T), map);
         }
 
         RootMap = classMap;
@@ -586,10 +554,7 @@ public class ExcelSheet
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public bool TryValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(out IReadOnlyList<string> problems)
     {
-        if (Reader.IsClosed)
-        {
-            throw new ExcelMappingException($"The underlying reader is closed.");
-        }
+        Worksheet.ThrowIfClosed();
 
         if (HasHeading && Heading == null)
         {
@@ -601,9 +566,6 @@ public class ExcelSheet
         problems = foundProblems;
         return foundProblems.Count == 0;
     }
-
-    // The number of rows FindHeading and TryFindHeading search by default (documented as 50).
-    internal const int DefaultHeadingSearchRows = 50;
 
     /// <summary>
     /// Finds the heading of a sheet with rows above it, such as a title or notes, and reads it. The
@@ -624,7 +586,7 @@ public class ExcelSheet
     /// <exception cref="InvalidOperationException">The heading has already been read.</exception>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ExcelHeading FindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>() => FindHeading<T>(DefaultHeadingSearchRows);
+    public ExcelHeading FindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>() => FindHeading<T>(HeadingSearch.DefaultMaxRows);
 
     /// <summary>
     /// Finds the heading of a sheet with rows above it, such as a title or notes, and reads it. The
@@ -660,7 +622,7 @@ public class ExcelSheet
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public bool TryFindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>([NotNullWhen(true)] out ExcelHeading? heading)
-        => TryFindHeading<T>(DefaultHeadingSearchRows, out heading, out _);
+        => TryFindHeading<T>(HeadingSearch.DefaultMaxRows, out heading, out _);
 
     /// <summary>
     /// Tries to find the heading of a sheet with rows above it, such as a title or notes, and reads it.
@@ -679,163 +641,25 @@ public class ExcelSheet
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     internal bool TryFindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int maxRows, [NotNullWhen(true)] out ExcelHeading? heading, [NotNullWhen(false)] out string? error)
     {
-        if (Reader.IsClosed)
-        {
-            throw new ExcelMappingException($"The underlying reader is closed.");
-        }
+        Worksheet.ThrowIfClosed();
         ThrowHelpers.ThrowIfNegativeOrZero(maxRows, nameof(maxRows));
         if (Heading != null)
         {
             throw new InvalidOperationException("The heading has already been read.");
         }
 
-        var classMap = GetOrCreateClassMap<T>();
-        var startRowIndex = GetHeadingRowIndex();
-        var endRowIndex = (int)Math.Min((long)startRowIndex + maxRows, int.MaxValue);
-
-        var closestRowIndex = -1;
-        var closestFound = 0;
-        List<string>? closestProblems = null;
-        for (var rowIndex = startRowIndex; rowIndex < endRowIndex; rowIndex++)
-        {
-            if (!TryReadUpTo(rowIndex))
-            {
-                break;
-            }
-            if (Importer.RowSource.IsBlankRow(0, Reader.FieldCount))
-            {
-                continue;
-            }
-
-            // Check the class map's columns against this row as the heading.
-            var candidate = new ExcelHeading(Reader, _dataRange, Importer.Configuration);
-            var lookedUp = 0;
-            var found = 0;
-            List<string>? problems = null;
-            Heading = candidate;
-            try
-            {
-                MapValidation.CountNamedColumns(classMap, this, ref lookedUp, ref found);
-                if (found > 0)
-                {
-                    problems = [];
-                    MapValidation.FindMissingColumns(classMap, this, null, problems);
-                }
-            }
-            finally
-            {
-                Heading = null;
-            }
-
-            if (lookedUp == 0)
-            {
-                RewindAfterHeadingSearch();
-                throw new ExcelMappingException($"Can't find the heading for type \"{typeof(T)}\" as it doesn't look up any column by name. Set {nameof(HeadingIndex)} instead.");
-            }
-
-            if (found > 0 && problems!.Count == 0)
-            {
-                _hasHeading = true;
-                _dataRange = new ExcelRange(rowIndex.._dataRange.Rows.End, _dataRange.Columns);
-                Heading = candidate;
-                heading = candidate;
-                error = null;
-                return true;
-            }
-
-            if (found > closestFound)
-            {
-                closestRowIndex = rowIndex;
-                closestFound = found;
-                closestProblems = problems;
-            }
-        }
-
-        RewindAfterHeadingSearch();
-        heading = null;
-        var searched = $"the first {maxRows} rows{(startRowIndex == 0 ? string.Empty : $" from row {startRowIndex + 1}")} of sheet \"{Name}\"";
-        error = closestRowIndex == -1
-            ? $"Could not find the heading for type \"{typeof(T)}\": none of {searched} has any of its columns."
-            : $"Could not find the heading for type \"{typeof(T)}\" in {searched}. The closest is row {closestRowIndex + 1}, which is missing {string.Join("; ", closestProblems!)}.";
-        return false;
+        return HeadingSearch.TryFind<T>(this, _cursor, maxRows, out heading, out error);
     }
 
-    private void RewindAfterHeadingSearch()
+    /// <summary>
+    /// Uses a row found by <see cref="HeadingSearch"/> as the heading: the data starts there.
+    /// </summary>
+    internal void UseHeading(int rowIndex, ExcelHeading heading)
     {
-        // Leave the sheet as it was: the next read starts from the beginning of the sheet again.
-        CurrentRowIndex = -1;
+        _hasHeading = true;
+        _dataRange = new ExcelRange(rowIndex.._dataRange.Rows.End, _dataRange.Columns);
+        Heading = heading;
     }
-
-    private bool MoveToNextRow()
-    {
-        if (Reader.IsClosed)
-        {
-            throw new ExcelMappingException($"The underlying reader is closed.");
-        }
-
-        // Ensure we're on the correct sheet and row.
-        ReadUpTo(CurrentRowIndex);
-
-        // Check if we've reached the end of the data range. Only count the rows for ranges
-        // relative to the end of the sheet: otherwise read until there are no more rows.
-        var rows = _dataRange.Rows;
-        var endRowIndex = !rows.End.IsFromEnd ? rows.End.Value
-            : rows.End.Value == 0 ? int.MaxValue
-            : rows.End.GetOffset(GetRowCount());
-        if (CurrentRowIndex + 1 >= endRowIndex)
-        {
-            return false;
-        }
-
-        // Skip any rows before the start of the data range. If the sheet has a heading, the
-        // heading row is the start of the data range and has already been read.
-        var startRowIndex = rows.Start.IsFromEnd ? rows.Start.GetOffset(GetRowCount()) : rows.Start.Value;
-        if (FirstDataRow is { } firstDataRow)
-        {
-            startRowIndex = Math.Max(startRowIndex, firstDataRow.IsFromEnd ? firstDataRow.GetOffset(GetRowCount()) : firstDataRow.Value);
-        }
-
-        if (CurrentRowIndex + 1 < startRowIndex)
-        {
-            if (startRowIndex >= endRowIndex || !TryReadUpTo(startRowIndex - 1))
-            {
-                return false;
-            }
-        }
-
-        // Read the next row.
-        if (!TryReadUpTo(CurrentRowIndex + 1))
-        {
-            return false;
-        }
-
-        if (Importer.Configuration.SkipBlankLines)
-        {
-            // Only consider the columns in the data range when checking for blank rows.
-            var fieldCount = Reader.FieldCount;
-            var startColumnIndex = Math.Min(_dataRange.Columns.Start.GetOffset(fieldCount), fieldCount);
-            var endColumnIndex = Math.Min(_dataRange.Columns.End.GetOffset(fieldCount), fieldCount);
-
-            while (Importer.RowSource.IsBlankRow(startColumnIndex, endColumnIndex))
-            {
-                // Don't skip past the end of the data range.
-                if (CurrentRowIndex + 1 >= endRowIndex || !TryReadUpTo(CurrentRowIndex + 1))
-                {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    private int GetHeadingRowIndex()
-    {
-        var start = _dataRange.Rows.Start;
-        return start.IsFromEnd ? start.GetOffset(GetRowCount()) : start.Value;
-    }
-
-    private int GetRowCount() => Importer.RowSource.GetRowCount(Index);
 
     /// <summary>
     /// The first row that can be data, if the heading is above the rows to read (see
@@ -864,150 +688,18 @@ public class ExcelSheet
         return sheetColumnIndex < Math.Min(ColumnEnd, NumberOfColumns) ? (int)sheetColumnIndex : -1;
     }
 
-    // Readers created by reader factories for this sheet, so that a column is found once per sheet
-    // rather than for every row. Keyed by the factory instance (the factories are internal and
-    // don't override Equals): a map whose factory is replaced gets a new reader.
-    private Dictionary<ICellReaderFactory, ICellReader?>? _cellReaders;
-    private Dictionary<ICellsReaderFactory, ICellsReader?>? _cellsReaders;
-
-    // Extra columns depend on the root map as well as the factory, as a nested class map can be
-    // shared between root maps (with WithClassMap).
-    private Dictionary<(ExtraColumnsReaderFactory, IMap?), ICellsReader?>? _extraColumnsReaders;
-
     /// <summary>
     /// Gets the reader a factory creates for this sheet, creating it the first time.
     /// </summary>
-    internal ICellReader? GetCellReader(ICellReaderFactory factory)
-    {
-        _cellReaders ??= [];
-        if (!_cellReaders.TryGetValue(factory, out var reader))
-        {
-            reader = factory.GetCellReader(this);
-            _cellReaders[factory] = reader;
-        }
-
-        return reader;
-    }
+    internal ICellReader? GetCellReader(ICellReaderFactory factory) => _bindings.GetCellReader(factory);
 
     /// <summary>
     /// Gets the cells reader a factory creates for this sheet, creating it the first time.
     /// </summary>
-    internal ICellsReader? GetCellsReader(ICellsReaderFactory factory)
-    {
-        if (factory is ExtraColumnsReaderFactory extraColumnsFactory)
-        {
-            return GetExtraColumnsReader(extraColumnsFactory);
-        }
-
-        _cellsReaders ??= [];
-        if (!_cellsReaders.TryGetValue(factory, out var reader))
-        {
-            reader = factory.GetCellsReader(this);
-            _cellsReaders[factory] = reader;
-        }
-
-        return reader;
-    }
-
-    private ICellsReader? GetExtraColumnsReader(ExtraColumnsReaderFactory factory)
-    {
-        _extraColumnsReaders ??= [];
-        var key = (factory, RootMap);
-        if (!_extraColumnsReaders.TryGetValue(key, out var reader))
-        {
-            reader = factory.GetCellsReader(this);
-            _extraColumnsReaders[key] = reader;
-        }
-
-        return reader;
-    }
-
-    private sealed class BoundClassMap(int version, BoundMember[] members)
-    {
-        public int Version { get; } = version;
-
-        public BoundMember[] Members { get; } = members;
-    }
-
-    // Class maps bound to this sheet. Rows are usually mapped with one class map at a time, so the
-    // last one is kept separately.
-    private Dictionary<ExcelClassMap, BoundClassMap>? _boundClassMaps;
-    private ExcelClassMap? _lastBoundClassMap;
-    private BoundClassMap? _lastBound;
+    internal ICellsReader? GetCellsReader(ICellsReaderFactory factory) => _bindings.GetCellsReader(factory);
 
     /// <summary>
     /// Gets the members of a class map bound to this sheet.
     /// </summary>
-    internal BoundMember[] GetBoundMembers(ExcelClassMap classMap)
-    {
-        var bound = ReferenceEquals(_lastBoundClassMap, classMap) ? _lastBound : null;
-        if (bound is null)
-        {
-            _boundClassMaps ??= [];
-            _boundClassMaps.TryGetValue(classMap, out bound);
-        }
-
-        var version = classMap.PropertiesVersion;
-        if (bound is null || bound.Version != version)
-        {
-            bound = new BoundClassMap(version, Bind(classMap));
-            _boundClassMaps![classMap] = bound;
-        }
-
-        _lastBoundClassMap = classMap;
-        _lastBound = bound;
-        return bound.Members;
-    }
-
-    private BoundMember[] Bind(ExcelClassMap classMap)
-    {
-        var properties = classMap.Properties;
-        var members = new BoundMember[properties.Count];
-        for (int i = 0; i < members.Length; i++)
-        {
-            var property = properties[i];
-            members[i] = property.Map switch
-            {
-                IBindableMap bindableMap => bindableMap.Bind(property, this),
-                ICellsMap cellsMap => new BoundCellsMember(cellsMap, property),
-                _ => new BoundMapMember(property),
-            };
-        }
-
-        return members;
-    }
-
-    internal void ReadUpTo(int index)
-    {
-        if (!TryReadUpTo(index))
-        {
-            throw new ExcelMappingException($"Sheet \"{Name}\" does not have row {index}.");
-        }
-    }
-
-    /// <summary>
-    /// Moves to a row of this sheet, so that its cells can be read. Other sheets of the importer
-    /// share the reader, so this can mean reading forward or rewinding.
-    /// </summary>
-    private bool TryReadUpTo(int index)
-    {
-        if (Reader.IsClosed)
-        {
-            throw new ExcelMappingException($"The underlying reader is closed.");
-        }
-
-        if (!Importer.RowSource.TryMoveTo(Index, index))
-        {
-            // The sheet ends before the row: the sheet is on its last row.
-            CurrentRowIndex = Importer.RowSource.LastRowIndex;
-            Importer.SheetIndex = Index;
-            return false;
-        }
-
-        // Reading rows of a sheet makes it the importer's current sheet, so ReadSheet() continues
-        // from the sheet after it.
-        Importer.SheetIndex = Index;
-        CurrentRowIndex = index;
-        return true;
-    }
+    internal BoundMember[] GetBoundMembers(ExcelClassMap classMap) => _bindings.GetBoundMembers(classMap);
 }
