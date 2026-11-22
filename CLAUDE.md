@@ -102,7 +102,7 @@ Patterns to keep:
 - A lambda that captures locals allocates its closure when the locals' scope is entered, even if the lambda isn't used. Create such lambdas in a separate static method that takes the values as parameters.
 - Use indexed `for` loops over `IList<T>` in per-cell code; `foreach` over an interface allocates an enumerator.
 - Maps are frozen the first time they're used with a sheet (`IMap.Freeze`), so nothing worked out from them needs to be rebuilt. Anything new that configures a map must throw once it's frozen (`ThrowIfFrozen`, or a `NonNullCollection<T>`), and a new kind of map must freeze the maps and pipelines under it.
-- Keep per-sheet state in the sheet's `SheetBindings` (through `ExcelSheet.FindColumn`, `GetCellsReader` and `GetBoundMembers`), not in a dictionary on a map keyed by sheet: maps outlive sheets and are shared between importers and threads, so they must not hold sheets.
+- Keep per-sheet state in the sheet's `SheetBindings` (through `SheetView.FindColumn`, `GetCellsReader` and `GetBoundMembers`), not in a dictionary on a map keyed by sheet: maps outlive sheets and are shared between importers and threads, so they must not hold sheets.
 
 ## Documentation
 

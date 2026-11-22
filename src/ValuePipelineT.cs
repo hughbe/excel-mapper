@@ -98,7 +98,7 @@ public abstract class ValuePipeline<T> : ValuePipeline
     /// be replaced and an invalid value are kept until a later result replaces them), then the
     /// invalid fallback.
     /// </summary>
-    internal T Map(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, MemberInfo? member, List<ExcelMappingException>? errors)
+    internal T Map(SheetView sheet, int rowIndex, ReadCellResult readResult, MemberInfo? member, List<ExcelMappingException>? errors)
     {
         var plan = GetPlan();
 

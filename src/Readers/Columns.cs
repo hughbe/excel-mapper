@@ -6,7 +6,7 @@ namespace ExcelMapper.Readers;
 
 /// <summary>
 /// The columns a member reads, chosen by name, position, a pattern or an <see cref="IColumnSelector"/>.
-/// They're found once for each sheet (see <see cref="ExcelSheet.FindColumn"/>): a member with a
+/// They're found once for each sheet (see <see cref="SheetView.FindColumn"/>): a member with a
 /// single value reads the first column found, and a collection or dictionary reads all of them.
 /// </summary>
 /// <remarks>
@@ -19,14 +19,14 @@ internal abstract class Columns
     /// Finds the column a single value is read from.
     /// </summary>
     /// <returns>The column's position in the worksheet, or -1 if the sheet doesn't have it.</returns>
-    public abstract int FindColumn(ExcelSheet sheet);
+    public abstract int FindColumn(SheetView sheet);
 
     /// <summary>
     /// Finds the columns a collection or dictionary is read from.
     /// </summary>
     /// <returns>The columns' positions in the worksheet, in the order to read them, or null if
     /// the sheet doesn't have them.</returns>
-    public virtual int[]? FindColumns(ExcelSheet sheet)
+    public virtual int[]? FindColumns(SheetView sheet)
     {
         var column = FindColumn(sheet);
         return column == -1 ? null : [column];
@@ -46,19 +46,19 @@ internal abstract class Columns
     /// <summary>
     /// Creates the error for a member whose columns the sheet doesn't have.
     /// </summary>
-    public virtual ExcelMappingException CreateMissingException(ExcelSheet sheet, int rowIndex, MemberInfo? member)
+    public virtual ExcelMappingException CreateMissingException(SheetView sheet, int rowIndex, MemberInfo? member)
         => Missing(sheet, rowIndex, member, null);
 
     /// <summary>
     /// Describes the columns for <see cref="ExcelSheet.ValidateHeading{T}"/>, such as
     /// <c>column "Name"</c>.
     /// </summary>
-    public virtual string Describe(ExcelSheet sheet) => "a matching column";
+    public virtual string Describe(SheetView sheet) => "a matching column";
 
-    private protected static ExcelMappingException Missing(ExcelSheet sheet, int rowIndex, MemberInfo? member, string? columns)
+    private protected static ExcelMappingException Missing(SheetView sheet, int rowIndex, MemberInfo? member, string? columns)
         => new($"Could not read value for member \"{member?.Name}\"{(columns is null ? string.Empty : " for " + columns)}", sheet, rowIndex, -1);
 
-    private protected static ExcelMappingException NoHeading(ExcelSheet sheet)
+    private protected static ExcelMappingException NoHeading(SheetView sheet)
         => new($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
 
     private protected static string DescribeNames(IReadOnlyList<string> names)
@@ -82,23 +82,23 @@ internal sealed class ColumnNameColumns : Columns
 
     public StringComparison Comparison { get; }
 
-    public override int FindColumn(ExcelSheet sheet)
+    public override int FindColumn(SheetView sheet)
         => ColumnUtilities.TryGetColumnIndex(sheet, Name, Comparison, out var column) ? column : -1;
 
     public override bool LooksUpNames => true;
 
     public override string ColumnName => Name;
 
-    public override ExcelMappingException CreateMissingException(ExcelSheet sheet, int rowIndex, MemberInfo? member)
+    public override ExcelMappingException CreateMissingException(SheetView sheet, int rowIndex, MemberInfo? member)
         => new($"Could not read value for member \"{member?.Name}\" for column \"{Name}\"", sheet, rowIndex, -1, null, ExcelMappingException.GetSimilarColumnHint(sheet, Name));
 
-    public override string Describe(ExcelSheet sheet)
+    public override string Describe(SheetView sheet)
     {
         var similar = ExcelMappingException.GetSimilarColumnHint(sheet, Name) is null ? null : SimilarColumn(sheet, Name);
         return similar is null ? $"column \"{Name}\"" : $"column \"{Name}\", did you mean \"{similar}\"?";
     }
 
-    private static string SimilarColumn(ExcelSheet sheet, string columnName)
+    private static string SimilarColumn(SheetView sheet, string columnName)
     {
         var normalizedName = ColumnUtilities.RemoveSeparators(columnName);
         return sheet.Heading!.ColumnNames.First(c => string.Equals(ColumnUtilities.RemoveSeparators(c), normalizedName, StringComparison.OrdinalIgnoreCase));
@@ -113,7 +113,7 @@ internal sealed class FirstColumnNameColumns(IReadOnlyList<ColumnNameColumns> co
 {
     public IReadOnlyList<ColumnNameColumns> Columns { get; } = columns;
 
-    public override int FindColumn(ExcelSheet sheet)
+    public override int FindColumn(SheetView sheet)
     {
         for (int i = 0; i < Columns.Count; i++)
         {
@@ -130,10 +130,10 @@ internal sealed class FirstColumnNameColumns(IReadOnlyList<ColumnNameColumns> co
 
     public override string ColumnName => Columns[0].Name;
 
-    public override ExcelMappingException CreateMissingException(ExcelSheet sheet, int rowIndex, MemberInfo? member)
+    public override ExcelMappingException CreateMissingException(SheetView sheet, int rowIndex, MemberInfo? member)
         => Columns[0].CreateMissingException(sheet, rowIndex, member);
 
-    public override string Describe(ExcelSheet sheet) => Columns[0].Describe(sheet);
+    public override string Describe(SheetView sheet) => Columns[0].Describe(sheet);
 }
 
 /// <summary>
@@ -154,7 +154,7 @@ internal sealed class ColumnNamesColumns : Columns
 
     public StringComparison Comparison { get; }
 
-    public override int FindColumn(ExcelSheet sheet)
+    public override int FindColumn(SheetView sheet)
     {
         foreach (var name in Names)
         {
@@ -167,7 +167,7 @@ internal sealed class ColumnNamesColumns : Columns
         return -1;
     }
 
-    public override int[]? FindColumns(ExcelSheet sheet)
+    public override int[]? FindColumns(SheetView sheet)
     {
         if (sheet.Heading == null)
         {
@@ -188,10 +188,10 @@ internal sealed class ColumnNamesColumns : Columns
 
     public override bool LooksUpNames => true;
 
-    public override ExcelMappingException CreateMissingException(ExcelSheet sheet, int rowIndex, MemberInfo? member)
+    public override ExcelMappingException CreateMissingException(SheetView sheet, int rowIndex, MemberInfo? member)
         => Missing(sheet, rowIndex, member, DescribeNames(Names));
 
-    public override string Describe(ExcelSheet sheet) => $"one of columns {string.Join(", ", Names.Select(n => $"\"{n}\""))}";
+    public override string Describe(SheetView sheet) => $"one of columns {string.Join(", ", Names.Select(n => $"\"{n}\""))}";
 }
 
 /// <summary>
@@ -208,12 +208,12 @@ internal sealed class ColumnIndexColumns : Columns
 
     public int Index { get; }
 
-    public override int FindColumn(ExcelSheet sheet) => sheet.ToSheetColumn(Index);
+    public override int FindColumn(SheetView sheet) => sheet.ToSheetColumn(Index);
 
-    public override ExcelMappingException CreateMissingException(ExcelSheet sheet, int rowIndex, MemberInfo? member)
+    public override ExcelMappingException CreateMissingException(SheetView sheet, int rowIndex, MemberInfo? member)
         => Missing(sheet, rowIndex, member, $"column at index {Index}");
 
-    public override string Describe(ExcelSheet sheet)
+    public override string Describe(SheetView sheet)
         => $"column {ExcelRange.GetColumnLetters(sheet.ColumnOffset + Index)} (index {Index})";
 }
 
@@ -231,7 +231,7 @@ internal sealed class ColumnIndicesColumns : Columns
 
     public IReadOnlyList<int> Indices { get; }
 
-    public override int FindColumn(ExcelSheet sheet)
+    public override int FindColumn(SheetView sheet)
     {
         foreach (var index in Indices)
         {
@@ -244,7 +244,7 @@ internal sealed class ColumnIndicesColumns : Columns
         return -1;
     }
 
-    public override int[]? FindColumns(ExcelSheet sheet)
+    public override int[]? FindColumns(SheetView sheet)
     {
         var columns = new int[Indices.Count];
         for (int i = 0; i < columns.Length; i++)
@@ -259,10 +259,10 @@ internal sealed class ColumnIndicesColumns : Columns
         return columns;
     }
 
-    public override ExcelMappingException CreateMissingException(ExcelSheet sheet, int rowIndex, MemberInfo? member)
+    public override ExcelMappingException CreateMissingException(SheetView sheet, int rowIndex, MemberInfo? member)
         => Missing(sheet, rowIndex, member, Indices.Count == 1 ? $"column at index {Indices[0]}" : $"columns at indices {string.Join(", ", Indices)}");
 
-    public override string Describe(ExcelSheet sheet)
+    public override string Describe(SheetView sheet)
         => $"columns {string.Join(", ", Indices.Select(i => ExcelRange.GetColumnLetters(sheet.ColumnOffset + i)))}";
 }
 
@@ -285,7 +285,7 @@ internal sealed class MatchingColumns : Columns
         _matches = regex.IsMatch;
     }
 
-    public override int FindColumn(ExcelSheet sheet)
+    public override int FindColumn(SheetView sheet)
     {
         var (start, end) = ColumnUtilities.GetColumnRange(sheet);
         for (var column = start; column < end; column++)
@@ -299,7 +299,7 @@ internal sealed class MatchingColumns : Columns
         return -1;
     }
 
-    public override int[]? FindColumns(ExcelSheet sheet)
+    public override int[]? FindColumns(SheetView sheet)
     {
         var columns = new List<int>();
         var (start, end) = ColumnUtilities.GetColumnRange(sheet);
@@ -314,12 +314,12 @@ internal sealed class MatchingColumns : Columns
         return columns.Count == 0 ? null : [.. columns];
     }
 
-    private bool Matches(ExcelSheet sheet, int column)
+    private bool Matches(SheetView sheet, int column)
         => _matches((sheet.Heading ?? throw NoHeading(sheet)).GetColumnName(column));
 
     public override bool LooksUpNames => true;
 
-    public override ExcelMappingException CreateMissingException(ExcelSheet sheet, int rowIndex, MemberInfo? member)
+    public override ExcelMappingException CreateMissingException(SheetView sheet, int rowIndex, MemberInfo? member)
     {
         if (sheet.Heading is not { } heading)
         {
@@ -353,11 +353,11 @@ internal sealed class SplitColumns(Columns cell, CellSplitter splitter) : Column
 
     public CellSplitter Splitter { get; } = splitter;
 
-    public override int FindColumn(ExcelSheet sheet) => Cell.FindColumn(sheet);
+    public override int FindColumn(SheetView sheet) => Cell.FindColumn(sheet);
 
     public override bool LooksUpNames => Cell.LooksUpNames;
 
-    public override ExcelMappingException CreateMissingException(ExcelSheet sheet, int rowIndex, MemberInfo? member)
+    public override ExcelMappingException CreateMissingException(SheetView sheet, int rowIndex, MemberInfo? member)
         => Cell switch
         {
             ColumnNameColumns or FirstColumnNameColumns => Missing(sheet, rowIndex, member, $"column \"{Cell.ColumnName}\""),
@@ -365,7 +365,7 @@ internal sealed class SplitColumns(Columns cell, CellSplitter splitter) : Column
             _ => Missing(sheet, rowIndex, member, null),
         };
 
-    public override string Describe(ExcelSheet sheet)
+    public override string Describe(SheetView sheet)
         => Cell switch
         {
             ColumnNameColumns or FirstColumnNameColumns => $"one of columns \"{Cell.ColumnName}\"",
@@ -381,20 +381,20 @@ internal sealed class SelectorColumns(IColumnSelector selector) : Columns
 {
     public IColumnSelector Selector { get; } = selector;
 
-    public override int FindColumn(ExcelSheet sheet)
+    public override int FindColumn(SheetView sheet)
     {
         var columns = Select(sheet);
         return columns.Length == 0 ? -1 : columns[0];
     }
 
-    public override int[]? FindColumns(ExcelSheet sheet)
+    public override int[]? FindColumns(SheetView sheet)
     {
         var columns = Select(sheet);
         return columns.Length == 0 ? null : columns;
     }
 
     // The chosen columns that are in the sheet (or region).
-    private int[] Select(ExcelSheet sheet)
+    private int[] Select(SheetView sheet)
     {
         var selected = Selector.SelectColumns(new ColumnSelectorContext(sheet)) ?? throw new InvalidOperationException($"The column selector \"{Selector.GetType()}\" returned null.");
         var end = Math.Min(sheet.ColumnEnd, sheet.NumberOfColumns);
@@ -410,10 +410,10 @@ internal sealed class SelectorColumns(IColumnSelector selector) : Columns
         return [.. columns];
     }
 
-    public override ExcelMappingException CreateMissingException(ExcelSheet sheet, int rowIndex, MemberInfo? member)
+    public override ExcelMappingException CreateMissingException(SheetView sheet, int rowIndex, MemberInfo? member)
         => Missing(sheet, rowIndex, member, Selector.Describe(new ColumnSelectorContext(sheet)));
 
-    public override string Describe(ExcelSheet sheet) => Selector.Describe(new ColumnSelectorContext(sheet));
+    public override string Describe(SheetView sheet) => Selector.Describe(new ColumnSelectorContext(sheet));
 }
 
 /// <summary>
@@ -427,9 +427,9 @@ internal sealed class AllColumns : Columns
     {
     }
 
-    public override int FindColumn(ExcelSheet sheet) => throw new NotSupportedException();
+    public override int FindColumn(SheetView sheet) => throw new NotSupportedException();
 
-    public override int[] FindColumns(ExcelSheet sheet)
+    public override int[] FindColumns(SheetView sheet)
     {
         var heading = sheet.Heading ?? throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
 
@@ -452,7 +452,7 @@ internal sealed class AllColumns : Columns
 /// <summary>
 /// The columns with a name that no other member of a class map reads: see
 /// <see cref="ExcelExtraColumnsAttribute"/>. When rows are read, the class map is the one rows
-/// are mapped with (see <see cref="ExcelSheet.RootMap"/>), as a nested class map can be shared.
+/// are mapped with (see <see cref="SheetView.RootMap"/>), as a nested class map can be shared.
 /// </summary>
 internal sealed class ExtraColumns : Columns
 {
@@ -464,9 +464,9 @@ internal sealed class ExtraColumns : Columns
 
     public ExcelClassMap ClassMap { get; }
 
-    public override int FindColumn(ExcelSheet sheet) => throw new NotSupportedException();
+    public override int FindColumn(SheetView sheet) => throw new NotSupportedException();
 
-    public override int[] FindColumns(ExcelSheet sheet)
+    public override int[] FindColumns(SheetView sheet)
     {
         var heading = sheet.Heading ?? throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Extra columns can only be read from sheets with a heading.");
 
@@ -487,7 +487,7 @@ internal sealed class ExtraColumns : Columns
         return [.. columns];
     }
 
-    private static void AddUsedColumns(IMap map, ExcelSheet sheet, HashSet<int> usedColumns)
+    private static void AddUsedColumns(IMap map, SheetView sheet, HashSet<int> usedColumns)
         => MapTree.VisitCellMaps(map, null, (cellMap, _) =>
         {
             switch (cellMap)
@@ -517,7 +517,7 @@ internal sealed class ExtraColumns : Columns
             }
         });
 
-    private static void AddUsedColumn(Columns columns, ExcelSheet sheet, HashSet<int> usedColumns)
+    private static void AddUsedColumn(Columns columns, SheetView sheet, HashSet<int> usedColumns)
     {
         try
         {

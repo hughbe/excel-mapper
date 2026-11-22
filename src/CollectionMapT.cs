@@ -95,7 +95,7 @@ public class CollectionMap<TElement> : ICellsMap
     internal CollectionBuilder<TElement> Builder { get; }
 
     /// <inheritdoc />
-    bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
+    bool IMap.TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
@@ -103,15 +103,15 @@ public class CollectionMap<TElement> : ICellsMap
     }
 
 
-    ICellsReader? ICellsMap.GetCellsReader(ExcelSheet sheet) => GetCellsReader(sheet);
+    ICellsReader? ICellsMap.GetCellsReader(SheetView sheet) => GetCellsReader(sheet);
 
-    private ICellsReader? GetCellsReader(ExcelSheet sheet)
+    private ICellsReader? GetCellsReader(SheetView sheet)
         => sheet.GetCellsReader(_columns);
 
-    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out object? value)
+    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out object? value)
         => TryGetValue(cellsReader, sheet, rowIndex, reader, member, errors, out value);
 
-    private bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
+    private bool TryGetValue(ICellsReader? cellsReader, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
     {
         if (cellsReader == null || !cellsReader.Start(reader, PreserveFormatting, out var count))
         {

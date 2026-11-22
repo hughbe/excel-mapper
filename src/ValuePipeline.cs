@@ -67,7 +67,7 @@ public abstract class ValuePipeline
     /// <see cref="ExcelMappingException"/> rather than a <see cref="NullReferenceException"/> if the
     /// value is null and <typeparamref name="T"/> is a non-nullable value type.
     /// </summary>
-    internal static T CastValue<T>(object? value, ExcelSheet sheet, int rowIndex, int columnIndex, MemberInfo? member)
+    internal static T CastValue<T>(object? value, SheetView sheet, int rowIndex, int columnIndex, MemberInfo? member)
     {
         if (value is null)
         {
