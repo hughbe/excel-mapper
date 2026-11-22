@@ -85,7 +85,7 @@ public sealed class ExcelRegion
     /// See <see cref="ExcelSheet.FindHeading{T}()"/>.
     /// </summary>
     /// <returns>A new region.</returns>
-    public ExcelRegion WithHeadingSearch() => new(Sheet, Range, HeadingKind.Search, ExcelSheet.DefaultHeadingSearchRows);
+    public ExcelRegion WithHeadingSearch() => new(Sheet, Range, HeadingKind.Search, HeadingSearch.DefaultMaxRows);
 
     /// <summary>
     /// Returns a region whose heading is found when it's read: the first row, among the region's first
@@ -184,7 +184,7 @@ public sealed class ExcelRegion
     /// </summary>
     private ExcelSheet CreateSheet()
     {
-        var sheet = new ExcelSheet(Sheet);
+        var sheet = new ExcelSheet(Sheet.Worksheet);
 
         // Columns chosen by position count from the region's first column, and stop at its last.
         var columnCount = Sheet.NumberOfColumns;
