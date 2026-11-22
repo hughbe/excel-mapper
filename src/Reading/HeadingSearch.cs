@@ -49,7 +49,7 @@ internal static class HeadingSearch
                 if (found > 0)
                 {
                     problems = [];
-                    MapValidation.FindMissingColumns(classMap, sheet, null, problems);
+                    MapValidation.FindMissingColumns(classMap, sheet, null, problems, reportAmbiguous: false);
                 }
             }
             finally

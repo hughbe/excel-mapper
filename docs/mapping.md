@@ -26,6 +26,8 @@ Console.WriteLine(employees[1].Salary); // 78000
 
 Public instance properties with a setter, and public instance fields, are mapped. Read-only properties are mapped only through a constructor (see [Records and constructors](#records-and-constructors)); static members and indexers are ignored. Set `importer.Configuration.IgnoreSeparatorsInColumnNames = true` to also match `FirstName` to columns such as "First Name", "first_name" or "First-Name" (an exact match is preferred).
 
+If more than one column matches a member's name (two columns named "Name", or "Name" and "name"), reading it throws an `ExcelMappingException` naming both columns, as it isn't clear which to read. Choose one by its letter or index (`[ExcelColumnLetter("B")]`, `.WithColumnLetter("B")`), or rename one of the columns. Columns with the same name that no member reads, such as several blank heading cells, are fine.
+
 **With attributes** on the type, to change how a member is read:
 
 ```csharp

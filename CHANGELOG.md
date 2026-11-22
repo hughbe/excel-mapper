@@ -24,6 +24,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - `ExcelRange` is a `readonly struct`; `default(ExcelRange)` (and the value `TryParse` returns on failure) means every row and column instead of an empty range; `Parse` rejects non-ASCII letters, signs, and rows or columns beyond Excel's limits. ([#117](https://github.com/hughbe/excel-mapper/pull/117))
 - With a `DataRange` that doesn't start at the first column, `ExcelHeading.GetColumnIndex` and `GetColumnName` use positions in the sheet rather than in the range. ([#116](https://github.com/hughbe/excel-mapper/pull/116))
 - Splitting a cell with a trailing separator (`"a,b,"`) includes the trailing empty value, as `string.Split` does, for arrays and lists alike; an empty cell gives no values. ([#116](https://github.com/hughbe/excel-mapper/pull/116))
+- Reading a member whose column name matches more than one column in the heading (such as two columns named "Name", or "Name" and "name") throws an `ExcelMappingException` naming both columns, instead of silently reading the first. Choose one by letter or index, or rename a column. (#PR)
 - A sheet takes the importer's settings when it starts reading, so changing them while its rows are read only affects sheets read afterwards, instead of the following rows. ([#182](https://github.com/hughbe/excel-mapper/pull/182))
 - A class map can't be changed once rows have been read with it (by `ReadRows`, `ReadRow`, `ReadRowResults`, `ValidateHeading` or `FindHeading`): calling `Map` or a fluent method on it, or on a map of one of its members, throws an `InvalidOperationException` instead of changing how the following rows are read. Register a new class map to read differently. ([#185](https://github.com/hughbe/excel-mapper/pull/185))
 - `RegisterClassMap` replaces a class map that auto-mapping registered implicitly instead of throwing. ([#120](https://github.com/hughbe/excel-mapper/pull/120))
@@ -99,6 +100,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Fixed
 
+- With two columns of the same name, `ExcelHeading.GetColumnIndex("Name_2")` found the second, and a column really named "Name_2" after them was found as "Name_2_2". The heading no longer invents names. A case-sensitive column name (`StringComparison.Ordinal`) wasn't found when a column with the same name in another case came before it. (#PR)
 - Mapping a nested object inside a dictionary with keys that aren't strings, such as `Map(p => p.ById[5].Street)` for a `Dictionary<int, Address>`, threw `InvalidCastException`. ([#180](https://github.com/hughbe/excel-mapper/pull/180))
 
 - Extra columns on a nested object (`MapExtraColumns(p => p.Details.Extra)`, or `[ExcelExtraColumns]` on a member of a nested type) included the columns read by members outside the nested object, such as the parent's. They now leave out every column read by the type being read, at any depth. ([#166](https://github.com/hughbe/excel-mapper/pull/166))

@@ -260,10 +260,11 @@ public class WorkflowScenarioTests
     }
 
     [Fact]
-    public void ReadRows_DuplicateColumns_UsesFirst()
+    public void ReadRows_DuplicateColumns_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetCsvImporter("Name,Name,Age\nFirst,Second,1\n");
-        Assert.Equal("First", importer.ReadSheet().ReadRows<Person>().Single().Name);
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<Person>().ToArray());
+        Assert.Contains("(columns A and B)", exception.Message);
     }
 
     [Fact]
