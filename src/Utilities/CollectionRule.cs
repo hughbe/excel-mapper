@@ -58,13 +58,13 @@ internal sealed class CollectionRule<TElement> : CollectionRule
     /// </summary>
     public static bool TryCreateCollectionMap(MemberInfo? member, Type collectionType, ICellsReaderFactory readerFactory, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out CollectionMap<TElement>? map)
     {
-        if (!TryGetFactory(collectionType, out var factory))
+        if (!TryGetBuilder(collectionType, out var builder))
         {
             map = null;
             return false;
         }
 
-        map = new CollectionMap<TElement>(readerFactory, factory);
+        map = new CollectionMap<TElement>(readerFactory, builder);
         if (!AutoMapper.TrySetupMap<TElement>(member, map, emptyValueStrategy, isAutoMapping: true))
         {
             map = null;
@@ -82,12 +82,12 @@ internal sealed class CollectionRule<TElement> : CollectionRule
                 ?? throw new InvalidOperationException($"Expression is already mapped differently as {existingMap.GetType()}.");
         }
 
-        if (!TryGetFactory(collectionType, out var factory))
+        if (!TryGetBuilder(collectionType, out var builder))
         {
             throw new ExcelMappingException($"Could not map array of type \"{collectionType}\".");
         }
 
-        var map = new CollectionIndexerMap<TElement>(factory);
+        var map = new CollectionIndexerMap<TElement>(builder);
         AutoMapper.AddExistingMap(parentMap, context, map);
         return map;
     }
@@ -100,187 +100,124 @@ internal sealed class CollectionRule<TElement> : CollectionRule
                 ?? throw new InvalidOperationException($"Expression is already mapped differently as {existingMap.GetType()}.");
         }
 
-        var map = new MultidimensionalIndexerMap<TElement>(new MultidimensionalArrayFactory<TElement>());
+        var map = new MultidimensionalIndexerMap<TElement>();
         AutoMapper.AddExistingMap(parentMap, context, map);
         return map;
     }
 
     /// <summary>
-    /// Finds how to create a collection of type <paramref name="collectionType"/> and add elements
-    /// to it.
+    /// Finds how to build a collection of type <paramref name="collectionType"/> from its elements.
     /// </summary>
-    private static bool TryGetFactory(Type collectionType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
+    internal static bool TryGetBuilder(Type collectionType, [NotNullWhen(true)] out CollectionBuilder<TElement>? builder)
     {
-        if (TryGetWellKnownFactory(collectionType, out result))
-        {
-            return true;
-        }
-
-        if (collectionType.IsInterface)
-        {
-            return TryGetInterfaceFactory(collectionType, out result);
-        }
-
-        if (!collectionType.IsAbstract)
-        {
-            return TryGetConcreteTypeFactory(collectionType, out result);
-        }
-
-        result = default;
-        return false;
+        builder = GetWellKnownBuilder(collectionType)
+            ?? (collectionType.IsInterface ? GetInterfaceBuilder(collectionType)
+            : !collectionType.IsAbstract ? GetConcreteTypeBuilder(collectionType)
+            : null);
+        return builder is not null;
     }
 
-    private static bool TryGetWellKnownFactory(Type collectionType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
+    private static CollectionBuilder<TElement>? GetWellKnownBuilder(Type collectionType)
     {
         if (collectionType == typeof(Array) || (collectionType.IsArray && collectionType.GetArrayRank() == 1))
         {
-            result = new ArrayEnumerableFactory<TElement>();
-            return true;
+            return CollectionBuilder<TElement>.ForArray();
         }
+        if (collectionType == typeof(List<TElement>))
+        {
+            return CollectionBuilder<TElement>.ForList();
+        }
+        if (collectionType == typeof(HashSet<TElement>))
+        {
+            return CollectionBuilder<TElement>.ForHashSet();
+        }
+
+        // Immutable and frozen collections are created from a copy of the elements.
         if (collectionType == typeof(ImmutableArray<TElement>))
         {
-            result = new ImmutableArrayEnumerableFactory<TElement>();
-            return true;
+            return CollectionBuilder<TElement>.FromList(static items => ImmutableArray.CreateRange(items), copiesElements: true);
         }
         if (collectionType == typeof(ImmutableList<TElement>) || collectionType == typeof(IImmutableList<TElement>))
         {
-            result = new ImmutableListEnumerableFactory<TElement>();
-            return true;
+            return CollectionBuilder<TElement>.FromList(static items => ImmutableList.CreateRange(items), copiesElements: true);
         }
         if (collectionType == typeof(ImmutableStack<TElement>) || collectionType == typeof(IImmutableStack<TElement>))
         {
-            result = new ImmutableStackEnumerableFactory<TElement>();
-            return true;
+            return CollectionBuilder<TElement>.FromList(static items => ImmutableStack.CreateRange(items), copiesElements: true);
         }
         if (collectionType == typeof(ImmutableQueue<TElement>) || collectionType == typeof(IImmutableQueue<TElement>))
         {
-            result = new ImmutableQueueEnumerableFactory<TElement>();
-            return true;
+            return CollectionBuilder<TElement>.FromList(static items => ImmutableQueue.CreateRange(items), copiesElements: true);
         }
         if (collectionType == typeof(ImmutableSortedSet<TElement>))
         {
-            result = new ImmutableSortedSetEnumerableFactory<TElement>();
-            return true;
+            return CollectionBuilder<TElement>.FromList(static items => ImmutableSortedSet.CreateRange(items), copiesElements: true);
         }
         if (collectionType == typeof(ImmutableHashSet<TElement>) || collectionType == typeof(IImmutableSet<TElement>))
         {
-            result = new ImmutableHashSetEnumerableFactory<TElement>();
-            return true;
+            return CollectionBuilder<TElement>.FromList(static items => ImmutableHashSet.CreateRange(items), copiesElements: true);
         }
         if (collectionType == typeof(FrozenSet<TElement>))
         {
-            result = new FrozenSetEnumerableFactory<TElement>();
-            return true;
+            return CollectionBuilder<TElement>.FromList(static items => items.ToFrozenSet(), copiesElements: true);
         }
 
-        result = default;
-        return false;
+        return null;
     }
 
-    private static bool TryGetInterfaceFactory(Type collectionType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
+    private static CollectionBuilder<TElement>? GetInterfaceBuilder(Type collectionType)
     {
-        // Add values by creating a list and assigning to the property.
+        // Create a list or set, and assign it to the member.
         if (typeof(List<TElement>).IsAssignableTo(collectionType))
         {
-            result = new ListEnumerableFactory<TElement>();
-            return true;
+            return CollectionBuilder<TElement>.ForList();
         }
         if (typeof(HashSet<TElement>).IsAssignableTo(collectionType))
         {
-            result = new HashSetEnumerableFactory<TElement>();
-            return true;
+            return CollectionBuilder<TElement>.ForHashSet();
         }
 
-        result = default;
-        return false;
+        return null;
     }
 
-    private static bool TryGetConcreteTypeFactory(Type collectionType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
+    private static CollectionBuilder<TElement>? GetConcreteTypeBuilder(Type collectionType)
     {
-        var hasDefaultConstructor = collectionType.GetConstructor([]) is not null;
+        var create = collectionType.GetConstructor([]) is not null ? CompiledAccessors.GetParameterlessConstructor(collectionType) : null;
 
         // A parameterless constructor and a collection interface.
-        if (hasDefaultConstructor && TryGetDefaultConstructorFactory(collectionType, out result))
+        if (create is not null && CollectionBuilder<TElement>.ForInterfaces(collectionType, create) is { } builder)
         {
-            return true;
+            return builder;
         }
 
-        // A constructor that takes the elements.
-        if (TryGetConstructorBasedFactory(collectionType, out result))
-        {
-            return true;
-        }
-
-        // A parameterless constructor and an Add method.
-        if (hasDefaultConstructor && collectionType.GetMethod("Add", [typeof(TElement)]) is not null)
-        {
-            result = new AddEnumerableFactory<TElement>(collectionType);
-            return true;
-        }
-
-        // A constructor that takes an ObservableCollection, such as ReadOnlyObservableCollection<T>.
-        if (CollectionUtilities.GetConstructorTaking(collectionType, typeof(ObservableCollection<TElement>)) is not null)
-        {
-            result = new ReadOnlyObservableCollectionEnumerableFactory<TElement>(collectionType);
-            return true;
-        }
-
-        result = default;
-        return false;
-    }
-
-    private static bool TryGetDefaultConstructorFactory(Type collectionType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
-    {
-        // Add values through IList<TElement>.Add(TElement item).
-        if (collectionType.ImplementsInterface(typeof(IList<TElement>)))
-        {
-            result = new IListTImplementingEnumerableFactory<TElement>(collectionType);
-            return true;
-        }
-
-        // Add values through ISet<TElement>.Add(TElement item).
-        if (collectionType.ImplementsInterface(typeof(ISet<TElement>)))
-        {
-            result = new ISetTImplementingEnumerableFactory<TElement>(collectionType);
-            return true;
-        }
-
-        // Add values through ICollection<TElement>.Add(TElement item).
-        if (collectionType.ImplementsInterface(typeof(ICollection<TElement>)))
-        {
-            result = new ICollectionTImplementingEnumerableFactory<TElement>(collectionType);
-            return true;
-        }
-
-        // Add values through IList.Add(object item).
-        if (collectionType.ImplementsInterface(typeof(IList)))
-        {
-            result = new IListImplementingEnumerableFactory<TElement>(collectionType);
-            return true;
-        }
-
-        result = default;
-        return false;
-    }
-
-    private static bool TryGetConstructorBasedFactory(Type collectionType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
-    {
         // A constructor that needs a set, such as ReadOnlySet<T>(ISet<T>).
-        if (CollectionUtilities.GetSetConstructor<TElement>(collectionType) is not null)
+        if (CollectionUtilities.GetSetConstructor<TElement>(collectionType) is { } setConstructor)
         {
-            result = new ConstructorSetEnumerableFactory<TElement>(collectionType);
-            return true;
+            return CollectionBuilder<TElement>.FromSet(CompiledAccessors.GetConstructor1(setConstructor));
         }
 
         // A constructor that takes the items as a list, such as ReadOnlyCollection<T>(IList<T>),
-        // Queue<T>(IEnumerable<T>) or Stack<T>(IEnumerable<T>).
-        if (CollectionUtilities.GetListConstructor<TElement>(collectionType) is not null)
+        // Queue<T>(IEnumerable<T>) or Stack<T>(IEnumerable<T>). The list is reused if the
+        // constructor copies it.
+        if (CollectionUtilities.GetListConstructor<TElement>(collectionType) is { } listConstructor)
         {
-            result = new ConstructorEnumerableFactory<TElement>(collectionType);
-            return true;
+            var construct = CompiledAccessors.GetConstructor1(listConstructor);
+            return CollectionBuilder<TElement>.FromList(construct, CollectionUtilities.ConstructorCopies(collectionType));
         }
 
-        result = default;
-        return false;
+        // A parameterless constructor and an Add method.
+        if (create is not null && collectionType.GetMethod("Add", [typeof(TElement)]) is { } addMethod)
+        {
+            return CollectionBuilder<TElement>.Direct(create, CompiledAccessors.GetAction<TElement?>(addMethod));
+        }
+
+        // A constructor that takes an ObservableCollection, such as ReadOnlyObservableCollection<T>.
+        if (CollectionUtilities.GetConstructorTaking(collectionType, typeof(ObservableCollection<TElement>)) is { } observableConstructor)
+        {
+            var construct = CompiledAccessors.GetConstructor1(observableConstructor);
+            return CollectionBuilder<TElement>.FromList(items => construct(new ObservableCollection<TElement?>(items)), copiesElements: true);
+        }
+
+        return null;
     }
 }

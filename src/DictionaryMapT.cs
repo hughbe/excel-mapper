@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelDataReader;
+using ExcelMapper.Factories;
 
 namespace ExcelMapper;
 
@@ -20,14 +21,11 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
     /// dictionary assigned to the property or field.
     /// </summary>
     /// <param name="readerFactory">Finds the columns to read.</param>
-    /// <param name="dictionaryFactory">Creates the dictionary.</param>
-    internal DictionaryMap(ICellsReaderFactory readerFactory, IDictionaryFactory<TKey, TValue> dictionaryFactory)
+    /// <param name="builder">Builds the dictionary.</param>
+    internal DictionaryMap(ICellsReaderFactory readerFactory, DictionaryBuilder<TKey, TValue> builder)
     {
-        ThrowHelpers.ThrowIfNull(readerFactory, nameof(readerFactory));
-        ThrowHelpers.ThrowIfNull(dictionaryFactory, nameof(dictionaryFactory));
-
         _readerFactory = readerFactory;
-        DictionaryFactory = dictionaryFactory;
+        Builder = builder;
     }
 
     /// <summary>
@@ -65,15 +63,9 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
     }
 
     /// <summary>
-    /// The factory for creating and adding elements to the list.
+    /// How the member's dictionary is built from its values.
     /// </summary>
-    internal IDictionaryFactory<TKey, TValue> DictionaryFactory { get; }
-
-    // Factories build one value at a time, so a map shared between importers (for example
-    // a class map instance registered in several importers used concurrently) must not
-    // build two values at once.
-    private readonly object _buildLock = new();
-
+    internal DictionaryBuilder<TKey, TValue> Builder { get; }
 
     /// <inheritdoc/>
     bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
@@ -100,35 +92,16 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
     private ICellsReader? GetCellsReader(ExcelSheet sheet)
         => sheet.GetCellsReader(_readerFactory);
 
-    object? ICellsMap.CreateBindingFactory() => (DictionaryFactory as IBindingFactory)?.CreateForBinding();
-
-    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, object? bindingFactory, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value)
-    {
-        if (bindingFactory is IDictionaryFactory<TKey, TValue> factory)
-        {
-            // The binding's own factory: only used by one sheet, so no lock is needed.
-            return TryGetValue(cellsReader, factory, sheet, rowIndex, reader, member, out value);
-        }
-
-        return TryGetValue(cellsReader, sheet, rowIndex, reader, member, out value);
-    }
+    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value)
+        => TryGetValue(cellsReader, sheet, rowIndex, reader, member, out value);
 
     private bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
-    {
-        lock (_buildLock)
-        {
-            return TryGetValue(cellsReader, DictionaryFactory, sheet, rowIndex, reader, member, out value);
-        }
-    }
-
-    private bool TryGetValue(ICellsReader? cellsReader, IDictionaryFactory<TKey, TValue> factory, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
         if (sheet.Heading == null)
         {
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
         }
 
-        
         if (cellsReader == null || !cellsReader.Start(reader, PreserveFormatting, out var count))
         {
             if (Optional)
@@ -140,36 +113,28 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
             throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
         }
 
-        factory.Begin(count);
+        var items = Builder.Begin(count);
         try
         {
-            try
+            while (cellsReader.TryGetNext(out var valueResult))
             {
-                while (cellsReader.TryGetNext(out var valueResult))
+                // The key is the column's name.
+                var elementKey = sheet.Heading.GetColumnName(valueResult.ColumnIndex);
+                TKey? convertedKey = elementKey is TKey key ? key : (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
+                if (convertedKey != null)
                 {
-                    // Get the column name for the current value
-                    var elementKey = sheet.Heading.GetColumnName(valueResult.ColumnIndex);
-                    // Convert the string key to TKey
-                    TKey? convertedKey = elementKey is TKey key ? key : (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
-                    if (convertedKey != null)
-                    {
-                        var elementValue = Pipeline.Map(sheet, rowIndex, valueResult, PreserveFormatting, member);
-                        factory.Add(convertedKey, elementValue);
-                    }
+                    var elementValue = Pipeline.Map(sheet, rowIndex, valueResult, PreserveFormatting, member);
+                    Builder.Add(items, convertedKey, elementValue);
                 }
             }
-            finally
-            {
-                cellsReader.Reset();
-            }
-
-            value = factory.End();
-            return true;
         }
         finally
         {
-            factory.Reset();
+            cellsReader.Reset();
         }
+
+        value = Builder.End(items);
+        return true;
     }
 
     /// <summary>

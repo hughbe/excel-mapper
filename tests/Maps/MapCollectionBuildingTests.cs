@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 namespace ExcelMapper.Tests;
 
 /// <summary>
-/// Collections are built by a factory per bound member, which can reuse a buffer between rows when
-/// the result is a copy of it. These check that rows never share storage.
+/// Collections are built by a builder shared by every sheet and thread, which can reuse a buffer
+/// between rows when the result is a copy of it. These check that rows never share storage.
 /// </summary>
 public class MapCollectionBuildingTests
 {
@@ -112,13 +112,24 @@ public class MapCollectionBuildingTests
     [Fact]
     public void ReadRows_ClassMapSharedAcrossThreads_ReturnsExpected()
     {
-        // Each binding has its own factory, so a class map shared between importers on different
-        // threads builds each row's collections separately.
-        var map = new ExcelClassMap<Shared>();
-        map.Map(r => r.Values).WithColumnNames("A", "B", "C");
-        map.Map(r => r.Set).WithColumnNames("A", "B", "C");
-
+        // Builders keep no state, and collections created from a copy of their elements gather
+        // them in a list of each thread's own, so a class map shared between importers on
+        // different threads builds each row's collections separately.
         var csv = "A,B,C\n" + string.Concat(Enumerable.Range(0, 2000).Select(i => $"{i},{i + 1},{i + 2}\n"));
+
+        // One class map instance: auto-mapped from the members' attributes, with two elements
+        // mapped one by one.
+        ExcelClassMap<Shared> map;
+        using (var first = Helpers.GetCsvImporter(csv))
+        {
+            first.ReadSheet().ReadRow<Shared>();
+            Assert.True(first.Configuration.TryGetClassMap<Shared>(out var autoMapped));
+            map = Assert.IsType<ExcelClassMap<Shared>>(autoMapped);
+        }
+
+        map.Map(r => r.Indexed[0]).WithColumnName("C");
+        map.Map(r => r.Indexed[1]).WithColumnName("A");
+
         var results = new ConcurrentBag<bool>();
         Parallel.For(0, 8, _ =>
         {
@@ -127,7 +138,13 @@ public class MapCollectionBuildingTests
             var i = 0;
             foreach (var row in importer.ReadSheet().ReadRows<Shared>())
             {
-                results.Add(row.Values.SequenceEqual([i, i + 1, i + 2]) && row.Set.SetEquals([i, i + 1, i + 2]));
+                results.Add(
+                    row.Values.SequenceEqual([i, i + 1, i + 2]) &&
+                    row.Set.SetEquals([i, i + 1, i + 2]) &&
+                    row.Immutable.SequenceEqual([i, i + 1, i + 2]) &&
+                    row.Frozen.SetEquals([i, i + 1, i + 2]) &&
+                    row.Dictionary.Count == 3 && row.Dictionary["A"] == i && row.Dictionary["C"] == i + 2 &&
+                    row.Indexed.SequenceEqual([i + 2, i]));
                 i++;
             }
         });
@@ -138,8 +155,23 @@ public class MapCollectionBuildingTests
 
     public class Shared
     {
+        [ExcelColumnNames("A", "B", "C")]
         public List<int> Values { get; set; } = [];
+
+        [ExcelColumnNames("A", "B", "C")]
         public ISet<int> Set { get; set; } = new HashSet<int>();
+
+        [ExcelColumnNames("A", "B", "C")]
+        public ImmutableList<int> Immutable { get; set; } = [];
+
+        [ExcelColumnNames("A", "B", "C")]
+        public FrozenSet<int> Frozen { get; set; } = FrozenSet<int>.Empty;
+
+        [ExcelColumnNames("A", "B", "C")]
+        public ImmutableDictionary<string, int> Dictionary { get; set; } = ImmutableDictionary<string, int>.Empty;
+
+        [ExcelIgnore]
+        public int[] Indexed { get; set; } = [];
     }
 
     [Fact]

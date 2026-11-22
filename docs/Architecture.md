@@ -66,7 +66,7 @@ A factory creates a cell reader for a sheet once; the reader then reads the memb
 The first time a class map is used with a sheet, `ExcelSheet.GetBoundMembers` (through its `SheetBindings`) binds each member to the sheet:
 
 - `BoundValueMember<T>` (single values): keeps the member's cell reader and a compiled `Action<object, T>` setter, so values stay typed from the pipeline to the member, without boxing.
-- `BoundCellsMember` (collections and dictionaries): keeps the cells reader, and its own copy of the collection factory (`IBindingFactory`), so one sheet's reads don't need a lock.
+- `BoundCellsMember` (collections and dictionaries): keeps the cells reader. The collection is built by the map's `CollectionBuilder<T>` or `DictionaryBuilder<TKey, TValue>`, chosen once for the member's type by its `CollectionRule`/`DictionaryRule`. Builders hold no state (the collection being built is a local), so one builder serves every sheet and thread without a lock. Collections created from a copy of their elements, such as immutable and frozen ones, gather them in a list each thread reuses.
 - `BoundMapMember` (everything else, such as nested class maps, indexers and row numbers): maps through `IMap.TryGetValue`.
 
 Bindings belong to the sheet, so a class map shared between importers or threads holds no per-sheet state. They're rebuilt if the class map's members or a map's columns change (both have version numbers).
@@ -127,7 +127,7 @@ The net8.0 build is annotated for trimming: the mapped type `T` and the types gi
 | `src/*.cs` | The public types (importer, sheets, regions, class maps and maps, attributes, extension points, `ValuePipeline<T>`, `ValuePipeline<T, TSelf>`, `ElementMap<T>` and the type-specific value methods in `ValuePipelineExtensions`), and the internal `IMap`, `ExcelPropertyMap` and indexer maps |
 | `src/Readers` | Reader factories and readers (internal) |
 | `src/Mappers`, `src/Transformers`, `src/Fallbacks` | Built-in conversion, transformers and fallbacks, and the adapters for the public extension points (internal) |
-| `src/Factories` | Collection and dictionary factories (internal) |
+| `src/Factories` | `CollectionBuilder<T>` and `DictionaryBuilder<TKey, TValue>`: how each collection and dictionary type is built (internal) |
 | `src/Abstractions` | The interfaces of the internal types, and the indexer map interfaces |
 | `src/Utilities` | Auto-mapping (`AutoMapper`, `TypeRule`, `CollectionRule`, `DictionaryRule`, `MemberMapper`, `ExpressionAutoMapper`), binding (`BoundMember`, `SheetBindings`), reading (`RowSource`, `Worksheet`, `RowCursor`, `HeadingSearch`), `CompiledAccessors`, constructor matching and parsing helpers |
 | `tests/ExcelMapper` | Unit tests of public types, one file per type, mirroring `src/` |

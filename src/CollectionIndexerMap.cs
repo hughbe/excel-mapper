@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
+using ExcelMapper.Factories;
 
 namespace ExcelMapper;
 
@@ -11,23 +12,13 @@ namespace ExcelMapper;
 /// </summary>
 internal class CollectionIndexerMap<TValue> : IEnumerableIndexerMap
 {
-    // Factories build one value at a time, so a map shared between importers (for example
-    // a class map instance registered in several importers used concurrently) must not
-    // build two values at once.
-    private readonly object _buildLock = new();
-
-    internal CollectionIndexerMap(IEnumerableFactory<TValue> enumerableFactory)
+    internal CollectionIndexerMap(CollectionBuilder<TValue> builder)
     {
-        ThrowHelpers.ThrowIfNull(enumerableFactory, nameof(enumerableFactory));
-        EnumerableFactory = enumerableFactory;
+        Builder = builder;
     }
 
-    /// <summary>
-    /// The factory for creating and adding elements to the list.
-    /// </summary>
-    internal IEnumerableFactory<TValue> EnumerableFactory { get; }
+    internal CollectionBuilder<TValue> Builder { get; }
 
-    /// <inheritdoc/>
     public Dictionary<int, IMap> Values { get; } = [];
 
     private int GetLength()
@@ -42,31 +33,20 @@ internal class CollectionIndexerMap<TValue> : IEnumerableIndexerMap
         return length;
     }
 
-    /// <inheritdoc/>
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
-        lock (_buildLock)
+        var items = Builder.Begin(GetLength());
+        foreach (var map in Values)
         {
-            EnumerableFactory.Begin(GetLength());
-            try
+            if (map.Value.TryGetValue(sheet, rowIndex, reader, member, out var elementValue))
             {
-                foreach (var map in Values)
-                {
-                    if (map.Value.TryGetValue(sheet, rowIndex, reader, member, out var elementValue))
-                    {
-                        EnumerableFactory.Set(map.Key, (TValue)elementValue);
-                    }
-                }
-
-                value = EnumerableFactory.End();
-                return true;
-            }
-            finally
-            {
-                EnumerableFactory.Reset();
+                Builder.Set(items, map.Key, (TValue)elementValue);
             }
         }
+
+        value = Builder.End(items);
+        return true;
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
 using ExcelMapper.Readers;
+using ExcelMapper.Factories;
 
 namespace ExcelMapper;
 
@@ -18,13 +19,10 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     /// Constructs a map that reads one or more values from one or more cells and maps these values to one
     /// property and field of the type of the property or field.
     /// </summary>
-    internal CollectionMap(ICellsReaderFactory readerFactory, IEnumerableFactory<TElement> enumerableFactory)
+    internal CollectionMap(ICellsReaderFactory readerFactory, CollectionBuilder<TElement> builder)
     {
-        ThrowHelpers.ThrowIfNull(readerFactory, nameof(readerFactory));
-        ThrowHelpers.ThrowIfNull(enumerableFactory, nameof(enumerableFactory));
-
         _readerFactory = readerFactory;
-        EnumerableFactory = enumerableFactory;
+        Builder = builder;
     }
 
     private ICellsReaderFactory _readerFactory;
@@ -61,15 +59,9 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     ValuePipeline IToOneMap.Pipeline => Pipeline;
 
     /// <summary>
-    /// The factory for creating and adding elements to the list.
+    /// How the member's collection is built from its elements.
     /// </summary>
-    internal IEnumerableFactory<TElement> EnumerableFactory { get; }
-
-    // Factories build one value at a time, so a map shared between importers (for example
-    // a class map instance registered in several importers used concurrently) must not
-    // build two values at once.
-    private readonly object _buildLock = new();
-
+    internal CollectionBuilder<TElement> Builder { get; }
 
     /// <inheritdoc />
     bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
@@ -92,28 +84,10 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     private ICellsReader? GetCellsReader(ExcelSheet sheet)
         => sheet.GetCellsReader(_readerFactory);
 
-    object? ICellsMap.CreateBindingFactory() => (EnumerableFactory as IBindingFactory)?.CreateForBinding();
-
-    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, object? bindingFactory, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value)
-    {
-        if (bindingFactory is IEnumerableFactory<TElement> factory)
-        {
-            // The binding's own factory: only used by one sheet, so no lock is needed.
-            return TryGetValue(cellsReader, factory, sheet, rowIndex, reader, member, out value);
-        }
-
-        return TryGetValue(cellsReader, sheet, rowIndex, reader, member, out value);
-    }
+    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value)
+        => TryGetValue(cellsReader, sheet, rowIndex, reader, member, out value);
 
     private bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
-    {
-        lock (_buildLock)
-        {
-            return TryGetValue(cellsReader, EnumerableFactory, sheet, rowIndex, reader, member, out value);
-        }
-    }
-
-    private bool TryGetValue(ICellsReader? cellsReader, IEnumerableFactory<TElement> factory, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
         if (cellsReader == null || !cellsReader.Start(reader, PreserveFormatting, out var count))
         {
@@ -126,29 +100,23 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
             throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
         }
 
-        factory.Begin(count);
+        var items = Builder.Begin(count);
         try
         {
-            try
+            var index = 0;
+            while (cellsReader.TryGetNext(out var result))
             {
-                while (cellsReader.TryGetNext(out var result))
-                {
-                    var elementValue = Pipeline.Map(sheet, rowIndex, result, PreserveFormatting, member);
-                    factory.Add(elementValue);
-                }
+                var elementValue = Pipeline.Map(sheet, rowIndex, result, PreserveFormatting, member);
+                Builder.Add(items, index++, elementValue);
             }
-            finally
-            {
-                cellsReader.Reset();
-            }
-
-            value = factory.End();
-            return true;
         }
         finally
         {
-            factory.Reset();
+            cellsReader.Reset();
         }
+
+        value = Builder.End(items);
+        return true;
     }
 
     /// <summary>

@@ -11,23 +11,11 @@ namespace ExcelMapper;
 /// </summary>
 internal class MultidimensionalIndexerMap<TValue> : IMultidimensionalIndexerMap
 {
-    // Factories build one value at a time, so a map shared between importers (for example
-    // a class map instance registered in several importers used concurrently) must not
-    // build two values at once.
-    private readonly object _buildLock = new();
-
-    internal MultidimensionalIndexerMap(IMultidimensionalArrayFactory<TValue> arrayFactory)
+    [RequiresDynamicCode("Creates multidimensional arrays of TValue whose rank is only known at run time, which native AOT can't guarantee.")]
+    internal MultidimensionalIndexerMap()
     {
-        ThrowHelpers.ThrowIfNull(arrayFactory, nameof(arrayFactory));
-        ArrayFactory = arrayFactory;
     }
 
-    /// <summary>
-    /// The factory for creating and adding elements to the list.
-    /// </summary>
-    internal IMultidimensionalArrayFactory<TValue> ArrayFactory { get; }
-
-    /// <inheritdoc/>
     public Dictionary<int[], IMap> Values { get; } = [];
 
     private int[] GetLengths()
@@ -49,32 +37,21 @@ internal class MultidimensionalIndexerMap<TValue> : IMultidimensionalIndexerMap
     }
 
     /// <inheritdoc/>
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "The constructor requires dynamic code.")]
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
-        var lengths = GetLengths();
-
-        lock (_buildLock)
+        var array = Array.CreateInstance(typeof(TValue), GetLengths());
+        foreach (var map in Values)
         {
-            ArrayFactory.Begin(lengths);
-            try
+            if (map.Value.TryGetValue(sheet, rowIndex, reader, member, out var elementValue))
             {
-                foreach (var map in Values)
-                {
-                    if (map.Value.TryGetValue(sheet, rowIndex, reader, member, out var elementValue))
-                    {
-                        ArrayFactory.Set(map.Key, (TValue)elementValue);
-                    }
-                }
-
-                value = ArrayFactory.End();
-                return true;
-            }
-            finally
-            {
-                ArrayFactory.Reset();
+                array.SetValue((TValue)elementValue, map.Key);
             }
         }
+
+        value = array;
+        return true;
     }
 }
