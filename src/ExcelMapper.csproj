@@ -106,7 +106,8 @@
     the package. It isn't referenced by the library itself.
   -->
   <ItemGroup>
-    <ProjectReference Include="../gen/ExcelMapper.SourceGeneration.csproj" ReferenceOutputAssembly="false" SetTargetFramework="TargetFramework=netstandard2.0" PrivateAssets="all" />
+    <!-- No SetTargetFramework: the generator has one target, and building it with the same properties as the tests' and the solution's references builds it once rather than twice at the same time. -->
+    <ProjectReference Include="../gen/ExcelMapper.SourceGeneration.csproj" ReferenceOutputAssembly="false" PrivateAssets="all" />
     <None Include="../gen/bin/$(Configuration)/netstandard2.0/ExcelMapper.SourceGeneration.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
 
