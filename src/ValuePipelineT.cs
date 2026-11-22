@@ -98,11 +98,17 @@ public abstract class ValuePipeline<T> : ValuePipeline
     {
         var plan = GetPlan();
 
+        // Cells are parsed and formatted with the importer's culture, if set, rather than the
+        // thread's: mappers use it when they have no format provider of their own.
+        var culture = sheet.Culture;
+        readResult.Culture = culture;
+
         // Use indexed loops: enumerating through an interface allocates for every cell.
         var transformers = plan.Transformers;
         for (int i = 0; i < transformers.Length; i++)
         {
             readResult = transformers[i].Transform(readResult, sheet, rowIndex, member, preserveFormatting);
+            readResult.Culture = culture;
         }
 
         if (plan.EmptyFallback is { } emptyFallback && readResult.IsEmpty())

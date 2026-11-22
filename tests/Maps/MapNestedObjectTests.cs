@@ -174,4 +174,32 @@ public class MapNestedObjectTests
         public string? EndTime { get; set; }
     }
 
+    [Fact]
+    public void ReadRows_NestedObjectInDictionaryWithIntKeys_ReturnsExpected()
+    {
+        // The nested object's map is found by its key, whatever the key's type.
+        using var importer = Helpers.GetCsvImporter("Street,Town\nHigh St,Leeds\n");
+        importer.Configuration.RegisterClassMap<WithAddressesById>(c =>
+        {
+            c.Map(p => p.ById[5].Street);
+            c.Map(p => p.ById[5].Town);
+        });
+
+        var row = Assert.Single(importer.ReadSheet().ReadRows<WithAddressesById>());
+        var address = Assert.Single(row.ById);
+        Assert.Equal(5, address.Key);
+        Assert.Equal("High St", address.Value.Street);
+        Assert.Equal("Leeds", address.Value.Town);
+    }
+
+    public class WithAddressesById
+    {
+        public Dictionary<int, AddressById> ById { get; set; } = default!;
+    }
+
+    public class AddressById
+    {
+        public string Street { get; set; } = default!;
+        public string Town { get; set; } = default!;
+    }
 }

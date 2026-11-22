@@ -52,7 +52,7 @@ internal sealed class DateTimeMapper : IFormatsCellMapper, ICellMapper<DateTime>
         }
 
         var stringValue = cell.GetString();
-        var provider = Provider;
+        var provider = Provider ?? cell.Culture;
         var style = Style;
         try
         {
@@ -79,7 +79,7 @@ internal sealed class DateTimeMapper : IFormatsCellMapper, ICellMapper<DateTime>
     {
         var stringValue = cell.GetString();
         var formats = Formats;
-        var provider = Provider;
+        var provider = Provider ?? cell.Culture;
         var style = Style;
         try
         {

@@ -31,7 +31,7 @@ The public API is the importer, sheets and regions, class maps and the fluent me
 | `ExcelHeading` | The heading row: column names and their indexes, for finding columns by name (`ColumnUtilities` also matches names without separators when `IgnoreSeparatorsInColumnNames` is set). |
 | `ExcelRegion` | An immutable block of a worksheet with its own heading choice (`WithHeadingAt`, `WithoutHeading`, `WithHeadingSearch`). Each read creates a private `ExcelSheet` for the region's `Worksheet`, with its own `DataRange`, heading, cursor and bindings, so regions reuse the sheet's reading, binding and heading code. Converters, column selectors and errors get that sheet, so its heading is the region's. Columns chosen by position count from the region's first column (`ExcelSheet.ColumnOffset` and `ToSheetColumn`). |
 
-`ExcelImporterConfiguration` holds the registered class maps and the settings that apply to every sheet: `Culture` (set as the current culture while a row is mapped, so parsing uses it), `SkipBlankLines`, `ValidateDataAnnotations` and `IgnoreSeparatorsInColumnNames`.
+`ExcelImporterConfiguration` holds the registered class maps and the settings that apply to every sheet: `Culture`, `SkipBlankLines`, `ValidateDataAnnotations` and `IgnoreSeparatorsInColumnNames`.
 
 ## Class maps
 
@@ -52,6 +52,8 @@ Each member's map is one of:
 | `CollectionIndexerMap<T>`, `DictionaryIndexerMap<TKey, TValue>`, `MultidimensionalIndexerMap<T>` (internal) | Elements mapped one by one: `Map(p => p.Values[0])` | One map per element |
 | `ExcelClassMap<T>` | Nested objects (`Map(p => p.Address)` or auto-mapping) | The nested type's own members |
 | `RowNumberMap` | `[ExcelRowNumber]` and `MapRowNumber` | The row's number |
+
+Class maps and the indexer maps are made of other maps (`IParentMap`: their children, each with a member, index or key). `MapTree` walks the tree, so code that needs every map that reads cells, such as `ValidateHeading`, `FindHeading`, extra columns and checking a class map when it's registered, doesn't switch over the kinds of map itself.
 
 A single-value map is itself a `ValuePipeline<T>` (see [The value pipeline](#the-value-pipeline)). The collection and dictionary maps hold an `ElementMap<T>`, another pipeline, for their elements or values (`WithElementMap`, `WithValueMap`). Both derive from `ValuePipeline<T, TSelf>`, whose value methods return `TSelf`, so a chain of value methods keeps the map's type: `Map(p => p.Name).WithTrim().MakeOptional()`.
 
@@ -128,7 +130,7 @@ The net8.0 build is annotated for trimming: the mapped type `T` and the types gi
 | `src/Readers` | `Columns` and its kinds, splitting cells, and the readers of several cells (internal) |
 | `src/Mappers`, `src/Transformers`, `src/Fallbacks` | Built-in conversion, transformers and fallbacks, and the adapters for the public extension points (internal) |
 | `src/Factories` | `CollectionBuilder<T>` and `DictionaryBuilder<TKey, TValue>`: how each collection and dictionary type is built (internal) |
-| `src/Abstractions` | The interfaces of the internal types, and the indexer map interfaces |
+| `src/Abstractions` | The interfaces of the internal types, including `IParentMap` |
 | `src/Utilities` | Auto-mapping (`AutoMapper`, `TypeRule`, `CollectionRule`, `DictionaryRule`, `MemberMapper`, `ExpressionAutoMapper`), binding (`BoundMember`, `SheetBindings`), reading (`RowSource`, `Worksheet`, `RowCursor`, `HeadingSearch`), `CompiledAccessors`, constructor matching and parsing helpers |
 | `tests/ExcelMapper` | Unit tests of public types, one file per type, mirroring `src/` |
 | `tests/Maps`, `tests/Fallbacks`, `tests/Transformers` | Mapping tests, which read spreadsheets and cover the internal types through the public API |

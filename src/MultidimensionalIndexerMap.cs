@@ -9,7 +9,7 @@ namespace ExcelMapper;
 /// A map that reads multiple cells of an excel sheet and maps the values of the cells to a
 /// multidimensional array property or field by their indices.
 /// </summary>
-internal class MultidimensionalIndexerMap<TValue> : IMultidimensionalIndexerMap
+internal class MultidimensionalIndexerMap<TValue> : IParentMap
 {
     [RequiresDynamicCode("Creates multidimensional arrays of TValue whose rank is only known at run time, which native AOT can't guarantee.")]
     internal MultidimensionalIndexerMap()
@@ -17,6 +17,41 @@ internal class MultidimensionalIndexerMap<TValue> : IMultidimensionalIndexerMap
     }
 
     public Dictionary<int[], IMap> Values { get; } = [];
+
+    IEnumerable<KeyValuePair<object?, IMap>> IParentMap.Children
+    {
+        get
+        {
+            foreach (var value in Values)
+            {
+                yield return new(value.Key, value.Value);
+            }
+        }
+    }
+
+    IMap? IParentMap.GetChild(object key) => FindKey((int[])key) is { } existing ? Values[existing] : null;
+
+    void IParentMap.SetChild(object key, IMap map)
+    {
+        var indices = (int[])key;
+        Values[FindKey(indices) ?? indices] = map;
+    }
+
+    // Arrays don't implement equality, so the key is found by its indices.
+    private int[]? FindKey(int[] indices)
+    {
+        foreach (var key in Values.Keys)
+        {
+            if (key.SequenceEqual(indices))
+            {
+                return key;
+            }
+        }
+
+        return null;
+    }
+
+    string? IParentMap.GetChildPath(string? path, object? key) => $"{path}[{string.Join(", ", (int[])key!)}]";
 
     private int[] GetLengths()
     {
