@@ -84,6 +84,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Changed
 
+- On .NET 8, a class that implements `IParsable<T>` or `INumberBase<T>` is parsed from its cell even if it has no public parameterless constructor (for example `IPAddress`, or a record with a constructor), rather than mapped through its members; its `Parse` method creates it. ([#201](https://github.com/hughbe/excel-mapper/pull/201))
 - A value given by `[ExcelMappingDictionary]` that isn't of the member's type is reported when the class map is created, with an `ExcelMappingException` naming the attribute and the member, instead of an `InvalidCastException` when that text is read. ([#168](https://github.com/hughbe/excel-mapper/pull/168))
 - The inner exception of the `ExcelMappingException` for an invalid number, date, `Guid`, `bool`, enum or `Uri` has ExcelMapper's own message, naming the value, the type and any formats (for example `The value "abc" isn't a valid Int32.`), instead of the .NET parser's message. Its type is unchanged. ([#157](https://github.com/hughbe/excel-mapper/pull/157))
 - Code page encodings are registered automatically; `Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)` is no longer needed. The netstandard builds now depend on `System.Text.Encoding.CodePages`. ([#122](https://github.com/hughbe/excel-mapper/pull/122))

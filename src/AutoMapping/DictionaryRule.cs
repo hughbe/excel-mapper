@@ -35,6 +35,7 @@ internal abstract class DictionaryRule
     /// <see cref="IDictionary"/>, or the parameters of the only two-parameter <c>Add</c> method of a
     /// collection such as <c>StringDictionary</c>.
     /// </summary>
+    // Keep in sync with the source generator's TypeWalker.TryGetKeyValueTypes. See "Auto-mapping and the source generator" in CLAUDE.md.
     public static bool TryGetKeyValueTypes(Type dictionaryType, [NotNullWhen(true)] out Type? keyType, [NotNullWhen(true)] out Type? valueType)
     {
         if (dictionaryType.ImplementsGenericInterface(typeof(IEnumerable<>), out var keyValuePairType) &&

@@ -11,6 +11,11 @@ namespace ExcelMapper.AutoMapping;
 /// unless an <see cref="ExcelMappingContext"/> registered them (see <see cref="ExcelTypeRegistrar"/>):
 /// a registration creates the type with <c>new</c>, which native AOT compiles.
 /// </summary>
+/// <remarks>
+/// Each type created here for a type found at run time needs an <see cref="ExcelTypeRegistrar"/>
+/// method that registers it, which the source generator's TypeWalker calls: see "Auto-mapping and
+/// the source generator" in CLAUDE.md.
+/// </remarks>
 internal static class GenericTypes
 {
     private static readonly ConcurrentDictionary<(Type Definition, Type Argument1, Type? Argument2), Func<object>> s_registered = new();
