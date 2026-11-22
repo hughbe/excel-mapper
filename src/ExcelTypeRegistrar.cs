@@ -24,6 +24,21 @@ public sealed class ExcelTypeRegistrar
 
     internal HashSet<Type> RowTypes { get; } = [];
 
+    // The generic types registered, which the context's class maps may use (see GenericTypes.Require).
+    internal HashSet<(Type Definition, Type Argument1, Type? Argument2)> RegisteredTypes { get; } = [];
+
+    private void Register(Type definition, Type argument, Func<object> create)
+    {
+        GenericTypes.Register(definition, argument, create);
+        RegisteredTypes.Add((definition, argument, null));
+    }
+
+    private void Register(Type definition, Type argument1, Type argument2, Func<object> create)
+    {
+        GenericTypes.Register(definition, argument1, argument2, create);
+        RegisteredTypes.Add((definition, argument1, argument2));
+    }
+
     /// <summary>
     /// Registers a type rows are mapped to, whose class map
     /// <see cref="ExcelMappingContext.GetClassMap{T}"/> gives. Register it with
@@ -43,7 +58,7 @@ public sealed class ExcelTypeRegistrar
     /// </summary>
     /// <typeparam name="T">The type.</typeparam>
     public void Type<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
-        => GenericTypes.Register(typeof(TypeRule<>), typeof(T), static () => TypeRule<T>.Instance);
+        => Register(typeof(TypeRule<>), typeof(T), static () => TypeRule<T>.Instance);
 
     /// <summary>
     /// Registers the nullable version of a value type, such as <c>int?</c> or the nullable version of
@@ -52,8 +67,8 @@ public sealed class ExcelTypeRegistrar
     /// <typeparam name="T">The value type.</typeparam>
     public void Nullable<T>() where T : struct
     {
-        GenericTypes.Register(typeof(TypeRule<>), typeof(T?), static () => TypeRule<T?>.Instance);
-        GenericTypes.Register(typeof(NullableAdapter<>), typeof(T), static () => new NullableAdapter<T>());
+        Register(typeof(TypeRule<>), typeof(T?), static () => TypeRule<T?>.Instance);
+        Register(typeof(NullableAdapter<>), typeof(T), static () => new NullableAdapter<T>());
     }
 
     /// <summary>
@@ -63,8 +78,8 @@ public sealed class ExcelTypeRegistrar
     /// <typeparam name="TEnum">The enum.</typeparam>
     public void Enum<TEnum>() where TEnum : struct, Enum
     {
-        GenericTypes.Register(typeof(TypeRule<>), typeof(TEnum), static () => TypeRule<TEnum>.Instance);
-        GenericTypes.Register(typeof(EnumMapper<>), typeof(TEnum), static () => new EnumMapper<TEnum>());
+        Register(typeof(TypeRule<>), typeof(TEnum), static () => TypeRule<TEnum>.Instance);
+        Register(typeof(EnumMapper<>), typeof(TEnum), static () => new EnumMapper<TEnum>());
     }
 
     /// <summary>
@@ -75,8 +90,8 @@ public sealed class ExcelTypeRegistrar
     /// <typeparam name="TElement">The element type.</typeparam>
     public void Collection<[DynamicallyAccessedMembers(TrimmingConstants.CollectionType)] TCollection, TElement>()
     {
-        GenericTypes.Register(typeof(TypeRule<>), typeof(TCollection), static () => TypeRule<TCollection>.Instance);
-        GenericTypes.Register(typeof(CollectionRule<>), typeof(TElement), static () => new CollectionRule<TElement>());
+        Register(typeof(TypeRule<>), typeof(TCollection), static () => TypeRule<TCollection>.Instance);
+        Register(typeof(CollectionRule<>), typeof(TElement), static () => new CollectionRule<TElement>());
     }
 
     /// <summary>
@@ -86,8 +101,8 @@ public sealed class ExcelTypeRegistrar
     /// <typeparam name="TElement">The element type.</typeparam>
     public void Array<TElement>()
     {
-        GenericTypes.Register(typeof(TypeRule<>), typeof(TElement[]), static () => TypeRule<TElement[]>.Instance);
-        GenericTypes.Register(typeof(CollectionRule<>), typeof(TElement), static () => new CollectionRule<TElement>());
+        Register(typeof(TypeRule<>), typeof(TElement[]), static () => TypeRule<TElement[]>.Instance);
+        Register(typeof(CollectionRule<>), typeof(TElement), static () => new CollectionRule<TElement>());
     }
 
     /// <summary>
@@ -99,8 +114,8 @@ public sealed class ExcelTypeRegistrar
     /// <typeparam name="TValue">The value type.</typeparam>
     public void Dictionary<[DynamicallyAccessedMembers(TrimmingConstants.CollectionType)] TDictionary, TKey, TValue>() where TKey : notnull
     {
-        GenericTypes.Register(typeof(TypeRule<>), typeof(TDictionary), static () => TypeRule<TDictionary>.Instance);
-        GenericTypes.Register(typeof(DictionaryRule<,>), typeof(TKey), typeof(TValue), static () => new DictionaryRule<TKey, TValue>());
+        Register(typeof(TypeRule<>), typeof(TDictionary), static () => TypeRule<TDictionary>.Instance);
+        Register(typeof(DictionaryRule<,>), typeof(TKey), typeof(TValue), static () => new DictionaryRule<TKey, TValue>());
     }
 
 #if NET7_0_OR_GREATER
@@ -111,8 +126,8 @@ public sealed class ExcelTypeRegistrar
     /// <typeparam name="T">The type.</typeparam>
     public void Parsable<T>() where T : struct, IParsable<T>
     {
-        GenericTypes.Register(typeof(TypeRule<>), typeof(T), static () => TypeRule<T>.Instance);
-        GenericTypes.Register(typeof(StructParsableMapper<>), typeof(T), static () => new StructParsableMapper<T>());
+        Register(typeof(TypeRule<>), typeof(T), static () => TypeRule<T>.Instance);
+        Register(typeof(StructParsableMapper<>), typeof(T), static () => new StructParsableMapper<T>());
     }
 
     /// <summary>
@@ -122,8 +137,8 @@ public sealed class ExcelTypeRegistrar
     /// <typeparam name="T">The type.</typeparam>
     public void ParsableClass<T>() where T : class, IParsable<T>
     {
-        GenericTypes.Register(typeof(TypeRule<>), typeof(T), static () => TypeRule<T>.Instance);
-        GenericTypes.Register(typeof(ParsableMapper<>), typeof(T), static () => new ParsableMapper<T>());
+        Register(typeof(TypeRule<>), typeof(T), static () => TypeRule<T>.Instance);
+        Register(typeof(ParsableMapper<>), typeof(T), static () => new ParsableMapper<T>());
     }
 #endif
 }

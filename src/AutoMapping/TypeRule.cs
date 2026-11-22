@@ -25,7 +25,11 @@ internal abstract class TypeRule
     private static readonly ConcurrentDictionary<Type, TypeRule> s_rules = new();
 
     public static TypeRule For(Type type)
-        => GetOrAdd(type, static t => (TypeRule)GenericTypes.Create(typeof(TypeRule<>), t));
+    {
+        // Checked each time, as the rule may already exist.
+        GenericTypes.Require(typeof(TypeRule<>), type);
+        return GetOrAdd(type, static t => (TypeRule)GenericTypes.Create(typeof(TypeRule<>), t));
+    }
 
     // One rule for each type, however it's created.
     private protected static TypeRule GetOrAdd(Type type, Func<Type, TypeRule> create)
@@ -81,6 +85,7 @@ internal sealed class TypeRule<T> : TypeRule
                 s_nullableAdapterCreated = true;
             }
 
+            GenericTypes.Require(s_nullableAdapter);
             return s_nullableAdapter;
         }
     }
@@ -99,6 +104,7 @@ internal sealed class TypeRule<T> : TypeRule
     private CollectionRule? _collection;
     private DictionaryRule? _dictionary;
     private Action<IList<ICellMapper<T>>>? _addDefaultMappers;
+    private object? _createdMapper;
 
     private static readonly CollectionRule s_noCollection = new CollectionRule<object>();
     private static readonly DictionaryRule s_noDictionary = new DictionaryRule<string, object>();
@@ -111,6 +117,7 @@ internal sealed class TypeRule<T> : TypeRule
             var rule = _collection ??= typeof(T).GetElementTypeOrEnumerableType() is { } elementType
                 ? (CollectionRule)GenericTypes.Create(typeof(CollectionRule<>), elementType)
                 : s_noCollection;
+            GenericTypes.Require(rule);
             return ReferenceEquals(rule, s_noCollection) ? null : rule;
         }
     }
@@ -122,6 +129,7 @@ internal sealed class TypeRule<T> : TypeRule
             var rule = _dictionary ??= DictionaryRule.TryGetKeyValueTypes(typeof(T), out var keyType, out var valueType)
                 ? (DictionaryRule)GenericTypes.Create(typeof(DictionaryRule<,>), keyType, valueType)
                 : s_noDictionary;
+            GenericTypes.Require(rule);
             return ReferenceEquals(rule, s_noDictionary) ? null : rule;
         }
     }
@@ -152,7 +160,15 @@ internal sealed class TypeRule<T> : TypeRule
     /// </summary>
     public bool TryAddDefaultMappers(IList<ICellMapper<T>> mappers)
     {
-        var addDefaultMappers = _addDefaultMappers ??= FindDefaultMappers() ?? s_noDefaultMappers;
+        if (_addDefaultMappers is null)
+        {
+            _addDefaultMappers = FindDefaultMappers(out var createdMapper) ?? s_noDefaultMappers;
+            _createdMapper = createdMapper;
+        }
+
+        // A mapper made for a type found at run time, such as an enum's.
+        GenericTypes.Require(_createdMapper);
+        var addDefaultMappers = _addDefaultMappers;
         if (ReferenceEquals(addDefaultMappers, s_noDefaultMappers))
         {
             return false;
@@ -165,8 +181,9 @@ internal sealed class TypeRule<T> : TypeRule
     // The built-in conversion for T, or for the underlying type of a nullable T.
     // Keep in sync with the source generator's TypeWalker (s_builtInTypes and HasConversion), which
     // registers the types that have a conversion here. See "Auto-mapping and the source generator" in CLAUDE.md.
-    private static Action<IList<ICellMapper<T>>>? FindDefaultMappers()
+    private static Action<IList<ICellMapper<T>>>? FindDefaultMappers(out object? createdMapper)
     {
+        createdMapper = null;
         var type = typeof(T).GetNullableTypeOrThis(out _);
 
         // Mappers hold no state (formats and other options come with the cell), so the mappers
@@ -193,6 +210,7 @@ internal sealed class TypeRule<T> : TypeRule
         {
             // Values with a DescriptionAttribute are also mapped from their description.
             var enumMapper = (ICellMapper<T>)EnumMappers.Create(type);
+            createdMapper = enumMapper;
             var descriptions = GetEnumDescriptions(type);
             var descriptionMapper = descriptions is null ? null : new MappingDictionaryMapper<T>(descriptions, null, MappingDictionaryBehavior.Optional);
             return mappers =>
@@ -220,7 +238,7 @@ internal sealed class TypeRule<T> : TypeRule
             }
             else if (type.ImplementsGenericInterface(typeof(INumberBase<>), out var numberType))
             {
-                mapper = GenericTypes.Create(numberType.IsValueType ? typeof(StructNumberMapper<>) : typeof(INumberBaseMapper<>), numberType);
+                mapper = createdMapper = GenericTypes.Create(numberType.IsValueType ? typeof(StructNumberMapper<>) : typeof(INumberBaseMapper<>), numberType);
             }
         }
 #else
@@ -241,7 +259,7 @@ internal sealed class TypeRule<T> : TypeRule
 #if NET7_0_OR_GREATER
         if (mapper is null && isParsedType && type.ImplementsGenericInterface(typeof(IParsable<>), out var parsableType))
         {
-            mapper = GenericTypes.Create(parsableType.IsValueType ? typeof(StructParsableMapper<>) : typeof(ParsableMapper<>), parsableType);
+            mapper = createdMapper = GenericTypes.Create(parsableType.IsValueType ? typeof(StructParsableMapper<>) : typeof(ParsableMapper<>), parsableType);
         }
 #endif
 

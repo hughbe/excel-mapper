@@ -22,6 +22,7 @@ public class ExcelTypeRegistrarTests
             types.Enum<RegistrarColor>();
             types.Nullable<RegistrarColor>();
             types.Type<RegistrarPoint>();
+            types.Type<int>();
             types.Collection<List<RegistrarListColor>, RegistrarListColor>();
             types.Enum<RegistrarListColor>();
             types.Array<RegistrarArrayColor>();
