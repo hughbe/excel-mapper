@@ -7,10 +7,10 @@ Opening workbooks and CSV files, choosing sheets, reading rows, and telling Exce
 `ExcelImporter.ReadRows<T>(path)` reads every row of a file's first sheet in one call. For anything else, create an importer:
 
 ```csharp
-using var importer = new ExcelImporter("data.xlsx");                          // a path
-using var importer = new ExcelImporter(stream);                               // a stream
-using var importer = new ExcelImporter("data.csv", ExcelImporterFileType.Csv); // a CSV file
-using var importer = new ExcelImporter(reader);                               // an IExcelDataReader you created
+new ExcelImporter("data.xlsx");                          // a path
+new ExcelImporter(stream);                               // a stream
+new ExcelImporter("data.csv", ExcelImporterFileType.Csv); // a CSV file
+new ExcelImporter(reader);                               // an IExcelDataReader you created
 ```
 
 `.xlsx`, `.xls` and `.xlsb` workbooks are detected automatically. CSV files must be opened with `ExcelImporterFileType.Csv` (otherwise ExcelDataReader throws a `HeaderException`); their separator (comma, semicolon, tab, pipe or `#`) is detected automatically. For passwords, a specific CSV separator or a fallback encoding, see [Reader options](../README.md#reader-options).

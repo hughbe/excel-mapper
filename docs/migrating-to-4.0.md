@@ -27,10 +27,10 @@ ExcelMapper 4.0 fixes several long-standing bugs and makes mapping more predicta
 **What to do:**
 
 ```csharp
-// Before: worked because every value was a string
+// 3.x: worked because every value was a string
 var amount = (string)row["Amount"];
 
-// After: use the typed value...
+// 4.0: use the typed value...
 var amount = (double)row["Amount"];
 
 // ...or convert explicitly, choosing the culture
@@ -54,8 +54,8 @@ To keep receiving text for a member, map it to `string`, or preserve formatting 
 public int Quantity { get; set; }
 
 // Or round explicitly
-Map(e => e.Quantity)
-    .WithConverter(value => (int)Math.Round(double.Parse(value, CultureInfo.InvariantCulture)));
+importer.Configuration.RegisterClassMap<Product>(c => c.Map(p => p.Quantity)
+    .WithConverter(value => (int)Math.Round(double.Parse(value!, CultureInfo.InvariantCulture))));
 ```
 
 To find affected rows without stopping at the first one, use `sheet.ReadRowResults<T>()`.
@@ -67,8 +67,11 @@ To find affected rows without stopping at the first one, use `sheet.ReadRowResul
 **Before:** the converter was added after the built-in conversion, so whether it ran depended on the member's type. For a number, the converter was skipped whenever the cell was a valid number. For a string, it was used for every cell:
 
 ```csharp
-Map(e => e.Quantity).WithConverter(value => int.Parse(value) * 2);  // "3" gave 3, not 6
-Map(e => e.Name).WithConverter(value => value.ToUpperInvariant());  // "a" gave "A"
+importer.Configuration.RegisterClassMap<Product>(c =>
+{
+    c.Map(p => p.Quantity).WithConverter(value => int.Parse(value!) * 2);  // "3" gave 3, not 6
+    c.Map(p => p.Name).WithConverter(value => value!.ToUpperInvariant());  // "a" gave "A"
+});
 ```
 
 **Now:** the converter replaces the built-in conversion, and any earlier converter, so it's used for every cell that isn't empty, whatever the type: `"3"` gives `6`. Empty cells still use the empty fallback, and a converter that throws uses the invalid fallback.
@@ -76,10 +79,10 @@ Map(e => e.Name).WithConverter(value => value.ToUpperInvariant());  // "a" gave 
 **What to do:** if the converter was meant as a fallback for values the built-in conversion can't handle, handle both in the converter:
 
 ```csharp
-Map(e => e.Quantity).WithConverter(value =>
+importer.Configuration.RegisterClassMap<Product>(c => c.Map(p => p.Quantity).WithConverter(value =>
     int.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var quantity)
         ? quantity
-        : ParseWords(value));
+        : ParseWords(value)));
 ```
 
 ## `ReadRow` reads the heading first
@@ -108,6 +111,10 @@ sheet.HasHeading = false;
 **What to do:** use the exception's properties instead of parsing the message:
 
 ```csharp
+try
+{
+    var employees = sheet.ReadRows<Employee>().ToList();
+}
 catch (ExcelMappingException ex)
 {
     Console.WriteLine(ex.CellAddress); // "B11"
@@ -172,7 +179,7 @@ public class PhoneConverter : ICellConverter<string>
     }
 }
 
-Map(c => c.Phone).WithConverter(new PhoneConverter());  // or [ExcelConverter(typeof(PhoneConverter))]
+importer.Configuration.RegisterClassMap<Contact>(c => c.Map(x => x.Phone).WithConverter(new PhoneConverter()));  // or [ExcelConverter(typeof(PhoneConverter))]
 ```
 
 `CellMapperResult.Ignore()` becomes `CellConversionResult<T>.NotHandled`, which lets the next converter try; if none converts the value, it's invalid. A converter replaces the built-in conversion (see [`WithConverter` replaces the built-in conversion](#withconverter-replaces-the-built-in-conversion)).
@@ -193,7 +200,7 @@ public class UnknownFallback : ICellFallback<int>
     public int Fallback(CellValue value, CellContext context, Exception? exception) => -1;
 }
 
-Map(e => e.Age).WithInvalidFallback(new UnknownFallback());  // or [ExcelInvalidFallback(typeof(UnknownFallback))]
+importer.Configuration.RegisterClassMap<Employee>(c => c.Map(e => e.Age).WithInvalidFallback(new UnknownFallback()));  // or [ExcelInvalidFallback(typeof(UnknownFallback))]
 ```
 
 A reader factory or column matcher becomes a column selector, which chooses columns once for each sheet and describes them for error messages:
@@ -212,7 +219,7 @@ public class QuarterColumns : IColumnSelector
     public string Describe(ColumnSelectorContext context) => "the columns starting with Q";
 }
 
-Map(r => r.Quarters).WithColumns(new QuarterColumns());
+importer.Configuration.RegisterClassMap<Report>(c => c.Map(r => r.Quarters).WithColumns(new QuarterColumns()));
 ```
 
 If you created a map with its constructor, or implemented `IMap`, map the member with `Map(...)` in a class map instead.

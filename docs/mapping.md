@@ -180,7 +180,7 @@ public class Employee
 }
 
 // Or with a class map
-Map(e => e.Bonuses).WithColumns(new PrefixSelector("Bonus_"));
+importer.Configuration.RegisterClassMap<Employee>(c => c.Map(e => e.Bonuses).WithColumns(new PrefixSelector("Bonus_")));
 ```
 
 If no column is chosen, the member is missing, as when a named column isn't found. When reading a region, chosen columns outside it are ignored.
@@ -298,12 +298,12 @@ public class Employee
 }
 
 // Or with a class map
-Map(e => e.Status).WithMapping(new Dictionary<string, Status>
+importer.Configuration.RegisterClassMap<Employee>(c => c.Map(e => e.Status).WithMapping(new Dictionary<string, Status>
 {
     ["FT"] = Status.FullTime,
     ["PT"] = Status.PartTime,
     ["C"] = Status.Contract,
-}, StringComparer.OrdinalIgnoreCase);
+}, StringComparer.OrdinalIgnoreCase));
 ```
 
 Text is matched case-sensitively unless you give a comparer. Text that isn't in the dictionary is converted as usual (so `"Contract"` still maps to `Status.Contract`); to make it invalid instead, use `[ExcelMappingDictionaryBehavior(MappingDictionaryBehavior.Required)]` or `.WithMapping(dictionary, behavior: MappingDictionaryBehavior.Required)`.
@@ -313,7 +313,7 @@ Text is matched case-sensitively unless you give a comparer. Text that isn't in 
 `WithConverter(value => ...)` converts a cell's text with a delegate:
 
 ```csharp
-Map(e => e.Score).WithConverter(value => float.Parse(value.TrimEnd('%')) / 100f);
+importer.Configuration.RegisterClassMap<Employee>(c => c.Map(e => e.Score).WithConverter(value => float.Parse(value!.TrimEnd('%')) / 100f));
 ```
 
 For more control, implement `ICellConverter<T>`. A converter gets the cell's value as Excel stores it and where the cell is, and is set with `[ExcelConverter]` or `.WithConverter(converter)`:

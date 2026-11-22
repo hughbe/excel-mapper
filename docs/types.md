@@ -81,7 +81,7 @@ public class Event
 }
 
 // Or with a class map
-Map(e => e.Date).WithFormats("yyyy-MM-dd", "dd/MM/yyyy");
+importer.Configuration.RegisterClassMap<Event>(c => c.Map(e => e.Date).WithFormats("yyyy-MM-dd", "dd/MM/yyyy"));
 ```
 
 ### Offsets
@@ -233,11 +233,12 @@ A [column selector](mapping.md#column-selectors) can choose the columns too.
 **Elements** are read like single values of the element type. Configure them with `WithElementMap`, which takes the same value methods as a single member:
 
 ```csharp
-Map(e => e.Certifications)
+importer.Configuration.RegisterClassMap<Employee>(c => c
+    .Map(e => e.Certifications)
     .WithColumnNames("Certified 1", "Certified 2")
     .WithElementMap(e => e
         .WithFormats("yyyy-MM-dd")
-        .WithInvalidFallback(DateTime.MinValue));
+        .WithInvalidFallback(DateTime.MinValue)));
 ```
 
 Attributes such as `[ExcelFormats]` and `[ExcelConverter]` on a collection member apply to each element.
@@ -296,8 +297,11 @@ public class DepartmentInfo
 }
 
 // Or with a class map
-Map(e => e.Department.Name).WithColumnName("Department");
-Map(e => e.Department.Location);
+importer.Configuration.RegisterClassMap<Employee>(c =>
+{
+    c.Map(e => e.Department.Name).WithColumnName("Department");
+    c.Map(e => e.Department.Location);
+});
 ```
 
 `MapObject(e => e.Department)` returns the nested object's class map, and `.WithClassMap(...)` on it uses or configures another class map. A type that contains itself (such as `Person.Parent`) can't be auto-mapped: mark the member `[ExcelIgnore]`, or map the type with a class map.
