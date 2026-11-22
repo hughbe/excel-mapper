@@ -57,7 +57,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - `ExcelSheet.ValidateHeading<T>()` and `TryValidateHeading<T>()` report every missing column before reading rows. ([#128](https://github.com/hughbe/excel-mapper/pull/128))
 - `ExcelImporter.ReadRows<T>(path or stream)` reads the first sheet in one call. ([#129](https://github.com/hughbe/excel-mapper/pull/129))
 - `[ExcelColumnLetter("C")]` and `.WithColumnLetter("C")` map columns by Excel letter. ([#129](https://github.com/hughbe/excel-mapper/pull/129))
-- `ExcelImporterConfiguration.Culture` sets the culture used for parsing and converting values to text. ([#127](https://github.com/hughbe/excel-mapper/pull/127))
+- `ExcelImporterConfiguration.Culture` sets the culture used for parsing and converting values to text. It's given to the built-in conversions rather than set as the thread's culture, so converters and fallbacks run in the caller's culture and get the importer's from `CellContext.FormatProvider`. ([#127](https://github.com/hughbe/excel-mapper/pull/127), [#179](https://github.com/hughbe/excel-mapper/pull/179))
 - `ExcelImporterConfiguration.IgnoreSeparatorsInColumnNames` matches `FirstName` to columns such as "First Name"; errors for a missing column suggest a similarly named one. ([#122](https://github.com/hughbe/excel-mapper/pull/122))
 - `ExcelImporter` constructors that take an `ExcelReaderConfiguration` (passwords, CSV separators, fallback encodings). ([#122](https://github.com/hughbe/excel-mapper/pull/122))
 - `[ExcelOffset("+00:00")]` and `.WithOffset(TimeSpan)` choose the offset of `DateTimeOffset` members. ([#131](https://github.com/hughbe/excel-mapper/pull/131))

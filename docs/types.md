@@ -106,7 +106,7 @@ Text is parsed, and numbers and dates are converted to text, with the current cu
 importer.Configuration.Culture = CultureInfo.InvariantCulture;   // or CultureInfo.GetCultureInfo("de-DE")
 ```
 
-The culture is only set while each row is mapped; your code between rows keeps its own. To use a different culture for one member, give it a format provider:
+The culture is given to the built-in conversions; it isn't set as the thread's culture, so your code, including converters and fallbacks, runs in its own. A converter gets the importer's culture from `context.FormatProvider` (see [Converters](mapping.md#converters)); a `WithConverter(value => ...)` delegate that parses text should pass a culture itself. To use a different culture for one member, give it a format provider:
 
 | Item  | Date       | Price    |
 |-------|------------|----------|
