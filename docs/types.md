@@ -49,10 +49,10 @@ Cells that Excel stores as dates, times or durations map directly. Excel stores 
 
 Dates and times written as **text** (every CSV cell, or text cells in a workbook) are parsed in these formats, using the importer's [culture](#culture):
 
-| Type | Accepted by default | Examples (en-GB) |
+| Type | Accepted by default | Examples (invariant culture) |
 |------|---------------------|------------------|
-| `DateTime`, `DateTimeOffset` | ISO 8601; the culture's date and time (`"G"`), short date and time (`"g"`) and short date (`"d"`) | `2024-03-04`, `2024-03-04T10:30:15Z`, `2024-03-04 10:30`, `04/03/2024 10:30:15`, `04/03/2024` |
-| `DateOnly` | the culture's short date (`"d"`); ISO 8601 | `04/03/2024`, `2024-03-04` |
+| `DateTime`, `DateTimeOffset` | ISO 8601; the culture's date and time (`"G"`), short date and time (`"g"`) and short date (`"d"`) | `2024-03-04`, `2024-03-04T10:30:15Z`, `2024-03-04 10:30`, `03/04/2024 10:30:15`, `03/04/2024` |
+| `DateOnly` | the culture's short date (`"d"`); ISO 8601 | `03/04/2024`, `2024-03-04` |
 | `TimeOnly` | the culture's short time (`"t"`) and long time (`"T"`); 24-hour times | `10:30`, `10:30:15`, `9:05`, `14:30:15.25` |
 | `TimeSpan` | the constant format (`"c"`) | `1:30`, `01:30:00`, `1.02:03:04` |
 
@@ -100,11 +100,13 @@ This applies to cells Excel stores as dates or numbers. Text with its own offset
 
 ## Culture
 
-Text is parsed, and numbers and dates are converted to text, with the current culture of the thread reading the rows, so results can depend on the machine's settings. Set a culture for the whole importer to make them predictable:
+Text is parsed, and numbers and dates are converted to text, with the invariant culture by default, so results don't depend on the machine's settings: `1.5` is one and a half, and dates are written `03/04/2024 00:00:00` (month first). For a file written in another culture, set the importer's culture:
 
 ```csharp
-importer.Configuration.Culture = CultureInfo.InvariantCulture;   // or CultureInfo.GetCultureInfo("de-DE")
+importer.Configuration.Culture = CultureInfo.GetCultureInfo("de-DE");   // reads "1,5" and "15.03.2024"
 ```
+
+To use the culture of the machine reading the file, as 3.x did, set it to `CultureInfo.CurrentCulture`.
 
 The culture is given to the built-in conversions; it isn't set as the thread's culture, so your code, including converters and fallbacks, runs in its own. A converter gets the importer's culture from `context.FormatProvider` (see [Converters](mapping.md#converters)); a `WithConverter(value => ...)` delegate that parses text should pass a culture itself. To use a different culture for one member, give it a format provider:
 

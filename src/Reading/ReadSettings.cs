@@ -10,7 +10,7 @@ namespace ExcelMapper.Reading;
 /// </summary>
 internal sealed class ReadSettings(ExcelImporterConfiguration configuration)
 {
-    public CultureInfo? Culture { get; } = configuration.Culture;
+    public CultureInfo Culture { get; } = configuration.Culture;
 
     public bool SkipBlankLines { get; } = configuration.SkipBlankLines;
 

@@ -20,9 +20,15 @@ internal struct ReadCellResult
     /// <summary>
     /// The culture to parse and format the cell's text with: the importer's
     /// <see cref="ExcelImporterConfiguration.Culture"/>, set when the cell is mapped
-    /// (<see cref="ValuePipeline{T}.Map"/>). Null means the current culture.
+    /// (<see cref="ValuePipeline{T}.Map"/>). Invariant if it isn't set.
     /// </summary>
-    public IFormatProvider? Culture { get; set; }
+    public IFormatProvider Culture
+    {
+        readonly get => _culture ?? CultureInfo.InvariantCulture;
+        set => _culture = value;
+    }
+
+    private IFormatProvider? _culture;
 
     /// <summary>
     /// The index of the column that contains the cell.
@@ -51,7 +57,7 @@ internal struct ReadCellResult
         {
             var numberFormatString = Reader.GetNumberFormatString(ColumnIndex);
             var numberFormat = new NumberFormat(numberFormatString);
-            _stringValue = numberFormat.Format(value, Culture as CultureInfo ?? CultureInfo.CurrentCulture);
+            _stringValue = numberFormat.Format(value, Culture as CultureInfo ?? CultureInfo.InvariantCulture);
         }
         else
         {

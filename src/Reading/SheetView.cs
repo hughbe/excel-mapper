@@ -115,7 +115,7 @@ internal sealed class SheetView
     /// <summary>
     /// The importer's culture, if set (see <see cref="ExcelImporterConfiguration.Culture"/>).
     /// </summary>
-    public CultureInfo? Culture => Settings.Culture;
+    public CultureInfo Culture => Settings.Culture;
 
     private ReadSettings? _settings;
 
@@ -166,15 +166,19 @@ internal sealed class SheetView
             ReadHeading();
         }
 
-        // Now delegate to iterator method for lazy evaluation
-        return ReadRowsIterator(classMap);
+        // Rows are read lazily, from the row the sheet is on now.
+        return ReadRowsIterator(classMap, CurrentRowIndex);
     }
 
     /// <summary>
-    /// Iterator method for reading rows. Separated from ReadRows to enable eager validation.
+    /// Reads the rows after <paramref name="rowIndex"/>. Separated from ReadRows so the heading is
+    /// read when ReadRows is called rather than when the rows are enumerated.
     /// </summary>
-    private IEnumerable<T> ReadRowsIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap)
+    private IEnumerable<T> ReadRowsIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, int rowIndex)
     {
+        // Each enumeration starts from the same row, so the result can be enumerated more than
+        // once, as with any IEnumerable<T>: calling Any() and then ToList() doesn't lose a row.
+        _cursor.MoveTo(rowIndex);
         while (TryReadRow(classMap, out T? row))
         {
             yield return row;
@@ -228,6 +232,8 @@ internal sealed class SheetView
     /// </summary>
     private IEnumerable<T> ReadRowsRangeIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, int startIndex, int count)
     {
+        // Each enumeration reads the same rows.
+        _cursor.MoveTo(startIndex - 1);
         for (int i = 0; i < count; i++)
         {
             if (!TryReadRow(classMap, out T? row))
@@ -288,11 +294,14 @@ internal sealed class SheetView
             ReadHeading();
         }
 
-        return ReadRowResultsIterator(classMap);
+        return ReadRowResultsIterator(classMap, CurrentRowIndex);
     }
 
-    private IEnumerable<ExcelRowResult<T>> ReadRowResultsIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap)
+    private IEnumerable<ExcelRowResult<T>> ReadRowResultsIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, int rowIndex)
     {
+        // Each enumeration starts from the same row, as for ReadRows.
+        _cursor.MoveTo(rowIndex);
+
         // Reuse one list for every row: valid rows (usually most of them) then don't allocate, and
         // only rows with errors get their own copy.
         var errors = new List<ExcelMappingException>();

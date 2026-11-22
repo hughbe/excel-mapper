@@ -90,7 +90,7 @@ foreach (var result in results.Where(r => !r.IsValid))
 
 **A fractional number such as `2.7` is invalid for an `int` member.** Excel stores every number as a `double`, and ExcelMapper doesn't silently drop or round the fraction (3.x did). Map to `decimal` or `double`, give the member an invalid fallback, or round it in a converter: `.WithConverter(value => (int)Math.Round(double.Parse(value)))`.
 
-**Dates from a CSV file are invalid, or the day and month are swapped.** Text is parsed with the importer's culture. Set `importer.Configuration.Culture`, or give the member its formats ([Dates and times](types.md#dates-and-times)).
+**Dates from a CSV file are invalid, or the day and month are swapped.** Text is parsed with the importer's culture, invariant by default (month first). Set `importer.Configuration.Culture`, or give the member its formats ([Dates and times](types.md#dates-and-times)).
 
 **`DateTimeOffset` values have a different offset on another machine.** Excel dates have no time zone, so they get the local offset: set one with `[ExcelOffset]` ([Offsets](types.md#offsets)).
 
