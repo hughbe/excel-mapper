@@ -56,7 +56,7 @@ public partial class AppMappingContext : ExcelMappingContext
 var employees = sheet.ReadRows(AppMappingContext.Default.Employee).ToList();
 ```
 
-The generator registers each type and every type its members use (except members with `[ExcelIgnore]`), and adds a property for each type's class map, named after the type (`DictionaryStringInt32` for `Dictionary<string, int>`, `Int32Array` for `int[]`), and a static `Default` instance. A member of the context with the same name is kept, and `GetClassMap<T>()` gives the class map too. It reports these errors:
+The generator registers each type and every type its members use (except members with `[ExcelIgnore]`), and the code that sets each member and calls each public constructor, so native AOT apps set members and create records without reflection (which boxes values and allocates); it adds a property for each type's class map, named after the type (`DictionaryStringInt32` for `Dictionary<string, int>`, `Int32Array` for `int[]`), and a static `Default` instance. A member of the context with the same name is kept, and `GetClassMap<T>()` gives the class map too. It reports these errors:
 
 | Error | Meaning |
 |---|---|

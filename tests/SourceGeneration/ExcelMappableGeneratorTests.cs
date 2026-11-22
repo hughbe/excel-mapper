@@ -83,6 +83,84 @@ public class ExcelMappableGeneratorTests
     }
 
     [Fact]
+    public void Generate_Object_RegistersSettersAndConstructors()
+    {
+        var (generated, diagnostics) = Generate("""
+            [ExcelMappable(typeof(Person))]
+            [ExcelMappable(typeof(Pair))]
+            [ExcelMappable(typeof(Point))]
+            public partial class AppContext : ExcelMappingContext
+            {
+            }
+
+            public class Person : Base
+            {
+                public Person()
+                {
+                }
+
+                public Person(string name, int age = 3)
+                {
+                    Name = name;
+                    Age = age;
+                }
+
+                protected Person(int age) => Age = age;
+
+                public Person(ref int age) => Age = age;
+
+                public string Name { get; set; } = "";
+                public int Age { get; set; }
+                public long Field;
+                public readonly long ReadOnlyField;
+                public string Init { get; init; } = "";
+                public string GetOnly => "";
+                public int PrivateSet { get; private set; }
+                [ExcelIgnore]
+                public int Ignored { get; set; }
+                public string @class { get; set; } = "";
+                public Base? Parent { get; set; }
+            }
+
+            public abstract class Base
+            {
+                protected Base()
+                {
+                }
+
+                public Base(int inherited) => Inherited = inherited;
+
+                public int Inherited { get; set; }
+            }
+
+            public record Pair(string Key, int? Value);
+
+            public struct Point
+            {
+                public Point(int x) => X = x;
+
+                public int X { get; set; }
+            }
+            """);
+
+        Assert.Empty(diagnostics);
+        Assert.Equal(
+        [
+            "Constructor<global::Person>(new global::System.Type[] { typeof(string), typeof(int) }, static arguments => new global::Person(arguments.Get<string>(0), arguments.Get<int>(1)))",
+            "Setter<global::Person, string>(\"Name\", static (ref global::Person owner, string value) => owner.Name = value)",
+            "Setter<global::Person, int>(\"Age\", static (ref global::Person owner, int value) => owner.Age = value)",
+            "Setter<global::Person, long>(\"Field\", static (ref global::Person owner, long value) => owner.Field = value)",
+            "Setter<global::Person, string>(\"class\", static (ref global::Person owner, string value) => owner.@class = value)",
+            "Setter<global::Person, global::Base>(\"Parent\", static (ref global::Person owner, global::Base value) => owner.Parent = value)",
+            "Setter<global::Base, int>(\"Inherited\", static (ref global::Base owner, int value) => owner.Inherited = value)",
+            "Setter<global::Person, int>(\"Inherited\", static (ref global::Person owner, int value) => owner.Inherited = value)",
+            "Constructor<global::Pair>(new global::System.Type[] { typeof(string), typeof(int?) }, static arguments => new global::Pair(arguments.Get<string>(0), arguments.Get<int?>(1)))",
+            "Constructor<global::Point>(new global::System.Type[] { typeof(int) }, static arguments => new global::Point(arguments.Get<int>(0)))",
+            "Setter<global::Point, int>(\"X\", static (ref global::Point owner, int value) => owner.X = value)",
+        ], Accessors(generated));
+    }
+
+    [Fact]
     public void Generate_GenericAndArrayRows_NamesProperties()
     {
         var (generated, diagnostics) = Generate("""
@@ -523,8 +601,19 @@ public class ExcelMappableGeneratorTests
         Assert.All(outputs, output => Assert.Contains(output.Reason, new[] { IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged }));
     }
 
+    // The types registered: every registration except setters and constructors.
     private static string[] Registrations(string generated)
-        => generated.Split('\n').Select(l => l.Trim()).Where(l => l.StartsWith("types.", StringComparison.Ordinal)).Select(l => l["types.".Length..^"();".Length]).ToArray();
+        => RegistrationLines(generated).Where(l => !IsAccessor(l)).Select(l => l[..^"()".Length]).ToArray();
+
+    // The setters and constructors registered.
+    private static string[] Accessors(string generated)
+        => RegistrationLines(generated).Where(IsAccessor).ToArray();
+
+    private static bool IsAccessor(string registration)
+        => registration.StartsWith("Setter<", StringComparison.Ordinal) || registration.StartsWith("Constructor<", StringComparison.Ordinal);
+
+    private static IEnumerable<string> RegistrationLines(string generated)
+        => generated.Split('\n').Select(l => l.Trim()).Where(l => l.StartsWith("types.", StringComparison.Ordinal)).Select(l => l["types.".Length..^";".Length]);
 
     private static readonly CSharpParseOptions s_parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
 

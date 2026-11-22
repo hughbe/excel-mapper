@@ -16,6 +16,10 @@ As a rough guide, a 10-member class read from a CSV file maps at about 1 µs per
 dotnet run -c Release --project benchmarks -- --filter '*.Mapping.*'
 ```
 
+### Native AOT
+
+With native AOT, read rows with a class map from a generated `ExcelMappingContext` (see [Native AOT apps](trimming.md#native-aot-apps)): its generated code sets members and calls constructors, so rows allocate the same as with the JIT. Mapping 50,000 rows of a 10-member class from CSV takes about 70 ms with native AOT and 45 ms with the JIT. Most of the difference is reading the file: ExcelDataReader itself is about 65% slower with native AOT, which can't optimize from how the code runs as the JIT does.
+
 ## Keeping it fast
 
 1. **Stream rows.** `ReadRows<T>()` maps lazily as you enumerate, so a large file doesn't have to fit in memory:

@@ -69,10 +69,10 @@ internal sealed class TypeWalker
     /// </summary>
     public void AddRow(ITypeSymbol type)
     {
-        Add($"Row<{Name(type)}>");
+        Add($"Row<{Name(type)}>()");
 
         // Row registers the type as Type does.
-        _registered.Add($"Type<{Name(type)}>");
+        _registered.Add($"Type<{Name(type)}>()");
         Visit(type);
     }
 
@@ -97,14 +97,14 @@ internal sealed class TypeWalker
         if (type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullable)
         {
             var underlyingType = nullable.TypeArguments[0];
-            Add($"Nullable<{Name(underlyingType)}>");
+            Add($"Nullable<{Name(underlyingType)}>()");
             Visit(underlyingType);
             return;
         }
 
         if (type.TypeKind == TypeKind.Enum)
         {
-            Add($"Enum<{name}>");
+            Add($"Enum<{name}>()");
             return;
         }
 
@@ -113,7 +113,7 @@ internal sealed class TypeWalker
             // Multidimensional arrays are only mapped by index with Map(...).
             if (array.Rank == 1)
             {
-                Add($"Array<{Name(array.ElementType)}>");
+                Add($"Array<{Name(array.ElementType)}>()");
                 Visit(array.ElementType);
             }
 
@@ -122,19 +122,19 @@ internal sealed class TypeWalker
 
         if (s_builtInTypes.Contains(MetadataName(type)))
         {
-            Add($"Type<{name}>");
+            Add($"Type<{name}>()");
             return;
         }
 
         if (HasConversion(type, out var isParsable))
         {
-            Add(isParsable && _canRegisterParsable ? (type.IsValueType ? $"Parsable<{name}>" : $"ParsableClass<{name}>") : $"Type<{name}>");
+            Add(isParsable && _canRegisterParsable ? (type.IsValueType ? $"Parsable<{name}>()" : $"ParsableClass<{name}>()") : $"Type<{name}>()");
             return;
         }
 
         if (TryGetKeyValueTypes(type, out var keyType, out var valueType))
         {
-            Add($"Dictionary<{name}, {Name(keyType)}, {Name(valueType)}>");
+            Add($"Dictionary<{name}, {Name(keyType)}, {Name(valueType)}>()");
             Visit(keyType);
             Visit(valueType);
             return;
@@ -142,17 +142,70 @@ internal sealed class TypeWalker
 
         if (TryGetElementType(type, out var elementType))
         {
-            Add($"Collection<{name}, {Name(elementType)}>");
+            Add($"Collection<{name}, {Name(elementType)}>()");
             Visit(elementType);
             return;
         }
 
-        Add($"Type<{name}>");
-        foreach (var memberType in GetMemberTypes(type))
+        Add($"Type<{name}>()");
+        AddConstructors(type, name);
+        foreach (var member in GetMappedMembers(type))
         {
+            var memberType = MemberType(member);
+            AddSetter(member, memberType, name);
             Visit(memberType);
         }
     }
+
+    // Registers a setter for a member auto-mapping sets: a property with a public setter that
+    // isn't init-only, or a field that isn't readonly. Others are set through a constructor, or by
+    // reflection (see CompiledAccessors.GetSetter).
+    private void AddSetter(ISymbol member, ITypeSymbol memberType, string ownerName)
+    {
+        var settable = member switch
+        {
+            IPropertySymbol { SetMethod: { DeclaredAccessibility: Accessibility.Public, IsInitOnly: false } } => true,
+            IFieldSymbol { IsReadOnly: false } => true,
+            _ => false,
+        };
+        if (!settable || memberType.IsRefLikeType)
+        {
+            return;
+        }
+
+        var valueName = Name(memberType);
+        var identifier = Identifier(member.Name);
+        Add($"Setter<{ownerName}, {valueName}>(\"{member.Name}\", static (ref {ownerName} owner, {valueName} value) => owner.{identifier} = value)");
+    }
+
+    // Registers the public constructors with parameters of a type auto-mapping creates, for records
+    // and types with read-only members (see ConstructionPlan<T>.Create).
+    private void AddConstructors(ITypeSymbol type, string name)
+    {
+        if (type is not INamedTypeSymbol { IsAbstract: false, TypeKind: TypeKind.Class or TypeKind.Struct } named)
+        {
+            return;
+        }
+
+        foreach (var constructor in named.InstanceConstructors)
+        {
+            if (constructor.DeclaredAccessibility != Accessibility.Public || constructor.Parameters.Length == 0 ||
+                constructor.Parameters.Any(p => p.RefKind != RefKind.None || p.Type.IsRefLikeType))
+            {
+                continue;
+            }
+
+            var parameterTypes = string.Join(", ", constructor.Parameters.Select(p => $"typeof({Name(p.Type)})"));
+            var arguments = string.Join(", ", constructor.Parameters.Select((p, i) => $"arguments.Get<{Name(p.Type)}>({i})"));
+            Add($"Constructor<{name}>(new global::System.Type[] {{ {parameterTypes} }}, static arguments => new {name}({arguments}))");
+        }
+    }
+
+    private static ITypeSymbol MemberType(ISymbol member) => member is IPropertySymbol property ? property.Type : ((IFieldSymbol)member).Type;
+
+    // A member's name as an identifier, escaping keywords such as "class".
+    private static string Identifier(string name)
+        => Microsoft.CodeAnalysis.CSharp.SyntaxFacts.GetKeywordKind(name) != Microsoft.CodeAnalysis.CSharp.SyntaxKind.None ? "@" + name : name;
 
     // Whether auto-mapping converts the type's cells itself: IConvertible, number and IParsable<T>
     // types that it can create (see TypeRule<T>.FindDefaultMappers).
@@ -250,9 +303,9 @@ internal sealed class TypeWalker
         return result;
     }
 
-    // The types of the public instance properties and fields auto-mapping reads, except those with
+    // The public instance properties and fields auto-mapping reads, except those with
     // [ExcelIgnore] (see AutoMapper.TryAddMembers).
-    private IEnumerable<ITypeSymbol> GetMemberTypes(ITypeSymbol type)
+    private IEnumerable<ISymbol> GetMappedMembers(ITypeSymbol type)
     {
         var names = new HashSet<string>();
         foreach (var member in GetAllMembers(type))
@@ -264,11 +317,9 @@ internal sealed class TypeWalker
 
             switch (member)
             {
-                case IPropertySymbol { IsIndexer: false, GetMethod: not null } property:
-                    yield return property.Type;
-                    break;
-                case IFieldSymbol { IsConst: false, IsImplicitlyDeclared: false } field:
-                    yield return field.Type;
+                case IPropertySymbol { IsIndexer: false, GetMethod: not null }:
+                case IFieldSymbol { IsConst: false, IsImplicitlyDeclared: false }:
+                    yield return member;
                     break;
             }
         }
