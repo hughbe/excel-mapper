@@ -1,7 +1,7 @@
 namespace ExcelMapper.Abstractions;
 
 /// <summary>
-/// A map that reads cells from columns: a single value (<see cref="IValueMap"/>), or a collection
+/// A map that reads cells from columns: a single value (<see cref="ValueMap{T}"/>), or a collection
 /// or dictionary (<see cref="ICellsMap"/>).
 /// </summary>
 internal interface IColumnsMap : IMap

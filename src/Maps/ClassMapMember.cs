@@ -1,10 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace ExcelMapper;
+namespace ExcelMapper.Maps;
 
 /// <summary>
-/// A member of a class map (<see cref="ExcelClassMap.Members"/>): the property or field, the map
+/// A member of a class map (<see cref="ExcelClassMap.Members"/>): the property or field, and the map
 /// that reads its value.
 /// </summary>
 internal sealed class ClassMapMember

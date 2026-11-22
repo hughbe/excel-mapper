@@ -13,6 +13,7 @@ internal sealed class AllColumns : Columns
     {
     }
 
+    // Only collections and dictionaries read these columns, never a single value.
     public override int FindColumn(SheetView sheet) => throw new NotSupportedException();
 
     public override int[] FindColumns(SheetView sheet)

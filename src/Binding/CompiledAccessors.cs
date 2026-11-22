@@ -51,7 +51,7 @@ internal static class CompiledAccessors
 
     private static RefSetter<TOwner, TValue> CreateSetter<TOwner, TValue>(MemberInfo member)
     {
-        var memberType = member is PropertyInfo propertyInfo ? propertyInfo.PropertyType : ((FieldInfo)member).FieldType;
+        var memberType = member.MemberType();
 
         // A read-only property is only mapped when it's a constructor parameter (see
         // ConstructionPlan<T>.Create), so it's never set.
@@ -115,28 +115,29 @@ internal static class CompiledAccessors
 
     /// <summary>
     /// Gets a delegate that calls an instance method with one argument, such as a collection's
-    /// <c>Add(T)</c>, without boxing value types or allocating an argument array.
+    /// <c>Add(T)</c>, without boxing value types or allocating an argument array. A struct instance
+    /// is changed inside its box.
     /// </summary>
     public static Action<object, T> GetAction<T>(MethodInfo method)
     {
-        if (!CanCompile || method.DeclaringType!.IsValueType)
+        if (!CanCompile)
         {
             return (instance, value) => method.InvokeUnwrapped(instance, [value]);
         }
 
         var instance = Expression.Parameter(typeof(object), "instance");
         var value = Expression.Parameter(typeof(T), "value");
-        var body = Expression.Call(Expression.Convert(instance, method.DeclaringType!), method, ConvertArgument(value, method.GetParameters()[0].ParameterType));
+        var body = Expression.Call(GetBoxedInstance(instance, method.DeclaringType!), method, ConvertArgument(value, method.GetParameters()[0].ParameterType));
         return Expression.Lambda<Action<object, T>>(body, instance, value).Compile();
     }
 
     /// <summary>
     /// Gets a delegate that calls an instance method with two arguments, such as a dictionary's
-    /// <c>Add(TKey, TValue)</c>.
+    /// <c>Add(TKey, TValue)</c>. A struct instance is changed inside its box.
     /// </summary>
     public static Action<object, T1, T2> GetAction<T1, T2>(MethodInfo method)
     {
-        if (!CanCompile || method.DeclaringType!.IsValueType)
+        if (!CanCompile)
         {
             return (instance, value1, value2) => method.InvokeUnwrapped(instance, [value1, value2]);
         }
@@ -146,12 +147,17 @@ internal static class CompiledAccessors
         var value2 = Expression.Parameter(typeof(T2), "value2");
         var parameters = method.GetParameters();
         var body = Expression.Call(
-            Expression.Convert(instance, method.DeclaringType!),
+            GetBoxedInstance(instance, method.DeclaringType!),
             method,
             ConvertArgument(value1, parameters[0].ParameterType),
             ConvertArgument(value2, parameters[1].ParameterType));
         return Expression.Lambda<Action<object, T1, T2>>(body, instance, value1, value2).Compile();
     }
+
+    // The instance a method is called on: a struct is unboxed in place, so the method changes the
+    // boxed struct rather than a copy.
+    private static Expression GetBoxedInstance(ParameterExpression instance, Type declaringType)
+        => declaringType.IsValueType ? Expression.Unbox(instance, declaringType) : Expression.Convert(instance, declaringType);
 
     private static Expression ConvertArgument(Expression value, Type parameterType)
         => value.Type == parameterType ? value : Expression.Convert(value, parameterType);

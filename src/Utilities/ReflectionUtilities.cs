@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 
@@ -8,45 +7,39 @@ namespace ExcelMapper.Utilities;
 
 internal static class ReflectionUtilities
 {
-#if !NET5_0_OR_GREATER
-    public static bool IsAssignableTo(this Type type, Type targetType)
-    {
-        return targetType.GetTypeInfo().IsAssignableFrom(type.GetTypeInfo());
-    }
-#endif
-
+    /// <summary>
+    /// Whether <paramref name="type"/> implements <paramref name="interfaceType"/>. An interface
+    /// doesn't implement itself.
+    /// </summary>
     public static bool ImplementsInterface([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type type, Type interfaceType)
-    {
-        return type.GetTypeInfo().ImplementedInterfaces.Any(t => t == interfaceType);
-    }
+        => Array.IndexOf(type.GetInterfaces(), interfaceType) >= 0;
 
+    /// <summary>
+    /// Whether <paramref name="type"/> is or implements a closed <paramref name="genericInterfaceType"/>,
+    /// such as <c>IEnumerable&lt;T&gt;</c>, giving its first type argument.
+    /// </summary>
     public static bool ImplementsGenericInterface(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type type,
         Type genericInterfaceType,
         [NotNullWhen(true)] out Type? elementType)
     {
-        bool CheckInterface(Type interfaceType, [NotNullWhen(true)] out Type? elementTypeResult)
+        bool IsGenericInterface(Type interfaceType, [NotNullWhen(true)] out Type? typeArgument)
         {
-            if (interfaceType.GetTypeInfo().IsGenericType && interfaceType.GetGenericTypeDefinition() == genericInterfaceType)
-            {
-                elementTypeResult = interfaceType.GenericTypeArguments[0];
-                return true;
-            }
-
-            elementTypeResult = null;
-            return false;
+            typeArgument = interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == genericInterfaceType
+                ? interfaceType.GenericTypeArguments[0]
+                : null;
+            return typeArgument is not null;
         }
 
-        // This type may actually be the interface in question.
-        // So return true if this is the case.
-        if (type.GetTypeInfo().IsInterface && CheckInterface(type, out elementType))
+        // The type may be the interface itself.
+        if (type.IsInterface && IsGenericInterface(type, out elementType))
         {
             return true;
         }
 
-        foreach (Type interfaceType in type.GetTypeInfo().ImplementedInterfaces)
+        foreach (var interfaceType in type.GetInterfaces())
         {
-            if (CheckInterface(interfaceType, out elementType))
+            if (IsGenericInterface(interfaceType, out elementType))
             {
                 return true;
             }
@@ -56,19 +49,11 @@ internal static class ReflectionUtilities
         return false;
     }
 
+    /// <summary>
+    /// The type of a mapped member, which is always a property or field.
+    /// </summary>
     public static Type MemberType(this MemberInfo member)
-    {
-        if (member is PropertyInfo property)
-        {
-            return property.PropertyType;
-        }
-        else if (member is FieldInfo field)
-        {
-            return field.FieldType;
-        }
-
-        throw new ArgumentException($"Member \"{member.Name}\" is not a property or field.", nameof(member));
-    }
+        => member is PropertyInfo property ? property.PropertyType : ((FieldInfo)member).FieldType;
 
     public static Type GetNullableTypeOrThis(this Type type, out bool isNullable)
     {
@@ -78,7 +63,7 @@ internal static class ReflectionUtilities
 
     public static bool IsNullable(this Type type)
     {
-        return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+        return Nullable.GetUnderlyingType(type) is not null;
     }
 
     /// <summary>
@@ -139,7 +124,10 @@ internal static class ReflectionUtilities
         return parameterType is not null && parameterType != typeof(object);
     }
 
-    [ExcludeFromCodeCoverage]
+    /// <summary>
+    /// Invokes a method through reflection, where code can't be compiled, rethrowing what it throws
+    /// rather than a <see cref="TargetInvocationException"/>.
+    /// </summary>
     public static object InvokeUnwrapped(this MethodInfo method, object? obj, params object?[] parameters)
     {
         try

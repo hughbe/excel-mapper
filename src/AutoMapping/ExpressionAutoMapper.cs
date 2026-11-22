@@ -10,25 +10,18 @@ namespace ExcelMapper.AutoMapping;
 [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
 internal static class ExpressionAutoMapper
 {
-    private static Stack<IMappedExpression> BuildExpressionStack(Expression expression)
+    // The member accesses and indexers of an expression such as p => p.Address.Street or
+    // p => p.Values[0], with the outermost (the one on the row) on top.
+    private static Stack<MappedAccessExpression> BuildAccessStack(Expression expression)
     {
-        var expressions = new Stack<IMappedExpression>();
+        var expressions = new Stack<MappedAccessExpression>();
         var currentExpression = expression;
-
         while (true)
         {
             currentExpression = SkipConvert(currentExpression, out var currentTargetType);
-            if (currentExpression is ParameterExpression parameterExpression)
+            if (currentExpression is ParameterExpression)
             {
-                // If we have reached the parameter expression and there are no other expressions, we
-                // need to map the parameter itself.
-                if (expressions.Count == 0)
-                {
-                    expressions.Push(new MappedParameterExpression(parameterExpression, currentTargetType));
-                    return expressions;
-                }
-
-                break;
+                return expressions;
             }
             else if (currentExpression is MemberExpression memberExpression)
             {
@@ -64,8 +57,6 @@ internal static class ExpressionAutoMapper
                 throw new ArgumentException($"Expression can only contain member accesses, but found {currentExpression.NodeType} ({currentExpression}) of type {currentExpression.GetType()}", nameof(expression));
             }
         }
-
-        return expressions;
     }
 
     internal static Expression SkipConvert(Expression expression, out Type convertedType)
@@ -109,100 +100,80 @@ internal static class ExpressionAutoMapper
             methodCallExpression.Method.Name == "get_Item" &&
             methodCallExpression.Arguments.Count == 1;
 
-    private static void AddMap(IMap parentMap, IMappedExpression expression, IMap map)
+    /// <summary>
+    /// Gets the map of what an expression reads, creating it with <paramref name="createMap"/> if
+    /// it's not mapped yet, along with the maps of the objects, collections and dictionaries it's
+    /// read through: for <c>p => p.Address.Street</c>, the class map of <c>Address</c>.
+    /// </summary>
+    private static IMap GetOrCreateMap<T>(ExcelClassMap<T> classMap, Expression expression, Func<MappedExpression, EmptyValueStrategy, IMap> createMap)
     {
-        if (parentMap is ExcelClassMap classMap && expression is not MappedMemberExpression)
+        var emptyValueStrategy = classMap.EmptyValueStrategy;
+        if (SkipConvert(expression, out var convertedType) is ParameterExpression parameter)
         {
-            if (expression is not MappedParameterExpression)
-            {
-                throw new ArgumentException($"Expected a member expression when adding to an object map. Received: {expression}", nameof(expression));
-            }
-
             // The row itself, such as Map(p => p).
-            classMap.SingleValueMap = map;
-            return;
+            var valueMap = createMap(new MappedParameterExpression(convertedType ?? parameter.Type), emptyValueStrategy);
+            classMap.SingleValueMap = valueMap;
+            return valueMap;
+        }
+
+        var stack = BuildAccessStack(expression);
+        IMap parentMap = classMap;
+        var current = stack.Pop();
+        while (stack.Count > 0)
+        {
+            var next = stack.Pop();
+            parentMap = next.GetOrCreateSourceMap(parentMap, current, emptyValueStrategy);
+            current = next;
+        }
+
+        if (parentMap is ExcelClassMap && current is not MappedMemberExpression)
+        {
+            throw new ArgumentException($"Expected a member expression when adding to an object map. Received: {expression}", nameof(expression));
         }
 
         // A member of a class map, or an element mapped by its index or key.
-        ((IParentMap)parentMap).SetChild(expression.Context, map);
+        var map = createMap(current, emptyValueStrategy);
+        ((IParentMap)parentMap).SetChild(current.Key, map);
+        return map;
     }
 
-    [ExcludeFromCodeCoverage]
-    private static IMap ProcessExpression<T, TProperty>(Stack<IMappedExpression> stack, IMap currentMap, IMappedExpression currentExpression, Func<IMappedExpression, EmptyValueStrategy, IMap> memberMapCreator, EmptyValueStrategy emptyValueStrategy)
-    {
-        if (stack.Count == 0)
-        {
-            var memberMap = memberMapCreator(currentExpression, emptyValueStrategy);
-            AddMap(currentMap, currentExpression, memberMap);
-            return memberMap;
-        }
-
-        var nextExpression = stack.Pop();
-        var nextMap = nextExpression.GetNextMap(currentMap, currentExpression, emptyValueStrategy);
-        return ProcessExpression<T, TProperty>(stack, nextMap, nextExpression, memberMapCreator, emptyValueStrategy);
-    }
-
-    private static IMap GetOrCreateMap<T, TProperty>(ExcelClassMap<T> classMap, Expression expression, Func<IMappedExpression, EmptyValueStrategy, IMap> memberMapCreator)
-    {
-        var stack = BuildExpressionStack(expression);
-        return ProcessExpression<T, TProperty>(stack, classMap, stack.Pop(), memberMapCreator, classMap.EmptyValueStrategy);
-    }
+    // The type a collection, dictionary or row number is created as: a member's declared type, so
+    // that it can be assigned to the member.
+    private static Type GetCreatedType(MappedExpression expression)
+        => expression is MappedMemberExpression memberExpression ? memberExpression.Type : expression.MappedValueType;
 
     public static ValueMap<TProperty> GetOrCreateValueMap<T, TProperty>(ExcelClassMap<T> classMap, Expression expression)
     {
-        static IMap memberMapCreator(IMappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
-        {
-            var member = finalExpression is MappedMemberExpression memberExpression ? memberExpression.Member : null;
-            return AutoMapper.CreateValueMap<TProperty>(member, finalExpression.GetDefaultColumns(), emptyValueStrategy, isAutoMapping: false)!;
-        }
+        static IMap createMap(MappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
+            => AutoMapper.CreateValueMap<TProperty>(finalExpression.Member, finalExpression.GetDefaultColumns(), emptyValueStrategy, isAutoMapping: false)!;
 
-        return (ValueMap<TProperty>)GetOrCreateMap<T, TProperty>(classMap, expression, memberMapCreator);
+        return (ValueMap<TProperty>)GetOrCreateMap(classMap, expression, createMap);
     }
 
     public static CollectionMap<TElement> GetOrCreateCollectionMap<T, TElement>(ExcelClassMap<T> classMap, Expression expression)
     {
-        static IMap memberMapCreator(IMappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
+        static IMap createMap(MappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
         {
-            MemberInfo? member;
-            Type type;
-            if (finalExpression is MappedMemberExpression memberExpression)
-            {
-                member = memberExpression.Member;
-                type = memberExpression.Type;
-            }
-            else
-            {
-                member = null;
-                type = finalExpression.MappedValueType;
-            }
-            if (!CollectionRule<TElement>.TryCreateCollectionMap(member, type, finalExpression.GetDefaultCellsColumns() ?? MemberMapper.GetDefaultSplitColumns(member, finalExpression.GetDefaultColumns()), emptyValueStrategy, out var map))
+            var member = finalExpression.Member;
+            var type = GetCreatedType(finalExpression);
+            var columns = finalExpression.GetDefaultCellsColumns() ?? MemberMapper.GetDefaultSplitColumns(member, finalExpression.GetDefaultColumns());
+            if (!CollectionRule<TElement>.TryCreateCollectionMap(member, type, columns, emptyValueStrategy, out var map))
             {
                 throw new ExcelMappingException($"No known way to instantiate type \"{type}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
             }
 
             return map;
         }
-        
-        return (CollectionMap<TElement>)GetOrCreateMap<T, TElement>(classMap, expression, memberMapCreator);
+
+        return (CollectionMap<TElement>)GetOrCreateMap(classMap, expression, createMap);
     }
 
     public static DictionaryMap<TKey, TValue> GetOrCreateDictionaryMap<T, TKey, TValue>(ExcelClassMap<T> classMap, Expression expression) where TKey : notnull
     {
-        static IMap memberMapCreator(IMappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
+        static IMap createMap(MappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
         {
-            MemberInfo? member;
-            Type type;
-            if (finalExpression is MappedMemberExpression memberExpression)
-            {
-                member = memberExpression.Member;
-                type = memberExpression.Type;
-            }
-            else
-            {
-                member = null;
-                type = finalExpression.MappedValueType;
-            }
-            if (!DictionaryRule<TKey, TValue>.TryCreateDictionaryMap(member, type, emptyValueStrategy, isAutoMapping: false, out var map))
+            var type = GetCreatedType(finalExpression);
+            if (!DictionaryRule<TKey, TValue>.TryCreateDictionaryMap(finalExpression.Member, type, emptyValueStrategy, isAutoMapping: false, out var map))
             {
                 throw new ExcelMappingException($"No known way to instantiate type \"{type}\".");
             }
@@ -210,7 +181,7 @@ internal static class ExpressionAutoMapper
             return map;
         }
 
-        var map = (DictionaryMap<TKey, TValue>)GetOrCreateMap<T, TValue>(classMap, expression, memberMapCreator);
+        var map = (DictionaryMap<TKey, TValue>)GetOrCreateMap(classMap, expression, createMap);
 
         // Honour [ExcelExtraColumns] on a member mapped with Map(...), as auto-mapping does.
         if (MapTree.FindOwner(classMap, map, out var member) is { } owner && member is not null && Attribute.IsDefined(member, typeof(ExcelExtraColumnsAttribute)))
@@ -231,9 +202,9 @@ internal static class ExpressionAutoMapper
 
     public static RowNumberMap GetOrCreateRowNumberMap<T, TProperty>(ExcelClassMap<T> classMap, Expression expression)
     {
-        static IMap memberMapCreator(IMappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
+        static IMap createMap(MappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
         {
-            var type = finalExpression is MappedMemberExpression memberExpression ? memberExpression.Type : finalExpression.MappedValueType;
+            var type = GetCreatedType(finalExpression);
             if (!RowNumberMap.IsSupportedType(type))
             {
                 throw new ArgumentException($"Row numbers can't be mapped to type \"{type}\". Use a numeric type such as int or long.", nameof(expression));
@@ -242,12 +213,12 @@ internal static class ExpressionAutoMapper
             return new RowNumberMap(type);
         }
 
-        return (RowNumberMap)GetOrCreateMap<T, TProperty>(classMap, expression, memberMapCreator);
+        return (RowNumberMap)GetOrCreateMap(classMap, expression, createMap);
     }
 
     public static ExcelClassMap<TElement> GetOrCreateObjectMap<T, TElement>(ExcelClassMap<T> classMap, Expression expression)
     {
-        static IMap memberMapCreator(IMappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
+        static IMap createMap(MappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
         {
             if (!AutoMapper.TryCreateObjectMap<TElement>(emptyValueStrategy, out var map))
             {
@@ -257,53 +228,89 @@ internal static class ExpressionAutoMapper
             return map;
         }
 
-        return (ExcelClassMap<TElement>)GetOrCreateMap<T, TElement>(classMap, expression, memberMapCreator);
+        return (ExcelClassMap<TElement>)GetOrCreateMap(classMap, expression, createMap);
     }
 }
 
-internal interface IMappedExpression
+/// <summary>
+/// What a mapping expression reads: the row itself (<c>p => p</c>), or a member, element or value
+/// (see <see cref="MappedAccessExpression"/>).
+/// </summary>
+[RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+[RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+internal abstract class MappedExpression
 {
-    Type Type { get; }
-    Type MappedValueType { get; }
-    object Context { get; }
-    IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy);
-    Columns GetDefaultColumns();
-    Columns? GetDefaultCellsColumns();
+    /// <summary>
+    /// The type the value is mapped as: its type, or the type the expression converts it to.
+    /// </summary>
+    public abstract Type MappedValueType { get; }
+
+    /// <summary>
+    /// The property or field read, if any.
+    /// </summary>
+    public virtual MemberInfo? Member => null;
+
+    /// <summary>
+    /// The columns a single value is read from by default.
+    /// </summary>
+    public abstract Columns GetDefaultColumns();
+
+    /// <summary>
+    /// The columns a collection or dictionary is read from by default, or null to read it from
+    /// the cell of <see cref="GetDefaultColumns"/>, split.
+    /// </summary>
+    public virtual Columns? GetDefaultCellsColumns() => null;
+}
+
+/// <summary>
+/// The row itself, as in <c>Map(p => p)</c>.
+/// </summary>
+[RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+[RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+internal sealed class MappedParameterExpression(Type mappedValueType) : MappedExpression
+{
+    public override Type MappedValueType { get; } = mappedValueType;
+
+    public override Columns GetDefaultColumns() => AutoMapper.s_firstColumn;
+
+    public override Columns? GetDefaultCellsColumns() => AllColumns.Instance;
+}
+
+/// <summary>
+/// A member access or indexer in a mapping expression, such as <c>.Address</c> or <c>[0]</c>.
+/// </summary>
+[RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+[RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+internal abstract class MappedAccessExpression : MappedExpression
+{
+    /// <summary>
+    /// The type of the object, collection or dictionary this reads from.
+    /// </summary>
+    public Type Type { get; private protected set; } = null!;
+
+    /// <summary>
+    /// What this reads, as the key of its map in the map of what it reads from
+    /// (<see cref="IParentMap.SetChild"/>): the member, index, indices or dictionary key.
+    /// </summary>
+    public abstract object Key { get; }
+
+    /// <summary>
+    /// Gets or creates the map of what this reads from, as the child of
+    /// <paramref name="parentMap"/> for <paramref name="source"/>: for <c>.Street</c> in
+    /// <c>p.Address.Street</c>, the class map of <c>Address</c>.
+    /// </summary>
+    public abstract IMap GetOrCreateSourceMap(IMap parentMap, MappedAccessExpression source, EmptyValueStrategy emptyValueStrategy);
 }
 
 [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
 [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-internal class MappedParameterExpression : IMappedExpression
+internal sealed class MappedMemberExpression : MappedAccessExpression
 {
-    [ExcludeFromCodeCoverage]
-    public Type Type { get; }
-    public Type MappedValueType { get; }
-    [ExcludeFromCodeCoverage]
-    public object Context => throw new NotImplementedException();
+    public override MemberInfo Member { get; }
 
-    public MappedParameterExpression(ParameterExpression expression, Type mappedType)
-    {
-        Type = expression.Type;
-        MappedValueType = mappedType ?? expression.Type;
-    }
+    public override Type MappedValueType { get; }
 
-    [ExcludeFromCodeCoverage]
-    public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
-        => throw new NotImplementedException();
-
-    public Columns GetDefaultColumns() => AutoMapper.s_firstColumn;
-
-    public Columns? GetDefaultCellsColumns() => AllColumns.Instance;
-}
-
-[RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
-[RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-internal class MappedMemberExpression : IMappedExpression
-{
-    public Type Type { get; }
-    public MemberInfo Member { get; }
-    public Type MappedValueType { get; }
-    public object Context => Member;
+    public override object Key => Member;
 
     public MappedMemberExpression(MemberExpression expression, Type memberType)
     {
@@ -317,29 +324,28 @@ internal class MappedMemberExpression : IMappedExpression
         MappedValueType = memberType ?? expression.Type;
     }
 
-    public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
-        => TypeRule.For(currentExpression.MappedValueType).GetOrCreateNestedMap(currentMap, currentExpression.Context, emptyValueStrategy);
+    public override IMap GetOrCreateSourceMap(IMap parentMap, MappedAccessExpression source, EmptyValueStrategy emptyValueStrategy)
+        => TypeRule.For(source.MappedValueType).GetOrCreateNestedMap(parentMap, source.Key, emptyValueStrategy);
 
-    public Columns GetDefaultColumns()
-        => MemberMapper.GetDefaultColumns(Member);
+    public override Columns GetDefaultColumns() => MemberMapper.GetDefaultColumns(Member);
 
-    public Columns? GetDefaultCellsColumns() => MemberMapper.GetDefaultCellsColumns(Member);
+    public override Columns? GetDefaultCellsColumns() => MemberMapper.GetDefaultCellsColumns(Member);
 }
 
 [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
 [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-internal class MappedEnumerableIndexerExpression : IMappedExpression
+internal sealed class MappedEnumerableIndexerExpression : MappedAccessExpression
 {
-    public Type Type { get; }
-    public Type MappedElementType { get; }
     public int Index { get; }
-    public Type MappedValueType => MappedElementType;
-    public object Context => Index;
+
+    public override Type MappedValueType { get; }
+
+    public override object Key => Index;
 
     public MappedEnumerableIndexerExpression(BinaryExpression expression, Type? mappedElementType)
     {
         Type = expression.Left.Type!;
-        MappedElementType = mappedElementType ?? Type.GetElementType()!;
+        MappedValueType = mappedElementType ?? Type.GetElementType()!;
 
         var indexExpression = ExpressionAutoMapper.SkipConvert(expression.Right, out var _);
         if (indexExpression is not ConstantExpression constantExpression)
@@ -359,7 +365,7 @@ internal class MappedEnumerableIndexerExpression : IMappedExpression
         var indexExpression = ExpressionAutoMapper.SkipConvert(expression.Arguments[0], out var _);
 
         Type = expression.Object!.Type;
-        MappedElementType = mappedElementType ?? Type.GetElementTypeOrEnumerableType()!;
+        MappedValueType = mappedElementType ?? Type.GetElementTypeOrEnumerableType()!;
 
         if (indexExpression is not ConstantExpression constantExpression)
         {
@@ -373,29 +379,26 @@ internal class MappedEnumerableIndexerExpression : IMappedExpression
         Index = (int)constantExpression.Value!;
     }
 
-    public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
-        => TypeRule.For(Type).Collection!.GetOrCreateIndexerMap(currentMap, Type, currentExpression.Context);
+    public override IMap GetOrCreateSourceMap(IMap parentMap, MappedAccessExpression source, EmptyValueStrategy emptyValueStrategy)
+        => TypeRule.For(Type).Collection!.GetOrCreateIndexerMap(parentMap, Type, source.Key);
 
-    public Columns GetDefaultColumns()
-        => new ColumnIndexColumns(Index);
-
-    public Columns? GetDefaultCellsColumns() => null;
+    public override Columns GetDefaultColumns() => new ColumnIndexColumns(Index);
 }
 
 [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
 [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-internal class MappedMultidimensionalArrayIndexerExpression : IMappedExpression
+internal sealed class MappedMultidimensionalArrayIndexerExpression : MappedAccessExpression
 {
-    public Type Type { get; }
-    public Type MappedElementType { get; }
     public int[] Indices { get; }
-    public Type MappedValueType => MappedElementType;
-    public object Context => Indices;
+
+    public override Type MappedValueType { get; }
+
+    public override object Key => Indices;
 
     public MappedMultidimensionalArrayIndexerExpression(MethodCallExpression expression, Type? mappedElementType)
     {
         Type = expression.Object!.Type;
-        MappedElementType = mappedElementType ?? Type.GetElementType()!;
+        MappedValueType = mappedElementType ?? Type.GetElementType()!;
 
         var arguments = expression.Arguments;
         Indices = new int[arguments.Count];
@@ -415,24 +418,19 @@ internal class MappedMultidimensionalArrayIndexerExpression : IMappedExpression
         }
     }
 
-    public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
-        => TypeRule.For(Type).Collection!.GetOrCreateMultidimensionalIndexerMap(currentMap, currentExpression.Context);
+    public override IMap GetOrCreateSourceMap(IMap parentMap, MappedAccessExpression source, EmptyValueStrategy emptyValueStrategy)
+        => TypeRule.For(Type).Collection!.GetOrCreateMultidimensionalIndexerMap(parentMap, source.Key);
 
-    public Columns GetDefaultColumns()
-        => AutoMapper.s_firstColumn;
-
-    public Columns? GetDefaultCellsColumns() => null;
+    public override Columns GetDefaultColumns() => AutoMapper.s_firstColumn;
 }
 
 [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
 [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-internal class MappedDictionaryIndexerExpression : IMappedExpression
+internal sealed class MappedDictionaryIndexerExpression : MappedAccessExpression
 {
-    public Type Type { get; }
-    public Type ValueType { get; }
-    public object Key { get; }
-    public Type MappedValueType => ValueType;
-    public object Context => Key;
+    public override object Key { get; }
+
+    public override Type MappedValueType { get; }
 
     public MappedDictionaryIndexerExpression(MethodCallExpression expression, Type valueType)
     {
@@ -449,15 +447,15 @@ internal class MappedDictionaryIndexerExpression : IMappedExpression
         Type = expression.Object!.Type;
         DictionaryRule.TryGetKeyValueTypes(Type, out _, out var actualValueType);
 
-        ValueType = valueType ?? actualValueType!;
+        MappedValueType = valueType ?? actualValueType!;
 
         Key = constantExpression.Value!;
     }
 
-    public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
-        => TypeRule.For(Type).Dictionary!.GetOrCreateIndexerMap(currentMap, Type, currentExpression.Context);
+    public override IMap GetOrCreateSourceMap(IMap parentMap, MappedAccessExpression source, EmptyValueStrategy emptyValueStrategy)
+        => TypeRule.For(Type).Dictionary!.GetOrCreateIndexerMap(parentMap, Type, source.Key);
 
-    public Columns GetDefaultColumns()
+    public override Columns GetDefaultColumns()
     {
         if (Key is string keyString)
         {
@@ -475,6 +473,4 @@ internal class MappedDictionaryIndexerExpression : IMappedExpression
 
         return new ColumnNameColumns(Key.ToString()!);
     }
-
-    public Columns? GetDefaultCellsColumns() => null;
 }

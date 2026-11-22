@@ -182,7 +182,7 @@ internal sealed class DictionaryRule<TKey, TValue> : DictionaryRule where TKey :
         if (dictionaryType.IsInterface)
         {
             // Create a dictionary, and assign it to the member.
-            return typeof(Dictionary<TKey, TValue>).IsAssignableTo(dictionaryType) ? DictionaryBuilder<TKey, TValue>.ForDictionary() : null;
+            return dictionaryType.IsAssignableFrom(typeof(Dictionary<TKey, TValue>)) ? DictionaryBuilder<TKey, TValue>.ForDictionary() : null;
         }
 
         if (dictionaryType.GetConstructor([]) is not null)
