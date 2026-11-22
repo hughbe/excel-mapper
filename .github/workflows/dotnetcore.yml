@@ -30,6 +30,11 @@ jobs:
         files: ./TestResults/**/coverage.cobertura.xml
         # Don't fail the build if Codecov is unavailable or no token is configured.
         fail_ci_if_error: false
+    - name: Build the benchmarks against 3.0.3
+      # benchmarks/README.md: the Mapping benchmarks also build against the 3.x package, to compare versions.
+      run: dotnet build benchmarks --configuration Release
+      env:
+        EXCELMAPPER_VERSION: 3.0.3
     - name: Pack
       run: dotnet pack src/ExcelMapper.csproj --configuration Release --no-build
     - name: Upload a Build Artifact

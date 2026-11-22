@@ -9,7 +9,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - **Read messy sheets:** find a heading below titles and notes (`FindHeading`), read part of a sheet or several tables on one sheet (`Region`), and report every invalid cell in a file instead of stopping at the first (`ReadRowResults`).
 - **Map more types:** records and constructor-only types, row numbers, the columns no other member reads, and dates and times written as text in more formats.
 - **Extend it simply:** typed converters, transformers, fallbacks and column selectors replace the old low-level types.
-- **Faster:** a 10-member class maps with about 80% fewer allocations, invalid cells no longer throw and catch exceptions, and auto-mapping is about 5 times faster.
+- **Faster:** compared with 3.0.3, an auto-mapped 10-member class maps 4 times faster, and ExcelMapper's own allocations for it are 93% lower; invalid cells with a fallback map 9 times faster, as they no longer throw and catch exceptions; and auto-mapping a type is nearly 4 times faster. See the [benchmarks](benchmarks/README.md#40-compared-with-303).
 
 4.0 contains breaking changes. Most code compiles unchanged, but some behaviour changed: see [Migrating to 4.0](docs/migrating-to-4.0.md) for what to check when upgrading from 3.x.
 
@@ -38,6 +38,8 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Two helper types made public by accident are internal: `CallerArgumentExpressionAttribute` on the netstandard builds (a polyfill, which the compiler ignored) and `ExcelMapper.Utilities.StringComparerUtilities`. ([#167](https://github.com/hughbe/excel-mapper/pull/167))
 
 ### Added
+
+- The `Mapping` benchmarks cover auto-mapping, class maps, invalid values, typed numbers, collections, records, row results, typed converters and regions, and can run against an earlier version of the package to compare (`EXCELMAPPER_VERSION=3.0.3`). ([#173](https://github.com/hughbe/excel-mapper/pull/173))
 
 - The elements and values of collections (`WithElementMap`, `WithValueMap`) take the same value methods as a member's map, including converters and fallbacks for a nullable element's underlying type. `WithMapping` accepts a dictionary whose values derive from the member's type, such as a `Dictionary<string, string>` for a `string?` member. ([#170](https://github.com/hughbe/excel-mapper/pull/170))
 - The package includes XML documentation, so the API's documentation shows in IntelliSense. ([#167](https://github.com/hughbe/excel-mapper/pull/167))
