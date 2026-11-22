@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 
 namespace ExcelMapper.Tests;
 
@@ -963,7 +964,7 @@ public class ExcelSheetTests
         Assert.Equal(9, sheet.CurrentRowIndex);
 
         var row5 = sheet.ReadRow<BlankLinesClass>();
-        Assert.Equal(new DateTime(2025, 10, 25, 0, 0, 0).ToString(), row5.StringValue);
+        Assert.Equal(new DateTime(2025, 10, 25, 0, 0, 0).ToString(CultureInfo.InvariantCulture), row5.StringValue);
         Assert.Equal(4, row5.IntValue);
         Assert.Equal(999, sheet.CurrentRowIndex);
 

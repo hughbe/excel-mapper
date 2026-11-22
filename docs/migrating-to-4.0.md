@@ -5,16 +5,17 @@ ExcelMapper 4.0 fixes several long-standing bugs and makes mapping more predicta
 ## Checklist
 
 1. [`object` members now receive typed values](#object-members-receive-typed-values)
-2. [Fractional numbers can't be mapped to integers](#fractional-numbers-cant-be-mapped-to-integers)
-3. [`WithConverter` replaces the built-in conversion](#withconverter-replaces-the-built-in-conversion)
-4. [`ReadRow` reads the heading first](#readrow-reads-the-heading-first)
-5. [Error messages use cell addresses](#error-messages-use-cell-addresses)
-6. [Sheet names are case-insensitive](#sheet-names-are-case-insensitive)
-7. [Extension types](#extension-types)
-8. [Renamed types](#renamed-types)
-9. [Renamed and removed methods](#renamed-and-removed-methods)
-10. [Smaller changes](#smaller-changes)
-11. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
+2. [Text is read with the invariant culture](#text-is-read-with-the-invariant-culture)
+3. [Fractional numbers can't be mapped to integers](#fractional-numbers-cant-be-mapped-to-integers)
+4. [`WithConverter` replaces the built-in conversion](#withconverter-replaces-the-built-in-conversion)
+5. [`ReadRow` reads the heading first](#readrow-reads-the-heading-first)
+6. [Error messages use cell addresses](#error-messages-use-cell-addresses)
+7. [Sheet names are case-insensitive](#sheet-names-are-case-insensitive)
+8. [Extension types](#extension-types)
+9. [Renamed types](#renamed-types)
+10. [Renamed and removed methods](#renamed-and-removed-methods)
+11. [Smaller changes](#smaller-changes)
+12. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
 
 ## `object` members receive typed values
 
@@ -38,6 +39,25 @@ var text = Convert.ToString(row["Amount"], CultureInfo.InvariantCulture);
 ```
 
 To keep receiving text for a member, map it to `string`, or preserve formatting (`[ExcelPreserveFormatting]` or `.MakePreserveFormatting()`) to get the text as displayed in Excel. CSV files are unaffected: every CSV cell is text.
+
+## Text is read with the invariant culture
+
+**Who's affected:** apps that read text cells (every cell of a CSV file, and text cells in a workbook) with numbers or dates in a culture other than the invariant one, such as `1,5` or `15.03.2024`, and rely on the machine's culture to parse them; and apps that map number or date cells to `string` members and expect the machine's format.
+
+**Before:** text was parsed, and numbers and dates were converted to text, with the current culture of the thread reading the rows. The same file could give different values on different machines: on a machine set to German, `1.5` was read as fifteen.
+
+**Now:** the importer's `Culture` defaults to `CultureInfo.InvariantCulture`, so results are the same on every machine. Cells Excel stores as numbers and dates aren't parsed, so they're unaffected unless mapped to text.
+
+**What to do:** set the culture the file was written in:
+
+```csharp
+importer.Configuration.Culture = CultureInfo.GetCultureInfo("de-DE");
+
+// Or, to keep 3.x's behaviour, the machine's culture:
+importer.Configuration.Culture = CultureInfo.CurrentCulture;
+```
+
+A member can have its own culture with `.WithFormatProvider(...)` (see [Culture](types.md#culture)).
 
 ## Fractional numbers can't be mapped to integers
 

@@ -115,7 +115,7 @@ internal sealed class SheetView
     /// <summary>
     /// The importer's culture, if set (see <see cref="ExcelImporterConfiguration.Culture"/>).
     /// </summary>
-    public CultureInfo? Culture => Settings.Culture;
+    public CultureInfo Culture => Settings.Culture;
 
     private ReadSettings? _settings;
 

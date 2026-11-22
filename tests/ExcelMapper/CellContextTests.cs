@@ -17,7 +17,7 @@ public class CellContextTests
         Assert.Equal(1, context.ColumnIndex);
         Assert.Same(member, context.Member);
         Assert.Equal("B11", context.CellAddress);
-        Assert.Same(CultureInfo.CurrentCulture, context.FormatProvider);
+        Assert.Same(CultureInfo.InvariantCulture, context.FormatProvider);
     }
 
     [Fact]

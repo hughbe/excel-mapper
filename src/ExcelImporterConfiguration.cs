@@ -64,14 +64,26 @@ public class ExcelImporterConfiguration
 
     /// <summary>
     /// Gets or sets the culture used to map cells: to parse text into numbers, dates and times,
-    /// and to convert numbers and dates to text. When null (the default), the current culture of
-    /// the thread reading the rows is used. Set this (for example to
-    /// <see cref="CultureInfo.InvariantCulture"/>) so results don't depend on the machine's
-    /// settings. A format provider set on an individual member takes precedence. The culture is
-    /// given to the built-in conversions, not set as the thread's culture: converters get it from
-    /// <see cref="CellContext.FormatProvider"/>.
+    /// and to convert numbers and dates to text. Default is <see cref="CultureInfo.InvariantCulture"/>,
+    /// so results don't depend on the settings of the machine reading the file: "1.5" is one and a
+    /// half everywhere. Set it to the culture the file was written in, such as
+    /// <c>new CultureInfo("de-DE")</c> for "1,5", or to <see cref="CultureInfo.CurrentCulture"/>
+    /// for the machine's culture. A format provider set on an individual member takes precedence.
+    /// The culture is given to the built-in conversions, not set as the thread's culture:
+    /// converters get it from <see cref="CellContext.FormatProvider"/>.
     /// </summary>
-    public CultureInfo? Culture { get; set; }
+    /// <exception cref="ArgumentNullException">The value is null.</exception>
+    public CultureInfo Culture
+    {
+        get => _culture;
+        set
+        {
+            ThrowHelpers.ThrowIfNull(value);
+            _culture = value;
+        }
+    }
+
+    private CultureInfo _culture = CultureInfo.InvariantCulture;
 
 
     internal ExcelImporterConfiguration() { }

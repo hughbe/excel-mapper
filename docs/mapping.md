@@ -356,7 +356,7 @@ public class Order
 
 - **A converter replaces the built-in conversion** for the member's type, so it's used for every cell that isn't empty. Empty cells use the member's empty fallback.
 - **`CellValue`**: `Kind` (`Empty`, `Text`, `Number`, `Boolean`, `DateTime`, `TimeSpan` or `Other`), `Text`, `Number`, `Boolean`, `DateTime`, `TimeSpan` and `Value`. CSV cells are always text.
-- **`CellContext`**: `Sheet`, the `Heading` of the rows being read (a region's, when reading one), `RowIndex`, `ColumnIndex`, `CellAddress` (such as `"B11"`), the `Member` being mapped, and the `FormatProvider` to parse with (the importer's [culture](types.md#culture), if set). To report a cell as an error, throw `new ExcelMappingException(message, context)`: the message gives the cell's address and column.
+- **`CellContext`**: `Sheet`, the `Heading` of the rows being read (a region's, when reading one), `RowIndex`, `ColumnIndex`, `CellAddress` (such as `"B11"`), the `Member` being mapped, and the `FormatProvider` to parse with (the importer's [culture](types.md#culture)). To report a cell as an error, throw `new ExcelMappingException(message, context)`: the message gives the cell's address and column.
 - **`CellConversionResult<T>`**: `Success(value)`; `Invalid()`, `Invalid(exception)` or `Invalid(() => exception)`, which uses the invalid fallback; or `NotHandled`, which lets the next converter try. Several `[ExcelConverter]` attributes are tried in order, and if none converts the value, it's invalid.
 - **Converters are shared** between rows and threads, so they mustn't change their own state. `[ExcelConverter]` takes `ConstructorArguments` for converters with parameters.
 
