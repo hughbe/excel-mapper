@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
 
-namespace ExcelMapper;
+namespace ExcelMapper.Maps;
 
 /// <summary>
 /// A map that reads multiple cells of an excel sheet and maps the values of the cells to a

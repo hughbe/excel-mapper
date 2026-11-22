@@ -168,11 +168,11 @@ internal sealed class CollectionRule<TElement> : CollectionRule
     private static CollectionBuilder<TElement>? GetInterfaceBuilder(Type collectionType)
     {
         // Create a list or set, and assign it to the member.
-        if (typeof(List<TElement>).IsAssignableTo(collectionType))
+        if (collectionType.IsAssignableFrom(typeof(List<TElement>)))
         {
             return CollectionBuilder<TElement>.ForList();
         }
-        if (typeof(HashSet<TElement>).IsAssignableTo(collectionType))
+        if (collectionType.IsAssignableFrom(typeof(HashSet<TElement>)))
         {
             return CollectionBuilder<TElement>.ForHashSet();
         }

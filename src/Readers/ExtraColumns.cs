@@ -17,6 +17,7 @@ internal sealed class ExtraColumns : Columns
 
     public ExcelClassMap ClassMap { get; }
 
+    // Only collections and dictionaries read these columns, never a single value.
     public override int FindColumn(SheetView sheet) => throw new NotSupportedException();
 
     public override int[] FindColumns(SheetView sheet)
@@ -45,10 +46,6 @@ internal sealed class ExtraColumns : Columns
         {
             switch (cellMap)
             {
-                case IValueMap valueMap:
-                    AddUsedColumn(valueMap.Settings.Columns, sheet, usedColumns);
-                    break;
-
                 case ICellsMap { Settings.Columns: ExtraColumns }:
                     // Another extra columns member: it doesn't claim any columns.
                     break;
@@ -66,6 +63,11 @@ internal sealed class ExtraColumns : Columns
                         // The member's columns can't be found, so it doesn't read any of the sheet's columns.
                     }
 
+                    break;
+
+                default:
+                    // A single value.
+                    AddUsedColumn(cellMap.Settings.Columns, sheet, usedColumns);
                     break;
             }
         });

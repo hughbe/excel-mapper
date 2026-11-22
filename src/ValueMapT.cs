@@ -11,7 +11,7 @@ namespace ExcelMapper;
 /// Maps a member to an Excel column of type T with a one-to-one relationship.
 /// </summary>
 /// <typeparam name="T">The type of the member.</typeparam>
-public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
+public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IColumnsMap, IBindableMap
 {
     internal ValueMap(Columns columns)
     {

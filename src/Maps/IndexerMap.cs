@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelDataReader;
 
-namespace ExcelMapper;
+namespace ExcelMapper.Maps;
 
 /// <summary>
 /// A collection, dictionary or array whose elements are mapped one by one, such as

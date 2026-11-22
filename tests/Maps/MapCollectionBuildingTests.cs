@@ -110,6 +110,58 @@ public class MapCollectionBuildingTests
     }
 
     [Fact]
+    public void ReadRows_StructCollectionsWithAdd_AddEveryValue()
+    {
+        // Add is called on the struct inside its box, so the values aren't added to a copy.
+        using var importer = Helpers.GetCsvImporter(Csv);
+        var rows = importer.ReadSheet().ReadRows<StructCollections>().ToArray();
+
+        Assert.Equal([[1, 2, 3], [4, 5, 6], [7, 8, 9]], rows.Select(r => r.List.Values.ToArray()));
+        Assert.Equal([1, 4, 7], rows.Select(r => r.Dictionary.Values["A"]));
+    }
+
+    public class StructCollections
+    {
+        [ExcelColumnNames("A", "B", "C")]
+        public AddOnlyStruct List { get; set; }
+
+        [ExcelColumnNames("A", "B", "C")]
+        public AddOnlyDictionaryStruct Dictionary { get; set; }
+    }
+
+    public struct AddOnlyStruct : IEnumerable<int>
+    {
+        public AddOnlyStruct()
+        {
+        }
+
+        public List<int> Values { get; } = [];
+
+        public readonly void Add(int value) => Values.Add(value);
+
+        public readonly IEnumerator<int> GetEnumerator() => Values.GetEnumerator();
+
+        readonly System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    public struct AddOnlyDictionaryStruct : IEnumerable<KeyValuePair<string, int>>
+    {
+        private Dictionary<string, int>? _values;
+
+        public AddOnlyDictionaryStruct()
+        {
+        }
+
+        public readonly Dictionary<string, int> Values => _values ?? [];
+
+        public void Add(string key, int value) => (_values ??= []).Add(key, value);
+
+        public readonly IEnumerator<KeyValuePair<string, int>> GetEnumerator() => Values.GetEnumerator();
+
+        readonly System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    [Fact]
     public void ReadRows_ClassMapSharedAcrossThreads_ReturnsExpected()
     {
         // Builders keep no state, and collections created from a copy of their elements gather
