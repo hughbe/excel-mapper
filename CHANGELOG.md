@@ -39,6 +39,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Added
 
+- `ExcelClassMap<T>.AutoMap()` maps every member auto-mapping would, except members already mapped, so a class map can start from auto-mapping and change only some members: `RegisterClassMap<T>(c => { c.AutoMap(); c.Map(e => e.Name).WithColumnName("Full Name"); })`. It replaces 3.x's public `AutoMapper.TryCreateClassMap`. ([#177](https://github.com/hughbe/excel-mapper/pull/177))
 - The `Mapping` benchmarks cover auto-mapping, class maps, invalid values, typed numbers, collections, records, row results, typed converters and regions, and can run against an earlier version of the package to compare (`EXCELMAPPER_VERSION=3.0.3`). ([#173](https://github.com/hughbe/excel-mapper/pull/173))
 
 - The elements and values of collections (`WithElementMap`, `WithValueMap`) take the same value methods as a member's map, including converters and fallbacks for a nullable element's underlying type. `WithMapping` accepts a dictionary whose values derive from the member's type, such as a `Dictionary<string, string>` for a `string?` member. ([#170](https://github.com/hughbe/excel-mapper/pull/170))
