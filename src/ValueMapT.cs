@@ -28,8 +28,8 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
         get => _columns;
         set
         {
+            ThrowIfFrozen();
             _columns = value;
-            ReaderVersion++;
         }
     }
 
@@ -40,15 +40,38 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
     }
 
     /// <inheritdoc />
-    public bool Optional { get; set; }
+    public bool Optional
+    {
+        get => _optional;
+        set
+        {
+            ThrowIfFrozen();
+            _optional = value;
+        }
+    }
+
+    private bool _optional;
 
     /// <inheritdoc />
-    public bool PreserveFormatting { get; set; }
+    public bool PreserveFormatting
+    {
+        get => _preserveFormatting;
+        set
+        {
+            ThrowIfFrozen();
+            _preserveFormatting = value;
+        }
+    }
+
+    private bool _preserveFormatting;
 
     /// <summary>
     /// Gets the map's value pipeline: the map itself, which converts the cell's value.
     /// </summary>
     ValuePipeline IColumnsMap.Pipeline => this;
+
+    /// <inheritdoc />
+    void IMap.Freeze() => Freeze();
 
     /// <inheritdoc />
     bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
@@ -63,11 +86,6 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
         return false;
     }
 
-    /// <summary>
-    /// Incremented when <see cref="Columns"/> changes, so that the column found for a sheet (see
-    /// <see cref="BoundValueMember{T}"/>) is found again.
-    /// </summary>
-    internal int ReaderVersion { get; private set; }
 
     /// <summary>
     /// Finds the member's column in the sheet, or -1 if the sheet doesn't have it.

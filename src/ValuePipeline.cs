@@ -21,7 +21,24 @@ public abstract class ValuePipeline
     /// </summary>
     internal IList<ICellTransformer> Transformers { get; } = new NonNullCollection<ICellTransformer>();
 
-    private protected int TransformersVersion => ((NonNullCollection<ICellTransformer>)Transformers).Version;
+    /// <summary>
+    /// Gets whether the pipeline has been used to read rows, so it can't be changed.
+    /// </summary>
+    internal bool IsFrozen { get; private set; }
+
+    /// <summary>
+    /// Throws if the pipeline has been used to read rows.
+    /// </summary>
+    internal void ThrowIfFrozen() => ThrowHelpers.ThrowIfFrozen(IsFrozen);
+
+    /// <summary>
+    /// Stops the pipeline changing, the first time rows are read with it (see <see cref="IMap.Freeze"/>).
+    /// </summary>
+    internal virtual void Freeze()
+    {
+        IsFrozen = true;
+        ((NonNullCollection<ICellTransformer>)Transformers).Freeze();
+    }
 
     /// <summary>
     /// Gets the mappers, for code that configures them without knowing the pipeline's type (such

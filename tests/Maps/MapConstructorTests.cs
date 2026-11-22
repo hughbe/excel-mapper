@@ -257,7 +257,7 @@ public class MapConstructorTests
     }
 
     [Fact]
-    public void Properties_ChangedAfterReading_UsesUpdatedMembers()
+    public void Properties_ChangedAfterReading_ThrowsInvalidOperationException()
     {
         using var importer = Helpers.GetCsvImporter(PeopleCsv);
         var map = new ExcelClassMap<MultipleConstructorsClass>();
@@ -269,11 +269,11 @@ public class MapConstructorTests
         var first = sheet.ReadRow<MultipleConstructorsClass>();
         Assert.Equal(-1, first.Age);
 
-        // Adding a member changes which constructor is used.
-        map.Map(p => p.Age);
+        // The class map is frozen, so the constructor chosen for it stays the same.
+        Assert.Throws<InvalidOperationException>(() => map.Map(p => p.Age));
         var second = sheet.ReadRow<MultipleConstructorsClass>();
         Assert.Equal("Bob", second.Name);
-        Assert.Equal(25, second.Age);
+        Assert.Equal(-1, second.Age);
     }
 
     public record AttributedRecord(

@@ -10,8 +10,6 @@ namespace ExcelMapper.Abstractions;
 /// </summary>
 internal interface ICellsMap : IColumnsMap
 {
-    int ReaderVersion { get; }
-
     ICellsReader? GetCellsReader(ExcelSheet sheet);
 
     bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out object? value);

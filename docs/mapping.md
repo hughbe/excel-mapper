@@ -83,6 +83,8 @@ importer.Configuration.RegisterClassMap<Employee>(c =>
 
 Each fluent method returns the map, so calls chain in any order. Every method and attribute is listed in the [API reference](api.md).
 
+Configure a class map before reading with it. The first time rows are read with a class map (or `ValidateHeading` or `FindHeading` uses it), it's frozen: changing it, or the map of one of its members, throws an `InvalidOperationException`. This is what lets one class map be shared between importers and threads.
+
 ## Records and constructors
 
 Types without a public parameterless constructor, such as positional records and classes with get-only properties, are created through a constructor:

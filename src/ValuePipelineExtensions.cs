@@ -574,6 +574,8 @@ public static class ValuePipelineExtensions
     // The callers are typed overloads, so the mapper is always one for the pipeline's type.
     private static TCellMapper GetOrAddMapper<TCellMapper>(this ValuePipeline map) where TCellMapper : class, new()
     {
+        // The mapper found is changed in place, so check the pipeline can still change.
+        map.ThrowIfFrozen();
         var mapper = map.MapperObjects
             .OfType<TCellMapper>()
             .FirstOrDefault();

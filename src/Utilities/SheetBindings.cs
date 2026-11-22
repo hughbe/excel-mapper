@@ -73,42 +73,33 @@ internal sealed class SheetBindings(ExcelSheet sheet)
         return columns.FindColumns(sheet) is { } found ? new ColumnIndicesReader(found) : null;
     }
 
-    private sealed class BoundClassMap(int version, BoundMember[] members)
-    {
-        public int Version { get; } = version;
-
-        public BoundMember[] Members { get; } = members;
-    }
-
     // Class maps bound to the sheet. Rows are usually mapped with one class map at a time, so the
-    // last one is kept separately.
-    private Dictionary<ExcelClassMap, BoundClassMap>? _boundClassMaps;
+    // last one is kept separately. Class maps are frozen before rows are read, so their members
+    // never need binding again.
+    private Dictionary<ExcelClassMap, BoundMember[]>? _boundClassMaps;
     private ExcelClassMap? _lastBoundClassMap;
-    private BoundClassMap? _lastBound;
+    private BoundMember[]? _lastBound;
 
     /// <summary>
-    /// Gets the members of a class map bound to the sheet, binding them again if the class map has
-    /// changed.
+    /// Gets the members of a class map bound to the sheet, binding them the first time.
     /// </summary>
     public BoundMember[] GetBoundMembers(ExcelClassMap classMap)
     {
-        var bound = ReferenceEquals(_lastBoundClassMap, classMap) ? _lastBound : null;
-        if (bound is null)
+        if (ReferenceEquals(_lastBoundClassMap, classMap))
         {
-            _boundClassMaps ??= [];
-            _boundClassMaps.TryGetValue(classMap, out bound);
+            return _lastBound!;
         }
 
-        var version = classMap.PropertiesVersion;
-        if (bound is null || bound.Version != version)
+        _boundClassMaps ??= [];
+        if (!_boundClassMaps.TryGetValue(classMap, out var bound))
         {
-            bound = new BoundClassMap(version, Bind(classMap));
-            _boundClassMaps![classMap] = bound;
+            bound = Bind(classMap);
+            _boundClassMaps[classMap] = bound;
         }
 
         _lastBoundClassMap = classMap;
         _lastBound = bound;
-        return bound.Members;
+        return bound;
     }
 
     private BoundMember[] Bind(ExcelClassMap classMap)

@@ -9,7 +9,7 @@ namespace ExcelMapper.Tests;
 public class BoundMemberTests
 {
     [Fact]
-    public void ReadRows_ReaderFactoryChangedAfterReading_UsesNewColumn()
+    public void ReadRows_ColumnChangedAfterReading_ThrowsInvalidOperationException()
     {
         using var importer = Helpers.GetCsvImporter("A,B\n1,x\n2,y\n");
         var map = new ExcelClassMap<Row>();
@@ -18,12 +18,12 @@ public class BoundMemberTests
         var sheet = importer.ReadSheet();
         Assert.Equal("1", sheet.ReadRow<Row>().Name);
 
-        nameMap.WithColumnName("B");
-        Assert.Equal("y", sheet.ReadRow<Row>().Name);
+        Assert.Throws<InvalidOperationException>(() => nameMap.WithColumnName("B"));
+        Assert.Equal("2", sheet.ReadRow<Row>().Name);
     }
 
     [Fact]
-    public void ReadRows_PropertyAddedAfterReading_MapsIt()
+    public void ReadRows_PropertyAddedAfterReading_ThrowsInvalidOperationException()
     {
         using var importer = Helpers.GetCsvImporter("Name,Age\na,1\nb,2\n");
         var map = new ExcelClassMap<Row>();
@@ -33,10 +33,10 @@ public class BoundMemberTests
         var first = sheet.ReadRow<Row>();
         Assert.Equal(0, first.Age);
 
-        map.Map(r => r.Age);
+        Assert.Throws<InvalidOperationException>(() => map.Map(r => r.Age));
         var second = sheet.ReadRow<Row>();
         Assert.Equal("b", second.Name);
-        Assert.Equal(2, second.Age);
+        Assert.Equal(0, second.Age);
     }
 
     [Fact]
@@ -309,7 +309,7 @@ public class BoundMemberTests
     }
 
     [Fact]
-    public void ReadRows_CollectionReaderFactoryChangedAfterReading_UsesNewColumns()
+    public void ReadRows_CollectionColumnsChangedAfterReading_ThrowsInvalidOperationException()
     {
         using var importer = Helpers.GetCsvImporter("A,B,C\n1,2,3\n4,5,6\n");
         var map = new ExcelClassMap<CollectionRow>();
@@ -318,8 +318,8 @@ public class BoundMemberTests
         var sheet = importer.ReadSheet();
         Assert.Equal([1, 2], sheet.ReadRow<CollectionRow>().Values);
 
-        valuesMap.WithColumnNames("B", "C");
-        Assert.Equal([5, 6], sheet.ReadRow<CollectionRow>().Values);
+        Assert.Throws<InvalidOperationException>(() => valuesMap.WithColumnNames("B", "C"));
+        Assert.Equal([4, 5], sheet.ReadRow<CollectionRow>().Values);
     }
 
     public class CollectionRow
@@ -328,7 +328,7 @@ public class BoundMemberTests
     }
 
     [Fact]
-    public void ReadRows_DictionaryReaderFactoryChangedAfterReading_UsesNewColumns()
+    public void ReadRows_DictionaryColumnsChangedAfterReading_ThrowsInvalidOperationException()
     {
         using var importer = Helpers.GetCsvImporter("A,B,C\n1,2,3\n4,5,6\n");
         var map = new ExcelClassMap<DictionaryRow>();
@@ -337,8 +337,8 @@ public class BoundMemberTests
         var sheet = importer.ReadSheet();
         Assert.Equal(new Dictionary<string, int> { ["A"] = 1 }, sheet.ReadRow<DictionaryRow>().Values);
 
-        valuesMap.WithColumnNames("C");
-        Assert.Equal(new Dictionary<string, int> { ["C"] = 6 }, sheet.ReadRow<DictionaryRow>().Values);
+        Assert.Throws<InvalidOperationException>(() => valuesMap.WithColumnNames("C"));
+        Assert.Equal(new Dictionary<string, int> { ["A"] = 4 }, sheet.ReadRow<DictionaryRow>().Values);
     }
 
     public class DictionaryRow

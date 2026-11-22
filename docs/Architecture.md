@@ -74,7 +74,9 @@ Which binding a member gets depends on its map's internal interface: `IColumnsMa
 - `BoundCellsMember` (collections and dictionaries): keeps the cells reader. The collection is built by the map's `CollectionBuilder<T>` or `DictionaryBuilder<TKey, TValue>`, chosen once for the member's type by its `CollectionRule`/`DictionaryRule`. Builders hold no state (the collection being built is a local), so one builder serves every sheet and thread without a lock. Collections created from a copy of their elements, such as immutable and frozen ones, gather them in a list each thread reuses.
 - `BoundMapMember` (everything else, such as nested class maps, indexers and row numbers): maps through `IMap.TryGetValue`.
 
-Bindings belong to the sheet, so a class map shared between importers or threads holds no per-sheet state. They're rebuilt if the class map's members or a map's columns change (both have version numbers).
+Bindings belong to the sheet, so a class map shared between importers or threads holds no per-sheet state.
+
+A class map is frozen (`IMap.Freeze`) the first time it's used with a sheet (`ExcelSheet.GetOrCreateClassMap`), with every map under it: its members, nested class maps, indexer maps, and the pipelines of values and elements. Changing a frozen map throws an `InvalidOperationException` (`ThrowHelpers.ThrowIfFrozen`, and `NonNullCollection<T>` for the lists of members, mappers and transformers). So what's worked out from a map never goes stale and nothing checks for changes: a pipeline's plan is made when it's frozen, a class map's construction plan and a sheet's bindings are made once, and bound members find their column or cells reader once.
 
 ### Creating objects
 

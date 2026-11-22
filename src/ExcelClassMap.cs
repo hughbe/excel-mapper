@@ -38,7 +38,44 @@ public class ExcelClassMap : IParentMap
     [DynamicallyAccessedMembers(TrimmingConstants.MappedType)]
     public Type Type { get; }
 
-    internal IMap? _valueMap;
+    /// <summary>
+    /// Gets or sets the map of a class map read as a single value (<c>Map(p => p)</c>).
+    /// </summary>
+    internal IMap? SingleValueMap
+    {
+        get => _valueMap;
+        set
+        {
+            ThrowHelpers.ThrowIfFrozen(_frozen);
+            _valueMap = value;
+        }
+    }
+
+    private IMap? _valueMap;
+
+    private bool _frozen;
+
+    /// <inheritdoc />
+    void IMap.Freeze() => Freeze();
+
+    /// <summary>
+    /// Stops the class map and its members' maps changing, the first time rows are read with it.
+    /// </summary>
+    internal void Freeze()
+    {
+        if (_frozen)
+        {
+            return;
+        }
+
+        _frozen = true;
+        ((PropertyMapCollection)Properties).Freeze();
+        _valueMap?.Freeze();
+        foreach (var property in Properties)
+        {
+            property.Map.Freeze();
+        }
+    }
 
     IEnumerable<KeyValuePair<object?, IMap>> IParentMap.Children
     {
@@ -144,11 +181,6 @@ public class ExcelClassMap : IParentMap
 
         return TryCreateUsingConstructor(plan, members, sheet, rowIndex, reader, errors, out result);
     }
-
-    /// <summary>
-    /// Incremented when <see cref="Properties"/> changes, so that members bound to a sheet are bound again.
-    /// </summary>
-    internal int PropertiesVersion => ((PropertyMapCollection)Properties).Version;
 
     private static void MapBoundMembers(BoundMember[] members, object instance, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
     {
@@ -268,20 +300,10 @@ public class ExcelClassMap : IParentMap
         return arguments;
     }
 
-    private ConstructionPlan GetConstructionPlan()
-    {
-        var properties = (PropertyMapCollection)Properties;
-        var plan = _constructionPlan;
-        if (plan is null || plan.Version != properties.Version)
-        {
-            plan = CreateConstructionPlan(properties.Version);
-            _constructionPlan = plan;
-        }
+    // Made when the first row is read, after the class map is frozen.
+    private ConstructionPlan GetConstructionPlan() => _constructionPlan ??= CreateConstructionPlan();
 
-        return plan;
-    }
-
-    private ConstructionPlan CreateConstructionPlan(int version)
+    private ConstructionPlan CreateConstructionPlan()
     {
         var hasReadOnlyMember = false;
         foreach (var property in Properties)
@@ -297,7 +319,7 @@ public class ExcelClassMap : IParentMap
         // set through a constructor.
         if (!hasReadOnlyMember && ConstructorUtilities.HasParameterlessConstructor(Type))
         {
-            return new ConstructionPlan(version, null, [], []) { CreateInstance = CompiledAccessors.GetParameterlessConstructor(Type) };
+            return new ConstructionPlan(null, [], []) { CreateInstance = CompiledAccessors.GetParameterlessConstructor(Type) };
         }
 
         if (Type.IsInterface || Type.IsAbstract)
@@ -356,17 +378,15 @@ public class ExcelClassMap : IParentMap
         }
 
         var createFromMembers = CompiledAccessors.GetConstructor(constructor, boundArguments);
-        return new ConstructionPlan(version, constructor, propertyParameterIndices, defaultArguments)
+        return new ConstructionPlan(constructor, propertyParameterIndices, defaultArguments)
         {
             CreateFromMembers = createFromMembers,
             InvokeConstructor = createFromMembers is null ? CompiledAccessors.GetConstructor(constructor) : null,
         };
     }
 
-    private sealed class ConstructionPlan(int version, ConstructorInfo? constructor, int[] propertyParameterIndices, object?[] defaultArguments)
+    private sealed class ConstructionPlan(ConstructorInfo? constructor, int[] propertyParameterIndices, object?[] defaultArguments)
     {
-        public int Version { get; } = version;
-
         /// <summary>
         /// The constructor to call, or null to use the parameterless constructor.
         /// </summary>
@@ -397,8 +417,7 @@ public class ExcelClassMap : IParentMap
     }
 
     /// <summary>
-    /// A collection of property maps. Its <see cref="NonNullCollection{T}.Version"/> tells the
-    /// construction plan and bound members to rebuild when it changes.
+    /// A collection of property maps, which can't change once the class map is frozen.
     /// </summary>
     private sealed class PropertyMapCollection : NonNullCollection<ExcelPropertyMap>
     {

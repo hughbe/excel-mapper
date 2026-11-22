@@ -20,4 +20,11 @@ internal interface IMap
     /// <param name="value">When this method returns true, contains the mapped object. When false, contains null.</param>
     /// <returns>True if the mapping succeeded and a value was produced; false if the mapping failed or no value could be produced (e.g., optional column not found).</returns>
     bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value);
+
+    /// <summary>
+    /// Stops the map and the maps under it changing, the first time rows are read with it: what's
+    /// worked out from a map (its plans and its bindings to sheets) is then never out of date.
+    /// Changing a frozen map throws an <see cref="InvalidOperationException"/>.
+    /// </summary>
+    void Freeze();
 }

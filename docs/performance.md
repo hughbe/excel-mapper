@@ -55,7 +55,7 @@ Parallel.ForEach(paths, path =>
 
 To process one file's rows in parallel, read them on one thread and hand them out, for example with `Parallel.ForEach(sheet.ReadRows<Employee>(), Process)`. `Parallel.ForEach` takes rows from the enumerator one at a time, so the sheet is only read by one thread. Don't call `ReadRow` or `ReadRows` on the same sheet from several threads yourself.
 
-**Class maps can be shared.** A class map can be registered in many importers, including importers used on different threads at the same time. Maps don't keep any state for the sheets they read, or keep them alive, so one shared map is safe in a long-running service:
+**Class maps can be shared.** A class map can be registered in many importers, including importers used on different threads at the same time. A class map can't change once rows have been read with it, and maps don't keep any state for the sheets they read, or keep them alive, so one shared map is safe in a long-running service:
 
 ```csharp
 private static readonly EmployeeMap s_employeeMap = new();

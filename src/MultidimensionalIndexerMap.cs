@@ -33,8 +33,26 @@ internal class MultidimensionalIndexerMap<TValue> : IParentMap
 
     void IParentMap.SetChild(object key, IMap map)
     {
+        ThrowHelpers.ThrowIfFrozen(_frozen);
         var indices = (int[])key;
         Values[FindKey(indices) ?? indices] = map;
+    }
+
+    private bool _frozen;
+
+    /// <inheritdoc />
+    void IMap.Freeze()
+    {
+        if (_frozen)
+        {
+            return;
+        }
+
+        _frozen = true;
+        foreach (var map in Values.Values)
+        {
+            map.Freeze();
+        }
     }
 
     // Arrays don't implement equality, so the key is found by its indices.
