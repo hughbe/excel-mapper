@@ -94,7 +94,7 @@ public abstract class ValuePipeline<T> : ValuePipeline
     /// be replaced and an invalid value are kept until a later result replaces them), then the
     /// invalid fallback.
     /// </summary>
-    internal T Map(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting, MemberInfo? member)
+    internal T Map(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting, MemberInfo? member, List<ExcelMappingException>? errors)
     {
         var plan = GetPlan();
 
@@ -107,7 +107,7 @@ public abstract class ValuePipeline<T> : ValuePipeline
 
         if (plan.EmptyFallback is { } emptyFallback && readResult.IsEmpty())
         {
-            return emptyFallback.Fallback(new CellValue(readResult), new CellContext(sheet, rowIndex, readResult.ColumnIndex, member), null);
+            return emptyFallback.Fallback(new CellValue(readResult), new CellContext(sheet, rowIndex, readResult.ColumnIndex, member, errors), null);
         }
 
         var state = CellConversion.NotHandled;
@@ -163,7 +163,7 @@ public abstract class ValuePipeline<T> : ValuePipeline
                     ? invalidMapper.CreateException(readResult)
                     : CellConversionResult<T>.CreateException(invalidError)
                 : null;
-            return invalidFallback.Fallback(new CellValue(readResult), new CellContext(sheet, rowIndex, readResult.ColumnIndex, member), exception);
+            return invalidFallback.Fallback(new CellValue(readResult), new CellContext(sheet, rowIndex, readResult.ColumnIndex, member, errors), exception);
         }
 
         return CastValue<T>(null, sheet, rowIndex, readResult.ColumnIndex, member)!;

@@ -25,7 +25,27 @@ public readonly struct CellContext
         RowIndex = rowIndex;
         ColumnIndex = columnIndex;
         Member = member;
+        Errors = null;
     }
+
+    /// <summary>
+    /// Creates the context of a cell being mapped, with the list errors are reported to when rows
+    /// are read with <see cref="ExcelSheet.ReadRowResults{T}"/>.
+    /// </summary>
+    internal CellContext(ExcelSheet sheet, int rowIndex, int columnIndex, MemberInfo? member, List<ExcelMappingException>? errors)
+    {
+        _readingSheet = sheet;
+        RowIndex = rowIndex;
+        ColumnIndex = columnIndex;
+        Member = member;
+        Errors = errors;
+    }
+
+    /// <summary>
+    /// Gets the list errors are added to instead of being thrown, when rows are read with
+    /// <see cref="ExcelSheet.ReadRowResults{T}"/>; otherwise null.
+    /// </summary>
+    internal List<ExcelMappingException>? Errors { get; }
 
     /// <summary>
     /// Gets the sheet being read. When reading a region, this is the sheet the region was created

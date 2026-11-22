@@ -114,7 +114,7 @@ Every stage is typed, so values are converted as `T` from the cell to the member
 
 - **`ExcelMappingException`** reports the cell (`CellAddress`, `ColumnName`, `Member`, one-based row in the message) and wraps the converter's exception.
 - **Exceptions are created only when they're used.** A mapper reports an invalid cell without an exception, and the pipeline asks it for one (`ICellMapper<T>.CreateException`) only if the fallback uses it. A converter can return `CellConversionResult<T>.Invalid(() => exception)`. Fixed-value fallbacks don't use the exception, so an invalid cell with a fallback doesn't create one.
-- **`ReadRowResults<T>`** sets `ExcelSheet.CollectedErrors` while it maps a row: errors are added to it rather than thrown, so every invalid cell in the row is reported, along with data-annotation failures (`ValidateDataAnnotations`). A member whose value had an error isn't set, so it keeps its initial value.
+- **`ReadRowResults<T>`** passes a list of errors down while it maps a row (through `IMap.TryGetValue`, the bound members, `ValuePipeline<T>.Map` and the fallbacks' `CellContext`): errors are added to it rather than thrown, so every invalid cell in the row is reported, along with data-annotation failures (`ValidateDataAnnotations`). A member whose value had an error isn't set, so it keeps its initial value.
 
 ## Trimming
 

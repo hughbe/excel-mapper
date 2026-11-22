@@ -38,14 +38,14 @@ internal class MultidimensionalIndexerMap<TValue> : IMultidimensionalIndexerMap
 
     /// <inheritdoc/>
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "The constructor requires dynamic code.")]
-    public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
+    public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
         var array = Array.CreateInstance(typeof(TValue), GetLengths());
         foreach (var map in Values)
         {
-            if (map.Value.TryGetValue(sheet, rowIndex, reader, member, out var elementValue))
+            if (map.Value.TryGetValue(sheet, rowIndex, reader, member, errors, out var elementValue))
             {
                 array.SetValue((TValue)elementValue, map.Key);
             }

@@ -120,7 +120,7 @@ internal sealed class BoundMapMember(ExcelPropertyMap property) : BoundMember
     public override bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out object? value)
     {
         var errorCount = errors?.Count ?? 0;
-        if (property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, out value) &&
+        if (property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, errors, out value) &&
             (errors is null || errors.Count == errorCount))
         {
             return true;
@@ -141,7 +141,7 @@ internal interface ICellsMap : IMap
 
     ICellsReader? GetCellsReader(ExcelSheet sheet);
 
-    bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value);
+    bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out object? value);
 }
 
 /// <summary>
@@ -172,7 +172,7 @@ internal sealed class BoundCellsMember(ICellsMap map, ExcelPropertyMap property)
         }
 
         var errorCount = errors?.Count ?? 0;
-        if (map.TryGetValue(_cellsReader, sheet, rowIndex, reader, property.Member, out value) &&
+        if (map.TryGetValue(_cellsReader, sheet, rowIndex, reader, property.Member, errors, out value) &&
             (errors is null || errors.Count == errorCount))
         {
             return true;
@@ -228,7 +228,7 @@ internal sealed class BoundValueMember<T> : BoundMember
         }
 
         var errorCount = errors?.Count ?? 0;
-        var found = _map.TryGetValue(_columnIndex, sheet, rowIndex, reader, _member, out value);
+        var found = _map.TryGetValue(_columnIndex, sheet, rowIndex, reader, _member, errors, out value);
         return found && (errors is null || errors.Count == errorCount);
     }
 

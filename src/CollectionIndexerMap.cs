@@ -33,14 +33,14 @@ internal class CollectionIndexerMap<TValue> : IEnumerableIndexerMap
         return length;
     }
 
-    public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
+    public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
         var items = Builder.Begin(GetLength());
         foreach (var map in Values)
         {
-            if (map.Value.TryGetValue(sheet, rowIndex, reader, member, out var elementValue))
+            if (map.Value.TryGetValue(sheet, rowIndex, reader, member, errors, out var elementValue))
             {
                 Builder.Set(items, map.Key, (TValue)elementValue);
             }
