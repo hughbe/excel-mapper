@@ -82,6 +82,8 @@ foreach (var result in results.Where(r => !r.IsValid))
 - make the member optional if the column isn't always there ([Missing and ignored columns](mapping.md#missing-and-ignored-columns));
 - check where the heading is: see [Where the heading is](reading.md#where-the-heading-is) and [Finding the heading](reading.md#finding-the-heading).
 
+**`The class map for type "Order" maps no members`.** Nothing in the type is mapped, so every row would be an empty object: its properties are read-only or have private setters, are all `[ExcelIgnore]`, or a class map registered for it has no `Map(...)` calls. Give the properties public setters or a constructor that takes them, or map them in a class map (`Map(p => p.Total)` works with a private setter).
+
 **`Cannot assign "" to member ...` for an empty cell.** The member's type can't be empty, such as `int` or `DateTime`. Make it nullable (`int?`), or give it an empty fallback ([Empty and invalid cells](mapping.md#empty-and-invalid-cells)).
 
 **`Cannot assign "N/A" to member ...` for text that isn't a valid value.** Give the member an invalid fallback, map the text with [value mapping](mapping.md#value-mapping), or [convert it yourself](mapping.md#converters).

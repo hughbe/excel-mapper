@@ -24,7 +24,7 @@ var employees = sheet.ReadRows<Employee>().ToArray();
 Console.WriteLine(employees[1].Salary); // 78000
 ```
 
-Public instance properties with a setter, and public instance fields, are mapped. Read-only properties are mapped only through a constructor (see [Records and constructors](#records-and-constructors)); static members and indexers are ignored. Set `importer.Configuration.IgnoreSeparatorsInColumnNames = true` to also match `FirstName` to columns such as "First Name", "first_name" or "First-Name" (an exact match is preferred).
+Public instance properties with a setter, and public instance fields, are mapped. Read-only properties are mapped only through a constructor (see [Records and constructors](#records-and-constructors)); static members and indexers are ignored. A type with nothing to map, such as one whose properties all have private setters, throws an `ExcelMappingException` when rows are read, rather than giving an empty object for every row. Set `importer.Configuration.IgnoreSeparatorsInColumnNames = true` to also match `FirstName` to columns such as "First Name", "first_name" or "First-Name" (an exact match is preferred).
 
 **With attributes** on the type, to change how a member is read:
 
