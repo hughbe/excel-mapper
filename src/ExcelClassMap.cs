@@ -8,7 +8,7 @@ namespace ExcelMapper;
 /// <summary>
 /// Maps a row of a sheet to an object of the given type.
 /// </summary>
-public class ExcelClassMap : IMap
+public class ExcelClassMap : IParentMap
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ExcelClassMap"/> class.
@@ -39,6 +39,54 @@ public class ExcelClassMap : IMap
     public Type Type { get; }
 
     internal IMap? _valueMap;
+
+    IEnumerable<KeyValuePair<object?, IMap>> IParentMap.Children
+    {
+        get
+        {
+            // A class map read as a single value (Map(p => p)) has a child with no key.
+            if (_valueMap is not null)
+            {
+                yield return new(null, _valueMap);
+            }
+
+            foreach (var property in Properties)
+            {
+                yield return new(property.Member, property.Map);
+            }
+        }
+    }
+
+    IMap? IParentMap.GetChild(object key)
+    {
+        foreach (var property in Properties)
+        {
+            if (property.Member.Equals(key))
+            {
+                return property.Map;
+            }
+        }
+
+        return null;
+    }
+
+    void IParentMap.SetChild(object key, IMap map)
+    {
+        var member = (MemberInfo)key;
+        for (int i = 0; i < Properties.Count; i++)
+        {
+            if (Properties[i].Member.Equals(member))
+            {
+                Properties.RemoveAt(i);
+                break;
+            }
+        }
+
+        Properties.Add(new ExcelPropertyMap(member, map));
+    }
+
+    string? IParentMap.GetChildPath(string? path, object? key)
+        => key is MemberInfo member ? (path is null ? member.Name : $"{path}.{member.Name}") : path;
 
     /// <summary>
     /// Gets the collection of property maps.

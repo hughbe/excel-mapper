@@ -10,7 +10,7 @@ namespace ExcelMapper;
 /// A map that reads multiple cells of an excel sheet and maps the values of the cells to a
 /// list property or field by their indices.
 /// </summary>
-internal class CollectionIndexerMap<TValue> : IEnumerableIndexerMap
+internal class CollectionIndexerMap<TValue> : IParentMap
 {
     internal CollectionIndexerMap(CollectionBuilder<TValue> builder)
     {
@@ -20,6 +20,23 @@ internal class CollectionIndexerMap<TValue> : IEnumerableIndexerMap
     internal CollectionBuilder<TValue> Builder { get; }
 
     public Dictionary<int, IMap> Values { get; } = [];
+
+    IEnumerable<KeyValuePair<object?, IMap>> IParentMap.Children
+    {
+        get
+        {
+            foreach (var value in Values)
+            {
+                yield return new(value.Key, value.Value);
+            }
+        }
+    }
+
+    IMap? IParentMap.GetChild(object key) => Values.TryGetValue((int)key, out var map) ? map : null;
+
+    void IParentMap.SetChild(object key, IMap map) => Values[(int)key] = map;
+
+    string? IParentMap.GetChildPath(string? path, object? key) => $"{path}[{key}]";
 
     private int GetLength()
     {

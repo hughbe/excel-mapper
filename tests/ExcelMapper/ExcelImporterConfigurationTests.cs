@@ -569,4 +569,19 @@ public class ExcelImporterConfigurationTests
         // A class map registered by the user can't be replaced.
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new ExcelClassMap<AutoMappedClass>()));
     }
+
+    [Fact]
+    public void RegisterClassMap_RowMapWithoutMappers_ThrowsExcelMappingException()
+    {
+        // A class map read as a single value is checked like its members.
+        using var importer = Helpers.GetCsvImporter("A\n1\n");
+        var map = new ExcelClassMap<RowWithoutMappers>();
+        map.Map(p => p);
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
+    }
+
+    public class RowWithoutMappers
+    {
+        public int A { get; set; }
+    }
 }

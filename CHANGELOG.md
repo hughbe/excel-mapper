@@ -84,6 +84,8 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Fixed
 
+- Mapping a nested object inside a dictionary with keys that aren't strings, such as `Map(p => p.ById[5].Street)` for a `Dictionary<int, Address>`, threw `InvalidCastException`. ([#180](https://github.com/hughbe/excel-mapper/pull/180))
+
 - Extra columns on a nested object (`MapExtraColumns(p => p.Details.Extra)`, or `[ExcelExtraColumns]` on a member of a nested type) included the columns read by members outside the nested object, such as the parent's. They now leave out every column read by the type being read, at any depth. ([#166](https://github.com/hughbe/excel-mapper/pull/166))
 - `Queue<T>`, `Stack<T>`, `ConcurrentQueue<T>`, `ConcurrentStack<T>`, `ConcurrentBag<T>` and other collections created by passing their items to a constructor that takes `IEnumerable<T>` no longer lose duplicate values: they were built through a `HashSet<T>`, because looking for a constructor taking `ISet<T>` also matched constructors taking `IEnumerable<T>`. Collections whose constructor takes `ICollection<T>` or `IReadOnlyList<T>` are now supported too. These collections also map 9% faster with less allocated, as the list holding the items is reused for each row. ([#161](https://github.com/hughbe/excel-mapper/pull/161))
 - Two `ExcelSheet` objects for the same worksheet (for example from calling `ReadSheet(name)` twice) shared the reader's position, so reading from one made the other read the wrong rows, or its heading from the wrong row. Each sheet now keeps its own position. ([#141](https://github.com/hughbe/excel-mapper/pull/141))
