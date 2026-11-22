@@ -16,6 +16,13 @@ internal sealed class ConversionOptions
     /// </summary>
     public static ConversionOptions Default { get; } = new();
 
+    private bool _frozen;
+
+    /// <summary>
+    /// Stops the options changing: their pipeline has been used to read rows (see <see cref="IMap.Freeze"/>).
+    /// </summary>
+    public void Freeze() => _frozen = true;
+
     private string[]? _formats;
     private UriKind? _uriKind;
     private TimeSpan? _offset;
@@ -29,6 +36,7 @@ internal sealed class ConversionOptions
         get => _formats;
         set
         {
+            ThrowHelpers.ThrowIfFrozen(_frozen);
             if (value is not null)
             {
                 FormatUtilities.ValidateFormats(value);
@@ -41,12 +49,32 @@ internal sealed class ConversionOptions
     /// <summary>
     /// Gets or sets the format provider text is parsed with. Null means the sheet's culture.
     /// </summary>
-    public IFormatProvider? Provider { get; set; }
+    public IFormatProvider? Provider
+    {
+        get => _provider;
+        set
+        {
+            ThrowHelpers.ThrowIfFrozen(_frozen);
+            _provider = value;
+        }
+    }
+
+    private IFormatProvider? _provider;
 
     /// <summary>
     /// Gets or sets the number style numbers are parsed with. Null means the type's default.
     /// </summary>
-    public NumberStyles? NumberStyle { get; set; }
+    public NumberStyles? NumberStyle
+    {
+        get => _numberStyle;
+        set
+        {
+            ThrowHelpers.ThrowIfFrozen(_frozen);
+            _numberStyle = value;
+        }
+    }
+
+    private NumberStyles? _numberStyle;
 
     /// <summary>
     /// Gets or sets the kind of URI accepted. Null means absolute URIs.
@@ -56,6 +84,7 @@ internal sealed class ConversionOptions
         get => _uriKind;
         set
         {
+            ThrowHelpers.ThrowIfFrozen(_frozen);
             if (value is { } uriKind)
             {
                 EnumUtilities.ValidateIsDefined(uriKind);
@@ -76,6 +105,7 @@ internal sealed class ConversionOptions
         get => _offset;
         set
         {
+            ThrowHelpers.ThrowIfFrozen(_frozen);
             if (value is { } offset && (offset.Ticks % TimeSpan.TicksPerMinute != 0 || offset < TimeSpan.FromHours(-14) || offset > TimeSpan.FromHours(14)))
             {
                 throw new ArgumentOutOfRangeException(nameof(value), offset, "The offset must be a whole number of minutes between -14 and +14 hours.");

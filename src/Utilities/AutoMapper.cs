@@ -173,7 +173,7 @@ internal static class AutoMapper
         // Wrap the class map in a BuiltinClassMap to satisfy the generic type.
         result = new ExcelClassMap<T>(emptyValueStrategy)
         {
-            _valueMap = objectMap
+            SingleValueMap = objectMap
         };
         return true;
     }
@@ -276,7 +276,7 @@ internal static class AutoMapper
 
         if (map is not ExcelClassMap<T>)
         {
-            classMap._valueMap ??= map;
+            classMap.SingleValueMap ??= map;
             return;
         }
 

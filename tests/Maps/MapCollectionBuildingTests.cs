@@ -119,14 +119,7 @@ public class MapCollectionBuildingTests
 
         // One class map instance: auto-mapped from the members' attributes, with two elements
         // mapped one by one.
-        ExcelClassMap<Shared> map;
-        using (var first = Helpers.GetCsvImporter(csv))
-        {
-            first.ReadSheet().ReadRow<Shared>();
-            Assert.True(first.Configuration.TryGetClassMap<Shared>(out var autoMapped));
-            map = Assert.IsType<ExcelClassMap<Shared>>(autoMapped);
-        }
-
+        var map = new ExcelClassMap<Shared>().AutoMap();
         map.Map(r => r.Indexed[0]).WithColumnName("C");
         map.Map(r => r.Indexed[1]).WithColumnName("A");
 

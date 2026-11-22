@@ -36,11 +36,40 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
 
     ValuePipeline IColumnsMap.Pipeline => Pipeline;
 
-    /// <inheritdoc />
-    public bool Optional { get; set; }
+    private bool _frozen;
 
     /// <inheritdoc />
-    public bool PreserveFormatting { get; set; }
+    void IMap.Freeze()
+    {
+        _frozen = true;
+        Pipeline.Freeze();
+    }
+
+    /// <inheritdoc />
+    public bool Optional
+    {
+        get => _optional;
+        set
+        {
+            ThrowHelpers.ThrowIfFrozen(_frozen);
+            _optional = value;
+        }
+    }
+
+    private bool _optional;
+
+    /// <inheritdoc />
+    public bool PreserveFormatting
+    {
+        get => _preserveFormatting;
+        set
+        {
+            ThrowHelpers.ThrowIfFrozen(_frozen);
+            _preserveFormatting = value;
+        }
+    }
+
+    private bool _preserveFormatting;
 
     private Columns _columns;
 
@@ -52,8 +81,8 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
         get => _columns;
         set
         {
+            ThrowHelpers.ThrowIfFrozen(_frozen);
             _columns = value;
-            ReaderVersion++;
         }
     }
 
@@ -80,13 +109,6 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
         return TryGetValue(GetCellsReader(sheet), sheet, rowIndex, reader, member, errors, out value);
     }
 
-    /// <summary>
-    /// Incremented when <see cref="Columns"/> changes, so that readers resolved for a sheet
-    /// (see <see cref="BoundCellsMember"/>) are resolved again.
-    /// </summary>
-    int ICellsMap.ReaderVersion => ReaderVersion;
-
-    internal int ReaderVersion { get; private set; }
 
     ICellsReader? ICellsMap.GetCellsReader(ExcelSheet sheet) => GetCellsReader(sheet);
 
@@ -151,6 +173,7 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
 
         var result = valueMap(Pipeline);
         ThrowHelpers.ThrowIfNull(result, nameof(valueMap));
+        ThrowHelpers.ThrowIfFrozen(_frozen);
         Pipeline = result;
 
         return this;

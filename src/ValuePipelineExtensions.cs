@@ -610,7 +610,6 @@ public static class ValuePipelineExtensions
         return (TMap)map;
     }
 
-
     /// <summary>
     /// Converts cells with <paramref name="converter"/>. The converter replaces the built-in conversion
     /// for the member's type and any earlier converter, so it is used for every cell that isn't empty.

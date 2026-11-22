@@ -483,6 +483,9 @@ public class ExcelSheet
             classMap = Configuration.RegisterAutoMappedClassMap(typeof(T), map);
         }
 
+        // The class map can't change once it's used with a sheet, so what's worked out from it
+        // (its plans and bindings) stays right.
+        classMap.Freeze();
         RootMap = classMap;
 
         return classMap;

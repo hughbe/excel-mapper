@@ -34,7 +34,28 @@ internal class CollectionIndexerMap<TValue> : IParentMap
 
     IMap? IParentMap.GetChild(object key) => Values.TryGetValue((int)key, out var map) ? map : null;
 
-    void IParentMap.SetChild(object key, IMap map) => Values[(int)key] = map;
+    void IParentMap.SetChild(object key, IMap map)
+    {
+        ThrowHelpers.ThrowIfFrozen(_frozen);
+        Values[(int)key] = map;
+    }
+
+    private bool _frozen;
+
+    /// <inheritdoc />
+    void IMap.Freeze()
+    {
+        if (_frozen)
+        {
+            return;
+        }
+
+        _frozen = true;
+        foreach (var map in Values.Values)
+        {
+            map.Freeze();
+        }
+    }
 
     string? IParentMap.GetChildPath(string? path, object? key) => $"{path}[{key}]";
 

@@ -51,7 +51,7 @@ public class MapBuiltInConversionTests
     }
 
     [Fact]
-    public void ReadRows_MappersChangedAfterReading_UsesNewMappers()
+    public void ReadRows_MappersChangedAfterReading_ThrowsInvalidOperationException()
     {
         using var importer = Helpers.GetCsvImporter("Value\n1\ntwo\n");
         var map = new ExcelClassMap<IntRow>();
@@ -60,9 +60,9 @@ public class MapBuiltInConversionTests
         var sheet = importer.ReadSheet();
         Assert.Equal(1, sheet.ReadRow<IntRow>().Value);
 
-        // The map is read again after it changes.
-        valueMap.WithMapping(new Dictionary<string, int> { ["two"] = 2 });
-        Assert.Equal(2, sheet.ReadRow<IntRow>().Value);
+        // The map is frozen once rows are read with it.
+        Assert.Throws<InvalidOperationException>(() => valueMap.WithMapping(new Dictionary<string, int> { ["two"] = 2 }));
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<IntRow>());
     }
 
     [Fact]

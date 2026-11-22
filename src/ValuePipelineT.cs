@@ -29,8 +29,8 @@ public abstract class ValuePipeline<T> : ValuePipeline
         get => _emptyFallback;
         set
         {
+            ThrowIfFrozen();
             _emptyFallback = value;
-            _fallbackVersion++;
         }
     }
 
@@ -44,16 +44,26 @@ public abstract class ValuePipeline<T> : ValuePipeline
         get => _invalidFallback;
         set
         {
+            ThrowIfFrozen();
             _invalidFallback = value;
-            _fallbackVersion++;
         }
     }
 
     private ICellFallback<T>? _invalidFallback;
 
-    private int _fallbackVersion;
-
     internal override bool HasMappers => Mappers.Count > 0;
+
+    internal override void Freeze()
+    {
+        if (IsFrozen)
+        {
+            return;
+        }
+
+        base.Freeze();
+        ((NonNullCollection<ICellMapper<T>>)Mappers).Freeze();
+        _plan = CreatePlan();
+    }
 
     internal override void SetFixedFallback(object? value, bool empty, bool invalid)
     {
@@ -81,8 +91,6 @@ public abstract class ValuePipeline<T> : ValuePipeline
             InvalidFallback = ThrowFallback<T>.Instance;
         }
     }
-
-    private int Version => TransformersVersion + ((NonNullCollection<ICellMapper<T>>)Mappers).Version + _fallbackVersion;
 
     /// <summary>
     /// Maps a cell to a <typeparamref name="T"/>, without boxing: the transformers, then the empty
@@ -154,12 +162,10 @@ public abstract class ValuePipeline<T> : ValuePipeline
         return CastValue<T>(null, sheet, rowIndex, readResult.ColumnIndex, member)!;
     }
 
-    // A snapshot of the pipeline, made when it's first used and again after it changes, so that
-    // mapping a cell reads arrays rather than lists through interfaces.
-    private sealed class Plan(int version, ICellMapper<T>[] mappers, ICellTransformer[] transformers, ICellFallback<T>? emptyFallback, ICellFallback<T>? invalidFallback)
+    // A snapshot of the pipeline, made when it's frozen, so that mapping a cell reads arrays
+    // rather than lists through interfaces.
+    private sealed class Plan(ICellMapper<T>[] mappers, ICellTransformer[] transformers, ICellFallback<T>? emptyFallback, ICellFallback<T>? invalidFallback)
     {
-        public int Version { get; } = version;
-
         public ICellMapper<T>[] Mappers { get; } = mappers;
 
         public ICellTransformer[] Transformers { get; } = transformers;
@@ -174,16 +180,16 @@ public abstract class ValuePipeline<T> : ValuePipeline
 
     private Plan? _plan;
 
-    private Plan GetPlan()
-    {
-        var version = Version;
-        var plan = _plan;
-        if (plan is null || plan.Version != version)
-        {
-            plan = new Plan(version, [.. Mappers], [.. Transformers], EmptyFallback, InvalidFallback);
-            _plan = plan;
-        }
+    // Maps are frozen before rows are read, so the plan is made then. A pipeline is also frozen
+    // the first time it maps a cell, in case it's used on its own. (Another thread may be freezing
+    // it at the same time, so the plan may not be set yet: plans of a frozen pipeline are equal.)
+    private Plan GetPlan() => _plan ?? FreezeAndGetPlan();
 
-        return plan;
+    private Plan FreezeAndGetPlan()
+    {
+        Freeze();
+        return _plan ?? CreatePlan();
     }
+
+    private Plan CreatePlan() => new([.. Mappers], [.. Transformers], EmptyFallback, InvalidFallback);
 }

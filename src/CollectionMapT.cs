@@ -36,8 +36,8 @@ public class CollectionMap<TElement> : ICellsMap
         get => _columns;
         set
         {
+            ThrowHelpers.ThrowIfFrozen(_frozen);
             _columns = value;
-            ReaderVersion++;
         }
     }
 
@@ -48,10 +48,30 @@ public class CollectionMap<TElement> : ICellsMap
     }
 
     /// <inheritdoc />
-    public bool Optional { get; set; }
+    public bool Optional
+    {
+        get => _optional;
+        set
+        {
+            ThrowHelpers.ThrowIfFrozen(_frozen);
+            _optional = value;
+        }
+    }
+
+    private bool _optional;
     
     /// <inheritdoc />
-    public bool PreserveFormatting { get; set; }
+    public bool PreserveFormatting
+    {
+        get => _preserveFormatting;
+        set
+        {
+            ThrowHelpers.ThrowIfFrozen(_frozen);
+            _preserveFormatting = value;
+        }
+    }
+
+    private bool _preserveFormatting;
 
     /// <summary>
     /// The mapping pipeline for each element in the list.
@@ -59,6 +79,15 @@ public class CollectionMap<TElement> : ICellsMap
     public ElementMap<TElement> Pipeline { get; private set; } = new ElementMap<TElement>();
 
     ValuePipeline IColumnsMap.Pipeline => Pipeline;
+
+    private bool _frozen;
+
+    /// <inheritdoc />
+    void IMap.Freeze()
+    {
+        _frozen = true;
+        Pipeline.Freeze();
+    }
 
     /// <summary>
     /// How the member's collection is built from its elements.
@@ -73,13 +102,6 @@ public class CollectionMap<TElement> : ICellsMap
         return TryGetValue(GetCellsReader(sheet), sheet, rowIndex, reader, member, errors, out value);
     }
 
-    /// <summary>
-    /// Incremented when <see cref="Columns"/> changes, so that readers resolved for a sheet
-    /// (see <see cref="BoundCellsMember"/>) are resolved again.
-    /// </summary>
-    int ICellsMap.ReaderVersion => ReaderVersion;
-
-    internal int ReaderVersion { get; private set; }
 
     ICellsReader? ICellsMap.GetCellsReader(ExcelSheet sheet) => GetCellsReader(sheet);
 
@@ -134,6 +156,7 @@ public class CollectionMap<TElement> : ICellsMap
 
         var result = elementMap(Pipeline);
         ThrowHelpers.ThrowIfNull(result, nameof(elementMap));
+        ThrowHelpers.ThrowIfFrozen(_frozen);
         Pipeline = result;
         return this;
     }
