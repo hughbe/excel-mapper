@@ -122,6 +122,12 @@ Update the docs in the same change as the code:
 - Package validation (`EnablePackageValidation`) compares the package with `PackageValidationBaselineVersion` (the last release on NuGet) on every `dotnet pack`, including in CI, and fails on unintended API breaks. Intentional breaks are listed in `src/CompatibilitySuppressions.xml` with a comment explaining why; regenerate it with `dotnet pack src -c Release -p:GenerateCompatibilitySuppressionFile=true`. Regenerating drops the comment: copy it first, put it back, and add a line for the new break. After publishing a release, move the baseline to it and remove the suppressions it covered.
 - Package validation only sees the API: behaviour changes still need the changelog and migration guide.
 
+To release a version:
+
+1. In a pull request: set `PackageVersion` in `src/ExcelMapper.csproj`, give the version's changelog heading its date, and move the lines of each `src/PublicAPI/<framework>/PublicAPI.Unshipped.txt` (except `#nullable enable`) to the `PublicAPI.Shipped.txt` beside it.
+2. After it's merged, tag `main` with the version and push the tag: `git tag v4.0.0 && git push origin v4.0.0`. `.github/workflows/release.yml` checks the tag matches `PackageVersion`, builds, runs the same tests as CI and the trimmed app, packs (with package validation), and publishes the package and its symbols to NuGet with Trusted Publishing (a policy on the nuget.org account for this repository and `release.yml`, and the `NUGET_USER` repository secret).
+3. Then, in a pull request, set `PackageValidationBaselineVersion` to the version just released and remove the suppressions in `src/CompatibilitySuppressions.xml` that it covered.
+
 ## Pull requests
 
 - One feature or fix per PR, branched from `main`. Avoid stacking PRs on each other's branches: a PR merged into another feature branch doesn't reach `main`.

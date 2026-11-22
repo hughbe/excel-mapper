@@ -1,0 +1,77 @@
+name: Release
+
+# Publishes ExcelDataReader.Mapping to NuGet when a version tag such as v4.0.0 is pushed. The tag
+# must match PackageVersion in src/ExcelMapper.csproj (without its "v"), which is set when preparing
+# the release (see CLAUDE.md). It uses NuGet Trusted Publishing: nuget.org trusts this workflow file
+# through a policy on the account, and NuGet/login swaps the workflow's GitHub identity for a
+# short-lived API key, so no key is stored. Needs the repository secret NUGET_USER, the nuget.org
+# account name the policy belongs to.
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
+
+permissions:
+  contents: read
+  id-token: write   # lets NuGet/login ask GitHub for the workflow's identity token
+
+jobs:
+  publish:
+    name: Build, test and publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Check the tag matches the package version
+        run: |
+          tag_version="${GITHUB_REF_NAME#v}"
+          package_version="$(dotnet msbuild src/ExcelMapper.csproj -getProperty:PackageVersion)"
+          if [ "$tag_version" != "$package_version" ]; then
+            echo "::error::The tag $GITHUB_REF_NAME doesn't match PackageVersion $package_version in src/ExcelMapper.csproj."
+            exit 1
+          fi
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      # The same checks as CI (dotnetcore.yml), so a tag on any commit publishes only what passes them.
+      - name: Test
+        run: dotnet test --configuration Release --no-build
+
+      - name: Test against the netstandard2.0 build
+        run: dotnet test tests --configuration Release -p:LibraryTargetFramework=netstandard2.0
+
+      - name: Test against the netstandard2.1 build
+        run: dotnet test tests --configuration Release -p:LibraryTargetFramework=netstandard2.1
+
+      - name: Run a trimmed app
+        run: |
+          dotnet publish tests/TrimmingTests --configuration Release --runtime linux-x64 --output trimming-out
+          ./trimming-out/TrimmingTests
+
+      # Packing also runs package validation against the last release (PackageValidationBaselineVersion).
+      - name: Pack
+        run: dotnet pack src/ExcelMapper.csproj --configuration Release --no-build --output packages
+
+      - name: Log in to NuGet with Trusted Publishing
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Publish to NuGet
+        # Pushing the .nupkg also pushes the .snupkg beside it to the symbol server.
+        run: dotnet nuget push "packages/*.nupkg" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: packages
