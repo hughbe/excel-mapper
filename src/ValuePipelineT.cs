@@ -19,7 +19,7 @@ public abstract class ValuePipeline<T> : ValuePipeline
     /// <summary>
     /// Gets the mappers, which are tried in order until one converts the value.
     /// </summary>
-    internal IList<ICellMapper<T>> Mappers { get; } = new NonNullCollection<ICellMapper<T>>();
+    internal NonNullCollection<ICellMapper<T>> Mappers { get; } = [];
 
     /// <summary>
     /// Gets or sets the value of empty cells. Null means empty cells are converted by the mappers.
@@ -61,7 +61,7 @@ public abstract class ValuePipeline<T> : ValuePipeline
         }
 
         base.Freeze();
-        ((NonNullCollection<ICellMapper<T>>)Mappers).Freeze();
+        Mappers.Freeze();
         _plan = CreatePlan();
     }
 

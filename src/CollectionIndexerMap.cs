@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
-using ExcelMapper.Factories;
+using ExcelMapper.Builders;
 
 namespace ExcelMapper;
 

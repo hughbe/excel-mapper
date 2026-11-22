@@ -1,8 +1,8 @@
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.Reading;
 
 /// <summary>
 /// Where a sheet, or a region of it, is reading: the row it last moved to. The reader is shared by
-/// every sheet of the importer, so the cursor asks the <see cref="Utilities.RowSource"/> to move to
+/// every sheet of the importer, so the cursor asks the <see cref="RowSource"/> to move to
 /// its row rather than moving the reader itself.
 /// </summary>
 internal sealed class RowCursor(Worksheet worksheet)

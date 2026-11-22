@@ -4,7 +4,7 @@ using System.Globalization;
 using ExcelDataReader;
 using ExcelMapper.Readers;
 
-namespace ExcelMapper;
+namespace ExcelMapper.Reading;
 
 /// <summary>
 /// What a sheet or a region reads: a worksheet, its data range and heading, the row it's on and

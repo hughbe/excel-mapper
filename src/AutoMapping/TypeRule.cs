@@ -6,7 +6,7 @@ using System.Linq;
 using System.Numerics;
 using ExcelMapper.Mappers;
 
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.AutoMapping;
 
 /// <summary>
 /// How members of a type are mapped, decided once per type: its built-in conversion, if it has
@@ -51,11 +51,6 @@ internal abstract class TypeRule
     /// </summary>
     public abstract ExcelClassMap GetOrCreateNestedMap(IMap parentMap, object? context, EmptyValueStrategy emptyValueStrategy);
 
-    // Mappers that hold no state, so they're shared. Each one maps a type and its nullable version.
-    private protected static readonly GuidMapper s_guidMapper = new();
-    private protected static readonly BoolMapper s_boolMapper = new();
-    private protected static readonly StringMapper s_stringMapper = new();
-    private protected static readonly VersionMapper s_versionMapper = new();
 }
 
 [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
@@ -169,92 +164,78 @@ internal sealed class TypeRule<T> : TypeRule
     {
         var type = typeof(T).GetNullableTypeOrThis(out _);
 
-        // Mappers without state are shared.
-        object? sharedMapper =
-            type == typeof(Guid) ? s_guidMapper :
-            type == typeof(bool) ? s_boolMapper :
-            type == typeof(string) ? s_stringMapper :
-            type == typeof(Version) ? s_versionMapper :
-            null;
-        if (sharedMapper is not null)
-        {
-            var mapper = (ICellMapper<T>)sharedMapper;
-            return mappers => mappers.Add(mapper);
-        }
-
-        // object and IConvertible members receive the cell's typed value (a double, DateTime, bool,
-        // string, etc.), not its text.
-        if (type == typeof(object) || type == typeof(IConvertible))
-        {
-            return static mappers => mappers.Add(new ObjectMapper<T>());
-        }
-
-        // Mappers hold no state (formats and other options come with the cell), so one mapper
-        // serves every member of the type.
-        Func<object>? createMapper =
-            type == typeof(DateTime) ? static () => DateTimeMapper.Instance :
-            type == typeof(DateTimeOffset) ? static () => DateTimeOffsetMapper.Instance :
-            type == typeof(TimeSpan) ? static () => TimeSpanMapper.Instance :
+        // Mappers hold no state (formats and other options come with the cell), so the mappers
+        // found here serve every member of the type, and of its nullable version.
+        object? mapper =
+            // object and IConvertible members receive the cell's typed value (a double, DateTime,
+            // bool, string, etc.), not its text.
+            type == typeof(object) || type == typeof(IConvertible) ? new ObjectMapper<T>() :
+            type == typeof(string) ? StringMapper.Instance :
+            type == typeof(bool) ? BoolMapper.Instance :
+            type == typeof(Guid) ? GuidMapper.Instance :
+            type == typeof(Version) ? VersionMapper.Instance :
+            type == typeof(DateTime) ? DateTimeMapper.Instance :
+            type == typeof(DateTimeOffset) ? DateTimeOffsetMapper.Instance :
+            type == typeof(TimeSpan) ? TimeSpanMapper.Instance :
 #if NET6_0_OR_GREATER
-            type == typeof(DateOnly) ? static () => DateOnlyMapper.Instance :
-            type == typeof(TimeOnly) ? static () => TimeOnlyMapper.Instance :
+            type == typeof(DateOnly) ? DateOnlyMapper.Instance :
+            type == typeof(TimeOnly) ? TimeOnlyMapper.Instance :
 #endif
-            type == typeof(Uri) ? static () => UriMapper.Instance :
+            type == typeof(Uri) ? UriMapper.Instance :
             null;
 
         if (type.IsEnum)
         {
             // Values with a DescriptionAttribute are also mapped from their description.
+            var enumMapper = (ICellMapper<T>)EnumMappers.Create(type, ignoreCase: false);
             var descriptions = GetEnumDescriptions(type);
+            var descriptionMapper = descriptions is null ? null : new MappingDictionaryMapper<T>(descriptions, null, MappingDictionaryBehavior.Optional);
             return mappers =>
             {
-                mappers.Add((ICellMapper<T>)EnumMappers.Create(type, ignoreCase: false));
-                if (descriptions is not null)
+                mappers.Add(enumMapper);
+                if (descriptionMapper is not null)
                 {
-                    // The mapper copies the dictionary.
-                    mappers.Add(new MappingDictionaryMapper<T>(descriptions, null, MappingDictionaryBehavior.Optional));
+                    mappers.Add(descriptionMapper);
                 }
             };
         }
 
-        if (createMapper is null && AutoMapper.CanConstructObject(type))
+        if (mapper is null && AutoMapper.CanConstructObject(type))
         {
 #if NET7_0_OR_GREATER
             // Numbers. Number value types (all the built-in ones) also convert nullable members
             // without boxing.
             if (type.ImplementsGenericInterface(typeof(INumberBase<>), out var numberType))
             {
-                var mapperType = (numberType.IsValueType ? typeof(StructNumberMapper<>) : typeof(INumberBaseMapper<>)).MakeGenericType(numberType);
-                createMapper = () => Activator.CreateInstance(mapperType)!;
+                mapper = Activator.CreateInstance((numberType.IsValueType ? typeof(StructNumberMapper<>) : typeof(INumberBaseMapper<>)).MakeGenericType(numberType));
             }
 #else
             // The netstandard builds don't have INumberBase<T>, so built-in numeric types use a
             // mapper that behaves the same way (including number styles and format providers).
             if (NumberMapper.IsSupportedType(type))
             {
-                createMapper = () => NumberMapper.Create(type);
+                mapper = NumberMapper.Create(type);
             }
 #endif
             else if (type.ImplementsInterface(typeof(IConvertible)))
             {
-                return static mappers => mappers.Add(new ChangeTypeMapper<T>());
+                mapper = new ChangeTypeMapper<T>();
             }
 #if NET7_0_OR_GREATER
             else if (type.ImplementsGenericInterface(typeof(IParsable<>), out var parsableType))
             {
-                var mapperType = (parsableType.IsValueType ? typeof(StructParsableMapper<>) : typeof(ParsableMapper<>)).MakeGenericType(parsableType);
-                createMapper = () => Activator.CreateInstance(mapperType)!;
+                mapper = Activator.CreateInstance((parsableType.IsValueType ? typeof(StructParsableMapper<>) : typeof(ParsableMapper<>)).MakeGenericType(parsableType));
             }
 #endif
         }
 
-        if (createMapper is null)
+        if (mapper is null)
         {
             return null;
         }
 
-        var sharedTypeMapper = (ICellMapper<T>)createMapper();
-        return mappers => mappers.Add(sharedTypeMapper);
+        var typeMapper = (ICellMapper<T>)mapper;
+        return mappers => mappers.Add(typeMapper);
     }
 
     private static Dictionary<string, T>? GetEnumDescriptions(Type enumType)

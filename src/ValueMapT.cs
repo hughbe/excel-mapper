@@ -116,7 +116,7 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
 
 
     /// <inheritdoc/>
-    BoundMember IValueMap.Bind(ExcelPropertyMap property, SheetView sheet) => new BoundValueMember<T>(this, property, sheet);
+    BoundMember IValueMap.Bind(ClassMapMember member) => new BoundValueMember<T>(this, member);
 
     /// <inheritdoc/>
     MethodInfo? IValueMap.GetArgumentMethod(Type parameterType)

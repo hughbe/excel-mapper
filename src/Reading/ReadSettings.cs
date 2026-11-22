@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.Reading;
 
 /// <summary>
 /// The importer's settings as a sheet reads them: taken from <see cref="ExcelImporterConfiguration"/>

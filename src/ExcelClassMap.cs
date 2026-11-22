@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelDataReader;
 
@@ -69,11 +68,11 @@ public class ExcelClassMap : IParentMap
         }
 
         _frozen = true;
-        ((PropertyMapCollection)Properties).Freeze();
+        Members.Freeze();
         _valueMap?.Freeze();
-        foreach (var property in Properties)
+        foreach (var member in Members)
         {
-            property.Map.Freeze();
+            member.Map.Freeze();
         }
     }
 
@@ -87,20 +86,20 @@ public class ExcelClassMap : IParentMap
                 yield return new(null, _valueMap);
             }
 
-            foreach (var property in Properties)
+            foreach (var member in Members)
             {
-                yield return new(property.Member, property.Map);
+                yield return new(member.Member, member.Map);
             }
         }
     }
 
     IMap? IParentMap.GetChild(object key)
     {
-        foreach (var property in Properties)
+        foreach (var member in Members)
         {
-            if (property.Member.Equals(key))
+            if (member.Member.Equals(key))
             {
-                return property.Map;
+                return member.Map;
             }
         }
 
@@ -110,25 +109,26 @@ public class ExcelClassMap : IParentMap
     void IParentMap.SetChild(object key, IMap map)
     {
         var member = (MemberInfo)key;
-        for (int i = 0; i < Properties.Count; i++)
+        for (int i = 0; i < Members.Count; i++)
         {
-            if (Properties[i].Member.Equals(member))
+            if (Members[i].Member.Equals(member))
             {
-                Properties.RemoveAt(i);
+                Members.RemoveAt(i);
                 break;
             }
         }
 
-        Properties.Add(new ExcelPropertyMap(member, map));
+        Members.Add(new ClassMapMember(member, map));
     }
 
     string? IParentMap.GetChildPath(string? path, object? key)
         => key is MemberInfo member ? (path is null ? member.Name : $"{path}.{member.Name}") : path;
 
     /// <summary>
-    /// Gets the collection of property maps.
+    /// Gets the members to map, each with the map that reads it. They can't change once the class
+    /// map is frozen.
     /// </summary>
-    internal Collection<ExcelPropertyMap> Properties { get; } = new PropertyMapCollection();
+    internal NonNullCollection<ClassMapMember> Members { get; } = [];
 
     /// <summary>
     /// Gets the default strategy to use when the value of a cell is empty.
@@ -271,12 +271,11 @@ public class ExcelClassMap : IParentMap
         }
 
         // Set any members that weren't passed to the constructor.
-        var properties = Properties;
         for (int i = 0; i < members.Length; i++)
         {
-            if (plan.PropertyParameterIndices[i] < 0 && members[i].HasValue)
+            if (plan.MemberParameterIndices[i] < 0 && members[i].HasValue)
             {
-                members[i].SetValue(instance, properties[i]);
+                members[i].SetValue(instance);
             }
         }
 
@@ -290,7 +289,7 @@ public class ExcelClassMap : IParentMap
         var arguments = (object?[])plan.DefaultArguments.Clone();
         for (int i = 0; i < members.Length; i++)
         {
-            var parameterIndex = plan.PropertyParameterIndices[i];
+            var parameterIndex = plan.MemberParameterIndices[i];
             if (parameterIndex >= 0 && members[i].HasValue)
             {
                 arguments[parameterIndex] = members[i].Value;
@@ -306,9 +305,9 @@ public class ExcelClassMap : IParentMap
     private ConstructionPlan CreateConstructionPlan()
     {
         var hasReadOnlyMember = false;
-        foreach (var property in Properties)
+        foreach (var member in Members)
         {
-            if (property.IsReadOnly)
+            if (member.IsReadOnly)
             {
                 hasReadOnlyMember = true;
                 break;
@@ -327,10 +326,10 @@ public class ExcelClassMap : IParentMap
             throw new ExcelMappingException($"Cannot create an instance of type \"{Type}\" as it is an interface or abstract class.");
         }
 
-        var members = new MemberInfo[Properties.Count];
+        var members = new MemberInfo[Members.Count];
         for (int i = 0; i < members.Length; i++)
         {
-            members[i] = Properties[i].Member;
+            members[i] = Members[i].Member;
         }
 
         var constructor = ConstructorUtilities.FindConstructor(Type, members, out var parameterMemberIndices);
@@ -341,10 +340,10 @@ public class ExcelClassMap : IParentMap
                 "constructor whose parameters each match a mapped property or field (by name and type) or have a default value.");
         }
 
-        var propertyParameterIndices = new int[members.Length];
-        for (int i = 0; i < propertyParameterIndices.Length; i++)
+        var memberParameterIndices = new int[members.Length];
+        for (int i = 0; i < memberParameterIndices.Length; i++)
         {
-            propertyParameterIndices[i] = -1;
+            memberParameterIndices[i] = -1;
         }
         var parameters = constructor.GetParameters();
         var defaultArguments = new object?[parameters.Length];
@@ -352,7 +351,7 @@ public class ExcelClassMap : IParentMap
         {
             if (parameterMemberIndices[i] >= 0)
             {
-                propertyParameterIndices[parameterMemberIndices[i]] = i;
+                memberParameterIndices[parameterMemberIndices[i]] = i;
             }
 
             // Reflection passes a zero-initialized value for null value type arguments.
@@ -361,7 +360,7 @@ public class ExcelClassMap : IParentMap
 
         for (int i = 0; i < members.Length; i++)
         {
-            if (propertyParameterIndices[i] == -1 && Properties[i].IsReadOnly)
+            if (memberParameterIndices[i] == -1 && Members[i].IsReadOnly)
             {
                 throw new ExcelMappingException($"Property \"{members[i].Name}\" of type \"{Type}\" is read-only and is not a parameter of the constructor {constructor}.");
             }
@@ -371,21 +370,21 @@ public class ExcelClassMap : IParentMap
         for (int i = 0; i < parameters.Length; i++)
         {
             var memberIndex = parameterMemberIndices[i];
-            var typedMethod = memberIndex >= 0 && Properties[memberIndex].Map is IValueMap bindableMap
-                ? bindableMap.GetArgumentMethod(parameters[i].ParameterType)
+            var typedMethod = memberIndex >= 0 && Members[memberIndex].Map is IValueMap valueMap
+                ? valueMap.GetArgumentMethod(parameters[i].ParameterType)
                 : null;
             boundArguments[i] = new BoundConstructorArgument(memberIndex, typedMethod, defaultArguments[i]);
         }
 
         var createFromMembers = CompiledAccessors.GetConstructor(constructor, boundArguments);
-        return new ConstructionPlan(constructor, propertyParameterIndices, defaultArguments)
+        return new ConstructionPlan(constructor, memberParameterIndices, defaultArguments)
         {
             CreateFromMembers = createFromMembers,
             InvokeConstructor = createFromMembers is null ? CompiledAccessors.GetConstructor(constructor) : null,
         };
     }
 
-    private sealed class ConstructionPlan(ConstructorInfo? constructor, int[] propertyParameterIndices, object?[] defaultArguments)
+    private sealed class ConstructionPlan(ConstructorInfo? constructor, int[] memberParameterIndices, object?[] defaultArguments)
     {
         /// <summary>
         /// The constructor to call, or null to use the parameterless constructor.
@@ -393,9 +392,9 @@ public class ExcelClassMap : IParentMap
         public ConstructorInfo? Constructor { get; } = constructor;
 
         /// <summary>
-        /// For each property map, the index of the constructor parameter it is passed to, or -1.
+        /// For each member, the index of the constructor parameter it is passed to, or -1.
         /// </summary>
-        public int[] PropertyParameterIndices { get; } = propertyParameterIndices;
+        public int[] MemberParameterIndices { get; } = memberParameterIndices;
 
         public object?[] DefaultArguments { get; } = defaultArguments;
 
@@ -414,12 +413,5 @@ public class ExcelClassMap : IParentMap
         /// Calls <see cref="Constructor"/> with an array of arguments, where code can't be compiled.
         /// </summary>
         public Func<object?[], object>? InvokeConstructor { get; set; }
-    }
-
-    /// <summary>
-    /// A collection of property maps, which can't change once the class map is frozen.
-    /// </summary>
-    private sealed class PropertyMapCollection : NonNullCollection<ExcelPropertyMap>
-    {
     }
 }

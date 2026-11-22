@@ -464,10 +464,10 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
             return this;
         }
 
-        Properties.Clear();
-        foreach (var propertyMap in classMap.Properties)
+        Members.Clear();
+        foreach (var member in classMap.Members)
         {
-            Properties.Add(propertyMap);
+            Members.Add(member);
         }
 
         return this;

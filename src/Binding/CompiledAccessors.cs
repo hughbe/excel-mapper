@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.Binding;
 
 /// <summary>
 /// Creates and caches compiled delegates that set members and call constructors, which are much
@@ -17,7 +17,7 @@ namespace ExcelMapper.Utilities;
 /// </remarks>
 internal static class CompiledAccessors
 {
-    private static readonly ConcurrentDictionary<MemberInfo, MemberSetValueDelegate> s_setters = new();
+    private static readonly ConcurrentDictionary<MemberInfo, MemberSetter> s_setters = new();
     private static readonly ConcurrentDictionary<ConstructorInfo, Func<object?[], object>> s_constructors = new();
     private static readonly ConcurrentDictionary<Type, Func<object>> s_parameterlessConstructors = new();
 
@@ -37,10 +37,10 @@ internal static class CompiledAccessors
     /// Gets a delegate that sets a writable property or field. A null value sets the member to its
     /// default value, matching <see cref="PropertyInfo.SetValue(object, object)"/>.
     /// </summary>
-    public static MemberSetValueDelegate GetSetter(MemberInfo member)
+    public static MemberSetter GetSetter(MemberInfo member)
         => s_setters.GetOrAdd(member, static m => CreateSetter(m));
 
-    private static MemberSetValueDelegate CreateSetter(MemberInfo member)
+    private static MemberSetter CreateSetter(MemberInfo member)
     {
         var declaringType = member.DeclaringType!;
 
@@ -72,7 +72,7 @@ internal static class CompiledAccessors
             body = Expression.Assign(Expression.Field(typedInstance, field), ConvertValue(value, field.FieldType));
         }
 
-        return Expression.Lambda<MemberSetValueDelegate>(body, instance, value).Compile();
+        return Expression.Lambda<MemberSetter>(body, instance, value).Compile();
     }
 
     private static readonly ConcurrentDictionary<(MemberInfo Member, Type ValueType), Delegate> s_typedSetters = new();

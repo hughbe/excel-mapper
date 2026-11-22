@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 
-namespace ExcelMapper.Factories;
+namespace ExcelMapper.Builders;
 
 /// <summary>
 /// How a collection of one type is built from its elements, chosen once for a member by

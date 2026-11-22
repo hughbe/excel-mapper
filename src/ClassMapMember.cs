@@ -8,15 +8,16 @@ namespace ExcelMapper;
 /// </summary>
 /// <param name="instance">The object instance whose member value should be set.</param>
 /// <param name="value">The value to set on the member.</param>
-internal delegate void MemberSetValueDelegate(object instance, object value);
+internal delegate void MemberSetter(object instance, object value);
 
 /// <summary>
-/// Maps a member to an Excel column.
+/// A member of a class map (<see cref="ExcelClassMap.Members"/>): the property or field, the map
+/// that reads its value, and how the value is set.
 /// </summary>
-internal class ExcelPropertyMap
+internal sealed class ClassMapMember
 {
     /// <summary>
-    /// Constructs a property map for a member and map.
+    /// Creates a member of a class map.
     /// </summary>
     /// <param name="member">The property or field of the class map's type.</param>
     /// <param name="map">The map that reads the member's value.</param>
@@ -26,7 +27,7 @@ internal class ExcelPropertyMap
         "Only read-only properties check the constructors of their type, which is the type of the class map " +
         "they're added to, and ExcelClassMap keeps that type's public constructors. If they were removed anyway, " +
         "this throws an ArgumentException rather than mapping incorrectly.")]
-    public ExcelPropertyMap(MemberInfo member, IMap map)
+    public ClassMapMember(MemberInfo member, IMap map)
     {
         // Members come from expressions on the mapped object and from its public instance
         // properties and fields, so they're never indexers or static.
@@ -37,7 +38,7 @@ internal class ExcelPropertyMap
         {
             if (property.CanWrite)
             {
-                SetValueFactory = CompiledAccessors.GetSetter(property);
+                SetValue = CompiledAccessors.GetSetter(property);
             }
             else
             {
@@ -51,12 +52,12 @@ internal class ExcelPropertyMap
                 }
 
                 IsReadOnly = true;
-                SetValueFactory = (_, _) => throw new InvalidOperationException($"Property \"{member.Name}\" is read-only and can only be set through a constructor parameter.");
+                SetValue = (_, _) => throw new InvalidOperationException($"Property \"{member.Name}\" is read-only and can only be set through a constructor parameter.");
             }
         }
         else
         {
-            SetValueFactory = CompiledAccessors.GetSetter((FieldInfo)member);
+            SetValue = CompiledAccessors.GetSetter((FieldInfo)member);
         }
     }
 
@@ -68,11 +69,11 @@ internal class ExcelPropertyMap
     /// <summary>
     /// Gets the delegate used to set the value of the member.
     /// </summary>
-    public MemberSetValueDelegate SetValueFactory { get; }
+    public MemberSetter SetValue { get; }
 
     /// <summary>
     /// Gets whether the member is a read-only property that is set through a constructor parameter
-    /// rather than <see cref="SetValueFactory"/>.
+    /// rather than <see cref="SetValue"/>.
     /// </summary>
     public bool IsReadOnly { get; }
 

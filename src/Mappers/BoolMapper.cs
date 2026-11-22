@@ -2,6 +2,15 @@ namespace ExcelMapper.Mappers;
 
 internal sealed class BoolMapper : ICellMapper<bool>, ICellMapper<bool?>
 {
+    /// <summary>
+    /// The mapper, shared by every member: it holds no state.
+    /// </summary>
+    public static BoolMapper Instance { get; } = new();
+
+    private BoolMapper()
+    {
+    }
+
     CellConversion ICellMapper<bool>.Convert(ReadCellResult cell, in CellContext context, out bool value, ref object? error)
     {
         if (cell.GetValue() is bool boolValue)

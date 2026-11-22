@@ -5,7 +5,7 @@ using System.Linq;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Readers;
 
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.AutoMapping;
 
 /// <summary>
 /// Creates maps from a type and its members' attributes: a value with the type's built-in
@@ -249,10 +249,10 @@ internal static class AutoMapper
     private static bool IsMapped(ExcelClassMap map, MemberInfo member)
     {
         // An indexed loop: enumerating the collection through its interface allocates.
-        var properties = map.Properties;
-        for (int i = 0; i < properties.Count; i++)
+        var members = map.Members;
+        for (int i = 0; i < members.Count; i++)
         {
-            if (properties[i].Member.Equals(member))
+            if (members[i].Member.Equals(member))
             {
                 return true;
             }
@@ -308,7 +308,7 @@ internal static class AutoMapper
                 throw new ExcelMappingException($"Member \"{member.Name}\" has the ExcelRowNumber attribute, but its type \"{memberType}\" is not a numeric type such as int or long.");
             }
 
-            map.Properties.Add(new ExcelPropertyMap(member, new RowNumberMap(memberType)));
+            map.Members.Add(new ClassMapMember(member, new RowNumberMap(memberType)));
             classMap = null;
             return true;
         }
@@ -323,7 +323,7 @@ internal static class AutoMapper
             }
 
             extraColumnsMap.Columns = new ExtraColumns(map);
-            map.Properties.Add(new ExcelPropertyMap(member, extraColumnsMap));
+            map.Members.Add(new ClassMapMember(member, extraColumnsMap));
             classMap = null;
             return true;
         }
@@ -335,7 +335,7 @@ internal static class AutoMapper
             return false;
         }
 
-        map.Properties.Add(new ExcelPropertyMap(member, memberMap));
+        map.Members.Add(new ClassMapMember(member, memberMap));
         classMap = null;
         return true;
     }

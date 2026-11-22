@@ -1,6 +1,6 @@
 using ExcelMapper.Readers;
 
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.Binding;
 
 /// <summary>
 /// What's been worked out about a sheet's columns, so it's done once per sheet rather than for
@@ -104,19 +104,19 @@ internal sealed class SheetBindings(SheetView sheet)
 
     private BoundMember[] Bind(ExcelClassMap classMap)
     {
-        var properties = classMap.Properties;
-        var members = new BoundMember[properties.Count];
-        for (int i = 0; i < members.Length; i++)
+        var members = classMap.Members;
+        var bound = new BoundMember[members.Count];
+        for (int i = 0; i < bound.Length; i++)
         {
-            var property = properties[i];
-            members[i] = property.Map switch
+            var member = members[i];
+            bound[i] = member.Map switch
             {
-                IValueMap bindableMap => bindableMap.Bind(property, sheet),
-                ICellsMap cellsMap => new BoundCellsMember(cellsMap, property),
-                _ => new BoundMapMember(property),
+                IValueMap valueMap => valueMap.Bind(member),
+                ICellsMap cellsMap => new BoundCellsMember(cellsMap, member),
+                _ => new BoundMapMember(member),
             };
         }
 
-        return members;
+        return bound;
     }
 }

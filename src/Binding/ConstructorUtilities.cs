@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.Binding;
 
 /// <summary>
 /// Helpers for creating objects through a constructor whose parameters are populated from mapped

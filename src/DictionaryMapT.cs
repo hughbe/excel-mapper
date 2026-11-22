@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelDataReader;
-using ExcelMapper.Factories;
+using ExcelMapper.Builders;
 
 namespace ExcelMapper;
 

@@ -40,7 +40,7 @@
       signatures (CP0002).
     - IMap, ExcelPropertyMap, ExcelPropertyMap<T>, MemberSetValueDelegate, the indexer maps and their
       interfaces, and AutoMapper are internal (CP0001), with ExcelClassMap.Properties and the maps'
-      TryGetValue methods (CP0002). Class maps are configured with their Map(...) methods.
+      TryGetValue methods (CP0002), so class maps no longer implement IMap (CP0008). Class maps are configured with their Map(...) methods.
       ExcelImporterConfiguration.TryGetClassMap returns an ExcelClassMap and RegisterClassMap(Type, ...)
       takes one, instead of an IMap (CP0002).
     - StringComparerUtilities (CP0001), an internal helper that was public by accident, is internal.
@@ -3331,6 +3331,48 @@
   <Suppression>
     <DiagnosticId>CP0009</DiagnosticId>
     <Target>T:ExcelMapper.ValuePipeline`1</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:ExcelMapper.ExcelClassMap</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:ExcelMapper.ExcelClassMap`1</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:ExcelMapper.ExcelClassMap</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:ExcelMapper.ExcelClassMap`1</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:ExcelMapper.ExcelClassMap</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:ExcelMapper.ExcelClassMap`1</Target>
     <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>

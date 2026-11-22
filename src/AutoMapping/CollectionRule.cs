@@ -4,10 +4,10 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using ExcelMapper.Factories;
+using ExcelMapper.Builders;
 using ExcelMapper.Readers;
 
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.AutoMapping;
 
 /// <summary>
 /// The rule for a type with elements (an array, list, set or other collection): how its elements

@@ -6,6 +6,15 @@ namespace ExcelMapper.Mappers;
 /// </summary>
 internal sealed class StringMapper : ICellMapper<string?>
 {
+    /// <summary>
+    /// The mapper, shared by every member: it holds no state.
+    /// </summary>
+    public static StringMapper Instance { get; } = new();
+
+    private StringMapper()
+    {
+    }
+
     public CellConversion Convert(ReadCellResult cell, in CellContext context, out string? value, ref object? error)
     {
         value = cell.GetString();

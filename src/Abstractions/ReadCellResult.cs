@@ -102,10 +102,6 @@ internal struct ReadCellResult
         return value is null || (value is string stringValue && string.IsNullOrEmpty(stringValue));
     }
 
-    /// <summary>
-    /// Gets the string value of the cell, ignoring formatting
-    /// </summary>
-    public string? StringValue => GetString();
 
     /// <summary>
     /// Gets whether to preserve number formatting options when reading string values.

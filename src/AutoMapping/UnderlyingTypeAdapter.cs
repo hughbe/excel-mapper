@@ -1,7 +1,7 @@
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
 
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.AutoMapping;
 
 /// <summary>
 /// For a member of a nullable value type, adapts a converter or fallback of the underlying type

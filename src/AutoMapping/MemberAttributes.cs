@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.AutoMapping;
 
 /// <summary>
 /// The attributes of members, read once per member. Mapping a member checks it for about 30

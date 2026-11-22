@@ -8,7 +8,7 @@ using ExcelMapper.Readers;
 using ExcelMapper.Transformers;
 using ExcelMapper.Utilities;
 
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.AutoMapping;
 
 internal static class MemberMapper
 {
