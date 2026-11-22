@@ -114,6 +114,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Performance
 
+- Rows that are structs map as fast as classes, with the same allocations: members of a struct are set by compiled setters inside the struct's box, instead of by reflection, which boxed every value. Mapping 50,000 rows of a 10-member struct is 15% faster and allocates 10.7 MB less. ([#195](https://github.com/hughbe/excel-mapper/pull/195))
 - Collections and dictionaries are built by one builder per member type, shared by every sheet and thread without a lock or a copy for each sheet: 5 collection members from CSV map 8% faster with 14% fewer allocations, and dictionaries allocate 9% less. ([#175](https://github.com/hughbe/excel-mapper/pull/175))
 - Every member converts its values without boxing, including members with `[ExcelMappingDictionary]` or `WithMapping`, `object`, `IConvertible`, `Uri` and `Version` members, and `IParsable<T>` and other `IConvertible` types, which used to go through a slower untyped path: a class with such members maps about 10% faster. ([#168](https://github.com/hughbe/excel-mapper/pull/168))
 - Invalid values no longer throw and catch an exception for every cell: 7x faster with a fallback. ([#121](https://github.com/hughbe/excel-mapper/pull/121))

@@ -113,6 +113,60 @@ public class BoundMemberTests
         public int Age { get; set; }
     }
 
+    // Members of a struct are set inside the struct's box, by compiled setters for properties and
+    // fields, and by reflection for readonly fields.
+    public struct FieldStruct
+    {
+        public string? Name;
+        public int Age;
+        public int? Manager;
+        public DateTime Joined;
+    }
+
+    [Fact]
+    public void ReadRows_StructWithFields_SetsEveryField()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Age,Manager,Joined\na,1,,2024-03-04\nb,2,7,2024-03-05\n");
+        var rows = importer.ReadSheet().ReadRows<FieldStruct>().ToArray();
+        Assert.Equal(["a", "b"], rows.Select(r => r.Name));
+        Assert.Equal([1, 2], rows.Select(r => r.Age));
+        Assert.Equal([null, 7], rows.Select(r => r.Manager));
+        Assert.Equal([new DateTime(2024, 3, 4), new DateTime(2024, 3, 5)], rows.Select(r => r.Joined));
+    }
+
+    public struct MixedStruct
+    {
+        public string? Name { get; set; }
+        public int Age;
+        public int? Manager { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_StructWithClassMap_SetsMappedMembers()
+    {
+        using var importer = Helpers.GetCsvImporter("Full Name,Age,Boss\na,1,3\n");
+        importer.Configuration.RegisterClassMap<MixedStruct>(c =>
+        {
+            c.Map(r => r.Name).WithColumnName("Full Name");
+            c.Map(r => r.Age);
+            c.Map(r => r.Manager).WithColumnName("Boss");
+        });
+
+        var row = importer.ReadSheet().ReadRows<MixedStruct>().Single();
+        Assert.Equal("a", row.Name);
+        Assert.Equal(1, row.Age);
+        Assert.Equal(3, row.Manager);
+    }
+
+    [Fact]
+    public void ReadRows_StructMemberMappedAsDifferentType_ConvertsAsBefore()
+    {
+        // The untyped setter (a map of another type than the member's) also sets inside the box.
+        using var importer = Helpers.GetCsvImporter("Name\nabc\n");
+        importer.Configuration.RegisterClassMap<RowStruct>(c => c.Map(r => (object?)r.Name));
+        Assert.Equal("abc", importer.ReadSheet().ReadRows<RowStruct>().Single().Name);
+    }
+
     [Fact]
     public void ReadRows_MapTypeDiffersFromMemberType_ConvertsAsBefore()
     {

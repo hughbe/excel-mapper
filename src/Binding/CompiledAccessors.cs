@@ -44,9 +44,8 @@ internal static class CompiledAccessors
     {
         var declaringType = member.DeclaringType!;
 
-        // Setting a member of a boxed struct through an expression would modify a copy, and readonly
-        // fields can't be assigned in an expression, so use reflection for these.
-        var useReflection = !CanCompile || declaringType.IsValueType || member is FieldInfo { IsInitOnly: true };
+        // Readonly fields can't be assigned in an expression, so use reflection for them.
+        var useReflection = !CanCompile || member is FieldInfo { IsInitOnly: true };
         if (useReflection)
         {
             return member switch
@@ -59,7 +58,7 @@ internal static class CompiledAccessors
 
         var instance = Expression.Parameter(typeof(object), "instance");
         var value = Expression.Parameter(typeof(object), "value");
-        var typedInstance = Expression.Convert(instance, declaringType);
+        var typedInstance = GetInstance(instance, declaringType);
 
         Expression body;
         if (member is PropertyInfo property)
@@ -91,7 +90,7 @@ internal static class CompiledAccessors
         var memberType = member is PropertyInfo propertyInfo ? propertyInfo.PropertyType : ((FieldInfo)member).FieldType;
 
         // As for GetSetter, use reflection where expressions can't set the member. This boxes.
-        if (!CanCompile || declaringType.IsValueType || member is FieldInfo { IsInitOnly: true })
+        if (!CanCompile || member is FieldInfo { IsInitOnly: true })
         {
             var setter = GetSetter(member);
             return (instance, value) => setter(instance, value!);
@@ -99,7 +98,7 @@ internal static class CompiledAccessors
 
         var instanceParameter = Expression.Parameter(typeof(object), "instance");
         var valueParameter = Expression.Parameter(typeof(T), "value");
-        var typedInstance = Expression.Convert(instanceParameter, declaringType);
+        var typedInstance = GetInstance(instanceParameter, declaringType);
         Expression typedValue = typeof(T) == memberType
             ? valueParameter
             : ConvertValue(Expression.Convert(valueParameter, typeof(object)), memberType);
@@ -166,6 +165,11 @@ internal static class CompiledAccessors
             ConvertArgument(value2, parameters[1].ParameterType));
         return Expression.Lambda<Action<object, T1, T2>>(body, instance, value1, value2).Compile();
     }
+
+    // The instance whose member is set. A struct is set inside its box, which Unbox refers to,
+    // rather than in a copy, which Convert would make.
+    private static Expression GetInstance(ParameterExpression instance, Type declaringType)
+        => declaringType.IsValueType ? Expression.Unbox(instance, declaringType) : Expression.Convert(instance, declaringType);
 
     private static Expression ConvertArgument(Expression value, Type parameterType)
         => value.Type == parameterType ? value : Expression.Convert(value, parameterType);
