@@ -20,10 +20,10 @@ internal sealed class ThrowFallback<T> : ICellFallback<T>
                 Member = member
             };
 
-        // When the sheet is collecting errors (ReadRowResults), record the error rather than
-        // throwing it: throwing and catching an exception for every invalid cell is slow. The
-        // member isn't set, as the row has an error.
-        if (sheet?.CollectedErrors is { } errors)
+        // When errors are being collected (ReadRowResults), record the error rather than throwing
+        // it: throwing and catching an exception for every invalid cell is slow. The member isn't
+        // set, as the row has an error.
+        if (context.Errors is { } errors)
         {
             errors.Add(mappingException);
             return default!;

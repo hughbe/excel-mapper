@@ -69,7 +69,7 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
     internal DictionaryBuilder<TKey, TValue> Builder { get; }
 
     /// <inheritdoc/>
-    bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
+    bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
         if (sheet.Heading == null)
@@ -77,7 +77,7 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
         }
 
-        return TryGetValue(GetCellsReader(sheet), sheet, rowIndex, reader, member, out value);
+        return TryGetValue(GetCellsReader(sheet), sheet, rowIndex, reader, member, errors, out value);
     }
 
     /// <summary>
@@ -93,10 +93,10 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
     private ICellsReader? GetCellsReader(ExcelSheet sheet)
         => sheet.GetCellsReader(_columns);
 
-    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value)
-        => TryGetValue(cellsReader, sheet, rowIndex, reader, member, out value);
+    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out object? value)
+        => TryGetValue(cellsReader, sheet, rowIndex, reader, member, errors, out value);
 
-    private bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
+    private bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
     {
         if (sheet.Heading == null)
         {
@@ -124,7 +124,7 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
                 TKey? convertedKey = elementKey is TKey key ? key : (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
                 if (convertedKey != null)
                 {
-                    var elementValue = Pipeline.Map(sheet, rowIndex, valueResult, PreserveFormatting, member);
+                    var elementValue = Pipeline.Map(sheet, rowIndex, valueResult, PreserveFormatting, member, errors);
                     Builder.Add(items, convertedKey, elementValue);
                 }
             }
