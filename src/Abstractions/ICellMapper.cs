@@ -48,7 +48,7 @@ internal interface ICellMapper<T>
     /// <summary>
     /// Creates the exception that says why <see cref="Convert"/> found a cell invalid. It's only
     /// called when the exception is used (by the default invalid fallback, a custom fallback or
-    /// <see cref="ExcelSheet.ReadRowResults{T}"/>), so invalid cells with a fixed fallback don't
+    /// <see cref="ExcelSheet.ReadRowResults{T}()"/>), so invalid cells with a fixed fallback don't
     /// create an exception at all.
     /// </summary>
     /// <param name="cell">The cell that <see cref="Convert"/> found invalid.</param>

@@ -9,7 +9,7 @@ namespace ExcelMapper;
 /// used for members of type <c>T?</c>.</typeparam>
 /// <remarks>
 /// To report the cell as an error instead, throw an exception: an <see cref="ExcelMappingException"/>
-/// is reported as is, and is recorded rather than thrown by <see cref="ExcelSheet.ReadRowResults{T}"/>.
+/// is reported as is, and is recorded rather than thrown by <see cref="ExcelSheet.ReadRowResults{T}()"/>.
 /// A fallback can be used for many cells at once on different threads, so it mustn't change its own
 /// state.
 /// </remarks>

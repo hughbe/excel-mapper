@@ -42,10 +42,6 @@ internal static class EnumMappers
     /// </summary>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-#if NET5_0_OR_GREATER
-    // The mapper type is made at run time, so the trimmer can't see it's created here.
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(EnumMapper<>))]
-#endif
     public static object Create(Type enumType)
-        => Activator.CreateInstance(typeof(EnumMapper<>).MakeGenericType(enumType))!;
+        => GenericTypes.Create(typeof(EnumMapper<>), enumType);
 }

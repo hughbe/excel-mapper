@@ -10,7 +10,7 @@ namespace ExcelMapper.Readers;
 /// </summary>
 /// <remarks>
 /// Each kind also describes itself, for the error when its columns are missing and for
-/// <see cref="ExcelSheet.ValidateHeading{T}"/>.
+/// <see cref="ExcelSheet.ValidateHeading{T}()"/>.
 /// </remarks>
 internal abstract class Columns
 {
@@ -49,7 +49,7 @@ internal abstract class Columns
         => Missing(sheet, rowIndex, member, null);
 
     /// <summary>
-    /// Describes the columns for <see cref="ExcelSheet.ValidateHeading{T}"/>, such as
+    /// Describes the columns for <see cref="ExcelSheet.ValidateHeading{T}()"/>, such as
     /// <c>column "Name"</c>.
     /// </summary>
     public virtual string Describe(SheetView sheet) => "a matching column";

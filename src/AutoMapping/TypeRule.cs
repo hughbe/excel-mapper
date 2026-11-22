@@ -24,11 +24,8 @@ internal abstract class TypeRule
 {
     private static readonly ConcurrentDictionary<Type, TypeRule> s_rules = new();
 
-#if NET5_0_OR_GREATER
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(TypeRule<>))]
-#endif
     public static TypeRule For(Type type)
-        => GetOrAdd(type, static t => (TypeRule)Activator.CreateInstance(typeof(TypeRule<>).MakeGenericType(t))!);
+        => GetOrAdd(type, static t => (TypeRule)GenericTypes.Create(typeof(TypeRule<>), t));
 
     // One rule for each type, however it's created.
     private protected static TypeRule GetOrAdd(Type type, Func<Type, TypeRule> create)
@@ -88,16 +85,13 @@ internal sealed class TypeRule<T> : TypeRule
         }
     }
 
-#if NET5_0_OR_GREATER
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(NullableAdapter<>))]
-#endif
     private static UnderlyingTypeAdapter<T>? CreateNullableAdapter()
         => Nullable.GetUnderlyingType(typeof(T)) is { } underlyingType
-            ? (UnderlyingTypeAdapter<T>)Activator.CreateInstance(typeof(NullableAdapter<>).MakeGenericType(underlyingType))!
+            ? (UnderlyingTypeAdapter<T>)GenericTypes.Create(typeof(NullableAdapter<>), underlyingType)
             : null;
 
     // Created when a converter or fallback of the underlying type needs adapting, rather than for
-    // every nullable type, as it's made with MakeGenericType.
+    // every nullable type, as it may be made with MakeGenericType.
     private static UnderlyingTypeAdapter<T>? s_nullableAdapter;
     private static bool s_nullableAdapterCreated;
 
@@ -112,13 +106,10 @@ internal sealed class TypeRule<T> : TypeRule
 
     public override CollectionRule? Collection
     {
-#if NET5_0_OR_GREATER
-        [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(CollectionRule<>))]
-#endif
         get
         {
             var rule = _collection ??= typeof(T).GetElementTypeOrEnumerableType() is { } elementType
-                ? (CollectionRule)Activator.CreateInstance(typeof(CollectionRule<>).MakeGenericType(elementType))!
+                ? (CollectionRule)GenericTypes.Create(typeof(CollectionRule<>), elementType)
                 : s_noCollection;
             return ReferenceEquals(rule, s_noCollection) ? null : rule;
         }
@@ -126,13 +117,10 @@ internal sealed class TypeRule<T> : TypeRule
 
     public override DictionaryRule? Dictionary
     {
-#if NET5_0_OR_GREATER
-        [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(DictionaryRule<,>))]
-#endif
         get
         {
             var rule = _dictionary ??= DictionaryRule.TryGetKeyValueTypes(typeof(T), out var keyType, out var valueType)
-                ? (DictionaryRule)Activator.CreateInstance(typeof(DictionaryRule<,>).MakeGenericType(keyType, valueType))!
+                ? (DictionaryRule)GenericTypes.Create(typeof(DictionaryRule<,>), keyType, valueType)
                 : s_noDictionary;
             return ReferenceEquals(rule, s_noDictionary) ? null : rule;
         }
@@ -175,14 +163,6 @@ internal sealed class TypeRule<T> : TypeRule
     }
 
     // The built-in conversion for T, or for the underlying type of a nullable T.
-#if NET7_0_OR_GREATER
-    // The mapper types are created by MakeGenericType, so the trimmer can't see that their
-    // constructors are needed.
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(StructNumberMapper<>))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(INumberBaseMapper<>))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(ParsableMapper<>))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(StructParsableMapper<>))]
-#endif
     private static Action<IList<ICellMapper<T>>>? FindDefaultMappers()
     {
         var type = typeof(T).GetNullableTypeOrThis(out _);
@@ -234,7 +214,7 @@ internal sealed class TypeRule<T> : TypeRule
             }
             else if (type.ImplementsGenericInterface(typeof(INumberBase<>), out var numberType))
             {
-                mapper = Activator.CreateInstance((numberType.IsValueType ? typeof(StructNumberMapper<>) : typeof(INumberBaseMapper<>)).MakeGenericType(numberType));
+                mapper = GenericTypes.Create(numberType.IsValueType ? typeof(StructNumberMapper<>) : typeof(INumberBaseMapper<>), numberType);
             }
 #else
             // The netstandard builds don't have INumberBase<T>, so built-in numeric types use a
@@ -251,7 +231,7 @@ internal sealed class TypeRule<T> : TypeRule
 #if NET7_0_OR_GREATER
             else if (type.ImplementsGenericInterface(typeof(IParsable<>), out var parsableType))
             {
-                mapper = Activator.CreateInstance((parsableType.IsValueType ? typeof(StructParsableMapper<>) : typeof(ParsableMapper<>)).MakeGenericType(parsableType));
+                mapper = GenericTypes.Create(parsableType.IsValueType ? typeof(StructParsableMapper<>) : typeof(ParsableMapper<>), parsableType);
             }
 #endif
         }
@@ -266,7 +246,7 @@ internal sealed class TypeRule<T> : TypeRule
     }
 
 #if NET7_0_OR_GREATER
-    // The mappers of the built-in number types, created without MakeGenericType so that native AOT
+    // The mappers of the built-in number types, created directly so that native AOT
     // has their code. Other number types (a user's INumberBase<T>) are found by their interface.
     private static object? CreateBuiltInNumberMapper(Type type)
         => type == typeof(int) ? new StructNumberMapper<int>() :

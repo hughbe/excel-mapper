@@ -12,7 +12,6 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 - `ReadSheets()` - Every sheet, in order
 - `NumberOfSheets` - The number of sheets
 - `Configuration` - Settings and class maps (see below)
-- `Reader` - The underlying `IExcelDataReader`
 
 **`ExcelSheet`** - A worksheet, and a position in it. Not thread-safe.
 - `ReadRows<T>()` - Every row, mapped lazily as you enumerate
@@ -22,13 +21,14 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 - `ReadHeading()` - Read the heading row now (the read methods do this when needed)
 - `FindHeading<T>()` / `FindHeading<T>(maxRows)` / `TryFindHeading<T>(out heading)` - Find the heading row of a sheet with titles, notes or blank rows above it ([Finding the heading](reading.md#finding-the-heading))
 - `ValidateHeading<T>()` / `TryValidateHeading<T>(out missingColumns)` - Check every column `T` needs is present, before reading rows
+- Each of these also takes an `ExcelClassMap<T>`, such as `ReadRows(classMap)`: it reads with that class map rather than the one registered or auto-mapped for `T`, and works with native AOT ([Native AOT apps](trimming.md#native-aot-apps))
 - `Region()` / `Region(ExcelRange)` / `Region("B3:F20")` - A block of the sheet with its own heading ([Reading part of a sheet](reading.md#reading-part-of-a-sheet))
 - `HasHeading` (default true), `HeadingIndex` (default 0), `DataRange` (default all rows and columns) - Where the heading and data are
 - `Heading` - The heading, once read
 - `Name`, `Index`, `Visibility`, `NumberOfColumns`, `CurrentRowIndex`
 
 **`ExcelRegion`** - An immutable block of a sheet, read with its own heading. Each read starts at the top of the region.
-- `ReadRows<T>()`, `ReadRowResults<T>()`, `ValidateHeading<T>()`, `TryValidateHeading<T>(out missingColumns)` - As on `ExcelSheet`
+- `ReadRows<T>()`, `ReadRowResults<T>()`, `ValidateHeading<T>()`, `TryValidateHeading<T>(out missingColumns)` - As on `ExcelSheet`, also with an `ExcelClassMap<T>`
 - `WithHeadingAt(rowIndex)` / `WithoutHeading()` / `WithHeadingSearch()` / `WithHeadingSearch(maxRows)` - Where the heading is: a row of the sheet, none, or found as for `FindHeading`
 - `Sheet`, `Range` - The sheet and block
 
@@ -56,6 +56,9 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 - `MaxColumnsPerSheet` - The most columns a sheet may have (default: 10,000)
 
 `importer.Configuration.RegisterClassMapsInNamespace(namespace)` (and an overload taking an `Assembly`) registers every class map in a namespace.
+
+**`ExcelMappingContext`** - Class maps for native AOT ([Native AOT apps](trimming.md#native-aot-apps)). Derive from it and register types in `RegisterTypes(ExcelTypeRegistrar)`.
+- `GetClassMap<T>()` - The class map of a registered row type, auto-mapped from the registered types; it can't be changed
 
 ## Results and errors
 

@@ -1468,4 +1468,120 @@ public class ExcelSheetTests
         var row = sheet.ReadRows<MatchingRow>().Single();
         Assert.Equal(["2"], row.Values);
     }
+
+    // A class map given to a reading method, rather than one registered or auto-mapped: it reads
+    // the "Other" column, which auto-mapping MapRow wouldn't.
+    private static ExcelClassMap<MapRow> CreateGivenMap()
+    {
+        var classMap = new ExcelClassMap<MapRow>();
+        classMap.Map(r => r.Name).WithColumnName("Other");
+        return classMap;
+    }
+
+    public class MapRow
+    {
+        public string? Name { get; set; }
+    }
+
+    private const string MapCsv = "Name,Other\na,x\nb,y\n";
+
+    [Fact]
+    public void ReadRows_ClassMap_UsesClassMap()
+    {
+        using var importer = Helpers.GetCsvImporter(MapCsv);
+        importer.Configuration.RegisterClassMap<MapRow>(c => c.Map(r => r.Name));
+        var sheet = importer.ReadSheet();
+        Assert.Equal(["x", "y"], sheet.ReadRows(CreateGivenMap()).Select(r => r.Name));
+    }
+
+    [Fact]
+    public void ReadRows_ClassMapRange_UsesClassMap()
+    {
+        using var importer = Helpers.GetCsvImporter(MapCsv);
+        var sheet = importer.ReadSheet();
+        Assert.Equal(["y"], sheet.ReadRows(CreateGivenMap(), 2, 1).Select(r => r.Name));
+    }
+
+    [Fact]
+    public void ReadRow_ClassMap_UsesClassMap()
+    {
+        using var importer = Helpers.GetCsvImporter(MapCsv);
+        var sheet = importer.ReadSheet();
+        var classMap = CreateGivenMap();
+        Assert.Equal("x", sheet.ReadRow(classMap).Name);
+        Assert.True(sheet.TryReadRow(classMap, out var row));
+        Assert.Equal("y", row.Name);
+        Assert.False(sheet.TryReadRow(classMap, out _));
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow(classMap));
+    }
+
+    [Fact]
+    public void ReadRowResults_ClassMap_UsesClassMap()
+    {
+        using var importer = Helpers.GetCsvImporter(MapCsv);
+        var results = importer.ReadSheet().ReadRowResults(CreateGivenMap()).ToArray();
+        Assert.Equal(["x", "y"], results.Select(r => r.Value!.Name));
+    }
+
+    [Fact]
+    public void ValidateHeading_ClassMap_ChecksClassMapsColumns()
+    {
+        using var importer = Helpers.GetCsvImporter("Name\na\n");
+        var sheet = importer.ReadSheet();
+        Assert.False(sheet.TryValidateHeading(CreateGivenMap(), out var problems));
+        Assert.Single(problems);
+        Assert.Throws<ExcelMappingException>(() => sheet.ValidateHeading(CreateGivenMap()));
+
+        using var valid = Helpers.GetCsvImporter(MapCsv);
+        var validSheet = valid.ReadSheet();
+        validSheet.ValidateHeading(CreateGivenMap());
+        Assert.True(validSheet.TryValidateHeading(CreateGivenMap(), out problems));
+        Assert.Empty(problems);
+    }
+
+    [Fact]
+    public void FindHeading_ClassMap_FindsClassMapsColumns()
+    {
+        const string Csv = "Title,\nName,Other\na,x\n";
+        using (var importer = Helpers.GetCsvImporter(Csv))
+        {
+            var sheet = importer.ReadSheet();
+            Assert.Equal(["Name", "Other"], sheet.FindHeading(CreateGivenMap()).ColumnNames);
+            Assert.Equal("x", sheet.ReadRow(CreateGivenMap()).Name);
+        }
+
+        using (var importer = Helpers.GetCsvImporter(Csv))
+        {
+            Assert.Equal(1, importer.ReadSheet().FindHeading(CreateGivenMap(), 5).ColumnNames.Count - 1);
+        }
+
+        using (var importer = Helpers.GetCsvImporter(Csv))
+        {
+            Assert.True(importer.ReadSheet().TryFindHeading(CreateGivenMap(), out var heading));
+            Assert.Equal(2, heading.ColumnNames.Count);
+        }
+
+        using (var importer = Helpers.GetCsvImporter(Csv))
+        {
+            Assert.False(importer.ReadSheet().TryFindHeading(CreateGivenMap(), 1, out _));
+        }
+    }
+
+    [Fact]
+    public void ReadRows_NullClassMap_ThrowsArgumentNullException()
+    {
+        using var importer = Helpers.GetCsvImporter(MapCsv);
+        var sheet = importer.ReadSheet();
+        Assert.Throws<ArgumentNullException>("classMap", () => sheet.ReadRows<MapRow>(null!));
+        Assert.Throws<ArgumentNullException>("classMap", () => sheet.ReadRows<MapRow>(null!, 1, 1));
+        Assert.Throws<ArgumentNullException>("classMap", () => sheet.ReadRow<MapRow>(null!));
+        Assert.Throws<ArgumentNullException>("classMap", () => sheet.TryReadRow<MapRow>(null!, out _));
+        Assert.Throws<ArgumentNullException>("classMap", () => sheet.ReadRowResults<MapRow>(null!));
+        Assert.Throws<ArgumentNullException>("classMap", () => sheet.ValidateHeading<MapRow>(null!));
+        Assert.Throws<ArgumentNullException>("classMap", () => sheet.TryValidateHeading<MapRow>(null!, out _));
+        Assert.Throws<ArgumentNullException>("classMap", () => sheet.FindHeading<MapRow>(null!));
+        Assert.Throws<ArgumentNullException>("classMap", () => sheet.FindHeading<MapRow>(null!, 1));
+        Assert.Throws<ArgumentNullException>("classMap", () => sheet.TryFindHeading<MapRow>(null!, out _));
+        Assert.Throws<ArgumentNullException>("classMap", () => sheet.TryFindHeading<MapRow>(null!, 1, out _));
+    }
 }

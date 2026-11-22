@@ -1,7 +1,7 @@
 namespace ExcelMapper;
 
 /// <summary>
-/// The result of mapping a row with <see cref="ExcelSheet.ReadRowResults{T}"/>: either the mapped
+/// The result of mapping a row with <see cref="ExcelSheet.ReadRowResults{T}()"/>: either the mapped
 /// value, or every error that prevented the row from being mapped.
 /// </summary>
 /// <typeparam name="T">The type of the object the row is mapped to.</typeparam>

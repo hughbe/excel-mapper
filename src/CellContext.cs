@@ -31,7 +31,7 @@ public readonly struct CellContext
 
     /// <summary>
     /// Creates the context of a cell being mapped, with the list errors are reported to when rows
-    /// are read with <see cref="ExcelSheet.ReadRowResults{T}"/>.
+    /// are read with <see cref="ExcelSheet.ReadRowResults{T}()"/>.
     /// </summary>
     internal CellContext(SheetView sheet, int rowIndex, int columnIndex, MemberInfo? member, List<ExcelMappingException>? errors, ConversionOptions? options)
     {
@@ -53,7 +53,7 @@ public readonly struct CellContext
 
     /// <summary>
     /// Gets the list errors are added to instead of being thrown, when rows are read with
-    /// <see cref="ExcelSheet.ReadRowResults{T}"/>; otherwise null.
+    /// <see cref="ExcelSheet.ReadRowResults{T}()"/>; otherwise null.
     /// </summary>
     internal List<ExcelMappingException>? Errors { get; }
 

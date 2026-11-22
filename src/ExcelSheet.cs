@@ -132,7 +132,7 @@ public class ExcelSheet
     /// </summary>
     /// <remarks>
     /// Reading is forward-only: rows are read from the current position of the sheet. Rows that have
-    /// already been read (for example by a previous call to this method or <see cref="ReadRow{T}"/>)
+    /// already been read (for example by a previous call to this method or <see cref="ReadRow{T}()"/>)
     /// are not returned again, so calling this method after all rows have been read returns an empty
     /// sequence. Use <see cref="ReadRows{T}(int, int)"/> to re-read a specific range of rows.
     /// </remarks>
@@ -141,6 +141,17 @@ public class ExcelSheet
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>() => View.ReadRows<T>();
+
+    /// <summary>
+    /// Maps each row of the sheet to an object with <paramref name="classMap"/>. See
+    /// <see cref="ReadRows{T}()"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    /// <returns>The objects mapped from each row.</returns>
+    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap) => View.ReadRows(SheetView.Given(classMap));
 
     /// <summary>
     /// Maps each row within the range specified to an object using a registered mapping. If no map is registered for this
@@ -157,6 +168,19 @@ public class ExcelSheet
     public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int startIndex, int count) => View.ReadRows<T>(startIndex, count);
 
     /// <summary>
+    /// Maps each row within the range specified to an object with <paramref name="classMap"/>. See
+    /// <see cref="ReadRows{T}(int, int)"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    /// <param name="startIndex">The zero-based index from the first row of the document (including the header) of the range of rows to map from.</param>
+    /// <param name="count">The number of rows to read and map.</param>
+    /// <returns>The objects mapped from each row within the range specified.</returns>
+    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap, int startIndex, int count) => View.ReadRows(SheetView.Given(classMap), startIndex, count);
+
+    /// <summary>
     /// Maps a single row of a sheet to an object using a registered mapping. If no map is registered for this
     /// type then the type will be automapped. This method will read the sheet's heading if the sheet has a
     /// heading and the heading has not yet been read. This method will throw if mapping fails or there are
@@ -169,6 +193,17 @@ public class ExcelSheet
     public T ReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>() => View.ReadRow<T>();
 
     /// <summary>
+    /// Maps a single row of the sheet to an object with <paramref name="classMap"/>. See
+    /// <see cref="ReadRow{T}()"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map a single row to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    /// <returns>The object mapped from the row.</returns>
+    public T ReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap) => View.ReadRow(SheetView.Given(classMap));
+
+    /// <summary>
     /// Maps a single row of a sheet to an object using a registered mapping. If no map is registered for this
     /// type then the type will be automapped. This method will read the sheet's heading if the sheet has a
     /// heading and the heading has not yet been read.
@@ -179,6 +214,18 @@ public class ExcelSheet
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public bool TryReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>([NotNullWhen(true)] out T? value) => View.TryReadRow(out value);
+
+    /// <summary>
+    /// Maps a single row of the sheet to an object with <paramref name="classMap"/>. See
+    /// <see cref="TryReadRow{T}(out T)"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map a single row to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    /// <param name="value">The object mapped from the row.</param>
+    /// <returns>False if there are no more rows in the sheet or the row cannot be mapped to an object, else true.</returns>
+    public bool TryReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap, [NotNullWhen(true)] out T? value) => View.TryReadRow(SheetView.Given(classMap), out value);
 
     /// <summary>
     /// Maps each row of the sheet to an object, like <see cref="ReadRows{T}()"/>, but reports invalid
@@ -196,6 +243,17 @@ public class ExcelSheet
     public IEnumerable<ExcelRowResult<T>> ReadRowResults<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>() => View.ReadRowResults<T>();
 
     /// <summary>
+    /// Maps each row of the sheet with <paramref name="classMap"/>, reporting invalid rows instead
+    /// of throwing at the first invalid cell. See <see cref="ReadRowResults{T}()"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    /// <returns>The result of mapping each row in the sheet.</returns>
+    public IEnumerable<ExcelRowResult<T>> ReadRowResults<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap) => View.ReadRowResults(SheetView.Given(classMap));
+
+    /// <summary>
     /// Checks that the sheet has every column needed to map rows to <typeparamref name="T"/>, and
     /// throws an <see cref="ExcelMappingException"/> listing all of the missing columns if not.
     /// Call this before reading rows to report every missing column at once, rather than one at a
@@ -208,6 +266,17 @@ public class ExcelSheet
     public void ValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>() => View.ValidateHeading<T>();
 
     /// <summary>
+    /// Checks that the sheet has every column <paramref name="classMap"/> needs, and throws an
+    /// <see cref="ExcelMappingException"/> listing all of the missing columns if not. See
+    /// <see cref="ValidateHeading{T}()"/>.
+    /// </summary>
+    /// <typeparam name="T">The type that rows will be mapped to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    public void ValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap) => View.ValidateHeading(SheetView.Given(classMap));
+
+    /// <summary>
     /// Checks that the sheet has every column needed to map rows to <typeparamref name="T"/>.
     /// Optional members are not required. This reads the heading if it has not been read yet.
     /// </summary>
@@ -218,6 +287,18 @@ public class ExcelSheet
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public bool TryValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(out IReadOnlyList<string> problems) => View.TryValidateHeading<T>(out problems);
+
+    /// <summary>
+    /// Checks that the sheet has every column <paramref name="classMap"/> needs. See
+    /// <see cref="TryValidateHeading{T}(out IReadOnlyList{string})"/>.
+    /// </summary>
+    /// <typeparam name="T">The type that rows will be mapped to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    /// <param name="problems">A description of each missing column. Empty if none are missing.</param>
+    /// <returns>True if every required column is present, else false.</returns>
+    public bool TryValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap, out IReadOnlyList<string> problems) => View.TryValidateHeading(SheetView.Given(classMap), out problems);
 
     /// <summary>
     /// Finds the heading of a sheet with rows above it, such as a title or notes, and reads it. The
@@ -241,6 +322,19 @@ public class ExcelSheet
     public ExcelHeading FindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>() => View.FindHeading<T>(HeadingSearch.DefaultMaxRows);
 
     /// <summary>
+    /// Finds the heading of a sheet with rows above it, among the first 50 rows, from the columns
+    /// <paramref name="classMap"/> needs, and reads it. See <see cref="FindHeading{T}()"/>.
+    /// </summary>
+    /// <typeparam name="T">The type that rows will be mapped to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    /// <returns>The heading.</returns>
+    /// <exception cref="ExcelMappingException">No row has the columns the class map needs.</exception>
+    /// <exception cref="InvalidOperationException">The heading has already been read.</exception>
+    public ExcelHeading FindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap) => View.FindHeading(SheetView.Given(classMap), HeadingSearch.DefaultMaxRows);
+
+    /// <summary>
     /// Finds the heading of a sheet with rows above it, such as a title or notes, and reads it. The
     /// heading is the first row, among the first <paramref name="maxRows"/> rows, that has every
     /// column <typeparamref name="T"/> needs by name and at least one of its columns.
@@ -257,6 +351,22 @@ public class ExcelSheet
     public ExcelHeading FindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int maxRows) => View.FindHeading<T>(maxRows);
 
     /// <summary>
+    /// Finds the heading of a sheet with rows above it, among the first <paramref name="maxRows"/>
+    /// rows, from the columns <paramref name="classMap"/> needs, and reads it. See
+    /// <see cref="FindHeading{T}(int)"/>.
+    /// </summary>
+    /// <typeparam name="T">The type that rows will be mapped to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    /// <param name="maxRows">The number of rows to search, starting at <see cref="HeadingIndex"/>.</param>
+    /// <returns>The heading.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="maxRows"/> is zero or negative.</exception>
+    /// <exception cref="ExcelMappingException">No row has the columns the class map needs.</exception>
+    /// <exception cref="InvalidOperationException">The heading has already been read.</exception>
+    public ExcelHeading FindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap, int maxRows) => View.FindHeading(SheetView.Given(classMap), maxRows);
+
+    /// <summary>
     /// Tries to find the heading of a sheet with rows above it, such as a title or notes, and reads it.
     /// See <see cref="FindHeading{T}()"/>.
     /// </summary>
@@ -267,6 +377,19 @@ public class ExcelSheet
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public bool TryFindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>([NotNullWhen(true)] out ExcelHeading? heading)
         => View.TryFindHeading<T>(HeadingSearch.DefaultMaxRows, out heading, out _);
+
+    /// <summary>
+    /// Tries to find the heading of a sheet with rows above it from the columns
+    /// <paramref name="classMap"/> needs, and reads it. See <see cref="FindHeading{T}(ExcelClassMap{T})"/>.
+    /// </summary>
+    /// <typeparam name="T">The type that rows will be mapped to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    /// <param name="heading">The heading, if found.</param>
+    /// <returns>Whether a heading was found. If not, the sheet is unchanged and reading starts from the beginning again.</returns>
+    public bool TryFindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap, [NotNullWhen(true)] out ExcelHeading? heading)
+        => View.TryFindHeading(SheetView.Given(classMap), HeadingSearch.DefaultMaxRows, out heading, out _);
 
     /// <summary>
     /// Tries to find the heading of a sheet with rows above it, such as a title or notes, and reads it.
@@ -280,4 +403,18 @@ public class ExcelSheet
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public bool TryFindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int maxRows, [NotNullWhen(true)] out ExcelHeading? heading)
         => View.TryFindHeading<T>(maxRows, out heading, out _);
+
+    /// <summary>
+    /// Tries to find the heading of a sheet with rows above it from the columns
+    /// <paramref name="classMap"/> needs, and reads it. See <see cref="FindHeading{T}(ExcelClassMap{T}, int)"/>.
+    /// </summary>
+    /// <typeparam name="T">The type that rows will be mapped to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    /// <param name="maxRows">The number of rows to search, starting at <see cref="HeadingIndex"/>.</param>
+    /// <param name="heading">The heading, if found.</param>
+    /// <returns>Whether a heading was found. If not, the sheet is unchanged and reading starts from the beginning again.</returns>
+    public bool TryFindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap, int maxRows, [NotNullWhen(true)] out ExcelHeading? heading)
+        => View.TryFindHeading(SheetView.Given(classMap), maxRows, out heading, out _);
 }

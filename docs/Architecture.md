@@ -127,7 +127,7 @@ The pipeline creates one `CellContext` for each cell and gives it to every trans
 
 ## Trimming
 
-The net8.0 build is annotated for trimming: the mapped type `T` and the types given in attributes are kept, and the reflection-based APIs are marked `[RequiresUnreferencedCode]`/`[RequiresDynamicCode]`. Generic mapper and adapter types created at run time are kept with `[DynamicDependency]`. `tests/TrimmingTests` is published trimmed and run in CI. Native AOT only has the code of the generic types it sees when compiling, so a type's `TypeRule<T>` and the built-in number mappers are created directly where the type is known (as for class maps and their `Map(...)` members), and `MakeGenericType` is only used for types found at run time: `tests/AotTests` is published with native AOT and run in CI. See [Trimming and Native AOT](trimming.md).
+The net8.0 build is annotated for trimming: the mapped type `T` and the types given in attributes are kept, and the reflection-based APIs are marked `[RequiresUnreferencedCode]`/`[RequiresDynamicCode]`. Generic mapper and adapter types created at run time are kept with `[DynamicDependency]`. `tests/TrimmingTests` is published trimmed and run in CI. Native AOT only has the code of the generic types it sees when compiling, so a type's `TypeRule<T>` and the built-in number mappers are created directly where the type is known (as for class maps and their `Map(...)` members), and generic types for types found at run time are made by `GenericTypes.Create`, with an instantiation an `ExcelMappingContext` registered (through `ExcelTypeRegistrar`) or else `MakeGenericType`. So a context's class maps are auto-mapped as usual, with native AOT: `tests/AotTests` is published with native AOT and run in CI. See [Trimming and Native AOT](trimming.md).
 
 ## Public API
 
@@ -150,5 +150,5 @@ The public API of each target framework is listed in `src/PublicAPI/<framework>/
 | `tests/ExcelMapper` | Unit tests of public types, one file per type, mirroring `src/` |
 | `tests/Maps`, `tests/Fallbacks`, `tests/Transformers` | Mapping tests, which read spreadsheets and cover the internal types through the public API |
 | `tests/TrimmingTests` | A trimmed app that checks mapping works after trimming |
-| `tests/AotTests` | A native AOT app that checks class maps of built-in types work with native AOT |
+| `tests/AotTests` | A native AOT app that checks mapping contexts, and class maps of built-in types, work with native AOT without warnings |
 | `benchmarks` | BenchmarkDotNet benchmarks (see [Performance](performance.md)) |

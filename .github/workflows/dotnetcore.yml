@@ -84,8 +84,8 @@ jobs:
     - name: Run
       run: ./trimming-out/TrimmingTests
 
-  # Publish and run a native AOT app that maps rows with class maps of built-in types, which native
-  # AOT supports. Native AOT compiles with clang and links zlib.
+  # Publish and run a native AOT app that maps rows with a mapping context, which must not warn, and
+  # with class maps of built-in types. Native AOT compiles with clang and links zlib.
   test-aot:
 
     runs-on: ubuntu-latest
