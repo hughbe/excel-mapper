@@ -28,6 +28,8 @@ public class Mapping
     private byte[] _numbersCsv = default!;
     private byte[] _smallCsv = default!;
     private byte[] _typedNumbersXlsx = default!;
+    private byte[] _typedDatesXlsx = default!;
+    private byte[] _blankLinesCsv = default!;
 
     [GlobalSetup]
     public void Setup()
@@ -65,6 +67,25 @@ public class Mapping
         }
 
         _typedNumbersXlsx = XlsxBuilder.CreateStream(rows).ToArray();
+
+        // Date cells, which ExcelDataReader returns as DateTime.
+        var dateRows = new object?[RowCount + 1][];
+        dateRows[0] = ["When", "Day"];
+        for (int i = 0; i < RowCount; i++)
+        {
+            dateRows[i + 1] = [new DateTime(2024, 1, 2, 3, 4, 5).AddMinutes(i), new DateTime(2024, 1, 1).AddDays(i % 365)];
+        }
+
+        _typedDatesXlsx = XlsxBuilder.CreateStream(dateRows).ToArray();
+
+        // Every other row is blank.
+        var blankLines = new StringBuilder("Name,Age\n");
+        for (int i = 0; i < RowCount; i++)
+        {
+            blankLines.Append("Name").Append(i).Append(',').Append(i % 90).Append("\n,\n");
+        }
+
+        _blankLinesCsv = Encoding.UTF8.GetBytes(blankLines.ToString());
     }
 
     private static ExcelImporter CreateImporter(byte[] csv)
@@ -266,7 +287,85 @@ public class Mapping
         return count;
     }
 
+    public class Dates
+    {
+        public DateTime When { get; set; }
+        public DateTime Day { get; set; }
+    }
+
+    [Benchmark]
+    public int TypedDates()
+    {
+        using var importer = new ExcelImporter(new MemoryStream(_typedDatesXlsx));
+        int count = 0;
+        foreach (var row in importer.ReadSheet().ReadRows<Dates>())
+        {
+            count += row.Day.Day;
+        }
+
+        return count;
+    }
+
+    public class NameAndAge
+    {
+        public string Name { get; set; } = "";
+        public int Age { get; set; }
+    }
+
+    [Benchmark]
+    public int SkipBlankLines()
+    {
+        // Half the rows are blank, and skipped.
+        using var importer = CreateImporter(_blankLinesCsv);
+        importer.Configuration.SkipBlankLines = true;
+        int count = 0;
+        foreach (var row in importer.ReadSheet().ReadRows<NameAndAge>())
+        {
+            count += row.Age;
+        }
+
+        return count;
+    }
+
+    public class WithMissingColumn
+    {
+        public string Name { get; set; } = "";
+        public int Age { get; set; }
+
+        [ExcelOptional]
+        public string? Department { get; set; }
+    }
+
+    [Benchmark]
+    public int OptionalMissingColumn()
+    {
+        // An optional member whose column the sheet doesn't have.
+        using var importer = CreateImporter(_validCsv);
+        int count = 0;
+        foreach (var row in importer.ReadSheet().ReadRows<WithMissingColumn>())
+        {
+            count += row.Age;
+        }
+
+        return count;
+    }
+
 #if !EXCELMAPPER_3
+    [Benchmark]
+    public int AutoMappedClassWithCulture()
+    {
+        // AutoMappedClass with ExcelImporterConfiguration.Culture set.
+        using var importer = CreateImporter(_validCsv);
+        importer.Configuration.Culture = CultureInfo.InvariantCulture;
+        int count = 0;
+        foreach (var row in importer.ReadSheet().ReadRows<Employee>())
+        {
+            count += row.Age;
+        }
+
+        return count;
+    }
+
     public record EmployeeRecord(string Name, int Age, double Score, decimal Salary, DateTime Joined, bool Active, Guid Id, Status Status, int? Manager, string Notes);
 
     [Benchmark]
