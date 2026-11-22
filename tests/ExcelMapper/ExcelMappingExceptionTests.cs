@@ -198,4 +198,34 @@ public class ExcelMappingExceptionTests
         Assert.Equal("Age", error.ColumnName);
         Assert.Equal("B2", error.CellAddress);
     }
+
+    [Fact]
+    public void Ctor_Message_CellContext()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var sheet = importer.ReadSheet();
+        sheet.ReadHeading();
+        var member = typeof(ExcelMappingExceptionTests).GetMethod(nameof(Ctor_Message_CellContext))!;
+        var context = new CellContext(sheet, 10, 1, member);
+
+        var exception = new ExcelMappingException("Message", context);
+        Assert.Equal("Message in column \"StringValue\" at cell B11 in sheet \"Primitives\".", exception.Message);
+        Assert.Null(exception.InnerException);
+        Assert.Same(sheet, exception.Sheet);
+        Assert.Same(member, exception.Member);
+        Assert.Equal("StringValue", exception.ColumnName);
+        Assert.Equal("B11", exception.CellAddress);
+
+        var innerException = new FormatException();
+        exception = new ExcelMappingException("Message", context, innerException);
+        Assert.Same(innerException, exception.InnerException);
+        Assert.Same(member, exception.Member);
+    }
+
+    [Fact]
+    public void Ctor_DefaultCellContext_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>("context", () => new ExcelMappingException("Message", default(CellContext)));
+        Assert.Throws<ArgumentException>("context", () => new ExcelMappingException("Message", default(CellContext), null));
+    }
 }

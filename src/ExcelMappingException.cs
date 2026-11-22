@@ -56,10 +56,40 @@ public class ExcelMappingException : Exception
     {
     }
 
+    /// <summary>
+    /// Creates an ExcelMappingException for the cell a converter, transformer or fallback is given,
+    /// for example for a value it can't convert. The message gives the cell's address and column
+    /// name, also when reading a region.
+    /// </summary>
+    /// <param name="message">The base error message of the exception.</param>
+    /// <param name="context">The cell.</param>
+    public ExcelMappingException(string message, CellContext context) : this(message, context, null)
+    {
+    }
+
+    /// <summary>
+    /// Creates an ExcelMappingException for the cell a converter, transformer or fallback is given,
+    /// for example for a value it can't convert. The message gives the cell's address and column
+    /// name, also when reading a region.
+    /// </summary>
+    /// <param name="message">The base error message of the exception.</param>
+    /// <param name="context">The cell.</param>
+    /// <param name="innerException">The inner exception of the exception.</param>
+    public ExcelMappingException(string message, CellContext context, Exception? innerException)
+        : this(message, GetReadingSheet(context), context.RowIndex, context.ColumnIndex, innerException, hint: null)
+    {
+        Member = context.Member;
+    }
+
+    private static ExcelSheet GetReadingSheet(CellContext context)
+        => context.ReadingSheet ?? throw new ArgumentException("The context has no sheet.", nameof(context));
+
     private ExcelMappingException(string message, ExcelSheet sheet, int rowIndex, int columnIndex, Exception? innerException, string? hint)
         : base(GetMessage(message, sheet, rowIndex, columnIndex) + hint, innerException)
     {
-        Sheet = sheet;
+        // The message and column name use the heading of the rows being read (a region's, for
+        // the sheet a region is read with), but the sheet is the one the user has.
+        Sheet = sheet?.UserSheet;
         RowIndex = rowIndex;
         ColumnIndex = columnIndex;
         if (columnIndex >= 0 && sheet?.Heading is { } heading && heading.TryGetColumnName(columnIndex, out var columnName))
@@ -117,7 +147,7 @@ public class ExcelMappingException : Exception
     {
         if (readerFactory is Readers.ColumnSelectorReaderFactory selectorFactory)
         {
-            return new ExcelMappingException($"Could not read value for member \"{member?.Name}\" for {selectorFactory.Selector.Describe(sheet)}", sheet, rowIndex, -1);
+            return new ExcelMappingException($"Could not read value for member \"{member?.Name}\" for {selectorFactory.Selector.Describe(new ColumnSelectorContext(sheet))}", sheet, rowIndex, -1);
         }
 
         if (readerFactory is IColumnNameProviderCellReaderFactory columnNameProvider)

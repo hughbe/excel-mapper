@@ -166,43 +166,43 @@ public class MapColumnSelectorTests
 
     public class PrefixSelector(string prefix) : IColumnSelector
     {
-        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
-            => sheet.Heading!.ColumnNames.Where(n => n.StartsWith(prefix, StringComparison.Ordinal)).Select(sheet.Heading.GetColumnIndex).ToArray();
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context)
+            => context.Heading!.ColumnNames.Where(n => n.StartsWith(prefix, StringComparison.Ordinal)).Select(context.Heading.GetColumnIndex).ToArray();
 
-        public string Describe(ExcelSheet sheet) => $"columns starting with \"{prefix}\"";
+        public string Describe(ColumnSelectorContext context) => $"columns starting with \"{prefix}\"";
     }
 
     public class ReversePrefixSelector(string prefix) : IColumnSelector
     {
-        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet) => new PrefixSelector(prefix).SelectColumns(sheet).Reverse().ToArray();
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context) => new PrefixSelector(prefix).SelectColumns(context).Reverse().ToArray();
 
-        public string Describe(ExcelSheet sheet) => $"columns starting with \"{prefix}\", last first";
+        public string Describe(ColumnSelectorContext context) => $"columns starting with \"{prefix}\", last first";
     }
 
     public class PositionsSelector(params int[] positions) : IColumnSelector
     {
-        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet) => positions;
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context) => positions;
 
-        public string Describe(ExcelSheet sheet) => $"columns {string.Join(", ", positions)}";
+        public string Describe(ColumnSelectorContext context) => $"columns {string.Join(", ", positions)}";
     }
 
     private sealed class CountingSelector : IColumnSelector
     {
         public int Calls { get; private set; }
 
-        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context)
         {
             Calls++;
             return [0];
         }
 
-        public string Describe(ExcelSheet sheet) => "the first column";
+        public string Describe(ColumnSelectorContext context) => "the first column";
     }
 
     private sealed class NullSelector : IColumnSelector
     {
-        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet) => null!;
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context) => null!;
 
-        public string Describe(ExcelSheet sheet) => "nothing";
+        public string Describe(ColumnSelectorContext context) => "nothing";
     }
 }

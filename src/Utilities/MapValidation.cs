@@ -181,7 +181,7 @@ internal static class MapValidation
     {
         if (readerFactory is ColumnSelectorReaderFactory selectorFactory)
         {
-            return selectorFactory.Selector.Describe(sheet);
+            return selectorFactory.Selector.Describe(new ColumnSelectorContext(sheet));
         }
 
         if (readerFactory is IColumnNameProviderCellReaderFactory nameProvider &&

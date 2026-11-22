@@ -518,10 +518,10 @@ public class MatchingMapTests
 
     private class ExcelColumnMatcherWithPredicate : IColumnSelector
     {
-        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
-            => Enumerable.Range(0, sheet.NumberOfColumns).Where(i => ColumnMatches(sheet, i)).ToArray();
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context)
+            => Enumerable.Range(0, context.NumberOfColumns).Where(i => ColumnMatches(context, i)).ToArray();
 
-        public string Describe(ExcelSheet sheet) => "matching columns";
+        public string Describe(ColumnSelectorContext context) => "matching columns";
 
         public Func<string, bool> Predicate { get;  }
 
@@ -530,8 +530,8 @@ public class MatchingMapTests
             Predicate = predicate;
         }
 
-        public bool ColumnMatches(ExcelSheet sheet, int columnIndex)
-            => Predicate?.Invoke(sheet.Heading?.GetColumnName(columnIndex) ?? "NoSuchName") ?? true;
+        public bool ColumnMatches(ColumnSelectorContext context, int columnIndex)
+            => Predicate?.Invoke(context.Heading?.GetColumnName(columnIndex) ?? "NoSuchName") ?? true;
     }
 
     private class ColumnMatchingRegexAttributeClass
@@ -593,16 +593,16 @@ public class MatchingMapTests
 
     private class MatchingColumnMatcher : IColumnSelector
     {
-        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
-            => Enumerable.Range(0, sheet.NumberOfColumns).Where(i => ColumnMatches(sheet, i)).ToArray();
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context)
+            => Enumerable.Range(0, context.NumberOfColumns).Where(i => ColumnMatches(context, i)).ToArray();
 
-        public string Describe(ExcelSheet sheet) => "matching columns";
+        public string Describe(ColumnSelectorContext context) => "matching columns";
 
         public MatchingColumnMatcher()
         {
         }
 
-        public bool ColumnMatches(ExcelSheet sheet, int columnIndex)
+        public bool ColumnMatches(ColumnSelectorContext context, int columnIndex)
             => columnIndex == 1;
     }
 
@@ -622,10 +622,10 @@ public class MatchingMapTests
 
     private class MatchingArgumentsColumnMatcher : IColumnSelector
     {
-        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
-            => Enumerable.Range(0, sheet.NumberOfColumns).Where(i => ColumnMatches(sheet, i)).ToArray();
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context)
+            => Enumerable.Range(0, context.NumberOfColumns).Where(i => ColumnMatches(context, i)).ToArray();
 
-        public string Describe(ExcelSheet sheet) => "matching columns";
+        public string Describe(ColumnSelectorContext context) => "matching columns";
 
         public int ColumnIndex { get; }
 
@@ -634,7 +634,7 @@ public class MatchingMapTests
             ColumnIndex = columnIndex;
         }
 
-        public bool ColumnMatches(ExcelSheet sheet, int columnIndex)
+        public bool ColumnMatches(ColumnSelectorContext context, int columnIndex)
             => columnIndex == ColumnIndex;
     }
 
@@ -669,16 +669,16 @@ public class MatchingMapTests
 
     private class NoMatchingColumnMatcher : IColumnSelector
     {
-        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
-            => Enumerable.Range(0, sheet.NumberOfColumns).Where(i => ColumnMatches(sheet, i)).ToArray();
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context)
+            => Enumerable.Range(0, context.NumberOfColumns).Where(i => ColumnMatches(context, i)).ToArray();
 
-        public string Describe(ExcelSheet sheet) => "matching columns";
+        public string Describe(ColumnSelectorContext context) => "matching columns";
 
         public NoMatchingColumnMatcher()
         {
         }
 
-        public bool ColumnMatches(ExcelSheet sheet, int columnIndex)
+        public bool ColumnMatches(ColumnSelectorContext context, int columnIndex)
             => false;
     }
 }

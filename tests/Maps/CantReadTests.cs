@@ -113,9 +113,9 @@ public class CantReadTests
 
     private class NeverMatcher : IColumnSelector
     {
-        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet) => [];
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context) => [];
 
-        public string Describe(ExcelSheet sheet) => "columns matching nothing";
+        public string Describe(ColumnSelectorContext context) => "columns matching nothing";
     }
 
     [Fact]

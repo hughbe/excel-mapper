@@ -627,10 +627,10 @@ public class MapCustomColumnMatchingTests
 
     private class NamesColumnMatcher : IColumnSelector
     {
-        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
-            => Enumerable.Range(0, sheet.NumberOfColumns).Where(i => ColumnMatches(sheet, i)).ToArray();
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context)
+            => Enumerable.Range(0, context.NumberOfColumns).Where(i => ColumnMatches(context, i)).ToArray();
 
-        public string Describe(ExcelSheet sheet) => "matching columns";
+        public string Describe(ColumnSelectorContext context) => "matching columns";
 
         public string[] ColumnNames { get; }
 
@@ -639,8 +639,8 @@ public class MapCustomColumnMatchingTests
             ColumnNames = columnNames;
         }
 
-        public bool ColumnMatches(ExcelSheet sheet, int columnIndex)
-            => ColumnNames.Contains(sheet.Heading!.GetColumnName(columnIndex));
+        public bool ColumnMatches(ColumnSelectorContext context, int columnIndex)
+            => ColumnNames.Contains(context.Heading!.GetColumnName(columnIndex));
     }
     
     

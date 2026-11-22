@@ -72,9 +72,9 @@ public class ValueMapTTests
 
     private sealed class LastColumnSelector : IColumnSelector
     {
-        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet) => [sheet.NumberOfColumns - 1];
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context) => [context.NumberOfColumns - 1];
 
-        public string Describe(ExcelSheet sheet) => "the last column";
+        public string Describe(ColumnSelectorContext context) => "the last column";
     }
 
     private class TestClass
