@@ -2,20 +2,14 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Mappers;
 
-/// <summary>
-/// An <see cref="EnumMapper"/> for a known enum type, which converts without boxing (see
-/// <see cref="ITypedCellMapper{T}"/>), for members of the enum type and of its nullable type.
-/// </summary>
-internal sealed class EnumMapper<TEnum> : EnumMapper, ITypedCellMapper<TEnum>, ITypedCellMapper<TEnum?> where TEnum : struct, Enum
+internal sealed class EnumMapper<TEnum>(bool ignoreCase) : ICellMapper<TEnum>, ICellMapper<TEnum?> where TEnum : struct, Enum
 {
-    public EnumMapper(bool ignoreCase) : base(typeof(TEnum), ignoreCase)
-    {
-    }
+    public bool IgnoreCase { get; } = ignoreCase;
 
-    CellConversion ITypedCellMapper<TEnum>.Convert(ReadCellResult cell, out TEnum value)
+    CellConversion ICellMapper<TEnum>.Convert(ReadCellResult cell, out TEnum value)
         => Enum.TryParse(cell.GetString(), IgnoreCase, out value) ? CellConversion.Success : CellConversion.Invalid;
 
-    CellConversion ITypedCellMapper<TEnum?>.Convert(ReadCellResult cell, out TEnum? value)
+    CellConversion ICellMapper<TEnum?>.Convert(ReadCellResult cell, out TEnum? value)
     {
         if (Enum.TryParse(cell.GetString(), IgnoreCase, out TEnum result))
         {
@@ -26,12 +20,23 @@ internal sealed class EnumMapper<TEnum> : EnumMapper, ITypedCellMapper<TEnum>, I
         value = null;
         return CellConversion.Invalid;
     }
+
+    public Exception CreateException(ReadCellResult cell)
+    {
+        var stringValue = cell.GetString();
+        var ignoreCase = IgnoreCase;
+
+        // Numbers can be out of range (an OverflowException): parse to find out.
+        return stringValue is null || stringValue.Length == 0 || char.IsDigit(stringValue.TrimStart()[0]) || stringValue.TrimStart()[0] is '-' or '+'
+            ? MapperUtilities.InvalidFromParse(() => Enum.Parse(typeof(TEnum), stringValue!, ignoreCase))
+            : new ArgumentException($"The value \"{stringValue}\" isn't a value of {typeof(TEnum).Name}.");
+    }
 }
 
 internal static class EnumMappers
 {
     /// <summary>
-    /// Creates an <see cref="EnumMapper"/> for an enum type, which converts without boxing.
+    /// Creates the mapper for an enum type, which maps the type and its nullable version.
     /// </summary>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
@@ -39,17 +44,11 @@ internal static class EnumMappers
     // The mapper type is cached, so the trimmer can't see it's created here.
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(EnumMapper<>))]
 #endif
-    public static EnumMapper Create(Type enumType, bool ignoreCase)
+    public static object Create(Type enumType, bool ignoreCase)
     {
-        if (!enumType.IsEnum)
-        {
-            // Let EnumMapper report the error.
-            return new EnumMapper(enumType, ignoreCase);
-        }
-
         // Pass the argument as an array: on netstandard2.0, a bool binds to CreateInstance(Type, bool nonPublic).
         var mapperType = s_mapperTypes.GetOrAdd(enumType, static t => typeof(EnumMapper<>).MakeGenericType(t));
-        return (EnumMapper)Activator.CreateInstance(mapperType, [ignoreCase])!;
+        return Activator.CreateInstance(mapperType, [ignoreCase])!;
     }
 
     // EnumMapper<TEnum> for each enum type, so that it's created once.

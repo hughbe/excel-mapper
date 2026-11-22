@@ -65,6 +65,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Changed
 
+- A value given by `[ExcelMappingDictionary]` that isn't of the member's type is reported when the class map is created, with an `ExcelMappingException` naming the attribute and the member, instead of an `InvalidCastException` when that text is read. ([#168](https://github.com/hughbe/excel-mapper/pull/168))
 - The inner exception of the `ExcelMappingException` for an invalid number, date, `Guid`, `bool`, enum or `Uri` has ExcelMapper's own message, naming the value, the type and any formats (for example `The value "abc" isn't a valid Int32.`), instead of the .NET parser's message. Its type is unchanged. ([#157](https://github.com/hughbe/excel-mapper/pull/157))
 - Code page encodings are registered automatically; `Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)` is no longer needed. The netstandard builds now depend on `System.Text.Encoding.CodePages`. ([#122](https://github.com/hughbe/excel-mapper/pull/122))
 - Trimming only changes text, so cells Excel stores as dates or numbers keep their type. ([#122](https://github.com/hughbe/excel-mapper/pull/122))
@@ -93,6 +94,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Performance
 
+- Every member converts its values without boxing, including members with `[ExcelMappingDictionary]` or `WithMapping`, `object`, `IConvertible`, `Uri` and `Version` members, and `IParsable<T>` and other `IConvertible` types, which used to go through a slower untyped path: a class with such members maps about 10% faster. ([#168](https://github.com/hughbe/excel-mapper/pull/168))
 - Invalid values no longer throw and catch an exception for every cell: 7x faster with a fallback. ([#121](https://github.com/hughbe/excel-mapper/pull/121))
 - Compiled setters and constructors, and fewer per-row and per-cell allocations. ([#121](https://github.com/hughbe/excel-mapper/pull/121), [#127](https://github.com/hughbe/excel-mapper/pull/127))
 - `ReadRowResults` costs the same as `ReadRows` for valid data. ([#126](https://github.com/hughbe/excel-mapper/pull/126))

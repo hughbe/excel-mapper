@@ -88,12 +88,11 @@ public class MapCellFallbackTests
     }
 
     [Fact]
-    public void ReadRows_ObjectPipeline_UsesFallback()
+    public void ReadRows_WithMapping_UsesFallback()
     {
         using var importer = Helpers.GetCsvImporter("Value,Other\nx,1\n");
         importer.Configuration.RegisterClassMap<IntRow>(c =>
         {
-            // A mapping dictionary isn't a converter, so values go through the pipeline as objects.
             c.Map(r => r.Value).WithInvalidFallback(new FixedIntFallback(9)).WithMapping(new Dictionary<string, int> { ["y"] = 1 });
         });
         Assert.Equal(9, importer.ReadSheet().ReadRows<IntRow>().Single().Value);

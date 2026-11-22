@@ -1,154 +1,124 @@
 using System.Reflection;
-using ExcelMapper.Abstractions;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
+using ExcelMapper.Transformers;
 
 namespace ExcelMapper;
 
 /// <summary>
-/// Reads a single cell of an excel sheet and maps the value of the cell to the
-/// type of the property or field.
+/// How the cells of a member of type <typeparamref name="T"/> are converted: see
+/// <see cref="ValuePipeline"/>.
 /// </summary>
+/// <typeparam name="T">The type of the member, or of the elements or values of a collection.</typeparam>
 public class ValuePipeline<T> : ValuePipeline
 {
     /// <summary>
-    /// Maps a cell to a <typeparamref name="T"/>: through the typed converters if every mapper is
-    /// one, without boxing, and otherwise through the pipeline as objects.
+    /// Gets the mappers, which are tried in order until one converts the value.
+    /// </summary>
+    internal IList<ICellMapper<T>> Mappers { get; } = new NonNullCollection<ICellMapper<T>>();
+
+    /// <summary>
+    /// Gets or sets the value of empty cells. Null means empty cells are converted by the mappers.
+    /// </summary>
+    internal ICellFallback<T>? EmptyFallback
+    {
+        get => _emptyFallback;
+        set
+        {
+            _emptyFallback = value;
+            _fallbackVersion++;
+        }
+    }
+
+    private ICellFallback<T>? _emptyFallback;
+
+    /// <summary>
+    /// Gets or sets the value of cells that no mapper converts. Null means the default value.
+    /// </summary>
+    internal ICellFallback<T>? InvalidFallback
+    {
+        get => _invalidFallback;
+        set
+        {
+            _invalidFallback = value;
+            _fallbackVersion++;
+        }
+    }
+
+    private ICellFallback<T>? _invalidFallback;
+
+    private int _fallbackVersion;
+
+    internal override IEnumerable<object> MapperObjects => Mappers;
+
+    internal override int MapperCount => Mappers.Count;
+
+    internal override void AddMapper(object mapper) => Mappers.Add((ICellMapper<T>)mapper);
+
+    internal override void SetFixedFallback(object? value, bool empty, bool invalid)
+    {
+        var fallback = new FixedValueFallback<T>(value);
+        if (empty)
+        {
+            EmptyFallback = fallback;
+        }
+
+        if (invalid)
+        {
+            InvalidFallback = fallback;
+        }
+    }
+
+    internal override void SetThrowingFallback(bool empty, bool invalid)
+    {
+        if (empty)
+        {
+            EmptyFallback = ThrowFallback<T>.Instance;
+        }
+
+        if (invalid)
+        {
+            InvalidFallback = ThrowFallback<T>.Instance;
+        }
+    }
+
+    private int Version => TransformersVersion + ((NonNullCollection<ICellMapper<T>>)Mappers).Version + _fallbackVersion;
+
+    /// <summary>
+    /// Maps a cell to a <typeparamref name="T"/>, without boxing: the transformers, then the empty
+    /// fallback for an empty cell, then the mappers in order (a success stops; a success that can
+    /// be replaced and an invalid value are kept until a later result replaces them), then the
+    /// invalid fallback.
     /// </summary>
     internal T Map(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting, MemberInfo? member)
     {
         var plan = GetPlan();
-        if (plan.Converters is { } converters)
+
+        // Use indexed loops: enumerating through an interface allocates for every cell.
+        var transformers = plan.Transformers;
+        for (int i = 0; i < transformers.Length; i++)
         {
-            return Convert(plan, converters, sheet, rowIndex, readResult, preserveFormatting, member);
-        }
-
-        var result = GetPropertyValue(this, sheet, rowIndex, readResult, preserveFormatting, member);
-        return CastValue<T>(result, sheet, rowIndex, readResult.ColumnIndex, member)!;
-    }
-
-    /// <summary>
-    /// Maps a cell to a <typeparamref name="T"/> with any pipeline: <see cref="Map(ExcelSheet, int, ReadCellResult, bool, MemberInfo?)"/> for a
-    /// <see cref="ValuePipeline{T}"/>, and otherwise through the pipeline as objects.
-    /// </summary>
-    internal static T Map(ValuePipeline pipeline, ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting, MemberInfo? member)
-    {
-        if (pipeline is ValuePipeline<T> typedPipeline)
-        {
-            return typedPipeline.Map(sheet, rowIndex, readResult, preserveFormatting, member);
-        }
-
-        var result = GetPropertyValue(pipeline, sheet, rowIndex, readResult, preserveFormatting, member);
-        return CastValue<T>(result, sheet, rowIndex, readResult.ColumnIndex, member)!;
-    }
-
-    /// <summary>
-    /// The pipeline as arrays and fields, so that mapping a cell doesn't go through the pipeline's
-    /// interfaces. Rebuilt when the pipeline changes.
-    /// </summary>
-    private sealed class Plan(int version, ITypedCellMapper<T>?[]? converters, ICellConverter<T>?[]? cellConverters, Abstractions.ICellTransformer[] transformers, IFallbackItem? emptyFallback, IFallbackItem? invalidFallback)
-    {
-        public int Version { get; } = version;
-
-        // The mappers as typed converters, or null if any of them isn't one (for example a custom
-        // mapper), in which case values go through the pipeline as objects. A mapper for an
-        // ICellConverter<T> is null here, and its converter is in CellConverters.
-        public ITypedCellMapper<T>?[]? Converters { get; } = converters;
-
-        // The ICellConverter<T> of each mapper that has one (see CellConverterMapper<T>), or null
-        // if no mapper has one.
-        public ICellConverter<T>?[]? CellConverters { get; } = cellConverters;
-
-        public Abstractions.ICellTransformer[] Transformers { get; } = transformers;
-
-        public IFallbackItem? EmptyFallback { get; } = emptyFallback;
-
-        public IFallbackItem? InvalidFallback { get; } = invalidFallback;
-
-        public bool InvalidFallbackUsesException { get; } = invalidFallback is not null && FallbackUsesException(invalidFallback);
-
-        // The ICellFallback<T> of each fallback that has one, called without boxing.
-        public ICellFallback<T>? TypedEmptyFallback { get; } = (emptyFallback as CellFallbackItem<T>)?.Fallback;
-
-        public ICellFallback<T>? TypedInvalidFallback { get; } = (invalidFallback as CellFallbackItem<T>)?.Fallback;
-    }
-
-    private Plan? _plan;
-
-    private Plan GetPlan()
-    {
-        var version = Version;
-        var plan = _plan;
-        if (plan is null || plan.Version != version)
-        {
-            var converters = CreateConverters((NonNullCollection<ICellMapper>)Mappers, out var cellConverters);
-            plan = new Plan(version, converters, cellConverters, [.. Transformers], EmptyFallback, InvalidFallback);
-            _plan = plan;
-        }
-
-        return plan;
-    }
-
-    private static ITypedCellMapper<T>?[]? CreateConverters(NonNullCollection<ICellMapper> mappers, out ICellConverter<T>?[]? cellConverters)
-    {
-        cellConverters = null;
-        var converters = new ITypedCellMapper<T>?[mappers.Count];
-        for (int i = 0; i < converters.Length; i++)
-        {
-            if (mappers[i] is CellConverterMapper<T> cellConverterMapper)
-            {
-                cellConverters ??= new ICellConverter<T>?[converters.Length];
-                cellConverters[i] = cellConverterMapper.Converter;
-            }
-            else if (mappers[i] is ITypedCellMapper<T> converter)
-            {
-                converters[i] = converter;
-            }
-            else
-            {
-                cellConverters = null;
-                return null;
-            }
-        }
-
-        return converters;
-    }
-
-    /// <summary>
-    /// Maps a cell through the typed converters, with the same rules as
-    /// <see cref="ValuePipeline.GetPropertyValue"/>: transformers, the empty fallback, then the
-    /// converters (a success stops, a success that can be replaced and an invalid value are kept
-    /// until a later result replaces them), then the invalid fallback.
-    /// </summary>
-    private T Convert(Plan plan, ITypedCellMapper<T>?[] converters, ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting, MemberInfo? member)
-    {
-        if (plan.Transformers.Length != 0)
-        {
-            readResult = ApplyTransformers(plan.Transformers, sheet, rowIndex, readResult, preserveFormatting, member);
+            readResult = transformers[i].Transform(readResult, sheet, rowIndex, member, preserveFormatting);
         }
 
         if (plan.EmptyFallback is { } emptyFallback && readResult.IsEmpty())
         {
-            if (plan.TypedEmptyFallback is { } typedEmptyFallback)
-            {
-                return typedEmptyFallback.Fallback(new CellValue(readResult), new CellContext(sheet, rowIndex, readResult.ColumnIndex, member), null);
-            }
-
-            return CastValue<T>(emptyFallback.PerformFallback(sheet, rowIndex, readResult, null, member), sheet, rowIndex, readResult.ColumnIndex, member)!;
+            return emptyFallback.Fallback(new CellValue(readResult), new CellContext(sheet, rowIndex, readResult.ColumnIndex, member), null);
         }
 
         var state = CellConversion.NotHandled;
         T result = default!;
         var invalidIndex = -1;
         object? invalidError = null;
+        var mappers = plan.Mappers;
         var cellConverters = plan.CellConverters;
-        for (int i = 0; i < converters.Length; i++)
+        for (int i = 0; i < mappers.Length; i++)
         {
             CellConversion conversion;
             T value;
-            if (converters[i] is { } converter)
+            if (mappers[i] is { } mapper)
             {
-                conversion = converter.Convert(readResult, out value);
+                conversion = mapper.Convert(readResult, out value);
             }
             else
             {
@@ -166,7 +136,7 @@ public class ValuePipeline<T> : ValuePipeline
                 case CellConversion.Invalid:
                     state = CellConversion.Invalid;
                     invalidIndex = i;
-                    if (converters[i] is not null)
+                    if (mappers[i] is not null)
                     {
                         invalidError = null;
                     }
@@ -182,24 +152,21 @@ public class ValuePipeline<T> : ValuePipeline
 
         if (plan.InvalidFallback is { } invalidFallback)
         {
-            // Create the exception only if the fallback uses it: with the built-in mapper's own Map, or
-            // from the error an ICellConverter<T> returned.
+            // Create the exception only if the fallback uses it: from the mapper, or from the error
+            // an ICellConverter<T> returned.
             var exception = state == CellConversion.Invalid && plan.InvalidFallbackUsesException
-                ? converters[invalidIndex] is { } invalidConverter
-                    ? invalidConverter.Map(readResult).Exception
+                ? mappers[invalidIndex] is { } invalidMapper
+                    ? invalidMapper.CreateException(readResult)
                     : CellConversionResult<T>.CreateException(invalidError)
                 : null;
-            if (plan.TypedInvalidFallback is { } typedInvalidFallback)
-            {
-                return typedInvalidFallback.Fallback(new CellValue(readResult), new CellContext(sheet, rowIndex, readResult.ColumnIndex, member), exception);
-            }
-
-            return CastValue<T>(invalidFallback.PerformFallback(sheet, rowIndex, readResult, exception, member), sheet, rowIndex, readResult.ColumnIndex, member)!;
+            return invalidFallback.Fallback(new CellValue(readResult), new CellContext(sheet, rowIndex, readResult.ColumnIndex, member), exception);
         }
 
         return CastValue<T>(null, sheet, rowIndex, readResult.ColumnIndex, member)!;
     }
 
+    // An ICellConverter<T> gets the cell's context, and its error is kept from the conversion: it
+    // can't be asked for an exception afterwards without converting the value again.
     private static CellConversion ConvertWithCellConverter(ICellConverter<T> converter, ExcelSheet sheet, int rowIndex, ReadCellResult readResult, MemberInfo? member, out T value, ref object? invalidError)
     {
         var result = converter.Convert(new CellValue(readResult), new CellContext(sheet, rowIndex, readResult.ColumnIndex, member));
@@ -214,5 +181,59 @@ public class ValuePipeline<T> : ValuePipeline
             default:
                 return CellConversion.NotHandled;
         }
+    }
+
+    // A snapshot of the pipeline, made when it's first used and again after it changes, so that
+    // mapping a cell reads arrays rather than lists through interfaces.
+    private sealed class Plan(int version, ICellMapper<T>?[] mappers, ICellConverter<T>?[]? cellConverters, IPipelineTransformer[] transformers, ICellFallback<T>? emptyFallback, ICellFallback<T>? invalidFallback)
+    {
+        public int Version { get; } = version;
+
+        // The mappers. The mapper for an ICellConverter<T> is null here, and its converter is in
+        // CellConverters.
+        public ICellMapper<T>?[] Mappers { get; } = mappers;
+
+        // The ICellConverter<T> of each mapper that has one (see CellConverterMapper<T>), or null
+        // if no mapper has one.
+        public ICellConverter<T>?[]? CellConverters { get; } = cellConverters;
+
+        public IPipelineTransformer[] Transformers { get; } = transformers;
+
+        public ICellFallback<T>? EmptyFallback { get; } = emptyFallback;
+
+        public ICellFallback<T>? InvalidFallback { get; } = invalidFallback;
+
+        // Fixed values don't use the exception, so it isn't created for them.
+        public bool InvalidFallbackUsesException { get; } = invalidFallback is not null and not FixedValueFallback<T>;
+    }
+
+    private Plan? _plan;
+
+    private Plan GetPlan()
+    {
+        var version = Version;
+        var plan = _plan;
+        if (plan is null || plan.Version != version)
+        {
+            var mappers = new ICellMapper<T>?[Mappers.Count];
+            ICellConverter<T>?[]? cellConverters = null;
+            for (int i = 0; i < mappers.Length; i++)
+            {
+                if (Mappers[i] is CellConverterMapper<T> cellConverterMapper)
+                {
+                    cellConverters ??= new ICellConverter<T>?[mappers.Length];
+                    cellConverters[i] = cellConverterMapper.Converter;
+                }
+                else
+                {
+                    mappers[i] = Mappers[i];
+                }
+            }
+
+            plan = new Plan(version, mappers, cellConverters, [.. Transformers], EmptyFallback, InvalidFallback);
+            _plan = plan;
+        }
+
+        return plan;
     }
 }

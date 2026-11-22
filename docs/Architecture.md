@@ -87,14 +87,14 @@ A `ValuePipeline<T>` turns a cell into a `T`. The stages, in order:
 3. **Converters** are tried in order. Each one converts the value, says it's invalid, or doesn't handle it, so the next one tries. By default this is the built-in conversion for the member's type; `WithConverter` replaces it, `WithMapping` adds a mapping dictionary, and `WithFormats` and the other format methods configure it.
 4. **Invalid values** use the invalid fallback: by default an `ExcelMappingException` for the cell (`WithInvalidFallback`, `[ExcelInvalidValue]`, `[ExcelInvalidFallback]`).
 
-Internally, each stage holds the older, untyped types: `ICellTransformer` (in `ExcelMapper.Abstractions`), `ICellMapper` and `IFallbackItem`. The public extension points are adapted to them: `CellTransformerAdapter` for `ICellTransformer`, `CellConverterMapper<T>` for `ICellConverter<T>` (and `DelegateCellConverter<T>` for `WithConverter(value => ...)`), and `CellFallbackItem<T>` for `ICellFallback<T>`. `NullableCellConverter<T>` and `NullableCellFallback<T>` let a converter or fallback for `T` serve a `T?` member.
+Every stage is typed, so values are converted as `T` from the cell to the member, without boxing:
 
-### Typed and object paths
+- **Mappers** implement the internal `ICellMapper<T>`: `Convert(cell, out T value)` returns `Success`, `SuccessUnlessReplaced` (strings, so that a later mapping dictionary can replace the text), `Invalid` or `NotHandled`, and `CreateException(cell)` creates the exception for an invalid cell, only when a fallback or `ReadRowResults` uses it. The mappers for value types also implement `ICellMapper<T?>`, so nullable members share them.
+- **Converters** (`ICellConverter<T>`, and `WithConverter(value => ...)` through `DelegateCellConverter<T>`) are carried in the list of mappers by `CellConverterMapper<T>`, and called by the pipeline with the cell's `CellContext`. The pipeline keeps the error a converter returns, since it can't be asked for an exception afterwards without converting again.
+- **Fallbacks** are `ICellFallback<T>`: the public interface, `FixedValueFallback<T>` for fixed values and `ThrowFallback<T>` for errors (which records the error instead of throwing while `ReadRowResults` collects errors).
+- **Transformers** implement the internal `IPipelineTransformer`, which works on the cell directly: `TrimStringCellTransformer`, and `CellTransformerAdapter` for `ICellTransformer`.
 
-The first time a pipeline maps a value, it builds a plan (rebuilt if the pipeline changes):
-
-- **Typed path.** If every mapper is a typed converter (`ITypedCellMapper<T>`, which the built-in mappers for strings, numbers, booleans, dates, times, durations, GUIDs and enums are) or wraps an `ICellConverter<T>`, values are converted as `T` without boxing, and typed fallbacks are called directly.
-- **Object path.** Otherwise (for example with a mapping dictionary, or for `Uri`, `Version`, `IParsable<T>` and `IConvertible` types), values go through the pipeline as objects and are cast to `T` at the end. The results are the same.
+`NullableCellConverter<T>` and `NullableCellFallback<T>` let a converter or fallback for `T` serve a `T?` member. The first time a pipeline maps a value, it takes a snapshot of its stages as arrays (taken again if the pipeline changes), so mapping a cell doesn't enumerate lists through interfaces.
 
 | Member type | Built-in mapper (in `src/Mappers`) |
 |---|---|
@@ -104,13 +104,14 @@ The first time a pipeline maps a value, it builds a plan (rebuilt if the pipelin
 | `DateTime`, `DateTimeOffset`, `DateOnly`, `TimeOnly`, `TimeSpan` | `DateTimeMapper`, `DateTimeOffsetMapper`, `DateOnlyMapper`, `TimeOnlyMapper`, `TimeSpanMapper` (Excel dates, serial numbers and text in the default or given formats) |
 | Enums | `EnumMapper<T>` |
 | `Guid`, `Uri`, `Version` | `GuidMapper`, `UriMapper`, `VersionMapper` |
-| `object`, `IConvertible` members | `ObjectMapper` (the value as Excel stores it) |
-| Other `IParsable<T>` (.NET 7+) and `IConvertible` types | `ParsableMapper<T>`, `ChangeTypeMapper` |
+| `object`, `IConvertible` members | `ObjectMapper<T>` (the value as Excel stores it) |
+| Other `IParsable<T>` (.NET 8) and `IConvertible` types | `ParsableMapper<T>` and `StructParsableMapper<T>`, `ChangeTypeMapper<T>` |
+| Values given by `[ExcelMappingDictionary]` and `WithMapping` | `MappingDictionaryMapper<T>` |
 
 ## Errors
 
 - **`ExcelMappingException`** reports the cell (`CellAddress`, `ColumnName`, `Member`, one-based row in the message) and wraps the converter's exception.
-- **Exceptions are created only when they're used.** Mappers return invalid results with a `Func<Exception>` (`CellMapperResult.Invalid`, `CellConversionResult<T>.Invalid(Func<Exception>)`), and fixed-value fallbacks don't need the exception, so an invalid cell with a fallback doesn't throw or create one.
+- **Exceptions are created only when they're used.** A mapper reports an invalid cell without an exception, and the pipeline asks it for one (`ICellMapper<T>.CreateException`) only if the fallback uses it. A converter can return `CellConversionResult<T>.Invalid(() => exception)`. Fixed-value fallbacks don't use the exception, so an invalid cell with a fallback doesn't create one.
 - **`ReadRowResults<T>`** sets `ExcelSheet.CollectedErrors` while it maps a row: errors are added to it rather than thrown, so every invalid cell in the row is reported, along with data-annotation failures (`ValidateDataAnnotations`). A member whose value had an error isn't set, so it keeps its initial value.
 
 ## Trimming

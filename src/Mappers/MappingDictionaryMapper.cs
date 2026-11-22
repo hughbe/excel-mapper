@@ -1,26 +1,15 @@
-﻿namespace ExcelMapper.Mappers;
+namespace ExcelMapper.Mappers;
 
 /// <summary>
-/// Tries to map the value of a cell to an object using a mapping dictionary.
+/// Maps fixed text to values, for <see cref="ExcelMappingDictionaryAttribute"/> and
+/// <c>WithMapping(dictionary)</c>.
 /// </summary>
-internal class MappingDictionaryMapper<T> : ICellMapper
+internal sealed class MappingDictionaryMapper<T> : ICellMapper<T>
 {
-    /// <summary>
-    /// Gets the dictionary used to map the value of a cell to an object.
-    /// </summary>
     public IReadOnlyDictionary<string, T> MappingDictionary { get; }
 
-    /// <summary>
-    /// Gets whether or not a failure to match is an error.
-    /// </summary>
     public MappingDictionaryMapperBehavior Behavior { get; }
 
-    /// <summary>
-    /// Constructs a mapper that tries to map the value of a cell to an object using a mapping dictionary.
-    /// </summary>
-    /// <param name="mappingDictionary">The dictionary used to map the value of a cell to an object.</param>
-    /// <param name="comparer">The equality comparer used to the value of a cell to an object.</param>
-    /// <param name="behavior">Whether or not a failure to match is an error.</param>
     public MappingDictionaryMapper(IDictionary<string, T> mappingDictionary, IEqualityComparer<string>? comparer, MappingDictionaryMapperBehavior behavior)
     {
         ThrowHelpers.ThrowIfNull(mappingDictionary, nameof(mappingDictionary));
@@ -30,21 +19,19 @@ internal class MappingDictionaryMapper<T> : ICellMapper
         Behavior = behavior;
     }
 
-    /// <inheritdoc/>
-    public CellMapperResult Map(ReadCellResult readResult)
+    public CellConversion Convert(ReadCellResult cell, out T value)
     {
-        // If we didn't find anything, keep going. This is not necessarily a fatal error.
-        var stringValue = readResult.GetString();
-        if (stringValue is null || !MappingDictionary.TryGetValue(stringValue, out T? result))
+        var stringValue = cell.GetString();
+        if (stringValue is not null && MappingDictionary.TryGetValue(stringValue, out value!))
         {
-            if (Behavior == MappingDictionaryMapperBehavior.Required)
-            {
-                return CellMapperResult.Invalid(new ExcelMappingException($"No mapping for value \"{stringValue}\"."));
-            }
-
-            return CellMapperResult.Ignore();
+            return CellConversion.Success;
         }
 
-        return CellMapperResult.Success(result!);
+        // Text that isn't in the dictionary is converted by the other mappers, unless it's required.
+        value = default!;
+        return Behavior == MappingDictionaryMapperBehavior.Required ? CellConversion.Invalid : CellConversion.NotHandled;
     }
+
+    public Exception CreateException(ReadCellResult cell)
+        => new ExcelMappingException($"No mapping for value \"{cell.GetString()}\".");
 }

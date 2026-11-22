@@ -3,11 +3,10 @@ using System.Linq;
 namespace ExcelMapper.Tests;
 
 /// <summary>
-/// A member whose mappers aren't all typed converters (here, because of a mapping dictionary) is
-/// mapped through the pipeline as objects. These check that the built-in conversions give the same
-/// values on that path.
+/// Each built-in type with a mapping dictionary: text the dictionary doesn't map is converted as
+/// usual, for every kind of cell (typed values, serial numbers, durations and text).
 /// </summary>
-public class MapObjectPipelineTests
+public class MapBuiltInTypesWithMappingTests
 {
     [Fact]
     public void ReadRows_Bool_ReturnsExpected()

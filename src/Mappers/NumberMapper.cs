@@ -70,72 +70,42 @@ internal abstract class NumberMapper : INumberStyleCellMapper
     internal static NumberStyles GetDefaultStyle(TypeCode typeCode)
         => IsInteger(typeCode) ? NumberStyles.Number : NumberStyles.Number | NumberStyles.AllowExponent;
 
-    public CellMapperResult Map(ReadCellResult readResult)
+    public Exception CreateException(ReadCellResult cell)
     {
-        var value = readResult.GetValue();
+        var value = cell.GetValue();
 
-        // Excel stores every number as a double.
-        if (value is double doubleValue)
+        // Excel stores every number as a double. A fractional number isn't silently truncated for
+        // an integer type: "2.7" as text can't be parsed as an int, so neither can 2.7.
+        if (value is double doubleValue && IsInteger(_typeCode) && Math.Floor(doubleValue) != doubleValue && !double.IsNaN(doubleValue) && !double.IsInfinity(doubleValue))
         {
-            // Pass the boxed value on, rather than boxing the double again.
-            return FromDouble(doubleValue, value);
+            return MapperUtilities.NotWholeNumber(doubleValue, Type);
         }
 
-        // Other typed values, such as booleans and dates, are converted as before.
+        // Numbers out of range, and other typed values such as booleans and dates.
         if (value is not null and not string)
         {
-            try
-            {
-                return CellMapperResult.Success(Convert.ChangeType(value, Type, CultureInfo.InvariantCulture));
-            }
-            catch (Exception exception)
-            {
-                return CellMapperResult.Invalid(exception);
-            }
+            var type = Type;
+            return MapperUtilities.InvalidFromParse(() => Convert.ChangeType(value, type, CultureInfo.InvariantCulture));
         }
 
-        var stringValue = GetNumberText(readResult.GetString(), Style);
+        var text = GetNumberText(cell.GetString(), Style);
         var style = Style;
         var provider = Provider;
+        var typeCode = _typeCode;
         try
         {
-            if (TryParse(_typeCode, stringValue, style, provider, out var result))
-            {
-                return CellMapperResult.Success(result);
-            }
+            // TryParse throws for invalid styles, such as hex for floating-point types.
+            _ = TryParse(typeCode, text, style, provider, out _);
         }
         catch (Exception exception)
         {
-            // TryParse throws for invalid styles, such as hex for floating-point types.
-            return CellMapperResult.Invalid(exception);
+            return exception;
         }
 
-        // Only create the exception (by parsing again) if it is needed.
-        return InvalidResult(_typeCode, stringValue, style, provider);
+        return MapperUtilities.InvalidNumber(text, style, provider, GetType(typeCode), IsInteger(typeCode), canCreateException: true, () => Parse(typeCode, text, style, provider));
     }
 
     private protected TypeCode TypeCode => _typeCode;
-
-    private CellMapperResult FromDouble(double value, object boxedValue)
-    {
-        // Don't silently drop the fractional part when mapping to an integer type: "2.7" as text
-        // can't be parsed as an int, so neither can 2.7.
-        if (IsInteger(_typeCode) && Math.Floor(value) != value && !double.IsNaN(value) && !double.IsInfinity(value))
-        {
-            return NotWholeNumberResult(value, Type);
-        }
-
-        try
-        {
-            // A double cell mapped to a double needs no conversion.
-            return CellMapperResult.Success(_typeCode == TypeCode.Double ? boxedValue : Convert.ChangeType(boxedValue, Type, CultureInfo.InvariantCulture));
-        }
-        catch (Exception exception)
-        {
-            // For example, out of range for the type.
-            return CellMapperResult.Invalid(exception);
-        }
-    }
 
     private protected static string GetNumberText(string? stringValue, NumberStyles style)
     {
@@ -189,11 +159,6 @@ internal abstract class NumberMapper : INumberStyleCellMapper
         _ => throw new InvalidOperationException($"Unexpected type code {typeCode}.")
     };
 
-    // Separate methods so that closures capturing these values are only allocated for invalid
-    // values. Creating the lambdas in Map would allocate a closure for every cell.
-    private static CellMapperResult InvalidResult(TypeCode typeCode, string text, NumberStyles style, IFormatProvider? provider)
-        => MapperUtilities.InvalidNumber(text, style, provider, GetType(typeCode), IsInteger(typeCode), canCreateException: true, () => Parse(typeCode, text, style, provider));
-
     private static Type GetType(TypeCode typeCode) => typeCode switch
     {
         TypeCode.SByte => typeof(sbyte),
@@ -208,16 +173,12 @@ internal abstract class NumberMapper : INumberStyleCellMapper
         TypeCode.Double => typeof(double),
         _ => typeof(decimal),
     };
-
-    private static CellMapperResult NotWholeNumberResult(double value, Type type)
-        => CellMapperResult.Invalid(() => new FormatException($"The value {value} is not a whole number, so it can't be converted to {type}."));
 }
 
 /// <summary>
-/// A <see cref="NumberMapper"/> for <typeparamref name="T"/> that converts cells without boxing,
-/// making the same decisions as <see cref="NumberMapper.Map"/>.
+/// A <see cref="NumberMapper"/> for <typeparamref name="T"/>, which converts cells without boxing.
 /// </summary>
-internal sealed class NumberMapper<T> : NumberMapper, ITypedCellMapper<T>, ITypedCellMapper<T?> where T : struct
+internal sealed class NumberMapper<T> : NumberMapper, ICellMapper<T>, ICellMapper<T?> where T : struct
 {
     private delegate bool TryParser(string text, NumberStyles style, IFormatProvider? provider, out T result);
 
@@ -269,7 +230,7 @@ internal sealed class NumberMapper<T> : NumberMapper, ITypedCellMapper<T>, IType
         return (Func<double, T>)fromDouble;
     }
 
-    CellConversion ITypedCellMapper<T>.Convert(ReadCellResult cell, out T value)
+    CellConversion ICellMapper<T>.Convert(ReadCellResult cell, out T value)
     {
         var cellValue = cell.GetValue();
         try
@@ -286,7 +247,7 @@ internal sealed class NumberMapper<T> : NumberMapper, ITypedCellMapper<T>, IType
                 return CellConversion.Success;
             }
 
-            // Other typed values, such as booleans and dates, are rare: convert them as Map does.
+            // Other typed values, such as booleans and dates, are rare.
             if (cellValue is not null and not string)
             {
                 value = (T)System.Convert.ChangeType(cellValue, typeof(T), CultureInfo.InvariantCulture);
@@ -305,9 +266,9 @@ internal sealed class NumberMapper<T> : NumberMapper, ITypedCellMapper<T>, IType
         }
     }
 
-    CellConversion ITypedCellMapper<T?>.Convert(ReadCellResult cell, out T? value)
+    CellConversion ICellMapper<T?>.Convert(ReadCellResult cell, out T? value)
     {
-        var conversion = ((ITypedCellMapper<T>)this).Convert(cell, out var result);
+        var conversion = ((ICellMapper<T>)this).Convert(cell, out var result);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }

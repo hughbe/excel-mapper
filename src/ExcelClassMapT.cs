@@ -81,7 +81,7 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
         var mapper = EnumMappers.Create(enumType, ignoreCase);
         var map = Map(expression);
         map.Mappers.Clear();
-        map.Mappers.Add(mapper);
+        map.Mappers.Add((ICellMapper<TProperty>)mapper);
         return map;
     }
 

@@ -1,4 +1,5 @@
-﻿
+﻿using System.Linq;
+
 namespace ExcelMapper.Tests;
 
 public class MapMappingDictionaryTests
@@ -298,5 +299,35 @@ public class MapMappingDictionaryTests
 
         var row4 = sheet.ReadRow<WithMappingValue>();
         Assert.Null(row4.StringValue);
+    }
+
+    [Fact]
+    public void ReadRows_MappingDictionaryAttributeValueOfWrongType_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\na\n");
+        var sheet = importer.ReadSheet();
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<WrongTypeMappingValue>().ToArray());
+        Assert.Contains("ExcelMappingDictionaryAttribute", exception.Message);
+        Assert.Contains("\"Value\"", exception.Message);
+    }
+
+    public class WrongTypeMappingValue
+    {
+        [ExcelMappingDictionary("a", 1)]
+        public string? Value { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_MappingDictionaryAttributeNullForNullable_ReturnsNull()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\nnone\n2\n");
+        var values = importer.ReadSheet().ReadRows<NullableMappingValue>().Select(r => r.Value).ToArray();
+        Assert.Equal([null, 2], values);
+    }
+
+    public class NullableMappingValue
+    {
+        [ExcelMappingDictionary("none", null)]
+        public int? Value { get; set; }
     }
 }

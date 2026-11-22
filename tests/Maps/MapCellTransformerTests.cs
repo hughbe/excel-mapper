@@ -119,9 +119,8 @@ public class MapCellTransformerTests
     }
 
     [Fact]
-    public void ReadRows_ObjectPipeline_Transforms()
+    public void ReadRows_WithMapping_Transforms()
     {
-        // A mapping dictionary isn't a converter, so values go through the pipeline as objects.
         using var importer = XlsxBuilder.Create(["Name"], ["  abc  "]);
         importer.Configuration.RegisterClassMap<StringRow>(c => c.Map(r => r.Name).WithTransformers(new TrimTransformer()).WithMapping(new Dictionary<string, string> { ["x"] = "y" }));
         Assert.Equal("abc", importer.ReadSheet().ReadRows<StringRow>().Single().Name);

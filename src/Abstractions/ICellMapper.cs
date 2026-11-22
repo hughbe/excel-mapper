@@ -1,12 +1,54 @@
-﻿namespace ExcelMapper.Abstractions;
+namespace ExcelMapper.Abstractions;
 
 /// <summary>
-/// Tries to map the value of a cell to an object.
+/// The result of <see cref="ICellMapper{T}.Convert"/>.
 /// </summary>
-internal interface ICellMapper
+internal enum CellConversion
 {
     /// <summary>
-    /// Maps the value of a cell to an object.
+    /// The value was converted, and later mappers aren't tried.
     /// </summary>
-    CellMapperResult Map(ReadCellResult readResult);
+    Success,
+
+    /// <summary>
+    /// The value was converted, but a later mapper that converts it replaces the value. Used for
+    /// strings, so that a mapping dictionary after the string mapper wins.
+    /// </summary>
+    SuccessUnlessReplaced,
+
+    /// <summary>
+    /// The value is invalid. Later mappers are still tried.
+    /// </summary>
+    Invalid,
+
+    /// <summary>
+    /// The mapper doesn't handle the value, so later mappers are tried.
+    /// </summary>
+    NotHandled,
+}
+
+/// <summary>
+/// Converts a cell to <typeparamref name="T"/> without boxing. A member's
+/// <see cref="ValuePipeline{T}"/> tries its mappers in order.
+/// </summary>
+/// <typeparam name="T">The type of the member, or of the elements or values of a collection.</typeparam>
+internal interface ICellMapper<T>
+{
+    /// <summary>
+    /// Converts a cell's value.
+    /// </summary>
+    /// <param name="cell">The cell, after any transformers.</param>
+    /// <param name="value">The converted value, if the result is a success.</param>
+    /// <returns>Whether the value was converted.</returns>
+    CellConversion Convert(ReadCellResult cell, out T value);
+
+    /// <summary>
+    /// Creates the exception that says why <see cref="Convert"/> found a cell invalid. It's only
+    /// called when the exception is used (by the default invalid fallback, a custom fallback or
+    /// <see cref="ExcelSheet.ReadRowResults{T}"/>), so invalid cells with a fixed fallback don't
+    /// create an exception at all.
+    /// </summary>
+    /// <param name="cell">The cell that <see cref="Convert"/> found invalid.</param>
+    /// <returns>The exception, which isn't thrown.</returns>
+    Exception CreateException(ReadCellResult cell);
 }

@@ -1,17 +1,17 @@
-﻿namespace ExcelMapper.Mappers;
+namespace ExcelMapper.Mappers;
 
 /// <summary>
-/// A mapper that returns the string value of a cell.
+/// Reads a cell's text. A later mapper that converts the value, such as a mapping dictionary,
+/// replaces it.
 /// </summary>
-internal class StringMapper : ICellMapper, ITypedCellMapper<string?>
+internal sealed class StringMapper : ICellMapper<string?>
 {
-    /// <inheritdoc/>
-    public CellMapperResult Map(ReadCellResult result)
-        => CellMapperResult.SuccessIfNoOtherSuccess(result.GetString());
-
-    CellConversion ITypedCellMapper<string?>.Convert(ReadCellResult cell, out string? value)
+    public CellConversion Convert(ReadCellResult cell, out string? value)
     {
         value = cell.GetString();
         return CellConversion.SuccessUnlessReplaced;
     }
+
+    // Text is never invalid.
+    public Exception CreateException(ReadCellResult cell) => new FormatException("The value couldn't be read as text.");
 }

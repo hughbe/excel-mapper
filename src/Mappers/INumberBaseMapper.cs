@@ -9,7 +9,7 @@ namespace ExcelMapper.Mappers;
 /// A mapper that tries to map the value of a cell to a number base type using the
 /// <see cref="INumberBase{T}"/> interface.
 /// </summary>
-internal class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] T> : INumberStyleCellMapper, ITypedCellMapper<T> where T : INumberBase<T>
+internal class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] T> : INumberStyleCellMapper, ICellMapper<T> where T : INumberBase<T>
 {
     /// <summary>
     /// Gets or sets the number styles used when mapping the value of a cell to a number base type.
@@ -43,51 +43,6 @@ internal class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessed
     public IFormatProvider? Provider { get; set; }
 
     /// <inheritdoc/>
-    public CellMapperResult Map(ReadCellResult readResult)
-    {
-        // Try to get the value as a double first for performance.
-        var value = readResult.GetValue();
-        if (value is double doubleValue)
-        {
-            // Excel stores every number as a double. Don't silently drop the fractional part when
-            // mapping to an integer type: "2.7" as text can't be parsed as an int, so neither can 2.7.
-            if (s_isInteger && !double.IsInteger(doubleValue) && double.IsFinite(doubleValue))
-            {
-                return NotWholeNumberResult(doubleValue);
-            }
-
-            try
-            {
-                return CellMapperResult.Success(T.CreateChecked(doubleValue));
-            }
-            catch (Exception exception)
-            {
-                return CellMapperResult.Invalid(exception);
-            }
-        }
-
-        // Fallback to parsing from string.
-        var stringValue = readResult.GetString();
-        var style = Style;
-        var provider = Provider;
-
-        try
-        {
-            if (T.TryParse(GetNumberSpan(stringValue, style), style, provider, out var result))
-            {
-                return CellMapperResult.Success(result);
-            }
-        }
-        catch (Exception exception)
-        {
-            // TryParse throws for invalid styles.
-            return CellMapperResult.Invalid(exception);
-        }
-
-        // Only create the exception (by parsing again) if it is needed.
-        return InvalidResult(stringValue, style, provider);
-    }
-
     private static ReadOnlySpan<char> GetNumberSpan(string? stringValue, NumberStyles style)
     {
         var span = stringValue.AsSpan();
@@ -102,9 +57,7 @@ internal class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessed
         return span;
     }
 
-    // A separate method so that the closure capturing these values is only allocated for invalid
-    // values. Creating the lambda in Map would allocate the closure for every cell.
-    CellConversion ITypedCellMapper<T>.Convert(ReadCellResult cell, out T value)
+    CellConversion ICellMapper<T>.Convert(ReadCellResult cell, out T value)
     {
         if (cell.GetValue() is double doubleValue)
         {
@@ -139,13 +92,32 @@ internal class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessed
         }
     }
 
-    private static CellMapperResult NotWholeNumberResult(double value)
-        => CellMapperResult.Invalid(() => new FormatException($"The value {value} is not a whole number, so it can't be converted to {typeof(T)}."));
+    public Exception CreateException(ReadCellResult cell)
+    {
+        if (cell.GetValue() is double doubleValue)
+        {
+            // Excel stores every number as a double. A fractional number isn't silently truncated
+            // for an integer type: "2.7" as text can't be parsed as an int, so neither can 2.7.
+            return s_isInteger && !double.IsInteger(doubleValue) && double.IsFinite(doubleValue)
+                ? MapperUtilities.NotWholeNumber(doubleValue, typeof(T))
+                : MapperUtilities.InvalidFromParse(() => T.CreateChecked(doubleValue));
+        }
 
-    // A separate method so that the closure capturing these values is only allocated for invalid
-    // values. Creating the lambda in Map would allocate the closure for every cell.
-    private static CellMapperResult InvalidResult(string? stringValue, NumberStyles style, IFormatProvider? provider)
-        => MapperUtilities.InvalidNumber(stringValue, style, provider, typeof(T), s_isInteger, s_isBuiltIn, () => T.Parse(GetNumberSpan(stringValue, style), style, provider));
+        var stringValue = cell.GetString();
+        var style = Style;
+        var provider = Provider;
+        try
+        {
+            // TryParse throws for invalid styles.
+            _ = T.TryParse(GetNumberSpan(stringValue, style), style, provider, out _);
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
+
+        return MapperUtilities.InvalidNumber(stringValue, style, provider, typeof(T), s_isInteger, s_isBuiltIn, () => T.Parse(GetNumberSpan(stringValue, style), style, provider));
+    }
 
     // Whether T is a built-in number type, whose invalid values' exceptions can be created without
     // parsing again (see MapperUtilities.InvalidNumber).

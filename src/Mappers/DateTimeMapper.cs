@@ -5,7 +5,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a DateTime.
 /// </summary>
-internal class DateTimeMapper : ICellMapper, IFormatsCellMapper, ITypedCellMapper<DateTime>, ITypedCellMapper<DateTime?>
+internal sealed class DateTimeMapper : IFormatsCellMapper, ICellMapper<DateTime>, ICellMapper<DateTime?>
 {
     private string[] _formats = ["G"];
 
@@ -37,44 +37,7 @@ internal class DateTimeMapper : ICellMapper, IFormatsCellMapper, ITypedCellMappe
     /// </summary>
     public DateTimeStyles Style { get; set; }
 
-    /// <inheritdoc/>
-    public CellMapperResult Map(ReadCellResult readResult)
-    {
-        // Excel stores dates as numbers (the number of days since 1899-12-30).
-        // ExcelDataReader automatically converts these cells to DateTime.
-        if (readResult.GetValue() is DateTime dateTimeValue)
-        {
-            return CellMapperResult.Success(dateTimeValue);
-        }
-
-        // A number in a cell without a date format is Excel's serial date (days since 1899-12-30).
-        if (ExcelDateUtilities.TryGetDateTime(readResult.GetValue(), out var serialDate))
-        {
-            return CellMapperResult.Success(serialDate);
-        }
-        
-        var stringValue = readResult.GetString();
-        var formats = Formats;
-        var provider = Provider;
-        var style = Style;
-        try
-        {
-            if (DateTime.TryParseExact(stringValue, formats, provider, style, out var result) ||
-                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateTime.TryParseExact(stringValue, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, style, out result)))
-            {
-                return CellMapperResult.Success(result);
-            }
-        }
-        catch (Exception exception)
-        {
-            return CellMapperResult.Invalid(exception);
-        }
-
-        // Only create the exception (by parsing again) if it is needed.
-        return InvalidResult(stringValue, formats, provider, style);
-    }
-
-    CellConversion ITypedCellMapper<DateTime>.Convert(ReadCellResult cell, out DateTime value)
+    CellConversion ICellMapper<DateTime>.Convert(ReadCellResult cell, out DateTime value)
     {
         var cellValue = cell.GetValue();
         if (cellValue is DateTime dateTimeValue)
@@ -105,15 +68,30 @@ internal class DateTimeMapper : ICellMapper, IFormatsCellMapper, ITypedCellMappe
         }
     }
 
-    CellConversion ITypedCellMapper<DateTime?>.Convert(ReadCellResult cell, out DateTime? value)
+    CellConversion ICellMapper<DateTime?>.Convert(ReadCellResult cell, out DateTime? value)
     {
-        var conversion = ((ITypedCellMapper<DateTime>)this).Convert(cell, out var result);
+        var conversion = ((ICellMapper<DateTime>)this).Convert(cell, out var result);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }
 
-    // A separate method so that the closure capturing these values is only allocated for invalid
-    // values. Creating the lambda in Map would allocate the closure for every cell.
-    private static CellMapperResult InvalidResult(string? stringValue, string[] formats, IFormatProvider? provider, DateTimeStyles style)
-        => MapperUtilities.InvalidDate(stringValue, style, "DateTime", formats, () => DateTime.ParseExact(stringValue!, formats, provider, style));
+    public Exception CreateException(ReadCellResult cell)
+    {
+        var stringValue = cell.GetString();
+        var formats = Formats;
+        var provider = Provider;
+        var style = Style;
+        try
+        {
+            // Parsing throws for some styles, such as invalid combinations.
+            _ = DateTime.TryParseExact(stringValue, formats, provider, style, out _) ||
+                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateTime.TryParseExact(stringValue, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, style, out _));
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
+
+        return MapperUtilities.InvalidDate(stringValue, style, "DateTime", formats, () => DateTime.ParseExact(stringValue!, formats, provider, style));
+    }
 }

@@ -40,11 +40,13 @@ internal static class AutoMapper
 
     private static bool TrySetupMap<T>(MemberInfo? member, IToOneMap map, FallbackStrategy emptyValueStrategy, bool isAutoMapping)
     {
-        // Setup mappers - ExcelMapper, etc.
+        var pipeline = (ValuePipeline<T>)map.Pipeline;
+
+        // Setup mappers - ExcelConverter, ExcelMappingDictionary, etc.
         var addDefaultMappers = true;
         if (member != null)
         {
-            addDefaultMappers = MemberMapper.AddMappers<T>(map.Pipeline, member);
+            addDefaultMappers = MemberMapper.AddMappers(pipeline, member);
         }
 
         // If no mappers are speciified, try to get a well-known mapper for the type.
@@ -55,7 +57,7 @@ internal static class AutoMapper
             // creating the map.
             // If the user doesn't add any mappers to the property, an ExcelMappingException
             // will be thrown at the point of registering the class map.
-            if (!TryAddWellKnownMappers<T>(map.Pipeline.Mappers))
+            if (!TryAddWellKnownMappers(pipeline.Mappers))
             {
                 if (isAutoMapping)
                 {
@@ -67,32 +69,32 @@ internal static class AutoMapper
         // Modify the mappers - ExcelFormats, etc.
         if (member != null)
         {
-            MemberMapper.ModifyMappers(map.Pipeline, member);
+            MemberMapper.ModifyMappers(pipeline, member);
         }
 
         // Setup the transformers - ExcelTrimString, ExcelTransformer, etc.
         if (member != null)
         {
-            MemberMapper.AddTransformers(map.Pipeline, member);
+            MemberMapper.AddTransformers(pipeline, member);
         }
 
         // Setup the empty fallback - ExcelDefaultValue, ExcelEmptyFallback, etc.
         if (member != null)
         {
-            map.Pipeline.EmptyFallback = MemberMapper.GetDefaultEmptyValueFallback<T>(member);
+            pipeline.EmptyFallback = MemberMapper.GetDefaultEmptyValueFallback<T>(member);
         }
 
         // If no fallback is specified, use the empty value strategy.
-        map.Pipeline.EmptyFallback ??= CreateEmptyFallback<T>(emptyValueStrategy);
+        pipeline.EmptyFallback ??= CreateEmptyFallback<T>(emptyValueStrategy);
 
         // Setup the invalid fallback - ExcelInvalidValue, ExcelInvalidFallback, etc.
         if (member != null)
         {
-            map.Pipeline.InvalidFallback = MemberMapper.GetDefaultInvalidValueFallback<T>(member);
+            pipeline.InvalidFallback = MemberMapper.GetDefaultInvalidValueFallback<T>(member);
         }
         
         // If no fallback is specified, use the throw fallback.
-        map.Pipeline.InvalidFallback ??= s_throwFallback;
+        pipeline.InvalidFallback ??= ThrowFallback<T>.Instance;
 
         // Apply member attributes - ExcelOptional, ExcelPreserveFormatting, etc.
         if (member != null)
@@ -103,77 +105,64 @@ internal static class AutoMapper
         return true;
     }
 
-    // Cached singleton instances for stateless, immutable objects.
-    // Note: Mappers with mutable state (e.g., IFormatsCellMapper with settable Formats property)
-    // cannot be cached as singletons because they can be modified via .WithFormats(), causing
-    // race conditions when tests run in parallel or maps are created concurrently.
-    private static readonly ICellMapper s_guidMapper = new GuidMapper();
-    private static readonly ICellMapper s_boolMapper = new BoolMapper();
-    private static readonly ICellMapper s_stringMapper = new StringMapper();
-    private static readonly ICellMapper s_objectMapper = new ObjectMapper();
-    private static readonly ICellMapper s_versionMapper = new VersionMapper();
+    // Mappers that hold no state, so they can be shared. Each one maps a type and its nullable version.
+    private static readonly GuidMapper s_guidMapper = new();
+    private static readonly BoolMapper s_boolMapper = new();
+    private static readonly StringMapper s_stringMapper = new();
+    private static readonly VersionMapper s_versionMapper = new();
     internal static readonly ICellReaderFactory s_zeroColumnIndexReaderFactory = new ColumnIndexReaderFactory(0);
     internal static readonly ICellsReaderFactory s_allColumnNamesReaderFactory = new AllColumnNamesReaderFactory();
-    private static readonly IFallbackItem s_throwFallback = new ThrowFallback();
-    private static readonly IFallbackItem s_nullFallback = new FixedValueFallback(null);
 
-    private static readonly FrozenDictionary<Type, ICellMapper> s_wellKnownTypeMappers = new Dictionary<Type, ICellMapper>
+    private static readonly FrozenDictionary<Type, object> s_wellKnownTypeMappers = new Dictionary<Type, object>
     {
         [typeof(Guid)] = s_guidMapper,
         [typeof(bool)] = s_boolMapper,
         [typeof(string)] = s_stringMapper,
-        // object and IConvertible members receive the cell's typed value (a double, DateTime, bool,
-        // string, etc.), not its text.
-        [typeof(object)] = s_objectMapper,
-        [typeof(IConvertible)] = s_objectMapper,
         [typeof(Version)] = s_versionMapper,
     }.ToFrozenDictionary();
 
-    // These types have mappers with mutable state and must be instantiated fresh each time
-    private static readonly FrozenSet<Type> s_mutableMapperTypes = new HashSet<Type>
-    {
-        typeof(DateTime),
-        typeof(DateTimeOffset),
-        typeof(TimeSpan),
-#if NET6_0_OR_GREATER
-        typeof(DateOnly),
-        typeof(TimeOnly),
-#endif
-        typeof(Uri)
-    }.ToFrozenSet();
-
     [ExcludeFromCodeCoverage]
-    private static bool TryAddWellKnownMappers<T>(IList<ICellMapper> mappers)
+    private static bool TryAddWellKnownMappers<T>(IList<ICellMapper<T>> mappers)
     {
         var type = typeof(T).GetNullableTypeOrThis(out _);
 
         // Fast path: Check dictionary for well-known types with immutable mappers.
         if (s_wellKnownTypeMappers.TryGetValue(type, out var cachedMapper))
         {
-            mappers.Add(cachedMapper);
+            mappers.Add((ICellMapper<T>)cachedMapper);
             return true;
         }
-        // Check for types with mutable mappers (cannot be cached as singletons).
-        else if (s_mutableMapperTypes.Contains(type))
+
+        // object and IConvertible members receive the cell's typed value (a double, DateTime, bool,
+        // string, etc.), not its text.
+        if (type == typeof(object) || type == typeof(IConvertible))
         {
-            mappers.Add(type switch
-            {
-                Type t when t == typeof(DateTime) => new DateTimeMapper(),
-                Type t when t == typeof(DateTimeOffset) => new DateTimeOffsetMapper(),
-                Type t when t == typeof(TimeSpan) => new TimeSpanMapper(),
+            mappers.Add(new ObjectMapper<T>());
+            return true;
+        }
+
+        // These mappers have settable formats or options, so each member gets its own.
+        object? mapper = type switch
+        {
+            Type t when t == typeof(DateTime) => new DateTimeMapper(),
+            Type t when t == typeof(DateTimeOffset) => new DateTimeOffsetMapper(),
+            Type t when t == typeof(TimeSpan) => new TimeSpanMapper(),
 #if NET6_0_OR_GREATER
-                Type t when t == typeof(DateOnly) => new DateOnlyMapper(),
-                Type t when t == typeof(TimeOnly) => new TimeOnlyMapper(),
+            Type t when t == typeof(DateOnly) => new DateOnlyMapper(),
+            Type t when t == typeof(TimeOnly) => new TimeOnlyMapper(),
 #endif
-                Type t when t == typeof(Uri) => new UriMapper(),
-                _ => throw new NotImplementedException("Unexpected mutable mapper type."),
-            });
+            Type t when t == typeof(Uri) => new UriMapper(),
+            _ => null,
+        };
+        if (mapper is not null)
+        {
+            mappers.Add((ICellMapper<T>)mapper);
             return true;
         }
-        // Check for enum types.
-        else if (type.IsEnum)
+
+        if (type.IsEnum)
         {
-            mappers.Add(EnumMappers.Create(type, ignoreCase: false));
+            mappers.Add((ICellMapper<T>)EnumMappers.Create(type, ignoreCase: false));
 
             // If enum values have a DescriptionAttribute, create a mapping dictionary for those
             // string values.
@@ -194,9 +183,16 @@ internal static class AutoMapper
 
         // Other types, such as numbers and IConvertible or IParsable types: the mapper to create
         // depends only on the type, so it's found once per type.
-        if (s_mapperFactories.GetOrAdd(type, static t => CreateMapperFactory(t)) is { } createMapper)
+        var createMapper = s_mapperFactories.GetOrAdd(type, static t => CreateMapperFactory(t));
+        if (ReferenceEquals(createMapper, s_changeTypeMapperFactory))
         {
-            mappers.Add(createMapper());
+            mappers.Add(new ChangeTypeMapper<T>());
+            return true;
+        }
+
+        if (createMapper is not null)
+        {
+            mappers.Add((ICellMapper<T>)createMapper());
             return true;
         }
 
@@ -223,7 +219,12 @@ internal static class AutoMapper
     }
 
     // For each type, a function that creates its mapper, or null if there isn't a well-known one.
-    private static readonly ConcurrentDictionary<Type, Func<ICellMapper>?> s_mapperFactories = new();
+    // The mapper maps the type and, for value types, its nullable version.
+    private static readonly ConcurrentDictionary<Type, Func<object>?> s_mapperFactories = new();
+
+    // Marks IConvertible types, whose ChangeTypeMapper<T> is created for the member's type, so that
+    // it needs no reflection.
+    private static readonly Func<object> s_changeTypeMapperFactory = static () => throw new InvalidOperationException();
 
 #if NET7_0_OR_GREATER
     // The mapper types are created by the returned functions, so the trimmer can't see that their
@@ -231,8 +232,9 @@ internal static class AutoMapper
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(StructNumberMapper<>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(INumberBaseMapper<>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(ParsableMapper<>))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(StructParsableMapper<>))]
 #endif
-    private static Func<ICellMapper>? CreateMapperFactory(Type type)
+    private static Func<object>? CreateMapperFactory(Type type)
     {
         if (!CanConstructObject(type))
         {
@@ -245,7 +247,7 @@ internal static class AutoMapper
         {
             // Number value types (all the built-in ones) also convert nullable members without boxing.
             var mapperType = (numberBaseInterfaceType.IsValueType ? typeof(StructNumberMapper<>) : typeof(INumberBaseMapper<>)).MakeGenericType(numberBaseInterfaceType);
-            return () => (ICellMapper)Activator.CreateInstance(mapperType)!;
+            return () => Activator.CreateInstance(mapperType)!;
         }
 #else
         // The netstandard builds don't have INumberBase<T>, so built-in numeric types use a
@@ -258,38 +260,35 @@ internal static class AutoMapper
         // Check for types implementing IConvertible.
         if (type.ImplementsInterface(typeof(IConvertible)))
         {
-            return () => new ChangeTypeMapper(type);
+            return s_changeTypeMapperFactory;
         }
 
 #if NET7_0_OR_GREATER
         // Check for types implementing IParsable<T>.
         if (type.ImplementsGenericInterface(typeof(IParsable<>), out var parsableInterfaceType))
         {
-            var mapperType = typeof(ParsableMapper<>).MakeGenericType(parsableInterfaceType);
-            return () => (ICellMapper)Activator.CreateInstance(mapperType)!;
+            var mapperType = (parsableInterfaceType.IsValueType ? typeof(StructParsableMapper<>) : typeof(ParsableMapper<>)).MakeGenericType(parsableInterfaceType);
+            return () => Activator.CreateInstance(mapperType)!;
         }
 #endif
 
         return null;
     }
 
-    private static IFallbackItem CreateEmptyFallback<T>(FallbackStrategy emptyValueStrategy)
+    private static ICellFallback<T> CreateEmptyFallback<T>(FallbackStrategy emptyValueStrategy)
     {
-        var isNullable = typeof(T).IsNullable();
-
         // Empty nullable values should be set to null.
-        if (isNullable || !typeof(T).IsValueType)
+        if (default(T) is null)
         {
-            return s_nullFallback;
+            return new FixedValueFallback<T>(null);
         }
         else if (emptyValueStrategy == FallbackStrategy.SetToDefaultValue)
         {
-            // T is a non-nullable value type, so the boxed default value can be shared.
-            return new FixedValueFallback(default(T));
+            return new FixedValueFallback<T>(default(T));
         }
 
         // Throw if we can't set to null or default value.
-        return s_throwFallback;
+        return ThrowFallback<T>.Instance;
     }
     
     private static readonly Lazy<MethodInfo> s_tryCreateSplitGenericMapMethod = new(

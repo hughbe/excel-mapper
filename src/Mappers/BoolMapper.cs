@@ -1,54 +1,8 @@
-﻿namespace ExcelMapper.Mappers;
+namespace ExcelMapper.Mappers;
 
-/// <summary>
-/// A mapper that tries to map the value of a cell to a bool.
-/// </summary>
-internal class BoolMapper : ICellMapper, ITypedCellMapper<bool>, ITypedCellMapper<bool?>
+internal sealed class BoolMapper : ICellMapper<bool>, ICellMapper<bool?>
 {
-    private static readonly object s_boxedTrue = true;
-    private static readonly object s_boxedFalse = false;
-
-    /// <inheritdoc/>
-    public CellMapperResult Map(ReadCellResult readResult)
-    {
-        if (readResult.GetValue() is bool boolValue)
-        {
-            return CellMapperResult.Success(boolValue);
-        }
-
-        var stringValue = readResult.GetString();
-
-        // Excel transforms bool values such as "true" or "false" to "1" or "0".
-        if (stringValue == "1")
-        {
-            return CellMapperResult.Success(s_boxedTrue);
-        }
-        if (stringValue == "0")
-        {
-            return CellMapperResult.Success(s_boxedFalse);
-        }
-
-        // Spreadsheets often use "Yes" and "No".
-        if (string.Equals(stringValue, "yes", StringComparison.OrdinalIgnoreCase))
-        {
-            return CellMapperResult.Success(s_boxedTrue);
-        }
-        if (string.Equals(stringValue, "no", StringComparison.OrdinalIgnoreCase))
-        {
-            return CellMapperResult.Success(s_boxedFalse);
-        }
-
-        if (bool.TryParse(stringValue, out var result))
-        {
-            return CellMapperResult.Success(result ? s_boxedTrue : s_boxedFalse);
-        }
-
-        // Only create the exception (by parsing again) if it is needed. If stringValue is null this
-        // is an ArgumentNullException.
-        return InvalidResult(stringValue);
-    }
-
-    CellConversion ITypedCellMapper<bool>.Convert(ReadCellResult cell, out bool value)
+    CellConversion ICellMapper<bool>.Convert(ReadCellResult cell, out bool value)
     {
         if (cell.GetValue() is bool boolValue)
         {
@@ -56,6 +10,8 @@ internal class BoolMapper : ICellMapper, ITypedCellMapper<bool>, ITypedCellMappe
             return CellConversion.Success;
         }
 
+        // Excel transforms bool values such as "true" or "false" to "1" or "0", and spreadsheets
+        // often use "Yes" and "No".
         var stringValue = cell.GetString();
         if (stringValue == "1" || string.Equals(stringValue, "yes", StringComparison.OrdinalIgnoreCase))
         {
@@ -72,15 +28,16 @@ internal class BoolMapper : ICellMapper, ITypedCellMapper<bool>, ITypedCellMappe
         return bool.TryParse(stringValue, out value) ? CellConversion.Success : CellConversion.Invalid;
     }
 
-    CellConversion ITypedCellMapper<bool?>.Convert(ReadCellResult cell, out bool? value)
+    CellConversion ICellMapper<bool?>.Convert(ReadCellResult cell, out bool? value)
     {
-        var conversion = ((ITypedCellMapper<bool>)this).Convert(cell, out var result);
+        var conversion = ((ICellMapper<bool>)this).Convert(cell, out var result);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }
 
-    // A separate method so that the closure capturing these values is only allocated for invalid
-    // values. Creating the lambda in Map would allocate the closure for every cell.
-    private static CellMapperResult InvalidResult(string? stringValue)
-        => MapperUtilities.InvalidFormat(stringValue, "a valid Boolean", () => bool.Parse(stringValue!));
+    public Exception CreateException(ReadCellResult cell)
+    {
+        var stringValue = cell.GetString();
+        return MapperUtilities.InvalidFormat(stringValue, "a valid Boolean", () => bool.Parse(stringValue!));
+    }
 }

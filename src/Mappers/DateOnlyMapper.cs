@@ -6,7 +6,7 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a DateOnly.
 /// </summary>
-internal class DateOnlyMapper : ICellMapper, IFormatsCellMapper, ITypedCellMapper<DateOnly>, ITypedCellMapper<DateOnly?>
+internal sealed class DateOnlyMapper : IFormatsCellMapper, ICellMapper<DateOnly>, ICellMapper<DateOnly?>
 {
     private string[] _formats = ["d"];
 
@@ -38,44 +38,7 @@ internal class DateOnlyMapper : ICellMapper, IFormatsCellMapper, ITypedCellMappe
     /// </summary>
     public DateTimeStyles Style { get; set; }
 
-    /// <inheritdoc/>
-    public CellMapperResult Map(ReadCellResult readResult)
-    {
-        // Excel stores dates as numbers (the number of days since 1899-12-30).
-        // ExcelDataReader automatically converts these cells to DateOnly.
-        if (readResult.GetValue() is DateTime dateTimeValue)
-        {
-            return CellMapperResult.Success(DateOnly.FromDateTime(dateTimeValue));
-        }
-
-        // A number in a cell without a date format is Excel's serial date (days since 1899-12-30).
-        if (ExcelDateUtilities.TryGetDateTime(readResult.GetValue(), out var serialDate))
-        {
-            return CellMapperResult.Success(DateOnly.FromDateTime(serialDate));
-        }
-        
-        var stringValue = readResult.GetString();
-        var formats = Formats;
-        var provider = Provider;
-        var style = Style;
-        try
-        {
-            if (DateOnly.TryParseExact(stringValue, formats, provider, style, out var result) ||
-                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateOnly.TryParseExact(stringValue, FormatUtilities.DefaultDateOnlyFormats, provider, style, out result)))
-            {
-                return CellMapperResult.Success(result);
-            }
-        }
-        catch (Exception exception)
-        {
-            return CellMapperResult.Invalid(exception);
-        }
-
-        // Only create the exception (by parsing again) if it is needed.
-        return InvalidResult(stringValue, formats, provider, style);
-    }
-
-    CellConversion ITypedCellMapper<DateOnly>.Convert(ReadCellResult cell, out DateOnly value)
+    CellConversion ICellMapper<DateOnly>.Convert(ReadCellResult cell, out DateOnly value)
     {
         var cellValue = cell.GetValue();
         if (cellValue is DateTime dateTimeValue || ExcelDateUtilities.TryGetDateTime(cellValue, out dateTimeValue))
@@ -101,16 +64,31 @@ internal class DateOnlyMapper : ICellMapper, IFormatsCellMapper, ITypedCellMappe
         }
     }
 
-    CellConversion ITypedCellMapper<DateOnly?>.Convert(ReadCellResult cell, out DateOnly? value)
+    CellConversion ICellMapper<DateOnly?>.Convert(ReadCellResult cell, out DateOnly? value)
     {
-        var conversion = ((ITypedCellMapper<DateOnly>)this).Convert(cell, out var result);
+        var conversion = ((ICellMapper<DateOnly>)this).Convert(cell, out var result);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }
 
-    // A separate method so that the closure capturing these values is only allocated for invalid
-    // values. Creating the lambda in Map would allocate the closure for every cell.
-    private static CellMapperResult InvalidResult(string? stringValue, string[] formats, IFormatProvider? provider, DateTimeStyles style)
-        => MapperUtilities.InvalidDate(stringValue, style, "DateOnly", formats, () => DateOnly.ParseExact(stringValue!, formats, provider, style));
+    public Exception CreateException(ReadCellResult cell)
+    {
+        var stringValue = cell.GetString();
+        var formats = Formats;
+        var provider = Provider;
+        var style = Style;
+        try
+        {
+            // Parsing throws for some styles, such as invalid combinations.
+            _ = DateOnly.TryParseExact(stringValue, formats, provider, style, out _) ||
+                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateOnly.TryParseExact(stringValue, FormatUtilities.DefaultDateOnlyFormats, provider, style, out _));
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
+
+        return MapperUtilities.InvalidDate(stringValue, style, "DateOnly", formats, () => DateOnly.ParseExact(stringValue!, formats, provider, style));
+    }
 }
 #endif

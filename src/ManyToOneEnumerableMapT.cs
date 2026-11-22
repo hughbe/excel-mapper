@@ -133,7 +133,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
             {
                 while (cellsReader.TryGetNext(out var result))
                 {
-                    var elementValue = ValuePipeline<TElement>.Map(Pipeline, sheet, rowIndex, result, PreserveFormatting, member);
+                    var elementValue = Pipeline.Map(sheet, rowIndex, result, PreserveFormatting, member);
                     factory.Add(elementValue);
                 }
             }

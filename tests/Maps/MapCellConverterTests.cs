@@ -149,8 +149,7 @@ public class MapCellConverterTests
     [Fact]
     public void ReadRows_WithOtherMapperAfterConverter_PassesContext()
     {
-        // A mapping dictionary isn't a converter, so values go through the pipeline as objects: the
-        // converter still gets the cell's context.
+        // With another mapper after the converter, the converter still gets the cell's context.
         using var importer = Helpers.GetCsvImporter("Value\n1\nskip\n");
         var converter = new ContextConverter();
         importer.Configuration.RegisterClassMap<IntRow>(c =>

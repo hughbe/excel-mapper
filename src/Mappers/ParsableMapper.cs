@@ -1,29 +1,43 @@
-﻿#if NET7_0_OR_GREATER
+#if NET7_0_OR_GREATER
 namespace ExcelMapper.Mappers;
 
 /// <summary>
-/// A mapper that tries to map the value of a cell to an IParsable object using IParsable.Parse.
+/// A mapper for <see cref="IParsable{TSelf}"/> types, using <c>TParse.Parse</c>.
 /// </summary>
-internal class ParsableMapper<TParse> : ICellMapper where TParse : IParsable<TParse>
+internal class ParsableMapper<TParse> : ICellMapper<TParse> where TParse : IParsable<TParse>
 {
-    /// <summary>
-    /// Gets or sets the IFormatProvider used to map the value to the type.
-    /// </summary>
     public IFormatProvider? Provider { get; set; }
 
-    /// <inheritdoc/>
-    public CellMapperResult Map(ReadCellResult readResult)
+    CellConversion ICellMapper<TParse>.Convert(ReadCellResult cell, out TParse value)
     {
-        var value = readResult.GetString();
+        // TryParse isn't used: types may only implement Parse properly, and Parse's exception says
+        // why the value is invalid.
         try
         {
-            var result = TParse.Parse(value!, Provider);
-            return CellMapperResult.Success(result);
+            value = TParse.Parse(cell.GetString()!, Provider);
+            return CellConversion.Success;
         }
-        catch (Exception exception)
+        catch
         {
-            return CellMapperResult.Invalid(exception);
+            value = default!;
+            return CellConversion.Invalid;
         }
+    }
+
+    public Exception CreateException(ReadCellResult cell)
+        => MapperUtilities.InvalidFromParse(() => TParse.Parse(cell.GetString()!, Provider));
+}
+
+/// <summary>
+/// A mapper for <see cref="IParsable{TSelf}"/> value types, which also maps nullable members.
+/// </summary>
+internal sealed class StructParsableMapper<TParse> : ParsableMapper<TParse>, ICellMapper<TParse?> where TParse : struct, IParsable<TParse>
+{
+    CellConversion ICellMapper<TParse?>.Convert(ReadCellResult cell, out TParse? value)
+    {
+        var conversion = ((ICellMapper<TParse>)this).Convert(cell, out var result);
+        value = conversion == CellConversion.Invalid ? null : result;
+        return conversion;
     }
 }
 #endif
