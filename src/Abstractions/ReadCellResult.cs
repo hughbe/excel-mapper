@@ -18,6 +18,13 @@ internal struct ReadCellResult
     public IExcelDataReader? Reader { get; }
 
     /// <summary>
+    /// The culture to parse and format the cell's text with: the importer's
+    /// <see cref="ExcelImporterConfiguration.Culture"/>, set when the cell is mapped
+    /// (<see cref="ValuePipeline{T}.Map"/>). Null means the current culture.
+    /// </summary>
+    public IFormatProvider? Culture { get; set; }
+
+    /// <summary>
     /// The index of the column that contains the cell.
     /// </summary>
     public int ColumnIndex { get; }
@@ -35,7 +42,7 @@ internal struct ReadCellResult
         if (Reader == null)
         {
             // A value created without a reader, such as a transformer's result.
-            _stringValue = _value?.ToString();
+            _stringValue = Format(_value);
             return _stringValue;
         }
 
@@ -44,11 +51,11 @@ internal struct ReadCellResult
         {
             var numberFormatString = Reader.GetNumberFormatString(ColumnIndex);
             var numberFormat = new NumberFormat(numberFormatString);
-            _stringValue = numberFormat.Format(value, CultureInfo.CurrentCulture);
+            _stringValue = numberFormat.Format(value, Culture as CultureInfo ?? CultureInfo.CurrentCulture);
         }
         else
         {
-            _stringValue = value?.ToString();
+            _stringValue = Format(value);
         }
 
         return _stringValue;
@@ -58,6 +65,10 @@ internal struct ReadCellResult
     /// Gets the value of the cell.
     /// </summary>
     /// <returns>The value of the cell.</returns>
+    // The text of a typed value, such as a number or date, in the cell's culture.
+    private readonly string? Format(object? value)
+        => value is IFormattable formattable ? formattable.ToString(null, Culture) : value?.ToString();
+
     public object? GetValue()
     {
         if (Reader == null || _value != null)

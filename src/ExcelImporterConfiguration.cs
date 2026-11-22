@@ -59,7 +59,9 @@ public class ExcelImporterConfiguration
     /// and to convert numbers and dates to text. When null (the default), the current culture of
     /// the thread reading the rows is used. Set this (for example to
     /// <see cref="CultureInfo.InvariantCulture"/>) so results don't depend on the machine's
-    /// settings. A format provider set on an individual member takes precedence.
+    /// settings. A format provider set on an individual member takes precedence. The culture is
+    /// given to the built-in conversions, not set as the thread's culture: converters get it from
+    /// <see cref="CellContext.FormatProvider"/>.
     /// </summary>
     public CultureInfo? Culture { get; set; }
 

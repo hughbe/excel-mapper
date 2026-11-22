@@ -13,7 +13,7 @@ internal sealed class ChangeTypeMapper<T> : ICellMapper<T>
     {
         try
         {
-            value = (T)System.Convert.ChangeType(cell.GetValue(), s_type)!;
+            value = (T)System.Convert.ChangeType(cell.GetValue(), s_type, cell.Culture)!;
             return CellConversion.Success;
         }
         catch
@@ -24,5 +24,5 @@ internal sealed class ChangeTypeMapper<T> : ICellMapper<T>
     }
 
     public Exception CreateException(ReadCellResult cell)
-        => MapperUtilities.InvalidFromParse(() => System.Convert.ChangeType(cell.GetValue(), s_type));
+        => MapperUtilities.InvalidFromParse(() => System.Convert.ChangeType(cell.GetValue(), s_type, cell.Culture));
 }

@@ -56,7 +56,7 @@ internal sealed class TimeSpanMapper : IFormatsCellMapper, ICellMapper<TimeSpan>
 
         try
         {
-            return TimeSpan.TryParseExact(cell.GetString(), Formats, Provider, Style, out value)
+            return TimeSpan.TryParseExact(cell.GetString(), Formats, Provider ?? cell.Culture, Style, out value)
                 ? CellConversion.Success
                 : CellConversion.Invalid;
         }
@@ -78,7 +78,7 @@ internal sealed class TimeSpanMapper : IFormatsCellMapper, ICellMapper<TimeSpan>
     {
         var stringValue = cell.GetString();
         var formats = Formats;
-        var provider = Provider;
+        var provider = Provider ?? cell.Culture;
         var style = Style;
         try
         {

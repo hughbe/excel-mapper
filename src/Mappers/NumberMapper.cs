@@ -90,7 +90,7 @@ internal abstract class NumberMapper : INumberStyleCellMapper
 
         var text = GetNumberText(cell.GetString(), Style);
         var style = Style;
-        var provider = Provider;
+        var provider = Provider ?? cell.Culture;
         var typeCode = _typeCode;
         try
         {
@@ -254,7 +254,7 @@ internal sealed class NumberMapper<T> : NumberMapper, ICellMapper<T>, ICellMappe
                 return CellConversion.Success;
             }
 
-            return s_tryParse(GetNumberText(cell.GetString(), Style), Style, Provider, out value)
+            return s_tryParse(GetNumberText(cell.GetString(), Style), Style, Provider ?? cell.Culture, out value)
                 ? CellConversion.Success
                 : CellConversion.Invalid;
         }

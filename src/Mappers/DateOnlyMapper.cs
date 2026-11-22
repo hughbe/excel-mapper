@@ -48,7 +48,7 @@ internal sealed class DateOnlyMapper : IFormatsCellMapper, ICellMapper<DateOnly>
         }
 
         var stringValue = cell.GetString();
-        var provider = Provider;
+        var provider = Provider ?? cell.Culture;
         var style = Style;
         try
         {
@@ -75,7 +75,7 @@ internal sealed class DateOnlyMapper : IFormatsCellMapper, ICellMapper<DateOnly>
     {
         var stringValue = cell.GetString();
         var formats = Formats;
-        var provider = Provider;
+        var provider = Provider ?? cell.Culture;
         var style = Style;
         try
         {
