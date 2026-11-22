@@ -24,7 +24,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - `ExcelRange` is a `readonly struct`; `default(ExcelRange)` (and the value `TryParse` returns on failure) means every row and column instead of an empty range; `Parse` rejects non-ASCII letters, signs, and rows or columns beyond Excel's limits. ([#117](https://github.com/hughbe/excel-mapper/pull/117))
 - With a `DataRange` that doesn't start at the first column, `ExcelHeading.GetColumnIndex` and `GetColumnName` use positions in the sheet rather than in the range. ([#116](https://github.com/hughbe/excel-mapper/pull/116))
 - Splitting a cell with a trailing separator (`"a,b,"`) includes the trailing empty value, as `string.Split` does, for arrays and lists alike; an empty cell gives no values. ([#116](https://github.com/hughbe/excel-mapper/pull/116))
-- `ReadRowResults` throws when it's called if the heading doesn't have a column the type needs, with the message `ValidateHeading` gives, instead of reporting the missing column as an error of every row. (#PR)
+- `ReadRowResults` throws when it's called if the heading doesn't have a column the type needs, with the message `ValidateHeading` gives, instead of reporting the missing column as an error of every row. ([#209](https://github.com/hughbe/excel-mapper/pull/209))
 - A sheet takes the importer's settings when it starts reading, so changing them while its rows are read only affects sheets read afterwards, instead of the following rows. ([#182](https://github.com/hughbe/excel-mapper/pull/182))
 - A class map can't be changed once rows have been read with it (by `ReadRows`, `ReadRow`, `ReadRowResults`, `ValidateHeading` or `FindHeading`): calling `Map` or a fluent method on it, or on a map of one of its members, throws an `InvalidOperationException` instead of changing how the following rows are read. Register a new class map to read differently. ([#185](https://github.com/hughbe/excel-mapper/pull/185))
 - `RegisterClassMap` replaces a class map that auto-mapping registered implicitly instead of throwing. ([#120](https://github.com/hughbe/excel-mapper/pull/120))
@@ -86,7 +86,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Changed
 
-- Error messages are clearer (#PR):
+- Error messages are clearer ([#209](https://github.com/hughbe/excel-mapper/pull/209)):
   - A missing column's message lists the columns the heading has: `Can't find column "Value" for member "Value" in sheet "People". The heading's columns are "Valeu", "Other".` It no longer gives a row, as the column is missing from the sheet, and its `RowIndex` is -1.
   - An empty cell says so: `The cell is empty, but member "Age" of type int can't be empty ...`, with what to do. A number that's too large for its type, or has a fraction for an integer type, says which.
   - Types are named as in C# (`int`, `int?`, `List<string>`, `Employee`) rather than `System.Int32`.
@@ -125,7 +125,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Performance
 
-- An `ExcelMappingException` builds its message when it's first read, so `ReadRowResults` over a file with many invalid or empty cells allocates about a fifth less and is about 10% faster. (#PR)
+- An `ExcelMappingException` builds its message when it's first read, so `ReadRowResults` over a file with many invalid or empty cells allocates about a fifth less and is about 10% faster. ([#209](https://github.com/hughbe/excel-mapper/pull/209))
 - With native AOT, a generated `ExcelMappingContext` sets members and calls constructors with generated code rather than reflection, which boxed values and allocated an argument array for every member: rows allocate the same as with the JIT (a 10-member class 58 MB instead of 84 MB for 50,000 rows, a struct 53 MB instead of 129 MB), and map 8 to 21% faster. `ExcelTypeRegistrar` has `Setter` and `Constructor` for this, with `ExcelMemberSetter<TOwner, TValue>`, `ExcelConstructor<TOwner>` and `ExcelConstructorArguments<TOwner>`. ([#202](https://github.com/hughbe/excel-mapper/pull/202))
 - Whole numbers in text cells, such as CSV, are parsed about 4 times faster: plain digits are tried with .NET's fast integer parser before the default style, which accepts thousands separators and decimal points. CSV columns of `int`, `long`, `byte` and other integer types map about 30% faster, almost as fast as `string` columns, with the same results. ([#197](https://github.com/hughbe/excel-mapper/pull/197))
 - Rows that are structs are never boxed: they're created and set in place by compiled setters, instead of by reflection on a boxed copy, which also boxed every member's value. Record structs, nested structs, and single values (`ReadRows<int>()`) aren't boxed either. Mapping 50,000 rows of a 10-member struct is 17% faster and allocates 15.6 MB (23%) less, less than a class, and `ReadRows<int>()` allocates 24 fewer bytes per row. ([#195](https://github.com/hughbe/excel-mapper/pull/195))
