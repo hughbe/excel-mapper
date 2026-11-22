@@ -256,7 +256,17 @@ internal sealed class NumberMapper<T> : NumberMapper, ICellMapper<T>, ICellMappe
             }
 
             var style = context.Options.NumberStyle ?? DefaultStyle;
-            return s_tryParse(GetNumberText(cell.GetString(), style), style, context.Options.Provider ?? cell.Culture, out value)
+            var provider = context.Options.Provider ?? cell.Culture;
+            var text = GetNumberText(cell.GetString(), style);
+
+            // Most cells of whole numbers are plain digits, which parse much faster as an integer.
+            // Anything else, such as "1,000", is parsed with the member's style.
+            if (IsInteger(TypeCode) && MapperUtilities.AllowsInteger(style) && s_tryParse(text, NumberStyles.Integer, provider, out value))
+            {
+                return CellConversion.Success;
+            }
+
+            return s_tryParse(text, style, provider, out value)
                 ? CellConversion.Success
                 : CellConversion.Invalid;
         }

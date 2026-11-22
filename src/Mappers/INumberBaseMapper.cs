@@ -73,9 +73,18 @@ internal class INumberBaseMapper<T> : ICellMapper<T> where T : INumberBase<T>
 
         var stringValue = cell.GetString();
         var style = context.Options.NumberStyle ?? s_defaultStyle;
+        var provider = context.Options.Provider ?? cell.Culture;
         try
         {
-            return T.TryParse(GetNumberSpan(stringValue, style), style, context.Options.Provider ?? cell.Culture, out value!) ? CellConversion.Success : CellConversion.Invalid;
+            // Most cells of whole numbers are plain digits, which parse much faster as an integer.
+            // Anything else, such as "1,000", is parsed with the member's style.
+            var span = GetNumberSpan(stringValue, style);
+            if (s_hasFastIntegerParse && MapperUtilities.AllowsInteger(style) && T.TryParse(span, NumberStyles.Integer, provider, out value!))
+            {
+                return CellConversion.Success;
+            }
+
+            return T.TryParse(span, style, provider, out value!) ? CellConversion.Success : CellConversion.Invalid;
         }
         catch
         {
@@ -110,6 +119,10 @@ internal class INumberBaseMapper<T> : ICellMapper<T> where T : INumberBase<T>
 
         return MapperUtilities.InvalidNumber(stringValue, style, provider, typeof(T), s_isInteger, s_isBuiltIn, () => T.Parse(GetNumberSpan(stringValue, style), style, provider));
     }
+
+    // Whether T is a built-in integer type, which parses NumberStyles.Integer on a fast path.
+    // Other number types (such as BigInteger, or a user's) aren't parsed twice.
+    private static readonly bool s_hasFastIntegerParse = Type.GetTypeCode(typeof(T)) is >= TypeCode.SByte and <= TypeCode.UInt64 || typeof(T) == typeof(Int128) || typeof(T) == typeof(UInt128);
 
     // Whether T is a built-in number type, whose invalid values' exceptions can be created without
     // parsing again (see MapperUtilities.InvalidNumber).

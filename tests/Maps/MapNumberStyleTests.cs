@@ -32,6 +32,24 @@ public class MapNumberStyleTests
         public decimal Value { get; set; }
     }
 
+    public class NoSignIntRow
+    {
+        [ExcelNumberStyle(NumberStyles.None)]
+        public int Value { get; set; }
+    }
+
+    public class ParenthesesIntRow
+    {
+        [ExcelNumberStyle(NumberStyles.Integer | NumberStyles.AllowParentheses)]
+        public int Value { get; set; }
+    }
+
+    public class ThousandsLongRow
+    {
+        [ExcelNumberStyle(NumberStyles.Integer | NumberStyles.AllowThousands)]
+        public long? Value { get; set; }
+    }
+
     public class HexDoubleRow
     {
         [ExcelNumberStyle(NumberStyles.AllowHexSpecifier)]
@@ -151,6 +169,36 @@ public class MapNumberStyleTests
     public void ReadRows_Culture_ParsesWithCulture()
     {
         Assert.Equal(1234.5, Read<Row<double>>("1.234,5", new CultureInfo("de-DE")).Value);
+    }
+
+    [Fact]
+    public void ReadRows_IntegerCulture_ParsesWithCulture()
+    {
+        // Whole numbers are parsed as plain integers first, then with the member's style: the
+        // culture's thousands separator is still accepted.
+        var german = new CultureInfo("de-DE");
+        Assert.Equal(1234, Read<Row<int>>("1.234", german).Value);
+        Assert.Equal(-7, Read<Row<long>>("-7", german).Value);
+    }
+
+    [Fact]
+    public void ReadRows_IntegerStyleWithoutSign_DoesNotAcceptSign()
+    {
+        // A style that doesn't allow everything NumberStyles.Integer does isn't parsed as an
+        // integer first.
+        Assert.Equal(5, Read<NoSignIntRow>("5").Value);
+        ReadFails<NoSignIntRow>("-5");
+        ReadFails<NoSignIntRow>(" 5");
+    }
+
+    [Fact]
+    public void ReadRows_IntegerStyleWithMore_AcceptsBoth()
+    {
+        Assert.Equal(-5, Read<ParenthesesIntRow>("(5)").Value);
+        Assert.Equal(-5, Read<ParenthesesIntRow>("-5").Value);
+        Assert.Equal(1000000L, Read<ThousandsLongRow>("1,000,000").Value);
+        Assert.Equal(42L, Read<ThousandsLongRow>("42").Value);
+        ReadFails<ThousandsLongRow>("1.5");
     }
 
     [Fact]
