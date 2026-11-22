@@ -52,7 +52,8 @@ internal interface ICellMapper<T>
     /// create an exception at all.
     /// </summary>
     /// <param name="cell">The cell that <see cref="Convert"/> found invalid.</param>
+    /// <param name="context">The cell's context, as given to <see cref="Convert"/>.</param>
     /// <param name="error">The error <see cref="Convert"/> gave, if any.</param>
     /// <returns>The exception, which isn't thrown, or null if there's none (a converter gave no error).</returns>
-    Exception? CreateException(ReadCellResult cell, object? error);
+    Exception? CreateException(ReadCellResult cell, in CellContext context, object? error);
 }

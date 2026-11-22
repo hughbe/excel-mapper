@@ -172,16 +172,17 @@ internal sealed class TypeRule<T> : TypeRule
             return static mappers => mappers.Add(new ObjectMapper<T>());
         }
 
-        // These mappers have settable formats or options, so each member gets its own.
+        // Mappers hold no state (formats and other options come with the cell), so one mapper
+        // serves every member of the type.
         Func<object>? createMapper =
-            type == typeof(DateTime) ? static () => new DateTimeMapper() :
-            type == typeof(DateTimeOffset) ? static () => new DateTimeOffsetMapper() :
-            type == typeof(TimeSpan) ? static () => new TimeSpanMapper() :
+            type == typeof(DateTime) ? static () => DateTimeMapper.Instance :
+            type == typeof(DateTimeOffset) ? static () => DateTimeOffsetMapper.Instance :
+            type == typeof(TimeSpan) ? static () => TimeSpanMapper.Instance :
 #if NET6_0_OR_GREATER
-            type == typeof(DateOnly) ? static () => new DateOnlyMapper() :
-            type == typeof(TimeOnly) ? static () => new TimeOnlyMapper() :
+            type == typeof(DateOnly) ? static () => DateOnlyMapper.Instance :
+            type == typeof(TimeOnly) ? static () => TimeOnlyMapper.Instance :
 #endif
-            type == typeof(Uri) ? static () => new UriMapper() :
+            type == typeof(Uri) ? static () => UriMapper.Instance :
             null;
 
         if (type.IsEnum)
@@ -235,7 +236,8 @@ internal sealed class TypeRule<T> : TypeRule
             return null;
         }
 
-        return mappers => mappers.Add((ICellMapper<T>)createMapper());
+        var sharedTypeMapper = (ICellMapper<T>)createMapper();
+        return mappers => mappers.Add(sharedTypeMapper);
     }
 
     private static Dictionary<string, T>? GetEnumDescriptions(Type enumType)

@@ -21,7 +21,7 @@ internal sealed class EnumMapper<TEnum>(bool ignoreCase) : ICellMapper<TEnum>, I
         return CellConversion.Invalid;
     }
 
-    public Exception CreateException(ReadCellResult cell, object? error)
+    public Exception CreateException(ReadCellResult cell, in CellContext context, object? error)
     {
         var stringValue = cell.GetString();
         var ignoreCase = IgnoreCase;

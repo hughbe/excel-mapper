@@ -6,37 +6,22 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a DateOnly.
 /// </summary>
-internal sealed class DateOnlyMapper : IFormatsCellMapper, ICellMapper<DateOnly>, ICellMapper<DateOnly?>
+internal sealed class DateOnlyMapper : ICellMapper<DateOnly>, ICellMapper<DateOnly?>
 {
-    private string[] _formats = ["d"];
-
     /// <summary>
-    /// Gets or sets the date formats used to map the value to a DateOnly.
-    /// This defaults to "d" - the default DateOnly format.
-    /// While the formats haven't been set, values that don't match also try ISO 8601, such as "2024-03-04".
+    /// The mapper, shared by every member: the formats and format provider come from the cell's
+    /// <see cref="CellContext.Options"/>.
     /// </summary>
-    private bool _formatsSet;
+    public static DateOnlyMapper Instance { get; } = new();
 
-    public string[] Formats
+    private DateOnlyMapper()
     {
-        get => _formats;
-        set
-        {
-            FormatUtilities.ValidateFormats(value);
-            _formats = value;
-            _formatsSet = true;
-        }
     }
 
-    /// <summary>
-    /// Gets or sets the IFormatProvider used to map the value to a DateOnly.
-    /// </summary>
-    public IFormatProvider? Provider { get; set; }
+    // The format tried first when the member has no formats of its own.
+    private static readonly string[] s_defaultFormats = ["d"];
 
-    /// <summary>
-    /// Gets or sets the DateTimeStyles used to map the value to a DateOnly.
-    /// </summary>
-    public DateTimeStyles Style { get; set; }
+    private const DateTimeStyles Style = DateTimeStyles.None;
 
     CellConversion ICellMapper<DateOnly>.Convert(ReadCellResult cell, in CellContext context, out DateOnly value, ref object? error)
     {
@@ -48,12 +33,12 @@ internal sealed class DateOnlyMapper : IFormatsCellMapper, ICellMapper<DateOnly>
         }
 
         var stringValue = cell.GetString();
-        var provider = Provider ?? cell.Culture;
+        var provider = context.Options.Provider ?? cell.Culture;
         var style = Style;
         try
         {
-            return DateOnly.TryParseExact(stringValue, Formats, provider, style, out value) ||
-                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateOnly.TryParseExact(stringValue, FormatUtilities.DefaultDateOnlyFormats, provider, style, out value))
+            return DateOnly.TryParseExact(stringValue, (context.Options.Formats ?? s_defaultFormats), provider, style, out value) ||
+                (context.Options.Formats is null && FormatUtilities.HasDigit(stringValue) && DateOnly.TryParseExact(stringValue, FormatUtilities.DefaultDateOnlyFormats, provider, style, out value))
                 ? CellConversion.Success
                 : CellConversion.Invalid;
         }
@@ -71,17 +56,17 @@ internal sealed class DateOnlyMapper : IFormatsCellMapper, ICellMapper<DateOnly>
         return conversion;
     }
 
-    public Exception CreateException(ReadCellResult cell, object? error)
+    public Exception CreateException(ReadCellResult cell, in CellContext context, object? error)
     {
         var stringValue = cell.GetString();
-        var formats = Formats;
-        var provider = Provider ?? cell.Culture;
+        var formats = context.Options.Formats ?? s_defaultFormats;
+        var provider = context.Options.Provider ?? cell.Culture;
         var style = Style;
         try
         {
             // Parsing throws for some styles, such as invalid combinations.
             _ = DateOnly.TryParseExact(stringValue, formats, provider, style, out _) ||
-                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateOnly.TryParseExact(stringValue, FormatUtilities.DefaultDateOnlyFormats, provider, style, out _));
+                (context.Options.Formats is null && FormatUtilities.HasDigit(stringValue) && DateOnly.TryParseExact(stringValue, FormatUtilities.DefaultDateOnlyFormats, provider, style, out _));
         }
         catch (Exception exception)
         {

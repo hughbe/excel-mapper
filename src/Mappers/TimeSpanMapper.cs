@@ -5,33 +5,22 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a TimeSpan.
 /// </summary>
-internal sealed class TimeSpanMapper : IFormatsCellMapper, ICellMapper<TimeSpan>, ICellMapper<TimeSpan?>
+internal sealed class TimeSpanMapper : ICellMapper<TimeSpan>, ICellMapper<TimeSpan?>
 {
-    private string[] _formats = ["c"];
-
     /// <summary>
-    /// Gets or sets the date formats used to map the value to a TimeSpan.
-    /// This defaults to "c" - the default TimeSpan format.
+    /// The mapper, shared by every member: the formats and format provider come from the cell's
+    /// <see cref="CellContext.Options"/>.
     /// </summary>
-    public string[] Formats
+    public static TimeSpanMapper Instance { get; } = new();
+
+    private TimeSpanMapper()
     {
-        get => _formats;
-        set
-        {
-            FormatUtilities.ValidateFormats(value);
-            _formats = value;
-        }
     }
 
-    /// <summary>
-    /// Gets or sets the IFormatProvider used to map the value to a TimeSpan.
-    /// </summary>
-    public IFormatProvider? Provider { get; set; }
+    // The format tried first when the member has no formats of its own.
+    private static readonly string[] s_defaultFormats = ["c"];
 
-    /// <summary>
-    /// Gets or sets the TimeSpanStyles used to map the value to a TimeSpan.
-    /// </summary>
-    public TimeSpanStyles Style { get; set; }
+    private const TimeSpanStyles Style = TimeSpanStyles.None;
 
     CellConversion ICellMapper<TimeSpan>.Convert(ReadCellResult cell, in CellContext context, out TimeSpan value, ref object? error)
     {
@@ -56,7 +45,7 @@ internal sealed class TimeSpanMapper : IFormatsCellMapper, ICellMapper<TimeSpan>
 
         try
         {
-            return TimeSpan.TryParseExact(cell.GetString(), Formats, Provider ?? cell.Culture, Style, out value)
+            return TimeSpan.TryParseExact(cell.GetString(), (context.Options.Formats ?? s_defaultFormats), context.Options.Provider ?? cell.Culture, Style, out value)
                 ? CellConversion.Success
                 : CellConversion.Invalid;
         }
@@ -74,11 +63,11 @@ internal sealed class TimeSpanMapper : IFormatsCellMapper, ICellMapper<TimeSpan>
         return conversion;
     }
 
-    public Exception CreateException(ReadCellResult cell, object? error)
+    public Exception CreateException(ReadCellResult cell, in CellContext context, object? error)
     {
         var stringValue = cell.GetString();
-        var formats = Formats;
-        var provider = Provider ?? cell.Culture;
+        var formats = context.Options.Formats ?? s_defaultFormats;
+        var provider = context.Options.Provider ?? cell.Culture;
         var style = Style;
         try
         {

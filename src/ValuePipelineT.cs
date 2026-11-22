@@ -51,11 +51,7 @@ public abstract class ValuePipeline<T> : ValuePipeline
 
     private ICellFallback<T>? _invalidFallback;
 
-    internal override IEnumerable<object> MapperObjects => Mappers;
-
-    internal override int MapperCount => Mappers.Count;
-
-    internal override void AddMapper(object mapper) => Mappers.Add((ICellMapper<T>)mapper);
+    internal override bool HasMappers => Mappers.Count > 0;
 
     internal override void Freeze()
     {
@@ -110,7 +106,7 @@ public abstract class ValuePipeline<T> : ValuePipeline
         // thread's: mappers use it when they have no format provider of their own.
         var culture = sheet.Culture;
         readResult.Culture = culture;
-        var context = new CellContext(sheet, rowIndex, readResult.ColumnIndex, member, errors);
+        var context = new CellContext(sheet, rowIndex, readResult.ColumnIndex, member, errors, Options);
 
         // Use indexed loops: enumerating through an interface allocates for every cell.
         var transformers = plan.Transformers;
@@ -158,7 +154,7 @@ public abstract class ValuePipeline<T> : ValuePipeline
         {
             // Create the exception only if the fallback uses it.
             var exception = state == CellConversion.Invalid && plan.InvalidFallbackUsesException
-                ? mappers[invalidIndex].CreateException(readResult, invalidError)
+                ? mappers[invalidIndex].CreateException(readResult, in context, invalidError)
                 : null;
             return invalidFallback.Fallback(new CellValue(readResult), context, exception);
         }

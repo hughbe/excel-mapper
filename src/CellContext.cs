@@ -26,20 +26,30 @@ public readonly struct CellContext
         ColumnIndex = columnIndex;
         Member = member;
         Errors = null;
+        _options = null;
     }
 
     /// <summary>
     /// Creates the context of a cell being mapped, with the list errors are reported to when rows
     /// are read with <see cref="ExcelSheet.ReadRowResults{T}"/>.
     /// </summary>
-    internal CellContext(ExcelSheet sheet, int rowIndex, int columnIndex, MemberInfo? member, List<ExcelMappingException>? errors)
+    internal CellContext(ExcelSheet sheet, int rowIndex, int columnIndex, MemberInfo? member, List<ExcelMappingException>? errors, ConversionOptions? options)
     {
         _readingSheet = sheet;
         RowIndex = rowIndex;
         ColumnIndex = columnIndex;
         Member = member;
         Errors = errors;
+        _options = options;
     }
+
+    private readonly ConversionOptions? _options;
+
+    /// <summary>
+    /// Gets how the member's built-in conversion parses text (its formats, format provider and so
+    /// on), from the pipeline converting the cell.
+    /// </summary>
+    internal ConversionOptions Options => _options ?? ConversionOptions.Default;
 
     /// <summary>
     /// Gets the list errors are added to instead of being thrown, when rows are read with

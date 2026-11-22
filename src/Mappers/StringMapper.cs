@@ -13,5 +13,5 @@ internal sealed class StringMapper : ICellMapper<string?>
     }
 
     // Text is never invalid.
-    public Exception CreateException(ReadCellResult cell, object? error) => new FormatException("The value couldn't be read as text.");
+    public Exception CreateException(ReadCellResult cell, in CellContext context, object? error) => new FormatException("The value couldn't be read as text.");
 }

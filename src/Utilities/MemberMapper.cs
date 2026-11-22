@@ -256,41 +256,33 @@ internal static class MemberMapper
         throw new ExcelMappingException($"The converter \"{converter.GetType()}\" given by ExcelConverterAttribute on member \"{member.Name}\" doesn't implement ICellConverter<{typeof(T)}>.");
     }
 
-    internal static void ModifyMappers(ValuePipeline pipeline, MemberInfo member)
+    /// <summary>
+    /// Applies the member's attributes that change how its built-in conversion parses text
+    /// (<see cref="ExcelFormatsAttribute"/>, <see cref="ExcelNumberStyleAttribute"/>,
+    /// <see cref="ExcelUriKindAttribute"/> and <see cref="ExcelOffsetAttribute"/>) to the pipeline's
+    /// options.
+    /// </summary>
+    internal static void ApplyConversionOptions(ValuePipeline pipeline, MemberInfo member)
     {
-        // If the member has a ExcelFormats attribute, modify the mappers.
+        var options = pipeline.Options;
         if (MemberAttributes.Get<ExcelFormatsAttribute>(member) is { } formatsAttribute)
         {
-            foreach (var mapper in pipeline.MapperObjects.OfType<IFormatsCellMapper>())
-            {
-                mapper.Formats = [.. formatsAttribute.Formats];
-            }
+            options.Formats = [.. formatsAttribute.Formats];
         }
 
-        // If the member has a ExcelNumberStyle attribute, modify the mappers.
         if (MemberAttributes.Get<ExcelNumberStyleAttribute>(member) is { } numberStyleAttribute)
         {
-            foreach (var mapper in pipeline.MapperObjects.OfType<INumberStyleCellMapper>())
-            {
-                mapper.Style = numberStyleAttribute.Style;
-            }
+            options.NumberStyle = numberStyleAttribute.Style;
         }
 
-        // If the member has a ExcelUri attribute, modify the mappers.
         if (MemberAttributes.Get<ExcelUriKindAttribute>(member) is { } uriKindAttribute)
         {
-            foreach (var mapper in pipeline.MapperObjects.OfType<UriMapper>())
-            {
-                mapper.UriKind = uriKindAttribute.UriKind;
-            }
+            options.UriKind = uriKindAttribute.UriKind;
         }
 
         if (MemberAttributes.Get<ExcelOffsetAttribute>(member) is { } offsetAttribute)
         {
-            foreach (var mapper in pipeline.MapperObjects.OfType<DateTimeOffsetMapper>())
-            {
-                mapper.Offset = offsetAttribute.Offset;
-            }
+            options.Offset = offsetAttribute.Offset;
         }
     }
 

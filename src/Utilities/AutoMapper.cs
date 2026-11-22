@@ -61,7 +61,7 @@ internal static class AutoMapper
         // Modify the mappers - ExcelFormats, etc.
         if (member != null)
         {
-            MemberMapper.ModifyMappers(pipeline, member);
+            MemberMapper.ApplyConversionOptions(pipeline, member);
         }
 
         // Setup the transformers - ExcelTrimString, ExcelTransformer, etc.

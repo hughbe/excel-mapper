@@ -15,5 +15,5 @@ internal sealed class ObjectMapper<T> : ICellMapper<T>
     }
 
     // Every value is valid.
-    public Exception CreateException(ReadCellResult cell, object? error) => new FormatException("The value couldn't be read.");
+    public Exception CreateException(ReadCellResult cell, in CellContext context, object? error) => new FormatException("The value couldn't be read.");
 }

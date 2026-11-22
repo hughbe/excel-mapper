@@ -38,23 +38,18 @@ public abstract class ValuePipeline
     {
         IsFrozen = true;
         ((NonNullCollection<ICellTransformer>)Transformers).Freeze();
+        Options.Freeze();
     }
 
     /// <summary>
-    /// Gets the mappers, for code that configures them without knowing the pipeline's type (such
-    /// as <see cref="ExcelFormatsAttribute"/>).
+    /// Gets how the built-in mappers parse text: formats, format provider, number style and so on.
     /// </summary>
-    internal abstract IEnumerable<object> MapperObjects { get; }
+    internal ConversionOptions Options { get; } = new();
 
     /// <summary>
-    /// Gets the number of mappers.
+    /// Gets whether the pipeline has any mappers.
     /// </summary>
-    internal abstract int MapperCount { get; }
-
-    /// <summary>
-    /// Adds a mapper, which must be one for the pipeline's type.
-    /// </summary>
-    internal abstract void AddMapper(object mapper);
+    internal abstract bool HasMappers { get; }
 
     /// <summary>
     /// Gives empty cells, invalid cells or both a fixed value, for the untyped fluent methods

@@ -6,37 +6,22 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a TimeOnly.
 /// </summary>
-internal sealed class TimeOnlyMapper : IFormatsCellMapper, ICellMapper<TimeOnly>, ICellMapper<TimeOnly?>
+internal sealed class TimeOnlyMapper : ICellMapper<TimeOnly>, ICellMapper<TimeOnly?>
 {
-    private string[] _formats = ["t"];
-
     /// <summary>
-    /// Gets or sets the date formats used to map the value to a TimeOnly.
-    /// This defaults to "t" - the default TimeOnly format.
-    /// While the formats haven't been set, values that don't match also try the culture's long time ("T") and 24-hour times such as "14:30" or "14:30:15".
+    /// The mapper, shared by every member: the formats and format provider come from the cell's
+    /// <see cref="CellContext.Options"/>.
     /// </summary>
-    private bool _formatsSet;
+    public static TimeOnlyMapper Instance { get; } = new();
 
-    public string[] Formats
+    private TimeOnlyMapper()
     {
-        get => _formats;
-        set
-        {
-            FormatUtilities.ValidateFormats(value);
-            _formats = value;
-            _formatsSet = true;
-        }
     }
 
-    /// <summary>
-    /// Gets or sets the IFormatProvider used to map the value to a TimeOnly.
-    /// </summary>
-    public IFormatProvider? Provider { get; set; }
+    // The format tried first when the member has no formats of its own.
+    private static readonly string[] s_defaultFormats = ["t"];
 
-    /// <summary>
-    /// Gets or sets the DateTimeStyles used to map the value to a TimeOnly.
-    /// </summary>
-    public DateTimeStyles Style { get; set; }
+    private const DateTimeStyles Style = DateTimeStyles.None;
 
     CellConversion ICellMapper<TimeOnly>.Convert(ReadCellResult cell, in CellContext context, out TimeOnly value, ref object? error)
     {
@@ -68,12 +53,12 @@ internal sealed class TimeOnlyMapper : IFormatsCellMapper, ICellMapper<TimeOnly>
         }
 
         var stringValue = cell.GetString();
-        var provider = Provider ?? cell.Culture;
+        var provider = context.Options.Provider ?? cell.Culture;
         var style = Style;
         try
         {
-            return TimeOnly.TryParseExact(stringValue, Formats, provider, style, out value) ||
-                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && TimeOnly.TryParseExact(stringValue, FormatUtilities.GetDefaultTimeOnlyFormats(provider), provider, style, out value))
+            return TimeOnly.TryParseExact(stringValue, (context.Options.Formats ?? s_defaultFormats), provider, style, out value) ||
+                (context.Options.Formats is null && FormatUtilities.HasDigit(stringValue) && TimeOnly.TryParseExact(stringValue, FormatUtilities.GetDefaultTimeOnlyFormats(provider), provider, style, out value))
                 ? CellConversion.Success
                 : CellConversion.Invalid;
         }
@@ -91,7 +76,7 @@ internal sealed class TimeOnlyMapper : IFormatsCellMapper, ICellMapper<TimeOnly>
         return conversion;
     }
 
-    public Exception CreateException(ReadCellResult cell, object? error)
+    public Exception CreateException(ReadCellResult cell, in CellContext context, object? error)
     {
         // A duration that isn't a time of day.
         if (cell.GetValue() is TimeSpan timeSpanValue)
@@ -100,14 +85,14 @@ internal sealed class TimeOnlyMapper : IFormatsCellMapper, ICellMapper<TimeOnly>
         }
 
         var stringValue = cell.GetString();
-        var formats = Formats;
-        var provider = Provider ?? cell.Culture;
+        var formats = context.Options.Formats ?? s_defaultFormats;
+        var provider = context.Options.Provider ?? cell.Culture;
         var style = Style;
         try
         {
             // Parsing throws for some styles, such as invalid combinations.
             _ = TimeOnly.TryParseExact(stringValue, formats, provider, style, out _) ||
-                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && TimeOnly.TryParseExact(stringValue, FormatUtilities.GetDefaultTimeOnlyFormats(provider), provider, style, out _));
+                (context.Options.Formats is null && FormatUtilities.HasDigit(stringValue) && TimeOnly.TryParseExact(stringValue, FormatUtilities.GetDefaultTimeOnlyFormats(provider), provider, style, out _));
         }
         catch (Exception exception)
         {

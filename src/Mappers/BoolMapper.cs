@@ -35,7 +35,7 @@ internal sealed class BoolMapper : ICellMapper<bool>, ICellMapper<bool?>
         return conversion;
     }
 
-    public Exception CreateException(ReadCellResult cell, object? error)
+    public Exception CreateException(ReadCellResult cell, in CellContext context, object? error)
     {
         var stringValue = cell.GetString();
         return MapperUtilities.InvalidFormat(stringValue, "a valid Boolean", () => bool.Parse(stringValue!));

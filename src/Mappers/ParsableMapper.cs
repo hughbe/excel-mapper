@@ -6,7 +6,6 @@ namespace ExcelMapper.Mappers;
 /// </summary>
 internal class ParsableMapper<TParse> : ICellMapper<TParse> where TParse : IParsable<TParse>
 {
-    public IFormatProvider? Provider { get; set; }
 
     CellConversion ICellMapper<TParse>.Convert(ReadCellResult cell, in CellContext context, out TParse value, ref object? error)
     {
@@ -14,7 +13,7 @@ internal class ParsableMapper<TParse> : ICellMapper<TParse> where TParse : IPars
         // why the value is invalid.
         try
         {
-            value = TParse.Parse(cell.GetString()!, Provider ?? cell.Culture);
+            value = TParse.Parse(cell.GetString()!, cell.Culture);
             return CellConversion.Success;
         }
         catch
@@ -24,8 +23,8 @@ internal class ParsableMapper<TParse> : ICellMapper<TParse> where TParse : IPars
         }
     }
 
-    public Exception CreateException(ReadCellResult cell, object? error)
-        => MapperUtilities.InvalidFromParse(() => TParse.Parse(cell.GetString()!, Provider ?? cell.Culture));
+    public Exception CreateException(ReadCellResult cell, in CellContext context, object? error)
+        => MapperUtilities.InvalidFromParse(() => TParse.Parse(cell.GetString()!, cell.Culture));
 }
 
 /// <summary>
