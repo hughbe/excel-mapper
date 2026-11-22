@@ -105,7 +105,7 @@ internal static class ExpressionAutoMapper
     private static bool IsDictionaryIndexerExpression(Expression expression)
         => expression is MethodCallExpression methodCallExpression &&
             methodCallExpression.Object is not null &&
-            AutoMapper.TryGetDictionaryKeyValueType(methodCallExpression.Object!.Type!, out var _, out var _) &&
+            DictionaryRule.TryGetKeyValueTypes(methodCallExpression.Object!.Type!, out var _, out var _) &&
             methodCallExpression.Method.Name == "get_Item" &&
             methodCallExpression.Arguments.Count == 1;
 
@@ -203,7 +203,7 @@ internal static class ExpressionAutoMapper
                 member = null;
                 type = finalExpression.MappedValueType;
             }
-            if (!AutoMapper.TryCreateSplitMapGeneric<TElement>(member, type, finalExpression.GetDefaultCellsReaderFactory() ?? MemberMapper.GetDefaultSplitCellsReaderFactory(member, finalExpression.GetDefaultCellReaderFactory()), emptyValueStrategy, out var map))
+            if (!CollectionRule<TElement>.TryCreateCollectionMap(member, type, finalExpression.GetDefaultCellsReaderFactory() ?? MemberMapper.GetDefaultSplitCellsReaderFactory(member, finalExpression.GetDefaultCellReaderFactory()), emptyValueStrategy, out var map))
             {
                 throw new ExcelMappingException($"No known way to instantiate type \"{type}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
             }
@@ -230,7 +230,7 @@ internal static class ExpressionAutoMapper
                 member = null;
                 type = finalExpression.MappedValueType;
             }
-            if (!AutoMapper.TryCreateGenericDictionaryMap<TKey, TValue>(member, type, emptyValueStrategy, isAutoMapping: false, out var map))
+            if (!DictionaryRule<TKey, TValue>.TryCreateDictionaryMap(member, type, emptyValueStrategy, isAutoMapping: false, out var map))
             {
                 throw new ExcelMappingException($"No known way to instantiate type \"{type}\".");
             }
@@ -413,7 +413,7 @@ internal class MappedMemberExpression : IMappedExpression
     }
 
     public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
-        => AutoMapper.GetOrCreateNestedMap(currentMap, currentExpression.MappedValueType, currentExpression.Context, emptyValueStrategy);
+        => TypeRule.For(currentExpression.MappedValueType).GetOrCreateNestedMap(currentMap, currentExpression.Context, emptyValueStrategy);
 
     public ICellReaderFactory GetDefaultCellReaderFactory()
         => MemberMapper.GetDefaultCellReaderFactory(Member);
@@ -426,7 +426,6 @@ internal class MappedMemberExpression : IMappedExpression
 internal class MappedEnumerableIndexerExpression : IMappedExpression
 {
     public Type Type { get; }
-    public Type ActualElementType { get; }
     public Type MappedElementType { get; }
     public int Index { get; }
     public Type MappedValueType => MappedElementType;
@@ -435,8 +434,7 @@ internal class MappedEnumerableIndexerExpression : IMappedExpression
     public MappedEnumerableIndexerExpression(BinaryExpression expression, Type? mappedElementType)
     {
         Type = expression.Left.Type!;
-        ActualElementType = Type.GetElementType()!;
-        MappedElementType = mappedElementType ?? ActualElementType;
+        MappedElementType = mappedElementType ?? Type.GetElementType()!;
 
         var indexExpression = ExpressionAutoMapper.SkipConvert(expression.Right, out var _);
         if (indexExpression is not ConstantExpression constantExpression)
@@ -456,8 +454,7 @@ internal class MappedEnumerableIndexerExpression : IMappedExpression
         var indexExpression = ExpressionAutoMapper.SkipConvert(expression.Arguments[0], out var _);
 
         Type = expression.Object!.Type;
-        ActualElementType = Type.GetElementTypeOrEnumerableType()!;
-        MappedElementType = mappedElementType ?? ActualElementType;
+        MappedElementType = mappedElementType ?? Type.GetElementTypeOrEnumerableType()!;
 
         if (indexExpression is not ConstantExpression constantExpression)
         {
@@ -472,7 +469,7 @@ internal class MappedEnumerableIndexerExpression : IMappedExpression
     }
 
     public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
-        => AutoMapper.GetOrCreateArrayIndexerMap(currentMap, Type, currentExpression.Context, ActualElementType);
+        => TypeRule.For(Type).Collection!.GetOrCreateIndexerMap(currentMap, Type, currentExpression.Context);
 
     public ICellReaderFactory GetDefaultCellReaderFactory()
         => new ColumnIndexReaderFactory(Index);
@@ -485,7 +482,6 @@ internal class MappedEnumerableIndexerExpression : IMappedExpression
 internal class MappedMultidimensionalArrayIndexerExpression : IMappedExpression
 {
     public Type Type { get; }
-    public Type ActualElementType { get; }
     public Type MappedElementType { get; }
     public int[] Indices { get; }
     public Type MappedValueType => MappedElementType;
@@ -494,8 +490,7 @@ internal class MappedMultidimensionalArrayIndexerExpression : IMappedExpression
     public MappedMultidimensionalArrayIndexerExpression(MethodCallExpression expression, Type? mappedElementType)
     {
         Type = expression.Object!.Type;
-        ActualElementType = Type.GetElementType()!;
-        MappedElementType = mappedElementType ?? ActualElementType;
+        MappedElementType = mappedElementType ?? Type.GetElementType()!;
 
         var arguments = expression.Arguments;
         Indices = new int[arguments.Count];
@@ -516,7 +511,7 @@ internal class MappedMultidimensionalArrayIndexerExpression : IMappedExpression
     }
 
     public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
-        => AutoMapper.GetOrCreateMultidimensionalIndexerMap(currentMap, Type, ActualElementType, currentExpression.Context);
+        => TypeRule.For(Type).Collection!.GetOrCreateMultidimensionalIndexerMap(currentMap, currentExpression.Context);
 
     public ICellReaderFactory GetDefaultCellReaderFactory()
         => new ColumnIndexReaderFactory(0);
@@ -530,8 +525,6 @@ internal class MappedDictionaryIndexerExpression : IMappedExpression
 {
     public Type Type { get; }
     public Type ValueType { get; }
-    public Type ActualKeyType { get; }
-    public Type ActualValueType { get; }
     public object Key { get; }
     public Type MappedValueType => ValueType;
     public object Context => Key;
@@ -549,18 +542,15 @@ internal class MappedDictionaryIndexerExpression : IMappedExpression
         }
 
         Type = expression.Object!.Type;
-        AutoMapper.TryGetDictionaryKeyValueType(Type, out var actualKeyType, out var actualValueType);
+        DictionaryRule.TryGetKeyValueTypes(Type, out _, out var actualValueType);
 
-        ActualKeyType = actualKeyType!;
-        ActualValueType = actualValueType!;
-
-        ValueType = valueType ?? ActualValueType;
+        ValueType = valueType ?? actualValueType!;
 
         Key = constantExpression.Value!;
     }
 
     public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
-        => AutoMapper.GetOrCreateDictionaryIndexerMap(currentMap, Type, ActualKeyType, ActualValueType, currentExpression.Context);
+        => TypeRule.For(Type).Dictionary!.GetOrCreateIndexerMap(currentMap, Type, currentExpression.Context);
 
     public ICellReaderFactory GetDefaultCellReaderFactory()
     {
