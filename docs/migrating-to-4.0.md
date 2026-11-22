@@ -255,7 +255,7 @@ If you created a map with its constructor, or implemented `IMap`, map the member
 | `configuration.RegisterClassMap(typeof(T), classMap)` | `configuration.RegisterClassMap(classMap)`, which registers the class map for its own type: the removed overload let a map be registered for a different type |
 | `importer.RegisterClassMapsInNamespace(...)` | `importer.Configuration.RegisterClassMapsInNamespace(...)`, next to `RegisterClassMap` |
 | `importer.Reader` | Removed: the importer's sheets share the reader, and moving it broke their positions. Pass your own `IExcelDataReader` to `new ExcelImporter(reader)` to configure it. |
-| `new ExcelClassMap(typeof(T))`, or a class deriving from `ExcelClassMap` | `new ExcelClassMap<T>()`, or derive from `ExcelClassMap<T>`: the non-generic class map, now abstract, couldn't map any members |
+| `new ExcelClassMap(typeof(T))`, or a class deriving from `ExcelClassMap` | `new ExcelClassMap<T>()`, or derive from `ExcelClassMap<T>`: the non-generic class map, now abstract with members only `ExcelClassMap<T>` implements, couldn't map any members |
 | `new ExcelRange("A1:B10")` | `ExcelRange.Parse("A1:B10")` |
 | Setting `Index`, `Indices`, `Name` or `Names` on a column attribute | Pass them to the attribute's constructor. The attributes are sealed, except `ExcelColumnIndexAttribute`. |
 | `WithColumnNames` and `WithColumnIndices` taking an `IReadOnlyList<T>` | `params T[]` or `IEnumerable<T>` |

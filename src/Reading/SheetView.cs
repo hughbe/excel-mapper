@@ -332,11 +332,12 @@ internal sealed class SheetView
 
         // The importer's culture, if set, is given to each cell (see ValuePipeline<T>.Map), not set
         // as the thread's culture.
-        var result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, errors, out var valueObject);
+        var result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, errors, out value);
 
         // If we've been asked to validate with data annotations, do so now.
-        if (Settings.ValidateDataAnnotations && result && valueObject is not null)
+        if (Settings.ValidateDataAnnotations && result && value is not null)
         {
+            object valueObject = value;
             if (errors is not null)
             {
                 // Report every validation failure rather than only the first.
@@ -355,14 +356,12 @@ internal sealed class SheetView
             }
         }
 
-        // valueObject is null if the row couldn't be mapped while collecting errors.
-        value = valueObject is null ? default : (T)valueObject;
         return result;
     }
 
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ExcelClassMap GetOrCreateClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
+    public ExcelClassMap<T> GetOrCreateClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
     {
         if (!Configuration.TryGetClassMap(typeof(T), out var classMap))
         {
@@ -382,7 +381,8 @@ internal sealed class SheetView
         classMap.Freeze();
         RootMap = classMap;
 
-        return classMap;
+        // Class maps are registered for their own type (see ExcelImporterConfiguration.RegisterClassMap).
+        return (ExcelClassMap<T>)classMap;
     }
 
     /// <summary>
@@ -524,5 +524,5 @@ internal sealed class SheetView
     /// <summary>
     /// Gets the members of a class map bound to this sheet.
     /// </summary>
-    public BoundMember[] GetBoundMembers(ExcelClassMap classMap) => _bindings.GetBoundMembers(classMap);
+    public BoundMember<T>[] GetBoundMembers<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap) => _bindings.GetBoundMembers(classMap);
 }

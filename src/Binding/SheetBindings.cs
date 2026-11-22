@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using ExcelMapper.Readers;
 
 namespace ExcelMapper.Binding;
@@ -73,21 +74,21 @@ internal sealed class SheetBindings(SheetView sheet)
         return columns.FindColumns(sheet) is { } found ? new ColumnIndicesReader(found) : null;
     }
 
-    // Class maps bound to the sheet. Rows are usually mapped with one class map at a time, so the
-    // last one is kept separately. Class maps are frozen before rows are read, so their members
-    // never need binding again.
-    private Dictionary<ExcelClassMap, BoundMember[]>? _boundClassMaps;
+    // Class maps bound to the sheet, each with its BoundMember<T>[]. Rows are usually mapped with
+    // one class map at a time, so the last one is kept separately. Class maps are frozen before
+    // rows are read, so their members never need binding again.
+    private Dictionary<ExcelClassMap, object>? _boundClassMaps;
     private ExcelClassMap? _lastBoundClassMap;
-    private BoundMember[]? _lastBound;
+    private object? _lastBound;
 
     /// <summary>
     /// Gets the members of a class map bound to the sheet, binding them the first time.
     /// </summary>
-    public BoundMember[] GetBoundMembers(ExcelClassMap classMap)
+    public BoundMember<T>[] GetBoundMembers<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap)
     {
         if (ReferenceEquals(_lastBoundClassMap, classMap))
         {
-            return _lastBound!;
+            return (BoundMember<T>[])_lastBound!;
         }
 
         _boundClassMaps ??= [];
@@ -99,21 +100,21 @@ internal sealed class SheetBindings(SheetView sheet)
 
         _lastBoundClassMap = classMap;
         _lastBound = bound;
-        return bound;
+        return (BoundMember<T>[])bound;
     }
 
-    private BoundMember[] Bind(ExcelClassMap classMap)
+    private static BoundMember<T>[] Bind<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap)
     {
         var members = classMap.Members;
-        var bound = new BoundMember[members.Count];
+        var bound = new BoundMember<T>[members.Count];
         for (int i = 0; i < bound.Length; i++)
         {
             var member = members[i];
             bound[i] = member.Map switch
             {
-                IValueMap valueMap => valueMap.Bind(member),
-                ICellsMap cellsMap => new BoundCellsMember(cellsMap, member),
-                _ => new BoundMapMember(member),
+                IBindableMap bindableMap => bindableMap.Bind<T>(member),
+                ICellsMap cellsMap => new BoundCellsMember<T>(cellsMap, member),
+                _ => new BoundMapMember<T>(member),
             };
         }
 

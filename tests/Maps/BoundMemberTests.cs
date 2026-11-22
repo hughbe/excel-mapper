@@ -113,8 +113,8 @@ public class BoundMemberTests
         public int Age { get; set; }
     }
 
-    // Members of a struct are set inside the struct's box, by compiled setters for properties and
-    // fields, and by reflection for readonly fields.
+    // Members of a struct are set in place, through a reference to it, by compiled setters for
+    // properties and fields.
     public struct FieldStruct
     {
         public string? Name;
@@ -161,10 +161,130 @@ public class BoundMemberTests
     [Fact]
     public void ReadRows_StructMemberMappedAsDifferentType_ConvertsAsBefore()
     {
-        // The untyped setter (a map of another type than the member's) also sets inside the box.
+        // A map of another type than the member's converts the value, and still sets the struct in place.
         using var importer = Helpers.GetCsvImporter("Name\nabc\n");
         importer.Configuration.RegisterClassMap<RowStruct>(c => c.Map(r => (object?)r.Name));
         Assert.Equal("abc", importer.ReadSheet().ReadRows<RowStruct>().Single().Name);
+    }
+
+    [Fact]
+    public void ReadRows_StructWithReadonlyField_SetsField()
+    {
+        // Readonly fields are set by reflection, in a box that's copied back to the struct.
+        using var importer = Helpers.GetCsvImporter("Name,Age\na,1\nb,2\n");
+        var rows = importer.ReadSheet().ReadRows<ReadonlyFieldStruct>().ToArray();
+        Assert.Equal(["a", "b"], rows.Select(r => r.Name));
+        Assert.Equal([1, 2], rows.Select(r => r.Age));
+    }
+
+    public struct ReadonlyFieldStruct
+    {
+        public readonly string? Name;
+        public int Age { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_StructWithNestedStruct_SetsNestedMembers()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Street,Number\na,High St,1\nb,Low St,2\n");
+        var rows = importer.ReadSheet().ReadRows<OuterStruct>().ToArray();
+        Assert.Equal(["a", "b"], rows.Select(r => r.Name));
+        Assert.Equal([new InnerStruct { Street = "High St", Number = 1 }, new InnerStruct { Street = "Low St", Number = 2 }], rows.Select(r => r.Address));
+    }
+
+    public struct OuterStruct
+    {
+        public string? Name { get; set; }
+        public InnerStruct Address;
+    }
+
+    public struct InnerStruct
+    {
+        public string? Street { get; set; }
+        public int Number { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_ClassWithNestedStruct_SetsNestedMembers()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Street,Number\na,High St,1\n");
+        var row = importer.ReadSheet().ReadRows<ClassWithStruct>().Single();
+        Assert.Equal("a", row.Name);
+        Assert.Equal(new InnerStruct { Street = "High St", Number = 1 }, row.Address);
+    }
+
+    public class ClassWithStruct
+    {
+        public string? Name { get; set; }
+        public InnerStruct Address { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_RecordStructWithNestedRecordStruct_PassesNestedValue()
+    {
+        // The nested value is passed to the constructor typed, as a value map's is.
+        using var importer = Helpers.GetCsvImporter("Name,Street,Number\na,High St,1\nb,Low St,2\n");
+        Assert.Equal(
+            [new OuterRecordStruct("a", new InnerRecordStruct("High St", 1)), new OuterRecordStruct("b", new InnerRecordStruct("Low St", 2))],
+            importer.ReadSheet().ReadRows<OuterRecordStruct>());
+    }
+
+    public readonly record struct OuterRecordStruct(string Name, InnerRecordStruct Address);
+
+    public readonly record struct InnerRecordStruct(string Street, int Number);
+
+    [Fact]
+    public void ReadRowResults_RecordStructWithInvalidNestedValue_RecordsError()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Street,Number\na,High St,x\nb,Low St,2\n");
+        var results = importer.ReadSheet().ReadRowResults<OuterRecordStruct>().ToArray();
+        Assert.False(results[0].IsValid);
+        Assert.Equal("C2", Assert.Single(results[0].Errors).CellAddress);
+        Assert.Equal(new OuterRecordStruct("b", new InnerRecordStruct("Low St", 2)), results[1].Value);
+    }
+
+    [Fact]
+    public void ReadRows_Int_ReturnsExpected()
+    {
+        // A single value is read typed, from the first column.
+        using var importer = Helpers.GetCsvImporter("Value\n1\n2\n");
+        Assert.Equal([1, 2], importer.ReadSheet().ReadRows<int>());
+    }
+
+    [Fact]
+    public void ReadRows_NullableInt_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("Value,Other\n1,a\n,b\n3,c\n");
+        Assert.Equal([1, null, 3], importer.ReadSheet().ReadRows<int?>());
+    }
+
+    [Fact]
+    public void ReadRowResults_IntInvalid_RecordsError()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\n1\nx\n3\n");
+        var results = importer.ReadSheet().ReadRowResults<int>().ToArray();
+        Assert.Equal([true, false, true], results.Select(r => r.IsValid));
+        Assert.Equal("A3", Assert.Single(results[1].Errors).CellAddress);
+        Assert.Equal(3, results[2].Value);
+    }
+
+    [Fact]
+    public void ReadRows_StructMappedAsSingleValue_ReturnsExpected()
+    {
+        // Map(p => p) reads the whole row as one value.
+        using var importer = Helpers.GetCsvImporter("Value\n2024-03-04\n");
+        importer.Configuration.RegisterClassMap<DateTime>(c => c.Map(d => d).WithColumnName("Value"));
+        Assert.Equal(new DateTime(2024, 3, 4), importer.ReadSheet().ReadRows<DateTime>().Single());
+    }
+
+    [Fact]
+    public void ReadRowResults_SingleValueColumnMissing_RecordsError()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\n2024-03-04\n");
+        importer.Configuration.RegisterClassMap<DateTime>(c => c.Map(d => d).WithColumnName("Missing"));
+        var result = importer.ReadSheet().ReadRowResults<DateTime>().Single();
+        Assert.False(result.IsValid);
+        Assert.Single(result.Errors);
     }
 
     [Fact]

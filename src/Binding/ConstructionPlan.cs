@@ -10,16 +10,16 @@ namespace ExcelMapper.Binding;
 /// mapped members by name and type (or have default values), after which the members that
 /// aren't parameters are set.
 /// </summary>
-internal sealed class ConstructionPlan
+internal sealed class ConstructionPlan<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>
 {
-    private ConstructionPlan(Func<object> createInstance)
+    private ConstructionPlan(Func<T> createInstance)
     {
         CreateInstance = createInstance;
         MemberParameterIndices = [];
         DefaultArguments = [];
     }
 
-    private ConstructionPlan(ConstructorInfo constructor, int[] memberParameterIndices, object?[] defaultArguments, Func<BoundMember[], object>? createFromMembers)
+    private ConstructionPlan(ConstructorInfo constructor, int[] memberParameterIndices, object?[] defaultArguments, Func<BoundMember<T>[], T>? createFromMembers)
     {
         Constructor = constructor;
         MemberParameterIndices = memberParameterIndices;
@@ -45,39 +45,39 @@ internal sealed class ConstructionPlan
     /// Gets a delegate that creates an instance with the parameterless constructor, if
     /// <see cref="Constructor"/> is null.
     /// </summary>
-    public Func<object>? CreateInstance { get; }
+    public Func<T>? CreateInstance { get; }
 
     // Calls the constructor with the values the bound members read, or null where code can't be compiled.
-    private Func<BoundMember[], object>? CreateFromMembers { get; }
+    private Func<BoundMember<T>[], T>? CreateFromMembers { get; }
 
     // Calls the constructor with an array of arguments, where code can't be compiled.
     private Func<object?[], object>? InvokeConstructor { get; }
 
     /// <summary>
     /// Calls <see cref="Constructor"/> with the values the bound members read (see
-    /// <see cref="BoundMember.ReadValue"/>).
+    /// <see cref="BoundMember{TOwner}.ReadValue"/>).
     /// </summary>
-    public object Construct(BoundMember[] members)
+    public T Construct(BoundMember<T>[] members)
         => CreateFromMembers is { } createFromMembers
             ? createFromMembers(members)
-            : InvokeConstructor!(GetArguments(members));
+            : (T)InvokeConstructor!(GetArguments(members));
 
     /// <summary>
     /// Sets the members that weren't passed to the constructor.
     /// </summary>
-    public void SetOtherMembers(object instance, BoundMember[] members)
+    public void SetOtherMembers(ref T instance, BoundMember<T>[] members)
     {
         for (int i = 0; i < members.Length; i++)
         {
             if (MemberParameterIndices[i] < 0 && members[i].HasValue)
             {
-                members[i].SetValue(instance);
+                members[i].SetValue(ref instance);
             }
         }
     }
 
     // Where constructors can't be compiled: the constructor's arguments as an array.
-    private object?[] GetArguments(BoundMember[] members)
+    private object?[] GetArguments(BoundMember<T>[] members)
     {
         var arguments = (object?[])DefaultArguments.Clone();
         for (int i = 0; i < members.Length; i++)
@@ -93,11 +93,12 @@ internal sealed class ConstructionPlan
     }
 
     /// <summary>
-    /// Decides how to create <paramref name="type"/> with the given members.
+    /// Decides how to create a <typeparamref name="T"/> with the given members.
     /// </summary>
     /// <exception cref="ExcelMappingException">The type can't be created with these members.</exception>
-    public static ConstructionPlan Create([DynamicallyAccessedMembers(TrimmingConstants.MappedType)] Type type, IReadOnlyList<ClassMapMember> classMembers)
+    public static ConstructionPlan<T> Create(IReadOnlyList<ClassMapMember> classMembers)
     {
+        var type = typeof(T);
         var hasReadOnlyMember = false;
         foreach (var member in classMembers)
         {
@@ -112,7 +113,7 @@ internal sealed class ConstructionPlan
         // set through a constructor.
         if (!hasReadOnlyMember && ConstructorUtilities.HasParameterlessConstructor(type))
         {
-            return new ConstructionPlan(CompiledAccessors.GetParameterlessConstructor(type));
+            return new ConstructionPlan<T>(CompiledAccessors.GetParameterlessConstructor<T>());
         }
 
         if (type.IsInterface || type.IsAbstract)
@@ -165,12 +166,12 @@ internal sealed class ConstructionPlan
         for (int i = 0; i < parameters.Length; i++)
         {
             var memberIndex = parameterMemberIndices[i];
-            var typedMethod = memberIndex >= 0 && classMembers[memberIndex].Map is IValueMap valueMap
-                ? valueMap.GetArgumentMethod(parameters[i].ParameterType)
+            var typedMethod = memberIndex >= 0 && classMembers[memberIndex].Map is IBindableMap bindableMap
+                ? bindableMap.GetArgumentMethod<T>(parameters[i].ParameterType)
                 : null;
             boundArguments[i] = new BoundConstructorArgument(memberIndex, typedMethod, defaultArguments[i]);
         }
 
-        return new ConstructionPlan(constructor, memberParameterIndices, defaultArguments, CompiledAccessors.GetConstructor(constructor, boundArguments));
+        return new ConstructionPlan<T>(constructor, memberParameterIndices, defaultArguments, CompiledAccessors.GetConstructor<T>(constructor, boundArguments));
     }
 }

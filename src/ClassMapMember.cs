@@ -4,15 +4,8 @@ using System.Reflection;
 namespace ExcelMapper;
 
 /// <summary>
-/// A delegate that sets the value of a member (property or field) on an object instance.
-/// </summary>
-/// <param name="instance">The object instance whose member value should be set.</param>
-/// <param name="value">The value to set on the member.</param>
-internal delegate void MemberSetter(object instance, object value);
-
-/// <summary>
 /// A member of a class map (<see cref="ExcelClassMap.Members"/>): the property or field, the map
-/// that reads its value, and how the value is set.
+/// that reads its value.
 /// </summary>
 internal sealed class ClassMapMember
 {
@@ -34,30 +27,18 @@ internal sealed class ClassMapMember
         Member = member;
         Map = map;
 
-        if (member is PropertyInfo property)
+        if (member is PropertyInfo { CanWrite: false } property)
         {
-            if (property.CanWrite)
+            // A read-only property can only be mapped if its value can be passed to a
+            // constructor parameter with the same name (for example a positional record).
+            var type = property.ReflectedType ?? property.DeclaringType!;
+            if (property.GetMethod is null || property.GetMethod.IsStatic ||
+                !ConstructorUtilities.IsConstructorParameter(type, property.Name, property.PropertyType))
             {
-                SetValue = CompiledAccessors.GetSetter(property);
+                throw new ArgumentException($"Property \"{member.Name}\" is read-only and does not match a constructor parameter.", nameof(member));
             }
-            else
-            {
-                // A read-only property can only be mapped if its value can be passed to a
-                // constructor parameter with the same name (for example a positional record).
-                var type = property.ReflectedType ?? property.DeclaringType!;
-                if (property.GetMethod is null || property.GetMethod.IsStatic ||
-                    !ConstructorUtilities.IsConstructorParameter(type, property.Name, property.PropertyType))
-                {
-                    throw new ArgumentException($"Property \"{member.Name}\" is read-only and does not match a constructor parameter.", nameof(member));
-                }
 
-                IsReadOnly = true;
-                SetValue = (_, _) => throw new InvalidOperationException($"Property \"{member.Name}\" is read-only and can only be set through a constructor parameter.");
-            }
-        }
-        else
-        {
-            SetValue = CompiledAccessors.GetSetter((FieldInfo)member);
+            IsReadOnly = true;
         }
     }
 
@@ -67,13 +48,7 @@ internal sealed class ClassMapMember
     public MemberInfo Member { get; }
 
     /// <summary>
-    /// Gets the delegate used to set the value of the member.
-    /// </summary>
-    public MemberSetter SetValue { get; }
-
-    /// <summary>
-    /// Gets whether the member is a read-only property that is set through a constructor parameter
-    /// rather than <see cref="SetValue"/>.
+    /// Gets whether the member is a read-only property that is set through a constructor parameter.
     /// </summary>
     public bool IsReadOnly { get; }
 
