@@ -11,7 +11,7 @@ namespace ExcelMapper;
 /// Maps a member to an Excel column of type T with a one-to-one relationship.
 /// </summary>
 /// <typeparam name="T">The type of the member.</typeparam>
-public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap, IBindableMap
+public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
 {
     internal ValueMap(Columns columns)
     {
@@ -33,7 +33,11 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap, IBindableMa
         }
     }
 
-    Columns IValueMap.Columns => Columns;
+    Columns IColumnsMap.Columns
+    {
+        get => Columns;
+        set => Columns = value;
+    }
 
     /// <inheritdoc />
     public bool Optional { get; set; }
@@ -44,7 +48,7 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap, IBindableMa
     /// <summary>
     /// Gets the map's value pipeline: the map itself, which converts the cell's value.
     /// </summary>
-    ValuePipeline IToOneMap.Pipeline => this;
+    ValuePipeline IColumnsMap.Pipeline => this;
 
     /// <inheritdoc />
     bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
@@ -88,16 +92,16 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap, IBindableMa
             throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _columns, member);
         }
 
-        value = Map(sheet, rowIndex, new ReadCellResult(columnIndex, reader, PreserveFormatting), PreserveFormatting, member, errors);
+        value = Map(sheet, rowIndex, new ReadCellResult(columnIndex, reader, PreserveFormatting), member, errors);
         return true;
     }
 
 
     /// <inheritdoc/>
-    BoundMember IBindableMap.Bind(ExcelPropertyMap property, ExcelSheet sheet) => new BoundValueMember<T>(this, property, sheet);
+    BoundMember IValueMap.Bind(ExcelPropertyMap property, ExcelSheet sheet) => new BoundValueMember<T>(this, property, sheet);
 
     /// <inheritdoc/>
-    MethodInfo? IBindableMap.GetArgumentMethod(Type parameterType)
+    MethodInfo? IValueMap.GetArgumentMethod(Type parameterType)
         => parameterType == typeof(T) ? s_getArgumentMethod ??= new Func<BoundValueMember<T>, T, T>(BoundValueMember<T>.GetValueOrDefault).Method : null;
 
     private static MethodInfo? s_getArgumentMethod;

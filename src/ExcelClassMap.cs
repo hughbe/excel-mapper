@@ -349,7 +349,7 @@ public class ExcelClassMap : IParentMap
         for (int i = 0; i < parameters.Length; i++)
         {
             var memberIndex = parameterMemberIndices[i];
-            var typedMethod = memberIndex >= 0 && Properties[memberIndex].Map is IBindableMap bindableMap
+            var typedMethod = memberIndex >= 0 && Properties[memberIndex].Map is IValueMap bindableMap
                 ? bindableMap.GetArgumentMethod(parameters[i].ParameterType)
                 : null;
             boundArguments[i] = new BoundConstructorArgument(memberIndex, typedMethod, defaultArguments[i]);

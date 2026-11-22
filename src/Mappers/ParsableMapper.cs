@@ -8,7 +8,7 @@ internal class ParsableMapper<TParse> : ICellMapper<TParse> where TParse : IPars
 {
     public IFormatProvider? Provider { get; set; }
 
-    CellConversion ICellMapper<TParse>.Convert(ReadCellResult cell, out TParse value)
+    CellConversion ICellMapper<TParse>.Convert(ReadCellResult cell, in CellContext context, out TParse value, ref object? error)
     {
         // TryParse isn't used: types may only implement Parse properly, and Parse's exception says
         // why the value is invalid.
@@ -24,7 +24,7 @@ internal class ParsableMapper<TParse> : ICellMapper<TParse> where TParse : IPars
         }
     }
 
-    public Exception CreateException(ReadCellResult cell)
+    public Exception CreateException(ReadCellResult cell, object? error)
         => MapperUtilities.InvalidFromParse(() => TParse.Parse(cell.GetString()!, Provider ?? cell.Culture));
 }
 
@@ -33,9 +33,9 @@ internal class ParsableMapper<TParse> : ICellMapper<TParse> where TParse : IPars
 /// </summary>
 internal sealed class StructParsableMapper<TParse> : ParsableMapper<TParse>, ICellMapper<TParse?> where TParse : struct, IParsable<TParse>
 {
-    CellConversion ICellMapper<TParse?>.Convert(ReadCellResult cell, out TParse? value)
+    CellConversion ICellMapper<TParse?>.Convert(ReadCellResult cell, in CellContext context, out TParse? value, ref object? error)
     {
-        var conversion = ((ICellMapper<TParse>)this).Convert(cell, out var result);
+        var conversion = ((ICellMapper<TParse>)this).Convert(cell, in context, out var result, ref error);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }

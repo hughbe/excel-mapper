@@ -314,7 +314,7 @@ internal static class CompiledAccessors
 /// <param name="memberIndex">The index of the bound member whose value the parameter takes, or -1
 /// to always pass <paramref name="defaultValue"/>.</param>
 /// <param name="typedMethod">The method that returns the member's value without boxing (see
-/// <see cref="IBindableMap.GetArgumentMethod"/>), or null to read it as an object.</param>
+/// <see cref="IValueMap.GetArgumentMethod"/>), or null to read it as an object.</param>
 /// <param name="defaultValue">The value passed when the member has no value. Null passes the
 /// parameter type's default value.</param>
 internal readonly struct BoundConstructorArgument(int memberIndex, MethodInfo? typedMethod, object? defaultValue)

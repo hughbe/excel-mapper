@@ -120,7 +120,7 @@ internal sealed class SheetBindings(ExcelSheet sheet)
             var property = properties[i];
             members[i] = property.Map switch
             {
-                IBindableMap bindableMap => bindableMap.Bind(property, sheet),
+                IValueMap bindableMap => bindableMap.Bind(property, sheet),
                 ICellsMap cellsMap => new BoundCellsMember(cellsMap, property),
                 _ => new BoundMapMember(property),
             };

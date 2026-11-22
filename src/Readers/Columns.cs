@@ -496,11 +496,11 @@ internal sealed class ExtraColumns : Columns
                     AddUsedColumn(valueMap.Columns, sheet, usedColumns);
                     break;
 
-                case IManyToOneMap { Columns: ExtraColumns }:
+                case ICellsMap { Columns: ExtraColumns }:
                     // Another extra columns member: it doesn't claim any columns.
                     break;
 
-                case IManyToOneMap cellsMap:
+                case ICellsMap cellsMap:
                     try
                     {
                         if (cellsMap.Columns.FindColumns(sheet) is { } columns)

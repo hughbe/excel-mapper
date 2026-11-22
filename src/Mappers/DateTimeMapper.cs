@@ -37,7 +37,7 @@ internal sealed class DateTimeMapper : IFormatsCellMapper, ICellMapper<DateTime>
     /// </summary>
     public DateTimeStyles Style { get; set; }
 
-    CellConversion ICellMapper<DateTime>.Convert(ReadCellResult cell, out DateTime value)
+    CellConversion ICellMapper<DateTime>.Convert(ReadCellResult cell, in CellContext context, out DateTime value, ref object? error)
     {
         var cellValue = cell.GetValue();
         if (cellValue is DateTime dateTimeValue)
@@ -68,14 +68,14 @@ internal sealed class DateTimeMapper : IFormatsCellMapper, ICellMapper<DateTime>
         }
     }
 
-    CellConversion ICellMapper<DateTime?>.Convert(ReadCellResult cell, out DateTime? value)
+    CellConversion ICellMapper<DateTime?>.Convert(ReadCellResult cell, in CellContext context, out DateTime? value, ref object? error)
     {
-        var conversion = ((ICellMapper<DateTime>)this).Convert(cell, out var result);
+        var conversion = ((ICellMapper<DateTime>)this).Convert(cell, in context, out var result, ref error);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }
 
-    public Exception CreateException(ReadCellResult cell)
+    public Exception CreateException(ReadCellResult cell, object? error)
     {
         var stringValue = cell.GetString();
         var formats = Formats;

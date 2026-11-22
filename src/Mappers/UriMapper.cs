@@ -14,7 +14,7 @@ internal sealed class UriMapper : ICellMapper<Uri?>
         }
     }
 
-    public CellConversion Convert(ReadCellResult cell, out Uri? value)
+    public CellConversion Convert(ReadCellResult cell, in CellContext context, out Uri? value, ref object? error)
     {
         var stringValue = cell.GetString();
         if (stringValue is not null && Uri.TryCreate(stringValue, UriKind, out value))
@@ -26,7 +26,7 @@ internal sealed class UriMapper : ICellMapper<Uri?>
         return CellConversion.Invalid;
     }
 
-    public Exception CreateException(ReadCellResult cell)
+    public Exception CreateException(ReadCellResult cell, object? error)
     {
         var uriKind = UriKind;
         return new UriFormatException($"The value \"{cell.GetString()}\" isn't a valid {(uriKind == UriKind.RelativeOrAbsolute ? "" : uriKind.ToString().ToLowerInvariant() + " ")}URI.");

@@ -13,7 +13,7 @@ namespace ExcelMapper;
 /// Reads multiple cells of an excel sheet and maps the value of the cell to the
 /// type of the property or field.
 /// </summary>
-public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
+public class CollectionMap<TElement> : ICellsMap
 {
     /// <summary>
     /// Constructs a map that reads one or more values from one or more cells and maps these values to one
@@ -41,7 +41,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
         }
     }
 
-    Columns IManyToOneMap.Columns
+    Columns IColumnsMap.Columns
     {
         get => Columns;
         set => Columns = value;
@@ -58,7 +58,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     /// </summary>
     public ElementMap<TElement> Pipeline { get; private set; } = new ElementMap<TElement>();
 
-    ValuePipeline IToOneMap.Pipeline => Pipeline;
+    ValuePipeline IColumnsMap.Pipeline => Pipeline;
 
     /// <summary>
     /// How the member's collection is built from its elements.
@@ -108,7 +108,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
             var index = 0;
             while (cellsReader.TryGetNext(out var result))
             {
-                var elementValue = Pipeline.Map(sheet, rowIndex, result, PreserveFormatting, member, errors);
+                var elementValue = Pipeline.Map(sheet, rowIndex, result, member, errors);
                 Builder.Add(items, index++, elementValue);
             }
         }

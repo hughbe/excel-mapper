@@ -70,7 +70,7 @@ internal abstract class NumberMapper : INumberStyleCellMapper
     internal static NumberStyles GetDefaultStyle(TypeCode typeCode)
         => IsInteger(typeCode) ? NumberStyles.Number : NumberStyles.Number | NumberStyles.AllowExponent;
 
-    public Exception CreateException(ReadCellResult cell)
+    public Exception CreateException(ReadCellResult cell, object? error)
     {
         var value = cell.GetValue();
 
@@ -230,7 +230,7 @@ internal sealed class NumberMapper<T> : NumberMapper, ICellMapper<T>, ICellMappe
         return (Func<double, T>)fromDouble;
     }
 
-    CellConversion ICellMapper<T>.Convert(ReadCellResult cell, out T value)
+    CellConversion ICellMapper<T>.Convert(ReadCellResult cell, in CellContext context, out T value, ref object? error)
     {
         var cellValue = cell.GetValue();
         try
@@ -266,9 +266,9 @@ internal sealed class NumberMapper<T> : NumberMapper, ICellMapper<T>, ICellMappe
         }
     }
 
-    CellConversion ICellMapper<T?>.Convert(ReadCellResult cell, out T? value)
+    CellConversion ICellMapper<T?>.Convert(ReadCellResult cell, in CellContext context, out T? value, ref object? error)
     {
-        var conversion = ((ICellMapper<T>)this).Convert(cell, out var result);
+        var conversion = ((ICellMapper<T>)this).Convert(cell, in context, out var result, ref error);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }

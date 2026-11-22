@@ -57,7 +57,7 @@ internal class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessed
         return span;
     }
 
-    CellConversion ICellMapper<T>.Convert(ReadCellResult cell, out T value)
+    CellConversion ICellMapper<T>.Convert(ReadCellResult cell, in CellContext context, out T value, ref object? error)
     {
         if (cell.GetValue() is double doubleValue)
         {
@@ -92,7 +92,7 @@ internal class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessed
         }
     }
 
-    public Exception CreateException(ReadCellResult cell)
+    public Exception CreateException(ReadCellResult cell, object? error)
     {
         if (cell.GetValue() is double doubleValue)
         {

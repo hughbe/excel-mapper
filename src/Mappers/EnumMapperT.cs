@@ -6,10 +6,10 @@ internal sealed class EnumMapper<TEnum>(bool ignoreCase) : ICellMapper<TEnum>, I
 {
     public bool IgnoreCase { get; } = ignoreCase;
 
-    CellConversion ICellMapper<TEnum>.Convert(ReadCellResult cell, out TEnum value)
+    CellConversion ICellMapper<TEnum>.Convert(ReadCellResult cell, in CellContext context, out TEnum value, ref object? error)
         => Enum.TryParse(cell.GetString(), IgnoreCase, out value) ? CellConversion.Success : CellConversion.Invalid;
 
-    CellConversion ICellMapper<TEnum?>.Convert(ReadCellResult cell, out TEnum? value)
+    CellConversion ICellMapper<TEnum?>.Convert(ReadCellResult cell, in CellContext context, out TEnum? value, ref object? error)
     {
         if (Enum.TryParse(cell.GetString(), IgnoreCase, out TEnum result))
         {
@@ -21,7 +21,7 @@ internal sealed class EnumMapper<TEnum>(bool ignoreCase) : ICellMapper<TEnum>, I
         return CellConversion.Invalid;
     }
 
-    public Exception CreateException(ReadCellResult cell)
+    public Exception CreateException(ReadCellResult cell, object? error)
     {
         var stringValue = cell.GetString();
         var ignoreCase = IgnoreCase;

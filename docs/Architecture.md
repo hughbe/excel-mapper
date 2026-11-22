@@ -68,6 +68,8 @@ The columns are found once per sheet (`ExcelSheet.FindColumn`, cached by `SheetB
 
 The first time a class map is used with a sheet, `ExcelSheet.GetBoundMembers` (through its `SheetBindings`) binds each member to the sheet:
 
+Which binding a member gets depends on its map's internal interface: `IColumnsMap` for maps that read their own `Columns`, `IValueMap` (single values) and `ICellsMap` (collections and dictionaries), which both extend it.
+
 - `BoundValueMember<T>` (single values): keeps the member's column and a compiled `Action<object, T>` setter, so values stay typed from the pipeline to the member, without boxing.
 - `BoundCellsMember` (collections and dictionaries): keeps the cells reader. The collection is built by the map's `CollectionBuilder<T>` or `DictionaryBuilder<TKey, TValue>`, chosen once for the member's type by its `CollectionRule`/`DictionaryRule`. Builders hold no state (the collection being built is a local), so one builder serves every sheet and thread without a lock. Collections created from a copy of their elements, such as immutable and frozen ones, gather them in a list each thread reuses.
 - `BoundMapMember` (everything else, such as nested class maps, indexers and row numbers): maps through `IMap.TryGetValue`.
@@ -94,10 +96,12 @@ A `ValuePipeline<T>` turns a cell into a `T`. The stages, in order:
 
 Every stage is typed, so values are converted as `T` from the cell to the member, without boxing:
 
-- **Mappers** implement the internal `ICellMapper<T>`: `Convert(cell, out T value)` returns `Success`, `SuccessUnlessReplaced` (strings, so that a later mapping dictionary can replace the text), `Invalid` or `NotHandled`, and `CreateException(cell)` creates the exception for an invalid cell, only when a fallback or `ReadRowResults` uses it. The mappers for value types also implement `ICellMapper<T?>`, so nullable members share them.
-- **Converters** (`ICellConverter<T>`, and `WithConverter(value => ...)` through `DelegateCellConverter<T>`) are carried in the list of mappers by `CellConverterMapper<T>`, and called by the pipeline with the cell's `CellContext`. The pipeline keeps the error a converter returns, since it can't be asked for an exception afterwards without converting again.
+- **Mappers** implement the internal `ICellMapper<T>`: `Convert(cell, context, out T value, ref error)` returns `Success`, `SuccessUnlessReplaced` (strings, so that a later mapping dictionary can replace the text), `Invalid` or `NotHandled`, and `CreateException(cell, error)` creates the exception for an invalid cell, only when a fallback or `ReadRowResults` uses it. The mappers for value types also implement `ICellMapper<T?>`, so nullable members share them.
+- **Converters** (`ICellConverter<T>`, and `WithConverter(value => ...)` through `DelegateCellConverter<T>`) are mappers too, through `CellConverterMapper<T>`. A mapper can keep what went wrong in `error`, which the pipeline passes back to `CreateException`: a converter's error can't be asked for afterwards without converting again.
 - **Fallbacks** are `ICellFallback<T>`: the public interface, `FixedValueFallback<T>` for fixed values and `ThrowFallback<T>` for errors (which records the error instead of throwing while `ReadRowResults` collects errors).
-- **Transformers** implement the internal `IPipelineTransformer`, which works on the cell directly: `TrimStringCellTransformer`, and `CellTransformerAdapter` for `ICellTransformer`.
+- **Transformers** are `ICellTransformer`, the public interface, including the built-in `TrimStringCellTransformer`.
+
+The pipeline creates one `CellContext` for each cell and gives it to every transformer, mapper and fallback.
 
 `NullableCellConverter<T>` and `NullableCellFallback<T>` let a converter or fallback for `T` serve a `T?` member. The first time a pipeline maps a value, it takes a snapshot of its stages as arrays (taken again if the pipeline changes), so mapping a cell doesn't enumerate lists through interfaces.
 

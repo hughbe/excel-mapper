@@ -33,7 +33,7 @@ internal sealed class TimeSpanMapper : IFormatsCellMapper, ICellMapper<TimeSpan>
     /// </summary>
     public TimeSpanStyles Style { get; set; }
 
-    CellConversion ICellMapper<TimeSpan>.Convert(ReadCellResult cell, out TimeSpan value)
+    CellConversion ICellMapper<TimeSpan>.Convert(ReadCellResult cell, in CellContext context, out TimeSpan value, ref object? error)
     {
         var cellValue = cell.GetValue();
         if (cellValue is TimeSpan timeSpanValue)
@@ -67,14 +67,14 @@ internal sealed class TimeSpanMapper : IFormatsCellMapper, ICellMapper<TimeSpan>
         }
     }
 
-    CellConversion ICellMapper<TimeSpan?>.Convert(ReadCellResult cell, out TimeSpan? value)
+    CellConversion ICellMapper<TimeSpan?>.Convert(ReadCellResult cell, in CellContext context, out TimeSpan? value, ref object? error)
     {
-        var conversion = ((ICellMapper<TimeSpan>)this).Convert(cell, out var result);
+        var conversion = ((ICellMapper<TimeSpan>)this).Convert(cell, in context, out var result, ref error);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }
 
-    public Exception CreateException(ReadCellResult cell)
+    public Exception CreateException(ReadCellResult cell, object? error)
     {
         var stringValue = cell.GetString();
         var formats = Formats;

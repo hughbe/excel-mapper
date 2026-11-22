@@ -1,21 +1,18 @@
-using System.Reflection;
-
 namespace ExcelMapper.Transformers;
 
 /// <summary>
 /// Trims text, for <see cref="ExcelTrimStringAttribute"/> and <c>WithTrim()</c>.
 /// </summary>
-internal sealed class TrimStringCellTransformer : IPipelineTransformer
+internal sealed class TrimStringCellTransformer : ICellTransformer
 {
-    public ReadCellResult Transform(ReadCellResult cell, ExcelSheet sheet, int rowIndex, MemberInfo? member, bool preserveFormatting)
-    {
-        // Trimming only changes text. Skip other values, such as dates and numbers, so that they
-        // keep their type rather than being converted to a string and parsed again.
-        if (!preserveFormatting && cell.GetValue() is not (string or null))
-        {
-            return cell;
-        }
+    public static TrimStringCellTransformer Instance { get; } = new();
 
-        return new ReadCellResult(cell.ColumnIndex, cell.GetString()?.Trim(), preserveFormatting);
+    private TrimStringCellTransformer()
+    {
     }
+
+    // Trimming only changes text. Other values, such as dates and numbers, keep their type rather
+    // than being converted to text and parsed again. With formatting preserved, every value is text.
+    public CellValue Transform(CellValue value, CellContext context)
+        => value.Value is string text ? new CellValue(text.Trim()) : value;
 }

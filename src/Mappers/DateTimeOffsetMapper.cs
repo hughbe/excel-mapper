@@ -61,7 +61,7 @@ internal sealed class DateTimeOffsetMapper : IFormatsCellMapper, ICellMapper<Dat
         }
     }
 
-    CellConversion ICellMapper<DateTimeOffset>.Convert(ReadCellResult cell, out DateTimeOffset value)
+    CellConversion ICellMapper<DateTimeOffset>.Convert(ReadCellResult cell, in CellContext context, out DateTimeOffset value, ref object? error)
     {
         var cellValue = cell.GetValue();
         if (cellValue is DateTime dateTimeValue || ExcelDateUtilities.TryGetDateTime(cellValue, out dateTimeValue))
@@ -97,14 +97,14 @@ internal sealed class DateTimeOffsetMapper : IFormatsCellMapper, ICellMapper<Dat
         }
     }
 
-    CellConversion ICellMapper<DateTimeOffset?>.Convert(ReadCellResult cell, out DateTimeOffset? value)
+    CellConversion ICellMapper<DateTimeOffset?>.Convert(ReadCellResult cell, in CellContext context, out DateTimeOffset? value, ref object? error)
     {
-        var conversion = ((ICellMapper<DateTimeOffset>)this).Convert(cell, out var result);
+        var conversion = ((ICellMapper<DateTimeOffset>)this).Convert(cell, in context, out var result, ref error);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }
 
-    public Exception CreateException(ReadCellResult cell)
+    public Exception CreateException(ReadCellResult cell, object? error)
     {
         // A date that can't have the offset, such as the earliest dates with a positive offset.
         var cellValue = cell.GetValue();

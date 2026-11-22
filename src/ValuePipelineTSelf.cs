@@ -25,7 +25,7 @@ public abstract class ValuePipeline<T, TSelf> : ValuePipeline<T> where TSelf : V
     /// <returns>The map on which this method was invoked.</returns>
     public TSelf WithTrim()
     {
-        Transformers.Add(new TrimStringCellTransformer());
+        Transformers.Add(TrimStringCellTransformer.Instance);
         return Self;
     }
 
@@ -49,7 +49,7 @@ public abstract class ValuePipeline<T, TSelf> : ValuePipeline<T> where TSelf : V
         Transformers.Clear();
         foreach (var transformer in transformers)
         {
-            Transformers.Add(new CellTransformerAdapter(transformer));
+            Transformers.Add(transformer);
         }
 
         return Self;

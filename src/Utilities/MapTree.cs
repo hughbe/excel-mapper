@@ -12,7 +12,7 @@ internal static class MapTree
     /// Calls <paramref name="visit"/> for each map under <paramref name="map"/> that reads cells
     /// (single values, collections and dictionaries), with the path of the member it's for.
     /// </summary>
-    public static void VisitCellMaps(IMap map, string? path, Action<IToOneMap, string?> visit)
+    public static void VisitCellMaps(IMap map, string? path, Action<IColumnsMap, string?> visit)
     {
         switch (map)
         {
@@ -24,7 +24,7 @@ internal static class MapTree
 
                 break;
 
-            case IToOneMap cellMap:
+            case IColumnsMap cellMap:
                 visit(cellMap, path);
                 break;
         }

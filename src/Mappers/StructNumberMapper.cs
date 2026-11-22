@@ -10,9 +10,9 @@ namespace ExcelMapper.Mappers;
 /// </summary>
 internal sealed class StructNumberMapper<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] T> : INumberBaseMapper<T>, ICellMapper<T?> where T : struct, INumberBase<T>
 {
-    CellConversion ICellMapper<T?>.Convert(ReadCellResult cell, out T? value)
+    CellConversion ICellMapper<T?>.Convert(ReadCellResult cell, in CellContext context, out T? value, ref object? error)
     {
-        var conversion = ((ICellMapper<T>)this).Convert(cell, out var result);
+        var conversion = ((ICellMapper<T>)this).Convert(cell, in context, out var result, ref error);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }

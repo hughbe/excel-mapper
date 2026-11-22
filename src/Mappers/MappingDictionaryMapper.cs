@@ -19,7 +19,7 @@ internal sealed class MappingDictionaryMapper<T> : ICellMapper<T>
         Behavior = behavior;
     }
 
-    public CellConversion Convert(ReadCellResult cell, out T value)
+    public CellConversion Convert(ReadCellResult cell, in CellContext context, out T value, ref object? error)
     {
         var stringValue = cell.GetString();
         if (stringValue is not null && MappingDictionary.TryGetValue(stringValue, out value!))
@@ -32,6 +32,6 @@ internal sealed class MappingDictionaryMapper<T> : ICellMapper<T>
         return Behavior == MappingDictionaryBehavior.Required ? CellConversion.Invalid : CellConversion.NotHandled;
     }
 
-    public Exception CreateException(ReadCellResult cell)
+    public Exception CreateException(ReadCellResult cell, object? error)
         => new ExcelMappingException($"No mapping for value \"{cell.GetString()}\".");
 }

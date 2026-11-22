@@ -8,12 +8,12 @@ namespace ExcelMapper.Mappers;
 /// </summary>
 internal sealed class ObjectMapper<T> : ICellMapper<T>
 {
-    public CellConversion Convert(ReadCellResult cell, out T value)
+    public CellConversion Convert(ReadCellResult cell, in CellContext context, out T value, ref object? error)
     {
         value = (T)(cell.PreserveFormatting ? cell.GetString() : cell.GetValue())!;
         return CellConversion.SuccessUnlessReplaced;
     }
 
     // Every value is valid.
-    public Exception CreateException(ReadCellResult cell) => new FormatException("The value couldn't be read.");
+    public Exception CreateException(ReadCellResult cell, object? error) => new FormatException("The value couldn't be read.");
 }
