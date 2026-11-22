@@ -11,7 +11,7 @@ internal sealed class ThrowFallback<T> : ICellFallback<T>
     public T Fallback(CellValue value, CellContext context, Exception? exception)
     {
         var member = context.Member;
-        var sheet = context.Sheet;
+        var sheet = context.ReadingSheet;
         var text = value.Text;
         var mappingException = member == null
             ? new ExcelMappingException($"Cannot assign \"{text}\"", sheet, context.RowIndex, context.ColumnIndex, exception)

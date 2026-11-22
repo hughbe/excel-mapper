@@ -326,4 +326,88 @@ public class MapRegionTests
         [ExcelColumnIndex(1)]
         public int Amount { get; set; }
     }
+
+    // A title above the sheet's first table, and a second table whose heading is different.
+    private const string TwoHeadings =
+        "Title,\n" +
+        "Name,Age\n" +
+        "a,1\n" +
+        ",\n" +
+        "Code,Count\n" +
+        "x,invalid\n";
+
+    [Fact]
+    public void ReadRows_RegionConverter_GetsUserSheetAndRegionHeading()
+    {
+        using var importer = Helpers.GetCsvImporter(TwoHeadings);
+        var sheet = importer.ReadSheet();
+        var converter = new CapturingConverter();
+        importer.Configuration.RegisterClassMap<CountRow>(c =>
+        {
+            c.Map(r => r.Code);
+            c.Map(r => r.Count).WithConverter(converter);
+        });
+
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.Region("A5:B6").ReadRows<CountRow>().ToArray());
+
+        // Extension points and errors get the sheet the region was created from, with the
+        // region's heading and column names.
+        var context = Assert.Single(converter.Contexts);
+        Assert.Same(sheet, context.Sheet);
+        Assert.Equal(["Code", "Count"], context.Heading!.ColumnNames);
+        Assert.Same(sheet, exception.Sheet);
+        Assert.Equal("Count", exception.ColumnName);
+        Assert.Equal("B6", exception.CellAddress);
+        Assert.Contains("in column \"Count\" at cell B6", exception.Message);
+    }
+
+    [Fact]
+    public void ReadRows_RegionColumnSelector_GetsUserSheetAndRegionHeading()
+    {
+        using var importer = Helpers.GetCsvImporter(TwoHeadings);
+        var sheet = importer.ReadSheet();
+        var selector = new CapturingSelector();
+        importer.Configuration.RegisterClassMap<CodeRow>(c => c.Map(r => r.Code).WithColumns(selector));
+
+        Assert.Equal(["x"], sheet.Region("A5:B6").ReadRows<CodeRow>().Select(r => r.Code));
+        var context = Assert.Single(selector.Contexts);
+        Assert.Same(sheet, context.Sheet);
+        Assert.Equal(["Code", "Count"], context.Heading!.ColumnNames);
+        Assert.Equal(2, context.NumberOfColumns);
+    }
+
+    private class CountRow
+    {
+        public string Code { get; set; } = default!;
+        public int Count { get; set; }
+    }
+
+    private class CodeRow
+    {
+        public string Code { get; set; } = default!;
+    }
+
+    private sealed class CapturingConverter : ICellConverter<int>
+    {
+        public List<CellContext> Contexts { get; } = [];
+
+        public CellConversionResult<int> Convert(CellValue value, CellContext context)
+        {
+            Contexts.Add(context);
+            return int.TryParse(value.Text, out var result) ? CellConversionResult<int>.Success(result) : CellConversionResult<int>.Invalid();
+        }
+    }
+
+    private sealed class CapturingSelector : IColumnSelector
+    {
+        public List<ColumnSelectorContext> Contexts { get; } = [];
+
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context)
+        {
+            Contexts.Add(context);
+            return [context.Heading!.GetColumnIndex("Code")];
+        }
+
+        public string Describe(ColumnSelectorContext context) => "column \"Code\"";
+    }
 }

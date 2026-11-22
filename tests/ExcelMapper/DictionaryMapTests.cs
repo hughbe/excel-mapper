@@ -118,8 +118,8 @@ public class DictionaryMapTests
 
     private sealed class PositionsSelector(params int[] positions) : IColumnSelector
     {
-        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet) => positions;
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context) => positions;
 
-        public string Describe(ExcelSheet sheet) => "columns";
+        public string Describe(ColumnSelectorContext context) => "columns";
     }
 }

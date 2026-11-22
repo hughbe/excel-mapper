@@ -202,13 +202,13 @@ A reader factory or column matcher becomes a column selector, which chooses colu
 public class QuarterColumns : IColumnSelector
 {
     // Positions in the worksheet, as GetColumnIndex gives them.
-    public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
-        => sheet.Heading!.ColumnNames
+    public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context)
+        => context.Heading!.ColumnNames
             .Where(name => name.StartsWith("Q"))
-            .Select(sheet.Heading.GetColumnIndex)
+            .Select(context.Heading.GetColumnIndex)
             .ToArray();
 
-    public string Describe(ExcelSheet sheet) => "the columns starting with Q";
+    public string Describe(ColumnSelectorContext context) => "the columns starting with Q";
 }
 
 Map(r => r.Quarters).WithColumns(new QuarterColumns());

@@ -33,5 +33,5 @@ internal sealed class FixedValueFallback<T> : ICellFallback<T>
     public object? Value { get; }
 
     public T Fallback(CellValue value, CellContext context, Exception? exception)
-        => _isTyped ? _typedValue : ValuePipeline.CastValue<T>(Value, context.Sheet, context.RowIndex, context.ColumnIndex, context.Member);
+        => _isTyped ? _typedValue : ValuePipeline.CastValue<T>(Value, context.ReadingSheet, context.RowIndex, context.ColumnIndex, context.Member);
 }
