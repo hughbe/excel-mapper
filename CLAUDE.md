@@ -5,7 +5,7 @@ Guidance for working on ExcelMapper (NuGet package `ExcelDataReader.Mapping`), a
 ## Layout
 
 - `src/` - the library. Targets `netstandard2.0`, `netstandard2.1` and `net8.0`.
-- `gen/` - the source generator for `ExcelMappingContext` (`[ExcelMappable]`), a netstandard2.0 Roslyn 4.8 generator packed into the library's package under `analyzers/dotnet/cs`. Its `TypeWalker` mirrors how auto-mapping treats each kind of type: when auto-mapping learns a new kind of type that needs a generic type made at run time, add the `ExcelTypeRegistrar` method and teach `TypeWalker` to call it. Tested in `tests/SourceGeneration`.
+- `gen/` - the source generator for `ExcelMappingContext` (`[ExcelMappable]`), a netstandard2.0 Roslyn 4.8 generator packed into the library's package under `analyzers/dotnet/cs`. It must stay in step with auto-mapping: see [Auto-mapping and the source generator](#auto-mapping-and-the-source-generator). Tested in `tests/SourceGeneration`.
 - `tests/` - xUnit tests (`net8.0`). See [Tests](#tests). `tests/TrimmingTests` and `tests/AotTests` are separate apps that CI publishes trimmed and with native AOT, and runs.
 - `benchmarks/` - BenchmarkDotNet benchmarks, which can also run against the 3.x package. See [Performance](#performance) and `benchmarks/README.md`.
 - `docs/` - user documentation, linked from the README's documentation index. `docs/Architecture.md` explains the map/reader/pipeline design.
@@ -45,6 +45,29 @@ The netstandard builds are used by .NET Framework and older .NET apps and take d
 - Generic types created at run time with `MakeGenericType` need a `[DynamicDependency]` on the method that creates them, or the trimmer removes their constructors (check with the trimmed app).
 - `Type.GetConstructor(types)` also matches constructors whose parameters the types are assignable to (asking for `ISet<T>` finds a constructor taking `IEnumerable<T>`). Use `CollectionUtilities.GetConstructorTaking` where the parameter type must match exactly.
 - Delete code that can't be reached rather than keeping it "just in case": validation that every internal caller already guarantees, unused overloads and constructors. Coverage against `main` (see [Tests](#tests)) shows what's reachable.
+
+## Auto-mapping and the source generator
+
+Auto-mapping (reflection, with compiled delegates) and the source generator describe the same rules twice: auto-mapping decides at run time how each type is mapped, and the generator's `gen/TypeWalker.cs` decides at compile time which types an `ExcelMappingContext` registers so that the same decisions work with native AOT. **Change them together, in the same PR, in both directions.** A rule changed in only one of them breaks native AOT apps (a type that isn't registered throws `NotSupportedException`) without failing anything under the JIT.
+
+They mirror each other here (each place has a comment pointing at the other):
+
+| Auto-mapping | `TypeWalker` |
+|---|---|
+| `AutoMapper.TryCreateMap`: a value, then a dictionary, a collection, an object | `Visit`, in the same order |
+| `TypeRule<T>.FindDefaultMappers`: which types have a built-in conversion (built-in types, enums, numbers, `IConvertible`, `IParsable<T>`) | `s_builtInTypes`, `HasConversion`, `CanConstructObject` |
+| `DictionaryRule.TryGetKeyValueTypes` | `TryGetKeyValueTypes` |
+| `ReflectionUtilities.GetElementTypeOrEnumerableType` | `TryGetElementType`, `GetSingleAdd` |
+| `AutoMapper.TryAddMembers`, `ShouldAutoMapProperty`, `[ExcelIgnore]` | `GetMemberTypes` |
+| each `GenericTypes.Create` call (a generic type made for a type found at run time) | an `ExcelTypeRegistrar` method that registers it, which `TypeWalker` calls |
+
+So:
+
+- **When auto-mapping changes** how a kind of type is mapped, which members it reads, or adds a `GenericTypes.Create` call: update `TypeWalker` (adding an `ExcelTypeRegistrar` method for a new generic type), and add cases to `tests/SourceGeneration/ExcelMappableGeneratorTests.cs` (the registrations written) and `GeneratedContextTests.cs` (a generated context maps rows as `ReadRows<T>()` does).
+- **When the generator changes** which types it registers or how it walks members: check it still matches auto-mapping as above, rather than making the generator decide differently.
+- A generic type made at run time must go through `GenericTypes.Create`, never `MakeGenericType` directly, so that a context can register it. Types known at compile time are created directly (see [Code conventions](#code-conventions)).
+- If the change matters with native AOT (a new kind of type, member or collection), add a case to the generated context in `tests/AotTests`, which fails on any trimming or AOT warning and on a missing registration.
+- The netstandard builds map some types differently (for example, they don't parse `IParsable<T>` types): `TypeWalker` checks what the library it compiles against supports, and `ExcelMappableGeneratorTests` has expectations for both.
 
 ## Public API
 
@@ -132,7 +155,7 @@ To release a version:
 ## Pull requests
 
 - One feature or fix per PR, branched from `main`. Avoid stacking PRs on each other's branches: a PR merged into another feature branch doesn't reach `main`.
-- CI (`.github/workflows/dotnetcore.yml`) runs for PRs into `main` only: build, tests with coverage, pack with package validation, the tests against the netstandard builds, and the trimmed test app.
+- CI (`.github/workflows/dotnetcore.yml`) runs for PRs into `main` only: build, tests with coverage, pack with package validation, the tests against the netstandard builds, the trimmed test app, and the native AOT test app.
 - PRs are squash-merged.
 - Don't force-push a branch that's been pushed: to bring in `main`, merge it into the branch.
 - Before opening a PR, check:
@@ -140,6 +163,7 @@ To release a version:
   - the tests pass against all three library builds (`net8.0`, `netstandard2.0`, `netstandard2.1`);
   - `dotnet pack src -c Release` passes package validation;
   - the trimmed app in `tests/TrimmingTests` publishes without trim warnings and passes, and the native AOT app in `tests/AotTests` passes (`dotnet publish tests/AotTests -c Release -r <rid> -o out && out/AotTests`), if mapping changed;
+  - auto-mapping and the source generator's `TypeWalker` still agree, if either changed (see [Auto-mapping and the source generator](#auto-mapping-and-the-source-generator));
   - performance against `main` (see [Performance](#performance)), or a note in the PR saying why it can't change;
   - the changelog, the migration guide (for breaking changes), `docs/api.md` and the topic pages are updated.
 - The PR description says what changed and why, how it was verified (test counts per build, trimmed app, pack), and the performance numbers.

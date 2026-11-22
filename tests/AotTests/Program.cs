@@ -58,7 +58,11 @@ internal static class ContextCases
             return $"{row.Day}/{row.Maybe?.ToString() ?? "null"}/{row.Size}";
         }, "Monday/null/L");
 
-        check("Context: parsable", () => Csv.Sheet("Code\nab\n").ReadRows(context.Parsed).Single().Code.Value, "AB");
+        check("Context: parsable", () =>
+        {
+            var row = Csv.Sheet("Code,Name\nab,CD\n").ReadRows(context.Parsed).Single();
+            return $"{row.Code.Value}/{row.Name?.Value}";
+        }, "AB/cd");
 
         check("Context: collections", () =>
         {
@@ -232,6 +236,20 @@ public enum Size
 public class Parsed
 {
     public Code Code { get; set; }
+
+    // Parsed without a parameterless constructor.
+    public Name? Name { get; set; }
+}
+
+public sealed record Name(string Value) : IParsable<Name>
+{
+    public static Name Parse(string s, IFormatProvider? provider) => new(s.ToLowerInvariant());
+
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out Name result)
+    {
+        result = s is null ? null : Parse(s, provider);
+        return result is not null;
+    }
 }
 
 public readonly struct Code(string value) : IParsable<Code>

@@ -12,8 +12,15 @@ namespace ExcelMapper.SourceGeneration;
 /// public properties and fields.
 /// </summary>
 /// <remarks>
-/// Registering a type that isn't needed only adds code to the app; missing one makes auto-mapping
-/// fail with native AOT. So where auto-mapping could go either way, both are registered.
+/// <para>Registering a type that isn't needed only adds code to the app; missing one makes auto-mapping
+/// fail with native AOT. So where auto-mapping could go either way, both are registered.</para>
+/// <para>This mirrors auto-mapping in the library, and the two must change together: <c>Visit</c>
+/// follows <c>AutoMapper.TryCreateMap</c>, <c>HasConversion</c> and <c>s_builtInTypes</c> follow
+/// <c>TypeRule&lt;T&gt;.FindDefaultMappers</c>, <c>CanConstructObject</c> follows
+/// <c>AutoMapper.CanConstructObject</c>, <c>TryGetKeyValueTypes</c> follows
+/// <c>DictionaryRule.TryGetKeyValueTypes</c>, <c>TryGetElementType</c> follows
+/// <c>ReflectionUtilities.GetElementTypeOrEnumerableType</c>, and <c>GetMemberTypes</c> follows
+/// <c>AutoMapper.TryAddMembers</c>. See "Auto-mapping and the source generator" in CLAUDE.md.</para>
 /// </remarks>
 internal sealed class TypeWalker
 {
@@ -126,9 +133,10 @@ internal sealed class TypeWalker
             return;
         }
 
-        if (HasConversion(type, out var isParsable))
+        // The library's netstandard builds map IParsable<T> types through their members, as objects.
+        if (HasConversion(type, out var isParsable) && (!isParsable || _canRegisterParsable))
         {
-            Add(isParsable && _canRegisterParsable ? (type.IsValueType ? $"Parsable<{name}>()" : $"ParsableClass<{name}>()") : $"Type<{name}>()");
+            Add(isParsable ? (type.IsValueType ? $"Parsable<{name}>()" : $"ParsableClass<{name}>()") : $"Type<{name}>()");
             return;
         }
 
@@ -207,22 +215,23 @@ internal sealed class TypeWalker
     private static string Identifier(string name)
         => Microsoft.CodeAnalysis.CSharp.SyntaxFacts.GetKeywordKind(name) != Microsoft.CodeAnalysis.CSharp.SyntaxKind.None ? "@" + name : name;
 
-    // Whether auto-mapping converts the type's cells itself: IConvertible, number and IParsable<T>
-    // types that it can create (see TypeRule<T>.FindDefaultMappers).
+    // Whether auto-mapping converts the type's cells itself (see TypeRule<T>.FindDefaultMappers):
+    // number and IParsable<T> types other than interfaces, which their Parse methods create, and
+    // IConvertible types it can create.
     private bool HasConversion(ITypeSymbol type, out bool isParsable)
     {
         isParsable = false;
-        if (!CanConstructObject(type))
-        {
-            return false;
-        }
-
-        if (Implements(type, _convertible) || ImplementsGeneric(type, _numberBase, out _))
+        if (type.TypeKind != TypeKind.Interface && ImplementsGeneric(type, _numberBase, out _))
         {
             return true;
         }
 
-        isParsable = ImplementsGeneric(type, _parsable, out _);
+        if (CanConstructObject(type) && Implements(type, _convertible))
+        {
+            return true;
+        }
+
+        isParsable = type.TypeKind != TypeKind.Interface && ImplementsGeneric(type, _parsable, out _);
         return isParsable;
     }
 

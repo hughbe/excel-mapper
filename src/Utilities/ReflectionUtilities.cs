@@ -71,6 +71,7 @@ internal static class ReflectionUtilities
     /// </summary>
     /// <param name="type">The type to get the element type of.</param>
     /// <returns>The element type or IEnumerable&lt;T&gt; of the given type, or null if it has none.</returns>
+    // Keep in sync with the source generator's TypeWalker.TryGetElementType. See "Auto-mapping and the source generator" in CLAUDE.md.
     public static Type? GetElementTypeOrEnumerableType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces | DynamicallyAccessedMemberTypes.PublicMethods)] this Type type)
     {
         // Array type.

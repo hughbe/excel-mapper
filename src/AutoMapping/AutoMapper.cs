@@ -118,6 +118,7 @@ internal static class AutoMapper
     /// if the type has a built-in conversion or the member's attributes give one, otherwise as a
     /// dictionary, a collection or an object.
     /// </summary>
+    // Keep in sync with the source generator's TypeWalker.Visit, which follows the same order. See "Auto-mapping and the source generator" in CLAUDE.md.
     internal static bool TryCreateMap<T>(MemberInfo? member, Columns defaultColumns, Columns defaultCellsColumns, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map)
     {
         if (CreateValueMap<T>(member, defaultColumns, emptyValueStrategy, isAutoMapping) is { } valueMap)
@@ -222,6 +223,7 @@ internal static class AutoMapper
     /// Adds a map for each public property and field of <typeparamref name="T"/> that
     /// <paramref name="map"/> doesn't map yet.
     /// </summary>
+    // Keep in sync with the source generator's TypeWalker.GetMemberTypes. See "Auto-mapping and the source generator" in CLAUDE.md.
     private static bool TryAddMembers<T>(ExcelClassMap<T> map, EmptyValueStrategy emptyValueStrategy, HashSet<Type> typeStack)
     {
         var type = typeof(T);
@@ -340,6 +342,7 @@ internal static class AutoMapper
         return true;
     }
 
+    // Keep in sync with the source generator's TypeWalker.CanConstructObject. See "Auto-mapping and the source generator" in CLAUDE.md.
     internal static bool CanConstructObject(Type type)
     {
         // Value types can always be constructed.

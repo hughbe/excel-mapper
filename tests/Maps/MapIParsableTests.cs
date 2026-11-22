@@ -1,6 +1,7 @@
 ﻿// These types are only supported by the library's .NET 7+ build.
 #if LIBRARY_NET8
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace ExcelMapper.Tests;
 
@@ -38,6 +39,67 @@ public class MapIParsableTests
 
         public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out ParsableClass result)
             => throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void ReadRows_IParsableClassWithoutParameterlessConstructor_Parses()
+    {
+        // Created by its Parse method, so it needn't have a parameterless constructor: it isn't
+        // mapped through its members.
+        using var importer = Helpers.GetCsvImporter("Code,Value\nab,x\n");
+        var row = importer.ReadSheet().ReadRows<CodeRow>().Single();
+        Assert.Equal("AB", row.Code.Value);
+        Assert.Equal("AB", row.Abstract!.Value);
+    }
+
+    [Fact]
+    public void ReadRows_IPAddress_Parses()
+    {
+        using var importer = Helpers.GetCsvImporter("Address\n192.168.0.1\n");
+        Assert.Equal(System.Net.IPAddress.Parse("192.168.0.1"), importer.ReadSheet().ReadRows<AddressRow>().Single().Address);
+    }
+
+    private class CodeRow
+    {
+        public Code Code { get; set; } = new("");
+
+        [ExcelColumnName("Code")]
+        public AbstractCode? Abstract { get; set; }
+    }
+
+    private class AddressRow
+    {
+        public System.Net.IPAddress? Address { get; set; }
+    }
+
+    private sealed record Code(string Value) : IParsable<Code>
+    {
+        public static Code Parse(string s, IFormatProvider? provider) => new(s.ToUpperInvariant());
+
+        public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out Code result)
+        {
+            result = s is null ? null : Parse(s, provider);
+            return result is not null;
+        }
+    }
+
+    // An abstract type is created by its Parse method too.
+    private abstract class AbstractCode : IParsable<AbstractCode>
+    {
+        public abstract string Value { get; }
+
+        public static AbstractCode Parse(string s, IFormatProvider? provider) => new UpperCode(s.ToUpperInvariant());
+
+        public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out AbstractCode result)
+        {
+            result = s is null ? null : Parse(s, provider);
+            return result is not null;
+        }
+    }
+
+    private sealed class UpperCode(string value) : AbstractCode
+    {
+        public override string Value { get; } = value;
     }
 
     [Fact]
