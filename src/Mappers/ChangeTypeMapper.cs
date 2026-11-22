@@ -23,6 +23,6 @@ internal sealed class ChangeTypeMapper<T> : ICellMapper<T>
         }
     }
 
-    public Exception CreateException(ReadCellResult cell, object? error)
+    public Exception CreateException(ReadCellResult cell, in CellContext context, object? error)
         => MapperUtilities.InvalidFromParse(() => System.Convert.ChangeType(cell.GetValue(), s_type, cell.Culture));
 }

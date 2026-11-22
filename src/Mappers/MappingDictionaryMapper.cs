@@ -32,6 +32,6 @@ internal sealed class MappingDictionaryMapper<T> : ICellMapper<T>
         return Behavior == MappingDictionaryBehavior.Required ? CellConversion.Invalid : CellConversion.NotHandled;
     }
 
-    public Exception CreateException(ReadCellResult cell, object? error)
+    public Exception CreateException(ReadCellResult cell, in CellContext context, object? error)
         => new ExcelMappingException($"No mapping for value \"{cell.GetString()}\".");
 }

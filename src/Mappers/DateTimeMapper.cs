@@ -5,37 +5,22 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a DateTime.
 /// </summary>
-internal sealed class DateTimeMapper : IFormatsCellMapper, ICellMapper<DateTime>, ICellMapper<DateTime?>
+internal sealed class DateTimeMapper : ICellMapper<DateTime>, ICellMapper<DateTime?>
 {
-    private string[] _formats = ["G"];
-
     /// <summary>
-    /// Gets or sets the date formats used to map the value to a DateTime.
-    /// This defaults to "G" - the default Excel format.
-    /// While the formats haven't been set, values that don't match also try the culture's short date ("d") and short date and time ("g"), and ISO 8601, such as "2024-03-04" or "2024-03-04T10:30:00Z".
+    /// The mapper, shared by every member: the formats and format provider come from the cell's
+    /// <see cref="CellContext.Options"/>.
     /// </summary>
-    private bool _formatsSet;
+    public static DateTimeMapper Instance { get; } = new();
 
-    public string[] Formats
+    private DateTimeMapper()
     {
-        get => _formats;
-        set
-        {
-            FormatUtilities.ValidateFormats(value);
-            _formats = value;
-            _formatsSet = true;
-        }
     }
 
-    /// <summary>
-    /// Gets or sets the IFormatProvider used to map the value to a DateTime.
-    /// </summary>
-    public IFormatProvider? Provider { get; set; }
+    // The format tried first when the member has no formats of its own.
+    private static readonly string[] s_defaultFormats = ["G"];
 
-    /// <summary>
-    /// Gets or sets the DateTimeStyles used to map the value to a DateTime.
-    /// </summary>
-    public DateTimeStyles Style { get; set; }
+    private const DateTimeStyles Style = DateTimeStyles.None;
 
     CellConversion ICellMapper<DateTime>.Convert(ReadCellResult cell, in CellContext context, out DateTime value, ref object? error)
     {
@@ -52,12 +37,12 @@ internal sealed class DateTimeMapper : IFormatsCellMapper, ICellMapper<DateTime>
         }
 
         var stringValue = cell.GetString();
-        var provider = Provider ?? cell.Culture;
+        var provider = context.Options.Provider ?? cell.Culture;
         var style = Style;
         try
         {
-            return DateTime.TryParseExact(stringValue, Formats, provider, style, out value) ||
-                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateTime.TryParseExact(stringValue, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, style, out value))
+            return DateTime.TryParseExact(stringValue, (context.Options.Formats ?? s_defaultFormats), provider, style, out value) ||
+                (context.Options.Formats is null && FormatUtilities.HasDigit(stringValue) && DateTime.TryParseExact(stringValue, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, style, out value))
                 ? CellConversion.Success
                 : CellConversion.Invalid;
         }
@@ -75,17 +60,17 @@ internal sealed class DateTimeMapper : IFormatsCellMapper, ICellMapper<DateTime>
         return conversion;
     }
 
-    public Exception CreateException(ReadCellResult cell, object? error)
+    public Exception CreateException(ReadCellResult cell, in CellContext context, object? error)
     {
         var stringValue = cell.GetString();
-        var formats = Formats;
-        var provider = Provider ?? cell.Culture;
+        var formats = context.Options.Formats ?? s_defaultFormats;
+        var provider = context.Options.Provider ?? cell.Culture;
         var style = Style;
         try
         {
             // Parsing throws for some styles, such as invalid combinations.
             _ = DateTime.TryParseExact(stringValue, formats, provider, style, out _) ||
-                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateTime.TryParseExact(stringValue, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, style, out _));
+                (context.Options.Formats is null && FormatUtilities.HasDigit(stringValue) && DateTime.TryParseExact(stringValue, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, style, out _));
         }
         catch (Exception exception)
         {

@@ -26,7 +26,7 @@ internal sealed class CellConverterMapper<T>(ICellConverter<T> converter) : ICel
         }
     }
 
-    public Exception? CreateException(ReadCellResult cell, object? error) => CellConversionResult<T>.CreateException(error);
+    public Exception? CreateException(ReadCellResult cell, in CellContext context, object? error) => CellConversionResult<T>.CreateException(error);
 }
 
 /// <summary>

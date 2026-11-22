@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 ﻿#if NET7_0_OR_GREATER
 using System.Globalization;
 using System.Numerics;
@@ -9,38 +8,31 @@ namespace ExcelMapper.Mappers;
 /// A mapper that tries to map the value of a cell to a number base type using the
 /// <see cref="INumberBase{T}"/> interface.
 /// </summary>
-internal class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] T> : INumberStyleCellMapper, ICellMapper<T> where T : INumberBase<T>
+internal class INumberBaseMapper<T> : ICellMapper<T> where T : INumberBase<T>
 {
-    /// <summary>
-    /// Gets or sets the number styles used when mapping the value of a cell to a number base type.
-    /// </summary>
-    /// <remarks>
-    /// The default is <see cref="NumberStyles.Number"/>, plus <see cref="NumberStyles.AllowExponent"/>
-    /// for floating-point types so that values such as "1E5" can be parsed.
-    /// </remarks>
-    public NumberStyles Style { get; set; } = s_defaultStyle;
+    // Whether T only has whole numbers, so a fractional number is invalid rather than truncated.
+    // Worked out with generic math rather than by looking for IBinaryInteger<T> among T's
+    // interfaces, which trimming could remove: a type that can't hold 0.5 has no fractions.
+    private static readonly bool s_isInteger = HasOnlyWholeNumbers();
 
-    private static readonly NumberStyles s_defaultStyle = typeof(T).ImplementsGenericInterface(typeof(IFloatingPoint<>), out _)
-        ? NumberStyles.Number | NumberStyles.AllowExponent
-        : NumberStyles.Number;
+    // Types with fractions accept exponents ("1E5"), as double.Parse does. Complex numbers don't,
+    // as Complex.Parse doesn't by default.
+    private static readonly NumberStyles s_defaultStyle = s_isInteger || typeof(T) == typeof(Complex)
+        ? NumberStyles.Number
+        : NumberStyles.Number | NumberStyles.AllowExponent;
 
-    private static readonly bool s_isInteger = IsIntegerType(typeof(T));
-
-    private static bool IsIntegerType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type type)
+    private static bool HasOnlyWholeNumbers()
     {
-        foreach (var interfaceType in type.GetInterfaces())
+        try
         {
-            if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IBinaryInteger<>))
-            {
-                return true;
-            }
+            return T.IsInteger(T.CreateTruncating(0.5));
         }
-
-        return false;
+        catch
+        {
+            // A type that can't be created from a double.
+            return false;
+        }
     }
-
-    /// <inheritdoc/>
-    public IFormatProvider? Provider { get; set; }
 
     /// <inheritdoc/>
     private static ReadOnlySpan<char> GetNumberSpan(string? stringValue, NumberStyles style)
@@ -80,10 +72,10 @@ internal class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessed
         }
 
         var stringValue = cell.GetString();
-        var style = Style;
+        var style = context.Options.NumberStyle ?? s_defaultStyle;
         try
         {
-            return T.TryParse(GetNumberSpan(stringValue, style), style, Provider ?? cell.Culture, out value!) ? CellConversion.Success : CellConversion.Invalid;
+            return T.TryParse(GetNumberSpan(stringValue, style), style, context.Options.Provider ?? cell.Culture, out value!) ? CellConversion.Success : CellConversion.Invalid;
         }
         catch
         {
@@ -92,7 +84,7 @@ internal class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessed
         }
     }
 
-    public Exception CreateException(ReadCellResult cell, object? error)
+    public Exception CreateException(ReadCellResult cell, in CellContext context, object? error)
     {
         if (cell.GetValue() is double doubleValue)
         {
@@ -104,8 +96,8 @@ internal class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessed
         }
 
         var stringValue = cell.GetString();
-        var style = Style;
-        var provider = Provider ?? cell.Culture;
+        var style = context.Options.NumberStyle ?? s_defaultStyle;
+        var provider = context.Options.Provider ?? cell.Culture;
         try
         {
             // TryParse throws for invalid styles.

@@ -10,7 +10,7 @@ namespace ExcelMapper.Mappers;
 /// provider, and the same rules for typed number cells. Created with <see cref="Create"/>, which
 /// returns a <see cref="NumberMapper{T}"/> that also converts cells without boxing.
 /// </summary>
-internal abstract class NumberMapper : INumberStyleCellMapper
+internal abstract class NumberMapper
 {
     private readonly TypeCode _typeCode;
 
@@ -45,14 +45,15 @@ internal abstract class NumberMapper : INumberStyleCellMapper
     {
         Type = type;
         _typeCode = Type.GetTypeCode(type);
-        Style = GetDefaultStyle(_typeCode);
+        DefaultStyle = GetDefaultStyle(_typeCode);
     }
 
     public Type Type { get; }
 
-    public NumberStyles Style { get; set; }
+    // The number style used when the member has none of its own.
+    private protected NumberStyles DefaultStyle { get; }
 
-    public IFormatProvider? Provider { get; set; }
+
 
     /// <summary>
     /// Gets whether the type is one of the built-in numeric types this mapper supports.
@@ -70,7 +71,7 @@ internal abstract class NumberMapper : INumberStyleCellMapper
     internal static NumberStyles GetDefaultStyle(TypeCode typeCode)
         => IsInteger(typeCode) ? NumberStyles.Number : NumberStyles.Number | NumberStyles.AllowExponent;
 
-    public Exception CreateException(ReadCellResult cell, object? error)
+    public Exception CreateException(ReadCellResult cell, in CellContext context, object? error)
     {
         var value = cell.GetValue();
 
@@ -88,9 +89,9 @@ internal abstract class NumberMapper : INumberStyleCellMapper
             return MapperUtilities.InvalidFromParse(() => Convert.ChangeType(value, type, CultureInfo.InvariantCulture));
         }
 
-        var text = GetNumberText(cell.GetString(), Style);
-        var style = Style;
-        var provider = Provider ?? cell.Culture;
+        var style = context.Options.NumberStyle ?? DefaultStyle;
+        var text = GetNumberText(cell.GetString(), style);
+        var provider = context.Options.Provider ?? cell.Culture;
         var typeCode = _typeCode;
         try
         {
@@ -254,7 +255,8 @@ internal sealed class NumberMapper<T> : NumberMapper, ICellMapper<T>, ICellMappe
                 return CellConversion.Success;
             }
 
-            return s_tryParse(GetNumberText(cell.GetString(), Style), Style, Provider ?? cell.Culture, out value)
+            var style = context.Options.NumberStyle ?? DefaultStyle;
+            return s_tryParse(GetNumberText(cell.GetString(), style), style, context.Options.Provider ?? cell.Culture, out value)
                 ? CellConversion.Success
                 : CellConversion.Invalid;
         }

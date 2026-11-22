@@ -5,61 +5,22 @@ namespace ExcelMapper.Mappers;
 /// <summary>
 /// A mapper that tries to map the value of a cell to a DateTimeOffset.
 /// </summary>
-internal sealed class DateTimeOffsetMapper : IFormatsCellMapper, ICellMapper<DateTimeOffset>, ICellMapper<DateTimeOffset?>
+internal sealed class DateTimeOffsetMapper : ICellMapper<DateTimeOffset>, ICellMapper<DateTimeOffset?>
 {
-    private string[] _formats = ["G"];
-
     /// <summary>
-    /// Gets or sets the date formats used to map the value to a DateTimeOffset.
-    /// This defaults to "G" - the default Excel format.
-    /// While the formats haven't been set, values that don't match also try the culture's short date ("d") and short date and time ("g"), and ISO 8601, such as "2024-03-04" or "2024-03-04T10:30:00+01:00".
+    /// The mapper, shared by every member: the formats and format provider come from the cell's
+    /// <see cref="CellContext.Options"/>.
     /// </summary>
-    private bool _formatsSet;
+    public static DateTimeOffsetMapper Instance { get; } = new();
 
-    public string[] Formats
+    private DateTimeOffsetMapper()
     {
-        get => _formats;
-        set
-        {
-            FormatUtilities.ValidateFormats(value);
-            _formats = value;
-            _formatsSet = true;
-        }
     }
 
-    /// <summary>
-    /// Gets or sets the IFormatProvider used to map the value to a DateTimeOffset.
-    /// </summary>
-    public IFormatProvider? Provider { get; set; }
+    // The format tried first when the member has no formats of its own.
+    private static readonly string[] s_defaultFormats = ["G"];
 
-    /// <summary>
-    /// Gets or sets the DateTimeStyles used to map the value to a DateTimeOffset.
-    /// </summary>
-    public DateTimeStyles Style { get; set; }
-
-    private TimeSpan? _offset;
-
-    /// <summary>
-    /// Gets or sets the offset from UTC given to cells that Excel stores as dates. Excel dates have no
-    /// time zone, so when this is null (the default) the machine's local offset is used, which makes
-    /// results depend on where the code runs. Set to <see cref="TimeSpan.Zero"/> for UTC. Text with
-    /// an explicit offset (for example a "zzz" format) keeps that offset.
-    /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException">The offset is not a whole number of minutes
-    /// between -14 and +14 hours.</exception>
-    public TimeSpan? Offset
-    {
-        get => _offset;
-        set
-        {
-            if (value is { } offset && (offset.Ticks % TimeSpan.TicksPerMinute != 0 || offset < TimeSpan.FromHours(-14) || offset > TimeSpan.FromHours(14)))
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), offset, "The offset must be a whole number of minutes between -14 and +14 hours.");
-            }
-
-            _offset = value;
-        }
-    }
+    private const DateTimeStyles Style = DateTimeStyles.None;
 
     CellConversion ICellMapper<DateTimeOffset>.Convert(ReadCellResult cell, in CellContext context, out DateTimeOffset value, ref object? error)
     {
@@ -68,7 +29,7 @@ internal sealed class DateTimeOffsetMapper : IFormatsCellMapper, ICellMapper<Dat
         {
             try
             {
-                value = Offset is { } offset
+                value = context.Options.Offset is { } offset
                     ? new DateTimeOffset(DateTime.SpecifyKind(dateTimeValue, DateTimeKind.Unspecified), offset)
                     : new DateTimeOffset(dateTimeValue);
                 return CellConversion.Success;
@@ -81,12 +42,12 @@ internal sealed class DateTimeOffsetMapper : IFormatsCellMapper, ICellMapper<Dat
         }
 
         var stringValue = cell.GetString();
-        var provider = Provider ?? cell.Culture;
+        var provider = context.Options.Provider ?? cell.Culture;
         var style = Style;
         try
         {
-            return DateTimeOffset.TryParseExact(stringValue, Formats, provider, style, out value) ||
-                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateTimeOffset.TryParseExact(stringValue, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, style, out value))
+            return DateTimeOffset.TryParseExact(stringValue, (context.Options.Formats ?? s_defaultFormats), provider, style, out value) ||
+                (context.Options.Formats is null && FormatUtilities.HasDigit(stringValue) && DateTimeOffset.TryParseExact(stringValue, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, style, out value))
                 ? CellConversion.Success
                 : CellConversion.Invalid;
         }
@@ -104,27 +65,27 @@ internal sealed class DateTimeOffsetMapper : IFormatsCellMapper, ICellMapper<Dat
         return conversion;
     }
 
-    public Exception CreateException(ReadCellResult cell, object? error)
+    public Exception CreateException(ReadCellResult cell, in CellContext context, object? error)
     {
         // A date that can't have the offset, such as the earliest dates with a positive offset.
         var cellValue = cell.GetValue();
         if (cellValue is DateTime dateTimeValue || ExcelDateUtilities.TryGetDateTime(cellValue, out dateTimeValue))
         {
-            var offset = Offset;
+            var offset = context.Options.Offset;
             return MapperUtilities.InvalidFromParse(() => _ = offset is { } value
                 ? new DateTimeOffset(DateTime.SpecifyKind(dateTimeValue, DateTimeKind.Unspecified), value)
                 : new DateTimeOffset(dateTimeValue));
         }
 
         var stringValue = cell.GetString();
-        var formats = Formats;
-        var provider = Provider ?? cell.Culture;
+        var formats = context.Options.Formats ?? s_defaultFormats;
+        var provider = context.Options.Provider ?? cell.Culture;
         var style = Style;
         try
         {
             // Parsing throws for some styles, such as invalid combinations.
             _ = DateTimeOffset.TryParseExact(stringValue, formats, provider, style, out _) ||
-                (!_formatsSet && FormatUtilities.HasDigit(stringValue) && DateTimeOffset.TryParseExact(stringValue, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, style, out _));
+                (context.Options.Formats is null && FormatUtilities.HasDigit(stringValue) && DateTimeOffset.TryParseExact(stringValue, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, style, out _));
         }
         catch (Exception exception)
         {

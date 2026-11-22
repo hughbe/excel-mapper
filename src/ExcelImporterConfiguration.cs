@@ -133,7 +133,7 @@ public class ExcelImporterConfiguration
     private static void ValidateMap(IMap map)
         => MapTree.VisitCellMaps(map, null, (cellMap, _) =>
         {
-            if (cellMap is ValuePipeline { MapperCount: 0 })
+            if (cellMap is ValuePipeline { HasMappers: false })
             {
                 throw new ExcelMappingException("Cannot register a class map with a property that has no Mappers defined.");
             }
