@@ -9,13 +9,13 @@ namespace ExcelMapper;
 /// </summary>
 public class ExcelHeading
 {
-    internal ExcelHeading(IDataRecord reader, ExcelRange dataRange, ExcelImporterConfiguration configuration)
+    internal ExcelHeading(IDataRecord reader, ExcelRange dataRange, int maxColumns)
     {
-        if (reader.FieldCount > configuration.MaxColumnsPerSheet)
+        if (reader.FieldCount > maxColumns)
         {
             throw new ExcelMappingException(
                 $"Sheet has {reader.FieldCount} columns which exceeds the maximum allowed " +
-                $"({configuration.MaxColumnsPerSheet}). Increase MaxColumnsPerSheet in the configuration if this is a legitimate file.");
+                $"({maxColumns}). Increase MaxColumnsPerSheet in the configuration if this is a legitimate file.");
         }
 
         var (offset, length) = dataRange.Columns.GetOffsetAndLength(reader.FieldCount);
