@@ -21,57 +21,44 @@ public class CollectionMap<TElement> : ICellsMap
     /// </summary>
     internal CollectionMap(Columns columns, CollectionBuilder<TElement> builder)
     {
-        _columns = columns;
+        Settings = new ColumnSettings(columns);
         Builder = builder;
     }
 
-    private Columns _columns;
-
     /// <summary>
-    /// Gets or sets the columns the elements are read from: several columns, or one cell split
-    /// into values (<see cref="SplitColumns"/>).
+    /// Gets or sets the columns the map reads.
     /// </summary>
     internal Columns Columns
     {
-        get => _columns;
-        set
-        {
-            ThrowHelpers.ThrowIfFrozen(_frozen);
-            _columns = value;
-        }
+        get => Settings.Columns;
+        set => Settings.Columns = value;
     }
 
-    Columns IColumnsMap.Columns
-    {
-        get => Columns;
-        set => Columns = value;
-    }
+    /// <summary>
+    /// Gets where the map reads its cells, and how.
+    /// </summary>
+    internal ColumnSettings Settings { get; }
 
-    /// <inheritdoc />
+    ColumnSettings IColumnsMap.Settings => Settings;
+
+    /// <summary>
+    /// Gets or sets whether the member's columns can be missing from the sheet: the member then
+    /// keeps its value, rather than mapping the row being an error.
+    /// </summary>
     public bool Optional
     {
-        get => _optional;
-        set
-        {
-            ThrowHelpers.ThrowIfFrozen(_frozen);
-            _optional = value;
-        }
+        get => Settings.Optional;
+        set => Settings.Optional = value;
     }
 
-    private bool _optional;
-    
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets or sets whether cells are read as the text Excel shows, with their number format applied.
+    /// </summary>
     public bool PreserveFormatting
     {
-        get => _preserveFormatting;
-        set
-        {
-            ThrowHelpers.ThrowIfFrozen(_frozen);
-            _preserveFormatting = value;
-        }
+        get => Settings.PreserveFormatting;
+        set => Settings.PreserveFormatting = value;
     }
-
-    private bool _preserveFormatting;
 
     /// <summary>
     /// The mapping pipeline for each element in the list.
@@ -80,12 +67,10 @@ public class CollectionMap<TElement> : ICellsMap
 
     ValuePipeline IColumnsMap.Pipeline => Pipeline;
 
-    private bool _frozen;
-
     /// <inheritdoc />
     void IMap.Freeze()
     {
-        _frozen = true;
+        Settings.Freeze();
         Pipeline.Freeze();
     }
 
@@ -106,22 +91,17 @@ public class CollectionMap<TElement> : ICellsMap
     ICellsReader? ICellsMap.GetCellsReader(SheetView sheet) => GetCellsReader(sheet);
 
     private ICellsReader? GetCellsReader(SheetView sheet)
-        => sheet.GetCellsReader(_columns);
+        => sheet.GetCellsReader(Settings.Columns);
 
     bool ICellsMap.TryGetValue(ICellsReader? cellsReader, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out object? value)
         => TryGetValue(cellsReader, sheet, rowIndex, reader, member, errors, out value);
 
     private bool TryGetValue(ICellsReader? cellsReader, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
     {
-        if (cellsReader == null || !cellsReader.Start(reader, PreserveFormatting, out var count))
+        if (!Settings.TryStart(cellsReader, sheet, rowIndex, reader, member, out var count))
         {
-            if (Optional)
-            {
-                value = default;
-                return false;
-            }
-
-            throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _columns, member);
+            value = default;
+            return false;
         }
 
         var items = Builder.Begin(count);
@@ -156,7 +136,7 @@ public class CollectionMap<TElement> : ICellsMap
 
         var result = elementMap(Pipeline);
         ThrowHelpers.ThrowIfNull(result, nameof(elementMap));
-        ThrowHelpers.ThrowIfFrozen(_frozen);
+        Settings.ThrowIfFrozen();
         Pipeline = result;
         return this;
     }

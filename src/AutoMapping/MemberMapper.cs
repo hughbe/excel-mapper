@@ -354,12 +354,12 @@ internal static class MemberMapper
         // If a member has an ExcelOptional attribute, mark it as optional.
         if (MemberAttributes.IsDefined<ExcelOptionalAttribute>(member))
         {
-            map.Optional = true;
+            map.Settings.Optional = true;
         }
         // If a member has an ExcelPreserveFormatting attribute, mark it as preserving formatting.
         if (MemberAttributes.IsDefined<ExcelPreserveFormattingAttribute>(member))
         {
-            map.PreserveFormatting = true;
+            map.Settings.PreserveFormatting = true;
         }
     }
 }
