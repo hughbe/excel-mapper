@@ -131,10 +131,13 @@ public class ExcelSheet
     /// a heading and the heading has not yet been read.
     /// </summary>
     /// <remarks>
-    /// Reading is forward-only: rows are read from the current position of the sheet. Rows that have
-    /// already been read (for example by a previous call to this method or <see cref="ReadRow{T}()"/>)
-    /// are not returned again, so calling this method after all rows have been read returns an empty
-    /// sequence. Use <see cref="ReadRows{T}(int, int)"/> to re-read a specific range of rows.
+    /// Rows are mapped lazily, as the result is enumerated, from the row after the sheet's position
+    /// when this method is called. Rows already read (for example by <see cref="ReadRow{T}()"/>) are
+    /// not returned, so calling this method again after all rows have been read returns an empty
+    /// sequence. The result can be enumerated more than once, like any <see cref="IEnumerable{T}"/>:
+    /// each enumeration reads the same rows again from the file, so calling <c>Any()</c> and then
+    /// <c>ToList()</c> doesn't lose a row. Use <see cref="ReadRows{T}(int, int)"/> to read a specific
+    /// range of rows.
     /// </remarks>
     /// <typeparam name="T">The type of the object to map each row to.</typeparam>
     /// <returns>A list of objects of type T mapped from each row in the sheet.</returns>
@@ -235,6 +238,7 @@ public class ExcelSheet
     /// <remarks>
     /// Problems with the mapping itself, such as a type that can't be auto-mapped, still throw.
     /// Use <see cref="ExcelRowResult{T}.IsValid"/> to find the rows that were mapped successfully.
+    /// As with <see cref="ReadRows{T}()"/>, each enumeration of the result reads the same rows.
     /// </remarks>
     /// <typeparam name="T">The type of the object to map each row to.</typeparam>
     /// <returns>The result of mapping each row in the sheet.</returns>
