@@ -28,7 +28,11 @@ internal abstract class TypeRule
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(TypeRule<>))]
 #endif
     public static TypeRule For(Type type)
-        => s_rules.GetOrAdd(type, static t => (TypeRule)Activator.CreateInstance(typeof(TypeRule<>).MakeGenericType(t))!);
+        => GetOrAdd(type, static t => (TypeRule)Activator.CreateInstance(typeof(TypeRule<>).MakeGenericType(t))!);
+
+    // One rule for each type, however it's created.
+    private protected static TypeRule GetOrAdd(Type type, Func<Type, TypeRule> create)
+        => s_rules.GetOrAdd(type, create);
 
     /// <summary>
     /// Gets the rule for the type's elements, or null if it isn't a collection.
@@ -59,14 +63,30 @@ internal sealed class TypeRule<T> : TypeRule
 {
     private static TypeRule<T>? s_instance;
 
-    public static TypeRule<T> Instance => s_instance ??= (TypeRule<T>)For(typeof(T));
+    /// <summary>
+    /// Gets the rule for <typeparamref name="T"/>, created without reflection: native AOT has the
+    /// code of a rule whose type is known when the code calling it is compiled.
+    /// </summary>
+    public static TypeRule<T> Instance => s_instance ??= (TypeRule<T>)GetOrAdd(typeof(T), static _ => new TypeRule<T>());
 
     /// <summary>
     /// Gets the adapter for converters and fallbacks of the underlying type of a nullable
     /// <typeparamref name="T"/> (see <see cref="UnderlyingTypeAdapter{T}"/>), or null if
     /// <typeparamref name="T"/> isn't nullable.
     /// </summary>
-    public UnderlyingTypeAdapter<T>? NullableAdapter => s_nullableAdapter;
+    public UnderlyingTypeAdapter<T>? NullableAdapter
+    {
+        get
+        {
+            if (!s_nullableAdapterCreated)
+            {
+                s_nullableAdapter = CreateNullableAdapter();
+                s_nullableAdapterCreated = true;
+            }
+
+            return s_nullableAdapter;
+        }
+    }
 
 #if NET5_0_OR_GREATER
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(NullableAdapter<>))]
@@ -76,7 +96,10 @@ internal sealed class TypeRule<T> : TypeRule
             ? (UnderlyingTypeAdapter<T>)Activator.CreateInstance(typeof(NullableAdapter<>).MakeGenericType(underlyingType))!
             : null;
 
-    private static readonly UnderlyingTypeAdapter<T>? s_nullableAdapter = CreateNullableAdapter();
+    // Created when a converter or fallback of the underlying type needs adapting, rather than for
+    // every nullable type, as it's made with MakeGenericType.
+    private static UnderlyingTypeAdapter<T>? s_nullableAdapter;
+    private static bool s_nullableAdapterCreated;
 
     // Each is found when it's first needed: null until then, and a sentinel if there's none.
     private CollectionRule? _collection;
@@ -205,7 +228,11 @@ internal sealed class TypeRule<T> : TypeRule
 #if NET7_0_OR_GREATER
             // Numbers. Number value types (all the built-in ones) also convert nullable members
             // without boxing.
-            if (type.ImplementsGenericInterface(typeof(INumberBase<>), out var numberType))
+            if (CreateBuiltInNumberMapper(type) is { } builtInMapper)
+            {
+                mapper = builtInMapper;
+            }
+            else if (type.ImplementsGenericInterface(typeof(INumberBase<>), out var numberType))
             {
                 mapper = Activator.CreateInstance((numberType.IsValueType ? typeof(StructNumberMapper<>) : typeof(INumberBaseMapper<>)).MakeGenericType(numberType));
             }
@@ -237,6 +264,31 @@ internal sealed class TypeRule<T> : TypeRule
         var typeMapper = (ICellMapper<T>)mapper;
         return mappers => mappers.Add(typeMapper);
     }
+
+#if NET7_0_OR_GREATER
+    // The mappers of the built-in number types, created without MakeGenericType so that native AOT
+    // has their code. Other number types (a user's INumberBase<T>) are found by their interface.
+    private static object? CreateBuiltInNumberMapper(Type type)
+        => type == typeof(int) ? new StructNumberMapper<int>() :
+            type == typeof(long) ? new StructNumberMapper<long>() :
+            type == typeof(double) ? new StructNumberMapper<double>() :
+            type == typeof(decimal) ? new StructNumberMapper<decimal>() :
+            type == typeof(float) ? new StructNumberMapper<float>() :
+            type == typeof(short) ? new StructNumberMapper<short>() :
+            type == typeof(byte) ? new StructNumberMapper<byte>() :
+            type == typeof(sbyte) ? new StructNumberMapper<sbyte>() :
+            type == typeof(ushort) ? new StructNumberMapper<ushort>() :
+            type == typeof(uint) ? new StructNumberMapper<uint>() :
+            type == typeof(ulong) ? new StructNumberMapper<ulong>() :
+            type == typeof(nint) ? new StructNumberMapper<nint>() :
+            type == typeof(nuint) ? new StructNumberMapper<nuint>() :
+            type == typeof(Half) ? new StructNumberMapper<Half>() :
+            type == typeof(Int128) ? new StructNumberMapper<Int128>() :
+            type == typeof(UInt128) ? new StructNumberMapper<UInt128>() :
+            type == typeof(BigInteger) ? new StructNumberMapper<BigInteger>() :
+            type == typeof(Complex) ? new StructNumberMapper<Complex>() :
+            null;
+#endif
 
     private static Dictionary<string, T>? GetEnumDescriptions(Type enumType)
     {

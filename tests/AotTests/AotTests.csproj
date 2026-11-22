@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Publishes a native AOT app that maps rows, to check what mapping supports under native AOT. CI
+    runs: dotnet publish tests/AotTests -c Release -r linux-x64 -o out && out/AotTests
+    The app calls reflection-based mapping on purpose, so the IL2026/IL3050 warnings are expected.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PublishAot>true</PublishAot>
+    <NoWarn>$(NoWarn);IL2026;IL3050</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/ExcelMapper.csproj" />
+  </ItemGroup>
+
+</Project>
