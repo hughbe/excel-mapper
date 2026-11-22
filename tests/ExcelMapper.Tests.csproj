@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- The trimming test app is a separate project (see TrimmingTests/TrimmingTests.csproj). -->
-    <Compile Remove="TrimmingTests/**" />
-    <None Remove="TrimmingTests/**" />
+    <!-- The trimming and native AOT test apps are separate projects (see TrimmingTests/TrimmingTests.csproj and AotTests/AotTests.csproj). -->
+    <Compile Remove="TrimmingTests/**;AotTests/**" />
+    <None Remove="TrimmingTests/**;AotTests/**" />
   </ItemGroup>
 
   <ItemGroup>

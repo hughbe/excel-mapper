@@ -5,7 +5,7 @@ Guidance for working on ExcelMapper (NuGet package `ExcelDataReader.Mapping`), a
 ## Layout
 
 - `src/` - the library. Targets `netstandard2.0`, `netstandard2.1` and `net8.0`.
-- `tests/` - xUnit tests (`net8.0`). See [Tests](#tests). `tests/TrimmingTests` is a separate app that CI publishes trimmed and runs.
+- `tests/` - xUnit tests (`net8.0`). See [Tests](#tests). `tests/TrimmingTests` and `tests/AotTests` are separate apps that CI publishes trimmed and with native AOT, and runs.
 - `benchmarks/` - BenchmarkDotNet benchmarks, which can also run against the 3.x package. See [Performance](#performance) and `benchmarks/README.md`.
 - `docs/` - user documentation, linked from the README's documentation index. `docs/Architecture.md` explains the map/reader/pipeline design.
 
@@ -29,7 +29,7 @@ The netstandard builds are used by .NET Framework and older .NET apps and take d
 
 ## Code conventions
 
-- The net8.0 build runs the trimming and native AOT analyzers (`IsTrimmable`, `IsAotCompatible`) and fails on their warnings. Annotate new reflection: put `[DynamicallyAccessedMembers]` on `Type` parameters and generic parameters where the caller knows the type (see `TrimmingConstants`), and `[RequiresUnreferencedCode]`/`[RequiresDynamicCode]` on code that discovers types at run time, carried up to the public API. Don't suppress warnings unless the justification is true. Changes to what mapping needs at run time should be checked with the trimmed app in `tests/TrimmingTests` (see [docs/trimming.md](docs/trimming.md)).
+- The net8.0 build runs the trimming and native AOT analyzers (`IsTrimmable`, `IsAotCompatible`) and fails on their warnings. Annotate new reflection: put `[DynamicallyAccessedMembers]` on `Type` parameters and generic parameters where the caller knows the type (see `TrimmingConstants`), and `[RequiresUnreferencedCode]`/`[RequiresDynamicCode]` on code that discovers types at run time, carried up to the public API. Don't suppress warnings unless the justification is true. Changes to what mapping needs at run time should be checked with the trimmed app in `tests/TrimmingTests` and the native AOT app in `tests/AotTests` (see [docs/trimming.md](docs/trimming.md)). Native AOT only has the code of generic types it can see: create a generic type for a type known at compile time directly (`TypeRule<T>.Instance`, `new StructNumberMapper<int>()`), not with `MakeGenericType`.
 
 - Public types and members have XML doc comments. The documentation ships in the package (IntelliSense), and the build fails on missing or broken doc comments: undocumented public members, wrong `<param>` names, unresolved `cref`s.
 - Validate arguments with `ThrowHelpers` (`ThrowIfNull`, `ThrowIfNegative`, ...) so parameter names match the API.
@@ -138,7 +138,7 @@ To release a version:
   - `dotnet build src -c Release --no-incremental` has no warnings;
   - the tests pass against all three library builds (`net8.0`, `netstandard2.0`, `netstandard2.1`);
   - `dotnet pack src -c Release` passes package validation;
-  - the trimmed app in `tests/TrimmingTests` publishes without trim warnings and passes, if mapping changed;
+  - the trimmed app in `tests/TrimmingTests` publishes without trim warnings and passes, and the native AOT app in `tests/AotTests` passes (`dotnet publish tests/AotTests -c Release -r <rid> -o out && out/AotTests`), if mapping changed;
   - performance against `main` (see [Performance](#performance)), or a note in the PR saying why it can't change;
   - the changelog, the migration guide (for breaking changes), `docs/api.md` and the topic pages are updated.
 - The PR description says what changed and why, how it was verified (test counts per build, trimmed app, pack), and the performance numbers.

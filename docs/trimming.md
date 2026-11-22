@@ -10,7 +10,7 @@ ExcelMapper maps rows by reflection: it finds a type's properties, fields and co
 - **The type you map is kept.** `ReadRows<T>`, `RegisterClassMap<T>` and `ExcelClassMap<T>` tell the trimmer to keep the public constructors, properties and fields of `T`, so classes and records whose members are numbers, strings, dates, enums, lists or dictionaries map in a trimmed app.
 - **Types given in attributes are kept**: the types in `[ExcelConverter]`, `[ExcelColumnMatching]`, `[ExcelColumnsMatching]`, `[ExcelEmptyFallback]`, `[ExcelInvalidFallback]` and `[ExcelTransformer]`.
 - **Nested types aren't kept automatically.** A member whose type is another class (for example `Customer.Address`) needs that type's members kept by the app, or mapping throws `ExcelMappingException` ("Cannot auto-map type").
-- **Native AOT isn't supported yet.** Mapping creates generic types and methods for the member types at run time, which AOT can't guarantee.
+- **Native AOT supports class maps of built-in types.** A class map registered with `RegisterClassMap`, whose members are mapped with `Map(...)` and are numbers, strings, dates, booleans, GUIDs, nullable values or lists of them, maps rows (records and structs too). Auto-mapped members of value types, enums, and types such as `IParsable<T>` types need generic code created for their types at run time, which native AOT doesn't have, so they throw `NotSupportedException`. The calls still warn (IL3050), as mapping can't tell in advance which members it will meet.
 
 ## Trimmed apps
 
@@ -39,5 +39,20 @@ ExcelMapper maps rows by reflection: it finds a type's properties, fields and co
 3. Test the published app: problems with trimming only show up at run time.
 
 The repository's [trimming test app](../tests/TrimmingTests/Program.cs) publishes a trimmed app that maps classes, records, class maps, split lists, dictionaries, enums and nested objects, and runs in CI.
+
+## Native AOT apps
+
+Register a class map for each type you read, and map its members with `Map(...)`:
+
+```csharp
+importer.Configuration.RegisterClassMap<Employee>(c =>
+{
+    c.Map(e => e.Name);
+    c.Map(e => e.Salary);
+    c.Map(e => e.HireDate).WithFormats("yyyy-MM-dd");
+});
+```
+
+The [native AOT test app](../tests/AotTests/Program.cs) shows what works, and runs in CI. Test your published app, as what native AOT is missing only shows up at run time.
 
 Registering class maps by scanning an assembly (`RegisterClassMapsInNamespace`) can't be made trim-safe: register class maps with `RegisterClassMap` instead.

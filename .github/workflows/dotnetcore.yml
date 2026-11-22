@@ -83,3 +83,22 @@ jobs:
       run: dotnet publish tests/TrimmingTests --configuration Release --runtime linux-x64 --output trimming-out
     - name: Run
       run: ./trimming-out/TrimmingTests
+
+  # Publish and run a native AOT app that maps rows with class maps of built-in types, which native
+  # AOT supports. Native AOT compiles with clang and links zlib.
+  test-aot:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Install the native AOT prerequisites
+      run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+    - name: Publish with native AOT
+      run: dotnet publish tests/AotTests --configuration Release --runtime linux-x64 --output aot-out
+    - name: Run
+      run: ./aot-out/AotTests

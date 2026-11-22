@@ -143,6 +143,8 @@ The package contains `net8.0`, `netstandard2.1` and `netstandard2.0` builds. Som
 - `.WithNumberStyle(...)` and `.WithFormatProvider(...)` for numeric members (use `[ExcelNumberStyle]` and `ExcelImporterConfiguration.Culture` on the netstandard builds).
 - `.WithFormats(...)` and related methods for `DateOnly` and `TimeOnly`, and mapping `IReadOnlySet<T>` members.
 
+With native AOT (`PublishAot`), class maps registered with `RegisterClassMap` whose members are built-in types (numbers, strings, dates, booleans, GUIDs, nullable values and lists of them) map rows, including records and structs; auto-mapped members of value types, enums and `IParsable<T>` types aren't supported yet (see [Trimming and Native AOT](docs/trimming.md)). ([#198](https://github.com/hughbe/excel-mapper/pull/198))
+
 The test suite now also runs against the netstandard builds in CI.
 
 ## Earlier versions

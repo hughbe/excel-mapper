@@ -56,6 +56,12 @@ jobs:
           dotnet publish tests/TrimmingTests --configuration Release --runtime linux-x64 --output trimming-out
           ./trimming-out/TrimmingTests
 
+      - name: Run a native AOT app
+        run: |
+          sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+          dotnet publish tests/AotTests --configuration Release --runtime linux-x64 --output aot-out
+          ./aot-out/AotTests
+
       # Packing also runs package validation against the last release (PackageValidationBaselineVersion).
       - name: Pack
         run: dotnet pack src/ExcelMapper.csproj --configuration Release --no-build --output packages
