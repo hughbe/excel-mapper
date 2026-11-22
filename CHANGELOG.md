@@ -99,7 +99,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Fixed
 
-- The result of `ExcelSheet.ReadRows<T>()` and `ReadRowResults<T>()` can be enumerated more than once: each enumeration reads the same rows, from the row after the sheet's position when the method was called. Before, a second enumeration continued where the first stopped, so `rows.Any()` followed by `rows.ToList()` lost the first row. (#PR)
+- The result of `ExcelSheet.ReadRows<T>()` and `ReadRowResults<T>()` can be enumerated more than once: each enumeration reads the same rows, from the row after the sheet's position when the method was called. Before, a second enumeration continued where the first stopped, so `rows.Any()` followed by `rows.ToList()` lost the first row. ([#206](https://github.com/hughbe/excel-mapper/pull/206))
 - Mapping a nested object inside a dictionary with keys that aren't strings, such as `Map(p => p.ById[5].Street)` for a `Dictionary<int, Address>`, threw `InvalidCastException`. ([#180](https://github.com/hughbe/excel-mapper/pull/180))
 
 - Extra columns on a nested object (`MapExtraColumns(p => p.Details.Extra)`, or `[ExcelExtraColumns]` on a member of a nested type) included the columns read by members outside the nested object, such as the parent's. They now leave out every column read by the type being read, at any depth. ([#166](https://github.com/hughbe/excel-mapper/pull/166))
