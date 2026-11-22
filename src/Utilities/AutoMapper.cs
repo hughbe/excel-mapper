@@ -415,57 +415,11 @@ internal static class AutoMapper
     private static bool CanUseConstructorParameters(Type type) => !typeof(IEnumerable).IsAssignableFrom(type);
 
     internal static IMap? GetExistingMap(IMap parentMap, object? context)
-    {
-        if (parentMap is ExcelClassMap parentClassMap)
-        {
-            return parentClassMap.Properties.FirstOrDefault(m => m.Member.Equals((MemberInfo)context!))?.Map;
-        }
-        else if (parentMap is IEnumerableIndexerMap enumerableIndexerMap)
-        {
-            return enumerableIndexerMap.Values.TryGetValue((int)context!, out var map) ? map : null;
-        }
-        else if (parentMap is IMultidimensionalIndexerMap multidimensionalIndexerMap)
-        {
-            // Need to find the key that matches the indices.
-            // Cannot use TryGetValue as arrays do not implement equality.
-            var indices = (int[])context!;
-            foreach (var kvp in multidimensionalIndexerMap.Values)
-            {
-                if (kvp.Key.SequenceEqual(indices))
-                {
-                    return kvp.Value;
-                }
-            }
-
-            return null;
-        }
-        else
-        {
-            var dictionaryIndexerMap = (IDictionaryIndexerMap)parentMap;
-            return dictionaryIndexerMap.Values.TryGetValue((string)context!, out var map) ? map : null;
-        }
-    }
+        => ((IParentMap)parentMap).GetChild(context!);
 
     internal static IMap AddExistingMap(IMap parentMap, object? context, IMap map)
     {
-        if (parentMap is ExcelClassMap parentClassMap)
-        {
-            parentClassMap.Properties.Add(new ExcelPropertyMap((MemberInfo)context!, map));
-        }
-        else if (parentMap is IEnumerableIndexerMap enumerableIndexerMap)
-        {
-            enumerableIndexerMap.Values[(int)context!] = map;
-        }
-        else if (parentMap is IMultidimensionalIndexerMap multidimensionalIndexerMap)
-        {
-            multidimensionalIndexerMap.Values[(int[])context!] = map;
-        }
-        else
-        {
-            var dictionaryIndexerMap = (IDictionaryIndexerMap)parentMap;
-            dictionaryIndexerMap.Values[(string)context!] = map;
-        }
-
+        ((IParentMap)parentMap).SetChild(context!, map);
         return map;
     }
 }

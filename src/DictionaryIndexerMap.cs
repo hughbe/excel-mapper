@@ -9,7 +9,7 @@ namespace ExcelMapper;
 /// A map that reads multiple cells of an excel sheet and maps the values of the cells to
 /// a dictionary property or field by their keys.
 /// </summary>
-internal class DictionaryIndexerMap<TKey, TValue> : IDictionaryIndexerMap where TKey : notnull
+internal class DictionaryIndexerMap<TKey, TValue> : IParentMap where TKey : notnull
 {
     internal DictionaryIndexerMap(DictionaryBuilder<TKey, TValue> builder)
     {
@@ -19,6 +19,23 @@ internal class DictionaryIndexerMap<TKey, TValue> : IDictionaryIndexerMap where 
     internal DictionaryBuilder<TKey, TValue> Builder { get; }
 
     public Dictionary<object, IMap> Values { get; } = [];
+
+    IEnumerable<KeyValuePair<object?, IMap>> IParentMap.Children
+    {
+        get
+        {
+            foreach (var value in Values)
+            {
+                yield return new(value.Key, value.Value);
+            }
+        }
+    }
+
+    IMap? IParentMap.GetChild(object key) => Values.TryGetValue(key, out var map) ? map : null;
+
+    void IParentMap.SetChild(object key, IMap map) => Values[key] = map;
+
+    string? IParentMap.GetChildPath(string? path, object? key) => $"{path}[\"{key}\"]";
 
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {

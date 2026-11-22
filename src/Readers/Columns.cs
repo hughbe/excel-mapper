@@ -488,71 +488,34 @@ internal sealed class ExtraColumns : Columns
     }
 
     private static void AddUsedColumns(IMap map, ExcelSheet sheet, HashSet<int> usedColumns)
-    {
-        switch (map)
+        => MapTree.VisitCellMaps(map, null, (cellMap, _) =>
         {
-            case ExcelClassMap classMap:
-                if (classMap._valueMap is not null)
-                {
-                    AddUsedColumns(classMap._valueMap, sheet, usedColumns);
-                }
+            switch (cellMap)
+            {
+                case IValueMap valueMap:
+                    AddUsedColumn(valueMap.Columns, sheet, usedColumns);
+                    break;
 
-                var properties = classMap.Properties;
-                for (int i = 0; i < properties.Count; i++)
-                {
-                    AddUsedColumns(properties[i].Map, sheet, usedColumns);
-                }
+                case IManyToOneMap { Columns: ExtraColumns }:
+                    // Another extra columns member: it doesn't claim any columns.
+                    break;
 
-                break;
-
-            case IValueMap valueMap:
-                AddUsedColumn(valueMap.Columns, sheet, usedColumns);
-                break;
-
-            case IManyToOneMap { Columns: ExtraColumns }:
-                // Another extra columns member: it doesn't claim any columns.
-                break;
-
-            case IManyToOneMap cellsMap:
-                try
-                {
-                    if (cellsMap.Columns.FindColumns(sheet) is { } columns)
+                case IManyToOneMap cellsMap:
+                    try
                     {
-                        usedColumns.UnionWith(columns);
+                        if (cellsMap.Columns.FindColumns(sheet) is { } columns)
+                        {
+                            usedColumns.UnionWith(columns);
+                        }
                     }
-                }
-                catch (ExcelMappingException)
-                {
-                    // The member's columns can't be found, so it doesn't read any of the sheet's columns.
-                }
+                    catch (ExcelMappingException)
+                    {
+                        // The member's columns can't be found, so it doesn't read any of the sheet's columns.
+                    }
 
-                break;
-
-            case IEnumerableIndexerMap enumerableIndexerMap:
-                foreach (var value in enumerableIndexerMap.Values.Values)
-                {
-                    AddUsedColumns(value, sheet, usedColumns);
-                }
-
-                break;
-
-            case IMultidimensionalIndexerMap multidimensionalIndexerMap:
-                foreach (var value in multidimensionalIndexerMap.Values.Values)
-                {
-                    AddUsedColumns(value, sheet, usedColumns);
-                }
-
-                break;
-
-            case IDictionaryIndexerMap dictionaryIndexerMap:
-                foreach (var value in dictionaryIndexerMap.Values.Values)
-                {
-                    AddUsedColumns(value, sheet, usedColumns);
-                }
-
-                break;
-        }
-    }
+                    break;
+            }
+        });
 
     private static void AddUsedColumn(Columns columns, ExcelSheet sheet, HashSet<int> usedColumns)
     {
