@@ -82,6 +82,8 @@ foreach (var result in results.Where(r => !r.IsValid))
 - make the member optional if the column isn't always there ([Missing and ignored columns](mapping.md#missing-and-ignored-columns));
 - check where the heading is: see [Where the heading is](reading.md#where-the-heading-is) and [Finding the heading](reading.md#finding-the-heading).
 
+**`More than one column matches "Name" (columns A and B)`.** The heading has two columns with the member's name (ignoring case, and separators if `IgnoreSeparatorsInColumnNames` is set), so it isn't clear which to read. Choose one with `[ExcelColumnLetter]` or `.WithColumnLetter(...)`, or rename one of the columns.
+
 **`Cannot assign "" to member ...` for an empty cell.** The member's type can't be empty, such as `int` or `DateTime`. Make it nullable (`int?`), or give it an empty fallback ([Empty and invalid cells](mapping.md#empty-and-invalid-cells)).
 
 **`Cannot assign "N/A" to member ...` for text that isn't a valid value.** Give the member an invalid fallback, map the text with [value mapping](mapping.md#value-mapping), or [convert it yourself](mapping.md#converters).
