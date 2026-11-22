@@ -8,26 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Resources\*.xlsx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Include="../tests/XlsxBuilder.cs" />
     <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
   </ItemGroup>
 
   <!-- By default, benchmark the library in src/. -->
   <ItemGroup Condition="'$(EXCELMAPPER_VERSION)' == ''">
-    <Compile Include="../tests/Helpers.cs" />
     <ProjectReference Include="..\src\ExcelMapper.csproj" />
   </ItemGroup>
 
   <!--
     With the environment variable EXCELMAPPER_VERSION set (for example to 3.0.3), benchmark that
-    version of the package instead, to compare versions. Only the Mapping benchmarks are built, as
-    they run on both, without the ones for 4.0 features.
+    version of the package instead, to compare versions, without the benchmarks for 4.0 features.
   -->
   <PropertyGroup Condition="'$(EXCELMAPPER_VERSION)' != ''">
     <DefineConstants>$(DefineConstants);EXCELMAPPER_3</DefineConstants>
