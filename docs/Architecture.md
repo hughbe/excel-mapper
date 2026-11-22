@@ -40,6 +40,8 @@ An `ExcelClassMap<T>` lists the members of `T` to map (its internal `Properties`
 - **Explicitly**, by deriving from `ExcelClassMap<T>` (or passing a callback to `RegisterClassMap<T>`) and calling `Map(...)`. `ExpressionAutoMapper` (internal) walks the expression: a member (`p => p.Name`), a chain of members (`p => p.Address.City`, which creates nested class maps), or an indexer with a constant argument (`p => p.Values[0]`, `p => p.Scores["Maths"]`, `p => p.Grid[0, 1]`).
 - **Automatically**, the first time a type without a registered map is read. `AutoMapper` finds the public properties and fields, and `MemberMapper` applies the member's attributes (`[ExcelColumnName]`, `[ExcelConverter]`, `[ExcelOptional]`, ...). Explicit maps use the same code to set a member up before the fluent methods change it.
 
+What a member's type supports is decided once per type, by its `TypeRule<T>` (`TypeRule.For(type)`): its built-in conversion, a `CollectionRule<TElement>` if it has elements and a `DictionaryRule<TKey, TValue>` if it has keys and values. Each rule creates and sets up the maps for its type: collection, dictionary and indexer maps, and the collection or dictionary itself. `AutoMapper.TryCreateMap<T>` tries them in order: a value (the type's conversion, or one the member's attributes give), a dictionary, a collection, then an object with its own members. The rules are the only place auto-mapping makes generic types at run time, so the rest of it calls them without reflection.
+
 Each member's map is one of:
 
 | Map | Used for | Reads |
@@ -127,7 +129,7 @@ The net8.0 build is annotated for trimming: the mapped type `T` and the types gi
 | `src/Mappers`, `src/Transformers`, `src/Fallbacks` | Built-in conversion, transformers and fallbacks, and the adapters for the public extension points (internal) |
 | `src/Factories` | Collection and dictionary factories (internal) |
 | `src/Abstractions` | The interfaces of the internal types, and the indexer map interfaces |
-| `src/Utilities` | Auto-mapping (`AutoMapper`, `MemberMapper`, `ExpressionAutoMapper`), binding (`BoundMember`), `RowSource`, `CompiledAccessors`, constructor matching and parsing helpers |
+| `src/Utilities` | Auto-mapping (`AutoMapper`, `TypeRule`, `CollectionRule`, `DictionaryRule`, `MemberMapper`, `ExpressionAutoMapper`), binding (`BoundMember`), `RowSource`, `CompiledAccessors`, constructor matching and parsing helpers |
 | `tests/ExcelMapper` | Unit tests of public types, one file per type, mirroring `src/` |
 | `tests/Maps`, `tests/Fallbacks`, `tests/Transformers` | Mapping tests, which read spreadsheets and cover the internal types through the public API |
 | `tests/TrimmingTests` | A trimmed app that checks mapping works after trimming |

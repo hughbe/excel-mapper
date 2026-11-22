@@ -1,32 +1,24 @@
-﻿using System.Collections.Concurrent;
 using System.Collections;
-using System.Collections.Frozen;
-using System.Collections.Immutable;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-#if NET7_0_OR_GREATER
-using System.Diagnostics;
-#endif
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Numerics;
 using System.Reflection;
-using System.Threading;
-using ExcelMapper.Factories;
+using System.Linq;
 using ExcelMapper.Fallbacks;
-using ExcelMapper.Mappers;
 using ExcelMapper.Readers;
 
 namespace ExcelMapper.Utilities;
 
 /// <summary>
-/// Provides automatic mapping functionality for Excel cells to .NET types.
-/// This class automatically configures mappers, transformers, and fallback strategies based on type information and attributes.
+/// Creates maps from a type and its members' attributes: a value with the type's built-in
+/// conversion, a dictionary, a collection, or an object with its own members, tried in that
+/// order. What each type supports is decided once, by its <see cref="TypeRule"/>.
 /// </summary>
 [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
 [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
 internal static class AutoMapper
 {
+    internal static readonly ICellReaderFactory s_zeroColumnIndexReaderFactory = new ColumnIndexReaderFactory(0);
+    internal static readonly ICellsReaderFactory s_allColumnNamesReaderFactory = new AllColumnNamesReaderFactory();
+
     internal static ValueMap<T>? CreateValueMap<T>(MemberInfo? member, ICellReaderFactory defaultCellReaderFactory, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping)
     {
         var map = new ValueMap<T>(defaultCellReaderFactory);
@@ -38,7 +30,7 @@ internal static class AutoMapper
         return map;
     }
 
-    private static bool TrySetupMap<T>(MemberInfo? member, IToOneMap map, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping)
+    internal static bool TrySetupMap<T>(MemberInfo? member, IToOneMap map, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping)
     {
         var pipeline = (ValuePipeline<T>)map.Pipeline;
 
@@ -57,7 +49,7 @@ internal static class AutoMapper
             // creating the map.
             // If the user doesn't add any mappers to the property, an ExcelMappingException
             // will be thrown at the point of registering the class map.
-            if (!TryAddWellKnownMappers(pipeline.Mappers))
+            if (!TypeRule<T>.Instance.TryAddDefaultMappers(pipeline.Mappers))
             {
                 if (isAutoMapping)
                 {
@@ -105,176 +97,6 @@ internal static class AutoMapper
         return true;
     }
 
-    // Mappers that hold no state, so they can be shared. Each one maps a type and its nullable version.
-    private static readonly GuidMapper s_guidMapper = new();
-    private static readonly BoolMapper s_boolMapper = new();
-    private static readonly StringMapper s_stringMapper = new();
-    private static readonly VersionMapper s_versionMapper = new();
-    internal static readonly ICellReaderFactory s_zeroColumnIndexReaderFactory = new ColumnIndexReaderFactory(0);
-    internal static readonly ICellsReaderFactory s_allColumnNamesReaderFactory = new AllColumnNamesReaderFactory();
-
-    private static readonly FrozenDictionary<Type, object> s_wellKnownTypeMappers = new Dictionary<Type, object>
-    {
-        [typeof(Guid)] = s_guidMapper,
-        [typeof(bool)] = s_boolMapper,
-        [typeof(string)] = s_stringMapper,
-        [typeof(Version)] = s_versionMapper,
-    }.ToFrozenDictionary();
-
-    [ExcludeFromCodeCoverage]
-    private static bool TryAddWellKnownMappers<T>(IList<ICellMapper<T>> mappers)
-    {
-        var type = typeof(T).GetNullableTypeOrThis(out _);
-
-        // Fast path: Check dictionary for well-known types with immutable mappers.
-        if (s_wellKnownTypeMappers.TryGetValue(type, out var cachedMapper))
-        {
-            mappers.Add((ICellMapper<T>)cachedMapper);
-            return true;
-        }
-
-        // object and IConvertible members receive the cell's typed value (a double, DateTime, bool,
-        // string, etc.), not its text.
-        if (type == typeof(object) || type == typeof(IConvertible))
-        {
-            mappers.Add(new ObjectMapper<T>());
-            return true;
-        }
-
-        // These mappers have settable formats or options, so each member gets its own.
-        object? mapper = type switch
-        {
-            Type t when t == typeof(DateTime) => new DateTimeMapper(),
-            Type t when t == typeof(DateTimeOffset) => new DateTimeOffsetMapper(),
-            Type t when t == typeof(TimeSpan) => new TimeSpanMapper(),
-#if NET6_0_OR_GREATER
-            Type t when t == typeof(DateOnly) => new DateOnlyMapper(),
-            Type t when t == typeof(TimeOnly) => new TimeOnlyMapper(),
-#endif
-            Type t when t == typeof(Uri) => new UriMapper(),
-            _ => null,
-        };
-        if (mapper is not null)
-        {
-            mappers.Add((ICellMapper<T>)mapper);
-            return true;
-        }
-
-        if (type.IsEnum)
-        {
-            mappers.Add((ICellMapper<T>)EnumMappers.Create(type, ignoreCase: false));
-
-            // If enum values have a DescriptionAttribute, create a mapping dictionary for those
-            // string values.
-            if (!s_enumDescriptions.TryGetValue(typeof(T), out var cachedDescriptions))
-            {
-                cachedDescriptions = s_enumDescriptions.GetOrAdd(typeof(T), GetEnumDescriptions<T>(type));
-            }
-
-            var descriptions = (Dictionary<string, T>?)cachedDescriptions;
-            if (descriptions is not null)
-            {
-                // The mapper copies the dictionary.
-                mappers.Add(new MappingDictionaryMapper<T>(descriptions, null, MappingDictionaryBehavior.Optional));
-            }
-
-            return true;
-        }
-
-        // Other types, such as numbers and IConvertible or IParsable types: the mapper to create
-        // depends only on the type, so it's found once per type.
-        var createMapper = s_mapperFactories.GetOrAdd(type, static t => CreateMapperFactory(t));
-        if (ReferenceEquals(createMapper, s_changeTypeMapperFactory))
-        {
-            mappers.Add(new ChangeTypeMapper<T>());
-            return true;
-        }
-
-        if (createMapper is not null)
-        {
-            mappers.Add((ICellMapper<T>)createMapper());
-            return true;
-        }
-
-        return false;
-    }
-
-    // The values of each enum type (or nullable enum type) with a DescriptionAttribute, as a
-    // Dictionary<string, T>, or null if there are none.
-    private static readonly ConcurrentDictionary<Type, object?> s_enumDescriptions = new();
-
-    private static Dictionary<string, T>? GetEnumDescriptions<T>(Type enumType)
-    {
-        var descriptions = enumType.GetFields(BindingFlags.Public | BindingFlags.Static)
-            .Select(f => new
-            {
-                Field = f,
-                DescriptionAttribute = f.GetCustomAttribute<DescriptionAttribute>()
-            })
-            .Where(x => x.DescriptionAttribute != null && !string.IsNullOrEmpty(x.DescriptionAttribute.Description))
-            .ToDictionary(
-                x => x.DescriptionAttribute!.Description,
-                x => (T)x.Field.GetValue(null)!);
-        return descriptions.Count > 0 ? descriptions : null;
-    }
-
-    // For each type, a function that creates its mapper, or null if there isn't a well-known one.
-    // The mapper maps the type and, for value types, its nullable version.
-    private static readonly ConcurrentDictionary<Type, Func<object>?> s_mapperFactories = new();
-
-    // Marks IConvertible types, whose ChangeTypeMapper<T> is created for the member's type, so that
-    // it needs no reflection.
-    private static readonly Func<object> s_changeTypeMapperFactory = static () => throw new InvalidOperationException();
-
-#if NET7_0_OR_GREATER
-    // The mapper types are created by the returned functions, so the trimmer can't see that their
-    // constructors are needed.
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(StructNumberMapper<>))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(INumberBaseMapper<>))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(ParsableMapper<>))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(StructParsableMapper<>))]
-#endif
-    private static Func<object>? CreateMapperFactory(Type type)
-    {
-        if (!CanConstructObject(type))
-        {
-            return null;
-        }
-
-        // Check for types implementing INumberBase<T>.
-#if NET7_0_OR_GREATER
-        if (type.ImplementsGenericInterface(typeof(INumberBase<>), out var numberBaseInterfaceType))
-        {
-            // Number value types (all the built-in ones) also convert nullable members without boxing.
-            var mapperType = (numberBaseInterfaceType.IsValueType ? typeof(StructNumberMapper<>) : typeof(INumberBaseMapper<>)).MakeGenericType(numberBaseInterfaceType);
-            return () => Activator.CreateInstance(mapperType)!;
-        }
-#else
-        // The netstandard builds don't have INumberBase<T>, so built-in numeric types use a
-        // mapper that behaves the same way (including number styles and format providers).
-        if (NumberMapper.IsSupportedType(type))
-        {
-            return () => NumberMapper.Create(type);
-        }
-#endif
-        // Check for types implementing IConvertible.
-        if (type.ImplementsInterface(typeof(IConvertible)))
-        {
-            return s_changeTypeMapperFactory;
-        }
-
-#if NET7_0_OR_GREATER
-        // Check for types implementing IParsable<T>.
-        if (type.ImplementsGenericInterface(typeof(IParsable<>), out var parsableInterfaceType))
-        {
-            var mapperType = (parsableInterfaceType.IsValueType ? typeof(StructParsableMapper<>) : typeof(ParsableMapper<>)).MakeGenericType(parsableInterfaceType);
-            return () => Activator.CreateInstance(mapperType)!;
-        }
-#endif
-
-        return null;
-    }
-
     private static ICellFallback<T> CreateEmptyFallback<T>(EmptyValueStrategy emptyValueStrategy)
     {
         // Empty nullable values should be set to null.
@@ -290,27 +112,35 @@ internal static class AutoMapper
         // Throw if we can't set to null or default value.
         return ThrowFallback<T>.Instance;
     }
-    
-    private static readonly Lazy<MethodInfo> s_tryCreateSplitGenericMapMethod = new(
-        () => typeof(AutoMapper).GetMethod(nameof(TryCreateSplitMapGeneric), BindingFlags.NonPublic | BindingFlags.Static)!,
-        LazyThreadSafetyMode.PublicationOnly);
-    private static MethodInfo TryCreateSplitGenericMapMethod => s_tryCreateSplitGenericMapMethod.Value;
 
-    private static bool TryCreateSplitMap(MemberInfo? member, Type listType, ICellsReaderFactory defaultCellsReaderFactory, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
+    /// <summary>
+    /// Maps a member (or, with no member, a whole row) of type <typeparamref name="T"/>: as a value
+    /// if the type has a built-in conversion or the member's attributes give one, otherwise as a
+    /// dictionary, a collection or an object.
+    /// </summary>
+    internal static bool TryCreateMap<T>(MemberInfo? member, ICellReaderFactory defaultCellReaderFactory, ICellsReaderFactory defaultCellsReaderFactory, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map)
     {
-        var elementType = listType.GetElementTypeOrEnumerableType();
-        if (elementType == null)
+        if (CreateValueMap<T>(member, defaultCellReaderFactory, emptyValueStrategy, isAutoMapping) is { } valueMap)
         {
-            map = null;
-            return false;
+            map = valueMap;
+            return true;
         }
 
-        var method = TryCreateSplitGenericMapMethod.MakeGenericMethod([elementType]);
-        var parameters = new object?[] { member, listType, defaultCellsReaderFactory, emptyValueStrategy, null };
-        var result = (bool)method.InvokeUnwrapped(null, parameters)!;
-        if (result)
+        var rule = TypeRule<T>.Instance;
+        if (rule.Dictionary is { } dictionaryRule && dictionaryRule.TryCreateMap(member, typeof(T), emptyValueStrategy, isAutoMapping, out var dictionaryMap))
         {
-            map = (IMap)parameters[^1]!;
+            map = dictionaryMap;
+            return true;
+        }
+
+        if (rule.Collection is { } collectionRule && collectionRule.TryCreateMap(member, typeof(T), defaultCellsReaderFactory, emptyValueStrategy, out map))
+        {
+            return true;
+        }
+
+        if (TryCreateObjectMap<T>(emptyValueStrategy, out var classMap, typeStack))
+        {
+            map = classMap;
             return true;
         }
 
@@ -318,533 +148,34 @@ internal static class AutoMapper
         return false;
     }
 
-    internal static bool TryCreateSplitMapGeneric<TElement>(MemberInfo? member, Type listType, ICellsReaderFactory defaultCellsReaderFactory, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out CollectionMap<TElement>? map)
+    /// <summary>
+    /// Creates a class map for the given type using the given strategy.
+    /// </summary>
+    /// <param name="emptyValueStrategy">The default strategy to use when the value of a cell is empty.</param>
+    /// <param name="result">The class map for the given type.</param>
+    /// <returns>True if the class map could be created, else false.</returns>
+    public static bool TryCreateClassMap<T>(EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out ExcelClassMap<T>? result)
     {
-        // Find the right way of creating the collection and adding items to it.
-        if (!TryGetCreateEnumerableFactory<TElement>(listType, out var factory))
+        EnumUtilities.ValidateIsDefined(emptyValueStrategy);
+
+        if (!TryCreateMap<T>(null, new ColumnIndexReaderFactory(0), s_allColumnNamesReaderFactory, emptyValueStrategy, isAutoMapping: true, typeStack: null, out var objectMap))
         {
-            map = null;
+            result = null;
             return false;
         }
 
-        // First, get the pipeline for the element. This is used to convert individual values
-        // to be added to/included in the collection.
-        map = new CollectionMap<TElement>(defaultCellsReaderFactory, factory);
-        if (!TrySetupMap<TElement>(member, map, emptyValueStrategy, isAutoMapping: true))
+        if (objectMap is ExcelClassMap<T> typedMap)
         {
-            map = null;
-            return false;
+            result = typedMap;
+            return true;
         }
 
+        // Wrap the class map in a BuiltinClassMap to satisfy the generic type.
+        result = new ExcelClassMap<T>(emptyValueStrategy)
+        {
+            _valueMap = objectMap
+        };
         return true;
-    }
-
-    private static bool TryGetCreateEnumerableFactory<TElement>(Type listType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
-    {
-        // Try well-known collection types
-        if (TryGetWellKnownEnumerableFactory(listType, out result))
-        {
-            return true;
-        }
-
-        // Try interface types
-        if (listType.IsInterface)
-        {
-            return TryGetInterfaceEnumerableFactory(listType, out result);
-        }
-
-        // Try concrete types
-        if (!listType.IsAbstract)
-        {
-            return TryGetConcreteTypeEnumerableFactory(listType, out result);
-        }
-
-        result = default;
-        return false;
-    }
-
-    private static bool TryGetWellKnownEnumerableFactory<TElement>(Type listType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
-    {
-        if (listType == typeof(Array) || (listType.IsArray && listType.GetArrayRank() == 1))
-        {
-            result = new ArrayEnumerableFactory<TElement>();
-            return true;
-        }
-        if (listType == typeof(ImmutableArray<TElement>))
-        {
-            result = new ImmutableArrayEnumerableFactory<TElement>();
-            return true;
-        }
-        if (listType == typeof(ImmutableList<TElement>) || listType == typeof(IImmutableList<TElement>))
-        {
-            result = new ImmutableListEnumerableFactory<TElement>();
-            return true;
-        }
-        if (listType == typeof(ImmutableStack<TElement>) || listType == typeof(IImmutableStack<TElement>))
-        {
-            result = new ImmutableStackEnumerableFactory<TElement>();
-            return true;
-        }
-        if (listType == typeof(ImmutableQueue<TElement>) || listType == typeof(IImmutableQueue<TElement>))
-        {
-            result = new ImmutableQueueEnumerableFactory<TElement>();
-            return true;
-        }
-        if (listType == typeof(ImmutableSortedSet<TElement>))
-        {
-            result = new ImmutableSortedSetEnumerableFactory<TElement>();
-            return true;
-        }
-        if (listType == typeof(ImmutableHashSet<TElement>) || listType == typeof(IImmutableSet<TElement>))
-        {
-            result = new ImmutableHashSetEnumerableFactory<TElement>();
-            return true;
-        }
-        if (listType == typeof(FrozenSet<TElement>))
-        {
-            result = new FrozenSetEnumerableFactory<TElement>();
-            return true;
-        }
-
-        result = default;
-        return false;
-    }
-
-    private static bool TryGetInterfaceEnumerableFactory<TElement>(Type listType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
-    {
-        // Add values by creating a list and assigning to the property.
-        if (typeof(List<TElement>).IsAssignableTo(listType))
-        {
-            result = new ListEnumerableFactory<TElement>();
-            return true;
-        }
-        if (typeof(HashSet<TElement>).IsAssignableTo(listType))
-        {
-            result = new HashSetEnumerableFactory<TElement>();
-            return true;
-        }
-
-        result = default;
-        return false;
-    }
-
-    private static bool TryGetConcreteTypeEnumerableFactory<TElement>(Type listType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
-    {
-        var hasDefaultConstructor = listType.GetConstructor([]) is not null;
-
-        // Try default constructor with collection interfaces
-        if (hasDefaultConstructor && TryGetDefaultConstructorFactory(listType, out result))
-        {
-            return true;
-        }
-
-        // Try constructor-based factories
-        if (TryGetConstructorBasedFactory(listType, out result))
-        {
-            return true;
-        }
-
-        // Try Add method factory
-        if (hasDefaultConstructor)
-        {
-            var addMethod = listType.GetMethod("Add", [typeof(TElement)]);
-            if (addMethod != null)
-            {
-                result = new AddEnumerableFactory<TElement>(listType);
-                return true;
-            }
-        }
-
-        // Try ObservableCollection constructor
-        var ctor = CollectionUtilities.GetConstructorTaking(listType, typeof(ObservableCollection<TElement>));
-        if (ctor != null)
-        {
-            result = new ReadOnlyObservableCollectionEnumerableFactory<TElement>(listType);
-            return true;
-        }
-
-        result = default;
-        return false;
-    }
-
-    private static bool TryGetDefaultConstructorFactory<TElement>(Type listType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
-    {
-        // Add values through IList<TElement>.Add(TElement item).
-        if (listType.ImplementsInterface(typeof(IList<TElement>)))
-        {
-            result = new IListTImplementingEnumerableFactory<TElement>(listType);
-            return true;
-        }
-
-        // Add values through ISet<TElement>.Add(TElement item).
-        if (listType.ImplementsInterface(typeof(ISet<TElement>)))
-        {
-            result = new ISetTImplementingEnumerableFactory<TElement>(listType);
-            return true;
-        }
-
-        // Add values through ICollection<TElement>.Add(TElement item).
-        if (listType.ImplementsInterface(typeof(ICollection<TElement>)))
-        {
-            result = new ICollectionTImplementingEnumerableFactory<TElement>(listType);
-            return true;
-        }
-
-        // Add values through IList.Add(TElement item).
-        if (listType.ImplementsInterface(typeof(IList)))
-        {
-            result = new IListImplementingEnumerableFactory<TElement>(listType);
-            return true;
-        }
-
-        result = default;
-        return false;
-    }
-
-    private static bool TryGetConstructorBasedFactory<TElement>(Type listType, [NotNullWhen(true)] out IEnumerableFactory<TElement>? result)
-    {
-        // A constructor that needs a set, such as ReadOnlySet<T>(ISet<T>).
-        var ctor = CollectionUtilities.GetSetConstructor<TElement>(listType);
-        if (ctor != null)
-        {
-            result = new ConstructorSetEnumerableFactory<TElement>(listType);
-            return true;
-        }
-
-        // A constructor that takes the items as a list, such as ReadOnlyCollection<T>(IList<T>),
-        // Queue<T>(IEnumerable<T>) or Stack<T>(IEnumerable<T>).
-        ctor = CollectionUtilities.GetListConstructor<TElement>(listType);
-        if (ctor != null)
-        {
-            result = new ConstructorEnumerableFactory<TElement>(listType);
-            return true;
-        }
-
-        result = default;
-        return false;
-    }
-
-    internal static ExcelClassMap GetOrCreateNestedMap(IMap parentMap, Type memberType, object? context, EmptyValueStrategy emptyValueStrategy)
-    {
-        var method = GetOrCreateNestedMapGenericMethod.MakeGenericMethod(memberType);
-        var parameters = new object?[] { parentMap, context, emptyValueStrategy };
-        return (ExcelClassMap)method.InvokeUnwrapped(null, parameters)!;
-    }
-
-    private static IMap GetOrCreateNestedMapGeneric<TProperty>(IMap parentMap, object? context, EmptyValueStrategy emptyValueStrategy)
-    {
-        if (GetExistingMap(parentMap, context) is { } existingMap)
-        {
-            if (existingMap is not ExcelClassMap<TProperty> existingTypeMap)
-            {
-                throw new InvalidOperationException($"Expression is already mapped differently as {existingMap.GetType()}.");
-            }
-
-            return existingTypeMap;
-        }
-
-        // By default, do not auto map nested fields.
-        var classMap = new ExcelClassMap<TProperty>(emptyValueStrategy);
-        AddExistingMap(parentMap, context, classMap);
-        return classMap;
-    }
-
-    private static readonly Lazy<MethodInfo> s_getOrCreateArrayIndexerMapGenericMethod = new(
-        () => typeof(AutoMapper).GetMethod(nameof(GetOrCreateArrayIndexerMapGeneric), BindingFlags.NonPublic | BindingFlags.Static)!,
-        LazyThreadSafetyMode.PublicationOnly);
-    private static MethodInfo GetOrCreateArrayIndexerMapGenericMethod => s_getOrCreateArrayIndexerMapGenericMethod.Value;
-
-    internal static IMap GetOrCreateArrayIndexerMap(IMap parentMap, Type arrayType, object? context, Type elementType)
-    {
-        var method = GetOrCreateArrayIndexerMapGenericMethod.MakeGenericMethod([elementType]);
-        var parameters = new object?[] { parentMap, arrayType, context };
-        return (IMap)method.InvokeUnwrapped(null, parameters)!;
-    }
-
-    private static CollectionIndexerMap<TElement> GetOrCreateArrayIndexerMapGeneric<TElement>(IMap parentMap, Type arrayType, object? context)
-    {
-        if (GetExistingMap(parentMap, context) is { } existingMap)
-        {
-            if (existingMap is not CollectionIndexerMap<TElement> arrayIndexerMap)
-            {
-                throw new InvalidOperationException($"Expression is already mapped differently as {existingMap.GetType()}.");
-            }
-
-            return arrayIndexerMap;
-        }
-
-        // Create a new array indexer map.
-        if (!TryCreateArrayIndexerMapGeneric<TElement>(arrayType, GetEmptyValueStrategy(parentMap), out var mapObj))
-        {
-            throw new ExcelMappingException($"Could not map array of type \"{arrayType}\".");
-        }
-
-        AddExistingMap(parentMap, context, mapObj);
-        return mapObj;
-    }
-
-    private static bool TryCreateArrayIndexerMapGeneric<TElement>(Type listType, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out CollectionIndexerMap<TElement>? map)
-    {
-        if (!TryGetCreateEnumerableFactory<TElement>(listType, out var factory))
-        {
-            map = null;
-            return false;
-        }
-
-        map = new CollectionIndexerMap<TElement>(factory);
-        return true;
-    }
-
-    private static readonly Lazy<MethodInfo> s_getOrCreateMultidimensionalIndexerMapGenericMethod = new(
-        () => typeof(AutoMapper).GetMethod(nameof(GetOrCreateMultidimensionalIndexerMapGeneric), BindingFlags.NonPublic | BindingFlags.Static)!,
-        LazyThreadSafetyMode.PublicationOnly);
-    private static MethodInfo GetOrCreateMultidimensionalIndexerMapGenericMethod => s_getOrCreateMultidimensionalIndexerMapGenericMethod.Value;
-
-    internal static IMap GetOrCreateMultidimensionalIndexerMap(IMap parentMap, Type arrayType, Type elementType, object? context)
-    {
-        var method = GetOrCreateMultidimensionalIndexerMapGenericMethod.MakeGenericMethod([elementType]);
-        var parameters = new object?[] { parentMap, arrayType, context };
-        return (IMap)method.InvokeUnwrapped(null, parameters)!;
-    }
-
-    private static MultidimensionalIndexerMap<TElement> GetOrCreateMultidimensionalIndexerMapGeneric<TElement>(IMap parentMap, Type arrayType, object? context)
-    {
-        if (GetExistingMap(parentMap, context) is { } existingMap)
-        {
-            if (existingMap is not MultidimensionalIndexerMap<TElement> multidimensionalMap)
-            {
-                throw new InvalidOperationException($"Expression is already mapped differently as {existingMap.GetType()}.");
-            }
-
-            return multidimensionalMap;
-        }
-
-        // Create a new array indexer map.
-        var factory = new MultidimensionalArrayFactory<TElement>();
-        var map = new MultidimensionalIndexerMap<TElement>(factory);
-        AddExistingMap(parentMap, context, map);
-        return map;
-    }
-
-    private static readonly Lazy<MethodInfo> s_getOrCreateDictionaryIndexerMapGenericMethod = new(
-        () => typeof(AutoMapper).GetMethod(nameof(GetOrCreateDictionaryIndexerMapGeneric), BindingFlags.NonPublic | BindingFlags.Static)!,
-        LazyThreadSafetyMode.PublicationOnly);
-    private static MethodInfo GetOrCreateDictionaryIndexerMapGenericMethod => s_getOrCreateDictionaryIndexerMapGenericMethod.Value;
-
-    internal static IDictionaryIndexerMap GetOrCreateDictionaryIndexerMap(IMap parentMap, Type dictionaryType, Type keyType, Type valueType, object? context)
-    {
-        var method = GetOrCreateDictionaryIndexerMapGenericMethod.MakeGenericMethod([keyType, valueType]);
-        var parameters = new object?[] { parentMap, dictionaryType, context };
-        return (IDictionaryIndexerMap)method.InvokeUnwrapped(null, parameters)!;
-    }
-
-    private static DictionaryIndexerMap<TKey, TValue> GetOrCreateDictionaryIndexerMapGeneric<TKey, TValue>(IMap parentMap, Type dictionaryType, object? context) where TKey : notnull
-    {
-        if (GetExistingMap(parentMap, context) is { } existingMap)
-        {
-            if (existingMap is not DictionaryIndexerMap<TKey, TValue> dictionaryIndexerMap)
-            {
-                throw new InvalidOperationException($"Expression is already mapped differently as {existingMap.GetType()}.");
-            }
-
-            return dictionaryIndexerMap;
-        }
-
-        // Create a new dictionary indexer map.
-        if (!TryCreateDictionaryIndexerMapGeneric<TKey, TValue>(dictionaryType, GetEmptyValueStrategy(parentMap), out var mapObj))
-        {
-            throw new ExcelMappingException($"Could not map dictionary of type \"{dictionaryType}\".");
-        }
-
-        AddExistingMap(parentMap, context, mapObj);
-        return mapObj;
-    }
-
-    private static bool TryCreateDictionaryIndexerMapGeneric<TKey, TValue>(Type dictionaryType, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out DictionaryIndexerMap<TKey, TValue>? map) where TKey : notnull
-    {
-        if (!TryGetCreateDictionaryFactory<TKey, TValue>(dictionaryType, out var factory))
-        {
-            map = null;
-            return false;
-        }
-
-        map = new DictionaryIndexerMap<TKey, TValue>(factory);
-        return true;
-    }
-
-    private static readonly Lazy<MethodInfo> s_tryCreateDictionaryMapGeneric = new(
-        () => typeof(AutoMapper).GetMethod(nameof(TryCreateGenericDictionaryMap), BindingFlags.NonPublic | BindingFlags.Static)!,
-        LazyThreadSafetyMode.PublicationOnly);
-    private static MethodInfo TryCreateDictionaryMapGeneric => s_tryCreateDictionaryMapGeneric.Value;
-
-    private static bool TryCreateDictionaryMap<TMember>(MemberInfo? member, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out IMap? map)
-    {
-        if (!TryGetDictionaryKeyValueType(typeof(TMember), out var keyType, out var valueType))
-        {
-            map = null;
-            return false;
-        }
-
-        var method = TryCreateDictionaryMapGeneric.MakeGenericMethod(keyType, valueType);
-        var parameters = new object?[] { member, typeof(TMember), emptyValueStrategy, isAutoMapping, null };
-        var result = (bool)method.InvokeUnwrapped(null, parameters)!;
-        if (result)
-        {
-            map = (IMap)parameters[^1]!;
-            return true;
-        }
-
-        map = null;
-        return false;
-    }
-
-    private static bool TryCreateDictionaryMap(MemberInfo member, Type dictionaryType, Type keyType, Type valueType, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out IManyToOneMap? map)
-    {
-        var method = TryCreateDictionaryMapGeneric.MakeGenericMethod(keyType, valueType);
-        var parameters = new object?[] { member, dictionaryType, emptyValueStrategy, true, null };
-        map = (bool)method.InvokeUnwrapped(null, parameters)! ? (IManyToOneMap)parameters[^1]! : null;
-        return map is not null;
-    }
-
-    internal static bool TryGetDictionaryKeyValueType(Type dictionaryType, [NotNullWhen(true)] out Type? keyType, [NotNullWhen(true)] out Type? valueType)
-    {
-        // We should be able to parse anything that implements IEnumerable<KeyValuePair<TKey, TValue>>
-        if (dictionaryType.ImplementsGenericInterface(typeof(IEnumerable<>), out Type? keyValuePairType))
-        {
-            if (keyValuePairType.IsGenericType && keyValuePairType.GetGenericTypeDefinition() == typeof(KeyValuePair<,>))
-            {
-                Type[] arguments = keyValuePairType.GenericTypeArguments;
-                keyType = arguments[0];
-                valueType = arguments[1];
-                return true;
-            }
-        }
-
-        // Parse regular IDictionary before checking for Add methods.
-        // IDictionary also has Add(object, object) but we want to use string keys by convention.
-        if (dictionaryType == typeof(IDictionary) || dictionaryType.ImplementsInterface(typeof(IDictionary)))
-        {
-            keyType = typeof(string);
-            valueType = typeof(object);
-            return true;
-        }
-
-        // Check for types like StringDictionary that have Add(TKey, TValue) method and implement IEnumerable.
-        // This handles dictionary-like types that don't implement IDictionary<TKey, TValue> or IDictionary.
-        if (dictionaryType.ImplementsInterface(typeof(IEnumerable)))
-        {
-            // If there are multiple add methods, we can't determine the key/value types.
-            MethodInfo? singleAddMethod = null;
-            int addMethodCount = 0;
-            foreach (var method in dictionaryType.GetMethods())
-            {
-                if (method.Name == "Add" && method.GetParameters().Length == 2)
-                {
-                    singleAddMethod = method;
-                    addMethodCount++;
-                    if (addMethodCount > 1)
-                    {
-                        // Multiple Add methods - can't determine types, invalidate the method
-                        singleAddMethod = null;
-                        break;
-                    }
-                }
-            }
-            
-            if (addMethodCount == 1 && singleAddMethod != null)
-            {
-                var parameters = singleAddMethod.GetParameters();
-                keyType = parameters[0].ParameterType;
-                valueType = parameters[1].ParameterType;
-                return true;
-            }
-        }
-        
-        keyType = null;
-        valueType = null;
-        return false;
-    }
-
-    internal static bool TryCreateGenericDictionaryMap<TKey, TValue>(MemberInfo? member, Type dictionaryType, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out DictionaryMap<TKey, TValue>? map) where TKey : notnull
-    {
-        // Find the right way of creating the dictionary and adding items to it.
-        if (!TryGetCreateDictionaryFactory<TKey, TValue>(dictionaryType, out var factory))
-        {
-            map = null;
-            return false;
-        }
-
-        // Default to all columns.
-        var defaultReaderFactory = MemberMapper.GetDefaultCellsReaderFactory(member) ?? s_allColumnNamesReaderFactory;
-        map = new DictionaryMap<TKey, TValue>(defaultReaderFactory, factory);
-        if (!TrySetupMap<TValue>(member, map, emptyValueStrategy, isAutoMapping))
-        {
-            map = null;
-            return false;
-        }
-
-        return true;
-    }
-
-    private static bool TryGetCreateDictionaryFactory<TKey, TValue>(Type dictionaryType, [NotNullWhen(true)] out IDictionaryFactory<TKey, TValue>? result) where TKey : notnull
-    {
-        if (dictionaryType == typeof(ImmutableDictionary<TKey, TValue>) || dictionaryType == typeof(IImmutableDictionary<TKey, TValue>))
-        {
-            result = new ImmutableDictionaryFactory<TKey, TValue>();
-            return true;
-        }
-        else if (dictionaryType == typeof(ImmutableSortedDictionary<TKey, TValue>))
-        {
-            result = new ImmutableSortedDictionaryFactory<TKey, TValue>();
-            return true;
-        }
-        else if (dictionaryType == typeof(FrozenDictionary<TKey, TValue>))
-        {
-            result = new FrozenDictionaryFactory<TKey, TValue>();
-            return true;
-        }
-        else if (dictionaryType.IsInterface)
-        {
-            if (typeof(Dictionary<TKey, TValue>).IsAssignableTo(dictionaryType))
-            {
-                result = new DictionaryFactory<TKey, TValue>();
-                return true;
-            }
-        }
-        else if (dictionaryType.GetConstructor([]) is not null)
-        {
-            if (dictionaryType.ImplementsInterface(typeof(IDictionary<TKey, TValue>)))
-            {
-                result = new IDictionaryTImplementingFactory<TKey, TValue>(dictionaryType);
-                return true;
-            }
-            else if (dictionaryType.ImplementsInterface(typeof(IDictionary)))
-            {
-                result = new IDictionaryImplementingFactory<TKey, TValue>(dictionaryType);
-                return true;
-            }
-
-            // Check if the type has Add(TKey, TValue) such as StringDictionary.
-            var addMethod = dictionaryType.GetMethod("Add", [typeof(TKey), typeof(TValue)]);
-            if (addMethod != null)
-            {
-                result = new AddDictionaryFactory<TKey, TValue>(dictionaryType);
-                return true;
-            }
-        }
-        else
-        {
-            // Check if the type has .ctor(IDictionary<TKey, TValue>) such as ReadOnlyDictionary<TKey, TValue>.
-            var ctor = CollectionUtilities.GetConstructorTaking(dictionaryType, typeof(Dictionary<TKey, TValue>));
-            if (ctor != null)
-            {
-                result = new ConstructorDictionaryFactory<TKey, TValue>(dictionaryType);
-                return true;
-            }
-        }
-
-        result = default;
-        return false;
     }
 
     internal static bool TryCreateObjectMap<T>(EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out ExcelClassMap<T>? classMap)
@@ -904,6 +235,7 @@ internal static class AutoMapper
             typeStack.Remove(type);
         }
     }
+
     private static bool TryAutoMapAndAddMember<T>(
         MemberInfo member, 
         Type memberType, 
@@ -933,9 +265,9 @@ internal static class AutoMapper
 
         if (MemberAttributes.IsDefined<ExcelExtraColumnsAttribute>(member))
         {
-            if (!TryGetDictionaryKeyValueType(memberType, out var keyType, out var valueType) ||
-                keyType != typeof(string) ||
-                !TryCreateDictionaryMap(member, memberType, keyType, valueType, emptyValueStrategy, out var extraColumnsMap))
+            if (TypeRule.For(memberType).Dictionary is not { } dictionaryRule ||
+                dictionaryRule.KeyType != typeof(string) ||
+                !dictionaryRule.TryCreateMap(member, memberType, emptyValueStrategy, isAutoMapping: true, out var extraColumnsMap))
             {
                 throw new ExcelMappingException($"Member \"{member.Name}\" has the ExcelExtraColumns attribute, but its type \"{memberType}\" is not a dictionary with string keys.");
             }
@@ -947,7 +279,7 @@ internal static class AutoMapper
         }
 
         // Infer the mapping for each member (property/field) belonging to the type.
-        if (!GetTryAutoMapMember(memberType)(member, emptyValueStrategy, typeStack, out var memberMap))
+        if (!TypeRule.For(memberType).TryAutoMapMember(member, emptyValueStrategy, typeStack, out var memberMap))
         {
             classMap = null!;
             return false;
@@ -958,7 +290,7 @@ internal static class AutoMapper
         return true;
     }
 
-    private static bool CanConstructObject(Type type)
+    internal static bool CanConstructObject(Type type)
     {
         // Value types can always be constructed.
         if (type.IsValueType)
@@ -1032,17 +364,7 @@ internal static class AutoMapper
     /// </summary>
     private static bool CanUseConstructorParameters(Type type) => !typeof(IEnumerable).IsAssignableFrom(type);
 
-    private static EmptyValueStrategy GetEmptyValueStrategy(IMap map)
-    {
-        if (map is ExcelClassMap classMap)
-        {
-            return classMap.EmptyValueStrategy;
-        }
-
-        return EmptyValueStrategy.Error;
-    }
-
-    private static IMap? GetExistingMap(IMap parentMap, object? context)
+    internal static IMap? GetExistingMap(IMap parentMap, object? context)
     {
         if (parentMap is ExcelClassMap parentClassMap)
         {
@@ -1074,7 +396,7 @@ internal static class AutoMapper
         }
     }
 
-    private static IMap AddExistingMap(IMap parentMap, object? context, IMap map)
+    internal static IMap AddExistingMap(IMap parentMap, object? context, IMap map)
     {
         if (parentMap is ExcelClassMap parentClassMap)
         {
@@ -1095,109 +417,5 @@ internal static class AutoMapper
         }
 
         return map;
-    }
-
-    private static readonly Lazy<MethodInfo> s_getOrCreateNestedMapGenericMethod = new(
-        () => typeof(AutoMapper).GetMethod(nameof(GetOrCreateNestedMapGeneric), BindingFlags.NonPublic | BindingFlags.Static)!,
-        LazyThreadSafetyMode.PublicationOnly);
-    private static MethodInfo GetOrCreateNestedMapGenericMethod => s_getOrCreateNestedMapGenericMethod.Value;
-
-    /// <summary>
-    /// Creates a class map for the given type using the given strategy.
-    /// </summary>
-    /// <param name="emptyValueStrategy">The default strategy to use when the value of a cell is empty.</param>
-    /// <param name="result">The class map for the given type.</param>
-    /// <returns>True if the class map could be created, else false.</returns>
-    public static bool TryCreateClassMap<T>(EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out ExcelClassMap<T>? result)
-    {
-        EnumUtilities.ValidateIsDefined(emptyValueStrategy);
-
-        if (!TryCreateMap<T>(null, typeof(T), new ColumnIndexReaderFactory(0), s_allColumnNamesReaderFactory, emptyValueStrategy, isAutoMapping: true, typeStack: null, out var objectMap))
-        {
-            result = null;
-            return false;
-        }
-
-        if (objectMap is ExcelClassMap<T> typedMap)
-        {
-            result = typedMap;
-            return true;
-        }
-
-        // Wrap the class map in a BuiltinClassMap to satisfy the generic type.
-        result = new ExcelClassMap<T>(emptyValueStrategy)
-        {
-            _valueMap = objectMap
-        };
-        return true;
-    }
-
-    private static readonly Lazy<MethodInfo> s_tryAutoMapMemberMethod = new(
-        () => typeof(AutoMapper).GetMethod(nameof(TryAutoMapMember), BindingFlags.NonPublic | BindingFlags.Static)!,
-        LazyThreadSafetyMode.PublicationOnly);
-    private static MethodInfo TryAutoMapMemberMethod => s_tryAutoMapMemberMethod.Value;
-
-    private delegate bool TryAutoMapMemberDelegate(MemberInfo member, EmptyValueStrategy emptyValueStrategy, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map);
-
-    // TryAutoMapMember for each member type, so that auto-mapping a type doesn't create and invoke a
-    // generic method for every member.
-    private static readonly ConcurrentDictionary<Type, TryAutoMapMemberDelegate> s_tryAutoMapMember = new();
-
-    private static TryAutoMapMemberDelegate GetTryAutoMapMember(Type memberType)
-        => s_tryAutoMapMember.GetOrAdd(memberType, static t => (TryAutoMapMemberDelegate)TryAutoMapMemberMethod.MakeGenericMethod(t).CreateDelegate(typeof(TryAutoMapMemberDelegate)));
-
-    /// <summary>
-    /// Creates a map to assign a value to a specific member.
-    /// </summary>
-    /// <typeparam name="TMember">The target type.</typeparam>
-    /// <param name="member"></param>
-    /// <param name="emptyValueStrategy">The behaviour if the value is empty.</param>
-    /// <param name="typeStack">Stack of types being processed to detect circular references.</param>
-    /// <param name="map">The pipeline.</param>
-    /// <returns>True if the member is able to be mapped.</returns>
-    private static bool TryAutoMapMember<TMember>(MemberInfo member, EmptyValueStrategy emptyValueStrategy, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map)
-    {
-        var readerFactory = MemberMapper.GetDefaultCellReaderFactory(member);
-        return TryCreateMap<TMember>(
-            member,
-            typeof(TMember),
-            readerFactory,
-            MemberMapper.GetDefaultCellsReaderFactory(member) ?? MemberMapper.GetDefaultSplitCellsReaderFactory(member, readerFactory),
-            emptyValueStrategy,
-            isAutoMapping: true,
-            typeStack,
-            out map);
-    }
-
-    private static bool TryCreateMap<T>(MemberInfo? member, Type memberType, ICellReaderFactory defaultCellReaderFactory, ICellsReaderFactory defaultCellsReaderFactory, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map)
-    {
-        // Mapping a known type (e.g., string, object, etc.) is supported and simply
-        // reads the first column into that value.
-        if (CreateValueMap<T>(member, defaultCellReaderFactory, emptyValueStrategy, isAutoMapping) is { } valueMap)
-        {
-            map = valueMap;
-            return true;
-        }
-        // User may ask to map the row to a dictionary.
-        else if (TryCreateDictionaryMap<T>(member, emptyValueStrategy, isAutoMapping, out var dictionaryMap))
-        {
-            map = dictionaryMap;
-            return true;
-        }
-        // User may ask to map the row to a list.
-        else if (TryCreateSplitMap(member, memberType, defaultCellsReaderFactory, emptyValueStrategy, out var enumerableMap))
-        {
-            map = enumerableMap;
-            return true;
-        }
-        // Otherwise, create the default class map for this type.
-        else if (TryCreateObjectMap<T>(emptyValueStrategy, out var classMap, typeStack))
-        {
-            map = classMap;
-            return true;
-        }
-
-        map = null;
-        return false;
     }
 }
