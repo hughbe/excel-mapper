@@ -56,7 +56,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     /// <summary>
     /// The mapping pipeline for each element in the list.
     /// </summary>
-    public ValuePipeline<TElement> Pipeline { get; private set; } = new ValuePipeline<TElement>();
+    public ElementMap<TElement> Pipeline { get; private set; } = new ElementMap<TElement>();
 
     ValuePipeline IToOneMap.Pipeline => Pipeline;
 
@@ -158,7 +158,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     /// <param name="elementMap">The pipeline that maps the value of a single cell to an object of the element type of the property
     /// or field.</param>
     /// <returns>The map that invoked this method.</returns>
-    public CollectionMap<TElement> WithElementMap(Func<ValuePipeline<TElement>, ValuePipeline<TElement>> elementMap)
+    public CollectionMap<TElement> WithElementMap(Func<ElementMap<TElement>, ElementMap<TElement>> elementMap)
     {
         ThrowHelpers.ThrowIfNull(elementMap, nameof(elementMap));
 

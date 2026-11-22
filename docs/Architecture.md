@@ -51,7 +51,7 @@ Each member's map is one of:
 | `ExcelClassMap<T>` | Nested objects (`Map(p => p.Address)` or auto-mapping) | The nested type's own members |
 | `RowNumberMap` | `[ExcelRowNumber]` and `MapRowNumber` | The row's number |
 
-A single-value map is itself a `ValuePipeline<T>` (see [The value pipeline](#the-value-pipeline)). The collection and dictionary maps hold one for their elements or values (`WithElementMap`, `WithValueMap`).
+A single-value map is itself a `ValuePipeline<T>` (see [The value pipeline](#the-value-pipeline)). The collection and dictionary maps hold an `ElementMap<T>`, another pipeline, for their elements or values (`WithElementMap`, `WithValueMap`). Both derive from `ValuePipeline<T, TSelf>`, whose value methods return `TSelf`, so a chain of value methods keeps the map's type: `Map(p => p.Name).WithTrim().MakeOptional()`.
 
 ### Choosing columns
 
@@ -122,7 +122,7 @@ The net8.0 build is annotated for trimming: the mapped type `T` and the types gi
 
 | Path | Contents |
 |---|---|
-| `src/*.cs` | The public types (importer, sheets, regions, class maps and maps, attributes, extension points, `ValuePipeline<T>` and its fluent extensions), and the internal `IMap`, `ExcelPropertyMap` and indexer maps |
+| `src/*.cs` | The public types (importer, sheets, regions, class maps and maps, attributes, extension points, `ValuePipeline<T>`, `ValuePipeline<T, TSelf>`, `ElementMap<T>` and the type-specific value methods in `ValuePipelineExtensions`), and the internal `IMap`, `ExcelPropertyMap` and indexer maps |
 | `src/Readers` | Reader factories and readers (internal) |
 | `src/Mappers`, `src/Transformers`, `src/Fallbacks` | Built-in conversion, transformers and fallbacks, and the adapters for the public extension points (internal) |
 | `src/Factories` | Collection and dictionary factories (internal) |

@@ -4,98 +4,41 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
-using ExcelMapper.Transformers;
 
 namespace ExcelMapper;
 
-
 /// <summary>
-/// Fluent methods for value pipelines: a member's map (<see cref="ValueMap{T}"/>) and the
-/// element or value pipelines of collections and dictionaries. Each returns the pipeline it was
-/// called on.
+/// The value methods for particular types, such as <c>WithFormats</c> for dates, and the methods
+/// that take an <see cref="ICellConverter{T}"/> or <see cref="ICellFallback{T}"/>. They work on a
+/// member's map (<see cref="ValueMap{T}"/>) and on the elements or values of a collection
+/// (<see cref="ElementMap{T}"/>), and each returns the map it was called on. The methods for any
+/// type are on <see cref="ValuePipeline{T, TSelf}"/>.
 /// </summary>
 public static class ValuePipelineExtensions
 {
     /// <summary>
-    /// Specifies that the string value of the cell should be trimmed before it is mapped to
-    /// a property or field.
-    /// </summary>
-    /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithTrim<TMap>(this TMap map) where TMap : ValuePipeline
-    {
-        map.Transformers.Add(new TrimStringCellTransformer());
-        return map;
-    }
-
-    /// <summary>
-    /// Transforms cells with <paramref name="transformers"/>, in order, before they're converted.
-    /// The transformers replace the map's existing transformers.
-    /// </summary>
-    /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <param name="transformers">The transformers.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithTransformers<TMap>(this TMap map, params ICellTransformer[] transformers) where TMap : ValuePipeline
-    {
-        ThrowHelpers.ThrowIfNull(transformers, nameof(transformers));
-        foreach (var transformer in transformers)
-        {
-            if (transformer == null)
-            {
-                throw new ArgumentException("Transformers cannot contain null values.", nameof(transformers));
-            }
-        }
-
-        map.Transformers.Clear();
-        foreach (var transformer in transformers)
-        {
-            map.Transformers.Add(new CellTransformerAdapter(transformer));
-        }
-
-        return map;
-    }
-
-    /// <summary>
-    /// Specifies that the value of a cell should be mapped to a fixed value if it cannot be parsed. This
-    /// is useful for mapping columns where equivalent data was entered differently.
-    /// </summary>
-    /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <typeparam name="TValue">The type of the property or field that the map represents.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <param name="mappingDictionary">A dictionary that maps a fixed string value to a fixed value of <typeparamref name="TValue"/>.</param>
-    /// <param name="comparer">The comparer uses to map fixed string values. This allows for case-insensitive mappings, for example.</param>
-    /// <param name="behavior">Whether or not a failure to match is an error.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithMapping<TMap, TValue>(this TMap map, IDictionary<string, TValue> mappingDictionary, IEqualityComparer<string>? comparer = null, MappingDictionaryBehavior behavior = MappingDictionaryBehavior.Optional) where TMap : ValuePipeline<TValue>
-    {
-        var item = new MappingDictionaryMapper<TValue>(mappingDictionary, comparer, behavior);
-        map.Mappers.Add(item);
-        return map;
-    }
-
-    /// <summary>
     /// Specifies formats used when mapping the value of a cell to a DateTime. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateTime> WithFormats(this ValuePipeline<DateTime> map, params string[] formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateTime, TMap> map, params string[] formats) where TMap : ValuePipeline<DateTime, TMap>
     {
         map.AddFormats<DateTimeMapper>(formats);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies formats used when mapping the value of a cell to a DateTime. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateTime> WithFormats(this ValuePipeline<DateTime> map, params IEnumerable<string> formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateTime, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<DateTime, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -105,23 +48,25 @@ public static class ValuePipelineExtensions
     /// Specifies formats used when mapping the value of a cell to a DateTime. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateTime?> WithFormats(this ValuePipeline<DateTime?> map, params string[] formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateTime?, TMap> map, params string[] formats) where TMap : ValuePipeline<DateTime?, TMap>
     {
         map.AddFormats<DateTimeMapper>(formats);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies formats used when mapping the value of a cell to a DateTime. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateTime?> WithFormats(this ValuePipeline<DateTime?> map, params IEnumerable<string> formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateTime?, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<DateTime?, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -131,51 +76,55 @@ public static class ValuePipelineExtensions
     /// Specifies the offset from UTC given to cells that Excel stores as dates. Excel dates have no
     /// time zone, so by default the machine's local offset is used. Use <see cref="TimeSpan.Zero"/> for UTC.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="offset">The offset, a whole number of minutes between -14 and +14 hours.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateTimeOffset> WithOffset(this ValuePipeline<DateTimeOffset> map, TimeSpan offset)
+    public static TMap WithOffset<TMap>(this ValuePipeline<DateTimeOffset, TMap> map, TimeSpan offset) where TMap : ValuePipeline<DateTimeOffset, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
         map.GetOrAddMapper<DateTimeOffsetMapper>().Offset = offset;
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies the offset from UTC given to cells that Excel stores as dates. Excel dates have no
     /// time zone, so by default the machine's local offset is used. Use <see cref="TimeSpan.Zero"/> for UTC.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="offset">The offset, a whole number of minutes between -14 and +14 hours.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateTimeOffset?> WithOffset(this ValuePipeline<DateTimeOffset?> map, TimeSpan offset)
+    public static TMap WithOffset<TMap>(this ValuePipeline<DateTimeOffset?, TMap> map, TimeSpan offset) where TMap : ValuePipeline<DateTimeOffset?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
         map.GetOrAddMapper<DateTimeOffsetMapper>().Offset = offset;
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies formats used when mapping the value of a cell to a DateTimeOffset. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTimeOffset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateTimeOffset> WithFormats(this ValuePipeline<DateTimeOffset> map, params string[] formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateTimeOffset, TMap> map, params string[] formats) where TMap : ValuePipeline<DateTimeOffset, TMap>
     {
         map.AddFormats<DateTimeOffsetMapper>(formats);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies formats used when mapping the value of a cell to a DateTimeOffset. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTimeOffset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateTimeOffset> WithFormats(this ValuePipeline<DateTimeOffset> map, params IEnumerable<string> formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateTimeOffset, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<DateTimeOffset, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -185,23 +134,25 @@ public static class ValuePipelineExtensions
     /// Specifies formats used when mapping the value of a cell to a DateTimeOffset. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTimeOffset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateTimeOffset?> WithFormats(this ValuePipeline<DateTimeOffset?> map, params string[] formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateTimeOffset?, TMap> map, params string[] formats) where TMap : ValuePipeline<DateTimeOffset?, TMap>
     {
         map.AddFormats<DateTimeOffsetMapper>(formats);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies formats used when mapping the value of a cell to a DateTimeOffset. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTimeOffset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateTimeOffset?> WithFormats(this ValuePipeline<DateTimeOffset?> map, params IEnumerable<string> formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateTimeOffset?, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<DateTimeOffset?, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -211,23 +162,25 @@ public static class ValuePipelineExtensions
     /// Specifies formats used when mapping the value of a cell to a TimeSpan. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeSpan.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<TimeSpan> WithFormats(this ValuePipeline<TimeSpan> map, params string[] formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<TimeSpan, TMap> map, params string[] formats) where TMap : ValuePipeline<TimeSpan, TMap>
     {
         map.AddFormats<TimeSpanMapper>(formats);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies formats used when mapping the value of a cell to a TimeSpan. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeSpan.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<TimeSpan> WithFormats(this ValuePipeline<TimeSpan> map, params IEnumerable<string> formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<TimeSpan, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<TimeSpan, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -237,23 +190,25 @@ public static class ValuePipelineExtensions
     /// Specifies formats used when mapping the value of a cell to a TimeSpan. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeSpan.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<TimeSpan?> WithFormats(this ValuePipeline<TimeSpan?> map, params string[] formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<TimeSpan?, TMap> map, params string[] formats) where TMap : ValuePipeline<TimeSpan?, TMap>
     {
         map.AddFormats<TimeSpanMapper>(formats);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies formats used when mapping the value of a cell to a TimeSpan. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeSpan.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<TimeSpan?> WithFormats(this ValuePipeline<TimeSpan?> map, params IEnumerable<string> formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<TimeSpan?, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<TimeSpan?, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -264,23 +219,25 @@ public static class ValuePipelineExtensions
     /// Specifies formats used when mapping the value of a cell to a DateOnly. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateOnly> WithFormats(this ValuePipeline<DateOnly> map, params string[] formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateOnly, TMap> map, params string[] formats) where TMap : ValuePipeline<DateOnly, TMap>
     {
         map.AddFormats<DateOnlyMapper>(formats);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies formats used when mapping the value of a cell to a DateOnly. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateOnly> WithFormats(this ValuePipeline<DateOnly> map, params IEnumerable<string> formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateOnly, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<DateOnly, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -290,23 +247,25 @@ public static class ValuePipelineExtensions
     /// Specifies formats used when mapping the value of a cell to a DateOnly. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateOnly?> WithFormats(this ValuePipeline<DateOnly?> map, params string[] formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateOnly?, TMap> map, params string[] formats) where TMap : ValuePipeline<DateOnly?, TMap>
     {
         map.AddFormats<DateOnlyMapper>(formats);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies formats used when mapping the value of a cell to a DateOnly. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateOnly?> WithFormats(this ValuePipeline<DateOnly?> map, params IEnumerable<string> formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateOnly?, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<DateOnly?, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -316,23 +275,25 @@ public static class ValuePipelineExtensions
     /// Specifies formats used when mapping the value of a cell to a TimeOnly. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<TimeOnly> WithFormats(this ValuePipeline<TimeOnly> map, params string[] formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<TimeOnly, TMap> map, params string[] formats) where TMap : ValuePipeline<TimeOnly, TMap>
     {
         map.AddFormats<TimeOnlyMapper>(formats);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies formats used when mapping the value of a cell to a TimeOnly. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<TimeOnly> WithFormats(this ValuePipeline<TimeOnly> map, params IEnumerable<string> formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<TimeOnly, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<TimeOnly, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -342,23 +303,25 @@ public static class ValuePipelineExtensions
     /// Specifies formats used when mapping the value of a cell to a TimeOnly. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<TimeOnly?> WithFormats(this ValuePipeline<TimeOnly?> map, params string[] formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<TimeOnly?, TMap> map, params string[] formats) where TMap : ValuePipeline<TimeOnly?, TMap>
     {
         map.AddFormats<TimeOnlyMapper>(formats);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies formats used when mapping the value of a cell to a TimeOnly. This is useful for
     /// mapping columns where formats differ. Existing formats are overriden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<TimeOnly?> WithFormats(this ValuePipeline<TimeOnly?> map, params IEnumerable<string> formats)
+    public static TMap WithFormats<TMap>(this ValuePipeline<TimeOnly?, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<TimeOnly?, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -376,78 +339,84 @@ public static class ValuePipelineExtensions
     /// Specifies the format provider used when mapping the value of a cell to a DateTime. This is useful for
     /// mapping columns where cultures differ. Existing provider is overridden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateTime> WithFormatProvider(this ValuePipeline<DateTime> map, IFormatProvider? provider)
+    public static TMap WithFormatProvider<TMap>(this ValuePipeline<DateTime, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<DateTime, TMap>
     {
         map.AddFormatProvider<DateTimeMapper>(provider);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies the format provider used when mapping the value of a cell to a DateTime. This is useful for
     /// mapping columns where cultures differ. Existing provider is overridden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateTime?> WithFormatProvider(this ValuePipeline<DateTime?> map, IFormatProvider? provider)
+    public static TMap WithFormatProvider<TMap>(this ValuePipeline<DateTime?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<DateTime?, TMap>
     {
         map.AddFormatProvider<DateTimeMapper>(provider);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies the format provider used when mapping the value of a cell to a DateTimeOffset. This is useful for
     /// mapping columns where cultures differ. Existing provider is overridden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a DateTimeOffset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateTimeOffset> WithFormatProvider(this ValuePipeline<DateTimeOffset> map, IFormatProvider? provider)
+    public static TMap WithFormatProvider<TMap>(this ValuePipeline<DateTimeOffset, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<DateTimeOffset, TMap>
     {
         map.AddFormatProvider<DateTimeOffsetMapper>(provider);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies the format provider used when mapping the value of a cell to a DateTimeOffset. This is useful for
     /// mapping columns where cultures differ. Existing provider is overridden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a DateTimeOffset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateTimeOffset?> WithFormatProvider(this ValuePipeline<DateTimeOffset?> map, IFormatProvider? provider)
+    public static TMap WithFormatProvider<TMap>(this ValuePipeline<DateTimeOffset?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<DateTimeOffset?, TMap>
     {
         map.AddFormatProvider<DateTimeOffsetMapper>(provider);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies the format provider used when mapping the value of a cell to a TimeSpan. This is useful for
     /// mapping columns where cultures differ. Existing provider is overridden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a TimeSpan.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<TimeSpan> WithFormatProvider(this ValuePipeline<TimeSpan> map, IFormatProvider? provider)
+    public static TMap WithFormatProvider<TMap>(this ValuePipeline<TimeSpan, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<TimeSpan, TMap>
     {
         map.AddFormatProvider<TimeSpanMapper>(provider);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies the format provider used when mapping the value of a cell to a TimeSpan. This is useful for
     /// mapping columns where cultures differ. Existing provider is overridden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a TimeSpan.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<TimeSpan?> WithFormatProvider(this ValuePipeline<TimeSpan?> map, IFormatProvider? provider)
+    public static TMap WithFormatProvider<TMap>(this ValuePipeline<TimeSpan?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<TimeSpan?, TMap>
     {
         map.AddFormatProvider<TimeSpanMapper>(provider);
-        return map;
+        return (TMap)map;
     }
 
 #if NET6_0_OR_GREATER
@@ -455,52 +424,56 @@ public static class ValuePipelineExtensions
     /// Specifies the format provider used when mapping the value of a cell to a DateOnly. This is useful for
     /// mapping columns where cultures differ. Existing provider is overridden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a DateOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateOnly> WithFormatProvider(this ValuePipeline<DateOnly> map, IFormatProvider? provider)
+    public static TMap WithFormatProvider<TMap>(this ValuePipeline<DateOnly, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<DateOnly, TMap>
     {
         map.AddFormatProvider<DateOnlyMapper>(provider);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies the format provider used when mapping the value of a cell to a DateOnly. This is useful for
     /// mapping columns where cultures differ. Existing provider is overridden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a DateOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<DateOnly?> WithFormatProvider(this ValuePipeline<DateOnly?> map, IFormatProvider? provider)
+    public static TMap WithFormatProvider<TMap>(this ValuePipeline<DateOnly?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<DateOnly?, TMap>
     {
         map.AddFormatProvider<DateOnlyMapper>(provider);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies the format provider used when mapping the value of a cell to a TimeOnly. This is useful for
     /// mapping columns where cultures differ. Existing provider is overridden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a TimeOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<TimeOnly> WithFormatProvider(this ValuePipeline<TimeOnly> map, IFormatProvider? provider)
+    public static TMap WithFormatProvider<TMap>(this ValuePipeline<TimeOnly, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<TimeOnly, TMap>
     {
         map.AddFormatProvider<TimeOnlyMapper>(provider);
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
     /// Specifies the format provider used when mapping the value of a cell to a TimeOnly. This is useful for
     /// mapping columns where cultures differ. Existing provider is overridden.
     /// </summary>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a TimeOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<TimeOnly?> WithFormatProvider(this ValuePipeline<TimeOnly?> map, IFormatProvider? provider)
+    public static TMap WithFormatProvider<TMap>(this ValuePipeline<TimeOnly?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<TimeOnly?, TMap>
     {
         map.AddFormatProvider<TimeOnlyMapper>(provider);
-        return map;
+        return (TMap)map;
     }
 #endif
 
@@ -517,14 +490,15 @@ public static class ValuePipelineExtensions
     /// cultures differ. Existing provider is overridden.
     /// </summary>
     /// <typeparam name="T">The type of the property or field that the map represents.</typeparam>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a numeric type.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<T> WithFormatProvider<T>(this ValuePipeline<T> map, IFormatProvider? provider) where T : INumberBase<T>
+    public static TMap WithFormatProvider<T, TMap>(this ValuePipeline<T, TMap> map, IFormatProvider? provider) where T : INumberBase<T> where TMap : ValuePipeline<T, TMap>
     {
         var mapper = map.GetOrAddMapper<INumberBaseMapper<T>>();
         mapper.Provider = provider;
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
@@ -533,14 +507,15 @@ public static class ValuePipelineExtensions
     /// cultures differ. Existing provider is overridden.
     /// </summary>
     /// <typeparam name="T">The type of the property or field that the map represents.</typeparam>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider to use when mapping the value of a cell to a numeric type.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<T?> WithFormatProvider<T>(this ValuePipeline<T?> map, IFormatProvider? provider) where T : struct, INumberBase<T>
+    public static TMap WithFormatProvider<T, TMap>(this ValuePipeline<T?, TMap> map, IFormatProvider? provider) where T : struct, INumberBase<T> where TMap : ValuePipeline<T?, TMap>
     {
         var mapper = map.GetOrAddMapper<INumberBaseMapper<T>>();
         mapper.Provider = provider;
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
@@ -549,14 +524,15 @@ public static class ValuePipelineExtensions
     /// how numeric values are formatted in the Excel file.
     /// </summary>
     /// <typeparam name="T">The type of the property or field that the map represents.</typeparam>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="style">The number styles to use when mapping the value of a cell to a numeric type.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<T> WithNumberStyle<T>(this ValuePipeline<T> map, NumberStyles style) where T : INumberBase<T>
+    public static TMap WithNumberStyle<T, TMap>(this ValuePipeline<T, TMap> map, NumberStyles style) where T : INumberBase<T> where TMap : ValuePipeline<T, TMap>
     {
         var mapper = map.GetOrAddMapper<INumberBaseMapper<T>>();
         mapper.Style = style;
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
@@ -565,14 +541,15 @@ public static class ValuePipelineExtensions
     /// how numeric values are formatted in the Excel file.
     /// </summary>
     /// <typeparam name="T">The type of the property or field that the map represents.</typeparam>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="style">The number styles to use when mapping the value of a cell to a numeric type.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<T?> WithNumberStyle<T>(this ValuePipeline<T?> map, NumberStyles style) where T : struct, INumberBase<T>
+    public static TMap WithNumberStyle<T, TMap>(this ValuePipeline<T?, TMap> map, NumberStyles style) where T : struct, INumberBase<T> where TMap : ValuePipeline<T?, TMap>
     {
         var mapper = map.GetOrAddMapper<INumberBaseMapper<T>>();
         mapper.Style = style;
-        return map;
+        return (TMap)map;
     }
 #endif
 
@@ -580,17 +557,18 @@ public static class ValuePipelineExtensions
     /// Specifies the kind of URI to use when mapping the value of a cell to a Uri. This is useful for
     /// specifying whether URIs should be absolute, relative, or either.
     /// </summary>
+    /// <typeparam name="TUri">The type of the member: <see cref="Uri"/>.</typeparam>
     /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
     /// <param name="uriKind">The kind of URI to use when mapping the value of a cell to a Uri. Must be a valid UriKind value (Absolute, Relative, or RelativeOrAbsolute).</param>
     /// <returns>The map on which this method was invoked.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="uriKind"/> is not a valid UriKind value.</exception>
-    public static TMap WithUriKind<TMap>(this TMap map, UriKind uriKind) where TMap : ValuePipeline<Uri?>
+    public static TMap WithUriKind<TUri, TMap>(this ValuePipeline<TUri, TMap> map, UriKind uriKind) where TUri : Uri? where TMap : ValuePipeline<TUri, TMap>
     {
         EnumUtilities.ValidateIsDefined(uriKind);
         var mapper = map.GetOrAddMapper<UriMapper>();
         mapper.UriKind = uriKind;
-        return map;
+        return (TMap)map;
     }
 
     // The callers are typed overloads, so the mapper is always one for the pipeline's type.
@@ -609,173 +587,107 @@ public static class ValuePipelineExtensions
     }
 
     /// <summary>
-    /// Specifies that the value of a cell should be mapped to a value using the given delegate. This is
-    /// useful for specifying custom mapping behaviour for a property or field without having to write
-    /// an <see cref="ICellConverter{T}"/>. The delegate replaces the map's mappers, including the built-in conversion
+    /// Converts cells with <paramref name="converter"/>. The converter replaces the built-in conversion
     /// for the member's type and any earlier converter, so it is used for every cell that isn't empty.
-    /// Empty cells still use the empty fallback, and values the delegate throws for use the invalid
-    /// fallback.
+    /// Empty cells still use the empty fallback, and values the converter returns
+    /// <see cref="CellConversionResult{T}.Invalid()"/> for use the invalid fallback.
     /// </summary>
+    /// <typeparam name="T">The type of the member, element or value.</typeparam>
     /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <typeparam name="TValue">The type of the property or field that the map represents.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <param name="converter">A delegate that is invoked to map the string value of a cell to the value of a property or field.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithConverter<TMap, TValue>(
-        this TMap map,
-        Func<string?, TValue?> converter)
-        where TMap : ValuePipeline<TValue?>
-    {
-        ThrowHelpers.ThrowIfNull(converter, nameof(converter));
-
-        // An ICellConverter<T>, so that values are converted without boxing.
-        map.Mappers.Clear();
-        map.Mappers.Add(new CellConverterMapper<TValue?>(new DelegateCellConverter<TValue?>(converter)));
-        return map;
-    }
-
-    /// <summary>
-    /// Converts cells with <paramref name="converter"/>. The converter replaces the map's mappers,
-    /// including the built-in conversion for the member's type and any earlier converter, so it is
-    /// used for every cell that isn't empty. Empty cells still use the empty fallback, and values the
-    /// converter returns <see cref="CellConversionResult{T}.Invalid()"/> for use the invalid fallback.
-    /// </summary>
-    /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <typeparam name="TValue">The type of the property or field that the map represents.</typeparam>
-    /// <param name="map">The map to use.</param>
+    /// <param name="map">The map.</param>
     /// <param name="converter">The converter.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithConverter<TMap, TValue>(this TMap map, ICellConverter<TValue> converter) where TMap : ValuePipeline<TValue>
-    {
-        ThrowHelpers.ThrowIfNull(converter, nameof(converter));
-
-        map.Mappers.Clear();
-        map.Mappers.Add(new CellConverterMapper<TValue>(converter));
-        return map;
-    }
-
-    /// <summary>
-    /// Converts the cells of a nullable member with a converter for its underlying type. The converter
-    /// replaces the map's mappers, as for <see cref="WithConverter{TMap, TValue}(TMap, ICellConverter{TValue})"/>.
-    /// Empty cells still use the empty fallback, which is null by default.
-    /// </summary>
-    /// <typeparam name="TValue">The underlying type of the property or field that the map represents.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <param name="converter">The converter.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static ValuePipeline<TValue?> WithConverter<TValue>(this ValuePipeline<TValue?> map, ICellConverter<TValue> converter) where TValue : struct
+    public static TMap WithConverter<T, TMap>(this ValuePipeline<T, TMap> map, ICellConverter<T> converter) where TMap : ValuePipeline<T, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
         ThrowHelpers.ThrowIfNull(converter, nameof(converter));
 
         map.Mappers.Clear();
-        map.Mappers.Add(new CellConverterMapper<TValue?>(new NullableCellConverter<TValue>(converter)));
-        return map;
+        map.Mappers.Add(new CellConverterMapper<T>(converter));
+        return (TMap)map;
     }
 
     /// <summary>
-    /// Specifies that the map should throw an exception if the value of a cell if empty or cannot be mapped.
+    /// Converts the cells of a nullable member with a converter for its underlying type, as for
+    /// <see cref="WithConverter{T, TMap}(ValuePipeline{T, TMap}, ICellConverter{T})"/>. Empty cells
+    /// still use the empty fallback, which is null by default.
     /// </summary>
+    /// <typeparam name="T">The underlying type of the member, element or value.</typeparam>
     /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <param name="map">The map to use.</param>
+    /// <param name="map">The map.</param>
+    /// <param name="converter">The converter.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithThrowingFallback<TMap>(this TMap map) where TMap : ValuePipeline
+    public static TMap WithConverter<T, TMap>(this ValuePipeline<T?, TMap> map, ICellConverter<T> converter) where T : struct where TMap : ValuePipeline<T?, TMap>
     {
-        map.SetThrowingFallback(empty: true, invalid: true);
-        return map;
-    }
+        ThrowHelpers.ThrowIfNull(map, nameof(map));
+        ThrowHelpers.ThrowIfNull(converter, nameof(converter));
 
-    /// <summary>
-    /// Specifies a fixed fallback to be used if the value of a cell is empty or cannot be mapped.
-    /// </summary>
-    /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <param name="value">The value that will be assigned to the property or field if the value of a cell is empty or cannot be mapped.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithValueFallback<TMap>(this TMap map, object? value) where TMap : ValuePipeline
-    {
-        map.SetFixedFallback(value, empty: true, invalid: true);
-        return map;
-    }
-
-    /// <summary>
-    /// Specifies a fixed fallback to be used if the value of a cell is empty.
-    /// </summary>
-    /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell is empty.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithEmptyFallback<TMap>(this TMap map, object? fallbackValue) where TMap : ValuePipeline
-    {
-        map.SetFixedFallback(fallbackValue, empty: true, invalid: false);
-        return map;
+        map.Mappers.Clear();
+        map.Mappers.Add(new CellConverterMapper<T?>(new NullableCellConverter<T>(converter)));
+        return (TMap)map;
     }
 
     /// <summary>
     /// Gives empty cells the value <paramref name="fallback"/> returns.
     /// </summary>
+    /// <typeparam name="T">The type of the member, element or value.</typeparam>
     /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <typeparam name="TValue">The type of the property or field that the map represents.</typeparam>
-    /// <param name="map">The map to use.</param>
+    /// <param name="map">The map.</param>
     /// <param name="fallback">The fallback.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithEmptyFallback<TMap, TValue>(this TMap map, ICellFallback<TValue> fallback) where TMap : ValuePipeline<TValue>
+    public static TMap WithEmptyFallback<T, TMap>(this ValuePipeline<T, TMap> map, ICellFallback<T> fallback) where TMap : ValuePipeline<T, TMap>
     {
+        ThrowHelpers.ThrowIfNull(map, nameof(map));
         ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
         map.EmptyFallback = fallback;
-        return map;
+        return (TMap)map;
+    }
+
+    /// <summary>
+    /// Gives empty cells of a nullable member the value a fallback for its underlying type returns.
+    /// </summary>
+    /// <typeparam name="T">The underlying type of the member, element or value.</typeparam>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
+    /// <param name="map">The map.</param>
+    /// <param name="fallback">The fallback.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static TMap WithEmptyFallback<T, TMap>(this ValuePipeline<T?, TMap> map, ICellFallback<T> fallback) where T : struct where TMap : ValuePipeline<T?, TMap>
+    {
+        ThrowHelpers.ThrowIfNull(map, nameof(map));
+        ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
+        map.EmptyFallback = new NullableCellFallback<T>(fallback);
+        return (TMap)map;
     }
 
     /// <summary>
     /// Gives invalid cells the value <paramref name="fallback"/> returns.
     /// </summary>
+    /// <typeparam name="T">The type of the member, element or value.</typeparam>
     /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <typeparam name="TValue">The type of the property or field that the map represents.</typeparam>
-    /// <param name="map">The map to use.</param>
+    /// <param name="map">The map.</param>
     /// <param name="fallback">The fallback.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithInvalidFallback<TMap, TValue>(this TMap map, ICellFallback<TValue> fallback) where TMap : ValuePipeline<TValue>
+    public static TMap WithInvalidFallback<T, TMap>(this ValuePipeline<T, TMap> map, ICellFallback<T> fallback) where TMap : ValuePipeline<T, TMap>
     {
+        ThrowHelpers.ThrowIfNull(map, nameof(map));
         ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
         map.InvalidFallback = fallback;
-        return map;
+        return (TMap)map;
     }
 
     /// <summary>
-    /// Specifies that the map should throw an exception if the value of a cell is empty.
+    /// Gives invalid cells of a nullable member the value a fallback for its underlying type returns.
     /// </summary>
+    /// <typeparam name="T">The underlying type of the member, element or value.</typeparam>
     /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <param name="map">The map to use.</param>
+    /// <param name="map">The map.</param>
+    /// <param name="fallback">The fallback.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithThrowingEmptyFallback<TMap>(this TMap map) where TMap : ValuePipeline
+    public static TMap WithInvalidFallback<T, TMap>(this ValuePipeline<T?, TMap> map, ICellFallback<T> fallback) where T : struct where TMap : ValuePipeline<T?, TMap>
     {
-        map.SetThrowingFallback(empty: true, invalid: false);
-        return map;
+        ThrowHelpers.ThrowIfNull(map, nameof(map));
+        ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
+        map.InvalidFallback = new NullableCellFallback<T>(fallback);
+        return (TMap)map;
     }
-
-    /// <summary>
-    /// Specifies that the map should throw an exception if the value of a cell cannot be mapped.
-    /// </summary>
-    /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithThrowingInvalidFallback<TMap>(this TMap map) where TMap : ValuePipeline
-    {
-        map.SetThrowingFallback(empty: false, invalid: true);
-        return map;
-    }
-
-    /// <summary>
-    /// Specifies a fixed fallback to be used if the value of a cell cannot be mapped.
-    /// </summary>
-    /// <typeparam name="TMap">The type of the map.</typeparam>
-    /// <param name="map">The map to use.</param>
-    /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell cannot be mapped.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithInvalidFallback<TMap>(this TMap map, object? fallbackValue) where TMap : ValuePipeline
-    {
-        map.SetFixedFallback(fallbackValue, empty: false, invalid: true);
-        return map;
-    }
-
 }

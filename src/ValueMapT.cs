@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelDataReader;
 using ExcelMapper.Readers;
-using ExcelMapper.Fallbacks;
 
 namespace ExcelMapper;
 
@@ -12,7 +11,7 @@ namespace ExcelMapper;
 /// Maps a member to an Excel column of type T with a one-to-one relationship.
 /// </summary>
 /// <typeparam name="T">The type of the member.</typeparam>
-public class ValueMap<T> : ValuePipeline<T>, IValueMap, IBindableMap
+public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap, IBindableMap
 {
     /// <summary>
     /// Constructs a one-to-one map with the specified cell reader factory.
@@ -130,57 +129,6 @@ public class ValueMap<T> : ValuePipeline<T>, IValueMap, IBindableMap
         => parameterType == typeof(T) ? s_getArgumentMethod ??= new Func<BoundValueMember<T>, T, T>(BoundValueMember<T>.GetValueOrDefault).Method : null;
 
     private static MethodInfo? s_getArgumentMethod;
-
-    /// <summary>
-    /// Specifies a fixed fallback to be used if the value of a cell is empty or cannot be mapped.
-    /// </summary>
-    /// <param name="value">The value that will be assigned to the property or field if the value of a cell is empty or cannot be mapped.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public ValueMap<T> WithValueFallback(T? value)
-    {
-        SetFixedFallback(value, empty: true, invalid: true);
-        return this;
-    }
-
-    /// <summary>
-    /// Specifies a fixed fallback to be used if the value of a cell is empty.
-    /// </summary>
-    /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell is empty.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public ValueMap<T> WithEmptyFallback(T? fallbackValue)
-    {
-        SetFixedFallback(fallbackValue, empty: true, invalid: false);
-        return this;
-    }
-
-    /// <summary>
-    /// Specifies a fixed fallback to be used if the value of a cell cannot be mapped.
-    /// </summary>
-    /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell cannot be mapped.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public ValueMap<T> WithInvalidFallback(T? fallbackValue)
-    {
-        SetFixedFallback(fallbackValue, empty: false, invalid: true);
-        return this;
-    }
-
-    /// <summary>
-    /// Converts cells with <paramref name="converter"/>, which is given the cell's text. The delegate
-    /// replaces the built-in conversion for the member's type and any earlier converter, so it is used
-    /// for every cell that isn't empty. Empty cells still use the empty fallback, and values the
-    /// delegate throws for use the invalid fallback.
-    /// </summary>
-    /// <param name="converter">The delegate.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public ValueMap<T> WithConverter(Func<string?, T> converter)
-    {
-        ThrowHelpers.ThrowIfNull(converter, nameof(converter));
-
-        // An ICellConverter<T>, so that values are converted without boxing.
-        Mappers.Clear();
-        Mappers.Add(new Mappers.CellConverterMapper<T>(new Mappers.DelegateCellConverter<T>(converter)));
-        return this;
-    }
 
     /// <summary>
     /// Reads the member from the column with the given name, ignoring case.
