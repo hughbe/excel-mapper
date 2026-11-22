@@ -10,10 +10,10 @@ Most of the work is done once, so mapping a row does little more than read its c
 - **Once per sheet:** each member's columns are found in the heading, and the members are bound to the sheet.
 - **For each row:** each member's cells are read and converted to the member's type, without boxing, and set with a compiled setter.
 
-As a rough guide, a 10-member class read from a CSV file maps at about 1 µs per row on a modern laptop, most of it spent by ExcelDataReader reading the file. Run the benchmarks in [`benchmarks/`](../benchmarks) to measure your own scenarios:
+As a rough guide, a 10-member class read from a CSV file maps at about 1 µs per row on a modern laptop, most of it spent by ExcelDataReader reading the file. The benchmarks in [`benchmarks/`](../benchmarks) measure common scenarios, and compare them with 3.x (see its [README](../benchmarks/README.md)):
 
 ```bash
-dotnet run -c Release --project benchmarks -- --filter *ReadRows*
+dotnet run -c Release --project benchmarks -- --filter '*.Mapping.*'
 ```
 
 ## Keeping it fast

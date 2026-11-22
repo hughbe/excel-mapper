@@ -14,16 +14,33 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="../tests/Helpers.cs" />
     <Compile Include="../tests/XlsxBuilder.cs" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!-- By default, benchmark the library in src/. -->
+  <ItemGroup Condition="'$(EXCELMAPPER_VERSION)' == ''">
+    <Compile Include="../tests/Helpers.cs" />
     <ProjectReference Include="..\src\ExcelMapper.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+  <!--
+    With the environment variable EXCELMAPPER_VERSION set (for example to 3.0.3), benchmark that
+    version of the package instead, to compare versions. Only the Mapping benchmarks are built, as
+    they run on both, without the ones for 4.0 features.
+  -->
+  <PropertyGroup Condition="'$(EXCELMAPPER_VERSION)' != ''">
+    <DefineConstants>$(DefineConstants);EXCELMAPPER_3</DefineConstants>
+    <!-- Keep the builds apart, so switching between versions doesn't mix their outputs. -->
+    <BaseOutputPath>bin/$(EXCELMAPPER_VERSION)/</BaseOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(EXCELMAPPER_VERSION)' != ''">
+    <Compile Remove="**/*.cs" />
+    <Compile Include="Mapping.cs;Program.cs" />
+    <PackageReference Include="ExcelDataReader.Mapping" Version="$(EXCELMAPPER_VERSION)" />
+    <!-- The ExcelDataReader version src/ uses, so the comparison is of ExcelMapper alone. -->
+    <PackageReference Include="ExcelDataReader" Version="3.9.0" />
   </ItemGroup>
 
 </Project>

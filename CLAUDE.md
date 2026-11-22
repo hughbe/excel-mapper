@@ -6,7 +6,7 @@ Guidance for working on ExcelMapper (NuGet package `ExcelDataReader.Mapping`), a
 
 - `src/` - the library. Targets `netstandard2.0`, `netstandard2.1` and `net8.0`.
 - `tests/` - xUnit tests (`net8.0`). See [Tests](#tests). `tests/TrimmingTests` is a separate app that CI publishes trimmed and runs.
-- `benchmarks/` - BenchmarkDotNet benchmarks. See [Performance](#performance).
+- `benchmarks/` - BenchmarkDotNet benchmarks, which can also run against the 3.x package. See [Performance](#performance) and `benchmarks/README.md`.
 - `docs/` - user documentation, linked from the README's documentation index. `docs/Architecture.md` explains the map/reader/pipeline design.
 
 ## Build and test
@@ -90,7 +90,7 @@ Test helpers:
 
 Performance matters: the mapping path runs for every cell of every row. For any change to `src` that can affect it:
 
-- Compare against `main`, preferably in-process (interleaved runs, best of several, `GC.GetAllocatedBytesForCurrentThread()` for allocations) or with the `Mapping` benchmark: `cd benchmarks && dotnet run -c Release -- --filter '*Mapping*' --job short`. BenchmarkDotNet timings on Apple Silicon can vary ~2x between runs; allocations are reliable, so compare those, and repeat timings.
+- Compare against `main`, preferably in-process (interleaved runs, best of several, `GC.GetAllocatedBytesForCurrentThread()` for allocations) or with the `Mapping` benchmark: `cd benchmarks && dotnet run -c Release -- --filter '*.Mapping.*' --job short` (see `benchmarks/README.md`). BenchmarkDotNet timings on Apple Silicon can vary ~2x between runs; allocations are reliable, so compare those, and repeat timings.
 - Report the numbers in the PR description.
 
 Patterns to keep:
