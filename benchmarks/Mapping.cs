@@ -144,6 +144,34 @@ public class Mapping
         return count;
     }
 
+    public struct EmployeeStruct
+    {
+        public string Name { get; set; }
+        public int Age { get; set; }
+        public double Score { get; set; }
+        public decimal Salary { get; set; }
+        public DateTime Joined { get; set; }
+        public bool Active { get; set; }
+        public Guid Id { get; set; }
+        public Status Status { get; set; }
+        public int? Manager { get; set; }
+        public string Notes { get; set; }
+    }
+
+    [Benchmark]
+    public int AutoMappedStruct()
+    {
+        // AutoMappedClass with each row a struct.
+        using var importer = CreateImporter(_validCsv);
+        int count = 0;
+        foreach (var row in importer.ReadSheet().ReadRows<EmployeeStruct>())
+        {
+            count += row.Age;
+        }
+
+        return count;
+    }
+
     public class FluentEmployee
     {
         public string Name { get; set; } = "";

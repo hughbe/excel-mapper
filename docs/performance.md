@@ -8,7 +8,7 @@ Most of the work is done once, so mapping a row does little more than read its c
 
 - **Once per type and importer:** the class map is created (by auto-mapping, or from your `ExcelClassMap`) and registered. Compiled setters and constructors are cached for the whole process, so later importers reuse them.
 - **Once per sheet:** each member's columns are found in the heading, and the members are bound to the sheet.
-- **For each row:** each member's cells are read and converted to the member's type, without boxing, and set with a compiled setter.
+- **For each row:** each member's cells are read and converted to the member's type, without boxing, and set with a compiled setter. Rows that are structs, and nested structs, are set in place and never boxed.
 
 As a rough guide, a 10-member class read from a CSV file maps at about 1 µs per row on a modern laptop, most of it spent by ExcelDataReader reading the file. The benchmarks in [`benchmarks/`](../benchmarks) measure common scenarios, and compare them with 3.x (see its [README](../benchmarks/README.md)):
 

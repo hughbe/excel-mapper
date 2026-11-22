@@ -66,11 +66,12 @@ The columns are found once per sheet (`SheetView.FindColumn`, cached by `SheetBi
 
 ## Binding
 
-The first time a class map is used with a sheet, `SheetView.GetBoundMembers` (through its `SheetBindings`) binds each member to the sheet as a `BoundMember`, which keeps what's been worked out for that sheet. The kind of bound member depends on the map's internal interface: maps that read their own `Columns` are `IColumnsMap`s, either `IValueMap` (single values) or `ICellsMap` (collections and dictionaries).
+The first time a class map is used with a sheet, `SheetView.GetBoundMembers` (through its `SheetBindings`) binds each member of an `ExcelClassMap<T>` to the sheet as a `BoundMember<T>`, which keeps what's been worked out for that sheet. Bound members set the row through a `ref T`, with compiled `RefSetter<T, TValue>` setters, so a struct row is created and set in place and never boxed. The kind of bound member depends on the map's internal interface: maps whose value has a known type when bound are `IBindableMap`s (`ValueMap<T>` and nested class maps), and maps that read their own `Columns` are `IColumnsMap`s, either `IValueMap` (single values) or `ICellsMap` (collections and dictionaries).
 
-- `BoundValueMember<T>` (single values): keeps the member's column and a compiled `Action<object, T>` setter, so values stay typed from the pipeline to the member, without boxing.
-- `BoundCellsMember` (collections and dictionaries): keeps the cells reader. The collection is built by the map's `CollectionBuilder<T>` or `DictionaryBuilder<TKey, TValue>`, chosen once for the member's type by its `CollectionRule`/`DictionaryRule`. Builders hold no state (the collection being built is a local), so one builder serves every sheet and thread without a lock. Collections created from a copy of their elements, such as immutable and frozen ones, gather them in a list each thread reuses.
-- `BoundMapMember` (everything else, such as nested class maps, indexers and row numbers): maps through `IMap.TryGetValue`.
+- `BoundValueMember<TOwner, T>` (single values): keeps the member's column, and the value stays a `T` from the pipeline to the member, without boxing.
+- `BoundClassMember<TOwner, T>` (nested class maps): reads the nested `T` with its class map, so a nested struct isn't boxed either.
+- `BoundCellsMember<TOwner>` (collections and dictionaries): keeps the cells reader. The collection is built by the map's `CollectionBuilder<T>` or `DictionaryBuilder<TKey, TValue>`, chosen once for the member's type by its `CollectionRule`/`DictionaryRule`. Builders hold no state (the collection being built is a local), so one builder serves every sheet and thread without a lock. Collections created from a copy of their elements, such as immutable and frozen ones, gather them in a list each thread reuses.
+- `BoundMapMember<TOwner>` (everything else, such as indexers and row numbers): maps through `IMap.TryGetValue`.
 
 Bindings belong to the sheet, so a class map shared between importers or threads holds no per-sheet state.
 
@@ -78,12 +79,12 @@ A class map is frozen (`IMap.Freeze`) the first time it's used with a sheet (`Sh
 
 ### Creating objects
 
-`ExcelClassMap` decides once how to create its type, when the first row is read (a `ConstructionPlan`, in `src/Binding`):
+`ExcelClassMap<T>` decides once how to create its type, when the first row is read (a `ConstructionPlan<T>`, in `src/Binding`):
 
 - With a **parameterless constructor**, it creates the object, then sets each member.
 - Otherwise (records, and classes with read-only properties), it finds the public **constructor** whose parameters match mapped members by name and type (or have default values), reads every member first, and passes them to the constructor. Members that aren't parameters are set afterwards.
 
-`CompiledAccessors` compiles setters and constructor calls once per member or constructor, and falls back to reflection where code can't be compiled.
+`CompiledAccessors` compiles setters and constructor calls once per member or constructor, and falls back to reflection where code can't be compiled (which boxes). A row read as a single value (`ReadRows<int>()`, or `Map(p => p)`) is read by its `ValueMap<T>` as a `T`.
 
 ## The value pipeline
 
@@ -137,7 +138,7 @@ The public API of each target framework is listed in `src/PublicAPI/<framework>/
 | Path | Contents |
 |---|---|
 | `src/*.cs` | The public types (importer, sheets, regions, class maps and maps, attributes, extension points, `ValuePipeline<T>`, `ValuePipeline<T, TSelf>`, `ElementMap<T>` and the type-specific value methods in `ValuePipelineExtensions`), and the internal `ClassMapMember` and indexer maps (`IndexerMap<TKey>` and its kinds) |
-| `src/Abstractions` | The internal map interfaces (`IMap`, `IParentMap`, `IColumnsMap`, `IValueMap`, `ICellsMap`), `ICellMapper<T>`, and `ReadCellResult`, the cell a mapper converts |
+| `src/Abstractions` | The internal map interfaces (`IMap`, `IParentMap`, `IColumnsMap`, `IValueMap`, `ICellsMap`, `IBindableMap`), `ICellMapper<T>`, and `ReadCellResult`, the cell a mapper converts |
 | `src/Reading` | Reading sheets: `SheetView`, `Worksheet`, `RowSource`, `RowCursor`, `HeadingSearch` and `ReadSettings` |
 | `src/AutoMapping` | Creating maps: `AutoMapper`, `ExpressionAutoMapper`, the rules (`TypeRule`, `CollectionRule`, `DictionaryRule`), `MemberMapper` and `MemberAttributes` (a member's attributes) and `UnderlyingTypeAdapter` |
 | `src/Binding` | Binding class maps to sheets: `SheetBindings`, `BoundMember` and its kinds, `ConstructionPlan` (how a class map creates its type), `CompiledAccessors` (compiled setters and constructors) and `ConstructorUtilities` (matching constructors to members) |

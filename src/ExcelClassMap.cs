@@ -7,9 +7,10 @@ namespace ExcelMapper;
 /// <summary>
 /// Maps a row of a sheet to an object of the given type. Class maps derive from
 /// <see cref="ExcelClassMap{T}"/>, which has the methods that map members: this is its base, so
-/// that class maps of any type can be registered and looked up.
+/// that class maps of any type can be registered and looked up. Only <see cref="ExcelClassMap{T}"/>
+/// can derive from it, as it has abstract members that are internal to the library.
 /// </summary>
-public abstract class ExcelClassMap : IParentMap
+public abstract class ExcelClassMap : IParentMap, IBindableMap
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ExcelClassMap"/> class.
@@ -137,144 +138,24 @@ public abstract class ExcelClassMap : IParentMap
     /// </summary>
     public EmptyValueStrategy EmptyValueStrategy { get; private protected set; }
 
-    private ConstructionPlan? _constructionPlan;
-
     /// <inheritdoc/>
     bool IMap.TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
-        => TryGetValue(sheet, rowIndex, reader, member, errors, out result);
+        => TryGetObject(sheet, rowIndex, reader, member, errors, out result);
 
     /// <summary>
-    /// Maps a row (or for a nested object, the cells it reads) to an object. When
-    /// <paramref name="errors"/> isn't null (see <see cref="ExcelSheet.ReadRowResults{T}"/>), mapping
-    /// errors are added to it rather than thrown, and every member is still read.
+    /// Maps a row (or for a nested object, the cells it reads) to an object (see
+    /// <see cref="ExcelClassMap{T}.TryGetValue"/>).
     /// </summary>
-    internal bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
-    {
-        // If the map represents a single value, use that map to get the value.
-        if (_valueMap is not null)
-        {
-            if (errors is null)
-            {
-                return _valueMap.TryGetValue(sheet, rowIndex, reader, member, null, out result);
-            }
+    private protected abstract bool TryGetObject(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result);
 
-            try
-            {
-                return _valueMap.TryGetValue(sheet, rowIndex, reader, member, errors, out result);
-            }
-            catch (ExcelMappingException exception)
-            {
-                errors.Add(exception);
-                result = null;
-                return false;
-            }
-        }
+    /// <inheritdoc/>
+    BoundMember<TOwner> IBindableMap.Bind<TOwner>(ClassMapMember member) => Bind<TOwner>(member);
 
-        var plan = GetConstructionPlan();
-        var members = sheet.GetBoundMembers(this);
-        if (plan.Constructor is null)
-        {
-            // Create an instance of the object and populate its properties.
-            var instance = plan.CreateInstance!();
-            MapBoundMembers(members, instance, sheet, rowIndex, reader, errors);
-            result = instance;
-            return true;
-        }
+    /// <inheritdoc/>
+    MethodInfo? IBindableMap.GetArgumentMethod<TOwner>(Type parameterType) => GetArgumentMethod<TOwner>(parameterType);
 
-        return TryCreateUsingConstructor(plan, members, sheet, rowIndex, reader, errors, out result);
-    }
+    // Binds the class map to a member of another class map, as a nested object.
+    private protected abstract BoundMember<TOwner> Bind<TOwner>(ClassMapMember member);
 
-    private static void MapBoundMembers(BoundMember[] members, object instance, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
-    {
-        if (errors is null)
-        {
-            for (int i = 0; i < members.Length; i++)
-            {
-                members[i].TryMap(instance, sheet, rowIndex, reader, null);
-            }
-
-            return;
-        }
-
-        for (int i = 0; i < members.Length; i++)
-        {
-            try
-            {
-                members[i].TryMap(instance, sheet, rowIndex, reader, errors);
-            }
-            catch (ExcelMappingException exception)
-            {
-                errors.Add(exception);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Reads a member's value for the row, for a type created through a constructor (see
-    /// <see cref="BoundMember.ReadValue"/>). When errors are being collected (see
-    /// <see cref="ExcelSheet.ReadRowResults{T}"/>), a mapping error is recorded and the member has no
-    /// value, so that the remaining members are still read.
-    /// </summary>
-    private static void ReadMemberValue(BoundMember member, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
-    {
-        if (errors is null)
-        {
-            member.ReadValue(sheet, rowIndex, reader, null);
-            return;
-        }
-
-        try
-        {
-            member.ReadValue(sheet, rowIndex, reader, errors);
-        }
-        catch (ExcelMappingException exception)
-        {
-            errors.Add(exception);
-        }
-    }
-
-    private bool TryCreateUsingConstructor(ConstructionPlan plan, BoundMember[] members, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
-    {
-        var errorCount = errors?.Count ?? 0;
-
-        // Read every member first, as constructor arguments must be known before the object exists.
-        // Each member keeps its value until it's passed to the constructor or set.
-        for (int i = 0; i < members.Length; i++)
-        {
-            ReadMemberValue(members[i], sheet, rowIndex, reader, errors);
-        }
-
-        // When collecting errors, don't call the constructor with arguments that couldn't be read.
-        if (errors is not null && errors.Count > errorCount)
-        {
-            result = null;
-            return false;
-        }
-
-        object instance;
-        try
-        {
-            instance = plan.Construct(members);
-        }
-        catch (Exception ex)
-        {
-            var inner = ex is TargetInvocationException { InnerException: { } invocationInner } ? invocationInner : ex;
-            var exception = new ExcelMappingException($"Could not create an instance of type \"{Type}\": {inner.Message}", sheet, rowIndex, -1, inner);
-            if (errors is null)
-            {
-                throw exception;
-            }
-
-            errors.Add(exception);
-            result = null;
-            return false;
-        }
-
-        plan.SetOtherMembers(instance, members);
-        result = instance;
-        return true;
-    }
-
-    // Made when the first row is read, after the class map is frozen.
-    private ConstructionPlan GetConstructionPlan() => _constructionPlan ??= ConstructionPlan.Create(Type, Members);
+    private protected abstract MethodInfo? GetArgumentMethod<TOwner>(Type parameterType);
 }

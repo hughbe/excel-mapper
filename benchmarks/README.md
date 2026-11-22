@@ -16,6 +16,7 @@
 | `OptionalMissingColumn` | `AutoMappedClass` with an optional member whose column the sheet doesn't have. |
 | `AutoMapping` | One row of a new type with collection, nested, enum and nullable members: the cost of auto-mapping a type, which each importer does the first time it reads it. |
 | `AutoMappedClassWithCulture` | `AutoMappedClass` with `ExcelImporterConfiguration.Culture` set (4.0). |
+| `AutoMappedStruct` | `AutoMappedClass` with each row a struct. |
 | `AutoMappedRecord` | `AutoMappedClass` as a positional record (4.0). |
 | `RowResultsClass`, `RowResultsInvalidValues` | `ReadRowResults` on valid rows, and on rows half of which are invalid, without a fallback (4.0). |
 | `TypedConverter` | An `ICellConverter<int>` on the invalid values (4.0). |

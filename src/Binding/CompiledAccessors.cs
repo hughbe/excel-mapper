@@ -1,10 +1,17 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace ExcelMapper.Binding;
+
+/// <summary>
+/// Sets a member of <paramref name="instance"/>, which is passed by reference so that a struct is
+/// set in place rather than in a copy or a box.
+/// </summary>
+internal delegate void RefSetter<TOwner, in TValue>(ref TOwner instance, TValue value);
 
 /// <summary>
 /// Creates and caches compiled delegates that set members and call constructors, which are much
@@ -17,9 +24,9 @@ namespace ExcelMapper.Binding;
 /// </remarks>
 internal static class CompiledAccessors
 {
-    private static readonly ConcurrentDictionary<MemberInfo, MemberSetter> s_setters = new();
     private static readonly ConcurrentDictionary<ConstructorInfo, Func<object?[], object>> s_constructors = new();
     private static readonly ConcurrentDictionary<Type, Func<object>> s_parameterlessConstructors = new();
+    private static readonly ConcurrentDictionary<(MemberInfo Member, Type OwnerType, Type ValueType), Delegate> s_setters = new();
 
     private static bool CanCompile
     {
@@ -34,81 +41,60 @@ internal static class CompiledAccessors
     }
 
     /// <summary>
-    /// Gets a delegate that sets a writable property or field. A null value sets the member to its
-    /// default value, matching <see cref="PropertyInfo.SetValue(object, object)"/>.
+    /// Gets a delegate that sets a property or field of a <typeparamref name="TOwner"/> to a
+    /// <typeparamref name="TValue"/>, without boxing either: a struct is set in place, through the
+    /// reference. If <typeparamref name="TValue"/> isn't the member's type, the value is converted to
+    /// it, and null sets a value type to its default value.
     /// </summary>
-    public static MemberSetter GetSetter(MemberInfo member)
-        => s_setters.GetOrAdd(member, static m => CreateSetter(m));
+    public static RefSetter<TOwner, TValue> GetSetter<TOwner, TValue>(MemberInfo member)
+        => (RefSetter<TOwner, TValue>)s_setters.GetOrAdd((member, typeof(TOwner), typeof(TValue)), static key => CreateSetter<TOwner, TValue>(key.Member));
 
-    private static MemberSetter CreateSetter(MemberInfo member)
+    private static RefSetter<TOwner, TValue> CreateSetter<TOwner, TValue>(MemberInfo member)
     {
-        var declaringType = member.DeclaringType!;
-
-        // Setting a member of a boxed struct through an expression would modify a copy, and readonly
-        // fields can't be assigned in an expression, so use reflection for these.
-        var useReflection = !CanCompile || declaringType.IsValueType || member is FieldInfo { IsInitOnly: true };
-        if (useReflection)
-        {
-            return member switch
-            {
-                PropertyInfo reflectedProperty => reflectedProperty.SetValue,
-                FieldInfo reflectedField => reflectedField.SetValue,
-                _ => throw new ArgumentException($"Member \"{member.Name}\" is not a field or property.", nameof(member))
-            };
-        }
-
-        var instance = Expression.Parameter(typeof(object), "instance");
-        var value = Expression.Parameter(typeof(object), "value");
-        var typedInstance = Expression.Convert(instance, declaringType);
-
-        Expression body;
-        if (member is PropertyInfo property)
-        {
-            body = Expression.Call(typedInstance, property.SetMethod!, ConvertValue(value, property.PropertyType));
-        }
-        else
-        {
-            var field = (FieldInfo)member;
-            body = Expression.Assign(Expression.Field(typedInstance, field), ConvertValue(value, field.FieldType));
-        }
-
-        return Expression.Lambda<MemberSetter>(body, instance, value).Compile();
-    }
-
-    private static readonly ConcurrentDictionary<(MemberInfo Member, Type ValueType), Delegate> s_typedSetters = new();
-
-    /// <summary>
-    /// Gets a delegate that sets a writable property or field to a <typeparamref name="T"/>, without
-    /// boxing value types. <typeparamref name="T"/> is converted to the member's type as by
-    /// <see cref="GetSetter(MemberInfo)"/> if they differ.
-    /// </summary>
-    public static Action<object, T> GetSetter<T>(MemberInfo member)
-        => (Action<object, T>)s_typedSetters.GetOrAdd((member, typeof(T)), static key => CreateSetter<T>(key.Member));
-
-    private static Action<object, T> CreateSetter<T>(MemberInfo member)
-    {
-        var declaringType = member.DeclaringType!;
         var memberType = member is PropertyInfo propertyInfo ? propertyInfo.PropertyType : ((FieldInfo)member).FieldType;
 
-        // As for GetSetter, use reflection where expressions can't set the member. This boxes.
-        if (!CanCompile || declaringType.IsValueType || member is FieldInfo { IsInitOnly: true })
+        // A read-only property is only mapped when it's a constructor parameter (see
+        // ConstructionPlan<T>.Create), so it's never set.
+        Debug.Assert(member is not PropertyInfo { CanWrite: false }, $"Property \"{member.Name}\" is read-only.");
+
+        // Readonly fields can't be assigned in an expression, and code can't be compiled with
+        // native AOT: use reflection, which boxes the value, and a struct instance.
+        if (!CanCompile || member is FieldInfo { IsInitOnly: true })
         {
-            var setter = GetSetter(member);
-            return (instance, value) => setter(instance, value!);
+            return CreateReflectionSetter<TOwner, TValue>(member);
         }
 
-        var instanceParameter = Expression.Parameter(typeof(object), "instance");
-        var valueParameter = Expression.Parameter(typeof(T), "value");
-        var typedInstance = Expression.Convert(instanceParameter, declaringType);
-        Expression typedValue = typeof(T) == memberType
-            ? valueParameter
-            : ConvertValue(Expression.Convert(valueParameter, typeof(object)), memberType);
+        var instance = Expression.Parameter(typeof(TOwner).MakeByRefType(), "instance");
+        var value = Expression.Parameter(typeof(TValue), "value");
+        var declaringType = member.DeclaringType!;
+        Expression typedInstance = declaringType == typeof(TOwner) ? instance : Expression.Convert(instance, declaringType);
+        Expression typedValue = typeof(TValue) == memberType
+            ? value
+            : ConvertValue(Expression.Convert(value, typeof(object)), memberType);
 
         Expression body = member is PropertyInfo property
             ? Expression.Call(typedInstance, property.SetMethod!, typedValue)
             : Expression.Assign(Expression.Field(typedInstance, (FieldInfo)member), typedValue);
 
-        return Expression.Lambda<Action<object, T>>(body, instanceParameter, valueParameter).Compile();
+        return Expression.Lambda<RefSetter<TOwner, TValue>>(body, instance, value).Compile();
+    }
+
+    private static RefSetter<TOwner, TValue> CreateReflectionSetter<TOwner, TValue>(MemberInfo member)
+    {
+        Action<object?, object?> setValue = member is PropertyInfo property ? property.SetValue : ((FieldInfo)member).SetValue;
+
+        if (typeof(TOwner).IsValueType)
+        {
+            // Set the struct in a box, then copy it back.
+            return (ref TOwner instance, TValue value) =>
+            {
+                object boxed = instance!;
+                setValue(boxed, value);
+                instance = (TOwner)boxed;
+            };
+        }
+
+        return (ref TOwner instance, TValue value) => setValue(instance, value);
     }
 
     /// <summary>
@@ -196,19 +182,24 @@ internal static class CompiledAccessors
         return Expression.Lambda<Func<object?[], object>>(body, arguments).Compile();
     }
 
-    private static readonly ConcurrentDictionary<BoundConstructorKey, Func<BoundMember[], object>> s_boundConstructors = new();
+    // The compiled constructors of each type, by the arguments they take from bound members.
+    private static class BoundConstructors<TOwner>
+    {
+        public static readonly ConcurrentDictionary<BoundConstructorKey, Func<BoundMember<TOwner>[], TOwner>> Cache = new();
 
-    private static readonly MethodInfo s_getValueOrDefault = new Func<BoundMember, object?, object?>(BoundMember.GetValueOrDefault).Method;
+        public static readonly MethodInfo GetValueOrDefault = new Func<BoundMember<TOwner>, object?, object?>(BoundMember<TOwner>.GetValueOrDefault).Method;
+    }
 
     /// <summary>
-    /// Gets a delegate that calls a constructor with the values bound members read for the row (see
-    /// <see cref="BoundMember.ReadValue"/>), without an argument array, and without boxing the
-    /// values of members that keep them typed. Returns null where code can't be compiled.
+    /// Gets a delegate that calls a constructor of <typeparamref name="TOwner"/> with the values
+    /// bound members read for the row (see <see cref="BoundMember{TOwner}.ReadValue"/>), without an
+    /// argument array, without boxing the values of members that keep them typed, and without
+    /// boxing the instance. Returns null where code can't be compiled.
     /// </summary>
     /// <param name="constructor">The constructor to call.</param>
     /// <param name="arguments">For each parameter, the member whose value it takes, if any, and its
     /// default value for when there is no value.</param>
-    public static Func<BoundMember[], object>? GetConstructor(ConstructorInfo constructor, BoundConstructorArgument[] arguments)
+    public static Func<BoundMember<TOwner>[], TOwner>? GetConstructor<TOwner>(ConstructorInfo constructor, BoundConstructorArgument[] arguments)
     {
         if (!CanCompile)
         {
@@ -216,17 +207,18 @@ internal static class CompiledAccessors
         }
 
         var key = new BoundConstructorKey(constructor, arguments);
-        if (!s_boundConstructors.TryGetValue(key, out var result))
+        var cache = BoundConstructors<TOwner>.Cache;
+        if (!cache.TryGetValue(key, out var result))
         {
-            result = s_boundConstructors.GetOrAdd(key, CreateConstructor(constructor, arguments));
+            result = cache.GetOrAdd(key, CreateConstructor<TOwner>(constructor, arguments));
         }
 
         return result;
     }
 
-    private static Func<BoundMember[], object> CreateConstructor(ConstructorInfo constructor, BoundConstructorArgument[] arguments)
+    private static Func<BoundMember<TOwner>[], TOwner> CreateConstructor<TOwner>(ConstructorInfo constructor, BoundConstructorArgument[] arguments)
     {
-        var members = Expression.Parameter(typeof(BoundMember[]), "members");
+        var members = Expression.Parameter(typeof(BoundMember<TOwner>[]), "members");
         var parameters = constructor.GetParameters();
         var argumentExpressions = new Expression[parameters.Length];
         var variables = new List<ParameterExpression>();
@@ -255,14 +247,21 @@ internal static class CompiledAccessors
                 var value = Expression.Variable(typeof(object));
                 variables.Add(value);
                 argumentExpressions[i] = Expression.Block(
-                    Expression.Assign(value, Expression.Call(s_getValueOrDefault, member, defaultValue)),
+                    Expression.Assign(value, Expression.Call(BoundConstructors<TOwner>.GetValueOrDefault, member, defaultValue)),
                     ConvertValue(value, parameterType));
             }
         }
 
-        var body = Expression.Block(variables, Expression.Convert(Expression.New(constructor, argumentExpressions), typeof(object)));
-        return Expression.Lambda<Func<BoundMember[], object>>(body, members).Compile();
+        var body = Expression.New(constructor, argumentExpressions);
+        return Expression.Lambda<Func<BoundMember<TOwner>[], TOwner>>(Expression.Block(variables, body), members).Compile();
     }
+
+    /// <summary>
+    /// Gets a delegate that creates a <typeparamref name="T"/>, a struct or a class with a public
+    /// parameterless constructor, without boxing it.
+    /// </summary>
+    public static Func<T> GetParameterlessConstructor<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>()
+        => CanCompile ? Expression.Lambda<Func<T>>(Expression.New(typeof(T))).Compile() : Activator.CreateInstance<T>;
 
     /// <summary>
     /// Gets a delegate that creates an instance of a type with a public parameterless constructor, or
@@ -308,13 +307,13 @@ internal static class CompiledAccessors
 }
 
 /// <summary>
-/// How a constructor compiled by <see cref="CompiledAccessors.GetConstructor(ConstructorInfo, BoundConstructorArgument[])"/>
+/// How a constructor compiled by <see cref="CompiledAccessors.GetConstructor{TOwner}(ConstructorInfo, BoundConstructorArgument[])"/>
 /// gets a parameter's value.
 /// </summary>
 /// <param name="memberIndex">The index of the bound member whose value the parameter takes, or -1
 /// to always pass <paramref name="defaultValue"/>.</param>
 /// <param name="typedMethod">The method that returns the member's value without boxing (see
-/// <see cref="IValueMap.GetArgumentMethod"/>), or null to read it as an object.</param>
+/// <see cref="IBindableMap.GetArgumentMethod{TOwner}(Type)"/>), or null to read it as an object.</param>
 /// <param name="defaultValue">The value passed when the member has no value. Null passes the
 /// parameter type's default value.</param>
 internal readonly struct BoundConstructorArgument(int memberIndex, MethodInfo? typedMethod, object? defaultValue)

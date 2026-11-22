@@ -132,11 +132,6 @@ public class ExcelImporterConfiguration
     public void RegisterClassMap(ExcelClassMap classMap)
     {
         ThrowHelpers.ThrowIfNull(classMap, nameof(classMap));
-        if (!IsGenericClassMap(classMap.GetType()))
-        {
-            throw new ArgumentException($"Class map \"{classMap.GetType()}\" must derive from ExcelClassMap<T>, which maps members.", nameof(classMap));
-        }
-
         ValidateMap(classMap);
 
         var classType = classMap.Type;
@@ -199,21 +194,6 @@ public class ExcelImporterConfiguration
         }
 
         return classMaps;
-    }
-
-    // A class map that derives from ExcelClassMap directly, rather than ExcelClassMap<T>, can't
-    // map any members.
-    private static bool IsGenericClassMap(Type type)
-    {
-        for (var current = type; current is not null; current = current.BaseType)
-        {
-            if (current.IsGenericType && current.GetGenericTypeDefinition() == typeof(ExcelClassMap<>))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private static void ValidateMap(IMap map)

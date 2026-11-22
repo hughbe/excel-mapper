@@ -95,13 +95,11 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
 
 
     /// <inheritdoc/>
-    BoundMember IValueMap.Bind(ClassMapMember member) => new BoundValueMember<T>(this, member);
+    BoundMember<TOwner> IBindableMap.Bind<TOwner>(ClassMapMember member) => new BoundValueMember<TOwner, T>(this, member);
 
     /// <inheritdoc/>
-    MethodInfo? IValueMap.GetArgumentMethod(Type parameterType)
-        => parameterType == typeof(T) ? s_getArgumentMethod ??= new Func<BoundValueMember<T>, T, T>(BoundValueMember<T>.GetValueOrDefault).Method : null;
-
-    private static MethodInfo? s_getArgumentMethod;
+    MethodInfo? IBindableMap.GetArgumentMethod<TOwner>(Type parameterType)
+        => parameterType == typeof(T) ? new Func<BoundMember<TOwner, T>, T, T>(BoundMember<TOwner, T>.GetValueOrDefault).Method : null;
 
     /// <summary>
     /// Reads the member from the column with the given name, ignoring case.
