@@ -415,6 +415,28 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
         => ExpressionAutoMapper.GetOrCreateDictionaryMap<T, string, object>(this, expression.Body);
 
     /// <summary>
+    /// Maps every member that auto-mapping would, from its type and attributes, except members this
+    /// class map already maps. Members mapped afterwards with <c>Map(...)</c> replace the
+    /// auto-mapped ones, so a class map can start from auto-mapping and change only what's different:
+    /// <code>
+    /// importer.Configuration.RegisterClassMap&lt;Employee&gt;(c =&gt;
+    /// {
+    ///     c.AutoMap();
+    ///     c.Map(e =&gt; e.Name).WithColumnName("Full Name");
+    /// });
+    /// </code>
+    /// </summary>
+    /// <returns>The class map.</returns>
+    /// <exception cref="ExcelMappingException"><typeparamref name="T"/>, or a member's type, can't be auto-mapped.</exception>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public ExcelClassMap<T> AutoMap()
+    {
+        AutoMapper.AutoMap(this);
+        return this;
+    }
+
+    /// <summary>
     /// Configures the existing class map used to map multiple cells in a row to the properties and fields
     /// of a an object.
     /// </summary>

@@ -71,7 +71,17 @@ importer.Configuration.RegisterClassMap<Employee>(c =>
 });
 ```
 
-A class map reads only the members it maps, and attributes on those members still apply. Each fluent method returns the map, so calls chain in any order. Every method and attribute is listed in the [API reference](api.md).
+A class map reads only the members it maps, and attributes on those members still apply. To start from what auto-mapping would map and change only some members, call `AutoMap()` first: members mapped after it replace the auto-mapped ones.
+
+```csharp
+importer.Configuration.RegisterClassMap<Employee>(c =>
+{
+    c.AutoMap();
+    c.Map(e => e.Name).WithColumnName("Full Name");
+});
+```
+
+Each fluent method returns the map, so calls chain in any order. Every method and attribute is listed in the [API reference](api.md).
 
 ## Records and constructors
 

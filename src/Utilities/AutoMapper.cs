@@ -202,28 +202,10 @@ internal static class AutoMapper
         try
         {
             var map = new ExcelClassMap<T>(emptyValueStrategy);
-            
-            // Process properties
-            foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            if (!TryAddMembers(map, emptyValueStrategy, typeStack))
             {
-                if (!ShouldAutoMapProperty(type, property))
-                {
-                    continue;
-                }
-
-                if (!TryAutoMapAndAddMember(property, property.PropertyType, map, emptyValueStrategy, typeStack, out classMap))
-                {
-                    return false;
-                }
-            }
-
-            // Process fields
-            foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
-            {
-                if (!TryAutoMapAndAddMember(field, field.FieldType, map, emptyValueStrategy, typeStack, out classMap))
-                {
-                    return false;
-                }
+                classMap = null;
+                return false;
             }
 
             classMap = map;
@@ -234,6 +216,74 @@ internal static class AutoMapper
             // Remove the type from the stack as we exit
             typeStack.Remove(type);
         }
+    }
+
+    /// <summary>
+    /// Adds a map for each public property and field of <typeparamref name="T"/> that
+    /// <paramref name="map"/> doesn't map yet.
+    /// </summary>
+    private static bool TryAddMembers<T>(ExcelClassMap<T> map, EmptyValueStrategy emptyValueStrategy, HashSet<Type> typeStack)
+    {
+        var type = typeof(T);
+        foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (ShouldAutoMapProperty(type, property) && !IsMapped(map, property) &&
+                !TryAutoMapAndAddMember(property, property.PropertyType, map, emptyValueStrategy, typeStack, out _))
+            {
+                return false;
+            }
+        }
+
+        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (!IsMapped(map, field) &&
+                !TryAutoMapAndAddMember(field, field.FieldType, map, emptyValueStrategy, typeStack, out _))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool IsMapped(ExcelClassMap map, MemberInfo member)
+    {
+        // An indexed loop: enumerating the collection through its interface allocates.
+        var properties = map.Properties;
+        for (int i = 0; i < properties.Count; i++)
+        {
+            if (properties[i].Member.Equals(member))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Adds what auto-mapping would map to <paramref name="classMap"/>: the members it doesn't map
+    /// yet or, for a type read from a row as a single value or collection (such as a string or a
+    /// dictionary of the row's columns), that map. See <see cref="ExcelClassMap{T}.AutoMap"/>.
+    /// </summary>
+    internal static void AutoMap<T>(ExcelClassMap<T> classMap)
+    {
+        var emptyValueStrategy = classMap.EmptyValueStrategy;
+        if (!TryCreateMap<T>(null, s_zeroColumnIndexReaderFactory, s_allColumnNamesReaderFactory, emptyValueStrategy, isAutoMapping: true, typeStack: null, out var map))
+        {
+            throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\".");
+        }
+
+        if (map is not ExcelClassMap<T>)
+        {
+            classMap._valueMap ??= map;
+            return;
+        }
+
+        // Add the members to the class map itself, rather than copying them from the map
+        // created above, as maps such as extra columns refer to the class map they're in. Every
+        // member was auto-mapped above, so this can't fail.
+        TryAddMembers(classMap, emptyValueStrategy, [typeof(T)]);
     }
 
     private static bool TryAutoMapAndAddMember<T>(

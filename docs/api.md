@@ -47,7 +47,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 
 **`ExcelImporterConfiguration`** - An importer's settings and class maps.
 - `RegisterClassMap<TMap>()` / `RegisterClassMap(classMap)` / `RegisterClassMap(type, classMap)` - Use a class map for a type. Replaces a map created earlier by auto-mapping; throws if you already registered one
-- `RegisterClassMap<T>(c => ...)` - Configure a class map for `T` inline. It starts empty: only the members you map are read
+- `RegisterClassMap<T>(c => ...)` - Configure a class map for `T` inline. It starts empty: only the members you map are read, unless you call `c.AutoMap()`
 - `TryGetClassMap<T>(out classMap)` / `TryGetClassMap(type, out classMap)` - The class map registered for a type, including one created by auto-mapping
 - `Culture` - The culture to parse text and format values with (default: the current culture)
 - `SkipBlankLines` - Skip empty rows (default: false)
@@ -81,6 +81,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 - `MapList<TElement>(p => p.Items)` - A non-generic collection, such as `ArrayList`
 - `MapDictionary<TValue>(p => p.Values)` - A dictionary member whose type the `Map` overloads don't cover, with values of type `TValue`
 - `MapObject<TElement>(p => p.Address)` - A nested object, mapped from the same row; returns its class map
+- `AutoMap()` - Map every member auto-mapping would, from its type and attributes, except members already mapped; members mapped afterwards replace the auto-mapped ones
 - `MapRowNumber(p => p.Row)` - A numeric member set to the row's number, as Excel shows it
 - `MapExtraColumns(p => p.Other)` - A dictionary of the columns no other member reads
 - `WithClassMap(classMap)` / `WithClassMap(c => ...)` - On a nested object's class map (from `MapObject`), use another class map or configure this one: `MapObject(p => p.Address).WithClassMap(c => c.Map(a => a.City))`
