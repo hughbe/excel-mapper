@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Reflection;
 
@@ -92,5 +93,25 @@ internal static class MemberAttributes
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Creates the object an attribute gives the type of, such as the converter of an
+    /// <see cref="ExcelConverterAttribute"/>, with the attribute's constructor arguments. If it
+    /// can't be created, the <see cref="ExcelMappingException"/> names the type, the attribute and
+    /// the member.
+    /// </summary>
+    public static object CreateInstance([DynamicallyAccessedMembers(TrimmingConstants.ActivatedType)] Type type, object?[]? arguments, string attributeName, MemberInfo member)
+    {
+        try
+        {
+            return Activator.CreateInstance(type, arguments)!;
+        }
+        catch (Exception exception) when (exception is MissingMethodException or AmbiguousMatchException or MemberAccessException or TargetInvocationException)
+        {
+            // A constructor that throws is reported as its own exception.
+            var reason = exception is TargetInvocationException { InnerException: { } inner } ? inner : exception;
+            throw new ExcelMappingException($"Can't create \"{type}\" given by {attributeName} on member \"{member.Name}\": {reason.Message}", reason);
+        }
     }
 }

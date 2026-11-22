@@ -45,7 +45,7 @@ internal static class MemberMapper
         var columnMatchingAttribute = MemberAttributes.Get<ExcelColumnMatchingAttribute>(member);
         if (columnMatchingAttribute != null)
         {
-            return CreateMatchingColumns(columnMatchingAttribute.Type, columnMatchingAttribute.ConstructorArguments);
+            return CreateMatchingColumns(columnMatchingAttribute.Type, columnMatchingAttribute.ConstructorArguments, nameof(ExcelColumnMatchingAttribute), member);
         }
 
         var columnIndexAttributes = MemberAttributes.GetMany<ExcelColumnIndexAttribute>(member);
@@ -123,7 +123,7 @@ internal static class MemberMapper
         var columnsMatchingAttribute = MemberAttributes.Get<ExcelColumnsMatchingAttribute>(member);
         if (columnsMatchingAttribute != null)
         {
-            return CreateMatchingColumns(columnsMatchingAttribute.Type, columnsMatchingAttribute.ConstructorArguments);
+            return CreateMatchingColumns(columnsMatchingAttribute.Type, columnsMatchingAttribute.ConstructorArguments, nameof(ExcelColumnsMatchingAttribute), member);
         }
 
         var columnIndicesAttribute = MemberAttributes.Get<ExcelColumnIndicesAttribute>(member);
@@ -137,8 +137,8 @@ internal static class MemberMapper
 
     // The type of [ExcelColumnMatching] and [ExcelColumnsMatching] is an IColumnSelector, or for a
     // pattern, RegexColumnMatcher.
-    private static Columns CreateMatchingColumns([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, object?[]? arguments)
-        => Activator.CreateInstance(type, arguments) switch
+    private static Columns CreateMatchingColumns([DynamicallyAccessedMembers(TrimmingConstants.ActivatedType)] Type type, object?[]? arguments, string attributeName, MemberInfo member)
+        => MemberAttributes.CreateInstance(type, arguments, attributeName, member) switch
         {
             RegexColumnMatcher regexMatcher => new MatchingColumns(regexMatcher.Regex),
             var selector => new SelectorColumns((IColumnSelector)selector!),
@@ -155,7 +155,7 @@ internal static class MemberMapper
         // If the member has ExcelConverter attributes, add their converters.
         foreach (var converterAttribute in MemberAttributes.GetMany<ExcelConverterAttribute>(member))
         {
-            var converter = Activator.CreateInstance(converterAttribute.Type, converterAttribute.ConstructorArguments)!;
+            var converter = MemberAttributes.CreateInstance(converterAttribute.Type, converterAttribute.ConstructorArguments, nameof(ExcelConverterAttribute), member);
             if (CreateConverterMapper<T>(converter, member) is { } converterMapper)
             {
                 hasMapperAttributes = true;
@@ -231,21 +231,11 @@ internal static class MemberMapper
     /// </summary>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-#if NET5_0_OR_GREATER
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(NullableCellConverter<>))]
-#endif
     private static ICellMapper<T>? CreateConverterMapper<T>(object converter, MemberInfo member)
     {
-        if (converter is ICellConverter<T> typedConverter)
+        if ((converter as ICellConverter<T> ?? TypeRule<T>.Instance.NullableAdapter?.AdaptConverter(converter)) is { } typedConverter)
         {
             return new CellConverterMapper<T>(typedConverter);
-        }
-
-        if (Nullable.GetUnderlyingType(typeof(T)) is { } underlyingType &&
-            typeof(ICellConverter<>).MakeGenericType(underlyingType).IsInstanceOfType(converter))
-        {
-            var nullableConverter = (ICellConverter<T>)Activator.CreateInstance(typeof(NullableCellConverter<>).MakeGenericType(underlyingType), converter)!;
-            return new CellConverterMapper<T>(nullableConverter);
         }
 
         if (typeof(T) != typeof(string) && typeof(System.Collections.IEnumerable).IsAssignableFrom(typeof(T)))
@@ -299,7 +289,7 @@ internal static class MemberMapper
         // If the member has a ExcelEmptyFallback attribute, add the fallback.
         if (MemberAttributes.Get<ExcelEmptyFallbackAttribute>(member) is { } emptyFallback)
         {
-            return CreateFallback<T>(Activator.CreateInstance(emptyFallback.Type, emptyFallback.ConstructorArguments)!, member, nameof(ExcelEmptyFallbackAttribute));
+            return CreateFallback<T>(MemberAttributes.CreateInstance(emptyFallback.Type, emptyFallback.ConstructorArguments, nameof(ExcelEmptyFallbackAttribute), member), member, nameof(ExcelEmptyFallbackAttribute));
         }
 
         return null;
@@ -318,7 +308,7 @@ internal static class MemberMapper
         // If the member has a ExcelInvalidFallback attribute, add the fallback.
         if (MemberAttributes.Get<ExcelInvalidFallbackAttribute>(member) is { } invalidFallback)
         {
-            return CreateFallback<T>(Activator.CreateInstance(invalidFallback.Type, invalidFallback.ConstructorArguments)!, member, nameof(ExcelInvalidFallbackAttribute));
+            return CreateFallback<T>(MemberAttributes.CreateInstance(invalidFallback.Type, invalidFallback.ConstructorArguments, nameof(ExcelInvalidFallbackAttribute), member), member, nameof(ExcelInvalidFallbackAttribute));
         }
 
         return null;
@@ -330,20 +320,11 @@ internal static class MemberMapper
     /// </summary>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-#if NET5_0_OR_GREATER
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(NullableCellFallback<>))]
-#endif
     private static ICellFallback<T> CreateFallback<T>(object fallback, MemberInfo member, string attributeName)
     {
-        if (fallback is ICellFallback<T> typedFallback)
+        if ((fallback as ICellFallback<T> ?? TypeRule<T>.Instance.NullableAdapter?.AdaptFallback(fallback)) is { } typedFallback)
         {
             return typedFallback;
-        }
-
-        if (Nullable.GetUnderlyingType(typeof(T)) is { } underlyingType &&
-            typeof(ICellFallback<>).MakeGenericType(underlyingType).IsInstanceOfType(fallback))
-        {
-            return (ICellFallback<T>)Activator.CreateInstance(typeof(NullableCellFallback<>).MakeGenericType(underlyingType), fallback)!;
         }
 
         throw new ExcelMappingException($"The fallback \"{fallback.GetType()}\" given by {attributeName} on member \"{member.Name}\" doesn't implement ICellFallback<{typeof(T)}>.");
@@ -362,7 +343,7 @@ internal static class MemberMapper
         {
             foreach (var transformAttribute in transformAttributes)
             {
-                var transformer = Activator.CreateInstance(transformAttribute.Type, transformAttribute.ConstructorArguments)!;
+                var transformer = MemberAttributes.CreateInstance(transformAttribute.Type, transformAttribute.ConstructorArguments, nameof(ExcelTransformerAttribute), member);
                 pipeline.Transformers.Add((ICellTransformer)transformer);
             }
         }

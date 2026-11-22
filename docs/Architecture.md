@@ -106,7 +106,7 @@ Every stage is typed, so values are converted as `T` from the cell to the member
 
 The pipeline creates one `CellContext` for each cell and gives it to every transformer, mapper and fallback.
 
-`NullableCellConverter<T>` and `NullableCellFallback<T>` let a converter or fallback for `T` serve a `T?` member. The first time a pipeline maps a value, it takes a snapshot of its stages as arrays (taken again if the pipeline changes), so mapping a cell doesn't enumerate lists through interfaces.
+`NullableCellConverter<T>` and `NullableCellFallback<T>` let a converter or fallback for `T` serve a `T?` member. For one given by an attribute, `TypeRule<T>.NullableAdapter` (an `UnderlyingTypeAdapter<T>`, made once per nullable type) wraps it, so a member's attributes are applied without reflection. The objects attributes give the type of are created by `MemberAttributes.CreateInstance`, which reports a type that can't be created with an `ExcelMappingException` naming the attribute and member. When a pipeline is frozen, it takes a snapshot of its stages as arrays, so mapping a cell doesn't enumerate lists through interfaces.
 
 | Member type | Built-in mapper (in `src/Mappers`) |
 |---|---|

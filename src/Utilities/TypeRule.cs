@@ -66,6 +66,23 @@ internal sealed class TypeRule<T> : TypeRule
 
     public static TypeRule<T> Instance => s_instance ??= (TypeRule<T>)For(typeof(T));
 
+    /// <summary>
+    /// Gets the adapter for converters and fallbacks of the underlying type of a nullable
+    /// <typeparamref name="T"/> (see <see cref="UnderlyingTypeAdapter{T}"/>), or null if
+    /// <typeparamref name="T"/> isn't nullable.
+    /// </summary>
+    public UnderlyingTypeAdapter<T>? NullableAdapter => s_nullableAdapter;
+
+#if NET5_0_OR_GREATER
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(NullableAdapter<>))]
+#endif
+    private static UnderlyingTypeAdapter<T>? CreateNullableAdapter()
+        => Nullable.GetUnderlyingType(typeof(T)) is { } underlyingType
+            ? (UnderlyingTypeAdapter<T>)Activator.CreateInstance(typeof(NullableAdapter<>).MakeGenericType(underlyingType))!
+            : null;
+
+    private static readonly UnderlyingTypeAdapter<T>? s_nullableAdapter = CreateNullableAdapter();
+
     // Each is found when it's first needed: null until then, and a sentinel if there's none.
     private CollectionRule? _collection;
     private DictionaryRule? _dictionary;
