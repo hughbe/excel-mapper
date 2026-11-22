@@ -37,7 +37,7 @@ public class EmptyValueStrategyTests
 
     public class EmptyValueStrategyMap : ExcelClassMap<EmptyValues>
     {
-        public EmptyValueStrategyMap() : base(FallbackStrategy.SetToDefaultValue)
+        public EmptyValueStrategyMap() : base(EmptyValueStrategy.DefaultValue)
         {
             Map(e => e.IntValue);
             Map(e => e.StringValue);

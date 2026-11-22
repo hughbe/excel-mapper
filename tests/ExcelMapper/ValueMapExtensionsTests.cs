@@ -1,6 +1,6 @@
 namespace ExcelMapper.Tests;
 
-public class OneToOneMapExtensionsTests : ExcelClassMap<OneToOneMapExtensionsTests.Row>
+public class ValueMapExtensionsTests : ExcelClassMap<ValueMapExtensionsTests.Row>
 {
     public class Row
     {
@@ -24,7 +24,7 @@ public class OneToOneMapExtensionsTests : ExcelClassMap<OneToOneMapExtensionsTes
     public void NullableMethods_NullArguments_ThrowArgumentNullException()
     {
         var map = Map(r => r.NullableNumber);
-        Assert.Throws<ArgumentNullException>("converter", () => map.WithConverter((ConvertUsingSimpleMapperDelegate<int?>)null!));
+        Assert.Throws<ArgumentNullException>("converter", () => map.WithConverter((Func<string?, int?>)null!));
         Assert.Throws<ArgumentNullException>("converter", () => map.WithConverter((ICellConverter<int>)null!));
         Assert.Throws<ArgumentNullException>("fallback", () => map.WithEmptyFallback((ICellFallback<int>)null!));
         Assert.Throws<ArgumentNullException>("fallback", () => map.WithInvalidFallback((ICellFallback<int>)null!));

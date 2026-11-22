@@ -84,9 +84,9 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 - `MapRowNumber(p => p.Row)` - A numeric member set to the row's number, as Excel shows it
 - `MapExtraColumns(p => p.Other)` - A dictionary of the columns no other member reads
 - `WithClassMap(classMap)` / `WithClassMap(c => ...)` - On a nested object's class map (from `MapObject`), use another class map or configure this one: `MapObject(p => p.Address).WithClassMap(c => c.Map(a => a.City))`
-- `new ExcelClassMap<T>(FallbackStrategy.SetToDefaultValue)` - Give empty cells the type's default value instead of an error
+- `new ExcelClassMap<T>(EmptyValueStrategy.DefaultValue)` - Give empty cells the type's default value instead of an error
 
-### Single values (`OneToOneMap<T>`)
+### Single values (`ValueMap<T>`)
 
 Columns:
 - `.WithColumnName("Name")` / `.WithColumnName("Name", StringComparison.Ordinal)` - A column by name (ignoring case by default)
@@ -115,7 +115,7 @@ Fallbacks:
 
 For a nullable member (`int?`), converters and fallbacks can be for the underlying type: `WithConverter(ICellConverter<int>)`, `WithEmptyFallback(ICellFallback<int>)`.
 
-### Collections (`ManyToOneEnumerableMap<TElement>`) and dictionaries (`ManyToOneDictionaryMap<TKey, TValue>`)
+### Collections (`CollectionMap<TElement>`) and dictionaries (`DictionaryMap<TKey, TValue>`)
 
 - `.WithColumnNames("A", "B")` / `.WithColumnIndices(0, 1)` - Read these columns
 - `.WithColumnsMatching(predicate)` / `.WithColumnsMatching(regex)` - Read every matching column
@@ -148,10 +148,10 @@ For a nullable member (`int?`), converters and fallbacks can be for the underlyi
 | `[ExcelFormats("yyyy-MM-dd", ...)]` | Date, time and duration formats |
 | `[ExcelNumberStyle(NumberStyles.Currency)]` | How numbers are parsed |
 | `[ExcelOffset("+01:00")]` | The offset of `DateTimeOffset` values |
-| `[ExcelUri(UriKind.Relative)]` | Which URIs are valid: `Absolute` (the default), `Relative` or `RelativeOrAbsolute` |
+| `[ExcelUriKind(UriKind.Relative)]` | Which URIs are valid: `Absolute` (the default), `Relative` or `RelativeOrAbsolute` |
 | `[ExcelMappingDictionary("text", value)]` | Map fixed text to a value (repeat for each value) |
 | `[ExcelMappingDictionaryComparer(StringComparison.OrdinalIgnoreCase)]` | How the text is compared |
-| `[ExcelMappingDictionaryBehavior(MappingDictionaryMapperBehavior.Required)]` | Whether text that isn't in the dictionary is invalid |
+| `[ExcelMappingDictionaryBehavior(MappingDictionaryBehavior.Required)]` | Whether text that isn't in the dictionary is invalid |
 
 Attributes that take a type (`[ExcelConverter]`, `[ExcelTransformer]`, the fallbacks and the column selectors) also take `ConstructorArguments`.
 

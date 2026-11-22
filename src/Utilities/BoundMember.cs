@@ -191,12 +191,12 @@ internal sealed class BoundCellsMember(ICellsMap map, ExcelPropertyMap property)
 }
 
 /// <summary>
-/// A <see cref="OneToOneMap{T}"/> bound to a member: the value stays a <typeparamref name="T"/>
+/// A <see cref="ValueMap{T}"/> bound to a member: the value stays a <typeparamref name="T"/>
 /// from the map to the member's setter.
 /// </summary>
-internal sealed class BoundOneToOneMember<T> : BoundMember
+internal sealed class BoundValueMember<T> : BoundMember
 {
-    private readonly OneToOneMap<T> _map;
+    private readonly ValueMap<T> _map;
     private readonly MemberInfo _member;
     // Created on first use: members passed to a constructor (such as get-only properties) are
     // never set.
@@ -210,7 +210,7 @@ internal sealed class BoundOneToOneMember<T> : BoundMember
     // The column, if the reader is a plain column reader: the cell is then read directly.
     private int _columnIndex = -1;
 
-    public BoundOneToOneMember(OneToOneMap<T> map, ExcelPropertyMap property, ExcelSheet sheet)
+    public BoundValueMember(ValueMap<T> map, ExcelPropertyMap property, ExcelSheet sheet)
     {
         _map = map;
         _member = property.Member;
@@ -270,6 +270,6 @@ internal sealed class BoundOneToOneMember<T> : BoundMember
     /// Returns the value read by <see cref="BoundMember.ReadValue"/>, or <paramref name="defaultValue"/>,
     /// without boxing. Called by compiled constructors.
     /// </summary>
-    public static T GetValueOrDefault(BoundOneToOneMember<T> member, T defaultValue)
+    public static T GetValueOrDefault(BoundValueMember<T> member, T defaultValue)
         => member.HasValue ? member._value : defaultValue;
 }

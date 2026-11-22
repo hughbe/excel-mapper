@@ -12,13 +12,13 @@ namespace ExcelMapper;
 /// Reads multiple cells of an excel sheet and maps the value of the cell to the
 /// type of the property or field.
 /// </summary>
-public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
+public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
 {
     /// <summary>
     /// Constructs a map that reads one or more values from one or more cells and maps these values to one
     /// property and field of the type of the property or field.
     /// </summary>
-    internal ManyToOneEnumerableMap(ICellsReaderFactory readerFactory, IEnumerableFactory<TElement> enumerableFactory)
+    internal CollectionMap(ICellsReaderFactory readerFactory, IEnumerableFactory<TElement> enumerableFactory)
     {
         ThrowHelpers.ThrowIfNull(readerFactory, nameof(readerFactory));
         ThrowHelpers.ThrowIfNull(enumerableFactory, nameof(enumerableFactory));
@@ -158,7 +158,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// <param name="elementMap">The pipeline that maps the value of a single cell to an object of the element type of the property
     /// or field.</param>
     /// <returns>The map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithElementMap(Func<ValuePipeline<TElement>, ValuePipeline<TElement>> elementMap)
+    public CollectionMap<TElement> WithElementMap(Func<ValuePipeline<TElement>, ValuePipeline<TElement>> elementMap)
     {
         ThrowHelpers.ThrowIfNull(elementMap, nameof(elementMap));
 
@@ -175,7 +175,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// <param name="columnName">The name of the column containing the cell to split.</param>
     /// <param name="comparison">The string comparison to use when matching the column name.</param>
     /// <returns>The map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumnName(string columnName, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+    public CollectionMap<TElement> WithColumnName(string columnName, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
     {
         var columnReader = new ColumnNameReaderFactory(columnName, comparison);
         if (ReaderFactory is SplitReaderFactory splitColumnReader)
@@ -196,7 +196,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// </summary>
     /// <param name="columnIndex">The zero-bassed index of the column containing the cell to split.</param>
     /// <returns>The map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumnIndex(int columnIndex)
+    public CollectionMap<TElement> WithColumnIndex(int columnIndex)
     {
         var factory = new ColumnIndexReaderFactory(columnIndex);
         if (ReaderFactory is SplitReaderFactory splitColumnReader)
@@ -217,7 +217,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// </summary>
     /// <param name="separators">The separators used to split the value of a single cell.</param>
     /// <returns>The map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithSeparators(params char[] separators)
+    public CollectionMap<TElement> WithSeparators(params char[] separators)
     {
         SeparatorUtilities.ValidateSeparators(separators);
 
@@ -240,7 +240,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// </summary>
     /// <param name="separators">The separators used to split the value of a single cell.</param>
     /// <returns>The map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithSeparators(params IEnumerable<char> separators)
+    public CollectionMap<TElement> WithSeparators(params IEnumerable<char> separators)
     {
         ThrowHelpers.ThrowIfNull(separators, nameof(separators));
         return WithSeparators(separators as char[] ?? separators.ToArray());
@@ -252,7 +252,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// </summary>
     /// <param name="separators">The separators used to split the value of a single cell.</param>
     /// <returns>The map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithSeparators(params string[] separators)
+    public CollectionMap<TElement> WithSeparators(params string[] separators)
     {
         SeparatorUtilities.ValidateSeparators(separators);
 
@@ -275,7 +275,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// </summary>
     /// <param name="separators">The separators used to split the value of a single cell.</param>
     /// <returns>The map that invoked this method.</returns>
-    public ManyToOneEnumerableMap<TElement> WithSeparators(params IEnumerable<string> separators)
+    public CollectionMap<TElement> WithSeparators(params IEnumerable<string> separators)
     {
         ThrowHelpers.ThrowIfNull(separators, nameof(separators));
         return WithSeparators(separators as string[] ?? separators.ToArray());
@@ -286,7 +286,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// </summary>
     /// <param name="columnNames">The names of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumnNames(params IReadOnlyList<string> columnNames)
+    public CollectionMap<TElement> WithColumnNames(params IReadOnlyList<string> columnNames)
         => WithReaderFactory(new ColumnNamesReaderFactory(columnNames));
 
     /// <summary>
@@ -295,7 +295,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// <param name="columnNames">The names of the columns.</param>
     /// <param name="comparison">How column names are compared.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumnNames(IReadOnlyList<string> columnNames, StringComparison comparison)
+    public CollectionMap<TElement> WithColumnNames(IReadOnlyList<string> columnNames, StringComparison comparison)
         => WithReaderFactory(new ColumnNamesReaderFactory(columnNames, comparison));
 
     /// <summary>
@@ -303,7 +303,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// </summary>
     /// <param name="columnNames">The names of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumnNames(params IEnumerable<string> columnNames)
+    public CollectionMap<TElement> WithColumnNames(params IEnumerable<string> columnNames)
     {
         ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
         return WithColumnNames([.. columnNames]);
@@ -315,7 +315,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// <param name="columnNames">The names of the columns.</param>
     /// <param name="comparison">How column names are compared.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumnNames(IEnumerable<string> columnNames, StringComparison comparison)
+    public CollectionMap<TElement> WithColumnNames(IEnumerable<string> columnNames, StringComparison comparison)
     {
         ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
         return WithColumnNames([.. columnNames], comparison);
@@ -326,7 +326,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// </summary>
     /// <param name="predicate">Whether a column name matches.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumnsMatching(Func<string, bool> predicate)
+    public CollectionMap<TElement> WithColumnsMatching(Func<string, bool> predicate)
         => WithReaderFactory(new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(predicate)));
 
     /// <summary>
@@ -334,7 +334,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// </summary>
     /// <param name="regex">The regular expression column names are matched against.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumnsMatching(Regex regex)
+    public CollectionMap<TElement> WithColumnsMatching(Regex regex)
         => WithReaderFactory(new ColumnsMatchingReaderFactory(new RegexColumnMatcher(regex)));
 
     /// <summary>
@@ -342,7 +342,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// </summary>
     /// <param name="columnIndices">The zero-based indices of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumnIndices(params IReadOnlyList<int> columnIndices)
+    public CollectionMap<TElement> WithColumnIndices(params IReadOnlyList<int> columnIndices)
         => WithReaderFactory(new ColumnIndicesReaderFactory(columnIndices));
 
     /// <summary>
@@ -350,7 +350,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// </summary>
     /// <param name="columnIndices">The zero-based indices of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumnIndices(params IEnumerable<int> columnIndices)
+    public CollectionMap<TElement> WithColumnIndices(params IEnumerable<int> columnIndices)
     {
         ThrowHelpers.ThrowIfNull(columnIndices, nameof(columnIndices));
         return WithColumnIndices([.. columnIndices]);
@@ -361,7 +361,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// </summary>
     /// <param name="selector">The column selector.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneEnumerableMap<TElement> WithColumns(IColumnSelector selector)
+    public CollectionMap<TElement> WithColumns(IColumnSelector selector)
     {
         ThrowHelpers.ThrowIfNull(selector, nameof(selector));
         return WithReaderFactory(new ColumnSelectorReaderFactory(selector));
@@ -372,7 +372,7 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// an error being thrown.
     /// </summary>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneEnumerableMap<TElement> MakeOptional()
+    public CollectionMap<TElement> MakeOptional()
     {
         Optional = true;
         return this;
@@ -382,13 +382,13 @@ public class ManyToOneEnumerableMap<TElement> : IManyToOneMap, ICellsMap
     /// Reads the cells' values as the text Excel shows, with their number formats applied.
     /// </summary>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneEnumerableMap<TElement> MakePreserveFormatting()
+    public CollectionMap<TElement> MakePreserveFormatting()
     {
         PreserveFormatting = true;
         return this;
     }
 
-    private ManyToOneEnumerableMap<TElement> WithReaderFactory(ICellsReaderFactory readerFactory)
+    private CollectionMap<TElement> WithReaderFactory(ICellsReaderFactory readerFactory)
     {
         ReaderFactory = readerFactory;
         return this;

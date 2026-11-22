@@ -12,13 +12,13 @@ namespace ExcelMapper;
 /// Maps a member to an Excel column of type T with a one-to-one relationship.
 /// </summary>
 /// <typeparam name="T">The type of the member.</typeparam>
-public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
+public class ValueMap<T> : ValuePipeline<T>, IValueMap, IBindableMap
 {
     /// <summary>
     /// Constructs a one-to-one map with the specified cell reader factory.
     /// </summary>
     /// <param name="readerFactory">The factory used to create cell readers for the mapped column.</param>
-    internal OneToOneMap(ICellReaderFactory readerFactory)
+    internal ValueMap(ICellReaderFactory readerFactory)
     {
         ThrowHelpers.ThrowIfNull(readerFactory, nameof(readerFactory));
         _readerFactory = readerFactory;
@@ -38,7 +38,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
         }
     }
 
-    ICellReaderFactory IOneToOneMap.ReaderFactory
+    ICellReaderFactory IValueMap.ReaderFactory
     {
         get => ReaderFactory;
         set => ReaderFactory = value;
@@ -70,7 +70,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
 
     /// <summary>
     /// Incremented when <see cref="ReaderFactory"/> changes, so that readers resolved for a sheet
-    /// (see <see cref="BoundOneToOneMember{T}"/>) are resolved again.
+    /// (see <see cref="BoundValueMember{T}"/>) are resolved again.
     /// </summary>
     internal int ReaderVersion { get; private set; }
 
@@ -94,7 +94,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
 
     /// <summary>
     /// Reads and maps the cell in the given column, for a member whose column is known (see
-    /// <see cref="BoundOneToOneMember{T}"/>), with the same result as reading it through a
+    /// <see cref="BoundValueMember{T}"/>), with the same result as reading it through a
     /// <see cref="ColumnIndexReader"/>.
     /// </summary>
     internal bool TryGetValue(int columnIndex, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out T value)
@@ -123,11 +123,11 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
         => Map(sheet, rowIndex, readResult, PreserveFormatting, member);
 
     /// <inheritdoc/>
-    BoundMember IBindableMap.Bind(ExcelPropertyMap property, ExcelSheet sheet) => new BoundOneToOneMember<T>(this, property, sheet);
+    BoundMember IBindableMap.Bind(ExcelPropertyMap property, ExcelSheet sheet) => new BoundValueMember<T>(this, property, sheet);
 
     /// <inheritdoc/>
     MethodInfo? IBindableMap.GetArgumentMethod(Type parameterType)
-        => parameterType == typeof(T) ? s_getArgumentMethod ??= new Func<BoundOneToOneMember<T>, T, T>(BoundOneToOneMember<T>.GetValueOrDefault).Method : null;
+        => parameterType == typeof(T) ? s_getArgumentMethod ??= new Func<BoundValueMember<T>, T, T>(BoundValueMember<T>.GetValueOrDefault).Method : null;
 
     private static MethodInfo? s_getArgumentMethod;
 
@@ -136,7 +136,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// </summary>
     /// <param name="value">The value that will be assigned to the property or field if the value of a cell is empty or cannot be mapped.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public OneToOneMap<T> WithValueFallback(T? value)
+    public ValueMap<T> WithValueFallback(T? value)
     {
         SetFixedFallback(value, empty: true, invalid: true);
         return this;
@@ -147,7 +147,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// </summary>
     /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell is empty.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public OneToOneMap<T> WithEmptyFallback(T? fallbackValue)
+    public ValueMap<T> WithEmptyFallback(T? fallbackValue)
     {
         SetFixedFallback(fallbackValue, empty: true, invalid: false);
         return this;
@@ -158,7 +158,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// </summary>
     /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell cannot be mapped.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public OneToOneMap<T> WithInvalidFallback(T? fallbackValue)
+    public ValueMap<T> WithInvalidFallback(T? fallbackValue)
     {
         SetFixedFallback(fallbackValue, empty: false, invalid: true);
         return this;
@@ -172,7 +172,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// </summary>
     /// <param name="converter">The delegate.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public OneToOneMap<T> WithConverter(ConvertUsingSimpleMapperDelegate<T> converter)
+    public ValueMap<T> WithConverter(Func<string?, T> converter)
     {
         ThrowHelpers.ThrowIfNull(converter, nameof(converter));
 
@@ -187,7 +187,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// </summary>
     /// <param name="columnName">The name of the column.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public OneToOneMap<T> WithColumnName(string columnName)
+    public ValueMap<T> WithColumnName(string columnName)
         => WithColumnName(columnName, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
@@ -196,7 +196,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// <param name="columnName">The name of the column.</param>
     /// <param name="comparison">How column names are compared.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public OneToOneMap<T> WithColumnName(string columnName, StringComparison comparison)
+    public ValueMap<T> WithColumnName(string columnName, StringComparison comparison)
         => WithReaderFactory(new ColumnNameReaderFactory(columnName, comparison));
 
     /// <summary>
@@ -204,7 +204,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// </summary>
     /// <param name="columnNames">The names of the columns, in order of preference.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public OneToOneMap<T> WithColumnNameMatching(params string[] columnNames)
+    public ValueMap<T> WithColumnNameMatching(params string[] columnNames)
         => WithReaderFactory(new ColumnNamesReaderFactory(columnNames));
 
     /// <summary>
@@ -212,7 +212,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// </summary>
     /// <param name="predicate">Whether a column name matches.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public OneToOneMap<T> WithColumnNameMatching(Func<string, bool> predicate)
+    public ValueMap<T> WithColumnNameMatching(Func<string, bool> predicate)
         => WithReaderFactory(new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(predicate)));
 
     /// <summary>
@@ -220,7 +220,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// </summary>
     /// <param name="regex">The regular expression column names are matched against.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public OneToOneMap<T> WithColumnNameMatching(Regex regex)
+    public ValueMap<T> WithColumnNameMatching(Regex regex)
         => WithReaderFactory(new ColumnsMatchingReaderFactory(new RegexColumnMatcher(regex)));
 
     /// <summary>
@@ -228,7 +228,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// </summary>
     /// <param name="columnIndex">The zero-based index of the column.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public OneToOneMap<T> WithColumnIndex(int columnIndex)
+    public ValueMap<T> WithColumnIndex(int columnIndex)
         => WithReaderFactory(new ColumnIndexReaderFactory(columnIndex));
 
     /// <summary>
@@ -236,7 +236,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// </summary>
     /// <param name="columnLetter">The letter of the column.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public OneToOneMap<T> WithColumnLetter(string columnLetter)
+    public ValueMap<T> WithColumnLetter(string columnLetter)
         => WithColumnIndex(ExcelRange.ParseColumnLetters(columnLetter, nameof(columnLetter)));
 
     /// <summary>
@@ -244,7 +244,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// </summary>
     /// <param name="selector">The column selector.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public OneToOneMap<T> WithColumns(IColumnSelector selector)
+    public ValueMap<T> WithColumns(IColumnSelector selector)
     {
         ThrowHelpers.ThrowIfNull(selector, nameof(selector));
         return WithReaderFactory(new ColumnSelectorReaderFactory(selector));
@@ -255,7 +255,7 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// an error being thrown.
     /// </summary>
     /// <returns>The map on which this method was invoked.</returns>
-    public OneToOneMap<T> MakeOptional()
+    public ValueMap<T> MakeOptional()
     {
         Optional = true;
         return this;
@@ -265,13 +265,13 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// Reads the cell's value as the text Excel shows, with its number format applied.
     /// </summary>
     /// <returns>The map on which this method was invoked.</returns>
-    public OneToOneMap<T> MakePreserveFormatting()
+    public ValueMap<T> MakePreserveFormatting()
     {
         PreserveFormatting = true;
         return this;
     }
 
-    private OneToOneMap<T> WithReaderFactory(ICellReaderFactory readerFactory)
+    private ValueMap<T> WithReaderFactory(ICellReaderFactory readerFactory)
     {
         ReaderFactory = readerFactory;
         return this;

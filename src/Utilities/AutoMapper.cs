@@ -27,9 +27,9 @@ namespace ExcelMapper.Utilities;
 [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
 internal static class AutoMapper
 {
-    internal static OneToOneMap<T>? CreateOneToOneMap<T>(MemberInfo? member, ICellReaderFactory defaultCellReaderFactory, FallbackStrategy emptyValueStrategy, bool isAutoMapping)
+    internal static ValueMap<T>? CreateValueMap<T>(MemberInfo? member, ICellReaderFactory defaultCellReaderFactory, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping)
     {
-        var map = new OneToOneMap<T>(defaultCellReaderFactory);
+        var map = new ValueMap<T>(defaultCellReaderFactory);
         if (!TrySetupMap<T>(member, map, emptyValueStrategy, isAutoMapping))
         {
             return null;
@@ -38,7 +38,7 @@ internal static class AutoMapper
         return map;
     }
 
-    private static bool TrySetupMap<T>(MemberInfo? member, IToOneMap map, FallbackStrategy emptyValueStrategy, bool isAutoMapping)
+    private static bool TrySetupMap<T>(MemberInfo? member, IToOneMap map, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping)
     {
         var pipeline = (ValuePipeline<T>)map.Pipeline;
 
@@ -175,7 +175,7 @@ internal static class AutoMapper
             if (descriptions is not null)
             {
                 // The mapper copies the dictionary.
-                mappers.Add(new MappingDictionaryMapper<T>(descriptions, null, MappingDictionaryMapperBehavior.Optional));
+                mappers.Add(new MappingDictionaryMapper<T>(descriptions, null, MappingDictionaryBehavior.Optional));
             }
 
             return true;
@@ -275,14 +275,14 @@ internal static class AutoMapper
         return null;
     }
 
-    private static ICellFallback<T> CreateEmptyFallback<T>(FallbackStrategy emptyValueStrategy)
+    private static ICellFallback<T> CreateEmptyFallback<T>(EmptyValueStrategy emptyValueStrategy)
     {
         // Empty nullable values should be set to null.
         if (default(T) is null)
         {
             return new FixedValueFallback<T>(null);
         }
-        else if (emptyValueStrategy == FallbackStrategy.SetToDefaultValue)
+        else if (emptyValueStrategy == EmptyValueStrategy.DefaultValue)
         {
             return new FixedValueFallback<T>(default(T));
         }
@@ -296,7 +296,7 @@ internal static class AutoMapper
         LazyThreadSafetyMode.PublicationOnly);
     private static MethodInfo TryCreateSplitGenericMapMethod => s_tryCreateSplitGenericMapMethod.Value;
 
-    private static bool TryCreateSplitMap(MemberInfo? member, Type listType, ICellsReaderFactory defaultCellsReaderFactory, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
+    private static bool TryCreateSplitMap(MemberInfo? member, Type listType, ICellsReaderFactory defaultCellsReaderFactory, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
     {
         var elementType = listType.GetElementTypeOrEnumerableType();
         if (elementType == null)
@@ -318,7 +318,7 @@ internal static class AutoMapper
         return false;
     }
 
-    internal static bool TryCreateSplitMapGeneric<TElement>(MemberInfo? member, Type listType, ICellsReaderFactory defaultCellsReaderFactory, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneEnumerableMap<TElement>? map)
+    internal static bool TryCreateSplitMapGeneric<TElement>(MemberInfo? member, Type listType, ICellsReaderFactory defaultCellsReaderFactory, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out CollectionMap<TElement>? map)
     {
         // Find the right way of creating the collection and adding items to it.
         if (!TryGetCreateEnumerableFactory<TElement>(listType, out var factory))
@@ -329,7 +329,7 @@ internal static class AutoMapper
 
         // First, get the pipeline for the element. This is used to convert individual values
         // to be added to/included in the collection.
-        map = new ManyToOneEnumerableMap<TElement>(defaultCellsReaderFactory, factory);
+        map = new CollectionMap<TElement>(defaultCellsReaderFactory, factory);
         if (!TrySetupMap<TElement>(member, map, emptyValueStrategy, isAutoMapping: true))
         {
             map = null;
@@ -524,14 +524,14 @@ internal static class AutoMapper
         return false;
     }
 
-    internal static ExcelClassMap GetOrCreateNestedMap(IMap parentMap, Type memberType, object? context, FallbackStrategy emptyValueStrategy)
+    internal static ExcelClassMap GetOrCreateNestedMap(IMap parentMap, Type memberType, object? context, EmptyValueStrategy emptyValueStrategy)
     {
         var method = GetOrCreateNestedMapGenericMethod.MakeGenericMethod(memberType);
         var parameters = new object?[] { parentMap, context, emptyValueStrategy };
         return (ExcelClassMap)method.InvokeUnwrapped(null, parameters)!;
     }
 
-    private static IMap GetOrCreateNestedMapGeneric<TProperty>(IMap parentMap, object? context, FallbackStrategy emptyValueStrategy)
+    private static IMap GetOrCreateNestedMapGeneric<TProperty>(IMap parentMap, object? context, EmptyValueStrategy emptyValueStrategy)
     {
         if (GetExistingMap(parentMap, context) is { } existingMap)
         {
@@ -561,11 +561,11 @@ internal static class AutoMapper
         return (IMap)method.InvokeUnwrapped(null, parameters)!;
     }
 
-    private static ManyToOneEnumerableIndexerMapT<TElement> GetOrCreateArrayIndexerMapGeneric<TElement>(IMap parentMap, Type arrayType, object? context)
+    private static CollectionIndexerMap<TElement> GetOrCreateArrayIndexerMapGeneric<TElement>(IMap parentMap, Type arrayType, object? context)
     {
         if (GetExistingMap(parentMap, context) is { } existingMap)
         {
-            if (existingMap is not ManyToOneEnumerableIndexerMapT<TElement> arrayIndexerMap)
+            if (existingMap is not CollectionIndexerMap<TElement> arrayIndexerMap)
             {
                 throw new InvalidOperationException($"Expression is already mapped differently as {existingMap.GetType()}.");
             }
@@ -583,7 +583,7 @@ internal static class AutoMapper
         return mapObj;
     }
 
-    private static bool TryCreateArrayIndexerMapGeneric<TElement>(Type listType, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneEnumerableIndexerMapT<TElement>? map)
+    private static bool TryCreateArrayIndexerMapGeneric<TElement>(Type listType, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out CollectionIndexerMap<TElement>? map)
     {
         if (!TryGetCreateEnumerableFactory<TElement>(listType, out var factory))
         {
@@ -591,7 +591,7 @@ internal static class AutoMapper
             return false;
         }
 
-        map = new ManyToOneEnumerableIndexerMapT<TElement>(factory);
+        map = new CollectionIndexerMap<TElement>(factory);
         return true;
     }
 
@@ -607,11 +607,11 @@ internal static class AutoMapper
         return (IMap)method.InvokeUnwrapped(null, parameters)!;
     }
 
-    private static ManyToOneMultidimensionalIndexerMapT<TElement> GetOrCreateMultidimensionalIndexerMapGeneric<TElement>(IMap parentMap, Type arrayType, object? context)
+    private static MultidimensionalIndexerMap<TElement> GetOrCreateMultidimensionalIndexerMapGeneric<TElement>(IMap parentMap, Type arrayType, object? context)
     {
         if (GetExistingMap(parentMap, context) is { } existingMap)
         {
-            if (existingMap is not ManyToOneMultidimensionalIndexerMapT<TElement> multidimensionalMap)
+            if (existingMap is not MultidimensionalIndexerMap<TElement> multidimensionalMap)
             {
                 throw new InvalidOperationException($"Expression is already mapped differently as {existingMap.GetType()}.");
             }
@@ -621,7 +621,7 @@ internal static class AutoMapper
 
         // Create a new array indexer map.
         var factory = new MultidimensionalArrayFactory<TElement>();
-        var map = new ManyToOneMultidimensionalIndexerMapT<TElement>(factory);
+        var map = new MultidimensionalIndexerMap<TElement>(factory);
         AddExistingMap(parentMap, context, map);
         return map;
     }
@@ -638,11 +638,11 @@ internal static class AutoMapper
         return (IDictionaryIndexerMap)method.InvokeUnwrapped(null, parameters)!;
     }
 
-    private static ManyToOneDictionaryIndexerMapT<TKey, TValue> GetOrCreateDictionaryIndexerMapGeneric<TKey, TValue>(IMap parentMap, Type dictionaryType, object? context) where TKey : notnull
+    private static DictionaryIndexerMap<TKey, TValue> GetOrCreateDictionaryIndexerMapGeneric<TKey, TValue>(IMap parentMap, Type dictionaryType, object? context) where TKey : notnull
     {
         if (GetExistingMap(parentMap, context) is { } existingMap)
         {
-            if (existingMap is not ManyToOneDictionaryIndexerMapT<TKey, TValue> dictionaryIndexerMap)
+            if (existingMap is not DictionaryIndexerMap<TKey, TValue> dictionaryIndexerMap)
             {
                 throw new InvalidOperationException($"Expression is already mapped differently as {existingMap.GetType()}.");
             }
@@ -660,7 +660,7 @@ internal static class AutoMapper
         return mapObj;
     }
 
-    private static bool TryCreateDictionaryIndexerMapGeneric<TKey, TValue>(Type dictionaryType, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ManyToOneDictionaryIndexerMapT<TKey, TValue>? map) where TKey : notnull
+    private static bool TryCreateDictionaryIndexerMapGeneric<TKey, TValue>(Type dictionaryType, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out DictionaryIndexerMap<TKey, TValue>? map) where TKey : notnull
     {
         if (!TryGetCreateDictionaryFactory<TKey, TValue>(dictionaryType, out var factory))
         {
@@ -668,7 +668,7 @@ internal static class AutoMapper
             return false;
         }
 
-        map = new ManyToOneDictionaryIndexerMapT<TKey, TValue>(factory);
+        map = new DictionaryIndexerMap<TKey, TValue>(factory);
         return true;
     }
 
@@ -677,7 +677,7 @@ internal static class AutoMapper
         LazyThreadSafetyMode.PublicationOnly);
     private static MethodInfo TryCreateDictionaryMapGeneric => s_tryCreateDictionaryMapGeneric.Value;
 
-    private static bool TryCreateDictionaryMap<TMember>(MemberInfo? member, FallbackStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out IMap? map)
+    private static bool TryCreateDictionaryMap<TMember>(MemberInfo? member, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out IMap? map)
     {
         if (!TryGetDictionaryKeyValueType(typeof(TMember), out var keyType, out var valueType))
         {
@@ -698,7 +698,7 @@ internal static class AutoMapper
         return false;
     }
 
-    private static bool TryCreateDictionaryMap(MemberInfo member, Type dictionaryType, Type keyType, Type valueType, FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out IManyToOneMap? map)
+    private static bool TryCreateDictionaryMap(MemberInfo member, Type dictionaryType, Type keyType, Type valueType, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out IManyToOneMap? map)
     {
         var method = TryCreateDictionaryMapGeneric.MakeGenericMethod(keyType, valueType);
         var parameters = new object?[] { member, dictionaryType, emptyValueStrategy, true, null };
@@ -765,7 +765,7 @@ internal static class AutoMapper
         return false;
     }
 
-    internal static bool TryCreateGenericDictionaryMap<TKey, TValue>(MemberInfo? member, Type dictionaryType, FallbackStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out ManyToOneDictionaryMap<TKey, TValue>? map) where TKey : notnull
+    internal static bool TryCreateGenericDictionaryMap<TKey, TValue>(MemberInfo? member, Type dictionaryType, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out DictionaryMap<TKey, TValue>? map) where TKey : notnull
     {
         // Find the right way of creating the dictionary and adding items to it.
         if (!TryGetCreateDictionaryFactory<TKey, TValue>(dictionaryType, out var factory))
@@ -776,7 +776,7 @@ internal static class AutoMapper
 
         // Default to all columns.
         var defaultReaderFactory = MemberMapper.GetDefaultCellsReaderFactory(member) ?? s_allColumnNamesReaderFactory;
-        map = new ManyToOneDictionaryMap<TKey, TValue>(defaultReaderFactory, factory);
+        map = new DictionaryMap<TKey, TValue>(defaultReaderFactory, factory);
         if (!TrySetupMap<TValue>(member, map, emptyValueStrategy, isAutoMapping))
         {
             map = null;
@@ -847,10 +847,10 @@ internal static class AutoMapper
         return false;
     }
 
-    internal static bool TryCreateObjectMap<T>(FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ExcelClassMap<T>? classMap)
+    internal static bool TryCreateObjectMap<T>(EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out ExcelClassMap<T>? classMap)
         => TryCreateObjectMap(emptyValueStrategy, out classMap, null);
 
-    private static bool TryCreateObjectMap<T>(FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ExcelClassMap<T>? classMap, HashSet<Type>? typeStack)
+    private static bool TryCreateObjectMap<T>(EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out ExcelClassMap<T>? classMap, HashSet<Type>? typeStack)
     {
         Type type = typeof(T);
         if (!CanConstructObjectMap(type))
@@ -908,7 +908,7 @@ internal static class AutoMapper
         MemberInfo member, 
         Type memberType, 
         ExcelClassMap<T> map, 
-        FallbackStrategy emptyValueStrategy, 
+        EmptyValueStrategy emptyValueStrategy, 
         HashSet<Type>? typeStack,
         [NotNullWhen(false)] out ExcelClassMap<T>? classMap)
     {
@@ -1032,14 +1032,14 @@ internal static class AutoMapper
     /// </summary>
     private static bool CanUseConstructorParameters(Type type) => !typeof(IEnumerable).IsAssignableFrom(type);
 
-    private static FallbackStrategy GetEmptyValueStrategy(IMap map)
+    private static EmptyValueStrategy GetEmptyValueStrategy(IMap map)
     {
         if (map is ExcelClassMap classMap)
         {
             return classMap.EmptyValueStrategy;
         }
 
-        return FallbackStrategy.ThrowIfPrimitive;
+        return EmptyValueStrategy.Error;
     }
 
     private static IMap? GetExistingMap(IMap parentMap, object? context)
@@ -1108,7 +1108,7 @@ internal static class AutoMapper
     /// <param name="emptyValueStrategy">The default strategy to use when the value of a cell is empty.</param>
     /// <param name="result">The class map for the given type.</param>
     /// <returns>True if the class map could be created, else false.</returns>
-    public static bool TryCreateClassMap<T>(FallbackStrategy emptyValueStrategy, [NotNullWhen(true)] out ExcelClassMap<T>? result)
+    public static bool TryCreateClassMap<T>(EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out ExcelClassMap<T>? result)
     {
         EnumUtilities.ValidateIsDefined(emptyValueStrategy);
 
@@ -1137,7 +1137,7 @@ internal static class AutoMapper
         LazyThreadSafetyMode.PublicationOnly);
     private static MethodInfo TryAutoMapMemberMethod => s_tryAutoMapMemberMethod.Value;
 
-    private delegate bool TryAutoMapMemberDelegate(MemberInfo member, FallbackStrategy emptyValueStrategy, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map);
+    private delegate bool TryAutoMapMemberDelegate(MemberInfo member, EmptyValueStrategy emptyValueStrategy, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map);
 
     // TryAutoMapMember for each member type, so that auto-mapping a type doesn't create and invoke a
     // generic method for every member.
@@ -1155,7 +1155,7 @@ internal static class AutoMapper
     /// <param name="typeStack">Stack of types being processed to detect circular references.</param>
     /// <param name="map">The pipeline.</param>
     /// <returns>True if the member is able to be mapped.</returns>
-    private static bool TryAutoMapMember<TMember>(MemberInfo member, FallbackStrategy emptyValueStrategy, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map)
+    private static bool TryAutoMapMember<TMember>(MemberInfo member, EmptyValueStrategy emptyValueStrategy, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map)
     {
         var readerFactory = MemberMapper.GetDefaultCellReaderFactory(member);
         return TryCreateMap<TMember>(
@@ -1169,13 +1169,13 @@ internal static class AutoMapper
             out map);
     }
 
-    private static bool TryCreateMap<T>(MemberInfo? member, Type memberType, ICellReaderFactory defaultCellReaderFactory, ICellsReaderFactory defaultCellsReaderFactory, FallbackStrategy emptyValueStrategy, bool isAutoMapping, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map)
+    private static bool TryCreateMap<T>(MemberInfo? member, Type memberType, ICellReaderFactory defaultCellReaderFactory, ICellsReaderFactory defaultCellsReaderFactory, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map)
     {
         // Mapping a known type (e.g., string, object, etc.) is supported and simply
         // reads the first column into that value.
-        if (CreateOneToOneMap<T>(member, defaultCellReaderFactory, emptyValueStrategy, isAutoMapping) is { } oneToOneMap)
+        if (CreateValueMap<T>(member, defaultCellReaderFactory, emptyValueStrategy, isAutoMapping) is { } valueMap)
         {
-            map = oneToOneMap;
+            map = valueMap;
             return true;
         }
         // User may ask to map the row to a dictionary.

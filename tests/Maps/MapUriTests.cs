@@ -204,7 +204,7 @@ public class MapUriTests
 
     private class UriKindAbsoluteClass
     {
-        [ExcelUri(UriKind.Absolute)]
+        [ExcelUriKind(UriKind.Absolute)]
         public Uri Uri { get; set; } = default!;
     }
 
@@ -254,7 +254,7 @@ public class MapUriTests
 
     private class UriKindRelativeClass
     {
-        [ExcelUri(UriKind.Relative)]
+        [ExcelUriKind(UriKind.Relative)]
         public Uri Uri { get; set; } = default!;
     }
 
@@ -306,7 +306,7 @@ public class MapUriTests
 
     private class UriKindRelativeOrAbsoluteClass
     {
-        [ExcelUri(UriKind.RelativeOrAbsolute)]
+        [ExcelUriKind(UriKind.RelativeOrAbsolute)]
         public Uri Uri { get; set; } = default!;
     }
 

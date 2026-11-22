@@ -9,14 +9,14 @@ namespace ExcelMapper;
 /// A map that reads multiple cells of an excel sheet and maps the values of the cells to a
 /// multidimensional array property or field by their indices.
 /// </summary>
-internal class ManyToOneMultidimensionalIndexerMapT<TValue> : IMultidimensionalIndexerMap
+internal class MultidimensionalIndexerMap<TValue> : IMultidimensionalIndexerMap
 {
     // Factories build one value at a time, so a map shared between importers (for example
     // a class map instance registered in several importers used concurrently) must not
     // build two values at once.
     private readonly object _buildLock = new();
 
-    internal ManyToOneMultidimensionalIndexerMapT(IMultidimensionalArrayFactory<TValue> arrayFactory)
+    internal MultidimensionalIndexerMap(IMultidimensionalArrayFactory<TValue> arrayFactory)
     {
         ThrowHelpers.ThrowIfNull(arrayFactory, nameof(arrayFactory));
         ArrayFactory = arrayFactory;

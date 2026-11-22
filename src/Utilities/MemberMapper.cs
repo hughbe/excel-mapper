@@ -179,7 +179,7 @@ internal static class MemberMapper
             }
 
             // If the member has a ExcelMappingDictionaryBehavior attribute, get the behavior.
-            var behavior = MappingDictionaryMapperBehavior.Optional;
+            var behavior = MappingDictionaryBehavior.Optional;
             if (MemberAttributes.Get<ExcelMappingDictionaryBehaviorAttribute>(member) is { } behaviorAttribute)
             {
                 behavior = behaviorAttribute.Behavior;
@@ -188,7 +188,7 @@ internal static class MemberMapper
             pipeline.Mappers.Add(new MappingDictionaryMapper<T>(mappingDictionary, comparer, behavior));
 
             // If the dictionary mapper was added as required, do not add default mappers.
-            if (behavior == MappingDictionaryMapperBehavior.Required)
+            if (behavior == MappingDictionaryBehavior.Required)
             {
                 addDefaultMappers = false;
             }
@@ -268,7 +268,7 @@ internal static class MemberMapper
         }
 
         // If the member has a ExcelUri attribute, modify the mappers.
-        if (MemberAttributes.Get<ExcelUriAttribute>(member) is { } uriKindAttribute)
+        if (MemberAttributes.Get<ExcelUriKindAttribute>(member) is { } uriKindAttribute)
         {
             foreach (var mapper in pipeline.MapperObjects.OfType<UriMapper>())
             {

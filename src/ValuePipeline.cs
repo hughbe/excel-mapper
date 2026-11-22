@@ -6,7 +6,7 @@ namespace ExcelMapper;
 /// <summary>
 /// How the cells of a member are converted to its type: the transformers, converters and
 /// fallbacks set with the value methods in <see cref="ValuePipelineExtensions"/>. A member's map
-/// (<see cref="OneToOneMap{T}"/>) is a pipeline, and collections and dictionaries have one for
+/// (<see cref="ValueMap{T}"/>) is a pipeline, and collections and dictionaries have one for
 /// their elements or values.
 /// </summary>
 public abstract class ValuePipeline

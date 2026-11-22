@@ -4,9 +4,9 @@ namespace ExcelMapper.Tests;
 public class ExcelClassMapTTests
 {
     [Theory]
-    [InlineData(FallbackStrategy.ThrowIfPrimitive - 1)]
-    [InlineData(FallbackStrategy.SetToDefaultValue + 1)]
-    public void Ctor_InvalidEmptyValueStrategy_ThrowsArgumentOutOfRangeException(FallbackStrategy emptyValueStrategy)
+    [InlineData(EmptyValueStrategy.Error - 1)]
+    [InlineData(EmptyValueStrategy.DefaultValue + 1)]
+    public void Ctor_InvalidEmptyValueStrategy_ThrowsArgumentOutOfRangeException(EmptyValueStrategy emptyValueStrategy)
     {
         Assert.Throws<ArgumentOutOfRangeException>("emptyValueStrategy", () => new TestClassMap(emptyValueStrategy));
     }
@@ -192,6 +192,6 @@ public class ExcelClassMapTTests
 
     private class TestClassMap : ExcelClassMap<Helpers.TestClass>
     {
-        public TestClassMap(FallbackStrategy emptyValueStrategy) : base(emptyValueStrategy) { }
+        public TestClassMap(EmptyValueStrategy emptyValueStrategy) : base(emptyValueStrategy) { }
     }
 }

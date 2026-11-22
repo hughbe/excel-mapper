@@ -168,17 +168,17 @@ To ignore case, map the member with `Map(e => e.Status, ignoreCase: true)` in a 
 
 ## Uris
 
-By default only **absolute** URIs (such as `https://example.com`) are valid. Accept relative ones with `[ExcelUri]` or `.WithUriKind(...)`:
+By default only **absolute** URIs (such as `https://example.com`) are valid. Accept relative ones with `[ExcelUriKind]` or `.WithUriKind(...)`:
 
 ```csharp
 public class Resource
 {
     public Uri Website { get; set; }                   // absolute only
 
-    [ExcelUri(UriKind.Relative)]                       // or .WithUriKind(UriKind.Relative)
+    [ExcelUriKind(UriKind.Relative)]                       // or .WithUriKind(UriKind.Relative)
     public Uri ApiEndpoint { get; set; }               // "/api/v1/users"
 
-    [ExcelUri(UriKind.RelativeOrAbsolute)]
+    [ExcelUriKind(UriKind.RelativeOrAbsolute)]
     public Uri Link { get; set; }                      // either
 }
 ```

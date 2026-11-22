@@ -7,13 +7,13 @@ public class ExcelClassMapTests
     public void Ctor_NullType_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>("type", () => new ExcelClassMap(null!));
-        Assert.Throws<ArgumentNullException>("type", () => new ExcelClassMap(null!, FallbackStrategy.ThrowIfPrimitive));
+        Assert.Throws<ArgumentNullException>("type", () => new ExcelClassMap(null!, EmptyValueStrategy.Error));
     }
 
     [Theory]
-    [InlineData(FallbackStrategy.ThrowIfPrimitive - 1)]
-    [InlineData(FallbackStrategy.SetToDefaultValue + 1)]
-    public void Ctor_InvalidEmptyValueStrategy_ThrowsArgumentOutOfRangeException(FallbackStrategy emptyValueStrategy)
+    [InlineData(EmptyValueStrategy.Error - 1)]
+    [InlineData(EmptyValueStrategy.DefaultValue + 1)]
+    public void Ctor_InvalidEmptyValueStrategy_ThrowsArgumentOutOfRangeException(EmptyValueStrategy emptyValueStrategy)
     {
         Assert.Throws<ArgumentOutOfRangeException>("emptyValueStrategy", () => new ExcelClassMap(typeof(string), emptyValueStrategy));
     }

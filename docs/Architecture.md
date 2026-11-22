@@ -44,10 +44,10 @@ Each member's map is one of:
 
 | Map | Used for | Reads |
 |---|---|---|
-| `OneToOneMap<T>` | Single values: numbers, strings, dates, enums, `object`, and any type with a converter | One cell |
-| `ManyToOneEnumerableMap<TElement>` | Arrays, lists, sets and other collections | Several columns, or one cell split by separators |
-| `ManyToOneDictionaryMap<TKey, TValue>` | Dictionaries, `ExpandoObject` and extra columns (`MapExtraColumns`) | Several columns, keyed by column name |
-| `ManyToOneEnumerableIndexerMapT<T>`, `ManyToOneDictionaryIndexerMapT<TKey, TValue>`, `ManyToOneMultidimensionalIndexerMapT<T>` (internal) | Elements mapped one by one: `Map(p => p.Values[0])` | One map per element |
+| `ValueMap<T>` | Single values: numbers, strings, dates, enums, `object`, and any type with a converter | One cell |
+| `CollectionMap<TElement>` | Arrays, lists, sets and other collections | Several columns, or one cell split by separators |
+| `DictionaryMap<TKey, TValue>` | Dictionaries, `ExpandoObject` and extra columns (`MapExtraColumns`) | Several columns, keyed by column name |
+| `CollectionIndexerMap<T>`, `DictionaryIndexerMap<TKey, TValue>`, `MultidimensionalIndexerMap<T>` (internal) | Elements mapped one by one: `Map(p => p.Values[0])` | One map per element |
 | `ExcelClassMap<T>` | Nested objects (`Map(p => p.Address)` or auto-mapping) | The nested type's own members |
 | `RowNumberMap` | `[ExcelRowNumber]` and `MapRowNumber` | The row's number |
 

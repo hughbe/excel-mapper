@@ -529,7 +529,7 @@ public class ExcelSheet
             // Sheets without a heading can still be auto-mapped if the map doesn't look up columns by
             // name, for example primitives (read from the first column) or members with ExcelColumnIndex.
             // Otherwise reading a named column throws a clear error.
-            if (!AutoMapper.TryCreateClassMap<T>(FallbackStrategy.ThrowIfPrimitive, out var map))
+            if (!AutoMapper.TryCreateClassMap<T>(EmptyValueStrategy.Error, out var map))
             {
                 throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\".");
             }

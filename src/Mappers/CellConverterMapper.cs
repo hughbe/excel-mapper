@@ -41,9 +41,9 @@ internal sealed class NullableCellConverter<T>(ICellConverter<T> converter) : IC
 /// The converter for <c>WithConverter(value => ...)</c>: converts a cell's text with a delegate. A
 /// delegate that throws makes the value invalid, with the exception it threw.
 /// </summary>
-internal sealed class DelegateCellConverter<T>(ConvertUsingSimpleMapperDelegate<T> converter) : ICellConverter<T>
+internal sealed class DelegateCellConverter<T>(Func<string?, T> converter) : ICellConverter<T>
 {
-    public ConvertUsingSimpleMapperDelegate<T> Converter { get; } = converter;
+    public Func<string?, T> Converter { get; } = converter;
 
     public CellConversionResult<T> Convert(CellValue value, CellContext context)
     {

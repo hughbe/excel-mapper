@@ -4,7 +4,7 @@ using ExcelDataReader;
 
 namespace ExcelMapper.Tests;
 
-public class OneToOneMapTTests
+public class ValueMapTTests
 {
 
 
@@ -49,7 +49,7 @@ public class OneToOneMapTTests
 
 
 
-    private static OneToOneMap<string> CreateMap() => new ExcelClassMap<TestClass>().Map(t => t.Value);
+    private static ValueMap<string> CreateMap() => new ExcelClassMap<TestClass>().Map(t => t.Value);
 
     [Fact]
     public void ColumnMethods_InvalidArguments_Throw()

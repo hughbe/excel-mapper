@@ -294,7 +294,7 @@ Map(e => e.Status).WithMapping(new Dictionary<string, Status>
 }, StringComparer.OrdinalIgnoreCase);
 ```
 
-Text is matched case-sensitively unless you give a comparer. Text that isn't in the dictionary is converted as usual (so `"Contract"` still maps to `Status.Contract`); to make it invalid instead, use `[ExcelMappingDictionaryBehavior(MappingDictionaryMapperBehavior.Required)]` or `.WithMapping(dictionary, behavior: MappingDictionaryMapperBehavior.Required)`.
+Text is matched case-sensitively unless you give a comparer. Text that isn't in the dictionary is converted as usual (so `"Contract"` still maps to `Status.Contract`); to make it invalid instead, use `[ExcelMappingDictionaryBehavior(MappingDictionaryBehavior.Required)]` or `.WithMapping(dictionary, behavior: MappingDictionaryBehavior.Required)`.
 
 ### Converters
 
@@ -427,7 +427,7 @@ public class Employee
 }
 ```
 
-`.WithValueFallback(value)` sets both. `.WithThrowingEmptyFallback()`, `.WithThrowingInvalidFallback()` and `.WithThrowingFallback()` make empty or invalid cells errors, for example for a nullable member that mustn't be empty. To give every empty cell of a class map its type's default value, pass `FallbackStrategy.SetToDefaultValue` to the `ExcelClassMap<T>` constructor.
+`.WithValueFallback(value)` sets both. `.WithThrowingEmptyFallback()`, `.WithThrowingInvalidFallback()` and `.WithThrowingFallback()` make empty or invalid cells errors, for example for a nullable member that mustn't be empty. To give every empty cell of a class map its type's default value, pass `EmptyValueStrategy.DefaultValue` to the `ExcelClassMap<T>` constructor.
 
 ### Computed fallbacks
 

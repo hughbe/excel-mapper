@@ -9,14 +9,14 @@ namespace ExcelMapper;
 /// A map that reads multiple cells of an excel sheet and maps the values of the cells to a
 /// list property or field by their indices.
 /// </summary>
-internal class ManyToOneEnumerableIndexerMapT<TValue> : IEnumerableIndexerMap
+internal class CollectionIndexerMap<TValue> : IEnumerableIndexerMap
 {
     // Factories build one value at a time, so a map shared between importers (for example
     // a class map instance registered in several importers used concurrently) must not
     // build two values at once.
     private readonly object _buildLock = new();
 
-    internal ManyToOneEnumerableIndexerMapT(IEnumerableFactory<TValue> enumerableFactory)
+    internal CollectionIndexerMap(IEnumerableFactory<TValue> enumerableFactory)
     {
         ThrowHelpers.ThrowIfNull(enumerableFactory, nameof(enumerableFactory));
         EnumerableFactory = enumerableFactory;
