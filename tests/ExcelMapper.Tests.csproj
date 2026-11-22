@@ -64,6 +64,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\src\ExcelMapper.csproj" SetTargetFramework="TargetFramework=$(LibraryTargetFramework)" />
+    <!-- The source generator runs on the tests (generated contexts) and is tested directly (SourceGeneration/). -->
+    <ProjectReference Include="..\gen\ExcelMapper.SourceGeneration.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
   </ItemGroup>
 
 </Project>

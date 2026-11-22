@@ -15,7 +15,7 @@ Built on [ExcelDataReader](https://github.com/ExcelDataReader/ExcelDataReader). 
 - **Real-world sheets** - Find a heading below titles and notes, read part of a sheet or several tables on one sheet, and set row numbers and unmapped columns on your objects
 - **Clear errors** - Messages name the cell (`at cell B11`), and every invalid cell in a file can be collected instead of stopping at the first
 - **Extensible** - Typed converters, transformers, fallbacks and column selectors
-- **Fast** - Rows stream lazily and map with compiled, typed setters, without boxing; trimmed apps are supported
+- **Fast** - Rows stream lazily and map with compiled, typed setters, without boxing; trimmed apps are supported, and native AOT apps through a source generator
 
 ## Installation
 
@@ -110,7 +110,7 @@ foreach (var result in sheet.ReadRowResults<Employee>())
 - **[Types](https://github.com/hughbe/excel-mapper/blob/main/docs/types.md)** - Supported types, enums, collections, dictionaries and nested objects
 - **[Errors and Troubleshooting](https://github.com/hughbe/excel-mapper/blob/main/docs/errors.md)** - Error messages, collecting errors, checking columns and common problems
 - **[Performance and Thread Safety](https://github.com/hughbe/excel-mapper/blob/main/docs/performance.md)** - Getting the best performance and using ExcelMapper from several threads
-- **[Trimming and Native AOT](https://github.com/hughbe/excel-mapper/blob/main/docs/trimming.md)** - Using ExcelMapper in trimmed apps
+- **[Trimming and Native AOT](https://github.com/hughbe/excel-mapper/blob/main/docs/trimming.md)** - Using ExcelMapper in trimmed and native AOT apps, with the source generator
 - **[API Reference](https://github.com/hughbe/excel-mapper/blob/main/docs/api.md)** - Every public type, attribute and fluent method
 - **[Migrating to 4.0](https://github.com/hughbe/excel-mapper/blob/main/docs/migrating-to-4.0.md)** - What to check when upgrading from 3.x, and what's new
 - **[Changelog](https://github.com/hughbe/excel-mapper/blob/main/CHANGELOG.md)** - What changed in each version

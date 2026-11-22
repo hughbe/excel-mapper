@@ -66,7 +66,7 @@ internal static class ContextCases
             return $"{string.Join(",", row.Values)}/{string.Join(",", row.Tags)}/{string.Join(",", row.Days)}";
         }, "1,2/a,b/");
 
-        check("Context: dictionary rows", () => string.Join(",", Csv.Sheet("A,B\n1,2\n").ReadRows(context.Counts).Single()
+        check("Context: dictionary rows", () => string.Join(",", Csv.Sheet("A,B\n1,2\n").ReadRows(context.DictionaryStringInt32).Single()
             .Select(kv => $"{kv.Key}={kv.Value}")), "A=1,B=2");
 
         check("Context: nested struct", () =>
@@ -112,52 +112,17 @@ internal static class ContextCases
     }
 }
 
-// A context written as the source generator will write it: the row types and every type
-// auto-mapping meets in their members.
-internal sealed class AppContext : ExcelMappingContext
+// A context the source generator writes: it registers each row type and every type their members
+// use, and adds a property for each row type's class map and a Default instance.
+[ExcelMappable(typeof(Person))]
+[ExcelMappable(typeof(Scheduled))]
+[ExcelMappable(typeof(Parsed))]
+[ExcelMappable(typeof(Collected))]
+[ExcelMappable(typeof(Dictionary<string, int>))]
+[ExcelMappable(typeof(Placed))]
+[ExcelMappable(typeof(Priced))]
+internal sealed partial class AppContext : ExcelMappingContext
 {
-    public static AppContext Default { get; } = new();
-
-    public ExcelClassMap<Person> Person => GetClassMap<Person>();
-    public ExcelClassMap<Scheduled> Scheduled => GetClassMap<Scheduled>();
-    public ExcelClassMap<Parsed> Parsed => GetClassMap<Parsed>();
-    public ExcelClassMap<Collected> Collected => GetClassMap<Collected>();
-    public ExcelClassMap<Dictionary<string, int>> Counts => GetClassMap<Dictionary<string, int>>();
-    public ExcelClassMap<Placed> Placed => GetClassMap<Placed>();
-    public ExcelClassMap<Priced> Priced => GetClassMap<Priced>();
-
-    protected override void RegisterTypes(ExcelTypeRegistrar types)
-    {
-        types.Row<Person>();
-        types.Type<string>();
-        types.Type<int>();
-        types.Nullable<int>();
-        types.Nullable<DateTime>();
-        types.Type<double>();
-
-        types.Row<Scheduled>();
-        types.Enum<DayOfWeek>();
-        types.Nullable<DayOfWeek>();
-        types.Enum<Size>();
-
-        types.Row<Parsed>();
-        types.Parsable<Code>();
-
-        types.Row<Collected>();
-        types.Collection<List<int>, int>();
-        types.Array<string>();
-        types.Array<DayOfWeek>();
-
-        types.Row<Dictionary<string, int>>();
-        types.Dictionary<Dictionary<string, int>, string, int>();
-
-        types.Row<Placed>();
-        types.Type<Point>();
-
-        types.Row<Priced>();
-        types.Type<decimal>();
-        types.Nullable<decimal>();
-    }
 }
 
 // Class maps of built-in types, registered with the reflection-based APIs, which warn.

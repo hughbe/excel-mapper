@@ -42,7 +42,34 @@ The repository's [trimming test app](../tests/TrimmingTests/Program.cs) publishe
 
 ## Native AOT apps
 
-Read rows with class maps from an `ExcelMappingContext`. A context registers the types rows are mapped to (`Row<T>()`) and every type auto-mapping meets in their members, and gives each row type's class map, auto-mapped from its members and attributes as `ReadRows<T>()` does:
+Read rows with class maps from an `ExcelMappingContext`. A context registers the types rows are mapped to and every type auto-mapping meets in their members, and gives each row type's class map, auto-mapped from its members and attributes as `ReadRows<T>()` does.
+
+The package includes a source generator that writes the context for you. Declare a `partial` class deriving from `ExcelMappingContext`, with `[ExcelMappable(typeof(T))]` for each type rows are mapped to:
+
+```csharp no-compile
+[ExcelMappable(typeof(Employee))]
+[ExcelMappable(typeof(Customer))]
+public partial class AppMappingContext : ExcelMappingContext
+{
+}
+
+var employees = sheet.ReadRows(AppMappingContext.Default.Employee).ToList();
+```
+
+The generator registers each type and every type its members use (except members with `[ExcelIgnore]`), and adds a property for each type's class map, named after the type (`DictionaryStringInt32` for `Dictionary<string, int>`, `Int32Array` for `int[]`), and a static `Default` instance. A member of the context with the same name is kept, and `GetClassMap<T>()` gives the class map too. It reports these errors:
+
+| Error | Meaning |
+|---|---|
+| EXM001 | The context, and each type it's declared in, must be `partial`. |
+| EXM002 | A class with `[ExcelMappable]` must derive from `ExcelMappingContext`. |
+| EXM003 | The context declares `RegisterTypes`, which the generator writes. |
+| EXM004 | `[ExcelMappable]` names an open generic type, such as `typeof(List<>)`. |
+
+Every reading method takes a class map: `ReadRows(classMap)`, `ReadRow(classMap)`, `ReadRowResults(classMap)`, `ValidateHeading(classMap)`, `FindHeading(classMap)` and the others, on sheets and regions. They read with the class map you give them rather than looking one up or auto-mapping, so they don't warn.
+
+### Writing a context yourself
+
+Without the generator (for example from a language other than C#), override `RegisterTypes`:
 
 ```csharp
 public sealed class AppMappingContext : ExcelMappingContext
@@ -67,8 +94,6 @@ public sealed class AppMappingContext : ExcelMappingContext
 var employees = sheet.ReadRows(AppMappingContext.Default.Employee).ToList();
 ```
 
-Every reading method takes a class map: `ReadRows(classMap)`, `ReadRow(classMap)`, `ReadRowResults(classMap)`, `ValidateHeading(classMap)`, `FindHeading(classMap)` and the others, on sheets and regions. They read with the class map you give them rather than looking one up or auto-mapping, so they don't warn.
-
 Register:
 
 - `Row<T>()` for each type rows are mapped to, and `Type<T>()` for the type of each member (and of each type mapped through its own members, such as a nested class or struct).
@@ -76,6 +101,6 @@ Register:
 - `Enum<TEnum>()` for each enum, and `Parsable<T>()` or `ParsableClass<T>()` for each other `IParsable<T>` type.
 - `Collection<TCollection, TElement>()`, `Array<TElement>()` or `Dictionary<TDictionary, TKey, TValue>()` for each collection, array or dictionary.
 
-A type that isn't registered still maps with the JIT, but with native AOT throws `NotSupportedException` naming the generic type it needs. The [native AOT test app](../tests/AotTests/Program.cs) shows contexts and what works without one, and runs in CI. Test your published app, as what native AOT is missing only shows up at run time.
+A type that isn't registered still maps with the JIT, but with native AOT throws `NotSupportedException` naming the generic type it needs. The [native AOT test app](../tests/AotTests/Program.cs) shows a generated context and what works without one, and runs in CI. Test your published app, as what native AOT is missing only shows up at run time.
 
 Registering class maps by scanning an assembly (`RegisterClassMapsInNamespace`) can't be made trim-safe: register class maps with `RegisterClassMap` instead.

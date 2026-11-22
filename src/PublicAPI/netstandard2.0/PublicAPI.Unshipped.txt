@@ -230,6 +230,9 @@ ExcelMapper.ExcelInvalidFallbackAttribute.Type.get -> System.Type!
 ExcelMapper.ExcelInvalidValueAttribute
 ExcelMapper.ExcelInvalidValueAttribute.ExcelInvalidValueAttribute(object? value) -> void
 ExcelMapper.ExcelInvalidValueAttribute.Value.get -> object?
+ExcelMapper.ExcelMappableAttribute
+ExcelMapper.ExcelMappableAttribute.ExcelMappableAttribute(System.Type! type) -> void
+ExcelMapper.ExcelMappableAttribute.Type.get -> System.Type!
 ExcelMapper.ExcelMappingContext
 ExcelMapper.ExcelMappingContext.ExcelMappingContext() -> void
 ExcelMapper.ExcelMappingContext.GetClassMap<T>() -> ExcelMapper.ExcelClassMap<T>!

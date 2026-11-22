@@ -57,7 +57,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 
 `importer.Configuration.RegisterClassMapsInNamespace(namespace)` (and an overload taking an `Assembly`) registers every class map in a namespace.
 
-**`ExcelMappingContext`** - Class maps for native AOT ([Native AOT apps](trimming.md#native-aot-apps)). Derive from it and register types in `RegisterTypes(ExcelTypeRegistrar)`.
+**`ExcelMappingContext`** - Class maps for native AOT ([Native AOT apps](trimming.md#native-aot-apps)). Declare a `partial` class deriving from it with `[ExcelMappable(typeof(T))]` for each row type, and the source generator writes it; or register types in `RegisterTypes(ExcelTypeRegistrar)` yourself.
 - `GetClassMap<T>()` - The class map of a registered row type, auto-mapped from the registered types; it can't be changed
 
 ## Results and errors
