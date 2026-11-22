@@ -75,9 +75,8 @@ public class EmployeeMap : ExcelClassMap<Employee>
     public EmployeeMap()
     {
         Map(e => e.Name).WithColumnName("Full Name");
+        Map(e => e.Department).MakeOptional();
         Map(e => e.Salary).WithColumnLetter("C").WithInvalidFallback(0m);
-        Map(e => e.HireDate).WithFormats("dd/MM/yyyy");
-        Map(e => e.Notes).MakeOptional();
     }
 }
 
