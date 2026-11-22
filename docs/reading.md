@@ -15,7 +15,7 @@ using var importer = new ExcelImporter(reader);                               //
 
 `.xlsx`, `.xls` and `.xlsb` workbooks are detected automatically. CSV files must be opened with `ExcelImporterFileType.Csv` (otherwise ExcelDataReader throws a `HeaderException`); their separator (comma, semicolon, tab, pipe or `#`) is detected automatically. For passwords, a specific CSV separator or a fallback encoding, see [Reader options](../README.md#reader-options).
 
-`importer.Reader` is the underlying `IExcelDataReader`.
+To configure ExcelDataReader yourself, create the `IExcelDataReader` and pass it to `new ExcelImporter(reader)`. Don't move the reader afterwards: the importer's sheets share it.
 
 ## Choosing a sheet
 
@@ -153,7 +153,7 @@ Regions have `ReadRows<T>()`, `ReadRowResults<T>()`, `ValidateHeading<T>()` and 
 
 ```csharp
 var sheet = importer.ReadSheet();
-sheet.DataRange = new ExcelRange("A2:B4");   // the heading and two rows, columns A and B
+sheet.DataRange = ExcelRange.Parse("A2:B4");   // the heading and two rows, columns A and B
 var employees = sheet.ReadRows<Employee>();
 ```
 
@@ -162,9 +162,9 @@ With a heading, the heading is the first row of the range. Set `DataRange` befor
 Ranges can be written in several ways:
 
 ```csharp
-new ExcelRange("B2:D10");                      // an Excel address, also "$B$2:$D$10"
-new ExcelRange("A:C");                         // whole columns
-new ExcelRange("5:20");                        // whole rows
+ExcelRange.Parse("B2:D10");                    // an Excel address, also "$B$2:$D$10"
+ExcelRange.Parse("A:C");                       // whole columns
+ExcelRange.Parse("5:20");                      // whole rows
 new ExcelRange(rowStart: 1, rowEnd: 99, columnStart: 0, columnEnd: null);   // zero-based, inclusive; null for no limit
 new ExcelRange(..^1, Range.All);               // System.Range: every row but the last
 ```

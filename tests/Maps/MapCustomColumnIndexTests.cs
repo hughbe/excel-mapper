@@ -635,7 +635,7 @@ public class MapCustomColumnNameTests
     {
         public CustomCustomIndexEnumPropertyClassMap()
         {
-            Map(p => p.CustomIndex, ignoreCase: true);
+            Map(p => p.CustomIndex).WithIgnoreCase();
         }
     }
 
@@ -657,7 +657,7 @@ public class MapCustomColumnNameTests
     {
         public CustomCustomIndexNullableEnumPropertyClassMap()
         {
-            Map(p => p.CustomIndex, ignoreCase: true);
+            Map(p => p.CustomIndex).WithIgnoreCase();
         }
     }
     
@@ -679,7 +679,7 @@ public class MapCustomColumnNameTests
     {
         public CustomCustomIndexEnumFieldClassMap()
         {
-            Map(p => p.CustomIndex, ignoreCase: true);
+            Map(p => p.CustomIndex).WithIgnoreCase();
         }
     }
 
@@ -701,7 +701,7 @@ public class MapCustomColumnNameTests
     {
         public CustomCustomIndexNullableEnumFieldClassMap()
         {
-            Map(p => p.CustomIndex, ignoreCase: true);
+            Map(p => p.CustomIndex).WithIgnoreCase();
         }
     }
 

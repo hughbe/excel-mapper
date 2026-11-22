@@ -51,36 +51,6 @@ public class ExcelColumnNameAttributeTests
     }
 
     [Theory]
-    [InlineData("columnname")]
-    [InlineData("ColumnName")]
-    public void Name_Set_GetReturnsExpected(string value)
-    {
-        var attribute = new ExcelColumnNameAttribute("Name")
-        {
-            Name = value
-        };
-        Assert.Equal(value, attribute.Name);
-
-        // Set same.
-        attribute.Name = value;
-        Assert.Equal(value, attribute.Name);
-    }
-
-    [Fact]
-    public void Name_SetNull_ThrowsArgumentNullException()
-    {
-        var attribute = new ExcelColumnNameAttribute("Name");
-        Assert.Throws<ArgumentNullException>("value", () => attribute.Name = null!);
-    }
-
-    [Fact]
-    public void Name_SetEmpty_ThrowsArgumentException()
-    {
-        var attribute = new ExcelColumnNameAttribute("Name");
-        Assert.Throws<ArgumentException>("value", () => attribute.Name = string.Empty);
-    }
-
-    [Theory]
     [InlineData(StringComparison.CurrentCulture)]
     [InlineData(StringComparison.CurrentCultureIgnoreCase)]
     [InlineData(StringComparison.InvariantCulture)]

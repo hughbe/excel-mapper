@@ -11,9 +11,10 @@ namespace ExcelMapper;
 public class ExcelImporter : IDisposable
 {
     /// <summary>
-    /// Gets the inner reader that the importer wraps. This is defined by the ExcelDataReader library.
+    /// Gets the inner reader that the importer wraps. It's internal: the importer's sheets share it,
+    /// and only <see cref="RowSource"/> moves it.
     /// </summary>
-    public IExcelDataReader Reader { get; }
+    internal IExcelDataReader Reader { get; }
 
 
     /// <summary>

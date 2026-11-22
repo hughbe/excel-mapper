@@ -396,7 +396,6 @@ public class MapUInt32Tests
         Assert.Equal(10u, row9.Value);
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedUInt32ValueHex_Success()
     {
@@ -442,9 +441,7 @@ public class MapUInt32Tests
         var row9 = sheet.ReadRow<UInt32Value>();
         Assert.Equal(10u, row9.Value);
     }
-#endif
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedUInt32ValueFormatProvider_Success()
     {
@@ -476,7 +473,6 @@ public class MapUInt32Tests
         var row3 = sheet.ReadRow<UInt32Value>();
         Assert.Equal(10u, row3.Value);
     }
-#endif
 
     [Fact]
     public void ReadRow_AutoMappedNullableUInt32ValueNumberStyleAttribute_Success()
@@ -568,7 +564,6 @@ public class MapUInt32Tests
         Assert.Equal(10u, row9.Value);
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableUInt32ValueHex_Success()
     {
@@ -614,9 +609,7 @@ public class MapUInt32Tests
         var row9 = sheet.ReadRow<NullableUInt32Value>();
         Assert.Equal(10u, row9.Value);
     }
-#endif
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableUInt32ValueFormatProvider_Success()
     {
@@ -648,5 +641,4 @@ public class MapUInt32Tests
         var row3 = sheet.ReadRow<NullableUInt32Value>();
         Assert.Equal(10u, row3.Value);
     }
-#endif
 }

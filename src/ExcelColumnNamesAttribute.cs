@@ -8,9 +8,8 @@ namespace ExcelMapper;
 /// Specifies the column names that are used when deserializing a property or field.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-public class ExcelColumnNamesAttribute : Attribute
+public sealed class ExcelColumnNamesAttribute : Attribute
 {
-    private IReadOnlyList<string> _columnNames;
     private StringComparison _comparison = StringComparison.OrdinalIgnoreCase;
 
     /// <summary>
@@ -20,7 +19,7 @@ public class ExcelColumnNamesAttribute : Attribute
     public ExcelColumnNamesAttribute(params string[] columnNames)
     {
         ColumnUtilities.ValidateColumnNames(columnNames);
-        _columnNames = columnNames;
+        Names = columnNames;
     }
 
     /// <summary>
@@ -32,22 +31,14 @@ public class ExcelColumnNamesAttribute : Attribute
     {
         ColumnUtilities.ValidateColumnNames(columnNames);
         EnumUtilities.ValidateIsDefined(comparison);
-        _columnNames = columnNames;
+        Names = columnNames;
         _comparison = comparison;
     }
 
     /// <summary>
-    /// Gets or sets the names of the columns.
+    /// Gets the names of the columns.
     /// </summary>
-    public IReadOnlyList<string> Names
-    {
-        get => _columnNames;
-        set
-        {
-            ColumnUtilities.ValidateColumnNames(value);
-            _columnNames = value;
-        }
-    }
+    public IReadOnlyList<string> Names { get; }
 
     /// <summary>
     /// Gets or sets the string comparison to use when matching column names.

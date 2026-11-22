@@ -38,32 +38,6 @@ public class ExcelColumnLetterAttributeTests
         Assert.Throws<ArgumentException>("letter", () => new ExcelColumnLetterAttribute(letter));
     }
 
-    [Theory]
-    [InlineData(0, "A")]
-    [InlineData(25, "Z")]
-    [InlineData(26, "AA")]
-    public void Index_Set_GetReturnsExpected(int value, string expectedLetter)
-    {
-        var attribute = new ExcelColumnLetterAttribute("C")
-        {
-            Index = value
-        };
-        Assert.Equal(value, attribute.Index);
-        Assert.Equal(expectedLetter, attribute.Letter);
-
-        // Set same.
-        attribute.Index = value;
-        Assert.Equal(value, attribute.Index);
-        Assert.Equal(expectedLetter, attribute.Letter);
-    }
-
-    [Fact]
-    public void Index_SetInvalidValue_ThrowsArgumentOutOfRangeException()
-    {
-        var attribute = new ExcelColumnLetterAttribute("A");
-        Assert.Throws<ArgumentOutOfRangeException>("value", () => attribute.Index = -1);
-    }
-
     [Fact]
     public void ExcelColumnLetterAttribute_IsExcelColumnIndexAttribute()
     {

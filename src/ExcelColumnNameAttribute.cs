@@ -8,9 +8,8 @@ namespace ExcelMapper;
 /// Specifies the column name that is used when deserializing a property or field.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true)]
-public class ExcelColumnNameAttribute : Attribute
+public sealed class ExcelColumnNameAttribute : Attribute
 {
-    private string _columnName;
     private StringComparison _comparison = StringComparison.OrdinalIgnoreCase;
 
     /// <summary>
@@ -22,22 +21,14 @@ public class ExcelColumnNameAttribute : Attribute
     {
         ColumnUtilities.ValidateColumnName(columnName);
         EnumUtilities.ValidateIsDefined(comparison);
-        _columnName = columnName;
+        Name = columnName;
         _comparison = comparison;
     }
 
     /// <summary>
-    /// Gets or sets the name of the column.
+    /// Gets the name of the column.
     /// </summary>
-    public string Name
-    {
-        get => _columnName;
-        set
-        {
-            ColumnUtilities.ValidateColumnName(value, nameof(value));
-            _columnName = value;
-        }
-    }
+    public string Name { get; }
 
     /// <summary>
     /// Gets or sets the string comparison to use when matching the column name.

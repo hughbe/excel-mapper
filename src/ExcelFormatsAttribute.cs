@@ -4,7 +4,7 @@ namespace ExcelMapper;
 /// An attribute used to specify the formats used when mapping date, time or numeric values.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-public class ExcelFormatsAttribute : Attribute
+public sealed class ExcelFormatsAttribute : Attribute
 {
     /// <summary>
     /// Gets the formats.

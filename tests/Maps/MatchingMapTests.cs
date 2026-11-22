@@ -394,7 +394,7 @@ public class MatchingMapTests
         public NoColumnMatchingColumnNamesClassMap()
         {
             Map(o => o.Value)
-                .WithColumnNameMatching("NoSuchColumn");
+                .WithColumnNames("NoSuchColumn");
         }
     }
 
@@ -403,7 +403,7 @@ public class MatchingMapTests
         public NoColumnMatchingColumnNamesOptionalClassMap()
         {
             Map(o => o.Value)
-                .WithColumnNameMatching("NoSuchColumn")
+                .WithColumnNames("NoSuchColumn")
                 .MakeOptional();
         }
     }
@@ -413,7 +413,7 @@ public class MatchingMapTests
         public ColumnMatchingColumnNamesClassMap()
         {
             Map(o => o.Value)
-                .WithColumnNameMatching("NoSuchColumn", "Int Value");
+                .WithColumnNames("NoSuchColumn", "Int Value");
         }
     }
 

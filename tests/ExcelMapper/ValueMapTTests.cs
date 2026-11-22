@@ -6,40 +6,22 @@ namespace ExcelMapper.Tests;
 
 public class ValueMapTTests
 {
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void Optional_Set_GetReturnsExpected(bool value)
+    [Fact]
+    public void MakeOptional_Invoke_SetsOptional()
     {
         var map = CreateMap();
-        map.Optional = value;
-        Assert.Equal(value, map.Optional);
-
-        // Set same.
-        map.Optional = value;
-        Assert.Equal(value, map.Optional);
-
-        // Set different.
-        map.Optional = !value;
-        Assert.Equal(!value, map.Optional);
+        Assert.False(map.Optional);
+        Assert.Same(map, map.MakeOptional());
+        Assert.True(map.Optional);
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void PreserveFormatting_Set_GetReturnsExpected(bool value)
+    [Fact]
+    public void MakePreserveFormatting_Invoke_SetsPreserveFormatting()
     {
         var map = CreateMap();
-        map.PreserveFormatting = value;
-        Assert.Equal(value, map.PreserveFormatting);
-
-        // Set same.
-        map.PreserveFormatting = value;
-        Assert.Equal(value, map.PreserveFormatting);
-
-        // Set different.
-        map.PreserveFormatting = !value;
-        Assert.Equal(!value, map.PreserveFormatting);
+        Assert.False(map.PreserveFormatting);
+        Assert.Same(map, map.MakePreserveFormatting());
+        Assert.True(map.PreserveFormatting);
     }
 
     private static ValueMap<string> CreateMap() => new ExcelClassMap<TestClass>().Map(t => t.Value);
@@ -51,7 +33,7 @@ public class ValueMapTTests
         Assert.Throws<ArgumentNullException>("columnName", () => map.WithColumnName(null!));
         Assert.Throws<ArgumentException>("columnName", () => map.WithColumnName(""));
         Assert.Throws<ArgumentOutOfRangeException>("comparison", () => map.WithColumnName("Name", (StringComparison)99));
-        Assert.Throws<ArgumentNullException>("columnNames", () => map.WithColumnNameMatching((string[])null!));
+        Assert.Throws<ArgumentNullException>("columnNames", () => map.WithColumnNames((string[])null!));
         Assert.Throws<ArgumentNullException>("predicate", () => map.WithColumnNameMatching((Func<string, bool>)null!));
         Assert.Throws<ArgumentNullException>("regex", () => map.WithColumnNameMatching((System.Text.RegularExpressions.Regex)null!));
         Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => map.WithColumnIndex(-1));

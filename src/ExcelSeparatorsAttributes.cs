@@ -4,7 +4,7 @@ namespace ExcelMapper;
 /// Specifies the separators used when mapping collections from cell values.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-public class ExcelSeparatorsAttribute : Attribute
+public sealed class ExcelSeparatorsAttribute : Attribute
 {
     /// <summary>
     /// Gets the string separators.

@@ -187,7 +187,7 @@ internal sealed class TypeRule<T> : TypeRule
         if (type.IsEnum)
         {
             // Values with a DescriptionAttribute are also mapped from their description.
-            var enumMapper = (ICellMapper<T>)EnumMappers.Create(type, ignoreCase: false);
+            var enumMapper = (ICellMapper<T>)EnumMappers.Create(type);
             var descriptions = GetEnumDescriptions(type);
             var descriptionMapper = descriptions is null ? null : new MappingDictionaryMapper<T>(descriptions, null, MappingDictionaryBehavior.Optional);
             return mappers =>

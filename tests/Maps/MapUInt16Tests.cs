@@ -396,7 +396,6 @@ public class MapUInt16Tests
         Assert.Equal((ushort)10, row9.Value);
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedUInt16ValueHex_Success()
     {
@@ -442,9 +441,7 @@ public class MapUInt16Tests
         var row9 = sheet.ReadRow<UInt16Value>();
         Assert.Equal((ushort)10, row9.Value);
     }
-#endif
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedUInt16ValueFormatProvider_Success()
     {
@@ -476,7 +473,6 @@ public class MapUInt16Tests
         var row3 = sheet.ReadRow<UInt16Value>();
         Assert.Equal((ushort)10, row3.Value);
     }
-#endif
 
     [Fact]
     public void ReadRow_AutoMappedNullableUInt16ValueNumberStyleAttribute_Success()
@@ -568,7 +564,6 @@ public class MapUInt16Tests
         Assert.Equal((ushort)10, row9.Value);
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableUInt16ValueHex_Success()
     {
@@ -614,9 +609,7 @@ public class MapUInt16Tests
         var row9 = sheet.ReadRow<NullableUInt16Value>();
         Assert.Equal((ushort)10, row9.Value);
     }
-#endif
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableUInt16ValueFormatProvider_Success()
     {
@@ -648,5 +641,4 @@ public class MapUInt16Tests
         var row3 = sheet.ReadRow<NullableUInt16Value>();
         Assert.Equal((ushort)10, row3.Value);
     }
-#endif
 }

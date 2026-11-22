@@ -20,7 +20,7 @@ public class ValuePipelineTSelfTests : ExcelClassMap<ValuePipelineTSelfTests.Row
         Assert.Same(map, map.WithTransformers(new UpperCellTransformer()));
         Assert.Same(map, map.WithMapping(new Dictionary<string, int> { { "one", 1 } }));
         Assert.Same(map, map.WithConverter(value => 1));
-        Assert.Same(map, map.WithValueFallback(1));
+        Assert.Same(map, map.WithFallback(1));
         Assert.Same(map, map.WithEmptyFallback(1));
         Assert.Same(map, map.WithInvalidFallback(1));
         Assert.Same(map, map.WithThrowingFallback());
@@ -34,12 +34,12 @@ public class ValuePipelineTSelfTests : ExcelClassMap<ValuePipelineTSelfTests.Row
     [Fact]
     public void Methods_ElementMap_ReturnTheMap()
     {
-        var map = new ExcelClassMap<CollectionRow>().Map(r => r.Numbers).Pipeline;
+        var map = Helpers.ElementsOf(new ExcelClassMap<CollectionRow>().Map(r => r.Numbers));
         Assert.Same(map, map.WithTrim());
         Assert.Same(map, map.WithTransformers(new UpperCellTransformer()));
         Assert.Same(map, map.WithMapping(new Dictionary<string, int> { { "one", 1 } }));
         Assert.Same(map, map.WithConverter(value => 1));
-        Assert.Same(map, map.WithValueFallback(1));
+        Assert.Same(map, map.WithFallback(1));
         Assert.Same(map, map.WithEmptyFallback(1));
         Assert.Same(map, map.WithInvalidFallback(1));
         Assert.Same(map, map.WithThrowingFallback());
@@ -56,12 +56,12 @@ public class ValuePipelineTSelfTests : ExcelClassMap<ValuePipelineTSelfTests.Row
     public void Fallbacks_NullForNullableMember_Success()
     {
         var map = Map(r => r.NullableNumber);
-        Assert.Same(map, map.WithValueFallback(null));
+        Assert.Same(map, map.WithFallback(null));
         Assert.Same(map, map.WithEmptyFallback(null));
         Assert.Same(map, map.WithInvalidFallback(null));
 
         var textMap = Map(r => r.Text);
-        Assert.Same(textMap, textMap.WithValueFallback(null));
+        Assert.Same(textMap, textMap.WithFallback(null));
         Assert.Same(textMap, textMap.WithEmptyFallback(null));
         Assert.Same(textMap, textMap.WithInvalidFallback(null));
     }

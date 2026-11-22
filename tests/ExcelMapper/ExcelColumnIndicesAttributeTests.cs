@@ -41,39 +41,4 @@ public class ExcelColumnIndicesAttributeTests
         yield return new object[] { new int[] { 0, 1 } };
     }
 
-    [Theory]
-    [MemberData(nameof(Indices_Set_TestData))]
-    public void Indices_Set_GetReturnsExpected(int[] value)
-    {
-        var reader = new ExcelColumnIndicesAttribute(1)
-        {
-            Indices = value
-        };
-        Assert.Same(value, reader.Indices);
-
-        // Set same.
-        reader.Indices = value;
-        Assert.Same(value, reader.Indices);
-    }
-
-    [Fact]
-    public void Indices_SetNullValue_ThrowsArgumentNullException()
-    {
-        var attribute = new ExcelColumnIndicesAttribute(1);
-        Assert.Throws<ArgumentNullException>("value", () => attribute.Indices = null!);
-    }
-
-    [Fact]
-    public void Indices_SetEmptyValue_ThrowsArgumentException()
-    {
-        var attribute = new ExcelColumnIndicesAttribute(1);
-        Assert.Throws<ArgumentException>("value", () => attribute.Indices = []);
-    }
-
-    [Fact]
-    public void Indices_SetNegativeValueInColumnIndices_ThrowsArgumentOutOfRangeException()
-    {
-        var attribute = new ExcelColumnIndicesAttribute(1);
-        Assert.Throws<ArgumentOutOfRangeException>("value", () => attribute.Indices = [-1]);
-    }
 }

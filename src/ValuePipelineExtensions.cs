@@ -14,7 +14,7 @@ namespace ExcelMapper;
 /// (<see cref="ElementMap{T}"/>), and each returns the map it was called on. The methods for any
 /// type are on <see cref="ValuePipeline{T, TSelf}"/>.
 /// </summary>
-public static class ValuePipelineExtensions
+public static partial class ValuePipelineExtensions
 {
     /// <summary>
     /// Specifies formats used when mapping the value of a cell to a DateTime. This is useful for
@@ -39,7 +39,7 @@ public static class ValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithFormats<TMap>(this ValuePipeline<DateTime, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<DateTime, TMap>
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateTime, TMap> map, IEnumerable<string> formats) where TMap : ValuePipeline<DateTime, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -68,7 +68,7 @@ public static class ValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTime.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithFormats<TMap>(this ValuePipeline<DateTime?, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<DateTime?, TMap>
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateTime?, TMap> map, IEnumerable<string> formats) where TMap : ValuePipeline<DateTime?, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -129,7 +129,7 @@ public static class ValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTimeOffset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithFormats<TMap>(this ValuePipeline<DateTimeOffset, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<DateTimeOffset, TMap>
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateTimeOffset, TMap> map, IEnumerable<string> formats) where TMap : ValuePipeline<DateTimeOffset, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -158,7 +158,7 @@ public static class ValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateTimeOffset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithFormats<TMap>(this ValuePipeline<DateTimeOffset?, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<DateTimeOffset?, TMap>
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateTimeOffset?, TMap> map, IEnumerable<string> formats) where TMap : ValuePipeline<DateTimeOffset?, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -187,7 +187,7 @@ public static class ValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeSpan.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithFormats<TMap>(this ValuePipeline<TimeSpan, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<TimeSpan, TMap>
+    public static TMap WithFormats<TMap>(this ValuePipeline<TimeSpan, TMap> map, IEnumerable<string> formats) where TMap : ValuePipeline<TimeSpan, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -216,7 +216,7 @@ public static class ValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeSpan.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithFormats<TMap>(this ValuePipeline<TimeSpan?, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<TimeSpan?, TMap>
+    public static TMap WithFormats<TMap>(this ValuePipeline<TimeSpan?, TMap> map, IEnumerable<string> formats) where TMap : ValuePipeline<TimeSpan?, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -246,7 +246,7 @@ public static class ValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithFormats<TMap>(this ValuePipeline<DateOnly, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<DateOnly, TMap>
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateOnly, TMap> map, IEnumerable<string> formats) where TMap : ValuePipeline<DateOnly, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -275,7 +275,7 @@ public static class ValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a DateOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithFormats<TMap>(this ValuePipeline<DateOnly?, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<DateOnly?, TMap>
+    public static TMap WithFormats<TMap>(this ValuePipeline<DateOnly?, TMap> map, IEnumerable<string> formats) where TMap : ValuePipeline<DateOnly?, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -304,7 +304,7 @@ public static class ValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithFormats<TMap>(this ValuePipeline<TimeOnly, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<TimeOnly, TMap>
+    public static TMap WithFormats<TMap>(this ValuePipeline<TimeOnly, TMap> map, IEnumerable<string> formats) where TMap : ValuePipeline<TimeOnly, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -333,7 +333,7 @@ public static class ValuePipelineExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">A list of formats to use when mapping the value of a cell to a TimeOnly.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithFormats<TMap>(this ValuePipeline<TimeOnly?, TMap> map, params IEnumerable<string> formats) where TMap : ValuePipeline<TimeOnly?, TMap>
+    public static TMap WithFormats<TMap>(this ValuePipeline<TimeOnly?, TMap> map, IEnumerable<string> formats) where TMap : ValuePipeline<TimeOnly?, TMap>
     {
         ThrowHelpers.ThrowIfNull(formats, nameof(formats));
         return map.WithFormats([.. formats]);
@@ -591,6 +591,36 @@ public static class ValuePipelineExtensions
         return (TMap)map;
     }
 #endif
+
+    /// <summary>
+    /// Matches the enum's names ignoring case, so that "active" maps to <c>Status.Active</c>.
+    /// </summary>
+    /// <typeparam name="TEnum">The enum type of the member.</typeparam>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static TMap WithIgnoreCase<TEnum, TMap>(this ValuePipeline<TEnum, TMap> map) where TEnum : struct, Enum where TMap : ValuePipeline<TEnum, TMap>
+    {
+        ThrowHelpers.ThrowIfNull(map, nameof(map));
+        map.Options.IgnoreCase = true;
+        map.AddMapperIfMissing<TEnum, EnumMapper<TEnum>>(static () => new EnumMapper<TEnum>());
+        return (TMap)map;
+    }
+
+    /// <summary>
+    /// Matches the enum's names ignoring case, so that "active" maps to <c>Status.Active</c>.
+    /// </summary>
+    /// <typeparam name="TEnum">The enum type of the member.</typeparam>
+    /// <typeparam name="TMap">The type of the map.</typeparam>
+    /// <param name="map">The map to use.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public static TMap WithIgnoreCase<TEnum, TMap>(this ValuePipeline<TEnum?, TMap> map) where TEnum : struct, Enum where TMap : ValuePipeline<TEnum?, TMap>
+    {
+        ThrowHelpers.ThrowIfNull(map, nameof(map));
+        map.Options.IgnoreCase = true;
+        map.AddMapperIfMissing<TEnum?, EnumMapper<TEnum>>(static () => new EnumMapper<TEnum>());
+        return (TMap)map;
+    }
 
     /// <summary>
     /// Specifies the kind of URI to use when mapping the value of a cell to a Uri. This is useful for

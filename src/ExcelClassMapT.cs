@@ -44,49 +44,6 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map enums.
-    /// </summary>
-    /// <typeparam name="TProperty">The enum type of the property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <param name="ignoreCase">A flag indicating whether enum parsing is case insensitive.</param>
-    /// <returns>The map for the given property or field.</returns>
-    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
-    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ValueMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression, bool ignoreCase) where TProperty : struct
-        => MapEnumInternal(expression, ignoreCase);
-
-    /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map nullable enums.
-    /// </summary>
-    /// <typeparam name="TProperty">The enum type of the property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <param name="ignoreCase">A flag indicating whether enum parsing is case insensitive.</param>
-    /// <returns>The map for the given property or field.</returns>
-    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
-    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ValueMap<TProperty?> Map<TProperty>(Expression<Func<T, TProperty?>> expression, bool ignoreCase) where TProperty : struct
-        => MapEnumInternal(expression, ignoreCase);
-
-    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
-    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    private ValueMap<TProperty> MapEnumInternal<TProperty>(Expression<Func<T, TProperty>> expression, bool ignoreCase)
-    {
-        var enumType = typeof(TProperty).GetNullableTypeOrThis(out _);
-        if (!enumType.IsEnum)
-        {
-            throw new ArgumentException($"The type {enumType} must be an Enum.", nameof(TProperty));
-        }
-
-        var mapper = EnumMappers.Create(enumType, ignoreCase);
-        var map = Map(expression);
-        map.Mappers.Clear();
-        map.Mappers.Add((ICellMapper<TProperty>)mapper);
-        return map;
-    }
-
-    /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
     /// This is used for map enumerables.
     /// </summary>
     /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
@@ -440,13 +397,13 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// Configures the existing class map used to map multiple cells in a row to the properties and fields
     /// of a an object.
     /// </summary>
-    /// <param name="classMapFactory">A delegate that allows configuring the default class map used.</param>
+    /// <param name="configure">Configures this class map.</param>
     /// <returns>The map that invoked this method.</returns>
-    public ExcelClassMap<T> WithClassMap(Action<ExcelClassMap<T>> classMapFactory)
+    public ExcelClassMap<T> WithClassMap(Action<ExcelClassMap<T>> configure)
     {
-        ThrowHelpers.ThrowIfNull(classMapFactory, nameof(classMapFactory));
+        ThrowHelpers.ThrowIfNull(configure, nameof(configure));
 
-        classMapFactory(this);
+        configure(this);
         return this;
     }
 

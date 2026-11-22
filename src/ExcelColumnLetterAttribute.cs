@@ -5,7 +5,7 @@ namespace ExcelMapper;
 /// This is the same as <see cref="ExcelColumnIndexAttribute"/> with the column's zero-based index.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true)]
-public class ExcelColumnLetterAttribute : ExcelColumnIndexAttribute
+public sealed class ExcelColumnLetterAttribute : ExcelColumnIndexAttribute
 {
     /// <summary>
     /// Maps a property or field to the column with the given Excel letters.

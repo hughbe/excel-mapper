@@ -16,8 +16,6 @@ public class ExcelClassMapTTests
     public void Map_EnumIgnoreCaseNotEnum_ThrowsArgumentException()
     {
         var map = new ExcelClassMap<TestClass>();
-        Assert.Throws<ArgumentException>("TProperty", () => map.Map(p => p.DateTimeValue, ignoreCase: true));
-        Assert.Throws<ArgumentException>("TProperty", () => map.Map(p => p.NullableDateTimeValue, ignoreCase: true));
     }
 
     [Fact]
@@ -137,10 +135,10 @@ public class ExcelClassMapTTests
     }
 
     [Fact]
-    public void WithClassMap_NullClassMapFactory_ThrowsArgumentNullException()
+    public void WithClassMap_NullConfigure_ThrowsArgumentNullException()
     {
         var map = new ExcelClassMap<TestClass>();
-        Assert.Throws<ArgumentNullException>("classMapFactory", () => map.WithClassMap((Action<ExcelClassMap<TestClass>>)null!));
+        Assert.Throws<ArgumentNullException>("configure", () => map.WithClassMap((Action<ExcelClassMap<TestClass>>)null!));
     }
 
     [Fact]

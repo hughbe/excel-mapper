@@ -127,7 +127,7 @@ Class maps work the same way: `c.Map(p => p.Name)` maps the `Name` parameter.
 |---|---|---|
 | A column by name (ignoring case) | `[ExcelColumnName("Full Name")]` | `.WithColumnName("Full Name")` |
 | A column by name, compared another way | `[ExcelColumnName("Name", StringComparison.Ordinal)]` | `.WithColumnName("Name", StringComparison.Ordinal)` |
-| The first of several possible columns | `[ExcelColumnNames("Dept", "Department")]` | `.WithColumnNameMatching("Dept", "Department")` |
+| The first of several possible columns | `[ExcelColumnNames("Dept", "Department")]` | `.WithColumnNames("Dept", "Department")` |
 | A column whose name matches a pattern | `[ExcelColumnMatching(@"\d{4} Salary")]` | `.WithColumnNameMatching(regex)` or `(name => ...)` |
 | A column by position | `[ExcelColumnIndex(0)]` or `[ExcelColumnLetter("A")]` | `.WithColumnIndex(0)` or `.WithColumnLetter("A")` |
 | The first of several positions | `[ExcelColumnIndices(2, 1)]` | |
@@ -439,7 +439,7 @@ public class Employee
 }
 ```
 
-`.WithValueFallback(value)` sets both. `.WithThrowingEmptyFallback()`, `.WithThrowingInvalidFallback()` and `.WithThrowingFallback()` make empty or invalid cells errors, for example for a nullable member that mustn't be empty. To give every empty cell of a class map its type's default value, pass `EmptyValueStrategy.DefaultValue` to the `ExcelClassMap<T>` constructor.
+`.WithFallback(value)` sets both. `.WithThrowingEmptyFallback()`, `.WithThrowingInvalidFallback()` and `.WithThrowingFallback()` make empty or invalid cells errors, for example for a nullable member that mustn't be empty. To give every empty cell of a class map its type's default value, pass `EmptyValueStrategy.DefaultValue` to the `ExcelClassMap<T>` constructor.
 
 ### Computed fallbacks
 

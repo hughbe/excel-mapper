@@ -3689,4 +3689,34 @@ public class MapCustomColumnNamesTests
         [ExcelOptional]
         public IDictionary<string, int> Value = default!;
     }
+
+    public class FirstNameRow
+    {
+        public string Name { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_ValueMapWithColumnNames_ReadsFirstColumnTheSheetHas()
+    {
+        using var importer = Helpers.GetCsvImporter("Other,Full Name\nx,Alice\n");
+        importer.Configuration.RegisterClassMap<FirstNameRow>(c => c.Map(r => r.Name).WithColumnNames("Name", "Full Name"));
+        Assert.Equal("Alice", importer.ReadSheet().ReadRow<FirstNameRow>().Name);
+    }
+
+    [Fact]
+    public void ReadRows_ValueMapWithColumnNamesEnumerableAndComparison_ReadsFirstColumnTheSheetHas()
+    {
+        using var importer = Helpers.GetCsvImporter("Other,FULL NAME\nx,Alice\n");
+        var sheet = importer.ReadSheet();
+        importer.Configuration.RegisterClassMap<FirstNameRow>(c => c.Map(r => r.Name).WithColumnNames(new List<string> { "Name", "Full Name" }, StringComparison.OrdinalIgnoreCase));
+        Assert.Equal("Alice", sheet.ReadRow<FirstNameRow>().Name);
+    }
+
+    [Fact]
+    public void ReadRows_ValueMapWithColumnNamesCaseSensitive_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("FULL NAME\nAlice\n");
+        importer.Configuration.RegisterClassMap<FirstNameRow>(c => c.Map(r => r.Name).WithColumnNames(["Full Name"], StringComparison.Ordinal));
+        Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRow<FirstNameRow>());
+    }
 }

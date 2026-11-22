@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Linq;
 
 namespace ExcelMapper.Tests;
 
@@ -279,7 +280,7 @@ public class MapEnumTests
     {
         public IgnoreCaseEnumClassMap()
         {
-            Map(u => u.Value, ignoreCase: true)
+            Map(u => u.Value).WithIgnoreCase()
                 .WithEmptyFallback(TestEnum.Empty)
                 .WithInvalidFallback(TestEnum.Invalid);
         }
@@ -312,7 +313,7 @@ public class MapEnumTests
     {
         public IgnoreCaseNullableCustomEnumClassMap()
         {
-            Map(u => u.Value, ignoreCase: true)
+            Map(u => u.Value).WithIgnoreCase()
                 .WithEmptyFallback(TestEnum.Empty)
                 .WithInvalidFallback(TestEnum.Invalid);
         }
@@ -742,5 +743,68 @@ public class MapEnumTests
 
         // Invalid cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidDescriptionNullableEnumClass>());
+    }
+
+    public enum Colour
+    {
+        Red,
+        [Description("Sky blue")]
+        Blue,
+    }
+
+    public class IgnoreCaseRow
+    {
+        public Colour Value { get; set; }
+        public Colour? Nullable { get; set; }
+        public Colour[] Values { get; set; } = default!;
+        public Colour CaseSensitive { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_WithIgnoreCase_MatchesNamesIgnoringCase()
+    {
+        using var importer = Helpers.GetCsvImporter("Value,Nullable,Values,CaseSensitive\nRED,blue,\"red,BLUE\",Red\nSky blue,,blue,Blue\n");
+        importer.Configuration.RegisterClassMap<IgnoreCaseRow>(c =>
+        {
+            c.Map(r => r.Value).WithIgnoreCase();
+            c.Map(r => r.Nullable).WithIgnoreCase();
+            c.Map(r => r.Values).WithElementMap(e => e.WithIgnoreCase());
+            c.Map(r => r.CaseSensitive);
+        });
+
+        var rows = importer.ReadSheet().ReadRows<IgnoreCaseRow>().ToArray();
+        Assert.Equal(Colour.Red, rows[0].Value);
+        Assert.Equal(Colour.Blue, rows[0].Nullable);
+        Assert.Equal([Colour.Red, Colour.Blue], rows[0].Values);
+        Assert.Equal(Colour.Red, rows[0].CaseSensitive);
+
+        // Descriptions still map, and other members still match case.
+        Assert.Equal(Colour.Blue, rows[1].Value);
+        Assert.Null(rows[1].Nullable);
+        Assert.Equal([Colour.Blue], rows[1].Values);
+        Assert.Equal(Colour.Blue, rows[1].CaseSensitive);
+    }
+
+    [Fact]
+    public void ReadRows_WithoutIgnoreCase_DoesntMatchOtherCase()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\nred\n");
+        importer.Configuration.RegisterClassMap<IgnoreCaseRow>(c => c.Map(r => r.Value));
+        Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRow<IgnoreCaseRow>());
+    }
+
+    private sealed class GreenConverter : ICellConverter<Colour>
+    {
+        public CellConversionResult<Colour> Convert(CellValue value, CellContext context)
+            => value.Text == "green" ? CellConversionResult<Colour>.Success(Colour.Red) : CellConversionResult<Colour>.NotHandled;
+    }
+
+    [Fact]
+    public void ReadRows_WithIgnoreCaseAfterConverter_ConvertsValuesTheConverterDoesNotHandle()
+    {
+        // The converter replaces the built-in conversion, and WithIgnoreCase adds it back after it.
+        using var importer = Helpers.GetCsvImporter("Value\ngreen\nBLUE\n");
+        importer.Configuration.RegisterClassMap<IgnoreCaseRow>(c => c.Map(r => r.Value).WithConverter(new GreenConverter()).WithIgnoreCase());
+        Assert.Equal([Colour.Red, Colour.Blue], importer.ReadSheet().ReadRows<IgnoreCaseRow>().Select(r => r.Value));
     }
 }

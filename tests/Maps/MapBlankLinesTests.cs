@@ -132,7 +132,7 @@ public class MapBlankLinesTests
     {
         using var importer = Helpers.GetCsvImporter("Name\na\n\nb\n");
         var sheet = importer.ReadSheet();
-        sheet.DataRange = new ExcelRange("1:10");
+        sheet.DataRange = ExcelRange.Parse("1:10");
         var rows = sheet.ReadRows<StringRow>().ToArray();
         Assert.Equal(["a", null, "b"], rows.Select(r => r.Name));
         Assert.Equal(3, sheet.CurrentRowIndex);

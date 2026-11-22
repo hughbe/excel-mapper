@@ -36,7 +36,7 @@ public class MapFallbackMethodsTests
     public void ReadRows_WithThrowingInvalidFallback_ReplacesEarlierInvalidFallback()
     {
         using var importer = Helpers.GetCsvImporter("Value\n\nabc\n");
-        importer.Configuration.RegisterClassMap<NullableRow>(c => c.Map(r => r.Value).WithValueFallback(-1).WithThrowingInvalidFallback());
+        importer.Configuration.RegisterClassMap<NullableRow>(c => c.Map(r => r.Value).WithFallback(-1).WithThrowingInvalidFallback());
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
         Assert.Equal(-1, sheet.ReadRow<NullableRow>().Value);
@@ -47,7 +47,7 @@ public class MapFallbackMethodsTests
     public void ReadRows_ElementsWithValueFallback_UsedForEmptyAndInvalidElements()
     {
         using var importer = Helpers.GetCsvImporter("Values\n\"1,,abc,4\"\n");
-        importer.Configuration.RegisterClassMap<ElementsRow>(c => c.Map(r => r.Values).WithElementMap(e => e.WithValueFallback(0)));
+        importer.Configuration.RegisterClassMap<ElementsRow>(c => c.Map(r => r.Values).WithElementMap(e => e.WithFallback(0)));
         Assert.Equal([1, 0, 0, 4], importer.ReadSheet().ReadRows<ElementsRow>().Single().Values);
     }
 

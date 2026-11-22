@@ -4,7 +4,7 @@ namespace ExcelMapper;
 /// The attribute used to specify the string comparison for dictionary key comparisons.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-public class ExcelMappingDictionaryComparerAttribute : Attribute
+public sealed class ExcelMappingDictionaryComparerAttribute : Attribute
 {
     /// <summary>
     /// The string comparison to use for dictionary key comparisons.

@@ -12,7 +12,7 @@ namespace ExcelMapper;
 /// Specifies the column matcher that is used when deserializing a property or field.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-public class ExcelColumnMatchingAttribute : Attribute
+public sealed class ExcelColumnMatchingAttribute : Attribute
 {
     /// <summary>
     /// The type of the <see cref="IColumnSelector"/>.

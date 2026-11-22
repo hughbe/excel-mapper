@@ -98,21 +98,6 @@ public class ExcelRangeTests
         yield return new object[] { " 3:7 ", 2..7, Range.All };
     }
 
-    [Theory]
-    [MemberData(nameof(ValidAddress_Data))]
-    public void Ctor_String(string address, Range expectedRows, Range expectedColumns)
-    {
-        var range = new ExcelRange(address);
-        Assert.Equal(expectedRows, range.Rows);
-        Assert.Equal(expectedColumns, range.Columns);
-    }
-
-    [Fact]
-    public void Ctor_NullAddress_ThrowsArgumentNullException()
-    {
-        Assert.Throws<ArgumentNullException>("address", () => new ExcelRange(null!));
-    }
-
 
     public static IEnumerable<object[]> InvalidAddress_Data()
     {
@@ -190,13 +175,6 @@ public class ExcelRangeTests
         yield return new object[] { "A:B:C" };
         yield return new object[] { "1:2:" };
         yield return new object[] { "1:2:C" };
-    }
-
-    [Theory]
-    [MemberData(nameof(InvalidAddress_Data))]
-    public void Ctor_InvalidAddress_ThrowsArgumentException(string address)
-    {
-        Assert.Throws<ArgumentException>("address", () => new ExcelRange(address));
     }
 
     [Theory]

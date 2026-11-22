@@ -4832,4 +4832,25 @@ public class MapSplitEnumerableTests
     {
         public ImmutableArray<int>.Builder Value { get; set; } = default!;
     }
+
+    public class LetterRow
+    {
+        public int[] Values { get; set; } = default!;
+    }
+
+    [Fact]
+    public void ReadRows_CollectionWithColumnLetter_SplitsThatColumn()
+    {
+        using var importer = Helpers.GetCsvImporter("A,B\nx,\"1,2\"\n");
+        importer.Configuration.RegisterClassMap<LetterRow>(c => c.Map(r => r.Values).WithColumnLetter("B"));
+        Assert.Equal([1, 2], importer.ReadSheet().ReadRow<LetterRow>().Values);
+    }
+
+    [Fact]
+    public void WithColumnLetter_InvalidLetter_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<LetterRow>().Map(r => r.Values);
+        Assert.Throws<ArgumentNullException>("columnLetter", () => map.WithColumnLetter(null!));
+        Assert.Throws<ArgumentException>("columnLetter", () => map.WithColumnLetter("1"));
+    }
 }

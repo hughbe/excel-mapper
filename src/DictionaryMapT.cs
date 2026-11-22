@@ -1,3 +1,4 @@
+using System.Linq;
 using ExcelMapper.Readers;
 using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
@@ -45,29 +46,21 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     ColumnSettings IColumnsMap.Settings => Settings;
 
     /// <summary>
-    /// Gets or sets whether the member's columns can be missing from the sheet: the member then
+    /// Gets whether the member's columns can be missing from the sheet: the member then
     /// keeps its value, rather than mapping the row being an error.
     /// </summary>
-    public bool Optional
-    {
-        get => Settings.Optional;
-        set => Settings.Optional = value;
-    }
+    public bool Optional => Settings.Optional;
 
     /// <summary>
-    /// Gets or sets whether cells are read as the text Excel shows, with their number format applied.
+    /// Gets whether cells are read as the text Excel shows, with their number format applied.
     /// </summary>
-    public bool PreserveFormatting
-    {
-        get => Settings.PreserveFormatting;
-        set => Settings.PreserveFormatting = value;
-    }
+    public bool PreserveFormatting => Settings.PreserveFormatting;
 
     /// <summary>
     /// Gets the map that maps the value of a single cell to an object of the element type of the property
     /// or field.
     /// </summary>
-    public ElementMap<TValue> Pipeline { get; private set; } = new ElementMap<TValue>();
+    internal ElementMap<TValue> Pipeline { get; private set; } = new ElementMap<TValue>();
 
     ValuePipeline IColumnsMap.Pipeline => Pipeline;
 
@@ -165,27 +158,18 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     /// </summary>
     /// <param name="columnNames">The names of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public DictionaryMap<TKey, TValue> WithColumnNames(params IReadOnlyList<string> columnNames)
+    public DictionaryMap<TKey, TValue> WithColumnNames(params string[] columnNames)
         => WithColumns(new ColumnNamesColumns(columnNames));
 
     /// <summary>
     /// Reads the dictionary from the given columns, in order.
     /// </summary>
     /// <param name="columnNames">The names of the columns.</param>
-    /// <param name="comparison">How column names are compared.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public DictionaryMap<TKey, TValue> WithColumnNames(IReadOnlyList<string> columnNames, StringComparison comparison)
-        => WithColumns(new ColumnNamesColumns(columnNames, comparison));
-
-    /// <summary>
-    /// Reads the dictionary from the given columns, in order.
-    /// </summary>
-    /// <param name="columnNames">The names of the columns.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public DictionaryMap<TKey, TValue> WithColumnNames(params IEnumerable<string> columnNames)
+    public DictionaryMap<TKey, TValue> WithColumnNames(IEnumerable<string> columnNames)
     {
         ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
-        return WithColumnNames([.. columnNames]);
+        return WithColumnNames(columnNames as string[] ?? columnNames.ToArray());
     }
 
     /// <summary>
@@ -197,7 +181,7 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     public DictionaryMap<TKey, TValue> WithColumnNames(IEnumerable<string> columnNames, StringComparison comparison)
     {
         ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
-        return WithColumnNames([.. columnNames], comparison);
+        return WithColumns(new ColumnNamesColumns([.. columnNames], comparison));
     }
 
     /// <summary>
@@ -221,7 +205,7 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     /// </summary>
     /// <param name="columnIndices">The zero-based indices of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public DictionaryMap<TKey, TValue> WithColumnIndices(params IReadOnlyList<int> columnIndices)
+    public DictionaryMap<TKey, TValue> WithColumnIndices(params int[] columnIndices)
         => WithColumns(new ColumnIndicesColumns(columnIndices));
 
     /// <summary>
@@ -229,10 +213,10 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     /// </summary>
     /// <param name="columnIndices">The zero-based indices of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public DictionaryMap<TKey, TValue> WithColumnIndices(params IEnumerable<int> columnIndices)
+    public DictionaryMap<TKey, TValue> WithColumnIndices(IEnumerable<int> columnIndices)
     {
         ThrowHelpers.ThrowIfNull(columnIndices, nameof(columnIndices));
-        return WithColumnIndices([.. columnIndices]);
+        return WithColumnIndices(columnIndices as int[] ?? columnIndices.ToArray());
     }
 
     /// <summary>
@@ -253,7 +237,7 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     /// <returns>The map on which this method was invoked.</returns>
     public DictionaryMap<TKey, TValue> MakeOptional()
     {
-        Optional = true;
+        Settings.Optional = true;
         return this;
     }
 
@@ -263,7 +247,7 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     /// <returns>The map on which this method was invoked.</returns>
     public DictionaryMap<TKey, TValue> MakePreserveFormatting()
     {
-        PreserveFormatting = true;
+        Settings.PreserveFormatting = true;
         return this;
     }
 

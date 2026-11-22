@@ -5,7 +5,7 @@ namespace ExcelMapper.Utilities;
 /// <summary>
 /// How a pipeline's built-in conversions parse text: the formats, format provider, number style,
 /// kind of URI and offset set with the fluent methods (<c>WithFormats</c>, <c>WithFormatProvider</c>,
-/// <c>WithNumberStyle</c>, <c>WithUriKind</c>, <c>WithOffset</c>) or their attributes. Each pipeline
+/// <c>WithNumberStyle</c>, <c>WithUriKind</c>, <c>WithOffset</c>, <c>WithIgnoreCase</c>) or their attributes. Each pipeline
 /// has its own, and gives it to the mappers with the cell (<see cref="CellContext.Options"/>), so the
 /// built-in mappers hold no state and are shared. Null means the mapper's default.
 /// </summary>
@@ -75,6 +75,21 @@ internal sealed class ConversionOptions
     }
 
     private NumberStyles? _numberStyle;
+
+    /// <summary>
+    /// Gets or sets whether enum names are matched ignoring case.
+    /// </summary>
+    public bool IgnoreCase
+    {
+        get => _ignoreCase;
+        set
+        {
+            ThrowHelpers.ThrowIfFrozen(_frozen);
+            _ignoreCase = value;
+        }
+    }
+
+    private bool _ignoreCase;
 
     /// <summary>
     /// Gets or sets the kind of URI accepted. Null means absolute URIs.

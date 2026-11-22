@@ -35,23 +35,15 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
     ColumnSettings IColumnsMap.Settings => Settings;
 
     /// <summary>
-    /// Gets or sets whether the member's columns can be missing from the sheet: the member then
+    /// Gets whether the member's columns can be missing from the sheet: the member then
     /// keeps its value, rather than mapping the row being an error.
     /// </summary>
-    public bool Optional
-    {
-        get => Settings.Optional;
-        set => Settings.Optional = value;
-    }
+    public bool Optional => Settings.Optional;
 
     /// <summary>
-    /// Gets or sets whether cells are read as the text Excel shows, with their number format applied.
+    /// Gets whether cells are read as the text Excel shows, with their number format applied.
     /// </summary>
-    public bool PreserveFormatting
-    {
-        get => Settings.PreserveFormatting;
-        set => Settings.PreserveFormatting = value;
-    }
+    public bool PreserveFormatting => Settings.PreserveFormatting;
 
     /// <summary>
     /// Gets the map's value pipeline: the map itself, which converts the cell's value.
@@ -129,12 +121,38 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
         => WithColumns(new ColumnNameColumns(columnName, comparison));
 
     /// <summary>
-    /// Reads the member from the first of the given columns that the sheet has.
+    /// Reads the member from the first of the given columns that the sheet has, as
+    /// <see cref="ExcelColumnNamesAttribute"/> does.
     /// </summary>
     /// <param name="columnNames">The names of the columns, in order of preference.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ValueMap<T> WithColumnNameMatching(params string[] columnNames)
+    public ValueMap<T> WithColumnNames(params string[] columnNames)
         => WithColumns(new ColumnNamesColumns(columnNames));
+
+    /// <summary>
+    /// Reads the member from the first of the given columns that the sheet has, as
+    /// <see cref="ExcelColumnNamesAttribute"/> does.
+    /// </summary>
+    /// <param name="columnNames">The names of the columns, in order of preference.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public ValueMap<T> WithColumnNames(IEnumerable<string> columnNames)
+    {
+        ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
+        return WithColumnNames(columnNames as string[] ?? [.. columnNames]);
+    }
+
+    /// <summary>
+    /// Reads the member from the first of the given columns that the sheet has, as
+    /// <see cref="ExcelColumnNamesAttribute"/> does.
+    /// </summary>
+    /// <param name="columnNames">The names of the columns, in order of preference.</param>
+    /// <param name="comparison">How column names are compared.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public ValueMap<T> WithColumnNames(IEnumerable<string> columnNames, StringComparison comparison)
+    {
+        ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
+        return WithColumns(new ColumnNamesColumns([.. columnNames], comparison));
+    }
 
     /// <summary>
     /// Reads the member from the first column whose name matches <paramref name="predicate"/>.
@@ -186,7 +204,7 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
     /// <returns>The map on which this method was invoked.</returns>
     public ValueMap<T> MakeOptional()
     {
-        Optional = true;
+        Settings.Optional = true;
         return this;
     }
 
@@ -196,7 +214,7 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
     /// <returns>The map on which this method was invoked.</returns>
     public ValueMap<T> MakePreserveFormatting()
     {
-        PreserveFormatting = true;
+        Settings.PreserveFormatting = true;
         return this;
     }
 

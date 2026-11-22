@@ -1,6 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace ExcelMapper;
 
@@ -106,51 +108,34 @@ public class ExcelImporterConfiguration
     }
 
     /// <summary>
-    /// Registers a class map of the given type to be used when mapping a row to an
-    /// object.
-    /// </summary> <typeparam name="T">The type of the class to map.</typeparam>
-    /// <param name="classMapFactory">A factory that configures and returns the class map to use.</param>
-    public void RegisterClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Action<ExcelClassMap<T>> classMapFactory)
+    /// Registers a class map for <typeparamref name="T"/>, configured by <paramref name="configure"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the class to map.</typeparam>
+    /// <param name="configure">Configures the class map, which starts with no members: call
+    /// <see cref="ExcelClassMap{T}.AutoMap"/> to start from what auto-mapping would map.</param>
+    public void RegisterClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Action<ExcelClassMap<T>> configure)
     {
-        ThrowHelpers.ThrowIfNull(classMapFactory, nameof(classMapFactory));
+        ThrowHelpers.ThrowIfNull(configure, nameof(configure));
 
-        var classMapInstance = new ExcelClassMap<T>();
-        classMapFactory(classMapInstance);
-        RegisterClassMap(typeof(T), classMapInstance);
+        var classMap = new ExcelClassMap<T>();
+        configure(classMap);
+        RegisterClassMap(classMap);
     }
 
     /// <summary>
-    /// Registers the given class map to be used when mapping a row to an object.
+    /// Registers the given class map to be used when mapping rows to its type
+    /// (<see cref="ExcelClassMap.Type"/>). It replaces a class map auto-mapping registered for the
+    /// type, for example in an earlier <c>ReadRows</c>.
     /// </summary>
     /// <param name="classMap">The class map to use.</param>
+    /// <exception cref="ExcelMappingException">A class map is already registered for the type.</exception>
     public void RegisterClassMap(ExcelClassMap classMap)
     {
         ThrowHelpers.ThrowIfNull(classMap, nameof(classMap));
 
-        RegisterClassMap(classMap.Type, classMap);
-    }
-
-    private static void ValidateMap(IMap map)
-        => MapTree.VisitCellMaps(map, null, (cellMap, _) =>
-        {
-            if (cellMap is ValuePipeline { HasMappers: false })
-            {
-                throw new ExcelMappingException("Cannot register a class map with a property that has no Mappers defined.");
-            }
-        });
-
-    /// <summary>
-    /// Registers the given class map to be used when mapping a row to an object.
-    /// </summary>
-    /// <param name="classType">The type of the class.</param>
-    /// <param name="classMap">The class map to use.</param>
-    public void RegisterClassMap(Type classType, ExcelClassMap classMap)
-    {
-        ThrowHelpers.ThrowIfNull(classType, nameof(classType));
-        ThrowHelpers.ThrowIfNull(classMap, nameof(classMap));
-
         ValidateMap(classMap);
-        
+
+        var classType = classMap.Type;
         if (!ClassMaps.TryAdd(classType, classMap))
         {
             // A map created implicitly by auto-mapping (for example by an earlier call to ReadRows)
@@ -164,6 +149,62 @@ public class ExcelImporterConfiguration
             throw new ExcelMappingException($"Class map already exists for type \"{classType.FullName}\"");
         }
     }
+
+    /// <summary>
+    /// Registers every <see cref="ExcelClassMap"/> type in a namespace of the calling assembly,
+    /// creating each with its parameterless constructor.
+    /// </summary>
+    /// <param name="namespaceString">The namespace to search for <see cref="ExcelClassMap"/> types.</param>
+    /// <returns>The class maps registered.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="namespaceString"/> is null.</exception>
+    /// <exception cref="ArgumentException"><paramref name="namespaceString"/> is empty or no class maps are found in the namespace.</exception>
+    [RequiresUnreferencedCode("Finds class maps by scanning the assembly's types and creates them through reflection, so the trimmer may remove them. Register class maps directly with RegisterClassMap instead.")]
+    [MethodImpl(MethodImplOptions.NoInlining)] // So that the calling assembly is the caller's.
+    public IReadOnlyList<ExcelClassMap> RegisterClassMapsInNamespace(string namespaceString)
+        => RegisterClassMapsInNamespace(Assembly.GetCallingAssembly(), namespaceString);
+
+    /// <summary>
+    /// Registers every <see cref="ExcelClassMap"/> type in a namespace of an assembly, creating
+    /// each with its parameterless constructor.
+    /// </summary>
+    /// <param name="assembly">The assembly to search for <see cref="ExcelClassMap"/> types.</param>
+    /// <param name="namespaceString">The namespace to search for <see cref="ExcelClassMap"/> types.</param>
+    /// <returns>The class maps registered.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="assembly"/> or <paramref name="namespaceString"/> is null.</exception>
+    /// <exception cref="ArgumentException"><paramref name="namespaceString"/> is empty or no class maps are found in the namespace.</exception>
+    [RequiresUnreferencedCode("Finds class maps by scanning the assembly's types and creates them through reflection, so the trimmer may remove them. Register class maps directly with RegisterClassMap instead.")]
+    public IReadOnlyList<ExcelClassMap> RegisterClassMapsInNamespace(Assembly assembly, string namespaceString)
+    {
+        ThrowHelpers.ThrowIfNull(assembly, nameof(assembly));
+        ThrowHelpers.ThrowIfNullOrEmpty(namespaceString, nameof(namespaceString));
+
+        var classMaps = new List<ExcelClassMap>();
+        foreach (var type in assembly.GetTypes())
+        {
+            if (typeof(ExcelClassMap).IsAssignableFrom(type) && type.Namespace == namespaceString &&
+                Activator.CreateInstance(type) is ExcelClassMap classMap)
+            {
+                classMaps.Add(classMap);
+                RegisterClassMap(classMap);
+            }
+        }
+
+        if (classMaps.Count == 0)
+        {
+            throw new ArgumentException($"No ExcelClassMap types found in the namespace \"{namespaceString}\" in the assembly \"{assembly}\".", nameof(namespaceString));
+        }
+
+        return classMaps;
+    }
+
+    private static void ValidateMap(IMap map)
+        => MapTree.VisitCellMaps(map, null, (cellMap, _) =>
+        {
+            if (cellMap is ValuePipeline { HasMappers: false })
+            {
+                throw new ExcelMappingException("Cannot register a class map with a property that has no Mappers defined.");
+            }
+        });
 
     /// <summary>
     /// Registers a map created by auto-mapping. Unlike a map registered by the user, this can be

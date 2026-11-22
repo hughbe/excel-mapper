@@ -22,7 +22,7 @@ public class ExcelSheetTests
         yield return new object[] { new ExcelRange(2, 6, 0, null), 2..7, 0.. };
         yield return new object[] { new ExcelRange(Range.All, Range.All), Range.All, Range.All };
         yield return new object[] { new ExcelRange(1..2, 3..4), 1..2, 3..4 };
-        yield return new object[] { new ExcelRange("AB2:AZ20"), 1..20, 27..52 };
+        yield return new object[] { ExcelRange.Parse("AB2:AZ20"), 1..20, 27..52 };
     }
 
     [Theory]
@@ -316,7 +316,7 @@ public class ExcelSheetTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         var sheet = importer.ReadSheet();
-        sheet.DataRange = new ExcelRange("I:J");
+        sheet.DataRange = ExcelRange.Parse("I:J");
 
         Assert.Throws<ArgumentOutOfRangeException>("length", () => sheet.ReadHeading());
     }
@@ -326,7 +326,7 @@ public class ExcelSheetTests
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         var sheet = importer.ReadSheet();
-        sheet.DataRange = new ExcelRange("A:J");
+        sheet.DataRange = ExcelRange.Parse("A:J");
 
         Assert.Throws<ArgumentOutOfRangeException>("length", () => sheet.ReadHeading());
     }
@@ -488,7 +488,7 @@ public class ExcelSheetTests
     {
         using var importer = Helpers.GetImporter("Non Zero Header Index.xlsx");
         var sheet = importer.ReadSheet();
-        sheet.DataRange = new ExcelRange("4:7");
+        sheet.DataRange = ExcelRange.Parse("4:7");
         sheet.ReadHeading();
 
         var rows = sheet.ReadRows<StringValue>();
@@ -508,7 +508,7 @@ public class ExcelSheetTests
     {
         using var importer = Helpers.GetImporter("Non Zero Header Index.xlsx");
         var sheet = importer.ReadSheet();
-        sheet.DataRange = new ExcelRange("4:9");
+        sheet.DataRange = ExcelRange.Parse("4:9");
         sheet.ReadHeading();
 
         // The sheet ends before the range: the last row isn't repeated.
@@ -529,7 +529,7 @@ public class ExcelSheetTests
     {
         using var importer = Helpers.GetImporter("Primitives_Range.xlsx");
         var sheet = importer.ReadSheet();
-        sheet.DataRange = new ExcelRange("B:D");
+        sheet.DataRange = ExcelRange.Parse("B:D");
         sheet.ReadHeading();
 
         var rows = sheet.ReadRows<string[]>().ToArray();
@@ -549,7 +549,7 @@ public class ExcelSheetTests
     {
         using var importer = Helpers.GetImporter("Primitives_Range.xlsx");
         var sheet = importer.ReadSheet();
-        sheet.DataRange = new ExcelRange("I:J");
+        sheet.DataRange = ExcelRange.Parse("I:J");
 
         Assert.Throws<ArgumentOutOfRangeException>("length", () => sheet.ReadRows<StringValue>());
         Assert.Equal(0, sheet.CurrentRowIndex);
@@ -564,7 +564,7 @@ public class ExcelSheetTests
     {
         using var importer = Helpers.GetImporter("Primitives_Range.xlsx");
         var sheet = importer.ReadSheet();
-        sheet.DataRange = new ExcelRange("A:J");
+        sheet.DataRange = ExcelRange.Parse("A:J");
 
         Assert.Throws<ArgumentOutOfRangeException>("length", () => sheet.ReadRows<StringValue>());
         Assert.Equal(0, sheet.CurrentRowIndex);
@@ -585,7 +585,7 @@ public class ExcelSheetTests
         });
 
         var sheet = importer.ReadSheet();
-        sheet.DataRange = new ExcelRange("B1:D4");
+        sheet.DataRange = ExcelRange.Parse("B1:D4");
         sheet.ReadHeading();
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>().ToArray());
@@ -1173,7 +1173,7 @@ public class ExcelSheetTests
 
     public static IEnumerable<object[]> Region_ExcelRange_TestData()
     {
-        yield return new object[] { new ExcelRange("B3:F20") };
+        yield return new object[] { ExcelRange.Parse("B3:F20") };
         yield return new object[] { new ExcelRange(1..5, 0..2) };
         yield return new object[] { new ExcelRange(..^1, Range.All) };
     }
@@ -1200,7 +1200,7 @@ public class ExcelSheetTests
         var sheet = importer.ReadSheet();
         var region = sheet.Region(address);
         Assert.Same(sheet, region.Sheet);
-        Assert.Equal(new ExcelRange(address), region.Range);
+        Assert.Equal(ExcelRange.Parse(address), region.Range);
     }
 
     [Fact]

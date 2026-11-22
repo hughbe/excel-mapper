@@ -325,7 +325,7 @@ public class WorkflowScenarioTests
         var sheet = importer.ReadSheet();
         sheet.ReadRows<Person>().First();
         Assert.Throws<InvalidOperationException>(() => sheet.HasHeading = false);
-        Assert.Throws<InvalidOperationException>(() => sheet.DataRange = new ExcelRange("A:B"));
+        Assert.Throws<InvalidOperationException>(() => sheet.DataRange = ExcelRange.Parse("A:B"));
     }
 
     [Fact]
