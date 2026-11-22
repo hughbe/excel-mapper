@@ -12,11 +12,21 @@ public class CellContextTests
         var member = typeof(CellContextTests).GetMethod(nameof(Ctor_Invoke_ReturnsExpected))!;
         var context = new CellContext(sheet, 10, 1, member);
         Assert.Same(sheet, context.Sheet);
+        Assert.Null(context.Heading);
         Assert.Equal(10, context.RowIndex);
         Assert.Equal(1, context.ColumnIndex);
         Assert.Same(member, context.Member);
         Assert.Equal("B11", context.CellAddress);
         Assert.Same(CultureInfo.CurrentCulture, context.FormatProvider);
+    }
+
+    [Fact]
+    public void Heading_ReadHeading_ReturnsSheetHeading()
+    {
+        using var importer = Helpers.GetCsvImporter("A\n1\n");
+        var sheet = importer.ReadSheet();
+        var heading = sheet.ReadHeading();
+        Assert.Same(heading, new CellContext(sheet, 1, 0, null).Heading);
     }
 
     [Fact]

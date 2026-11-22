@@ -141,19 +141,19 @@ var employees = sheet.ReadRows<Employee>();
 
 ### Column selectors
 
-To choose columns in code, implement `IColumnSelector`. It's called once for each sheet, and returns the positions of the columns to read, as `ExcelHeading.GetColumnIndex` gives them:
+To choose columns in code, implement `IColumnSelector`. It's called once for each sheet (or region), with the sheet and the heading of the rows being read, and returns the positions of the columns to read, as `ExcelHeading.GetColumnIndex` gives them:
 
 ```csharp
 public class PrefixSelector(string prefix) : IColumnSelector
 {
-    public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
-        => sheet.Heading!.ColumnNames
+    public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context)
+        => context.Heading!.ColumnNames
             .Where(name => name.StartsWith(prefix))
-            .Select(sheet.Heading.GetColumnIndex)
+            .Select(context.Heading.GetColumnIndex)
             .ToArray();
 
     // Used in error messages: Could not read value for member "Bonuses" for columns starting with "Bonus_".
-    public string Describe(ExcelSheet sheet) => $"columns starting with \"{prefix}\"";
+    public string Describe(ColumnSelectorContext context) => $"columns starting with \"{prefix}\"";
 }
 
 public class Employee
@@ -344,7 +344,7 @@ public class Order
 
 - **A converter replaces the built-in conversion** for the member's type, so it's used for every cell that isn't empty. Empty cells use the member's empty fallback.
 - **`CellValue`**: `Kind` (`Empty`, `Text`, `Number`, `Boolean`, `DateTime`, `TimeSpan` or `Other`), `Text`, `Number`, `Boolean`, `DateTime`, `TimeSpan` and `Value`. CSV cells are always text.
-- **`CellContext`**: `Sheet`, `RowIndex`, `ColumnIndex`, `CellAddress` (such as `"B11"`), the `Member` being mapped, and the `FormatProvider` to parse with (the importer's [culture](types.md#culture), if set).
+- **`CellContext`**: `Sheet`, the `Heading` of the rows being read (a region's, when reading one), `RowIndex`, `ColumnIndex`, `CellAddress` (such as `"B11"`), the `Member` being mapped, and the `FormatProvider` to parse with (the importer's [culture](types.md#culture), if set). To report a cell as an error, throw `new ExcelMappingException(message, context)`: the message gives the cell's address and column.
 - **`CellConversionResult<T>`**: `Success(value)`; `Invalid()`, `Invalid(exception)` or `Invalid(() => exception)`, which uses the invalid fallback; or `NotHandled`, which lets the next converter try. Several `[ExcelConverter]` attributes are tried in order, and if none converts the value, it's invalid.
 - **Converters are shared** between rows and threads, so they mustn't change their own state. `[ExcelConverter]` takes `ConstructorArguments` for converters with parameters.
 
@@ -445,7 +445,7 @@ public class AgeFromBirthYearFallback : ICellFallback<int>
         }
 
         // Throw to report the cell as an error, as the default invalid fallback does.
-        throw new ExcelMappingException($"Invalid age \"{value.Text}\".", context.Sheet, context.RowIndex, context.ColumnIndex, exception);
+        throw new ExcelMappingException($"Invalid age \"{value.Text}\".", context, exception);
     }
 }
 

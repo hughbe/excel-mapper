@@ -25,7 +25,7 @@ internal sealed class ColumnSelectorReaderFactory(IColumnSelector selector) : IC
     // The chosen columns that are in the sheet (or region).
     private int[] SelectColumns(ExcelSheet sheet)
     {
-        var selected = Selector.SelectColumns(sheet) ?? throw new InvalidOperationException($"The column selector \"{Selector.GetType()}\" returned null.");
+        var selected = Selector.SelectColumns(new ColumnSelectorContext(sheet)) ?? throw new InvalidOperationException($"The column selector \"{Selector.GetType()}\" returned null.");
         var end = Math.Min(sheet.ColumnEnd, sheet.NumberOfColumns);
         var count = 0;
         for (int i = 0; i < selected.Count; i++)

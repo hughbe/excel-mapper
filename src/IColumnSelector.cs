@@ -13,19 +13,19 @@ namespace ExcelMapper;
 public interface IColumnSelector
 {
     /// <summary>
-    /// Chooses the columns to read from a sheet.
+    /// Chooses the columns to read.
     /// </summary>
-    /// <param name="sheet">The sheet being read. Its <see cref="ExcelSheet.Heading"/> gives the
-    /// columns' names, if it has a heading.</param>
+    /// <param name="context">The sheet being read. Its <see cref="ColumnSelectorContext.Heading"/>
+    /// gives the columns' names, if the rows have a heading.</param>
     /// <returns>The zero-based positions of the columns in the worksheet, as
     /// <see cref="ExcelHeading.GetColumnIndex(string)"/> gives them, in the order to read them, or
     /// an empty list if there are none. When reading a region, columns outside it are ignored.</returns>
-    IReadOnlyList<int> SelectColumns(ExcelSheet sheet);
+    IReadOnlyList<int> SelectColumns(ColumnSelectorContext context);
 
     /// <summary>
     /// Describes the columns for error messages, for example <c>column "Name"</c> or
     /// <c>columns matching "^Q[1-4]$"</c>.
     /// </summary>
-    /// <param name="sheet">The sheet being read.</param>
-    string Describe(ExcelSheet sheet);
+    /// <param name="context">The sheet being read.</param>
+    string Describe(ColumnSelectorContext context);
 }

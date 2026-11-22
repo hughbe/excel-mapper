@@ -231,8 +231,8 @@ public class Selected
 
 public class PrefixSelector(string prefix) : IColumnSelector
 {
-    public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
-        => sheet.Heading!.ColumnNames.Where(n => n.StartsWith(prefix, StringComparison.Ordinal)).Select(sheet.Heading.GetColumnIndex).ToArray();
+    public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context)
+        => context.Heading!.ColumnNames.Where(n => n.StartsWith(prefix, StringComparison.Ordinal)).Select(context.Heading.GetColumnIndex).ToArray();
 
-    public string Describe(ExcelSheet sheet) => $"columns starting with \"{prefix}\"";
+    public string Describe(ColumnSelectorContext context) => $"columns starting with \"{prefix}\"";
 }

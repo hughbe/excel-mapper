@@ -184,7 +184,7 @@ public sealed class ExcelRegion
     /// </summary>
     private ExcelSheet CreateSheet()
     {
-        var sheet = new ExcelSheet(Sheet.Worksheet);
+        var sheet = new ExcelSheet(Sheet.Worksheet, Sheet);
 
         // Columns chosen by position count from the region's first column, and stop at its last.
         var columnCount = Sheet.NumberOfColumns;

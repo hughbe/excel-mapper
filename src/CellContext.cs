@@ -4,11 +4,14 @@ using System.Reflection;
 namespace ExcelMapper;
 
 /// <summary>
-/// Where a cell being converted is: its sheet, row and column, and the member it's mapped to. See
-/// <see cref="ICellConverter{T}"/>.
+/// Where a cell being converted is: its sheet, row and column, the heading of the rows being read,
+/// and the member it's mapped to. See <see cref="ICellConverter{T}"/>.
 /// </summary>
 public readonly struct CellContext
 {
+    // The sheet the rows are read with: for a region, its own sheet, with the region's heading.
+    private readonly ExcelSheet _readingSheet;
+
     /// <summary>
     /// Creates a context, for example to test a converter.
     /// </summary>
@@ -18,16 +21,28 @@ public readonly struct CellContext
         ThrowHelpers.ThrowIfNegative(rowIndex, nameof(rowIndex));
         ThrowHelpers.ThrowIfNegative(columnIndex, nameof(columnIndex));
 
-        Sheet = sheet;
+        _readingSheet = sheet;
         RowIndex = rowIndex;
         ColumnIndex = columnIndex;
         Member = member;
     }
 
     /// <summary>
-    /// Gets the sheet being read.
+    /// Gets the sheet being read. When reading a region, this is the sheet the region was created
+    /// from: use <see cref="Heading"/> for the region's heading.
     /// </summary>
-    public ExcelSheet Sheet { get; }
+    public ExcelSheet Sheet => _readingSheet?.UserSheet!;
+
+    /// <summary>
+    /// Gets the heading of the rows being read: the region's heading when reading a region,
+    /// otherwise the sheet's. Null if they have no heading.
+    /// </summary>
+    public ExcelHeading? Heading => _readingSheet?.Heading;
+
+    /// <summary>
+    /// Gets the sheet the rows are read with, which has the heading and columns of a region.
+    /// </summary>
+    internal ExcelSheet ReadingSheet => _readingSheet;
 
     /// <summary>
     /// Gets the zero-based index of the cell's row in the worksheet.
@@ -49,7 +64,7 @@ public readonly struct CellContext
     /// Gets the culture to parse and format values with: the importer's
     /// <see cref="ExcelImporterConfiguration.Culture"/>, or the current culture if it isn't set.
     /// </summary>
-    public IFormatProvider FormatProvider => Sheet?.Culture ?? CultureInfo.CurrentCulture;
+    public IFormatProvider FormatProvider => _readingSheet?.Culture ?? CultureInfo.CurrentCulture;
 
     /// <summary>
     /// Gets the cell's address, such as "B11".

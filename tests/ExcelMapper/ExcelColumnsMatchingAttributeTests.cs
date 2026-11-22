@@ -39,9 +39,9 @@ public class ExcelColumnsMatchingAttributeTests
 
     private abstract class AbstractExcelColumnMatcher : IColumnSelector
     {
-        public abstract IReadOnlyList<int> SelectColumns(ExcelSheet sheet);
+        public abstract IReadOnlyList<int> SelectColumns(ColumnSelectorContext context);
 
-        public abstract string Describe(ExcelSheet sheet);
+        public abstract string Describe(ColumnSelectorContext context);
     }
 
     private class NoConstructorExcelColumnMatcher : IColumnSelector
@@ -50,10 +50,10 @@ public class ExcelColumnsMatchingAttributeTests
         {
         }
 
-        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context)
             => throw new NotImplementedException();
 
-        public string Describe(ExcelSheet sheet)
+        public string Describe(ColumnSelectorContext context)
             => throw new NotImplementedException();
     }
     
@@ -115,17 +115,17 @@ public class ExcelColumnsMatchingAttributeTests
 
     private class ColumnMatcher : IColumnSelector
     {
-        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context)
             => throw new NotImplementedException();
 
-        public string Describe(ExcelSheet sheet)
+        public string Describe(ColumnSelectorContext context)
             => throw new NotImplementedException();
     }
 
     private sealed class Selector : IColumnSelector
     {
-        public IReadOnlyList<int> SelectColumns(ExcelSheet sheet) => [0];
+        public IReadOnlyList<int> SelectColumns(ColumnSelectorContext context) => [0];
 
-        public string Describe(ExcelSheet sheet) => "the first column";
+        public string Describe(ColumnSelectorContext context) => "the first column";
     }
 }

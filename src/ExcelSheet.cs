@@ -25,9 +25,10 @@ public class ExcelSheet
     /// Creates a sheet for a worksheet. A region is read with a sheet of its own for the same
     /// worksheet, with its own heading and position (see <see cref="ExcelRegion"/>).
     /// </summary>
-    internal ExcelSheet(Worksheet worksheet)
+    internal ExcelSheet(Worksheet worksheet, ExcelSheet? userSheet = null)
     {
         Worksheet = worksheet;
+        UserSheet = userSheet ?? this;
         _cursor = new RowCursor(worksheet);
         _bindings = new SheetBindings(this);
     }
@@ -36,6 +37,13 @@ public class ExcelSheet
     /// The worksheet, shared with the sheets that regions of it are read with.
     /// </summary>
     internal Worksheet Worksheet { get; }
+
+    /// <summary>
+    /// The sheet the user has: this sheet, or for the sheet a region is read with, the sheet the
+    /// region was created from. Extension points and errors are given this sheet, never a
+    /// region's own.
+    /// </summary>
+    internal ExcelSheet UserSheet { get; }
 
     private readonly RowCursor _cursor;
     private readonly SheetBindings _bindings;

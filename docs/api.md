@@ -162,8 +162,10 @@ Attributes that take a type (`[ExcelConverter]`, `[ExcelTransformer]`, the fallb
 | `ICellConverter<T>` | Convert a cell (`CellValue`, with `CellContext`) to `T`, returning a `CellConversionResult<T>`: `Success`, `Invalid` or `NotHandled` | `WithConverter(converter)`, `[ExcelConverter]` |
 | `ICellTransformer` | Change a cell's value before it's converted | `WithTransformers(...)`, `[ExcelTransformer]` |
 | `ICellFallback<T>` | Give the value of an empty or invalid cell | `WithEmptyFallback`/`WithInvalidFallback(fallback)`, `[ExcelEmptyFallback]`/`[ExcelInvalidFallback]` |
-| `IColumnSelector` | Choose the columns a member is read from, once for each sheet | `WithColumns(selector)`, `[ExcelColumnMatching(typeof(...))]`, `[ExcelColumnsMatching(typeof(...))]` |
+| `IColumnSelector` | Choose the columns a member is read from, once for each sheet, from a `ColumnSelectorContext` | `WithColumns(selector)`, `[ExcelColumnMatching(typeof(...))]`, `[ExcelColumnsMatching(typeof(...))]` |
 
 **`CellValue`** - A cell's value: `Kind` (`Empty`, `Text`, `Number`, `Boolean`, `DateTime`, `TimeSpan`, `Other`), `IsEmpty`, `Text`, `Value` (as Excel stores it), and `Number`, `Boolean`, `DateTime` and `TimeSpan` for typed cells. Create one with `new CellValue(text or number or bool or DateTime or TimeSpan)`, for example to return from a transformer.
 
-**`CellContext`** - Where a cell is: `Sheet`, `RowIndex`, `ColumnIndex`, `CellAddress`, `Member`, and `FormatProvider` (the importer's culture).
+**`CellContext`** - Where a cell is: `Sheet`, `Heading` (a region's, when reading one), `RowIndex`, `ColumnIndex`, `CellAddress`, `Member`, and `FormatProvider` (the importer's culture). `new ExcelMappingException(message, context)` reports the cell as an error.
+
+**`ColumnSelectorContext`** - What an `IColumnSelector` chooses from: `Sheet`, `Heading` (a region's, when reading one) and `NumberOfColumns`.
