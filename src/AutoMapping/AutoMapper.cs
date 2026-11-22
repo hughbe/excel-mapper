@@ -223,7 +223,7 @@ internal static class AutoMapper
     /// Adds a map for each public property and field of <typeparamref name="T"/> that
     /// <paramref name="map"/> doesn't map yet.
     /// </summary>
-    // Keep in sync with the source generator's TypeWalker.GetMemberTypes. See "Auto-mapping and the source generator" in CLAUDE.md.
+    // Keep in sync with the source generator's TypeWalker.GetMappedMembers. See "Auto-mapping and the source generator" in CLAUDE.md.
     private static bool TryAddMembers<T>(ExcelClassMap<T> map, EmptyValueStrategy emptyValueStrategy, HashSet<Type> typeStack)
     {
         var type = typeof(T);

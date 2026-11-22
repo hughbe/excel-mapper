@@ -41,6 +41,8 @@ internal static class CompiledAccessors
     /// it, and null sets a value type to its default value. A setter an
     /// <see cref="ExcelMappingContext"/> registered is used if there is one.
     /// </summary>
+    // Keep in sync with the source generator's TypeWalker.AddSetter, which registers a setter for
+    // each member set here. See "Auto-mapping and the source generator" in CLAUDE.md.
     public static ExcelMemberSetter<TOwner, TValue> GetSetter<TOwner, TValue>(MemberInfo member)
         => (ExcelMemberSetter<TOwner, TValue>)s_setters.GetOrAdd((member, typeof(TOwner), typeof(TValue)), static key => CreateSetter<TOwner, TValue>(key.Member));
 

@@ -97,6 +97,8 @@ internal sealed class ConstructionPlan<[DynamicallyAccessedMembers(TrimmingConst
     /// Decides how to create a <typeparamref name="T"/> with the given members.
     /// </summary>
     /// <exception cref="ExcelMappingException">The type can't be created with these members.</exception>
+    // Keep in sync with the source generator's TypeWalker.AddConstructors, which registers a call
+    // for each constructor this can choose. See "Auto-mapping and the source generator" in CLAUDE.md.
     public static ConstructionPlan<T> Create(IReadOnlyList<ClassMapMember> classMembers)
     {
         var type = typeof(T);

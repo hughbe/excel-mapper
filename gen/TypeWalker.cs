@@ -19,8 +19,9 @@ namespace ExcelMapper.SourceGeneration;
 /// <c>TypeRule&lt;T&gt;.FindDefaultMappers</c>, <c>CanConstructObject</c> follows
 /// <c>AutoMapper.CanConstructObject</c>, <c>TryGetKeyValueTypes</c> follows
 /// <c>DictionaryRule.TryGetKeyValueTypes</c>, <c>TryGetElementType</c> follows
-/// <c>ReflectionUtilities.GetElementTypeOrEnumerableType</c>, and <c>GetMemberTypes</c> follows
-/// <c>AutoMapper.TryAddMembers</c>. See "Auto-mapping and the source generator" in CLAUDE.md.</para>
+/// <c>ReflectionUtilities.GetElementTypeOrEnumerableType</c>, <c>GetMappedMembers</c> follows
+/// <c>AutoMapper.TryAddMembers</c>, <c>AddSetter</c> follows <c>CompiledAccessors.GetSetter</c>, and
+/// <c>AddConstructors</c> follows <c>ConstructionPlan&lt;T&gt;.Create</c>. See "Auto-mapping and the source generator" in CLAUDE.md.</para>
 /// </remarks>
 internal sealed class TypeWalker
 {

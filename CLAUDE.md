@@ -58,12 +58,14 @@ They mirror each other here (each place has a comment pointing at the other):
 | `TypeRule<T>.FindDefaultMappers`: which types have a built-in conversion (built-in types, enums, numbers, `IConvertible`, `IParsable<T>`) | `s_builtInTypes`, `HasConversion`, `CanConstructObject` |
 | `DictionaryRule.TryGetKeyValueTypes` | `TryGetKeyValueTypes` |
 | `ReflectionUtilities.GetElementTypeOrEnumerableType` | `TryGetElementType`, `GetSingleAdd` |
-| `AutoMapper.TryAddMembers`, `ShouldAutoMapProperty`, `[ExcelIgnore]` | `GetMemberTypes` |
+| `AutoMapper.TryAddMembers`, `ShouldAutoMapProperty`, `[ExcelIgnore]` | `GetMappedMembers` |
 | each `GenericTypes.Create` call (a generic type made for a type found at run time) | an `ExcelTypeRegistrar` method that registers it, which `TypeWalker` calls |
+| `CompiledAccessors.GetSetter`: which members are set, and how (a property's public setter, a field that isn't readonly) | `AddSetter`, which registers a generated setter for each |
+| `ConstructionPlan<T>.Create` and `ConstructorUtilities`: which constructors create a type | `AddConstructors`, which registers a generated call for each public constructor with parameters |
 
 So:
 
-- **When auto-mapping changes** how a kind of type is mapped, which members it reads, or adds a `GenericTypes.Create` call: update `TypeWalker` (adding an `ExcelTypeRegistrar` method for a new generic type), and add cases to `tests/SourceGeneration/ExcelMappableGeneratorTests.cs` (the registrations written) and `GeneratedContextTests.cs` (a generated context maps rows as `ReadRows<T>()` does).
+- **When auto-mapping changes** how a kind of type is mapped, which members it reads or sets, which constructors it calls, or adds a `GenericTypes.Create` call: update `TypeWalker` (adding an `ExcelTypeRegistrar` method for a new generic type), and add cases to `tests/SourceGeneration/ExcelMappableGeneratorTests.cs` (the registrations written) and `GeneratedContextTests.cs` (a generated context maps rows as `ReadRows<T>()` does).
 - **When the generator changes** which types it registers or how it walks members: check it still matches auto-mapping as above, rather than making the generator decide differently.
 - A generic type made at run time must go through `GenericTypes.Create`, never `MakeGenericType` directly, so that a context can register it. Types known at compile time are created directly (see [Code conventions](#code-conventions)).
 - If the change matters with native AOT (a new kind of type, member or collection), add a case to the generated context in `tests/AotTests`, which fails on any trimming or AOT warning and on a missing registration.
