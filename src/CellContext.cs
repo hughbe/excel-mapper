@@ -92,9 +92,9 @@ public readonly struct CellContext
 
     /// <summary>
     /// Gets the culture to parse and format values with: the importer's
-    /// <see cref="ExcelImporterConfiguration.Culture"/>, or the current culture if it isn't set.
+    /// <see cref="ExcelImporterConfiguration.Culture"/> (by default <see cref="CultureInfo.InvariantCulture"/>).
     /// </summary>
-    public IFormatProvider FormatProvider => _view?.Culture ?? CultureInfo.CurrentCulture;
+    public IFormatProvider FormatProvider => _view?.Culture ?? CultureInfo.InvariantCulture;
 
     /// <summary>
     /// Gets the cell's address, such as "B11".

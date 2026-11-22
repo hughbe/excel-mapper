@@ -512,22 +512,21 @@ public class ExcelImporterConfigurationTests
     }
 
     [Fact]
-    public void Culture_GetDefault_ReturnsNull()
+    public void Culture_GetDefault_ReturnsInvariantCulture()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        Assert.Null(importer.Configuration.Culture);
+        Assert.Same(System.Globalization.CultureInfo.InvariantCulture, importer.Configuration.Culture);
     }
 
     public static IEnumerable<object?[]> Culture_Set_TestData()
     {
-        yield return new object?[] { null };
         yield return new object?[] { System.Globalization.CultureInfo.InvariantCulture };
         yield return new object?[] { new System.Globalization.CultureInfo("de-DE") };
     }
 
     [Theory]
     [MemberData(nameof(Culture_Set_TestData))]
-    public void Culture_Set_GetReturnsExpected(System.Globalization.CultureInfo? value)
+    public void Culture_Set_GetReturnsExpected(System.Globalization.CultureInfo value)
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
         importer.Configuration.Culture = value;
@@ -536,6 +535,13 @@ public class ExcelImporterConfigurationTests
         // Set same.
         importer.Configuration.Culture = value;
         Assert.Same(value, importer.Configuration.Culture);
+    }
+
+    [Fact]
+    public void Culture_SetNull_ThrowsArgumentNullException()
+    {
+        using var importer = Helpers.GetImporter("Strings.xlsx");
+        Assert.Throws<ArgumentNullException>("value", () => importer.Configuration.Culture = null!);
     }
 
     public class AutoMappedClass
