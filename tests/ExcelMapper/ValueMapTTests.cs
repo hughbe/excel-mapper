@@ -6,11 +6,6 @@ namespace ExcelMapper.Tests;
 
 public class ValueMapTTests
 {
-
-
-
-
-
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -46,8 +41,6 @@ public class ValueMapTTests
         map.PreserveFormatting = !value;
         Assert.Equal(!value, map.PreserveFormatting);
     }
-
-
 
     private static ValueMap<string> CreateMap() => new ExcelClassMap<TestClass>().Map(t => t.Value);
 

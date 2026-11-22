@@ -67,7 +67,7 @@ public class DictionaryMapTests
     public void WithValueMap_ValidMap_Success()
     {
         var map = CreateMap();
-        var newPipeline = new ValuePipeline<int>();
+        var newPipeline = CreateMap().Pipeline;
         Assert.Same(map, map.WithValueMap(v =>
         {
             Assert.Same(v, map.Pipeline);

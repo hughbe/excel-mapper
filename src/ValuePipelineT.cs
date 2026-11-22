@@ -10,8 +10,12 @@ namespace ExcelMapper;
 /// <see cref="ValuePipeline"/>.
 /// </summary>
 /// <typeparam name="T">The type of the member, or of the elements or values of a collection.</typeparam>
-public class ValuePipeline<T> : ValuePipeline
+public abstract class ValuePipeline<T> : ValuePipeline
 {
+    private protected ValuePipeline()
+    {
+    }
+
     /// <summary>
     /// Gets the mappers, which are tried in order until one converts the value.
     /// </summary>

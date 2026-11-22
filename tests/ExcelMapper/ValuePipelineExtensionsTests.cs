@@ -6,20 +6,6 @@ namespace ExcelMapper.Tests;
 
 public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 {
-    [Fact]
-    public void WithTransformers_ParamsArrayNullTransformers_ThrowsArgumentNullException()
-    {
-        var map = Map(t => t.Value);
-        Assert.Throws<ArgumentNullException>("transformers", () => map.WithTransformers((ICellTransformer[])null!));
-    }
-
-    [Fact]
-    public void WithMapping_NullMapping_ThrowsArgumentNullException()
-    {
-        var map = Map(t => t.Value);
-        Assert.Throws<ArgumentNullException>("mappingDictionary", () => map.WithMapping((Dictionary<string, string>)null!));
-    }
-
     public static IEnumerable<object[]> Formats_TestData()
     {
         yield return new object[] { new string[] { "1" } };
@@ -220,18 +206,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     }
 
 #if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
     [Fact]
     public void WithFormats_DateOnlyNullFormats_ThrowsArgumentNullException()
     {
@@ -269,18 +243,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
 #endif
 
 #if LIBRARY_NET8
@@ -324,18 +286,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
 #endif
 
 #if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
     [Fact]
     public void WithFormats_TimeOnlyNullFormats_ThrowsArgumentNullException()
     {
@@ -373,18 +323,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats([string.Empty]));
         Assert.Throws<ArgumentException>("formats", () => map.WithFormats(new List<string> { string.Empty }));
     }
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
 #endif
 
 #if LIBRARY_NET8
@@ -433,30 +371,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         yield return new object[] { new CultureInfo("fr-FR") };
     }
 
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
     [Theory]
     [InlineData(UriKind.RelativeOrAbsolute - 1)]
     [InlineData(UriKind.Relative + 1)]
@@ -467,24 +381,67 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     }
 
     [Fact]
-    public void WithTransformers_NullCellTransformers_ThrowsArgumentNullException()
-    {
-        var map = Map(t => t.Value);
-        Assert.Throws<ArgumentNullException>("transformers", () => map.WithTransformers((ICellTransformer[])null!));
-        Assert.Throws<ArgumentException>("transformers", () => map.WithTransformers(new UpperCellTransformer(), null!));
-    }
-
-    [Fact]
     public void WithFallback_NullCellFallback_ThrowsArgumentNullException()
     {
         var map = Map(t => t.DateTimeValue);
         Assert.Throws<ArgumentNullException>("fallback", () => map.WithEmptyFallback((ICellFallback<DateTime>)null!));
         Assert.Throws<ArgumentNullException>("fallback", () => map.WithInvalidFallback((ICellFallback<DateTime>)null!));
+
+        // A fallback for the underlying type of a nullable member.
+        var nullableMap = Map(t => t.NullableDateTimeValue);
+        Assert.Throws<ArgumentNullException>("fallback", () => nullableMap.WithEmptyFallback((ICellFallback<DateTime>)null!));
+        Assert.Throws<ArgumentNullException>("fallback", () => nullableMap.WithInvalidFallback((ICellFallback<DateTime>)null!));
     }
 
-    private sealed class UpperCellTransformer : ICellTransformer
+    [Fact]
+    public void Methods_NullMap_ThrowArgumentNullException()
     {
-        public CellValue Transform(CellValue value, CellContext context) => new(value.Text?.ToUpperInvariant());
+        Assert.Throws<ArgumentNullException>("map", () => ((ValueMap<int>)null!).WithConverter(new ZeroConverter()));
+        Assert.Throws<ArgumentNullException>("map", () => ((ValueMap<int?>)null!).WithConverter(new ZeroConverter()));
+        Assert.Throws<ArgumentNullException>("map", () => ((ValueMap<int>)null!).WithEmptyFallback(new ZeroFallback()));
+        Assert.Throws<ArgumentNullException>("map", () => ((ValueMap<int?>)null!).WithEmptyFallback(new ZeroFallback()));
+        Assert.Throws<ArgumentNullException>("map", () => ((ValueMap<int>)null!).WithInvalidFallback(new ZeroFallback()));
+        Assert.Throws<ArgumentNullException>("map", () => ((ValueMap<int?>)null!).WithInvalidFallback(new ZeroFallback()));
+    }
+
+    [Fact]
+    public void Methods_ReturnTheMap()
+    {
+        var map = Map(t => t.DateTimeValue);
+        Assert.Same(map, map.WithFormats("yyyy-MM-dd"));
+        Assert.Same(map, map.WithFormatProvider(CultureInfo.InvariantCulture));
+        Assert.Same(map, map.WithEmptyFallback(new MinValueFallback()));
+        Assert.Same(map, map.WithInvalidFallback(new MinValueFallback()));
+        Assert.Same(map, map.WithConverter(new MinValueConverter()));
+
+        var nullableMap = Map(t => t.NullableDateTimeValue);
+        Assert.Same(nullableMap, nullableMap.WithFormats("yyyy-MM-dd"));
+        Assert.Same(nullableMap, nullableMap.WithEmptyFallback(new MinValueFallback()));
+        Assert.Same(nullableMap, nullableMap.WithInvalidFallback(new MinValueFallback()));
+        Assert.Same(nullableMap, nullableMap.WithConverter(new MinValueConverter()));
+
+        var uriMap = new ExcelClassMap<UriClass>().Map(u => u.Uri);
+        Assert.Same(uriMap, uriMap.WithUriKind(UriKind.Relative));
+    }
+
+    private sealed class UriClass
+    {
+        public Uri Uri { get; set; } = default!;
+    }
+
+    private sealed class ZeroConverter : ICellConverter<int>
+    {
+        public CellConversionResult<int> Convert(CellValue value, CellContext context) => CellConversionResult<int>.Success(0);
+    }
+
+    private sealed class ZeroFallback : ICellFallback<int>
+    {
+        public int Fallback(CellValue value, CellContext context, Exception? exception) => 0;
+    }
+
+    private sealed class MinValueConverter : ICellConverter<DateTime>
+    {
+        public CellConversionResult<DateTime> Convert(CellValue value, CellContext context) => CellConversionResult<DateTime>.Success(DateTime.MinValue);
     }
 
     private sealed class MinValueFallback : ICellFallback<DateTime>
@@ -506,72 +463,6 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
         public CellConversionResult<T> Convert(CellValue cell, CellContext context) => CellConversionResult<T>.Success(value);
     }
 
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
-#if LIBRARY_NET8
-#endif
-
     [Fact]
     public void WithOffset_InvalidOffset_ThrowsArgumentOutOfRangeException()
     {
@@ -582,7 +473,7 @@ public class ValuePipelineExtensionsTests : ExcelClassMap<Helpers.TestClass>
     [Fact]
     public void WithOffset_NullMap_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>("map", () => ((ValuePipeline<DateTimeOffset>)null!).WithOffset(TimeSpan.Zero));
-        Assert.Throws<ArgumentNullException>("map", () => ((ValuePipeline<DateTimeOffset?>)null!).WithOffset(TimeSpan.Zero));
+        Assert.Throws<ArgumentNullException>("map", () => ((ValueMap<DateTimeOffset>)null!).WithOffset(TimeSpan.Zero));
+        Assert.Throws<ArgumentNullException>("map", () => ((ValueMap<DateTimeOffset?>)null!).WithOffset(TimeSpan.Zero));
     }
 }

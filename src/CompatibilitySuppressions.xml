@@ -23,9 +23,12 @@
     - OneToOneMap<T> derives from ValuePipeline<T> (CP0009) instead of holding one, so the value
       methods take ValuePipeline/ValuePipeline<T> and IValuePipelineExtensions is renamed
       ValuePipelineExtensions (CP0001). ValuePipeline's constructor is private protected (CP0002):
-      pipelines are typed. The collection and dictionary maps' Pipeline properties are typed, and
-      WithElementMap/WithValueMap take Func<ValuePipeline<T>, ValuePipeline<T>> (CP0002); lambdas
-      passed to them compile unchanged.
+      pipelines are typed. ValuePipeline<T> is abstract and its constructor is private protected
+      (CP0002, CP0009): the value methods for any type are instance methods of ValuePipeline<T, TSelf>,
+      the base of ValueMap<T> and of ElementMap<T>, so that they return the map they're called on.
+      The collection and dictionary maps' Pipeline properties are ElementMap<T>, and
+      WithElementMap/WithValueMap take Func<ElementMap<T>, ElementMap<T>> (CP0002); lambdas passed
+      to them compile unchanged.
     - The old extension types are internal (CP0001): ICellMapper, CellMapperResult, ReadCellResult,
       Abstractions.ICellTransformer, IFallbackItem, IValuePipeline and IValuePipeline<T>, and the
       types in ExcelMapper.Mappers, ExcelMapper.Fallbacks and ExcelMapper.Transformers. ICellConverter<T>,
@@ -2641,6 +2644,13 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline`1.#ctor</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:ExcelMapper.ExcelClassMap.#ctor(System.Type,ExcelMapper.FallbackStrategy)</Target>
     <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
@@ -2935,6 +2945,13 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline`1.#ctor</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:ExcelMapper.ExcelClassMap.#ctor(System.Type,ExcelMapper.FallbackStrategy)</Target>
     <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
@@ -3228,6 +3245,13 @@
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ValuePipeline`1.#ctor</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
     <DiagnosticId>CP0008</DiagnosticId>
     <Target>T:ExcelMapper.ValuePipeline</Target>
     <Left>lib/net8.0/ExcelMapper.dll</Left>
@@ -3278,6 +3302,13 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0009</DiagnosticId>
+    <Target>T:ExcelMapper.ValuePipeline`1</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0009</DiagnosticId>
     <Target>T:ExcelMapper.ValuePipeline</Target>
     <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
@@ -3285,7 +3316,21 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0009</DiagnosticId>
+    <Target>T:ExcelMapper.ValuePipeline`1</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0009</DiagnosticId>
     <Target>T:ExcelMapper.ValuePipeline</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0009</DiagnosticId>
+    <Target>T:ExcelMapper.ValuePipeline`1</Target>
     <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>

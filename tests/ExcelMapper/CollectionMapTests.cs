@@ -154,7 +154,7 @@ public class CollectionMapTests
     public void WithElementMap_ValidMap_Success()
     {
         var map = CreateMap();
-        var newPipeline = new ValuePipeline<string>();
+        var newPipeline = CreateMap().Pipeline;
         Assert.Same(map, map.WithElementMap(e =>
         {
             Assert.Same(e, map.Pipeline);
