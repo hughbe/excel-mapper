@@ -20,7 +20,7 @@ internal static class HeadingSearch
     /// </summary>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public static bool TryFind<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelSheet sheet, RowCursor cursor, int maxRows, [NotNullWhen(true)] out ExcelHeading? heading, [NotNullWhen(false)] out string? error)
+    public static bool TryFind<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(SheetView sheet, RowCursor cursor, int maxRows, [NotNullWhen(true)] out ExcelHeading? heading, [NotNullWhen(false)] out string? error)
     {
         var classMap = sheet.GetOrCreateClassMap<T>();
         var startRowIndex = cursor.GetRowIndex(sheet.DataRange.Rows.Start);
@@ -63,7 +63,7 @@ internal static class HeadingSearch
             if (lookedUp == 0)
             {
                 cursor.Reset();
-                throw new ExcelMappingException($"Can't find the heading for type \"{typeof(T)}\" as it doesn't look up any column by name. Set {nameof(ExcelSheet.HeadingIndex)} instead.");
+                throw new ExcelMappingException($"Can't find the heading for type \"{typeof(T)}\" as it doesn't look up any column by name. Set {nameof(SheetView.HeadingIndex)} instead.");
             }
 
             if (found > 0 && problems!.Count == 0)

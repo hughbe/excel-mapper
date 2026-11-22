@@ -111,7 +111,7 @@ public sealed class ExcelRegion
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
     {
-        foreach (var row in CreateSheet<T>().ReadRows<T>())
+        foreach (var row in CreateView<T>().ReadRows<T>())
         {
             yield return row;
         }
@@ -127,7 +127,7 @@ public sealed class ExcelRegion
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public IEnumerable<ExcelRowResult<T>> ReadRowResults<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
     {
-        foreach (var result in CreateSheet<T>().ReadRowResults<T>())
+        foreach (var result in CreateView<T>().ReadRowResults<T>())
         {
             yield return result;
         }
@@ -142,7 +142,7 @@ public sealed class ExcelRegion
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public void ValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
-        => CreateSheet<T>().ValidateHeading<T>();
+        => CreateView<T>().ValidateHeading<T>();
 
     /// <summary>
     /// Checks that the region's heading has every column that <typeparamref name="T"/> needs.
@@ -155,60 +155,61 @@ public sealed class ExcelRegion
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public bool TryValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(out IReadOnlyList<string> problems)
     {
-        var sheet = CreateSheet();
-        if (_headingKind == HeadingKind.Search && !sheet.TryFindHeading<T>(_headingValue, out _, out var error))
+        var view = CreateView();
+        if (_headingKind == HeadingKind.Search && !view.TryFindHeading<T>(_headingValue, out _, out var error))
         {
             problems = [error];
             return false;
         }
 
-        return sheet.TryValidateHeading<T>(out problems);
+        return view.TryValidateHeading<T>(out problems);
     }
 
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    private ExcelSheet CreateSheet<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
+    private SheetView CreateView<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
     {
-        var sheet = CreateSheet();
+        var view = CreateView();
         if (_headingKind == HeadingKind.Search)
         {
-            sheet.FindHeading<T>(_headingValue);
+            view.FindHeading<T>(_headingValue);
         }
 
-        return sheet;
+        return view;
     }
 
     /// <summary>
-    /// Creates a sheet for the region's worksheet, with its own heading and position, set up to read
-    /// the region.
+    /// Creates a view of the region's worksheet, with its own heading and position, set up to read
+    /// the region. The view's sheet is the one the region is of, which extension points and
+    /// exceptions are given.
     /// </summary>
-    private ExcelSheet CreateSheet()
+    private SheetView CreateView()
     {
-        var sheet = new ExcelSheet(Sheet.Worksheet, Sheet);
+        var view = new SheetView(Sheet.Worksheet, Sheet);
 
         // Columns chosen by position count from the region's first column, and stop at its last.
         var columnCount = Sheet.NumberOfColumns;
-        sheet.ColumnOffset = Math.Min(Range.Columns.Start.GetOffset(columnCount), columnCount);
-        sheet.ColumnEnd = Math.Max(sheet.ColumnOffset, Math.Min(Range.Columns.End.GetOffset(columnCount), columnCount));
+        view.ColumnOffset = Math.Min(Range.Columns.Start.GetOffset(columnCount), columnCount);
+        view.ColumnEnd = Math.Max(view.ColumnOffset, Math.Min(Range.Columns.End.GetOffset(columnCount), columnCount));
 
         switch (_headingKind)
         {
             case HeadingKind.None:
-                sheet.HasHeading = false;
-                sheet.DataRange = Range;
+                view.HasHeading = false;
+                view.DataRange = Range;
                 break;
 
             case HeadingKind.AtRow:
                 // The heading is read from its row; the data is the region's rows after it.
-                sheet.DataRange = new ExcelRange(_headingValue..Range.Rows.End, Range.Columns);
-                sheet.FirstDataRow = Range.Rows.Start;
+                view.DataRange = new ExcelRange(_headingValue..Range.Rows.End, Range.Columns);
+                view.FirstDataRow = Range.Rows.Start;
                 break;
 
             default:
-                sheet.DataRange = Range;
+                view.DataRange = Range;
                 break;
         }
 
-        return sheet;
+        return view;
     }
 }

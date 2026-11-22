@@ -13,8 +13,18 @@ public readonly struct ColumnSelectorContext
     public ColumnSelectorContext(ExcelSheet sheet)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
-        Sheet = sheet.UserSheet;
+        Sheet = sheet;
         Heading = sheet.Heading;
+    }
+
+    /// <summary>
+    /// Creates the context for the rows being read: the user's sheet, with the heading of the
+    /// sheet or region.
+    /// </summary>
+    internal ColumnSelectorContext(SheetView view)
+    {
+        Sheet = view.Sheet;
+        Heading = view.Heading;
     }
 
     /// <summary>

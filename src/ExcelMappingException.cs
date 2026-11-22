@@ -52,7 +52,7 @@ public class ExcelMappingException : Exception
     /// <param name="columnIndex">The zero-based index of the column in the sheet that is currently being read.</param>
     /// <param name="innerException">The inner exception of the exception.</param>
     public ExcelMappingException(string message, ExcelSheet sheet, int rowIndex, int columnIndex, Exception? innerException)
-        : this(message, sheet, rowIndex, columnIndex, innerException, hint: null)
+        : this(message, sheet?.View, rowIndex, columnIndex, innerException, hint: null)
     {
     }
 
@@ -81,15 +81,23 @@ public class ExcelMappingException : Exception
         Member = context.Member;
     }
 
-    private static ExcelSheet GetReadingSheet(CellContext context)
-        => context.ReadingSheet ?? throw new ArgumentException("The context has no sheet.", nameof(context));
+    private static SheetView GetReadingSheet(CellContext context)
+        => context.View ?? throw new ArgumentException("The context has no sheet.", nameof(context));
 
-    internal ExcelMappingException(string message, ExcelSheet sheet, int rowIndex, int columnIndex, Exception? innerException, string? hint)
+    /// <summary>
+    /// Creates an exception for a cell of the rows being read, with the sheet or region's heading.
+    /// </summary>
+    internal ExcelMappingException(string message, SheetView sheet, int rowIndex, int columnIndex, Exception? innerException = null)
+        : this(message, sheet, rowIndex, columnIndex, innerException, hint: null)
+    {
+    }
+
+    internal ExcelMappingException(string message, SheetView? sheet, int rowIndex, int columnIndex, Exception? innerException, string? hint)
         : base(GetMessage(message, sheet, rowIndex, columnIndex) + hint, innerException)
     {
-        // The message and column name use the heading of the rows being read (a region's, for
-        // the sheet a region is read with), but the sheet is the one the user has.
-        Sheet = sheet?.UserSheet;
+        // The message and column name use the heading of the rows being read (a region's when
+        // reading a region), but the sheet is the user's.
+        Sheet = sheet?.Sheet;
         RowIndex = rowIndex;
         ColumnIndex = columnIndex;
         if (columnIndex >= 0 && sheet?.Heading is { } heading && heading.TryGetColumnName(columnIndex, out var columnName))
@@ -130,7 +138,7 @@ public class ExcelMappingException : Exception
     /// </summary>
     public string? CellAddress => RowIndex >= 0 && ColumnIndex >= 0 ? ExcelRange.GetCellAddress(RowIndex, ColumnIndex) : null;
 
-    internal static ExcelMappingException CreateForNoSuchColumn(ExcelSheet sheet, int rowIndex, Readers.Columns columns, MemberInfo? member)
+    internal static ExcelMappingException CreateForNoSuchColumn(SheetView sheet, int rowIndex, Readers.Columns columns, MemberInfo? member)
     {
         var exception = columns.CreateMissingException(sheet, rowIndex, member);
         exception.Member = member;
@@ -142,7 +150,7 @@ public class ExcelMappingException : Exception
     /// Suggests a column whose name only differs by case or by separators (spaces, underscores,
     /// hyphens and dots), which is a common reason for a column not being found.
     /// </summary>
-    internal static string? GetSimilarColumnHint(ExcelSheet sheet, string columnName)
+    internal static string? GetSimilarColumnHint(SheetView sheet, string columnName)
     {
         if (sheet.Heading is null || sheet.Settings.IgnoreSeparatorsInColumnNames)
         {
@@ -162,7 +170,7 @@ public class ExcelMappingException : Exception
         return null;
     }
 
-    private static string GetMessage(string message, ExcelSheet? sheet, int rowIndex, int columnIndex)
+    private static string GetMessage(string message, SheetView? sheet, int rowIndex, int columnIndex)
     {
         string columnDescription = string.Empty;
         if (columnIndex >= 0)

@@ -49,7 +49,7 @@ internal static class ColumnUtilities
         }
     }
 
-    public static bool TryGetColumnIndex(ExcelSheet sheet, string columnName, StringComparison comparison, out int columnIndex)
+    public static bool TryGetColumnIndex(SheetView sheet, string columnName, StringComparison comparison, out int columnIndex)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
         if (sheet.Heading == null)
@@ -112,7 +112,7 @@ internal static class ColumnUtilities
         return builder.ToString();
     }
 
-    private static bool TryGetExactColumnIndex(ExcelSheet sheet, ExcelHeading heading, string columnName, StringComparison comparison, out int columnIndex)
+    private static bool TryGetExactColumnIndex(SheetView sheet, ExcelHeading heading, string columnName, StringComparison comparison, out int columnIndex)
     {
         // ExcelSheet.TryGetColumnIndex defaults to OrdinalIgnoreCase.
         // Ordinal comparison can be optimised by ensuring the column name is in the correct case.
@@ -158,7 +158,7 @@ internal static class ColumnUtilities
     /// columns that can be mapped. If the sheet has a heading, this is the columns in the
     /// heading (i.e. the columns in the data range). Otherwise this is every column.
     /// </summary>
-    public static (int Start, int End) GetColumnRange(ExcelSheet sheet)
+    public static (int Start, int End) GetColumnRange(SheetView sheet)
     {
         if (sheet.Heading is { } heading)
         {

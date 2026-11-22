@@ -138,7 +138,7 @@ public class ExcelClassMap : IParentMap
     private ConstructionPlan? _constructionPlan;
 
     /// <inheritdoc/>
-    bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
+    bool IMap.TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
         => TryGetValue(sheet, rowIndex, reader, member, errors, out result);
 
     /// <summary>
@@ -146,7 +146,7 @@ public class ExcelClassMap : IParentMap
     /// <paramref name="errors"/> isn't null (see <see cref="ExcelSheet.ReadRowResults{T}"/>), mapping
     /// errors are added to it rather than thrown, and every member is still read.
     /// </summary>
-    internal bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
+    internal bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
     {
         // If the map represents a single value, use that map to get the value.
         if (_valueMap is not null)
@@ -182,7 +182,7 @@ public class ExcelClassMap : IParentMap
         return TryCreateUsingConstructor(plan, members, sheet, rowIndex, reader, errors, out result);
     }
 
-    private static void MapBoundMembers(BoundMember[] members, object instance, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
+    private static void MapBoundMembers(BoundMember[] members, object instance, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
     {
         if (errors is null)
         {
@@ -213,7 +213,7 @@ public class ExcelClassMap : IParentMap
     /// <see cref="ExcelSheet.ReadRowResults{T}"/>), a mapping error is recorded and the member has no
     /// value, so that the remaining members are still read.
     /// </summary>
-    private static void ReadMemberValue(BoundMember member, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
+    private static void ReadMemberValue(BoundMember member, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
     {
         if (errors is null)
         {
@@ -231,7 +231,7 @@ public class ExcelClassMap : IParentMap
         }
     }
 
-    private bool TryCreateUsingConstructor(ConstructionPlan plan, BoundMember[] members, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
+    private bool TryCreateUsingConstructor(ConstructionPlan plan, BoundMember[] members, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
     {
         var errorCount = errors?.Count ?? 0;
 
