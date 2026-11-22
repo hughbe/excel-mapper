@@ -128,6 +128,10 @@ The pipeline creates one `CellContext` for each cell and gives it to every trans
 
 The net8.0 build is annotated for trimming: the mapped type `T` and the types given in attributes are kept, and the reflection-based APIs are marked `[RequiresUnreferencedCode]`/`[RequiresDynamicCode]`. Generic mapper and adapter types created at run time are kept with `[DynamicDependency]`. `tests/TrimmingTests` is published trimmed and run in CI. See [Trimming and Native AOT](trimming.md).
 
+## Public API
+
+The public API of each target framework is listed in `src/PublicAPI/<framework>/PublicAPI.Unshipped.txt` (and `PublicAPI.Shipped.txt` after a release), checked by Microsoft.CodeAnalysis.PublicApiAnalyzers on every build, so a change to the public API fails the build until the lists change with it. The frameworks' APIs differ: .NET 8 also has `DateOnly`, `TimeOnly` and the generic `INumberBase<T>` options. Package validation separately compares the package with the last release on NuGet (see `CLAUDE.md`).
+
 ## Source layout
 
 | Path | Contents |

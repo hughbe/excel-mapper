@@ -5,15 +5,17 @@ using ExcelDataReader;
 namespace ExcelMapper;
 
 /// <summary>
-/// Maps a row of a sheet to an object of the given type.
+/// Maps a row of a sheet to an object of the given type. Class maps derive from
+/// <see cref="ExcelClassMap{T}"/>, which has the methods that map members: this is its base, so
+/// that class maps of any type can be registered and looked up.
 /// </summary>
-public class ExcelClassMap : IParentMap
+public abstract class ExcelClassMap : IParentMap
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ExcelClassMap"/> class.
     /// </summary>
     /// <param name="type">The type of the object to create.</param>
-    private protected ExcelClassMap([DynamicallyAccessedMembers(TrimmingConstants.MappedType)] Type type) : this(type, EmptyValueStrategy.Error)
+    protected ExcelClassMap([DynamicallyAccessedMembers(TrimmingConstants.MappedType)] Type type) : this(type, EmptyValueStrategy.Error)
     {
     }
 
@@ -22,7 +24,7 @@ public class ExcelClassMap : IParentMap
     /// </summary>
     /// <param name="type">The type of the object to create.</param>
     /// <param name="emptyValueStrategy">The default strategy to use when the value of a cell is empty.</param>
-    private protected ExcelClassMap([DynamicallyAccessedMembers(TrimmingConstants.MappedType)] Type type, EmptyValueStrategy emptyValueStrategy)
+    protected ExcelClassMap([DynamicallyAccessedMembers(TrimmingConstants.MappedType)] Type type, EmptyValueStrategy emptyValueStrategy)
     {
         ThrowHelpers.ThrowIfNull(type, nameof(type));
         EnumUtilities.ValidateIsDefined(emptyValueStrategy);
