@@ -47,7 +47,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 
 **`ExcelImporterConfiguration`** - An importer's settings and class maps.
 - `RegisterClassMap<TMap>()` / `RegisterClassMap(classMap)` / `RegisterClassMap(type, classMap)` - Use a class map for a type. Replaces a map created earlier by auto-mapping; throws if you already registered one
-- `RegisterClassMap<T>(c => ...)` - Start from the auto-mapped class map for `T`, and change it
+- `RegisterClassMap<T>(c => ...)` - Configure a class map for `T` inline. It starts empty: only the members you map are read
 - `TryGetClassMap<T>(out classMap)` / `TryGetClassMap(type, out classMap)` - The class map registered for a type, including one created by auto-mapping
 - `Culture` - The culture to parse text and format values with (default: the current culture)
 - `SkipBlankLines` - Skip empty rows (default: false)

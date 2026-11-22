@@ -62,7 +62,7 @@ public class EmployeeMap : ExcelClassMap<Employee>
 importer.Configuration.RegisterClassMap<EmployeeMap>();
 ```
 
-Or configure one inline. This starts from the class map auto-mapping would create, so you only change the members that need it:
+Or configure one inline:
 
 ```csharp
 importer.Configuration.RegisterClassMap<Employee>(c =>
