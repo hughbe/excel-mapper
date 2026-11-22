@@ -84,7 +84,7 @@ A class map is frozen (`IMap.Freeze`) the first time it's used with a sheet (`Sh
 - With a **parameterless constructor**, it creates the object, then sets each member.
 - Otherwise (records, and classes with read-only properties), it finds the public **constructor** whose parameters match mapped members by name and type (or have default values), reads every member first, and passes them to the constructor. Members that aren't parameters are set afterwards.
 
-`CompiledAccessors` compiles setters and constructor calls once per member or constructor, and falls back to reflection where code can't be compiled (which boxes). A row read as a single value (`ReadRows<int>()`, or `Map(p => p)`) is read by its `ValueMap<T>` as a `T`.
+`CompiledAccessors` compiles setters and constructor calls once per member or constructor, and falls back to reflection where code can't be compiled (which boxes). A setter or constructor an `ExcelMappingContext` registered (`RegisteredAccessors`, written by the source generator as ordinary code: `ExcelMemberSetter<TOwner, TValue>` and `ExcelConstructor<TOwner>`, whose `ExcelConstructorArguments<TOwner>` reads each argument typed) is used before either, so native AOT apps don't use reflection. A row read as a single value (`ReadRows<int>()`, or `Map(p => p)`) is read by its `ValueMap<T>` as a `T`.
 
 ## The value pipeline
 

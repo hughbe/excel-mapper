@@ -136,4 +136,102 @@ public class ExcelTypeRegistrarTests
         Assert.Equal(RegistrarDictionaryColor.Red, row["A"]);
         Assert.Equal(RegistrarDictionaryColor.Green, row["B"]);
     }
+
+    // A context whose setters and constructors mark what they set, to show they're the ones used.
+    private sealed class AccessorContext : ExcelMappingContext
+    {
+        public static AccessorContext Instance { get; } = new();
+
+        protected override void RegisterTypes(ExcelTypeRegistrar types)
+        {
+            types.Row<SetterRow>();
+            types.Type<string>();
+            types.Type<int>();
+            types.Setter<SetterRow, string?>(nameof(SetterRow.Name), static (ref SetterRow row, string? value) => row.Name = value + "!");
+            types.Setter<SetterStruct, int>(nameof(SetterStruct.Value), static (ref SetterStruct row, int value) => row.Value = value * 10);
+            types.Row<SetterStruct>();
+
+            types.Row<ConstructedRow>();
+            types.Nullable<int>();
+            types.Dictionary<Dictionary<string, string>, string, string>();
+            types.Constructor<ConstructedRow>(
+                [typeof(string), typeof(int?), typeof(Dictionary<string, string>), typeof(string), typeof(int)],
+                static arguments => new ConstructedRow(arguments.Get<string>(0) + "!", arguments.Get<int?>(1), arguments.Get<Dictionary<string, string>>(2), arguments.Get<string>(3), arguments.Get<int>(4)));
+        }
+    }
+
+    public class SetterRow
+    {
+        public string? Name { get; set; }
+    }
+
+    public struct SetterStruct
+    {
+        public int Value { get; set; }
+    }
+
+    public record ConstructedRow(
+        string Name,
+        int? Age,
+        [property: ExcelColumnNames("A", "B")] Dictionary<string, string> Values,
+        [property: ExcelIgnore] string? Missing = null,
+        [property: ExcelIgnore] int Count = 5);
+
+    [Fact]
+    public void Setter_Registered_SetsMember()
+    {
+        using var importer = Helpers.GetCsvImporter("Name\nAl\n");
+        Assert.Equal("Al!", importer.ReadSheet().ReadRows(AccessorContext.Instance.GetClassMap<SetterRow>()).Single().Name);
+    }
+
+    [Fact]
+    public void Setter_RegisteredForStruct_SetsInPlace()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\n3\n");
+        Assert.Equal(30, importer.ReadSheet().ReadRows(AccessorContext.Instance.GetClassMap<SetterStruct>()).Single().Value);
+    }
+
+    [Fact]
+    public void Constructor_Registered_CreatesWithArguments()
+    {
+        // Name is read typed, Values as an object (a dictionary), Missing and Count from their
+        // default values, and Age is empty.
+        using var importer = Helpers.GetCsvImporter("Name,Age,A,B\nAl,,1,2\n");
+        var row = importer.ReadSheet().ReadRows(AccessorContext.Instance.GetClassMap<ConstructedRow>()).Single();
+        Assert.Equal("Al!", row.Name);
+        Assert.Null(row.Age);
+        Assert.Equal("1", row.Values["A"]);
+        Assert.Equal("2", row.Values["B"]);
+        Assert.Null(row.Missing);
+        Assert.Equal(5, row.Count);
+    }
+
+    [Fact]
+    public void Setter_NullArguments_ThrowsArgumentNullException()
+    {
+        var types = CaptureRegistrar();
+        Assert.Throws<ArgumentNullException>("member", () => types.Setter<SetterRow, string>(null!, static (ref SetterRow _, string _) => { }));
+        Assert.Throws<ArgumentNullException>("setter", () => types.Setter<SetterRow, string>("Name", null!));
+        Assert.Throws<ArgumentNullException>("parameterTypes", () => types.Constructor<SetterRow>(null!, static _ => new SetterRow()));
+        Assert.Throws<ArgumentNullException>("constructor", () => types.Constructor<SetterRow>([], null!));
+    }
+
+    // The registrar a context is given, which only the library creates.
+    private static ExcelTypeRegistrar CaptureRegistrar()
+    {
+        var context = new CapturingContext();
+        context.GetClassMap<string>();
+        return context.Types!;
+    }
+
+    private sealed class CapturingContext : ExcelMappingContext
+    {
+        public ExcelTypeRegistrar? Types { get; private set; }
+
+        protected override void RegisterTypes(ExcelTypeRegistrar types)
+        {
+            Types = types;
+            types.Row<string>();
+        }
+    }
 }

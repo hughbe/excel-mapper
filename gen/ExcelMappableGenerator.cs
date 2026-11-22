@@ -237,7 +237,7 @@ public sealed class ExcelMappableGenerator : IIncrementalGenerator
             builder.AppendLine($"{member}{{");
             foreach (var registration in model.Registrations)
             {
-                builder.AppendLine($"{member}    types.{registration}();");
+                builder.AppendLine($"{member}    types.{registration};");
             }
 
             builder.AppendLine($"{member}}}");
