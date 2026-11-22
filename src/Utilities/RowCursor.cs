@@ -64,10 +64,10 @@ internal sealed class RowCursor(Worksheet worksheet)
 
     /// <summary>
     /// Moves to the next row of data in <paramref name="dataRange"/>, skipping rows before
-    /// <paramref name="firstDataRow"/> and, if the importer skips blank lines, blank rows.
+    /// <paramref name="firstDataRow"/> and, if <paramref name="skipBlankLines"/>, blank rows.
     /// </summary>
     /// <returns>False if there are no more rows.</returns>
-    public bool MoveNext(ExcelRange dataRange, Index? firstDataRow)
+    public bool MoveNext(ExcelRange dataRange, Index? firstDataRow, bool skipBlankLines)
     {
         worksheet.ThrowIfClosed();
 
@@ -107,7 +107,7 @@ internal sealed class RowCursor(Worksheet worksheet)
             return false;
         }
 
-        if (worksheet.Configuration.SkipBlankLines)
+        if (skipBlankLines)
         {
             // Only consider the columns in the data range when checking for blank rows.
             var fieldCount = worksheet.Reader.FieldCount;

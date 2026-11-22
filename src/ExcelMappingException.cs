@@ -144,7 +144,7 @@ public class ExcelMappingException : Exception
     /// </summary>
     internal static string? GetSimilarColumnHint(ExcelSheet sheet, string columnName)
     {
-        if (sheet.Heading is null || sheet.Configuration.IgnoreSeparatorsInColumnNames)
+        if (sheet.Heading is null || sheet.Settings.IgnoreSeparatorsInColumnNames)
         {
             return null;
         }

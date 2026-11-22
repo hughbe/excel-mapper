@@ -173,7 +173,14 @@ public class ExcelSheet
     /// <summary>
     /// The importer's culture, if set (see <see cref="ExcelImporterConfiguration.Culture"/>).
     /// </summary>
-    internal CultureInfo? Culture => Worksheet.Configuration.Culture;
+    internal CultureInfo? Culture => Settings.Culture;
+
+    private ReadSettings? _settings;
+
+    /// <summary>
+    /// The importer's settings, taken when this sheet first needs them: when it starts reading.
+    /// </summary>
+    internal ReadSettings Settings => _settings ??= new ReadSettings(Worksheet.Configuration);
 
     internal ExcelImporterConfiguration Configuration => Worksheet.Configuration;
 
@@ -199,7 +206,7 @@ public class ExcelSheet
         _cursor.MoveTo(_cursor.GetRowIndex(_dataRange.Rows.Start));
 
         // Create the heading.
-        var heading = new ExcelHeading(Reader, DataRange, Configuration);
+        var heading = new ExcelHeading(Reader, DataRange, Settings.MaxColumnsPerSheet);
         Heading = heading;
         return heading;
     }
@@ -420,7 +427,7 @@ public class ExcelSheet
             ReadHeading();
         }
 
-        return _cursor.MoveNext(_dataRange, FirstDataRow);
+        return _cursor.MoveNext(_dataRange, FirstDataRow, Settings.SkipBlankLines);
     }
 
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
@@ -434,7 +441,7 @@ public class ExcelSheet
         var result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, errors, out var valueObject);
 
         // If we've been asked to validate with data annotations, do so now.
-        if (Configuration.ValidateDataAnnotations && result && valueObject is not null)
+        if (Settings.ValidateDataAnnotations && result && valueObject is not null)
         {
             if (errors is not null)
             {

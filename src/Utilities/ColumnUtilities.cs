@@ -63,7 +63,7 @@ internal static class ColumnUtilities
         }
 
         // Optionally fall back to ignoring separators, for example matching "First Name" to FirstName.
-        if (sheet.Configuration.IgnoreSeparatorsInColumnNames)
+        if (sheet.Settings.IgnoreSeparatorsInColumnNames)
         {
             var normalizedName = RemoveSeparators(columnName);
             var columnNames = sheet.Heading.ColumnNames;

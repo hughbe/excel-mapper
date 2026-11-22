@@ -32,6 +32,7 @@ The public API is the importer, sheets and regions, class maps and the fluent me
 | `ExcelRegion` | An immutable block of a worksheet with its own heading choice (`WithHeadingAt`, `WithoutHeading`, `WithHeadingSearch`). Each read creates a private `ExcelSheet` for the region's `Worksheet`, with its own `DataRange`, heading, cursor and bindings, so regions reuse the sheet's reading, binding and heading code. Converters, column selectors and errors get that sheet, so its heading is the region's. Columns chosen by position count from the region's first column (`ExcelSheet.ColumnOffset` and `ToSheetColumn`). |
 
 `ExcelImporterConfiguration` holds the registered class maps and the settings that apply to every sheet: `Culture`, `SkipBlankLines`, `ValidateDataAnnotations` and `IgnoreSeparatorsInColumnNames`.
+A sheet takes the settings when it starts reading (`ReadSettings`), so changing them part way through a sheet only affects sheets read afterwards.
 
 ## Class maps
 

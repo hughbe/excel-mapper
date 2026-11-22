@@ -5,9 +5,15 @@ using System.Globalization;
 namespace ExcelMapper;
 
 /// <summary>
-/// Configuration options for importing Excel documents. The main function is to handle registering
-/// known class maps.
+/// Configuration options for importing Excel documents, and the class maps registered for types.
 /// </summary>
+/// <remarks>
+/// A sheet takes the settings (<see cref="Culture"/>, <see cref="SkipBlankLines"/>,
+/// <see cref="ValidateDataAnnotations"/>, <see cref="IgnoreSeparatorsInColumnNames"/> and
+/// <see cref="MaxColumnsPerSheet"/>) when it starts reading, at its heading or first row, so
+/// changing them part way through doesn't change how the rest of the sheet is read. Sheets and
+/// regions read afterwards use the new settings.
+/// </remarks>
 public class ExcelImporterConfiguration
 {
     private ConcurrentDictionary<Type, ExcelClassMap> ClassMaps { get; } = new();
