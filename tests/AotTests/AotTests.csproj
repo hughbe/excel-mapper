@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/ExcelMapper.csproj" />
+    <ProjectReference Include="../../gen/ExcelMapper.SourceGeneration.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

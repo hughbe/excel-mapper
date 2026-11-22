@@ -100,6 +100,16 @@
     <None Include="../README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
+  <!--
+    The source generator for ExcelMappingContext ships in this package, as an analyzer: built
+    first, and packed under analyzers/dotnet/cs, which compilers load for C# projects that reference
+    the package. It isn't referenced by the library itself.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="../gen/ExcelMapper.SourceGeneration.csproj" ReferenceOutputAssembly="false" SetTargetFramework="TargetFramework=netstandard2.0" PrivateAssets="all" />
+    <None Include="../gen/bin/$(Configuration)/netstandard2.0/ExcelMapper.SourceGeneration.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+
   <PropertyGroup>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>

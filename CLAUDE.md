@@ -5,6 +5,7 @@ Guidance for working on ExcelMapper (NuGet package `ExcelDataReader.Mapping`), a
 ## Layout
 
 - `src/` - the library. Targets `netstandard2.0`, `netstandard2.1` and `net8.0`.
+- `gen/` - the source generator for `ExcelMappingContext` (`[ExcelMappable]`), a netstandard2.0 Roslyn 4.8 generator packed into the library's package under `analyzers/dotnet/cs`. Its `TypeWalker` mirrors how auto-mapping treats each kind of type: when auto-mapping learns a new kind of type that needs a generic type made at run time, add the `ExcelTypeRegistrar` method and teach `TypeWalker` to call it. Tested in `tests/SourceGeneration`.
 - `tests/` - xUnit tests (`net8.0`). See [Tests](#tests). `tests/TrimmingTests` and `tests/AotTests` are separate apps that CI publishes trimmed and with native AOT, and runs.
 - `benchmarks/` - BenchmarkDotNet benchmarks, which can also run against the 3.x package. See [Performance](#performance) and `benchmarks/README.md`.
 - `docs/` - user documentation, linked from the README's documentation index. `docs/Architecture.md` explains the map/reader/pipeline design.
