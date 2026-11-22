@@ -20,6 +20,7 @@ public abstract class ExcelMappingContext
     private readonly ConcurrentDictionary<Type, ExcelClassMap> _classMaps = new();
     private readonly object _registerLock = new();
     private HashSet<Type>? _rowTypes;
+    private HashSet<(Type, Type, Type?)> _registeredTypes = [];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExcelMappingContext"/> class.
@@ -54,7 +55,7 @@ public abstract class ExcelMappingContext
 
         if (!_classMaps.TryGetValue(typeof(T), out var classMap))
         {
-            classMap = _classMaps.GetOrAdd(typeof(T), CreateClassMap<T>());
+            classMap = _classMaps.GetOrAdd(typeof(T), CreateClassMap<T>(GetType(), _registeredTypes));
         }
 
         return (ExcelClassMap<T>)classMap;
@@ -65,8 +66,11 @@ public abstract class ExcelMappingContext
     // the context registered (see GenericTypes).
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "The members of T are kept by its annotation, and the types of its members by the annotations of the ExcelTypeRegistrar methods that registered them.")]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "The generic types auto-mapping needs for T's members are created with the instantiations the context registered.")]
-    private static ExcelClassMap<T> CreateClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
+    private static ExcelClassMap<T> CreateClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Type contextType, HashSet<(Type, Type, Type?)> registeredTypes)
     {
+        // With GenericTypes.RequireRegisteredTypes on (in the tests), this throws if the context
+        // doesn't register a type its class map needs (see GenericTypes.Require).
+        using var scope = GenericTypes.EnterContext(contextType, registeredTypes);
         if (!AutoMapper.TryCreateClassMap<T>(EmptyValueStrategy.Error, out var classMap))
         {
             throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\".");
@@ -89,6 +93,7 @@ public abstract class ExcelMappingContext
             {
                 var registrar = new ExcelTypeRegistrar();
                 RegisterTypes(registrar);
+                _registeredTypes = registrar.RegisteredTypes;
                 _rowTypes = registrar.RowTypes;
             }
 
