@@ -936,7 +936,7 @@ public class MapCustomColumnIndexTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<CustomNameEnumPropertyClass>(c =>
         {
-            c.Map(p => p.CustomName, ignoreCase: true);
+            c.Map(p => p.CustomName).WithIgnoreCase();
         });
 
         var sheet = importer.ReadSheet();
@@ -993,7 +993,7 @@ public class MapCustomColumnIndexTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<CustomNameEnumFieldClass>(c =>
         {
-            c.Map(p => p.CustomName, ignoreCase: true);
+            c.Map(p => p.CustomName).WithIgnoreCase();
         });
 
         var sheet = importer.ReadSheet();
@@ -1050,7 +1050,7 @@ public class MapCustomColumnIndexTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<CustomNameNullableEnumPropertyClass>(c =>
         {
-            c.Map(p => p.CustomName, ignoreCase: true);
+            c.Map(p => p.CustomName).WithIgnoreCase();
         });
 
         var sheet = importer.ReadSheet();
@@ -1107,7 +1107,7 @@ public class MapCustomColumnIndexTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         importer.Configuration.RegisterClassMap<CustomNameNullableEnumFieldClass>(c =>
         {
-            c.Map(p => p.CustomName, ignoreCase: true);
+            c.Map(p => p.CustomName).WithIgnoreCase();
         });
 
         var sheet = importer.ReadSheet();

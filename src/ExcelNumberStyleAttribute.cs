@@ -6,7 +6,7 @@ namespace ExcelMapper;
 /// An attribute used to specify the number styles to use when parsing numeric values.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-public class ExcelNumberStyleAttribute : Attribute
+public sealed class ExcelNumberStyleAttribute : Attribute
 {
     /// <summary>
     /// Gets the number styles.

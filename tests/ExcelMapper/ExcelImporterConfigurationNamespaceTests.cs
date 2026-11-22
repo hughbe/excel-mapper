@@ -1,16 +1,19 @@
 ﻿using System.Reflection;
 using ExcelMapper.Tests;
 
-namespace ExcelMapper.Utilities.Tests;
+namespace ExcelMapper.Tests.ClassMapsNamespace;
 
-public class ExcelImporterExtensionsTests
+// ExcelImporterConfiguration.RegisterClassMapsInNamespace, with a namespace of its own that holds
+// one class map.
+
+public class ExcelImporterConfigurationNamespaceTests
 {
 #if !NETCOREAPP1_1
     [Fact]
     public void RegisterClassMapsInNamespace_NoAssemblyAndValidNamespaceString_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        IEnumerable<ExcelClassMap> classMaps = ExcelImporterExtensions.RegisterClassMapsInNamespace(importer, "ExcelMapper.Utilities.Tests");
+        IReadOnlyList<ExcelClassMap> classMaps = importer.Configuration.RegisterClassMapsInNamespace("ExcelMapper.Tests.ClassMapsNamespace");
         ExcelClassMap classMap = Assert.Single(classMaps);
         Assert.IsType<TestClassMap>(classMap);
     }
@@ -20,8 +23,8 @@ public class ExcelImporterExtensionsTests
     public void RegisterClassMapsInNamespace_AssemblyAndValidNamespaceString_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        Assembly assembly = typeof(ExcelImporterExtensionsTests).GetTypeInfo().Assembly;
-        IEnumerable<ExcelClassMap> classMaps = ExcelImporterExtensions.RegisterClassMapsInNamespace(importer, assembly, "ExcelMapper.Utilities.Tests");
+        Assembly assembly = typeof(ExcelImporterConfigurationNamespaceTests).GetTypeInfo().Assembly;
+        IReadOnlyList<ExcelClassMap> classMaps = importer.Configuration.RegisterClassMapsInNamespace(assembly, "ExcelMapper.Tests.ClassMapsNamespace");
         ExcelClassMap classMap = Assert.Single(classMaps);
         Assert.IsType<TestClassMap>(classMap);
     }
@@ -30,31 +33,31 @@ public class ExcelImporterExtensionsTests
     public void RegisterClassMapsInNamespace_NullAssembly_ThrowsArgumentNullException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        Assert.Throws<ArgumentNullException>("assembly", () => ExcelImporterExtensions.RegisterClassMapsInNamespace(importer, null!, "ExcelMapper.Utilities.Tests"));
+        Assert.Throws<ArgumentNullException>("assembly", () => importer.Configuration.RegisterClassMapsInNamespace(null!, "ExcelMapper.Tests.ClassMapsNamespace"));
     }
 
     [Fact]
     public void RegisterClassMapsInNamespace_NullNamespaceString_ThrowsArgumentNullException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        Assembly assembly = typeof(ExcelImporterExtensions).GetTypeInfo().Assembly;
-        Assert.Throws<ArgumentNullException>("namespaceString", () => ExcelImporterExtensions.RegisterClassMapsInNamespace(importer, assembly, null!));
+        Assembly assembly = typeof(ExcelImporterConfiguration).GetTypeInfo().Assembly;
+        Assert.Throws<ArgumentNullException>("namespaceString", () => importer.Configuration.RegisterClassMapsInNamespace(assembly, null!));
     }
 
     [Fact]
     public void RegisterClassMapsInNamespace_EmptyNamespaceString_ThrowsArgumentException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        Assembly assembly = typeof(ExcelImporterExtensions).GetTypeInfo().Assembly;
-        Assert.Throws<ArgumentException>("namespaceString", () => ExcelImporterExtensions.RegisterClassMapsInNamespace(importer, assembly, ""));
+        Assembly assembly = typeof(ExcelImporterConfiguration).GetTypeInfo().Assembly;
+        Assert.Throws<ArgumentException>("namespaceString", () => importer.Configuration.RegisterClassMapsInNamespace(assembly, ""));
     }
 
     [Fact]
     public void RegisterClassMapsInNamespace_InvalidNamespaceString_ThrowsArgumentException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        Assembly assembly = typeof(ExcelImporterExtensions).GetTypeInfo().Assembly;
-        Assert.Throws<ArgumentException>("namespaceString", () => ExcelImporterExtensions.RegisterClassMapsInNamespace(importer, assembly, "INVALID_NAMESPACE"));
+        Assembly assembly = typeof(ExcelImporterConfiguration).GetTypeInfo().Assembly;
+        Assert.Throws<ArgumentException>("namespaceString", () => importer.Configuration.RegisterClassMapsInNamespace(assembly, "INVALID_NAMESPACE"));
     }
 }
 

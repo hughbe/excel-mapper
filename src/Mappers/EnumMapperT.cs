@@ -2,16 +2,18 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Mappers;
 
-internal sealed class EnumMapper<TEnum>(bool ignoreCase) : ICellMapper<TEnum>, ICellMapper<TEnum?> where TEnum : struct, Enum
+/// <summary>
+/// Maps an enum's names and numbers. Whether names are matched ignoring case comes from the cell's
+/// <see cref="CellContext.Options"/> (<c>WithIgnoreCase</c>), so the mapper holds no state.
+/// </summary>
+internal sealed class EnumMapper<TEnum> : ICellMapper<TEnum>, ICellMapper<TEnum?> where TEnum : struct, Enum
 {
-    public bool IgnoreCase { get; } = ignoreCase;
-
     CellConversion ICellMapper<TEnum>.Convert(ReadCellResult cell, in CellContext context, out TEnum value, ref object? error)
-        => Enum.TryParse(cell.GetString(), IgnoreCase, out value) ? CellConversion.Success : CellConversion.Invalid;
+        => Enum.TryParse(cell.GetString(), context.Options.IgnoreCase, out value) ? CellConversion.Success : CellConversion.Invalid;
 
     CellConversion ICellMapper<TEnum?>.Convert(ReadCellResult cell, in CellContext context, out TEnum? value, ref object? error)
     {
-        if (Enum.TryParse(cell.GetString(), IgnoreCase, out TEnum result))
+        if (Enum.TryParse(cell.GetString(), context.Options.IgnoreCase, out TEnum result))
         {
             value = result;
             return CellConversion.Success;
@@ -24,7 +26,7 @@ internal sealed class EnumMapper<TEnum>(bool ignoreCase) : ICellMapper<TEnum>, I
     public Exception CreateException(ReadCellResult cell, in CellContext context, object? error)
     {
         var stringValue = cell.GetString();
-        var ignoreCase = IgnoreCase;
+        var ignoreCase = context.Options.IgnoreCase;
 
         // Numbers can be out of range (an OverflowException): parse to find out.
         return stringValue is null || stringValue.Length == 0 || char.IsDigit(stringValue.TrimStart()[0]) || stringValue.TrimStart()[0] is '-' or '+'
@@ -41,16 +43,9 @@ internal static class EnumMappers
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
 #if NET5_0_OR_GREATER
-    // The mapper type is cached, so the trimmer can't see it's created here.
+    // The mapper type is made at run time, so the trimmer can't see it's created here.
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(EnumMapper<>))]
 #endif
-    public static object Create(Type enumType, bool ignoreCase)
-    {
-        // Pass the argument as an array: on netstandard2.0, a bool binds to CreateInstance(Type, bool nonPublic).
-        var mapperType = s_mapperTypes.GetOrAdd(enumType, static t => typeof(EnumMapper<>).MakeGenericType(t));
-        return Activator.CreateInstance(mapperType, [ignoreCase])!;
-    }
-
-    // EnumMapper<TEnum> for each enum type, so that it's created once.
-    private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, Type> s_mapperTypes = new();
+    public static object Create(Type enumType)
+        => Activator.CreateInstance(typeof(EnumMapper<>).MakeGenericType(enumType))!;
 }

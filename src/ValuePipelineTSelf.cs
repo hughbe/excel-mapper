@@ -108,7 +108,7 @@ public abstract class ValuePipeline<T, TSelf> : ValuePipeline<T> where TSelf : V
     /// </summary>
     /// <param name="value">The value of empty and invalid cells.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public TSelf WithValueFallback(T? value)
+    public TSelf WithFallback(T? value)
     {
         SetFixedFallback(value, empty: true, invalid: true);
         return Self;

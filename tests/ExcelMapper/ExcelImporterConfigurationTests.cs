@@ -153,10 +153,10 @@ public class ExcelImporterConfigurationTests
     }
 
     [Fact]
-    public void RegisterClassMap_NullClassMapFactory_ThrowsArgumentNullException()
+    public void RegisterClassMap_NullConfigure_ThrowsArgumentNullException()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
-        Assert.Throws<ArgumentNullException>("classMapFactory", () => importer.Configuration.RegisterClassMap<int>(null!));
+        Assert.Throws<ArgumentNullException>("configure", () => importer.Configuration.RegisterClassMap<int>(null!));
     }
 
     [Fact]
@@ -174,33 +174,10 @@ public class ExcelImporterConfigurationTests
     }
 
     [Fact]
-    public void RegisterClassMap_InvokeTypeExcelClassMap_Success()
-    {
-        using var importer = Helpers.GetImporter("Primitives.xlsx");
-        var map = new TestMap();
-        importer.Configuration.RegisterClassMap(typeof(int), map);
-
-        Assert.True(importer.Configuration.TryGetClassMap<int>(out var classMap));
-        Assert.Same(map, classMap);
-
-        Assert.True(importer.Configuration.TryGetClassMap(typeof(int), out classMap));
-        Assert.Same(map, classMap);
-    }
-
-    [Fact]
-    public void RegisterClassMap_NullClassType_ThrowsArgumentNullException()
-    {
-        using var importer = Helpers.GetImporter("Primitives.xlsx");
-        var map = new TestMap();
-        Assert.Throws<ArgumentNullException>("classType", () => importer.Configuration.RegisterClassMap(null!, map));
-    }
-
-    [Fact]
     public void RegisterClassMap_NullClassMap_ThrowsArgumentNullException()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         Assert.Throws<ArgumentNullException>("classMap", () => importer.Configuration.RegisterClassMap(null!));
-        Assert.Throws<ArgumentNullException>("classMap", () => importer.Configuration.RegisterClassMap(typeof(int), null!));
     }
 
     [Fact]
@@ -210,7 +187,6 @@ public class ExcelImporterConfigurationTests
         importer.Configuration.RegisterClassMap<TestMap>();
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<TestMap>());
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new TestMap()));
-        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(int), new TestMap()));
     }
 
     [Fact]
@@ -247,7 +223,7 @@ public class ExcelImporterConfigurationTests
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<NoMapperClassMap>());
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new NoMapperClassMap()));
-        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(RecordClass), new NoMapperClassMap()));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new NoMapperClassMap()));
     }
 
     public class NoMapperClassMap : ExcelClassMap<RecordClass>
@@ -266,7 +242,7 @@ public class ExcelImporterConfigurationTests
         map.Map(p => p.Value[0]);
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
-        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectArrayClass), map));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
     }
 
     private class IDisposableArrayClass
@@ -280,7 +256,7 @@ public class ExcelImporterConfigurationTests
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<DefaultObjectArrayIndexClassMap>());
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new DefaultObjectArrayIndexClassMap()));
-        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectArrayClass), new DefaultObjectArrayIndexClassMap()));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new DefaultObjectArrayIndexClassMap()));
     }
 
     private class DefaultObjectArrayIndexClassMap : ExcelClassMap<ObjectArrayClass>
@@ -309,7 +285,7 @@ public class ExcelImporterConfigurationTests
         map.Map(p => p.Value);
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
-        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectMultidimensionalClass), map));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
     }
 
     private class MultidimensionalClass
@@ -324,7 +300,7 @@ public class ExcelImporterConfigurationTests
         map.Map(p => p.Value[0, 0]);
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
-        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectMultidimensionalClass), map));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
     }
 
     private class IDisposableMultidimensionalClass
@@ -338,7 +314,7 @@ public class ExcelImporterConfigurationTests
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<DefaultObjectMultidimensionalIndexClassMap>());
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new DefaultObjectMultidimensionalIndexClassMap()));
-        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectMultidimensionalClass), new DefaultObjectMultidimensionalIndexClassMap()));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new DefaultObjectMultidimensionalIndexClassMap()));
     }
 
     private class DefaultObjectMultidimensionalIndexClassMap : ExcelClassMap<ObjectMultidimensionalClass>
@@ -362,7 +338,7 @@ public class ExcelImporterConfigurationTests
         map.Map(p => p.Value[0]);
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
-        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectListClass), map));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
     }
 
     private class IDisposableListClass
@@ -376,7 +352,7 @@ public class ExcelImporterConfigurationTests
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<DefaultObjectListIndexClassMap>());
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new DefaultObjectListIndexClassMap()));
-        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectListClass), new DefaultObjectListIndexClassMap()));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new DefaultObjectListIndexClassMap()));
     }
 
     private class DefaultObjectListIndexClassMap : ExcelClassMap<ObjectListClass>
@@ -400,7 +376,7 @@ public class ExcelImporterConfigurationTests
         map.Map(p => p.Value["key"]);
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
-        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectDictionaryClass), map));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(map));
     }
 
     private class IDisposableDictionaryClass
@@ -414,7 +390,7 @@ public class ExcelImporterConfigurationTests
         using var importer = Helpers.GetImporter("Numbers.xlsx");
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<DefaultObjectDictionaryIndexClassMap>());
         Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new DefaultObjectDictionaryIndexClassMap()));
-        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(typeof(ObjectDictionaryClass), new DefaultObjectDictionaryIndexClassMap()));
+        Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap(new DefaultObjectDictionaryIndexClassMap()));
     }
 
     private class DefaultObjectDictionaryIndexClassMap : ExcelClassMap<ObjectDictionaryClass>

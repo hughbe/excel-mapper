@@ -12,8 +12,9 @@ ExcelMapper 4.0 fixes several long-standing bugs and makes mapping more predicta
 6. [Sheet names are case-insensitive](#sheet-names-are-case-insensitive)
 7. [Extension types](#extension-types)
 8. [Renamed types](#renamed-types)
-9. [Smaller changes](#smaller-changes)
-10. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
+9. [Renamed and removed methods](#renamed-and-removed-methods)
+10. [Smaller changes](#smaller-changes)
+11. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
 
 ## `object` members receive typed values
 
@@ -227,11 +228,32 @@ If you created a map with its constructor, or implemented `IMap`, map the member
 | `ManyToOneDictionaryMap<TKey, TValue>` | `DictionaryMap<TKey, TValue>` |
 | `FallbackStrategy.ThrowIfPrimitive`, `FallbackStrategy.SetToDefaultValue` | `EmptyValueStrategy.Error`, `EmptyValueStrategy.DefaultValue` |
 | `[ExcelUri(UriKind.Relative)]` (`ExcelUriAttribute`) | `[ExcelUriKind(UriKind.Relative)]` (`ExcelUriKindAttribute`) |
-| `ExcelImporterUtils` | `ExcelImporterExtensions` |
+| `ExcelImporterUtils.RegisterClassMapsInNamespace(importer, ...)` | `importer.Configuration.RegisterClassMapsInNamespace(...)` |
 | `ExcelMapper.Mappers.MappingDictionaryMapperBehavior` | `ExcelMapper.MappingDictionaryBehavior` |
 | `ConvertUsingSimpleMapperDelegate<T>` | `Func<string?, T>` |
 
 **What to do:** replace the old names with the new ones.
+
+## Renamed and removed methods
+
+**Who's affected:** code that calls these methods or sets these properties. Most are one-line changes; the compiler points to each.
+
+| 3.x | 4.0 |
+|---|---|
+| `Map(p => p.Status, ignoreCase: true)` | `Map(p => p.Status).WithIgnoreCase()`, which only compiles for enums (the old overload compiled for any struct and threw when used) |
+| `.WithColumnNameMatching("Name", "Full Name")` (the first of several columns) | `.WithColumnNames("Name", "Full Name")`, as `[ExcelColumnNames]` means. `WithColumnNameMatching` still takes a predicate or regex. |
+| `.WithValueFallback(value)` | `.WithFallback(value)` |
+| `map.Optional = true`, `map.PreserveFormatting = true` | `map.MakeOptional()`, `map.MakePreserveFormatting()`; the properties are read-only |
+| `collectionMap.Pipeline`, `dictionaryMap.Pipeline` | `.WithElementMap(e => ...)`, `.WithValueMap(v => ...)` |
+| `configuration.RegisterClassMap(typeof(T), classMap)` | `configuration.RegisterClassMap(classMap)`, which registers the class map for its own type: the removed overload let a map be registered for a different type |
+| `importer.RegisterClassMapsInNamespace(...)` | `importer.Configuration.RegisterClassMapsInNamespace(...)`, next to `RegisterClassMap` |
+| `importer.Reader` | Removed: the importer's sheets share the reader, and moving it broke their positions. Pass your own `IExcelDataReader` to `new ExcelImporter(reader)` to configure it. |
+| `new ExcelClassMap(typeof(T))` | `new ExcelClassMap<T>()`: the non-generic class map couldn't map any members |
+| `new ExcelRange("A1:B10")` | `ExcelRange.Parse("A1:B10")` |
+| Setting `Index`, `Indices`, `Name` or `Names` on a column attribute | Pass them to the attribute's constructor. The attributes are sealed, except `ExcelColumnIndexAttribute`. |
+| `WithColumnNames` and `WithColumnIndices` taking an `IReadOnlyList<T>` | `params T[]` or `IEnumerable<T>` |
+
+**What to do:** make the change in the table for each compile error.
 
 ## Smaller changes
 
@@ -242,7 +264,7 @@ If you created a map with its constructor, or implemented `IMap`, map the member
 - **Changing class maps after reading**: a class map, and the maps of its members, can't be changed once rows have been read with it, including by `ValidateHeading` or `FindHeading`. `Map(...)` or a fluent method called afterwards throws an `InvalidOperationException`. Before 4.0, the change applied to the following rows. Configure the class map before reading, or register a new one: `RegisterClassMap<T>` replaces an auto-mapped map, and a new importer can register a different map for the same type.
 - **Changing settings while reading**: a sheet takes the importer's settings (`SkipBlankLines`, `ValidateDataAnnotations`, `Culture`, ...) when it starts reading, so changing them while its rows are read only affects sheets read afterwards. Before 4.0, a change applied to the following rows.
 - **Constructor exceptions**: an exception thrown by a constructor called during mapping (for records and constructor-only types) is wrapped in an `ExcelMappingException` with the row, with the original as `InnerException`.
-- **Fallback values**: `WithValueFallback`, `WithEmptyFallback` and `WithInvalidFallback` take a value of the member's type, where they took an `object`. A value of the wrong type, such as `WithEmptyFallback("none")` on an `int` member, is now a compile error instead of an `InvalidCastException` when rows are read. `WithEmptyFallback(null)` on a member that can't be null throws an `ArgumentNullException`: give the value, such as `WithEmptyFallback(0)`.
+- **Fallback values**: `WithFallback` (was `WithValueFallback`), `WithEmptyFallback` and `WithInvalidFallback` take a value of the member's type, where they took an `object`. A value of the wrong type, such as `WithEmptyFallback("none")` on an `int` member, is now a compile error instead of an `InvalidCastException` when rows are read. `WithEmptyFallback(null)` on a member that can't be null throws an `ArgumentNullException`: give the value, such as `WithEmptyFallback(0)`.
 - **Trimming**: `[ExcelTrimString]`/`.WithTrim()` no longer turn date and number cells into text, so they keep their type.
 - **`bool`**: "yes" and "no" (any case) are now valid, where they were invalid.
 - **Dates written as text**: without set formats, ISO 8601 (`2024-03-04`) and the culture's short date, short date and time, and time patterns are now accepted, where only the culture's full date and time (`"G"`, or `"d"`/`"t"` for `DateOnly`/`TimeOnly`) was before. Values that were invalid, and so used an `[ExcelInvalidValue]` or other fallback, may now map. To accept only specific formats, set them with `[ExcelFormats]` or `.WithFormats(...)`.
@@ -265,7 +287,7 @@ On .NET Framework, .NET Standard and older .NET apps, the package now brings in 
 The package contains `net8.0`, `netstandard2.1` and `netstandard2.0` builds. If your app targets .NET Framework or .NET before 8, some features aren't available; this is unchanged from 3.x:
 
 - mapping `DateOnly`, `TimeOnly`, `Half`, `Int128`, `UInt128`, `nint`, `nuint`, `BigInteger`, `Complex` and other `IParsable<T>` / `INumberBase<T>` types
-- `.WithNumberStyle(...)` and `.WithFormatProvider(...)` for numeric members; on the netstandard builds use `[ExcelNumberStyle]` and `importer.Configuration.Culture` instead
+- `.WithNumberStyle(...)` and `.WithFormatProvider(...)` for number types other than the built-in ones (on the netstandard builds they work for `int`, `decimal`, `double` and the other built-in types)
 - `.WithFormats(...)` for `DateOnly` and `TimeOnly`, and `IReadOnlySet<T>` members
 
 ## New in 4.0

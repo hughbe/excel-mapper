@@ -25,7 +25,7 @@ public class DictionaryMapTests
         var map = CreateMap();
         Assert.False(map.Optional);
         Assert.False(map.PreserveFormatting);
-        Assert.NotNull(map.Pipeline);
+        Assert.NotNull(Helpers.ValuesOf(map));
     }
 
     [Fact]
@@ -67,13 +67,13 @@ public class DictionaryMapTests
     public void WithValueMap_ValidMap_Success()
     {
         var map = CreateMap();
-        var newPipeline = CreateMap().Pipeline;
+        var newPipeline = Helpers.ValuesOf(CreateMap());
         Assert.Same(map, map.WithValueMap(v =>
         {
-            Assert.Same(v, map.Pipeline);
+            Assert.Same(v, Helpers.ValuesOf(map));
             return newPipeline;
         }));
-        Assert.Same(newPipeline, map.Pipeline);
+        Assert.Same(newPipeline, Helpers.ValuesOf(map));
         Assert.Throws<ArgumentNullException>("valueMap", () => map.WithValueMap(null!));
         Assert.Throws<ArgumentNullException>("valueMap", () => map.WithValueMap(_ => null!));
     }

@@ -42,28 +42,20 @@ public class CollectionMap<TElement> : ICellsMap
     ColumnSettings IColumnsMap.Settings => Settings;
 
     /// <summary>
-    /// Gets or sets whether the member's columns can be missing from the sheet: the member then
+    /// Gets whether the member's columns can be missing from the sheet: the member then
     /// keeps its value, rather than mapping the row being an error.
     /// </summary>
-    public bool Optional
-    {
-        get => Settings.Optional;
-        set => Settings.Optional = value;
-    }
+    public bool Optional => Settings.Optional;
 
     /// <summary>
-    /// Gets or sets whether cells are read as the text Excel shows, with their number format applied.
+    /// Gets whether cells are read as the text Excel shows, with their number format applied.
     /// </summary>
-    public bool PreserveFormatting
-    {
-        get => Settings.PreserveFormatting;
-        set => Settings.PreserveFormatting = value;
-    }
+    public bool PreserveFormatting => Settings.PreserveFormatting;
 
     /// <summary>
     /// The mapping pipeline for each element in the list.
     /// </summary>
-    public ElementMap<TElement> Pipeline { get; private set; } = new ElementMap<TElement>();
+    internal ElementMap<TElement> Pipeline { get; private set; } = new ElementMap<TElement>();
 
     ValuePipeline IColumnsMap.Pipeline => Pipeline;
 
@@ -160,6 +152,14 @@ public class CollectionMap<TElement> : ICellsMap
     public CollectionMap<TElement> WithColumnIndex(int columnIndex)
         => WithSplitCell(new ColumnIndexColumns(columnIndex));
 
+    /// <summary>
+    /// Splits the value of the cell in the column with the given letter, such as "B".
+    /// </summary>
+    /// <param name="columnLetter">The letter of the column containing the cell to split.</param>
+    /// <returns>The map that invoked this method.</returns>
+    public CollectionMap<TElement> WithColumnLetter(string columnLetter)
+        => WithColumnIndex(ExcelRange.ParseColumnLetters(columnLetter, nameof(columnLetter)));
+
     // Splits the cell in the given column, with the separators set before, if any.
     private CollectionMap<TElement> WithSplitCell(Columns cell)
     {
@@ -185,7 +185,7 @@ public class CollectionMap<TElement> : ICellsMap
     /// </summary>
     /// <param name="separators">The separators used to split the value of a single cell.</param>
     /// <returns>The map that invoked this method.</returns>
-    public CollectionMap<TElement> WithSeparators(params IEnumerable<char> separators)
+    public CollectionMap<TElement> WithSeparators(IEnumerable<char> separators)
     {
         ThrowHelpers.ThrowIfNull(separators, nameof(separators));
         return WithSeparators(separators as char[] ?? separators.ToArray());
@@ -222,7 +222,7 @@ public class CollectionMap<TElement> : ICellsMap
     /// </summary>
     /// <param name="separators">The separators used to split the value of a single cell.</param>
     /// <returns>The map that invoked this method.</returns>
-    public CollectionMap<TElement> WithSeparators(params IEnumerable<string> separators)
+    public CollectionMap<TElement> WithSeparators(IEnumerable<string> separators)
     {
         ThrowHelpers.ThrowIfNull(separators, nameof(separators));
         return WithSeparators(separators as string[] ?? separators.ToArray());
@@ -233,27 +233,18 @@ public class CollectionMap<TElement> : ICellsMap
     /// </summary>
     /// <param name="columnNames">The names of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public CollectionMap<TElement> WithColumnNames(params IReadOnlyList<string> columnNames)
+    public CollectionMap<TElement> WithColumnNames(params string[] columnNames)
         => WithColumns(new ColumnNamesColumns(columnNames));
 
     /// <summary>
     /// Reads the collection from the given columns, in order.
     /// </summary>
     /// <param name="columnNames">The names of the columns.</param>
-    /// <param name="comparison">How column names are compared.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public CollectionMap<TElement> WithColumnNames(IReadOnlyList<string> columnNames, StringComparison comparison)
-        => WithColumns(new ColumnNamesColumns(columnNames, comparison));
-
-    /// <summary>
-    /// Reads the collection from the given columns, in order.
-    /// </summary>
-    /// <param name="columnNames">The names of the columns.</param>
-    /// <returns>The map on which this method was invoked.</returns>
-    public CollectionMap<TElement> WithColumnNames(params IEnumerable<string> columnNames)
+    public CollectionMap<TElement> WithColumnNames(IEnumerable<string> columnNames)
     {
         ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
-        return WithColumnNames([.. columnNames]);
+        return WithColumnNames(columnNames as string[] ?? columnNames.ToArray());
     }
 
     /// <summary>
@@ -265,7 +256,7 @@ public class CollectionMap<TElement> : ICellsMap
     public CollectionMap<TElement> WithColumnNames(IEnumerable<string> columnNames, StringComparison comparison)
     {
         ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
-        return WithColumnNames([.. columnNames], comparison);
+        return WithColumns(new ColumnNamesColumns([.. columnNames], comparison));
     }
 
     /// <summary>
@@ -289,7 +280,7 @@ public class CollectionMap<TElement> : ICellsMap
     /// </summary>
     /// <param name="columnIndices">The zero-based indices of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public CollectionMap<TElement> WithColumnIndices(params IReadOnlyList<int> columnIndices)
+    public CollectionMap<TElement> WithColumnIndices(params int[] columnIndices)
         => WithColumns(new ColumnIndicesColumns(columnIndices));
 
     /// <summary>
@@ -297,10 +288,10 @@ public class CollectionMap<TElement> : ICellsMap
     /// </summary>
     /// <param name="columnIndices">The zero-based indices of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public CollectionMap<TElement> WithColumnIndices(params IEnumerable<int> columnIndices)
+    public CollectionMap<TElement> WithColumnIndices(IEnumerable<int> columnIndices)
     {
         ThrowHelpers.ThrowIfNull(columnIndices, nameof(columnIndices));
-        return WithColumnIndices([.. columnIndices]);
+        return WithColumnIndices(columnIndices as int[] ?? columnIndices.ToArray());
     }
 
     /// <summary>
@@ -321,7 +312,7 @@ public class CollectionMap<TElement> : ICellsMap
     /// <returns>The map on which this method was invoked.</returns>
     public CollectionMap<TElement> MakeOptional()
     {
-        Optional = true;
+        Settings.Optional = true;
         return this;
     }
 
@@ -331,7 +322,7 @@ public class CollectionMap<TElement> : ICellsMap
     /// <returns>The map on which this method was invoked.</returns>
     public CollectionMap<TElement> MakePreserveFormatting()
     {
-        PreserveFormatting = true;
+        Settings.PreserveFormatting = true;
         return this;
     }
 

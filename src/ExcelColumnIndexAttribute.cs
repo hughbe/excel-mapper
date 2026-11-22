@@ -10,8 +10,6 @@ namespace ExcelMapper;
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true)]
 public class ExcelColumnIndexAttribute : Attribute
 {
-    private int _index;
-
     /// <summary>
     /// Initializes a new instance of <see cref="ExcelColumnIndexAttribute"/> with the specified column index.
     /// </summary>
@@ -23,15 +21,7 @@ public class ExcelColumnIndexAttribute : Attribute
     }
 
     /// <summary>
-    /// Gets or sets the index of the column.
+    /// Gets the index of the column.
     /// </summary>
-    public int Index
-    {
-        get => _index;
-        set
-        {
-            ColumnUtilities.ValidateColumnIndex(value, nameof(value));
-            _index = value;
-        }
-    }
+    public int Index { get; }
 }

@@ -81,17 +81,6 @@ public readonly struct ExcelRange : IEquatable<ExcelRange>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ExcelRange"/> struct from an Excel address string.
-    /// </summary>
-    /// <param name="address">The Excel address string (e.g., "A1:B10", "C5", "$A$1", "A:C", "1:5").</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="address"/> is null.</exception>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="address"/> is empty or has an invalid format.</exception>
-    public ExcelRange(string address)
-    {
-        this = Parse(address);
-    }
-
-    /// <summary>
     /// Parses an Excel address string such as "A1", "A1:B10", "$A$1:$B$10", "A:C" or "1:5".
     /// Column letters are case-insensitive. Rows must be between 1 and 1048576 and columns between
     /// A and XFD, the limits of an Excel worksheet.

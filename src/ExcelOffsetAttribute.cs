@@ -8,7 +8,7 @@ namespace ExcelMapper;
 /// offset is used.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-public class ExcelOffsetAttribute : Attribute
+public sealed class ExcelOffsetAttribute : Attribute
 {
     /// <summary>
     /// Specifies the offset from UTC, such as "+00:00" (UTC), "-08:00" or "+05:30".

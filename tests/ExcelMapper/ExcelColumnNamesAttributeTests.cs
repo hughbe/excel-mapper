@@ -83,49 +83,6 @@ public class ExcelColumnNamesAttributeTests
     }
 
     [Theory]
-    [MemberData(nameof(Names_Set_TestData))]
-    public void Names_Set_GetReturnsExpected(string[] value)
-    {
-        var attribute = new ExcelColumnNamesAttribute("ColumnName")
-        {
-            Names = value
-        };
-        Assert.Same(value, attribute.Names);
-        
-        // Set same.
-        attribute.Names = value;
-        Assert.Same(value, attribute.Names);
-    }
-
-    [Fact]
-    public void Names_SetNullValue_ThrowsArgumentNullException()
-    {
-        var attribute = new ExcelColumnNamesAttribute(["ColumnName"]);
-        Assert.Throws<ArgumentNullException>("value", () => attribute.Names = null!);
-    }
-
-    [Fact]
-    public void Names_SetEmptyValue_ThrowsArgumentException()
-    {
-        var attribute = new ExcelColumnNamesAttribute(["ColumnName"]);
-        Assert.Throws<ArgumentException>("value", () => attribute.Names = []);
-    }
-
-    [Fact]
-    public void Names_SetNullValueInValue_ThrowsArgumentException()
-    {
-        var attribute = new ExcelColumnNamesAttribute(["ColumnName"]);
-        Assert.Throws<ArgumentException>("value", () => attribute.Names = [null!]);
-    }
-
-    [Fact]
-    public void Names_SetEmptyValueInValue_ThrowsArgumentException()
-    {
-        var attribute = new ExcelColumnNamesAttribute(["ColumnName"]);
-        Assert.Throws<ArgumentException>("value", () => attribute.Names = [""]);
-    }
-
-    [Theory]
     [InlineData(StringComparison.CurrentCulture)]
     [InlineData(StringComparison.CurrentCultureIgnoreCase)]
     [InlineData(StringComparison.InvariantCulture)]

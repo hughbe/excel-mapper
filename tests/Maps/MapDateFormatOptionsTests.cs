@@ -162,7 +162,7 @@ public class MapDateFormatOptionsTests
     public void ReadRows_WithValueFallback_UsedForEmptyAndInvalidCells()
     {
         using var importer = Helpers.GetCsvImporter("Value\n1\n\nabc\n");
-        importer.Configuration.RegisterClassMap<IntRow>(c => c.Map(r => r.Value).WithValueFallback(5));
+        importer.Configuration.RegisterClassMap<IntRow>(c => c.Map(r => r.Value).WithFallback(5));
         Assert.Equal([1, 5, 5], importer.ReadSheet().ReadRows<IntRow>().Select(r => r.Value));
     }
 

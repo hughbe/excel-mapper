@@ -631,7 +631,7 @@ public class MultiMapTests
             Map(p => p.IEnumerableInt)
                 .WithColumnNames(new List<string> { "IEnumerableInt1", "IEnumerableInt2" })
                 .WithElementMap(e => e
-                    .WithValueFallback(default(int))
+                    .WithFallback(default(int))
                 );
 
             MapList<string>(p => p.ICollectionNonGeneric)
@@ -643,7 +643,7 @@ public class MultiMapTests
             Map(p => p.ICollectionBool)
                 .WithColumnIndices(new List<int> { 7, 8 })
                 .WithElementMap(e => e
-                    .WithValueFallback(default(bool))
+                    .WithFallback(default(bool))
                 );
 
             MapList<string>(p => p.IReadOnlyCollectionString)
@@ -731,7 +731,7 @@ public class MultiMapTests
             Map<ObservableCollectionEnum>(p => p.CustomObservableCollectionEnum)
                 .WithColumnNames("MultiMapIndex1", "MultiMapIndex2")
                 .WithElementMap(e => e
-                    .WithValueFallback(ObservableCollectionEnum.custom)
+                    .WithFallback(ObservableCollectionEnum.custom)
                 );
         }
     }

@@ -159,4 +159,24 @@ public static class Helpers
 
         IEnumerator IEnumerable.GetEnumerator() => throw new NotImplementedException();
     }
+
+    /// <summary>
+    /// Gets the map of a collection's elements, through the public <c>WithElementMap</c>.
+    /// </summary>
+    public static ElementMap<T> ElementsOf<T>(CollectionMap<T> map)
+    {
+        ElementMap<T>? elements = null;
+        map.WithElementMap(e => elements = e);
+        return elements!;
+    }
+
+    /// <summary>
+    /// Gets the map of a dictionary's values, through the public <c>WithValueMap</c>.
+    /// </summary>
+    public static ElementMap<TValue> ValuesOf<TKey, TValue>(DictionaryMap<TKey, TValue> map) where TKey : notnull
+    {
+        ElementMap<TValue>? values = null;
+        map.WithValueMap(v => values = v);
+        return values!;
+    }
 }

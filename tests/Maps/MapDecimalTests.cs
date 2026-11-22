@@ -261,7 +261,6 @@ public class MapDecimalTests
         Assert.Equal(10, row3.Value);
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedDecimalValueAllowThousands_Success()
     {
@@ -289,9 +288,7 @@ public class MapDecimalTests
         var row3 = sheet.ReadRow<DecimalValue>();
         Assert.Equal(10, row3.Value);
     }
-#endif
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedDecimalValueFormatProvider_Success()
     {
@@ -324,7 +321,6 @@ public class MapDecimalTests
         var row3 = sheet.ReadRow<DecimalValue>();
         Assert.Equal(10, row3.Value);
     }
-#endif
 
     [Fact]
     public void ReadRow_AutoMappedNullableDecimalValue_Success()
@@ -447,7 +443,6 @@ public class MapDecimalTests
         Assert.Equal(10, row3.Value);
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableDecimalValueAllowThousands_Success()
     {
@@ -475,9 +470,7 @@ public class MapDecimalTests
         var row3 = sheet.ReadRow<NullableDecimalValue>();
         Assert.Equal(10, row3.Value);
     }
-#endif
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableDecimalValueFormatProvider_Success()
     {
@@ -510,7 +503,6 @@ public class MapDecimalTests
         var row3 = sheet.ReadRow<NullableDecimalValue>();
         Assert.Equal(10, row3.Value);
     }
-#endif
 
     private class DecimalValue
     {

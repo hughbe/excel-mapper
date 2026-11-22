@@ -4,7 +4,7 @@ namespace ExcelMapper;
 /// An attribute used to specify the kind of URI to use when mapping cell values to <see cref="Uri"/> objects.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-public class ExcelUriKindAttribute : Attribute
+public sealed class ExcelUriKindAttribute : Attribute
 {
     /// <summary>
     /// Gets the URI kind.

@@ -8,10 +8,8 @@ namespace ExcelMapper;
 /// Specifies the column indices that are used when deserializing a property or field.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-public class ExcelColumnIndicesAttribute : Attribute
+public sealed class ExcelColumnIndicesAttribute : Attribute
 {
-    private int[] _columnIndices;
-
     /// <summary>
     /// Initializes a new instance of <see cref="ExcelColumnIndicesAttribute"/> with the specified column name.
     /// </summary>
@@ -19,19 +17,11 @@ public class ExcelColumnIndicesAttribute : Attribute
     public ExcelColumnIndicesAttribute(params int[] columnIndices)
     {
         ColumnUtilities.ValidateColumnIndices(columnIndices , nameof(columnIndices));
-        _columnIndices = columnIndices;
+        Indices = columnIndices;
     }
 
     /// <summary>
-    /// Gets or sets the indices of the columns.
+    /// Gets the indices of the columns.
     /// </summary>
-    public int[] Indices
-    {
-        get => _columnIndices;
-        set
-        {
-            ColumnUtilities.ValidateColumnIndices(value , nameof(value));
-            _columnIndices = value;
-        }
-    }
+    public int[] Indices { get; }
 }

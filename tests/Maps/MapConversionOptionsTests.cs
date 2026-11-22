@@ -95,7 +95,6 @@ public class MapConversionOptionsTests
         Assert.Equal([new DateTime(2024, 3, 4), new DateTime(2024, 3, 5)], row.Second);
     }
 
-#if LIBRARY_NET8
     public class TwoNumbers
     {
         public int First { get; set; }
@@ -134,7 +133,6 @@ public class MapConversionOptionsTests
         Assert.Equal(255, row.Second);
     }
 
-#endif
 
     public class TwoUris
     {

@@ -308,7 +308,6 @@ public class MapInt16Tests
         Assert.Equal((short)10, row9.Value);
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedInt16ValueHex_Success()
     {
@@ -354,9 +353,7 @@ public class MapInt16Tests
         var row9 = sheet.ReadRow<Int16Value>();
         Assert.Equal((short)10, row9.Value);
     }
-#endif
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedInt16ValueFormatProvider_Success()
     {
@@ -388,7 +385,6 @@ public class MapInt16Tests
         var row3 = sheet.ReadRow<Int16Value>();
         Assert.Equal((short)10, row3.Value);
     }
-#endif
 
     [Fact]
     public void ReadRow_AutoMappedNullableInt16ValueNumberStyleAttribute_Success()
@@ -556,7 +552,6 @@ public class MapInt16Tests
         Assert.Equal((short)10, row3.Value);
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableInt16ValueHex_Success()
     {
@@ -602,9 +597,7 @@ public class MapInt16Tests
         var row9 = sheet.ReadRow<NullableInt16Value>();
         Assert.Equal((short)10, row9.Value);
     }
-#endif
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableInt16ValueFormatProvider_Success()
     {
@@ -636,7 +629,6 @@ public class MapInt16Tests
         var row3 = sheet.ReadRow<NullableInt16Value>();
         Assert.Equal((short)10, row3.Value);
     }
-#endif
 
     [Fact]
     public void ReadRow_Int16Overflow_ThrowsExcelMappingException()

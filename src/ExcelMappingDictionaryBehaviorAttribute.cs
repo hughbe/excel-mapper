@@ -6,7 +6,7 @@ namespace ExcelMapper;
 /// Specifies the behavior of a Dictionary mapper when mapping keys.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-public class ExcelMappingDictionaryBehaviorAttribute : Attribute
+public sealed class ExcelMappingDictionaryBehaviorAttribute : Attribute
 {
     /// <summary>
     /// The behavior of the Dictionary mapper when mapping keys.

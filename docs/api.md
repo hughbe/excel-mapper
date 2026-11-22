@@ -39,7 +39,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 - `GetFirstColumnMatchingIndex(predicate)` / `TryGetFirstColumnMatchingIndex(predicate, out index)` - The first column whose name matches
 
 **`ExcelRange`** - A block of rows and columns, as zero-based ranges.
-- `new ExcelRange("A1:B10")`, `ExcelRange.Parse(address)`, `ExcelRange.TryParse(address, out range)` - From an Excel address, including whole rows (`"1:5"`) and columns (`"A:C"`)
+- `ExcelRange.Parse("A1:B10")`, `ExcelRange.TryParse(address, out range)` - From an Excel address, including whole rows (`"1:5"`) and columns (`"A:C"`)
 - `new ExcelRange(rowStart, rowEnd, columnStart, columnEnd)` - From indexes; `null` ends mean no limit
 - `new ExcelRange(rows, columns)` - From `System.Range`s, such as `new ExcelRange(1.., 0..3)` or `new ExcelRange(..^1, Range.All)`
 - `Rows`, `Columns` - The ranges
@@ -55,7 +55,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 - `ValidateDataAnnotations` - Validate each row with data annotations such as `[Range]` (default: false)
 - `MaxColumnsPerSheet` - The most columns a sheet may have (default: 10,000)
 
-`importer.RegisterClassMapsInNamespace(namespace)` (and an overload taking an `Assembly`) registers every class map in a namespace.
+`importer.Configuration.RegisterClassMapsInNamespace(namespace)` (and an overload taking an `Assembly`) registers every class map in a namespace.
 
 ## Results and errors
 
@@ -77,7 +77,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 
 **`ExcelClassMap<T>`** - How rows map to `T`. Derive from it and call `Map(...)` in the constructor, or configure one with `RegisterClassMap<T>(c => ...)`. Members you don't map aren't read.
 - `Map(p => p.Member)` - A single value, collection or dictionary member; returns the member's map (below). Indexers map elements one by one: `Map(p => p.Values[0])`, `Map(p => p.Scores["Maths"])`
-- `Map(p => p.Status, ignoreCase: true)` - An enum, matched ignoring case
+- `Map(p => p.Status).WithIgnoreCase()` - An enum, matched ignoring case (also on an enum collection's `WithElementMap`)
 - `MapList<TElement>(p => p.Items)` - A non-generic collection, such as `ArrayList`
 - `MapDictionary<TValue>(p => p.Values)` - A dictionary member whose type the `Map` overloads don't cover, with values of type `TValue`
 - `MapObject<TElement>(p => p.Address)` - A nested object, mapped from the same row; returns its class map
@@ -91,7 +91,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 
 Columns:
 - `.WithColumnName("Name")` / `.WithColumnName("Name", StringComparison.Ordinal)` - A column by name (ignoring case by default)
-- `.WithColumnNameMatching("Name1", "Name2")` - The first of these columns that the sheet has
+- `.WithColumnNames("Name1", "Name2")` - The first of these columns that the sheet has
 - `.WithColumnNameMatching(name => name.StartsWith("Total"))` / `.WithColumnNameMatching(regex)` - The first column whose name matches
 - `.WithColumnIndex(0)` / `.WithColumnLetter("C")` - A column by position
 - `.WithColumns(selector)` - The first column an `IColumnSelector` chooses
@@ -103,14 +103,14 @@ Values (also available on collection elements and dictionary values, through `Wi
 - `.WithConverter(ICellConverter<T>)` - Convert with a converter, which gets the typed cell value and where it is ([Custom converters](mapping.md#converters))
 - `.WithMapping(dictionary, comparer, behavior)` - Map fixed text to values
 - `.WithFormats("yyyy-MM-dd", ...)` - Date, time and duration formats
-- `.WithFormatProvider(provider)` - The culture for dates, times, durations and (.NET 8) numbers
-- `.WithNumberStyle(NumberStyles.Currency)` - How numbers are parsed (.NET 8)
+- `.WithFormatProvider(provider)` - The culture for dates, times, durations and numbers
+- `.WithNumberStyle(NumberStyles.Currency)` - How numbers are parsed (on the netstandard builds, for the built-in number types)
 - `.WithOffset(TimeSpan)` - The offset of `DateTimeOffset` values (dates in Excel have no time zone)
 - `.WithUriKind(UriKind.Relative)` - Which URIs are valid (absolute only by default)
 - `.WithTrim()` / `.WithTransformers(ICellTransformer...)` - Change cells before they're converted
 
 Fallbacks:
-- `.WithEmptyFallback(value)` / `.WithInvalidFallback(value)` / `.WithValueFallback(value)` - The value of empty cells, invalid cells, or both
+- `.WithEmptyFallback(value)` / `.WithInvalidFallback(value)` / `.WithFallback(value)` - The value of empty cells, invalid cells, or both
 - `.WithEmptyFallback(ICellFallback<T>)` / `.WithInvalidFallback(ICellFallback<T>)` - Compute the value ([Fallbacks](mapping.md#computed-fallbacks))
 - `.WithThrowingEmptyFallback()` / `.WithThrowingInvalidFallback()` / `.WithThrowingFallback()` - Throw instead (the default for non-nullable value types)
 
@@ -121,7 +121,7 @@ For a nullable member (`int?`), converters and fallbacks can be for the underlyi
 - `.WithColumnNames("A", "B")` / `.WithColumnIndices(0, 1)` - Read these columns
 - `.WithColumnsMatching(predicate)` / `.WithColumnsMatching(regex)` - Read every matching column
 - `.WithColumns(selector)` - Read the columns an `IColumnSelector` chooses
-- `.WithColumnName("Tags")` / `.WithColumnIndex(0)` with `.WithSeparators(',', ';')` - Split one cell (collections only; `,` by default)
+- `.WithColumnName("Tags")` / `.WithColumnIndex(0)` / `.WithColumnLetter("B")` with `.WithSeparators(',', ';')` - Split one cell (collections only; `,` by default)
 - `.WithElementMap(e => ...)` / `.WithValueMap(v => ...)` - Configure each element or value with the value methods above
 - `.MakeOptional()`, `.MakePreserveFormatting()` - As for single values
 

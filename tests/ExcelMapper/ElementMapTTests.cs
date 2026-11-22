@@ -9,18 +9,18 @@ public class ElementMapTTests
     {
         var collectionMap = new ExcelClassMap<Row>().Map(r => r.Dates);
         var dictionaryMap = new ExcelClassMap<Row>().Map(r => r.Values);
-        Assert.IsType<ElementMap<DateTime>>(collectionMap.Pipeline);
-        Assert.IsType<ElementMap<int?>>(dictionaryMap.Pipeline);
+        Assert.IsType<ElementMap<DateTime>>(Helpers.ElementsOf(collectionMap));
+        Assert.IsType<ElementMap<int?>>(Helpers.ValuesOf(dictionaryMap));
     }
 
     [Fact]
     public void TypeMethods_ElementMap_ReturnTheMap()
     {
-        var map = new ExcelClassMap<Row>().Map(r => r.Dates).Pipeline;
+        var map = Helpers.ElementsOf(new ExcelClassMap<Row>().Map(r => r.Dates));
         Assert.Same(map, map.WithFormats("yyyy-MM-dd"));
         Assert.Same(map, map.WithFormatProvider(CultureInfo.InvariantCulture));
 
-        var nullableMap = new ExcelClassMap<Row>().Map(r => r.Values).Pipeline;
+        var nullableMap = Helpers.ValuesOf(new ExcelClassMap<Row>().Map(r => r.Values));
         Assert.Same(nullableMap, nullableMap.WithConverter(new NumberConverter()));
         Assert.Same(nullableMap, nullableMap.WithEmptyFallback(new ZeroFallback()));
         Assert.Same(nullableMap, nullableMap.WithInvalidFallback(new ZeroFallback()));

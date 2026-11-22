@@ -41,7 +41,7 @@ The currency symbol and separators are the [culture](#culture)'s, so this exampl
 
 A fractional number (such as `2.7`) mapped to an integer type is invalid, as the text `"2.7"` would be: it isn't truncated or rounded. Map to `decimal` or `double`, or give the member an [invalid fallback](mapping.md#empty-and-invalid-cells).
 
-On the netstandard builds, `.WithNumberStyle(...)` and `.WithFormatProvider(...)` aren't available for numbers: use `[ExcelNumberStyle]` and the importer's [culture](#culture).
+On the netstandard builds, `.WithNumberStyle(...)` and `.WithFormatProvider(...)` are available for the built-in number types (`int`, `decimal`, `double` and so on, and their nullable versions).
 
 ## Dates and times
 
@@ -128,7 +128,7 @@ public class OrderMap : ExcelClassMap<Order>
 
         Map(o => o.Item);
         Map(o => o.Date).WithFormatProvider(german);
-        Map(o => o.Price).WithFormatProvider(german);   // numbers: .NET 8 only
+        Map(o => o.Price).WithFormatProvider(german);
     }
 }
 ```
@@ -164,7 +164,7 @@ public class Employee
 }
 ```
 
-To ignore case, map the member with `Map(e => e.Status, ignoreCase: true)` in a class map. To map other text, such as codes, use [value mapping](mapping.md#value-mapping).
+To ignore case, map the member with `Map(e => e.Status).WithIgnoreCase()` in a class map. To map other text, such as codes, use [value mapping](mapping.md#value-mapping).
 
 ## Uris
 

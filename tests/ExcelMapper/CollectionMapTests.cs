@@ -35,7 +35,7 @@ public class CollectionMapTests
         var map = CreateMap();
         Assert.False(map.Optional);
         Assert.False(map.PreserveFormatting);
-        Assert.NotNull(map.Pipeline);
+        Assert.NotNull(Helpers.ElementsOf(map));
         Assert.Equal(["x", "y"], ReadStrings(m => m, "Values\n\"x,y\"\n"));
     }
 
@@ -154,13 +154,13 @@ public class CollectionMapTests
     public void WithElementMap_ValidMap_Success()
     {
         var map = CreateMap();
-        var newPipeline = CreateMap().Pipeline;
+        var newPipeline = Helpers.ElementsOf(CreateMap());
         Assert.Same(map, map.WithElementMap(e =>
         {
-            Assert.Same(e, map.Pipeline);
+            Assert.Same(e, Helpers.ElementsOf(map));
             return newPipeline;
         }));
-        Assert.Same(newPipeline, map.Pipeline);
+        Assert.Same(newPipeline, Helpers.ElementsOf(map));
         Assert.Throws<ArgumentNullException>("elementMap", () => map.WithElementMap(null!));
         Assert.Throws<ArgumentNullException>("elementMap", () => map.WithElementMap(_ => null!));
     }

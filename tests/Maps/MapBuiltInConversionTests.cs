@@ -170,7 +170,7 @@ public class MapBuiltInConversionTests
     public void ReadRows_EnumIgnoreCase_ReturnsExpected()
     {
         using var importer = Helpers.GetCsvImporter("Day\nmonday\n");
-        importer.Configuration.RegisterClassMap<EnumRow>(c => c.Map(r => r.Day, ignoreCase: true));
+        importer.Configuration.RegisterClassMap<EnumRow>(c => c.Map(r => r.Day).WithIgnoreCase());
         Assert.Equal(DayOfWeek.Monday, importer.ReadSheet().ReadRows<EnumRow>().Single().Day);
     }
 

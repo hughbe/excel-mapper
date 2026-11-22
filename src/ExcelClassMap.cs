@@ -13,7 +13,7 @@ public class ExcelClassMap : IParentMap
     /// Initializes a new instance of the <see cref="ExcelClassMap"/> class.
     /// </summary>
     /// <param name="type">The type of the object to create.</param>
-    public ExcelClassMap([DynamicallyAccessedMembers(TrimmingConstants.MappedType)] Type type) : this(type, EmptyValueStrategy.Error)
+    private protected ExcelClassMap([DynamicallyAccessedMembers(TrimmingConstants.MappedType)] Type type) : this(type, EmptyValueStrategy.Error)
     {
     }
 
@@ -22,7 +22,7 @@ public class ExcelClassMap : IParentMap
     /// </summary>
     /// <param name="type">The type of the object to create.</param>
     /// <param name="emptyValueStrategy">The default strategy to use when the value of a cell is empty.</param>
-    public ExcelClassMap([DynamicallyAccessedMembers(TrimmingConstants.MappedType)] Type type, EmptyValueStrategy emptyValueStrategy)
+    private protected ExcelClassMap([DynamicallyAccessedMembers(TrimmingConstants.MappedType)] Type type, EmptyValueStrategy emptyValueStrategy)
     {
         ThrowHelpers.ThrowIfNull(type, nameof(type));
         EnumUtilities.ValidateIsDefined(emptyValueStrategy);

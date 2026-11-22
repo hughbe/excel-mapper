@@ -272,7 +272,6 @@ public class MapDoubleTests
         Assert.Equal(10, row3.Value);
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedDoubleValueAllowThousands_Success()
     {
@@ -300,9 +299,7 @@ public class MapDoubleTests
         var row3 = sheet.ReadRow<DoubleValue>();
         Assert.Equal(10, row3.Value);
     }
-#endif
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedDoubleValueFormatProvider_Success()
     {
@@ -335,7 +332,6 @@ public class MapDoubleTests
         var row3 = sheet.ReadRow<DoubleValue>();
         Assert.Equal(10, row3.Value);
     }
-#endif
 
     [Fact]
     public void ReadRow_AutoMappedNullableDoubleValue_Success()
@@ -467,7 +463,6 @@ public class MapDoubleTests
         Assert.Equal(10, row3.Value);
     }
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableDoubleValueAllowThousands_Success()
     {
@@ -495,9 +490,7 @@ public class MapDoubleTests
         var row3 = sheet.ReadRow<NullableDoubleValue>();
         Assert.Equal(10, row3.Value);
     }
-#endif
 
-#if LIBRARY_NET8
     [Fact]
     public void ReadRow_CustomMappedNullableDoubleValueFormatProvider_Success()
     {
@@ -530,5 +523,4 @@ public class MapDoubleTests
         var row3 = sheet.ReadRow<NullableDoubleValue>();
         Assert.Equal(10, row3.Value);
     }
-#endif
 }
