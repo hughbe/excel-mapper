@@ -99,7 +99,7 @@ Columns:
 
 Values (also available on collection elements and dictionary values, through `WithElementMap` and `WithValueMap`):
 - `.WithConverter(value => ...)` - Convert the cell's text with a delegate, replacing the built-in conversion
-- `.WithConverter(ICellConverter<T>)` - Convert with a converter, which gets the typed cell value and where it is ([Custom converters](mapping.md#custom-converters))
+- `.WithConverter(ICellConverter<T>)` - Convert with a converter, which gets the typed cell value and where it is ([Custom converters](mapping.md#converters))
 - `.WithMapping(dictionary, comparer, behavior)` - Map fixed text to values
 - `.WithFormats("yyyy-MM-dd", ...)` - Date, time and duration formats
 - `.WithFormatProvider(provider)` - The culture for dates, times, durations and (.NET 8) numbers
@@ -110,7 +110,7 @@ Values (also available on collection elements and dictionary values, through `Wi
 
 Fallbacks:
 - `.WithEmptyFallback(value)` / `.WithInvalidFallback(value)` / `.WithValueFallback(value)` - The value of empty cells, invalid cells, or both
-- `.WithEmptyFallback(ICellFallback<T>)` / `.WithInvalidFallback(ICellFallback<T>)` - Compute the value ([Fallbacks](mapping.md#advanced-fallback-strategies))
+- `.WithEmptyFallback(ICellFallback<T>)` / `.WithInvalidFallback(ICellFallback<T>)` - Compute the value ([Fallbacks](mapping.md#computed-fallbacks))
 - `.WithThrowingEmptyFallback()` / `.WithThrowingInvalidFallback()` / `.WithThrowingFallback()` - Throw instead (the default for non-nullable value types)
 
 For a nullable member (`int?`), converters and fallbacks can be for the underlying type: `WithConverter(ICellConverter<int>)`, `WithEmptyFallback(ICellFallback<int>)`.

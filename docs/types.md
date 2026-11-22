@@ -1,48 +1,150 @@
-# Types and Advanced Mapping
+# Types
 
-Supported types, enums, collections, dictionaries, nested objects, custom converters and transformers. See the [documentation index](../README.md#documentation) for other topics.
+The types ExcelMapper maps, and how each one is read from a cell. How to choose columns, convert values yourself and handle empty or invalid cells is in [Mapping](mapping.md). See the [documentation index](../README.md#documentation) for other topics.
 
-## Advanced Features
+## Supported types
 
-### Enums
+| Kind | Types |
+|---|---|
+| Text | `string`, `char` |
+| Numbers | `int`, `long`, `short`, `byte`, `sbyte`, `uint`, `ulong`, `ushort`, `float`, `double`, `decimal`; on .NET 8 also `Half`, `Int128`, `UInt128`, `BigInteger`, `Complex`, `nint`, `nuint` and other `INumberBase<T>` types |
+| Dates and times | `DateTime`, `DateTimeOffset`, `TimeSpan`; on .NET 8 also `DateOnly`, `TimeOnly` |
+| Other values | `bool`, enums, `Guid`, `Uri`, `Version`, `object`; on .NET 8 any `IParsable<T>` type; any `IConvertible` type |
+| Collections | Arrays, lists, sets, queues, stacks, immutable and concurrent collections, and your own (see [Collections](#collections)) |
+| Dictionaries | Dictionaries with string keys, `ExpandoObject` and the non-generic dictionaries (see [Dictionaries](#dictionaries)) |
+| Objects | Classes, structs and records, mapped member by member, including [nested objects](#nested-objects) |
 
-Parse string values to enums (case-sensitive by default):
+Nullable versions of every value type are supported: an empty cell is `null`. The ".NET 8" types need the library's `net8.0` build, used by .NET 8 and later; on .NET Framework and other platforms that use the netstandard builds they aren't available.
 
-| Name          | Status   |
-|---------------|----------|
-| Alice Johnson | FullTime |
-| Bob Smith     | fulltime |
-| Carol White   | PARTTIME |
+A cell's value is read as Excel stores it: numbers, dates, times and booleans from Excel files arrive typed, and are converted to the member's type without being turned into text first. CSV cells are always text, and are parsed.
+
+## Numbers
+
+Text is parsed with `NumberStyles.Number`: leading and trailing spaces, a sign, thousands separators and a decimal point, so `" -1,234.5 "` is valid. Floating-point types also accept exponents (`1E5`). Change the style for a member with `[ExcelNumberStyle]` or `.WithNumberStyle(...)`:
+
+| Product  | Price     |
+|----------|-----------|
+| Widget A | $1,234.56 |
+| Widget B | (250.00)  |
 
 ```csharp
-public enum EmploymentStatus { FullTime, PartTime, Contract }
-
-public class Employee
+public class Product
 {
     public string Name { get; set; }
-    public EmploymentStatus Status { get; set; }
+
+    [ExcelNumberStyle(NumberStyles.Currency)]   // currency symbols, and parentheses for negative numbers
+    public decimal Price { get; set; }
+}
+```
+
+The currency symbol and separators are the [culture](#culture)'s, so this example needs an en-US culture. Number styles only affect text: cells Excel stores as numbers aren't parsed.
+
+A fractional number (such as `2.7`) mapped to an integer type is invalid, as the text `"2.7"` would be: it isn't truncated or rounded. Map to `decimal` or `double`, or give the member an [invalid fallback](mapping.md#empty-and-invalid-cells).
+
+On the netstandard builds, `.WithNumberStyle(...)` and `.WithFormatProvider(...)` aren't available for numbers: use `[ExcelNumberStyle]` and the importer's [culture](#culture).
+
+## Dates and times
+
+Cells that Excel stores as dates, times or durations map directly. Excel stores dates as numbers, the days since 1899-12-30, so a number in a cell without a date format is also read as a date: `45355` is 2024-03-04 for `DateTime`, `DateTimeOffset` and `DateOnly`. For `TimeOnly` a number is a fraction of a day (`0.25` is 06:00), and for `TimeSpan` a number of days (`1.5` is 36 hours). A cell formatted as a time of day maps to `TimeOnly` or `TimeSpan`.
+
+Dates and times written as **text** (every CSV cell, or text cells in a workbook) are parsed in these formats, using the importer's [culture](#culture):
+
+| Type | Accepted by default | Examples (en-GB) |
+|------|---------------------|------------------|
+| `DateTime`, `DateTimeOffset` | ISO 8601; the culture's date and time (`"G"`), short date and time (`"g"`) and short date (`"d"`) | `2024-03-04`, `2024-03-04T10:30:15Z`, `2024-03-04 10:30`, `04/03/2024 10:30:15`, `04/03/2024` |
+| `DateOnly` | the culture's short date (`"d"`); ISO 8601 | `04/03/2024`, `2024-03-04` |
+| `TimeOnly` | the culture's short time (`"t"`) and long time (`"T"`); 24-hour times | `10:30`, `10:30:15`, `9:05`, `14:30:15.25` |
+| `TimeSpan` | the constant format (`"c"`) | `1:30`, `01:30:00`, `1.02:03:04` |
+
+Text such as `3/4/2024 10:30 AM` matches en-US patterns whether it uses an ordinary space or the narrow no-break space .NET uses on Linux, macOS and recent Windows. A `DateTime` with an offset (`Z`, `+01:00`) is converted to local time, as `DateTime.Parse` does; map to `DateTimeOffset` to keep the offset.
+
+To accept exactly the formats you give, and nothing else, set them with `[ExcelFormats]` or `.WithFormats(...)`:
+
+| Event      | Date       | Start   | Duration |
+|------------|------------|---------|----------|
+| Conference | 2024-03-15 | 09:30   | 02:30:00 |
+| Workshop   | 15/03/2024 | 2:00 PM | 01:15:00 |
+
+```csharp
+public class Event
+{
+    public string Name { get; set; }
+
+    [ExcelFormats("yyyy-MM-dd", "dd/MM/yyyy")]
+    public DateTime Date { get; set; }
+
+    [ExcelFormats("HH:mm", "h:mm tt")]
+    public TimeOnly Start { get; set; }
+
+    [ExcelFormats(@"hh\:mm\:ss", @"mm\:ss")]
+    public TimeSpan Duration { get; set; }
 }
 
-// Case-insensitive enum parsing
-public class EmployeeMap : ExcelClassMap<Employee>
+// Or with a class map
+Map(e => e.Date).WithFormats("yyyy-MM-dd", "dd/MM/yyyy");
+```
+
+### Offsets
+
+Excel dates have no time zone. Mapped to a `DateTimeOffset`, they get the machine's local offset, so the same file can give different results on different servers. Choose the offset instead:
+
+```csharp
+public class Event
 {
-    public EmployeeMap()
+    [ExcelOffset("+00:00")]          // or .WithOffset(TimeSpan.Zero)
+    public DateTimeOffset StartsAt { get; set; }
+}
+```
+
+This applies to cells Excel stores as dates or numbers. Text with its own offset, parsed with a format such as `"yyyy-MM-ddTHH:mm:sszzz"`, keeps it.
+
+## Culture
+
+Text is parsed, and numbers and dates are converted to text, with the current culture of the thread reading the rows, so results can depend on the machine's settings. Set a culture for the whole importer to make them predictable:
+
+```csharp
+importer.Configuration.Culture = CultureInfo.InvariantCulture;   // or CultureInfo.GetCultureInfo("de-DE")
+```
+
+The culture is only set while each row is mapped; your code between rows keeps its own. To use a different culture for one member, give it a format provider:
+
+| Item  | Date       | Price    |
+|-------|------------|----------|
+| Kabel | 15.03.2024 | 1.234,56 |
+
+```csharp
+public class Order
+{
+    public string Item { get; set; }
+    public DateTime Date { get; set; }
+    public decimal Price { get; set; }
+}
+
+public class OrderMap : ExcelClassMap<Order>
+{
+    public OrderMap()
     {
-        Map(e => e.Name);
-        Map(e => e.Status, ignoreCase: true);  // Handles "fulltime", "FULLTIME", etc.
+        var german = CultureInfo.GetCultureInfo("de-DE");
+
+        Map(o => o.Item);
+        Map(o => o.Date).WithFormatProvider(german);
+        Map(o => o.Price).WithFormatProvider(german);   // numbers: .NET 8 only
     }
 }
 ```
 
-#### Mapping Enums with DescriptionAttribute
+## Booleans
 
-ExcelMapper automatically supports mapping enum values using their `[Description]` attribute values. This is useful when your Excel data contains user-friendly text that differs from the enum names:
+Excel booleans map directly. Text is valid if it's `true` or `false`, `1` or `0`, or `yes` or `no`, ignoring case.
 
-| Status              |
-|---------------------|
-| Full Time Employee  |
-| Part Time Employee  |
-| Contract Worker     |
+## Enums
+
+Text is matched to the enum's names, case-sensitively, and to the text of `[Description]` attributes on its values (which win when both match):
+
+| Name          | Status             |
+|---------------|--------------------|
+| Alice Johnson | Full Time Employee |
+| Bob Smith     | PartTime           |
 
 ```csharp
 using System.ComponentModel;
@@ -51,612 +153,151 @@ public enum EmploymentStatus
 {
     [Description("Full Time Employee")]
     FullTime,
-    
-    [Description("Part Time Employee")]
+
     PartTime,
-    
-    [Description("Contract Worker")]
-    Contract
 }
 
 public class Employee
 {
+    public string Name { get; set; }
     public EmploymentStatus Status { get; set; }
 }
 ```
 
-The DescriptionAttribute mapping works automatically with:
-- Direct enum properties (automatic mapping)
-- Explicit property mapping via `RegisterClassMap`
-- Nullable enums
-- Both standard enum name matching and description matching (description takes precedence when both match)
+To ignore case, map the member with `Map(e => e.Status, ignoreCase: true)` in a class map. To map other text, such as codes, use [value mapping](mapping.md#value-mapping).
 
-**Important Notes:**
-- Description matching is **case-sensitive**
-- Empty or null descriptions are ignored
-- If a description is not found, the standard enum name is matched instead
-- Enum values without a `[Description]` attribute can still be mapped using their standard names
+## Uris
 
-### Uri Mapping
-
-ExcelMapper maps cell values to `Uri` objects. By default only **absolute** URIs (such as `https://example.com`) are valid; set the URI kind to accept relative ones:
-
-| Website                   | API Endpoint         | Relative Path     |
-|---------------------------|----------------------|-------------------|
-| https://example.com       | /api/v1/users        | ../resources      |
-| https://www.contoso.com   | /api/v1/products     | ./images/logo.png |
-
-**Using Attributes:**
+By default only **absolute** URIs (such as `https://example.com`) are valid. Accept relative ones with `[ExcelUri]` or `.WithUriKind(...)`:
 
 ```csharp
 public class Resource
 {
-    // Absolute URIs only (the default), e.g. https://example.com
-    public Uri Website { get; set; }
+    public Uri Website { get; set; }                   // absolute only
 
-    // Relative URIs only, e.g. /api/v1/users
-    [ExcelUri(UriKind.Relative)]
-    public Uri ApiEndpoint { get; set; }
+    [ExcelUri(UriKind.Relative)]                       // or .WithUriKind(UriKind.Relative)
+    public Uri ApiEndpoint { get; set; }               // "/api/v1/users"
 
-    // Absolute or relative URIs
     [ExcelUri(UriKind.RelativeOrAbsolute)]
-    public Uri RelativePath { get; set; }
-}
-
-var resources = sheet.ReadRows<Resource>();
-```
-
-**Using Fluent API:**
-
-```csharp
-public class ResourceMap : ExcelClassMap<Resource>
-{
-    public ResourceMap()
-    {
-        // Absolute URIs only (the default)
-        Map(r => r.Website);
-
-        // Relative URIs only
-        Map(r => r.ApiEndpoint)
-            .WithUriKind(UriKind.Relative);
-
-        // Absolute or relative URIs
-        Map(r => r.RelativePath)
-            .WithUriKind(UriKind.RelativeOrAbsolute);
-    }
-}
-
-importer.Configuration.RegisterClassMap<ResourceMap>();
-var resources = sheet.ReadRows<Resource>();
-```
-
-**Available UriKind Options:**
-- `UriKind.Absolute` (default) - Must be an absolute URI (e.g., `https://example.com`)
-- `UriKind.Relative` - Must be a relative URI (e.g., `/api/users` or `../path`)
-- `UriKind.RelativeOrAbsolute` - Can be either absolute or relative
-
-**Error Handling:**
-
-```csharp
-public class ResourceMap : ExcelClassMap<Resource>
-{
-    public ResourceMap()
-    {
-        Map(r => r.Website)
-            .WithInvalidFallback(null);  // Use null for invalid (such as relative) URIs
-    }
+    public Uri Link { get; set; }                      // either
 }
 ```
 
-**Important Notes:**
-- **Hyperlink formulas are not supported** due to limitations in the underlying ExcelDataReader library. Only the displayed text value in cells is read, not the hyperlink target. If you need to read hyperlink targets, consider using a different library or extracting them separately.
-- Invalid URIs will throw an exception unless you provide a fallback value
-- Empty cells are treated as null for nullable `Uri?` properties
-- URI validation is performed using .NET's `Uri.TryCreate` method
+A hyperlink cell maps from its displayed text: ExcelDataReader doesn't read hyperlink targets.
 
-### Collections and Arrays
+## Values as Excel stores them
 
-ExcelMapper supports multiple strategies for mapping collections.
+`object` and `IConvertible` members, and `object` values in dictionaries, `ExpandoObject` and non-generic collections such as `ArrayList`, receive the value as Excel stores it: a `double` for numbers, a `DateTime` for dates, a `bool` for booleans, a `TimeSpan` for durations and a `string` for text. With `[ExcelPreserveFormatting]` they receive the displayed text instead. Collections that only hold one type, such as `StringCollection`, convert values to that type.
 
-#### Split Single Cell
+## Collections
 
-By default, splits cell value by comma:
+A collection member reads one cell split by separators, or several columns.
 
-| Name          | Skills                           |
-|---------------|----------------------------------|
-| Alice Johnson | C#,Python,SQL                    |
-| Bob Smith     | Java,JavaScript,Docker,Kubernetes |
+**One cell, split.** By default a collection reads the column with its name, split by commas:
+
+| Name          | Skills         |
+|---------------|----------------|
+| Alice Johnson | C#,Python,SQL  |
 
 ```csharp
 public class Employee
 {
     public string Name { get; set; }
-    public string[] Skills { get; set; }  // Auto-split by comma
+    public string[] Skills { get; set; }    // ["C#", "Python", "SQL"]
+
+    [ExcelSeparators(';', '|')]             // or .WithSeparators(';', '|'); strings work too
+    public List<string> Tags { get; set; }
 }
 ```
 
-Customize the separator using attributes or fluent API:
+An empty cell gives an empty collection, and a trailing separator (`"a,b,"`) gives a trailing empty value, as `string.Split` does.
 
-```csharp
-// Using attributes
-public class Employee
-{
-    public string Name { get; set; }
-    
-    // Split by semicolon instead of comma
-    [ExcelSeparators(';')]
-    public string[] Skills { get; set; }
-    
-    // Split by multiple separators (pipe or comma)
-    [ExcelSeparators('|', ',')]
-    public string[] Tags { get; set; }
-    
-    // String separators also supported
-    [ExcelSeparators(";", "||")]
-    public string[] Categories { get; set; }
-}
-
-// Or using fluent API
-public class EmployeeMap : ExcelClassMap<Employee>
-{
-    public EmployeeMap()
-    {
-        Map(e => e.Name);
-        
-        // Split by semicolon instead of comma
-        Map(e => e.Skills)
-            .WithSeparators(';');
-            
-        // Split by multiple separators (pipe or comma)
-        Map(e => e.Tags)
-            .WithSeparators('|', ',');
-    }
-}
-```
-
-#### Multiple Columns by Name
+**Several columns**, each giving one element:
 
 ```csharp
 public class Employee
 {
-    public string Name { get; set; }
-
-    [ExcelColumnNames("Review1", "Review2", "Review3")]
-    public int[] Reviews { get; set; }
-}
-```
-
-#### Multiple Columns by Index
-
-```csharp
-public class Employee
-{
-    public string Name { get; set; }
-
-    [ExcelColumnIndices(1, 2, 3)]
+    [ExcelColumnNames("Q1", "Q2", "Q3", "Q4")]           // or .WithColumnNames(...)
     public int[] QuarterlyScores { get; set; }
+
+    [ExcelColumnIndices(5, 6)]                           // or .WithColumnIndices(...)
+    public decimal[] Bonuses { get; set; }
+
+    [ExcelColumnsMatching(@"^Review \d+$")]              // or .WithColumnsMatching(regex or predicate)
+    public List<string> Reviews { get; set; }
 }
 ```
 
-#### Multiple Columns by Pattern
+A [column selector](mapping.md#column-selectors) can choose the columns too.
+
+**Elements** are read like single values of the element type. Configure them with `WithElementMap`, which takes the same value methods as a single member:
 
 ```csharp
-public class Employee
-{
-    public string Name { get; set; }
-
-    [ExcelColumnsMatching(@"Q\d+.*Score", RegexOptions.IgnoreCase)]
-    public int[] QuarterlyScores { get; set; }
-}
+Map(e => e.Certifications)
+    .WithColumnNames("Certified 1", "Certified 2")
+    .WithElementMap(e => e
+        .WithFormats("yyyy-MM-dd")
+        .WithInvalidFallback(DateTime.MinValue));
 ```
 
-The fluent API accepts a predicate or a regular expression:
+Attributes such as `[ExcelFormats]` and `[ExcelConverter]` on a collection member apply to each element.
+
+**Collection types.** Arrays (including multidimensional arrays mapped by index, such as `Map(p => p.Grid[0, 1])`), `List<T>` and the list, collection and enumerable interfaces, `Collection<T>`, `ReadOnlyCollection<T>`, `ObservableCollection<T>`, `LinkedList<T>`, `HashSet<T>`, `SortedSet<T>`, `ISet<T>`, `Queue<T>`, `Stack<T>`, the concurrent collections, `BlockingCollection<T>`, the immutable collections, `FrozenSet<T>` (.NET 8), and the non-generic `ArrayList`, `Queue`, `Stack` and `StringCollection`. Your own collection types work if they have a parameterless constructor and an `Add` method, or a constructor that takes an `IEnumerable<T>`, `ICollection<T>` or `IReadOnlyList<T>`.
+
+To map elements one by one from different columns, map them by index: `Map(p => p.Values[0]).WithColumnName("First")`.
+
+## Dictionaries
+
+A dictionary member, or a whole row read as a dictionary, maps every column, keyed by column name:
 
 ```csharp
-Map(e => e.QuarterlyScores).WithColumnsMatching(name => name.StartsWith("Q"));
-Map(e => e.QuarterlyScores).WithColumnsMatching(new Regex(@"Q\d+.*Score", RegexOptions.IgnoreCase));
-```
-
-#### Fluent Collection Mapping
-
-```csharp
-public class Employee
-{
-    public string Name { get; set; }
-    public string[] Skills { get; set; }
-    public DateTime[] Certifications { get; set; }
-    public int[] Scores { get; set; }
-}
-
-public class EmployeeMap : ExcelClassMap<Employee>
-{
-    public EmployeeMap()
-    {
-        Map(e => e.Name);
-
-        // Split by comma (default)
-        Map(e => e.Skills)
-            .WithColumnName("Skills");
-
-        // Read multiple columns with custom element mapping
-        Map(e => e.Certifications)
-            .WithColumnNames("Certification Date 1", "Certification Date 2")
-            .WithElementMap(m => m
-                .WithFormats("yyyy-MM-dd", "dd/MM/yyyy")
-                .WithInvalidFallback(DateTime.MinValue)
-            );
-            
-        // Configure element conversion for split values
-        Map(e => e.Scores)
-            .WithColumnName("Quarterly Scores")
-            .WithSeparators(';')
-            .WithElementMap(m => m
-                .WithInvalidFallback(-1)  // Handle non-numeric values
-            );
-    }
-}
-```
-
-The `.WithElementMap()` method allows you to configure how individual elements in a collection are parsed, including:
-- Custom formats (`.WithFormats()`)
-- Fallback values (`.WithEmptyFallback()`, `.WithInvalidFallback()`)
-- Custom converters (`.WithConverter()`)
-- Value mappings (`.WithMapping()`)
-
-#### Supported Collection Types
-
-- **Arrays**: `T[]`
-- **Lists**: `List<T>`, `IList<T>`, `ICollection<T>`, `IEnumerable<T>`
-- **Sets**: `HashSet<T>`, `ISet<T>`, `FrozenSet<T>` (.NET 8+), `ImmutableHashSet<T>`, `ImmutableSortedSet<T>`
-- **Immutable Collections**: `ImmutableArray<T>`, `ImmutableList<T>`
-- **Observable Collections**: `ObservableCollection<T>`
-- **Custom collections** with `Add(T)` method and parameterless constructor
-
-### Dictionaries
-
-Map multiple columns to dictionary properties.
-
-#### All Columns to Dictionary
-
-```csharp
-// Maps ALL columns to dictionary
 var rows = sheet.ReadRows<Dictionary<string, string>>().ToArray();
 Console.WriteLine(rows[0]["Name"]);
-Console.WriteLine(rows[0]["Age"]);
-```
-
-#### Dictionary Property
-
-```csharp
-public class Record
-{
-    public Dictionary<string, string> Values { get; set; }
-}
-
-public class RecordMap : ExcelClassMap<Record>
-{
-    public RecordMap()
-    {
-        // Map all columns
-        Map(r => r.Values);
-
-        // Or specific columns
-        Map(r => r.Values)
-            .WithColumnNames("Column1", "Column2", "Column3");
-    }
-}
-```
-
-#### Supported Dictionary Types
-
-- `Dictionary<TKey, TValue>`, `IDictionary<TKey, TValue>`
-- `FrozenDictionary<TKey, TValue>` (.NET 8+)
-- `ImmutableDictionary<TKey, TValue>`, `ImmutableSortedDictionary<TKey, TValue>`
-- Keys are derived from column names
-- Values can be any supported type
-
-### Nested Objects
-
-Map nested properties to Excel columns:
-
-| Name          | HireDate   | Department | Location |
-|---------------|------------|------------|----------|
-| Alice Johnson | 2020-03-15 | Engineering| Seattle  |
-| Bob Smith     | 2019-07-22 | Marketing  | New York |
-
-```csharp
-public class DepartmentInfo
-{
-    public string Name { get; set; }
-    public string Location { get; set; }
-}
-
-public class Employee
-{
-    public string Name { get; set; }
-    public DateTime HireDate { get; set; }
-    public DepartmentInfo Department { get; set; }
-}
-
-public class EmployeeMap : ExcelClassMap<Employee>
-{
-    public EmployeeMap()
-    {
-        Map(e => e.Name);
-        Map(e => e.HireDate);
-
-        // Map nested properties
-        Map(e => e.Department.Name)
-            .WithColumnName("Department");
-
-        Map(e => e.Department.Location);
-    }
-}
-
-importer.Configuration.RegisterClassMap<EmployeeMap>();
-var employees = sheet.ReadRows<Employee>();
-```
-
-**Circular Reference Detection:**
-
-ExcelMapper automatically detects and prevents circular references during auto-mapping:
-
-```csharp
-public class Person
-{
-    public string Name { get; set; }
-    public Person Parent { get; set; }  // Would cause infinite recursion
-}
-
-// This will throw ExcelMappingException with a clear error message
-var people = sheet.ReadRows<Person>();
-// Exception: "Circular reference detected: type 'Person' references itself 
-//             through its members. Consider applying the ExcelIgnore 
-//             attribute to break the cycle."
-```
-
-**Solution - use `[ExcelIgnore]`:**
-
-```csharp
-public class Person
-{
-    public string Name { get; set; }
-    
-    [ExcelIgnore]  // Break the circular reference
-    public Person Parent { get; set; }
-}
-```
-
-### Custom Converters
-
-Create custom type conversions:
-
-```csharp
-public class EmployeeMap : ExcelClassMap<Employee>
-{
-    public EmployeeMap()
-    {
-        Map(e => e.Salary)
-            .WithConverter(value => 
-            {
-                // Remove currency symbol and parse
-                var cleaned = value.Replace("$", "").Replace(",", "");
-                return decimal.Parse(cleaned);
-            });
-
-        Map(e => e.Active)
-            .WithConverter(value => value.ToLower() switch
-            {
-                "yes" => true,
-                "y" => true,
-                "active" => true,
-                "no" => false,
-                "n" => false,
-                "inactive" => false,
-                _ => false
-            });
-    }
-}
-```
-
-### Custom Transformers and Converters
-
-For advanced scenarios, implement `ICellTransformer` or `ICellConverter<T>` (see [Custom Converters](mapping.md#custom-converters)):
-
-**ICellTransformer** - Changes a cell's value before it's converted:
-
-```csharp
-public class UpperCaseTransformer : ICellTransformer
-{
-    public CellValue Transform(CellValue value, CellContext context)
-        => value.Kind == CellKind.Text ? new CellValue(value.Text!.ToUpperInvariant()) : value;
-}
-
-public class EmployeeMap : ExcelClassMap<Employee>
-{
-    public EmployeeMap()
-    {
-        Map(e => e.Name)
-            .WithTransformers(new UpperCaseTransformer());
-
-        // Or use the built-in trim transformer
-        Map(e => e.Department)
-            .WithTrim();
-    }
-}
-```
-
-**ICellConverter<T>** - Custom conversion, used for every cell that isn't empty:
-
-```csharp
-public class PhoneNumberConverter : ICellConverter<string>
-{
-    public CellConversionResult<string> Convert(CellValue value, CellContext context)
-    {
-        // Remove formatting and validate
-        var digits = new string(value.Text!.Where(char.IsDigit).ToArray());
-        return digits.Length == 10
-            ? CellConversionResult<string>.Success(digits)
-            : CellConversionResult<string>.Invalid(() => new FormatException("Phone number must be 10 digits."));
-    }
-}
-
-public class ContactMap : ExcelClassMap<Contact>
-{
-    public ContactMap()
-    {
-        Map(e => e.PhoneNumber)
-            .WithConverter(new PhoneNumberConverter());
-    }
-}
-```
-
-**Chaining Transformers and Converters:** transformers run first, in order, then the converter.
-
-```csharp
-public class ContactMap : ExcelClassMap<Contact>
-{
-    public ContactMap()
-    {
-        Map(e => e.PhoneNumber)
-            .WithTrim()
-            .WithConverter(new PhoneNumberConverter());
-    }
-}
-```
-
-## Supported Types
-
-### Primitive Types
-- **Numeric**: `int`, `long`, `double`, `decimal`, `float`, `byte`, `short`, `uint`, `ulong`, `ushort`, `sbyte`
-- **Extended Numeric**: `Int128`, `UInt128`, `BigInteger`, `Half`, `nint` (IntPtr), `nuint` (UIntPtr), `Complex`
-- **Text**: `string`, `char`
-- **Other**: `bool` (Excel booleans, `true`/`false`, `1`/`0` and `yes`/`no`, case-insensitive), `Guid`, `Uri`, `Version`
-- **Enums**: With optional case-insensitive parsing
-- **Nullable versions** of all value types
-- **Any type implementing `IParsable<T>`** (.NET 7+) - automatically supported
-- **Any type implementing `IConvertible`** - automatically supported
-
-> **Note:** Fractional numeric cells (such as `2.7`) mapped to integer types are invalid rather than truncated or rounded. See [Fractional Numbers Mapped to Integer Properties](errors.md#fractional-numbers-mapped-to-integer-properties).
-
-> **Note:** `object` and `IConvertible` members, and `object` values in dictionaries, `ExpandoObject` and non-generic collections such as `ArrayList`, receive the value as Excel stores it: a `double` for numbers, a `DateTime` for dates, a `bool` for booleans and a `string` for text. With `[ExcelPreserveFormatting]` they receive the displayed text instead. CSV cells are always text. Collections that only accept one type, such as `StringCollection`, convert values to that type.
-
-### Collection Types
-- `T[]`, `List<T>`, `IList<T>`, `ICollection<T>`, `IEnumerable<T>`
-- `HashSet<T>`, `ISet<T>`, `FrozenSet<T>`, `ImmutableHashSet<T>`
-- `ImmutableArray<T>`, `ImmutableList<T>`
-- `Dictionary<TKey, TValue>`, `IDictionary<TKey, TValue>`
-- `FrozenDictionary<TKey, TValue>`, `ImmutableDictionary<TKey, TValue>`
-
-### Date and Time Types
-
-ExcelMapper has comprehensive support for modern .NET date and time types:
-
-- `DateTime` - Date and time
-- `DateTimeOffset` - Date and time with an offset. Excel dates have no time zone, so by default they get the machine's local offset; use `[ExcelOffset("+00:00")]` or `.WithOffset(TimeSpan.Zero)` to choose one
-- `DateOnly` - Date without time (available in .NET 6+)
-- `TimeOnly` - Time without date (available in .NET 6+)
-- `TimeSpan` - Duration/time interval
-
-Cells that Excel stores as dates, times or durations are mapped directly. Excel stores dates as numbers (the number of days since 1899-12-30), so a number in a cell without a date format is also read as a date: `45355` maps to 2024-03-04 for `DateTime`, `DateTimeOffset` and `DateOnly`. For `TimeOnly` a number is a fraction of a day (`0.25` is 06:00), and for `TimeSpan` it is a number of days (`1.5` is 36 hours). A cell formatted as a time of day can be mapped to `TimeOnly` or `TimeSpan`.
-
-Text cells support custom format parsing with `.WithFormats()` and culture-specific parsing with `.WithFormatProvider()`.
-
-**Example:**
-
-```csharp
-using System.Globalization;
-
-public class EventMap : ExcelClassMap<Event>
-{
-    public EventMap()
-    {
-        Map(e => e.EventDate)
-            .WithFormats("yyyy-MM-dd", "dd/MM/yyyy", "MM/dd/yyyy");
-            
-        Map(e => e.StartTime)
-            .WithFormats("HH:mm:ss", "hh:mm tt");
-            
-        Map(e => e.Duration)
-            .WithFormats(@"hh\:mm\:ss", @"mm\:ss");
-    }
-}
-```
-
-**`DateTimeOffset` offsets:**
-
-Excel stores dates without a time zone. When mapped to a `DateTimeOffset`, they get the machine's local offset by default, so the same file can give different results on different servers. Choose the offset instead:
-
-```csharp
-public class Event
-{
-    [ExcelOffset("+00:00")]          // UTC
-    public DateTimeOffset StartsAt { get; set; }
-
-    [ExcelOffset("-08:00")]
-    public DateTimeOffset? EndsAt { get; set; }
-}
-
-// Or with the fluent API
-Map(e => e.StartsAt).WithOffset(TimeSpan.Zero);
-```
-
-This applies to cells that Excel stores as dates (or as serial numbers). Text that includes an offset, parsed with a format such as `"yyyy-MM-ddTHH:mm:sszzz"`, keeps its own offset.
-
-**Culture-Specific Parsing:**
-
-Use `.WithFormatProvider()` to parse dates and times using specific cultures:
-
-```csharp
-public class EventMap : ExcelClassMap<Event>
-{
-    public EventMap()
-    {
-        var frenchCulture = new CultureInfo("fr-FR");
-        
-        // Parse French-formatted dates: "15/03/2024"
-        Map(e => e.EventDate)
-            .WithFormats("dd/MM/yyyy")
-            .WithFormatProvider(frenchCulture);
-    }
-}
-```
-
-### Complex Types
-- Classes with public properties/fields
-- Record types (C# 9+) and classes or structs with get-only properties set through a constructor
-- Nested objects
-- `ExpandoObject` for dynamic scenarios
-
-**Record Type Example:**
-
-```csharp
-// Records are created through their constructor (see Records and Constructors)
-public record Employee(string Name, string Department, decimal Salary);
-
-using var importer = new ExcelImporter("employees.xlsx");
-var sheet = importer.ReadSheet();
-var employees = sheet.ReadRows<Employee>().ToArray();
-```
-
-**ExpandoObject Example:**
-
-```csharp
-using System.Dynamic;
-
-// Read rows as dynamic objects when column structure varies
-using var importer = new ExcelImporter("data.xlsx");
-var sheet = importer.ReadSheet();
 
 foreach (dynamic row in sheet.ReadRows<ExpandoObject>())
 {
-    Console.WriteLine(row.ColumnName);  // Access properties dynamically
+    Console.WriteLine(row.Name);
 }
 
-// Or use in a property
-public class FlexibleData
+public class Record
 {
-    public string Id { get; set; }
-    public ExpandoObject Metadata { get; set; }  // Maps all remaining columns
+    public Dictionary<string, int> Scores { get; set; }   // every column
+
+    [ExcelColumnNames("Maths", "English")]                // or chosen columns
+    public Dictionary<string, int> Core { get; set; }
 }
 ```
+
+Values are read like single values of the value type, and configured with `WithValueMap(v => ...)`. To map only the columns nothing else reads, use [extra columns](mapping.md#extra-columns); to map one value by key, `Map(p => p.Scores["Maths"])`.
+
+**Dictionary types.** `Dictionary<string, TValue>` and the dictionary interfaces, `SortedDictionary`, `SortedList`, `ConcurrentDictionary`, `ReadOnlyDictionary`, the immutable dictionaries, `FrozenDictionary` (.NET 8), `ExpandoObject`, and the non-generic `Hashtable`, `SortedList`, `StringDictionary` and `NameValueCollection`.
+
+## Nested objects
+
+A member whose type is a class, struct or record is mapped from the same row, member by member:
+
+| Name          | Department  | Location |
+|---------------|-------------|----------|
+| Alice Johnson | Engineering | Seattle  |
+
+```csharp
+public class Employee
+{
+    public string Name { get; set; }
+    public DepartmentInfo Department { get; set; }
+}
+
+public class DepartmentInfo
+{
+    [ExcelColumnName("Department")]
+    public string Name { get; set; }
+
+    public string Location { get; set; }
+}
+
+// Or with a class map
+Map(e => e.Department.Name).WithColumnName("Department");
+Map(e => e.Department.Location);
+```
+
+`MapObject(e => e.Department)` returns the nested object's class map, and `.WithClassMap(...)` on it uses or configures another class map. A type that contains itself (such as `Person.Parent`) can't be auto-mapped: mark the member `[ExcelIgnore]`, or map the type with a class map.

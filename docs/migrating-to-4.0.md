@@ -129,10 +129,10 @@ catch (ExcelMappingException ex)
 
 | To... | 3.x | 4.0 |
 |---|---|---|
-| Convert a cell | `ICellMapper` with `WithMappers(...)` or `[ExcelMapper]`; `CellMapperResult`; `ReadCellResult`; `WithConverter(readResult => ...)` | [`ICellConverter<T>`](mapping.md#custom-converters) with `WithConverter(converter)` or `[ExcelConverter(typeof(...))]`, or `WithConverter(value => ...)` with the cell's text |
-| Change a cell before it's converted | `Abstractions.ICellTransformer`, `TrimStringCellTransformer` | [`ICellTransformer`](mapping.md#custom-cell-transformers) (in the `ExcelMapper` namespace) with `WithTransformers(...)` or `[ExcelTransformer]`, and `WithTrim()` or `[ExcelTrimString]` |
-| Give empty or invalid cells a value | `IFallbackItem`, `FixedValueFallback`, `ThrowFallback`, `WithFallbackItem`, `WithEmptyFallbackItem`, `WithInvalidFallbackItem` | [`ICellFallback<T>`](mapping.md#advanced-fallback-strategies) with `WithEmptyFallback(fallback)`/`WithInvalidFallback(fallback)` or `[ExcelEmptyFallback]`/`[ExcelInvalidFallback]`; or `WithValueFallback(value)`, `WithEmptyFallback(value)` and `WithThrowingFallback()` |
-| Choose columns in code | `ICellReaderFactory`, `ICellsReaderFactory`, `WithReaderFactory(...)`, `IExcelColumnMatcher` | [`IColumnSelector`](mapping.md#pattern-matching) with `WithColumns(selector)`, `[ExcelColumnMatching(typeof(...))]` or `[ExcelColumnsMatching(typeof(...))]` |
+| Convert a cell | `ICellMapper` with `WithMappers(...)` or `[ExcelMapper]`; `CellMapperResult`; `ReadCellResult`; `WithConverter(readResult => ...)` | [`ICellConverter<T>`](mapping.md#converters) with `WithConverter(converter)` or `[ExcelConverter(typeof(...))]`, or `WithConverter(value => ...)` with the cell's text |
+| Change a cell before it's converted | `Abstractions.ICellTransformer`, `TrimStringCellTransformer` | [`ICellTransformer`](mapping.md#transformers) (in the `ExcelMapper` namespace) with `WithTransformers(...)` or `[ExcelTransformer]`, and `WithTrim()` or `[ExcelTrimString]` |
+| Give empty or invalid cells a value | `IFallbackItem`, `FixedValueFallback`, `ThrowFallback`, `WithFallbackItem`, `WithEmptyFallbackItem`, `WithInvalidFallbackItem` | [`ICellFallback<T>`](mapping.md#computed-fallbacks) with `WithEmptyFallback(fallback)`/`WithInvalidFallback(fallback)` or `[ExcelEmptyFallback]`/`[ExcelInvalidFallback]`; or `WithValueFallback(value)`, `WithEmptyFallback(value)` and `WithThrowingFallback()` |
+| Choose columns in code | `ICellReaderFactory`, `ICellsReaderFactory`, `WithReaderFactory(...)`, `IExcelColumnMatcher` | [`IColumnSelector`](mapping.md#column-selectors) with `WithColumns(selector)`, `[ExcelColumnMatching(typeof(...))]` or `[ExcelColumnsMatching(typeof(...))]` |
 | Configure a member | `IOneToOneMap`, `IManyToOneMap`, `IToOneMap` and their extension classes; a pipeline's `Mappers`, `Transformers`, `EmptyFallback` and `InvalidFallback`; `OneToOneMap<T>.Pipeline` | The map `Map(...)` returns, and its fluent methods. The column methods (`WithColumnName`, `MakeOptional`, ...) are methods of the maps; the value methods are in `ValuePipelineExtensions` (was `IValuePipelineExtensions`) |
 | Map members by hand | `IMap`, `ExcelPropertyMap`, `ExcelClassMap.Properties`, the maps' constructors, the indexer maps, `AutoMapper.TryCreateClassMap`, `RegisterClassMap(Type, IMap)` | `Map(...)` in a class map, including `Map(p => p.Values[0])` for elements. Start from the auto-mapped class map with `RegisterClassMap<T>(c => ...)`. `TryGetClassMap` returns an `ExcelClassMap` |
 | Create collections | `IEnumerableFactory<T>`, `IDictionaryFactory<TKey, TValue>`, `IMultidimensionalArrayFactory<T>` | ExcelMapper creates the collection for the member's type |
@@ -255,9 +255,9 @@ Worth a look while upgrading:
 - [Find the heading](reading.md#finding-the-heading) of sheets with titles or notes above it with `FindHeading`.
 - [Read part of a sheet](reading.md#reading-part-of-a-sheet), or several tables on one sheet, with `sheet.Region("B3:F20")`.
 - [Records and constructor-only types](mapping.md#records-and-constructors) map without a parameterless constructor.
-- Map by [column letter](mapping.md#column-index-mapping), choose a [culture](mapping.md#culture-for-the-whole-importer) for the whole importer, and set the [offset of `DateTimeOffset` values](types.md#date-and-time-types).
+- Map by [column letter](mapping.md#choosing-columns), choose a [culture](types.md#culture) for the whole importer, and set the [offset of `DateTimeOffset` values](types.md#offsets).
 - `ExcelImporter.ReadRows<T>("file.xlsx")` reads a file in one line.
 - Set a member to the [row number](mapping.md#row-numbers), or collect the [columns no other member reads](mapping.md#extra-columns) into a dictionary.
-- [Typed converters](mapping.md#custom-converters) get the cell's value as Excel stores it and where the cell is, without boxing.
+- [Typed converters](mapping.md#converters) get the cell's value as Excel stores it and where the cell is, without boxing.
 - Mapping works in [trimmed apps](trimming.md), and the package includes XML documentation for IntelliSense.
 - Mapping is faster and allocates much less: see the [changelog](../CHANGELOG.md#performance).
