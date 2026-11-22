@@ -153,7 +153,10 @@ internal sealed class SheetView
     /// <inheritdoc cref="ExcelSheet.ReadRows{T}()"/>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
+    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>() => ReadRows(AutoMapped<T>.ClassMap);
+
+    /// <inheritdoc cref="ExcelSheet.ReadRows{T}(ExcelClassMap{T})"/>
+    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap)
     {
         Worksheet.ThrowIfClosed();
 
@@ -164,17 +167,15 @@ internal sealed class SheetView
         }
 
         // Now delegate to iterator method for lazy evaluation
-        return ReadRowsIterator<T>();
+        return ReadRowsIterator(classMap);
     }
 
     /// <summary>
     /// Iterator method for reading rows. Separated from ReadRows to enable eager validation.
     /// </summary>
-    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
-    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    private IEnumerable<T> ReadRowsIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
+    private IEnumerable<T> ReadRowsIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap)
     {
-        while (TryReadRow(out T? row))
+        while (TryReadRow(classMap, out T? row))
         {
             yield return row;
         }
@@ -183,7 +184,10 @@ internal sealed class SheetView
     /// <inheritdoc cref="ExcelSheet.ReadRows{T}(int, int)"/>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int startIndex, int count)
+    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int startIndex, int count) => ReadRows(AutoMapped<T>.ClassMap, startIndex, count);
+
+    /// <inheritdoc cref="ExcelSheet.ReadRows{T}(ExcelClassMap{T}, int, int)"/>
+    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, int startIndex, int count)
     {
         Worksheet.ThrowIfClosed();
         ThrowHelpers.ThrowIfNegative(startIndex, nameof(startIndex));
@@ -216,19 +220,17 @@ internal sealed class SheetView
         }
 
         // Now delegate to iterator method for lazy evaluation
-        return ReadRowsRangeIterator<T>(startIndex, count);
+        return ReadRowsRangeIterator(classMap, startIndex, count);
     }
 
     /// <summary>
     /// Iterator method for reading a range of rows. Separated from ReadRows to enable eager validation.
     /// </summary>
-    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
-    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    private IEnumerable<T> ReadRowsRangeIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int startIndex, int count)
+    private IEnumerable<T> ReadRowsRangeIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, int startIndex, int count)
     {
         for (int i = 0; i < count; i++)
         {
-            if (!TryReadRow(out T? row))
+            if (!TryReadRow(classMap, out T? row))
             {
                 throw new ExcelMappingException($"Sheet \"{Name}\" does not have row {startIndex + i}.");
             }
@@ -237,12 +239,15 @@ internal sealed class SheetView
         }
     }
 
-    /// <inheritdoc cref="ExcelSheet.ReadRow{T}"/>
+    /// <inheritdoc cref="ExcelSheet.ReadRow{T}()"/>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public T ReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
+    public T ReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>() => ReadRow(AutoMapped<T>.ClassMap);
+
+    /// <inheritdoc cref="ExcelSheet.ReadRow{T}(ExcelClassMap{T})"/>
+    public T ReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap)
     {
-        if (!TryReadRow<T>(out var value))
+        if (!TryReadRow(classMap, out T? value))
         {
             throw new ExcelMappingException($"No more rows in sheet \"{Name}\".");
         }
@@ -253,7 +258,10 @@ internal sealed class SheetView
     /// <inheritdoc cref="ExcelSheet.TryReadRow{T}(out T)"/>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public bool TryReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>([NotNullWhen(true)] out T? value)
+    public bool TryReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>([NotNullWhen(true)] out T? value) => TryReadRow(AutoMapped<T>.ClassMap, out value);
+
+    /// <inheritdoc cref="ExcelSheet.TryReadRow{T}(ExcelClassMap{T}, out T)"/>
+    public bool TryReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, [NotNullWhen(true)] out T? value)
     {
         if (!AdvanceToNextRow())
         {
@@ -261,13 +269,16 @@ internal sealed class SheetView
             return false;
         }
 
-        return MapCurrentRow(null, out value);
+        return MapCurrentRow(classMap(this), null, out value);
     }
 
-    /// <inheritdoc cref="ExcelSheet.ReadRowResults{T}"/>
+    /// <inheritdoc cref="ExcelSheet.ReadRowResults{T}()"/>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public IEnumerable<ExcelRowResult<T>> ReadRowResults<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
+    public IEnumerable<ExcelRowResult<T>> ReadRowResults<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>() => ReadRowResults(AutoMapped<T>.ClassMap);
+
+    /// <inheritdoc cref="ExcelSheet.ReadRowResults{T}(ExcelClassMap{T})"/>
+    public IEnumerable<ExcelRowResult<T>> ReadRowResults<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap)
     {
         Worksheet.ThrowIfClosed();
 
@@ -277,19 +288,17 @@ internal sealed class SheetView
             ReadHeading();
         }
 
-        return ReadRowResultsIterator<T>();
+        return ReadRowResultsIterator(classMap);
     }
 
-    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
-    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    private IEnumerable<ExcelRowResult<T>> ReadRowResultsIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
+    private IEnumerable<ExcelRowResult<T>> ReadRowResultsIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap)
     {
         // Reuse one list for every row: valid rows (usually most of them) then don't allocate, and
         // only rows with errors get their own copy.
         var errors = new List<ExcelMappingException>();
         while (AdvanceToNextRow())
         {
-            var mapped = MapCurrentRow(errors, out T? value);
+            var mapped = MapCurrentRow(classMap(this), errors, out T? value);
 
             if (errors.Count == 0)
             {
@@ -324,12 +333,10 @@ internal sealed class SheetView
         return _cursor.MoveNext(_dataRange, FirstDataRow, Settings.SkipBlankLines);
     }
 
-    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
-    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    private bool MapCurrentRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(List<ExcelMappingException>? errors, [NotNullWhen(true)] out T? value)
+    // Data annotations are validated by reflection over T's properties, which ExcelClassMap<T> keeps.
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "The public properties of T, which Validator validates, are kept by ExcelClassMap<T>'s annotation.")]
+    private bool MapCurrentRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap, List<ExcelMappingException>? errors, [NotNullWhen(true)] out T? value)
     {
-        var classMap = GetOrCreateClassMap<T>();
-
         // The importer's culture, if set, is given to each cell (see ValuePipeline<T>.Map), not set
         // as the thread's culture.
         var result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, errors, out value);
@@ -376,13 +383,41 @@ internal sealed class SheetView
             classMap = Configuration.RegisterAutoMappedClassMap(typeof(T), map);
         }
 
+        // Class maps are registered for their own type (see ExcelImporterConfiguration.RegisterClassMap).
+        return UseClassMap((ExcelClassMap<T>)classMap);
+    }
+
+    /// <summary>
+    /// Maps rows with <paramref name="classMap"/>: a class map given to a reading method, or the
+    /// one registered or auto-mapped for the type.
+    /// </summary>
+    public ExcelClassMap<T> UseClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap)
+    {
         // The class map can't change once it's used with a sheet, so what's worked out from it
         // (its plans and bindings) stays right.
         classMap.Freeze();
         RootMap = classMap;
+        return classMap;
+    }
 
-        // Class maps are registered for their own type (see ExcelImporterConfiguration.RegisterClassMap).
-        return (ExcelClassMap<T>)classMap;
+    /// <summary>
+    /// Gets the class map a reading method given <paramref name="classMap"/> maps rows with.
+    /// </summary>
+    public static Func<SheetView, ExcelClassMap<T>> Given<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap)
+    {
+        ThrowHelpers.ThrowIfNull(classMap, nameof(classMap));
+        return sheet => sheet.UseClassMap(classMap);
+    }
+
+    /// <summary>
+    /// Gets the class map registered for T, or auto-mapped (see <see cref="GetOrCreateClassMap{T}"/>),
+    /// for each row: what reading methods without a class map use.
+    /// </summary>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public static class AutoMapped<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>
+    {
+        public static readonly Func<SheetView, ExcelClassMap<T>> ClassMap = static sheet => sheet.GetOrCreateClassMap<T>();
     }
 
     /// <summary>
@@ -398,12 +433,15 @@ internal sealed class SheetView
     /// </remarks>
     public IMap? RootMap { get; private set; }
 
-    /// <inheritdoc cref="ExcelSheet.ValidateHeading{T}"/>
+    /// <inheritdoc cref="ExcelSheet.ValidateHeading{T}()"/>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public void ValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
+    public void ValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>() => ValidateHeading(AutoMapped<T>.ClassMap);
+
+    /// <inheritdoc cref="ExcelSheet.ValidateHeading{T}(ExcelClassMap{T})"/>
+    public void ValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap)
     {
-        if (!TryValidateHeading<T>(out var problems))
+        if (!TryValidateHeading(classMap, out var problems))
         {
             throw new ExcelMappingException(
                 $"Sheet \"{Name}\" is missing columns needed to map type \"{typeof(T)}\": {string.Join("; ", problems)}.");
@@ -413,7 +451,10 @@ internal sealed class SheetView
     /// <inheritdoc cref="ExcelSheet.TryValidateHeading{T}(out IReadOnlyList{string})"/>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public bool TryValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(out IReadOnlyList<string> problems)
+    public bool TryValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(out IReadOnlyList<string> problems) => TryValidateHeading(AutoMapped<T>.ClassMap, out problems);
+
+    /// <inheritdoc cref="ExcelSheet.TryValidateHeading{T}(ExcelClassMap{T}, out IReadOnlyList{string})"/>
+    public bool TryValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, out IReadOnlyList<string> problems)
     {
         Worksheet.ThrowIfClosed();
 
@@ -423,22 +464,20 @@ internal sealed class SheetView
         }
 
         var foundProblems = new List<string>();
-        MapValidation.FindMissingColumns(GetOrCreateClassMap<T>(), this, null, foundProblems);
+        MapValidation.FindMissingColumns(classMap(this), this, null, foundProblems);
         problems = foundProblems;
         return foundProblems.Count == 0;
     }
 
-    /// <inheritdoc cref="ExcelSheet.FindHeading{T}()"/>
-    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
-    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ExcelHeading FindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>() => FindHeading<T>(HeadingSearch.DefaultMaxRows);
-
     /// <inheritdoc cref="ExcelSheet.FindHeading{T}(int)"/>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ExcelHeading FindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int maxRows)
+    public ExcelHeading FindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int maxRows) => FindHeading(AutoMapped<T>.ClassMap, maxRows);
+
+    /// <inheritdoc cref="ExcelSheet.FindHeading{T}(ExcelClassMap{T}, int)"/>
+    public ExcelHeading FindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, int maxRows)
     {
-        if (!TryFindHeading<T>(maxRows, out var heading, out var error))
+        if (!TryFindHeading(classMap, maxRows, out var heading, out var error))
         {
             throw new ExcelMappingException(error);
         }
@@ -446,21 +485,14 @@ internal sealed class SheetView
         return heading;
     }
 
-    /// <inheritdoc cref="ExcelSheet.TryFindHeading{T}(out ExcelHeading)"/>
-    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
-    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public bool TryFindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>([NotNullWhen(true)] out ExcelHeading? heading)
-        => TryFindHeading<T>(HeadingSearch.DefaultMaxRows, out heading, out _);
-
     /// <inheritdoc cref="ExcelSheet.TryFindHeading{T}(int, out ExcelHeading)"/>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public bool TryFindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int maxRows, [NotNullWhen(true)] out ExcelHeading? heading)
-        => TryFindHeading<T>(maxRows, out heading, out _);
-
-    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
-    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public bool TryFindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(int maxRows, [NotNullWhen(true)] out ExcelHeading? heading, [NotNullWhen(false)] out string? error)
+        => TryFindHeading(AutoMapped<T>.ClassMap, maxRows, out heading, out error);
+
+    /// <inheritdoc cref="ExcelSheet.TryFindHeading{T}(ExcelClassMap{T}, int, out ExcelHeading)"/>
+    public bool TryFindHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, int maxRows, [NotNullWhen(true)] out ExcelHeading? heading, [NotNullWhen(false)] out string? error)
     {
         Worksheet.ThrowIfClosed();
         ThrowHelpers.ThrowIfNegativeOrZero(maxRows, nameof(maxRows));
@@ -469,7 +501,7 @@ internal sealed class SheetView
             throw new InvalidOperationException("The heading has already been read.");
         }
 
-        return HeadingSearch.TryFind<T>(this, _cursor, maxRows, out heading, out error);
+        return HeadingSearch.TryFind(this, _cursor, classMap(this), maxRows, out heading, out error);
     }
 
     /// <summary>

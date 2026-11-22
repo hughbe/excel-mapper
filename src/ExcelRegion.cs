@@ -109,9 +109,22 @@ public sealed class ExcelRegion
     /// <returns>The objects mapped from each row.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
+    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>() => ReadRows(SheetView.AutoMapped<T>.ClassMap);
+
+    /// <summary>
+    /// Maps each row of the region to an object with <paramref name="classMap"/>. See
+    /// <see cref="ReadRows{T}()"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    /// <returns>The objects mapped from each row.</returns>
+    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap) => ReadRows(SheetView.Given(classMap));
+
+    private IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap)
     {
-        foreach (var row in CreateView<T>().ReadRows<T>())
+        foreach (var row in CreateView(classMap).ReadRows(classMap))
         {
             yield return row;
         }
@@ -119,15 +132,28 @@ public sealed class ExcelRegion
 
     /// <summary>
     /// Maps each row of the region, reporting every invalid cell instead of stopping at the first.
-    /// See <see cref="ExcelSheet.ReadRowResults{T}"/>.
+    /// See <see cref="ExcelSheet.ReadRowResults{T}()"/>.
     /// </summary>
     /// <typeparam name="T">The type of the object to map each row to.</typeparam>
     /// <returns>The result of mapping each row.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public IEnumerable<ExcelRowResult<T>> ReadRowResults<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
+    public IEnumerable<ExcelRowResult<T>> ReadRowResults<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>() => ReadRowResults(SheetView.AutoMapped<T>.ClassMap);
+
+    /// <summary>
+    /// Maps each row of the region with <paramref name="classMap"/>, reporting every invalid cell
+    /// instead of stopping at the first. See <see cref="ReadRowResults{T}()"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    /// <returns>The result of mapping each row.</returns>
+    public IEnumerable<ExcelRowResult<T>> ReadRowResults<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap) => ReadRowResults(SheetView.Given(classMap));
+
+    private IEnumerable<ExcelRowResult<T>> ReadRowResults<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap)
     {
-        foreach (var result in CreateView<T>().ReadRowResults<T>())
+        foreach (var result in CreateView(classMap).ReadRowResults(classMap))
         {
             yield return result;
         }
@@ -135,14 +161,28 @@ public sealed class ExcelRegion
 
     /// <summary>
     /// Checks that the region's heading has every column that <typeparamref name="T"/> needs.
-    /// See <see cref="ExcelSheet.ValidateHeading{T}"/>.
+    /// See <see cref="ExcelSheet.ValidateHeading{T}()"/>.
     /// </summary>
     /// <typeparam name="T">The type rows will be mapped to.</typeparam>
     /// <exception cref="ExcelMappingException">A column is missing, or the heading can't be found.</exception>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public void ValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
-        => CreateView<T>().ValidateHeading<T>();
+        => ValidateHeading(SheetView.AutoMapped<T>.ClassMap);
+
+    /// <summary>
+    /// Checks that the region's heading has every column <paramref name="classMap"/> needs. See
+    /// <see cref="ValidateHeading{T}()"/>.
+    /// </summary>
+    /// <typeparam name="T">The type rows will be mapped to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    /// <exception cref="ExcelMappingException">A column is missing, or the heading can't be found.</exception>
+    public void ValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap) => ValidateHeading(SheetView.Given(classMap));
+
+    private void ValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap)
+        => CreateView(classMap).ValidateHeading(classMap);
 
     /// <summary>
     /// Checks that the region's heading has every column that <typeparamref name="T"/> needs.
@@ -154,25 +194,39 @@ public sealed class ExcelRegion
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public bool TryValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(out IReadOnlyList<string> problems)
+        => TryValidateHeading(SheetView.AutoMapped<T>.ClassMap, out problems);
+
+    /// <summary>
+    /// Checks that the region's heading has every column <paramref name="classMap"/> needs. See
+    /// <see cref="TryValidateHeading{T}(out IReadOnlyList{string})"/>.
+    /// </summary>
+    /// <typeparam name="T">The type rows will be mapped to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    /// <param name="problems">The missing columns, or why the heading couldn't be found.</param>
+    /// <returns>Whether every column is present.</returns>
+    public bool TryValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap, out IReadOnlyList<string> problems)
+        => TryValidateHeading(SheetView.Given(classMap), out problems);
+
+    private bool TryValidateHeading<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, out IReadOnlyList<string> problems)
     {
         var view = CreateView();
-        if (_headingKind == HeadingKind.Search && !view.TryFindHeading<T>(_headingValue, out _, out var error))
+        if (_headingKind == HeadingKind.Search && !view.TryFindHeading(classMap, _headingValue, out _, out var error))
         {
             problems = [error];
             return false;
         }
 
-        return view.TryValidateHeading<T>(out problems);
+        return view.TryValidateHeading(classMap, out problems);
     }
 
-    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
-    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    private SheetView CreateView<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>()
+    private SheetView CreateView<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap)
     {
         var view = CreateView();
         if (_headingKind == HeadingKind.Search)
         {
-            view.FindHeading<T>(_headingValue);
+            view.FindHeading(classMap, _headingValue);
         }
 
         return view;

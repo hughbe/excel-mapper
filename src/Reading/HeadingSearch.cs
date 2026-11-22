@@ -18,11 +18,8 @@ internal static class HeadingSearch
     /// column the class map needs by name and at least one of its columns is read as the heading.
     /// If none is, the sheet is unchanged and <paramref name="error"/> describes the closest row.
     /// </summary>
-    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
-    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public static bool TryFind<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(SheetView sheet, RowCursor cursor, int maxRows, [NotNullWhen(true)] out ExcelHeading? heading, [NotNullWhen(false)] out string? error)
+    public static bool TryFind<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(SheetView sheet, RowCursor cursor, ExcelClassMap<T> classMap, int maxRows, [NotNullWhen(true)] out ExcelHeading? heading, [NotNullWhen(false)] out string? error)
     {
-        var classMap = sheet.GetOrCreateClassMap<T>();
         var startRowIndex = cursor.GetRowIndex(sheet.DataRange.Rows.Start);
         var endRowIndex = (int)Math.Min((long)startRowIndex + maxRows, int.MaxValue);
 

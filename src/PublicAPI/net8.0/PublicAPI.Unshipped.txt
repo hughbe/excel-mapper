@@ -1,4 +1,5 @@
 #nullable enable
+abstract ExcelMapper.ExcelMappingContext.RegisterTypes(ExcelMapper.ExcelTypeRegistrar! types) -> void
 ExcelMapper.CellContext
 ExcelMapper.CellContext.CellAddress.get -> string!
 ExcelMapper.CellContext.CellContext() -> void
@@ -230,6 +231,9 @@ ExcelMapper.ExcelInvalidFallbackAttribute.Type.get -> System.Type!
 ExcelMapper.ExcelInvalidValueAttribute
 ExcelMapper.ExcelInvalidValueAttribute.ExcelInvalidValueAttribute(object? value) -> void
 ExcelMapper.ExcelInvalidValueAttribute.Value.get -> object?
+ExcelMapper.ExcelMappingContext
+ExcelMapper.ExcelMappingContext.ExcelMappingContext() -> void
+ExcelMapper.ExcelMappingContext.GetClassMap<T>() -> ExcelMapper.ExcelClassMap<T>!
 ExcelMapper.ExcelMappingDictionaryAttribute
 ExcelMapper.ExcelMappingDictionaryAttribute.ExcelMappingDictionaryAttribute(string! value, object? mappedValue) -> void
 ExcelMapper.ExcelMappingDictionaryAttribute.MappedValue.get -> object?
@@ -274,10 +278,14 @@ ExcelMapper.ExcelRange.Rows.get -> System.Range
 ExcelMapper.ExcelRegion
 ExcelMapper.ExcelRegion.Range.get -> ExcelMapper.ExcelRange
 ExcelMapper.ExcelRegion.ReadRowResults<T>() -> System.Collections.Generic.IEnumerable<ExcelMapper.ExcelRowResult<T>>!
+ExcelMapper.ExcelRegion.ReadRowResults<T>(ExcelMapper.ExcelClassMap<T>! classMap) -> System.Collections.Generic.IEnumerable<ExcelMapper.ExcelRowResult<T>>!
 ExcelMapper.ExcelRegion.ReadRows<T>() -> System.Collections.Generic.IEnumerable<T>!
+ExcelMapper.ExcelRegion.ReadRows<T>(ExcelMapper.ExcelClassMap<T>! classMap) -> System.Collections.Generic.IEnumerable<T>!
 ExcelMapper.ExcelRegion.Sheet.get -> ExcelMapper.ExcelSheet!
+ExcelMapper.ExcelRegion.TryValidateHeading<T>(ExcelMapper.ExcelClassMap<T>! classMap, out System.Collections.Generic.IReadOnlyList<string!>! problems) -> bool
 ExcelMapper.ExcelRegion.TryValidateHeading<T>(out System.Collections.Generic.IReadOnlyList<string!>! problems) -> bool
 ExcelMapper.ExcelRegion.ValidateHeading<T>() -> void
+ExcelMapper.ExcelRegion.ValidateHeading<T>(ExcelMapper.ExcelClassMap<T>! classMap) -> void
 ExcelMapper.ExcelRegion.WithHeadingAt(int rowIndex) -> ExcelMapper.ExcelRegion!
 ExcelMapper.ExcelRegion.WithHeadingSearch() -> ExcelMapper.ExcelRegion!
 ExcelMapper.ExcelRegion.WithHeadingSearch(int maxRows) -> ExcelMapper.ExcelRegion!
@@ -302,6 +310,8 @@ ExcelMapper.ExcelSheet.CurrentRowIndex.get -> int
 ExcelMapper.ExcelSheet.DataRange.get -> ExcelMapper.ExcelRange
 ExcelMapper.ExcelSheet.DataRange.set -> void
 ExcelMapper.ExcelSheet.FindHeading<T>() -> ExcelMapper.ExcelHeading!
+ExcelMapper.ExcelSheet.FindHeading<T>(ExcelMapper.ExcelClassMap<T>! classMap) -> ExcelMapper.ExcelHeading!
+ExcelMapper.ExcelSheet.FindHeading<T>(ExcelMapper.ExcelClassMap<T>! classMap, int maxRows) -> ExcelMapper.ExcelHeading!
 ExcelMapper.ExcelSheet.FindHeading<T>(int maxRows) -> ExcelMapper.ExcelHeading!
 ExcelMapper.ExcelSheet.HasHeading.get -> bool
 ExcelMapper.ExcelSheet.HasHeading.set -> void
@@ -313,17 +323,26 @@ ExcelMapper.ExcelSheet.Name.get -> string!
 ExcelMapper.ExcelSheet.NumberOfColumns.get -> int
 ExcelMapper.ExcelSheet.ReadHeading() -> ExcelMapper.ExcelHeading!
 ExcelMapper.ExcelSheet.ReadRow<T>() -> T
+ExcelMapper.ExcelSheet.ReadRow<T>(ExcelMapper.ExcelClassMap<T>! classMap) -> T
 ExcelMapper.ExcelSheet.ReadRowResults<T>() -> System.Collections.Generic.IEnumerable<ExcelMapper.ExcelRowResult<T>>!
+ExcelMapper.ExcelSheet.ReadRowResults<T>(ExcelMapper.ExcelClassMap<T>! classMap) -> System.Collections.Generic.IEnumerable<ExcelMapper.ExcelRowResult<T>>!
 ExcelMapper.ExcelSheet.ReadRows<T>() -> System.Collections.Generic.IEnumerable<T>!
+ExcelMapper.ExcelSheet.ReadRows<T>(ExcelMapper.ExcelClassMap<T>! classMap) -> System.Collections.Generic.IEnumerable<T>!
+ExcelMapper.ExcelSheet.ReadRows<T>(ExcelMapper.ExcelClassMap<T>! classMap, int startIndex, int count) -> System.Collections.Generic.IEnumerable<T>!
 ExcelMapper.ExcelSheet.ReadRows<T>(int startIndex, int count) -> System.Collections.Generic.IEnumerable<T>!
 ExcelMapper.ExcelSheet.Region() -> ExcelMapper.ExcelRegion!
 ExcelMapper.ExcelSheet.Region(ExcelMapper.ExcelRange range) -> ExcelMapper.ExcelRegion!
 ExcelMapper.ExcelSheet.Region(string! address) -> ExcelMapper.ExcelRegion!
+ExcelMapper.ExcelSheet.TryFindHeading<T>(ExcelMapper.ExcelClassMap<T>! classMap, int maxRows, out ExcelMapper.ExcelHeading? heading) -> bool
+ExcelMapper.ExcelSheet.TryFindHeading<T>(ExcelMapper.ExcelClassMap<T>! classMap, out ExcelMapper.ExcelHeading? heading) -> bool
 ExcelMapper.ExcelSheet.TryFindHeading<T>(int maxRows, out ExcelMapper.ExcelHeading? heading) -> bool
 ExcelMapper.ExcelSheet.TryFindHeading<T>(out ExcelMapper.ExcelHeading? heading) -> bool
+ExcelMapper.ExcelSheet.TryReadRow<T>(ExcelMapper.ExcelClassMap<T>! classMap, out T? value) -> bool
 ExcelMapper.ExcelSheet.TryReadRow<T>(out T? value) -> bool
+ExcelMapper.ExcelSheet.TryValidateHeading<T>(ExcelMapper.ExcelClassMap<T>! classMap, out System.Collections.Generic.IReadOnlyList<string!>! problems) -> bool
 ExcelMapper.ExcelSheet.TryValidateHeading<T>(out System.Collections.Generic.IReadOnlyList<string!>! problems) -> bool
 ExcelMapper.ExcelSheet.ValidateHeading<T>() -> void
+ExcelMapper.ExcelSheet.ValidateHeading<T>(ExcelMapper.ExcelClassMap<T>! classMap) -> void
 ExcelMapper.ExcelSheet.Visibility.get -> ExcelMapper.ExcelSheetVisibility
 ExcelMapper.ExcelSheetVisibility
 ExcelMapper.ExcelSheetVisibility.Hidden = 1 -> ExcelMapper.ExcelSheetVisibility
@@ -336,6 +355,16 @@ ExcelMapper.ExcelTransformerAttribute.ExcelTransformerAttribute(System.Type! tra
 ExcelMapper.ExcelTransformerAttribute.Type.get -> System.Type!
 ExcelMapper.ExcelTrimStringAttribute
 ExcelMapper.ExcelTrimStringAttribute.ExcelTrimStringAttribute() -> void
+ExcelMapper.ExcelTypeRegistrar
+ExcelMapper.ExcelTypeRegistrar.Array<TElement>() -> void
+ExcelMapper.ExcelTypeRegistrar.Collection<TCollection, TElement>() -> void
+ExcelMapper.ExcelTypeRegistrar.Dictionary<TDictionary, TKey, TValue>() -> void
+ExcelMapper.ExcelTypeRegistrar.Enum<TEnum>() -> void
+ExcelMapper.ExcelTypeRegistrar.Nullable<T>() -> void
+ExcelMapper.ExcelTypeRegistrar.Parsable<T>() -> void
+ExcelMapper.ExcelTypeRegistrar.ParsableClass<T>() -> void
+ExcelMapper.ExcelTypeRegistrar.Row<T>() -> void
+ExcelMapper.ExcelTypeRegistrar.Type<T>() -> void
 ExcelMapper.ExcelUriKindAttribute
 ExcelMapper.ExcelUriKindAttribute.ExcelUriKindAttribute(System.UriKind uriKind) -> void
 ExcelMapper.ExcelUriKindAttribute.UriKind.get -> System.UriKind

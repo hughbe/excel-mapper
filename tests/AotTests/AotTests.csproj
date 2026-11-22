@@ -3,7 +3,8 @@
   <!--
     Publishes a native AOT app that maps rows, to check what mapping supports under native AOT. CI
     runs: dotnet publish tests/AotTests -c Release -r linux-x64 -o out && out/AotTests
-    The app calls reflection-based mapping on purpose, so the IL2026/IL3050 warnings are expected.
+    Reading rows with a mapping context must not warn, so trimming and AOT warnings are errors. The
+    cases that call the reflection-based APIs on purpose suppress them (see ClassMapCases).
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -11,7 +12,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <PublishAot>true</PublishAot>
-    <NoWarn>$(NoWarn);IL2026;IL3050</NoWarn>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+    <WarningsAsErrors>$(WarningsAsErrors);IL2026;IL2104;IL3050;IL3053</WarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>

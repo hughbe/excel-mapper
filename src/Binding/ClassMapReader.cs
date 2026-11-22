@@ -18,7 +18,7 @@ internal sealed class ClassMapReader<[DynamicallyAccessedMembers(TrimmingConstan
     /// <summary>
     /// Maps a row (or for a nested object, the cells it reads) to a <typeparamref name="T"/>, which
     /// isn't boxed if it's a value type. When <paramref name="errors"/> isn't null (see
-    /// <see cref="ExcelSheet.ReadRowResults{T}"/>), mapping errors are added to it rather than
+    /// <see cref="ExcelSheet.ReadRowResults{T}()"/>), mapping errors are added to it rather than
     /// thrown, and every member is still read.
     /// </summary>
     /// <returns>Whether there is a value: false if a nested object's cells are missing and it's
@@ -104,7 +104,7 @@ internal sealed class ClassMapReader<[DynamicallyAccessedMembers(TrimmingConstan
     /// <summary>
     /// Reads a member's value for the row, for a type created through a constructor (see
     /// <see cref="BoundMember{TOwner}.ReadValue"/>). When errors are being collected (see
-    /// <see cref="ExcelSheet.ReadRowResults{T}"/>), a mapping error is recorded and the member has no
+    /// <see cref="ExcelSheet.ReadRowResults{T}()"/>), a mapping error is recorded and the member has no
     /// value, so that the remaining members are still read.
     /// </summary>
     private static void ReadMemberValue(BoundMember<T> member, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)

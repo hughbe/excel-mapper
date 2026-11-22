@@ -48,6 +48,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Added
 
+- `ExcelMappingContext` gives class maps for native AOT: it registers the types rows are mapped to and the types of their members with an `ExcelTypeRegistrar` (`Row<T>()`, `Type<T>()`, `Nullable<T>()`, `Enum<TEnum>()`, `Collection<TCollection, TElement>()`, `Array<TElement>()`, `Dictionary<TDictionary, TKey, TValue>()`, `Parsable<T>()`), and `GetClassMap<T>()` auto-maps a row type with them. Every reading method of `ExcelSheet` and `ExcelRegion` (`ReadRows`, `ReadRow`, `TryReadRow`, `ReadRowResults`, `ValidateHeading`, `TryValidateHeading`, `FindHeading`, `TryFindHeading`) also takes an `ExcelClassMap<T>`, which it reads with rather than looking one up or auto-mapping, without trimming or AOT warnings. ([#199](https://github.com/hughbe/excel-mapper/pull/199))
 - On the netstandard builds, `WithNumberStyle` and `WithFormatProvider` for the built-in number types (`int`, `decimal`, `double` and so on, and their nullable versions), as on .NET 8. `WithIgnoreCase()` works on an enum collection's elements too, and collections split from one cell take `WithColumnLetter("B")`. ([#191](https://github.com/hughbe/excel-mapper/pull/191))
 - `ExcelClassMap<T>.AutoMap()` maps every member auto-mapping would, except members already mapped, so a class map can start from auto-mapping and change only some members: `RegisterClassMap<T>(c => { c.AutoMap(); c.Map(e => e.Name).WithColumnName("Full Name"); })`. It replaces 3.x's public `AutoMapper.TryCreateClassMap`. ([#177](https://github.com/hughbe/excel-mapper/pull/177))
 - The `Mapping` benchmarks cover auto-mapping, class maps, invalid values, typed numbers, collections, records, row results, typed converters and regions, and can run against an earlier version of the package to compare (`EXCELMAPPER_VERSION=3.0.3`). ([#173](https://github.com/hughbe/excel-mapper/pull/173))
@@ -143,7 +144,7 @@ The package contains `net8.0`, `netstandard2.1` and `netstandard2.0` builds. Som
 - `.WithNumberStyle(...)` and `.WithFormatProvider(...)` for numeric members (use `[ExcelNumberStyle]` and `ExcelImporterConfiguration.Culture` on the netstandard builds).
 - `.WithFormats(...)` and related methods for `DateOnly` and `TimeOnly`, and mapping `IReadOnlySet<T>` members.
 
-With native AOT (`PublishAot`), class maps registered with `RegisterClassMap` whose members are built-in types (numbers, strings, dates, booleans, GUIDs, nullable values and lists of them) map rows, including records and structs; auto-mapped members of value types, enums and `IParsable<T>` types aren't supported yet (see [Trimming and Native AOT](docs/trimming.md)). ([#198](https://github.com/hughbe/excel-mapper/pull/198))
+With native AOT (`PublishAot`), read rows with class maps from an `ExcelMappingContext` ([#199](https://github.com/hughbe/excel-mapper/pull/199)). Without one, class maps registered with `RegisterClassMap` whose members are built-in types (numbers, strings, dates, booleans, GUIDs, nullable values and lists of them) map rows, including records and structs, but auto-mapped members of value types, enums and `IParsable<T>` types don't (see [Trimming and Native AOT](docs/trimming.md)). ([#198](https://github.com/hughbe/excel-mapper/pull/198))
 
 The test suite now also runs against the netstandard builds in CI.
 

@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace ExcelMapper.Tests;
 
 public class ExcelRegionTests
@@ -84,5 +86,53 @@ public class ExcelRegionTests
     {
         [ExcelColumnIndex(0)]
         public string? Value { get; set; }
+    }
+
+    private static ExcelClassMap<RegionMapRow> CreateGivenMap()
+    {
+        var classMap = new ExcelClassMap<RegionMapRow>();
+        classMap.Map(r => r.Name).WithColumnName("Other");
+        return classMap;
+    }
+
+    public class RegionMapRow
+    {
+        public string? Name { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_ClassMap_UsesClassMap()
+    {
+        using var importer = Helpers.GetCsvImporter("Title,,\n,Name,Other\n,a,x\n");
+        var region = importer.ReadSheet().Region("B2:C3");
+        Assert.Equal(["x"], region.ReadRows(CreateGivenMap()).Select(r => r.Name));
+        Assert.Equal(["x"], region.ReadRowResults(CreateGivenMap()).Select(r => r.Value!.Name));
+        region.ValidateHeading(CreateGivenMap());
+        Assert.True(region.TryValidateHeading(CreateGivenMap(), out _));
+    }
+
+    [Fact]
+    public void ReadRows_ClassMapHeadingSearch_FindsHeading()
+    {
+        using var importer = Helpers.GetCsvImporter("Title,\nName,Other\na,x\n");
+        var sheet = importer.ReadSheet();
+        var region = sheet.Region().WithHeadingSearch();
+        Assert.Equal(["x"], region.ReadRows(CreateGivenMap()).Select(r => r.Name));
+        Assert.True(region.TryValidateHeading(CreateGivenMap(), out _));
+
+        var missing = sheet.Region("A1:A1").WithHeadingSearch(1);
+        Assert.False(missing.TryValidateHeading(CreateGivenMap(), out var problems));
+        Assert.Single(problems);
+    }
+
+    [Fact]
+    public void ReadRows_NullClassMap_ThrowsArgumentNullException()
+    {
+        using var importer = Helpers.GetCsvImporter("Name\na\n");
+        var region = importer.ReadSheet().Region();
+        Assert.Throws<ArgumentNullException>("classMap", () => region.ReadRows<RegionMapRow>(null!));
+        Assert.Throws<ArgumentNullException>("classMap", () => region.ReadRowResults<RegionMapRow>(null!));
+        Assert.Throws<ArgumentNullException>("classMap", () => region.ValidateHeading<RegionMapRow>(null!));
+        Assert.Throws<ArgumentNullException>("classMap", () => region.TryValidateHeading<RegionMapRow>(null!, out _));
     }
 }
