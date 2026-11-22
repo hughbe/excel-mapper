@@ -40,7 +40,7 @@ internal sealed class SelectorColumns(IColumnSelector selector) : Columns
     }
 
     public override ExcelMappingException CreateMissingException(SheetView sheet, int rowIndex, MemberInfo? member)
-        => Missing(sheet, rowIndex, member, Selector.Describe(new ColumnSelectorContext(sheet)));
+        => Missing(sheet, member, Describe(sheet));
 
     public override string Describe(SheetView sheet) => Selector.Describe(new ColumnSelectorContext(sheet));
 }

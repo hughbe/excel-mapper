@@ -108,6 +108,8 @@ sheet.HasHeading = false;
 
 **Now:** `... at cell B11 in sheet "Sheet1".` when the column is known, otherwise `... on row 11 ...` (one-based, as Excel shows it).
 
+Other messages are reworded too: a missing column's message starts `Can't find column "Name" for member "Name"` and lists the heading's columns, an empty cell's starts `The cell is empty, but member ...`, types are named as in C# (`int` rather than `System.Int32`), and messages for a CSV file don't name its sheet.
+
 **What to do:** use the exception's properties instead of parsing the message:
 
 ```csharp
@@ -269,6 +271,7 @@ If you created a map with its constructor, or implemented `IMap`, map the member
 - **Split values**: `"a,b,"` split into an array or list now includes the trailing empty value, which maps through the empty-value fallback (`null` for strings; an error for non-nullable numbers unless you add a fallback). An empty cell gives an empty collection.
 - **Registering after auto-mapping**: `RegisterClassMap<T>` now replaces a map that auto-mapping created for `T` (for example by an earlier `ReadRows<T>()`) instead of throwing. Registering twice yourself still throws.
 - **Changing class maps after reading**: a class map, and the maps of its members, can't be changed once rows have been read with it, including by `ValidateHeading` or `FindHeading`. `Map(...)` or a fluent method called afterwards throws an `InvalidOperationException`. Before 4.0, the change applied to the following rows. Configure the class map before reading, or register a new one: `RegisterClassMap<T>` replaces an auto-mapped map, and a new importer can register a different map for the same type.
+- **Missing columns in `ReadRowResults`**: a column the type needs that the heading doesn't have throws an `ExcelMappingException` when `ReadRowResults` is called (with the message `ValidateHeading` gives), instead of being reported as an error of every row. Make the member optional if the column may be missing.
 - **Changing settings while reading**: a sheet takes the importer's settings (`SkipBlankLines`, `ValidateDataAnnotations`, `Culture`, ...) when it starts reading, so changing them while its rows are read only affects sheets read afterwards. Before 4.0, a change applied to the following rows.
 - **Constructor exceptions**: an exception thrown by a constructor called during mapping (for records and constructor-only types) is wrapped in an `ExcelMappingException` with the row, with the original as `InnerException`.
 - **Fallback values**: `WithFallback` (was `WithValueFallback`), `WithEmptyFallback` and `WithInvalidFallback` take a value of the member's type, where they took an `object`. A value of the wrong type, such as `WithEmptyFallback("none")` on an `int` member, is now a compile error instead of an `InvalidCastException` when rows are read. `WithEmptyFallback(null)` on a member that can't be null throws an `ArgumentNullException`: give the value, such as `WithEmptyFallback(0)`.

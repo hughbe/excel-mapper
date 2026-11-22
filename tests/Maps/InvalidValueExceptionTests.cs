@@ -96,7 +96,7 @@ public class InvalidValueExceptionTests
         var sheet = importer.ReadSheet();
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<Row<int>>().ToArray());
         Assert.Contains("\"abc\"", exception.InnerException!.Message);
-        Assert.Contains("Int32", exception.InnerException.Message);
+        Assert.Contains("valid int", exception.InnerException.Message);
     }
 
     [Fact]

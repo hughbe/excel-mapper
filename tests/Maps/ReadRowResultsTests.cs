@@ -178,13 +178,38 @@ public class ReadRowResultsTests
     }
 
     [Fact]
-    public void ReadRowResults_MissingColumn_ReportedForEachRow()
+    public void ReadRowResults_MissingColumn_ThrowsOnce()
+    {
+        // A missing column is a problem with the sheet, not each row, so it's reported once,
+        // when ReadRowResults is called, as ValidateHeading reports it.
+        using var importer = Helpers.GetCsvImporter("Name\na\nb\n");
+        var sheet = importer.ReadSheet();
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRowResults<MissingColumn>());
+        Assert.Equal("The sheet is missing columns needed to map type ReadRowResultsTests.MissingColumn: column \"Missing\" (member Missing).", exception.Message);
+    }
+
+    [Fact]
+    public void ReadRowResults_MissingColumnNoRows_Throws()
+    {
+        using var importer = Helpers.GetCsvImporter("Name\n");
+        Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRowResults<MissingColumn>());
+    }
+
+    public class OptionalMissingColumn
+    {
+        public string Name { get; set; } = "";
+
+        [ExcelOptional]
+        public string Missing { get; set; } = "unchanged";
+    }
+
+    [Fact]
+    public void ReadRowResults_OptionalMissingColumn_ReturnsRows()
     {
         using var importer = Helpers.GetCsvImporter("Name\na\nb\n");
-        var results = importer.ReadSheet().ReadRowResults<MissingColumn>().ToArray();
-
-        Assert.Equal(2, results.Length);
-        Assert.All(results, r => Assert.Contains("\"Missing\"", Assert.Single(r.Errors).Message));
+        var results = importer.ReadSheet().ReadRowResults<OptionalMissingColumn>().ToArray();
+        Assert.Equal(["a", "b"], results.Select(r => r.Value!.Name));
+        Assert.All(results, r => Assert.Equal("unchanged", r.Value!.Missing));
     }
 
     public class Unmappable

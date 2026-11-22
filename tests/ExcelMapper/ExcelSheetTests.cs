@@ -1124,7 +1124,7 @@ public class ExcelSheetTests
         Assert.NotEmpty(sheet.ReadRows<object>().ToArray());
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<object>());
-        Assert.Equal("No more rows in sheet \"Primitives\".", ex.Message);
+        Assert.Equal("There are no more rows in sheet \"Primitives\".", ex.Message);
     }
 
     [Fact]

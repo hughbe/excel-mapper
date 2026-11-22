@@ -36,7 +36,7 @@ public class MapColumnChoicesTests
         using var importer = Helpers.GetCsvImporter("Other\na\n");
         var sheet = importer.ReadSheet();
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<SeveralNames>().ToArray());
-        Assert.Contains("for column \"Full Name\"", exception.Message);
+        Assert.Contains("Can't find column \"Full Name\"", exception.Message);
         Assert.Equal("Full Name", exception.ColumnName);
         using var validating = Helpers.GetCsvImporter("Other\na\n");
         Assert.False(validating.ReadSheet().TryValidateHeading<SeveralNames>(out var problems));
@@ -79,7 +79,7 @@ public class MapColumnChoicesTests
         importer.Configuration.RegisterClassMap<Single>(c => c.Map(r => r.Value).WithColumnNameMatching(n => n == "Missing"));
         var sheet = importer.ReadSheet();
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<Single>().ToArray());
-        Assert.Contains("(no columns matching)", exception.Message);
+        Assert.Contains("Can't find a matching column", exception.Message);
         using var validating = Helpers.GetCsvImporter("A,B\n1,2\n");
         validating.Configuration.RegisterClassMap<Single>(c => c.Map(r => r.Value).WithColumnNameMatching(n => n == "Missing"));
         Assert.False(validating.ReadSheet().TryValidateHeading<Single>(out var problems));
@@ -93,7 +93,7 @@ public class MapColumnChoicesTests
         importer.Configuration.RegisterClassMap<Many>(c => c.Map(r => r.Values).WithColumnsMatching(new Regex("^Q")));
         var sheet = importer.ReadSheet();
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<Many>().ToArray());
-        Assert.Contains("(no columns matching)", exception.Message);
+        Assert.Contains("Can't find a matching column", exception.Message);
     }
 
     [Fact]

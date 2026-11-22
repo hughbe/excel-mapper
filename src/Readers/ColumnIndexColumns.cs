@@ -20,7 +20,7 @@ internal sealed class ColumnIndexColumns : Columns
     public override int FindColumn(SheetView sheet) => sheet.ToSheetColumn(Index);
 
     public override ExcelMappingException CreateMissingException(SheetView sheet, int rowIndex, MemberInfo? member)
-        => Missing(sheet, rowIndex, member, $"column at index {Index}");
+        => Missing(sheet, member, Describe(sheet));
 
     public override string Describe(SheetView sheet)
         => $"column {ExcelRange.GetColumnLetters(sheet.ColumnOffset + Index)} (index {Index})";

@@ -46,7 +46,7 @@ internal abstract class Columns
     /// Creates the error for a member whose columns the sheet doesn't have.
     /// </summary>
     public virtual ExcelMappingException CreateMissingException(SheetView sheet, int rowIndex, MemberInfo? member)
-        => Missing(sheet, rowIndex, member, null);
+        => Missing(sheet, member, "a matching column");
 
     /// <summary>
     /// Describes the columns for <see cref="ExcelSheet.ValidateHeading{T}()"/>, such as
@@ -54,8 +54,38 @@ internal abstract class Columns
     /// </summary>
     public virtual string Describe(SheetView sheet) => "a matching column";
 
-    private protected static ExcelMappingException Missing(SheetView sheet, int rowIndex, MemberInfo? member, string? columns)
-        => new($"Could not read value for member \"{member?.Name}\"{(columns is null ? string.Empty : " for " + columns)}", sheet, rowIndex, -1);
+    /// <summary>
+    /// Creates the error for a member whose columns the sheet doesn't have, such as
+    /// <c>Can't find column "Name" for member "Name" in sheet "People". The heading's columns are
+    /// "First Name", "Age".</c>
+    /// </summary>
+    /// <param name="sheet">The sheet being read.</param>
+    /// <param name="member">The member being read, if any.</param>
+    /// <param name="columns">Describes the columns, such as <c>column "Name"</c>.</param>
+    /// <param name="hint">Text to add after the message, such as a suggested column.</param>
+    /// <param name="rowIndex">The row, if the columns are missing from it rather than the sheet.</param>
+    private protected static ExcelMappingException Missing(SheetView sheet, MemberInfo? member, string columns, string? hint = null, int rowIndex = -1)
+        => new($"Can't find {columns}{(member is null ? string.Empty : $" for member \"{member.Name}\"")}", sheet, rowIndex, -1, null, DescribeHeading(sheet) + hint);
+
+    // The names in the heading, so a misspelt or renamed column can be seen in the message.
+    private static string? DescribeHeading(SheetView sheet)
+    {
+        if (sheet.Heading is not { } heading)
+        {
+            return null;
+        }
+
+        const int MaxNames = 20;
+        var names = heading.ColumnNames.Where(n => n.Length != 0).ToArray();
+        if (names.Length == 0)
+        {
+            return " The heading is empty.";
+        }
+
+        var listed = string.Join(", ", names.Take(MaxNames).Select(n => $"\"{n}\""));
+        var more = names.Length > MaxNames ? $" and {names.Length - MaxNames} more" : string.Empty;
+        return $" The heading's columns are {listed}{more}.";
+    }
 
     private protected static ExcelMappingException NoHeading(SheetView sheet)
         => new($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");

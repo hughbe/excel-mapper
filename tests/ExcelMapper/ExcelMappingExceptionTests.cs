@@ -112,7 +112,7 @@ public class ExcelMappingExceptionTests
 
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<IntValueRow>().ToArray());
         Assert.Equal("B3", exception.CellAddress);
-        Assert.Contains("in column \"Value\" at cell B3 in sheet", exception.Message);
+        Assert.Contains("in column \"Value\" at cell B3.", exception.Message);
     }
 
     private class IntValueRow
