@@ -12,7 +12,7 @@ internal static class MapValidation
         {
             if (!cellMap.Optional)
             {
-                Check(Columns(cellMap), many: cellMap is IManyToOneMap, sheet, memberPath, problems);
+                Check(cellMap.Columns, many: cellMap is ICellsMap, sheet, memberPath, problems);
             }
         });
 
@@ -22,11 +22,11 @@ internal static class MapValidation
         var foundCount = 0;
         MapTree.VisitCellMaps(map, null, (cellMap, _) =>
         {
-            var columns = Columns(cellMap);
+            var columns = cellMap.Columns;
             if (columns.LooksUpNames)
             {
                 lookedUpCount++;
-                if (HasColumns(columns, many: cellMap is IManyToOneMap, sheet))
+                if (HasColumns(columns, many: cellMap is ICellsMap, sheet))
                 {
                     foundCount++;
                 }
@@ -37,7 +37,6 @@ internal static class MapValidation
         found += foundCount;
     }
 
-    private static Columns Columns(IToOneMap map) => map is IValueMap valueMap ? valueMap.Columns : ((IManyToOneMap)map).Columns;
 
     // A collection split from one cell reads one column.
     private static bool Found(Columns columns, bool many, ExcelSheet sheet)

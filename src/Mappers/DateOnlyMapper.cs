@@ -38,7 +38,7 @@ internal sealed class DateOnlyMapper : IFormatsCellMapper, ICellMapper<DateOnly>
     /// </summary>
     public DateTimeStyles Style { get; set; }
 
-    CellConversion ICellMapper<DateOnly>.Convert(ReadCellResult cell, out DateOnly value)
+    CellConversion ICellMapper<DateOnly>.Convert(ReadCellResult cell, in CellContext context, out DateOnly value, ref object? error)
     {
         var cellValue = cell.GetValue();
         if (cellValue is DateTime dateTimeValue || ExcelDateUtilities.TryGetDateTime(cellValue, out dateTimeValue))
@@ -64,14 +64,14 @@ internal sealed class DateOnlyMapper : IFormatsCellMapper, ICellMapper<DateOnly>
         }
     }
 
-    CellConversion ICellMapper<DateOnly?>.Convert(ReadCellResult cell, out DateOnly? value)
+    CellConversion ICellMapper<DateOnly?>.Convert(ReadCellResult cell, in CellContext context, out DateOnly? value, ref object? error)
     {
-        var conversion = ((ICellMapper<DateOnly>)this).Convert(cell, out var result);
+        var conversion = ((ICellMapper<DateOnly>)this).Convert(cell, in context, out var result, ref error);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }
 
-    public Exception CreateException(ReadCellResult cell)
+    public Exception CreateException(ReadCellResult cell, object? error)
     {
         var stringValue = cell.GetString();
         var formats = Formats;

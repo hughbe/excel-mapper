@@ -5,22 +5,6 @@ using ExcelMapper.Readers;
 namespace ExcelMapper.Utilities;
 
 /// <summary>
-/// A map that can be bound to a member of a class for a sheet, to map rows without per-cell
-/// lookups or boxing. See <see cref="BoundMember"/>.
-/// </summary>
-internal interface IBindableMap
-{
-    BoundMember Bind(ExcelPropertyMap property, ExcelSheet sheet);
-
-    /// <summary>
-    /// Gets a static method <c>(TBoundMember member, TParameter defaultValue) → TParameter</c> that
-    /// returns the value a bound member of this map read for a constructor parameter, without
-    /// boxing. Null if the parameter's type isn't the map's type.
-    /// </summary>
-    MethodInfo? GetArgumentMethod(Type parameterType);
-}
-
-/// <summary>
 /// A member of a class map bound to a sheet: it reads the member's value from the current row and
 /// sets it. Bound members are created once per sheet and class map (see
 /// <see cref="ExcelSheet.GetBoundMembers(ExcelClassMap)"/>), so they can keep what was resolved for
@@ -129,19 +113,6 @@ internal sealed class BoundMapMember(ExcelPropertyMap property) : BoundMember
         value = null;
         return false;
     }
-}
-
-/// <summary>
-/// A map that reads several cells (a collection or dictionary) and can be bound to a member: its
-/// cells reader is resolved once for the sheet.
-/// </summary>
-internal interface ICellsMap : IMap
-{
-    int ReaderVersion { get; }
-
-    ICellsReader? GetCellsReader(ExcelSheet sheet);
-
-    bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out object? value);
 }
 
 /// <summary>

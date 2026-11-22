@@ -38,9 +38,12 @@ internal interface ICellMapper<T>
     /// Converts a cell's value.
     /// </summary>
     /// <param name="cell">The cell, after any transformers.</param>
+    /// <param name="context">Where the cell is, for an <see cref="ICellConverter{T}"/>.</param>
     /// <param name="value">The converted value, if the result is a success.</param>
+    /// <param name="error">For an invalid cell, an error to give <see cref="CreateException"/>, such
+    /// as the one an <see cref="ICellConverter{T}"/> returned. Built-in mappers leave it.</param>
     /// <returns>Whether the value was converted.</returns>
-    CellConversion Convert(ReadCellResult cell, out T value);
+    CellConversion Convert(ReadCellResult cell, in CellContext context, out T value, ref object? error);
 
     /// <summary>
     /// Creates the exception that says why <see cref="Convert"/> found a cell invalid. It's only
@@ -49,6 +52,7 @@ internal interface ICellMapper<T>
     /// create an exception at all.
     /// </summary>
     /// <param name="cell">The cell that <see cref="Convert"/> found invalid.</param>
-    /// <returns>The exception, which isn't thrown.</returns>
-    Exception CreateException(ReadCellResult cell);
+    /// <param name="error">The error <see cref="Convert"/> gave, if any.</param>
+    /// <returns>The exception, which isn't thrown, or null if there's none (a converter gave no error).</returns>
+    Exception? CreateException(ReadCellResult cell, object? error);
 }

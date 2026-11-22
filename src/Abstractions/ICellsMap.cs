@@ -1,0 +1,18 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using ExcelDataReader;
+
+namespace ExcelMapper.Abstractions;
+
+/// <summary>
+/// A map that reads several cells (a collection or dictionary) and can be bound to a member: its
+/// cells reader is resolved once for the sheet.
+/// </summary>
+internal interface ICellsMap : IColumnsMap
+{
+    int ReaderVersion { get; }
+
+    ICellsReader? GetCellsReader(ExcelSheet sheet);
+
+    bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out object? value);
+}

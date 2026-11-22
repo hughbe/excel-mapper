@@ -9,7 +9,7 @@ internal sealed class ChangeTypeMapper<T> : ICellMapper<T>
 {
     private static readonly Type s_type = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
 
-    public CellConversion Convert(ReadCellResult cell, out T value)
+    public CellConversion Convert(ReadCellResult cell, in CellContext context, out T value, ref object? error)
     {
         try
         {
@@ -23,6 +23,6 @@ internal sealed class ChangeTypeMapper<T> : ICellMapper<T>
         }
     }
 
-    public Exception CreateException(ReadCellResult cell)
+    public Exception CreateException(ReadCellResult cell, object? error)
         => MapperUtilities.InvalidFromParse(() => System.Convert.ChangeType(cell.GetValue(), s_type, cell.Culture));
 }

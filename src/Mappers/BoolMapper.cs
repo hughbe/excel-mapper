@@ -2,7 +2,7 @@ namespace ExcelMapper.Mappers;
 
 internal sealed class BoolMapper : ICellMapper<bool>, ICellMapper<bool?>
 {
-    CellConversion ICellMapper<bool>.Convert(ReadCellResult cell, out bool value)
+    CellConversion ICellMapper<bool>.Convert(ReadCellResult cell, in CellContext context, out bool value, ref object? error)
     {
         if (cell.GetValue() is bool boolValue)
         {
@@ -28,14 +28,14 @@ internal sealed class BoolMapper : ICellMapper<bool>, ICellMapper<bool?>
         return bool.TryParse(stringValue, out value) ? CellConversion.Success : CellConversion.Invalid;
     }
 
-    CellConversion ICellMapper<bool?>.Convert(ReadCellResult cell, out bool? value)
+    CellConversion ICellMapper<bool?>.Convert(ReadCellResult cell, in CellContext context, out bool? value, ref object? error)
     {
-        var conversion = ((ICellMapper<bool>)this).Convert(cell, out var result);
+        var conversion = ((ICellMapper<bool>)this).Convert(cell, in context, out var result, ref error);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }
 
-    public Exception CreateException(ReadCellResult cell)
+    public Exception CreateException(ReadCellResult cell, object? error)
     {
         var stringValue = cell.GetString();
         return MapperUtilities.InvalidFormat(stringValue, "a valid Boolean", () => bool.Parse(stringValue!));

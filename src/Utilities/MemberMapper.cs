@@ -362,7 +362,7 @@ internal static class MemberMapper
         // If the member has a ExcelTrimString attribute, add the transformer.
         if (MemberAttributes.Get<ExcelTrimStringAttribute>(member) is { } trimStringAttribute)
         {
-            pipeline.Transformers.Add(new TrimStringCellTransformer());
+            pipeline.Transformers.Add(TrimStringCellTransformer.Instance);
         }
 
         // If the member has ExcelTransformer attributes, add the transformers.
@@ -371,12 +371,12 @@ internal static class MemberMapper
             foreach (var transformAttribute in transformAttributes)
             {
                 var transformer = Activator.CreateInstance(transformAttribute.Type, transformAttribute.ConstructorArguments)!;
-                pipeline.Transformers.Add(new CellTransformerAdapter((ICellTransformer)transformer));
+                pipeline.Transformers.Add((ICellTransformer)transformer);
             }
         }
     }
 
-    internal static void ApplyMemberAttributes(IToOneMap map, MemberInfo member)
+    internal static void ApplyMemberAttributes(IColumnsMap map, MemberInfo member)
     {
         // If a member has an ExcelOptional attribute, mark it as optional.
         if (MemberAttributes.IsDefined<ExcelOptionalAttribute>(member))

@@ -30,7 +30,7 @@ internal static class AutoMapper
         return map;
     }
 
-    internal static bool TrySetupMap<T>(MemberInfo? member, IToOneMap map, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping)
+    internal static bool TrySetupMap<T>(MemberInfo? member, IColumnsMap map, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping)
     {
         var pipeline = (ValuePipeline<T>)map.Pipeline;
 

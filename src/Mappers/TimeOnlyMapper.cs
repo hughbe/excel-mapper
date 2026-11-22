@@ -38,7 +38,7 @@ internal sealed class TimeOnlyMapper : IFormatsCellMapper, ICellMapper<TimeOnly>
     /// </summary>
     public DateTimeStyles Style { get; set; }
 
-    CellConversion ICellMapper<TimeOnly>.Convert(ReadCellResult cell, out TimeOnly value)
+    CellConversion ICellMapper<TimeOnly>.Convert(ReadCellResult cell, in CellContext context, out TimeOnly value, ref object? error)
     {
         var cellValue = cell.GetValue();
         if (cellValue is TimeSpan timeSpanValue)
@@ -84,14 +84,14 @@ internal sealed class TimeOnlyMapper : IFormatsCellMapper, ICellMapper<TimeOnly>
         }
     }
 
-    CellConversion ICellMapper<TimeOnly?>.Convert(ReadCellResult cell, out TimeOnly? value)
+    CellConversion ICellMapper<TimeOnly?>.Convert(ReadCellResult cell, in CellContext context, out TimeOnly? value, ref object? error)
     {
-        var conversion = ((ICellMapper<TimeOnly>)this).Convert(cell, out var result);
+        var conversion = ((ICellMapper<TimeOnly>)this).Convert(cell, in context, out var result, ref error);
         value = conversion == CellConversion.Invalid ? null : result;
         return conversion;
     }
 
-    public Exception CreateException(ReadCellResult cell)
+    public Exception CreateException(ReadCellResult cell, object? error)
     {
         // A duration that isn't a time of day.
         if (cell.GetValue() is TimeSpan timeSpanValue)

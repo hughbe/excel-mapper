@@ -1,15 +1,19 @@
+using System.Reflection;
+
 namespace ExcelMapper.Abstractions;
 
 /// <summary>
-/// Map for one-to-one relationships, for example, mapping a single cell to a single object.
+/// A map of a single value read from one cell (<see cref="ValueMap{T}"/>), which binds to a sheet
+/// as a <see cref="BoundValueMember{T}"/>.
 /// </summary>
-internal interface IValueMap : IToOneMap
+internal interface IValueMap : IColumnsMap
 {
+    BoundMember Bind(ExcelPropertyMap property, ExcelSheet sheet);
+
     /// <summary>
-    /// Gets or sets the factory that creates a reader for a cell value.
+    /// Gets a static method <c>(TBoundMember member, TParameter defaultValue) → TParameter</c> that
+    /// returns the value a bound member of this map read for a constructor parameter, without
+    /// boxing. Null if the parameter's type isn't the map's type.
     /// </summary>
-    /// <summary>
-    /// The columns the map reads.
-    /// </summary>
-    public Readers.Columns Columns { get; }
+    MethodInfo? GetArgumentMethod(Type parameterType);
 }

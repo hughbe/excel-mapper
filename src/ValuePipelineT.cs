@@ -94,7 +94,7 @@ public abstract class ValuePipeline<T> : ValuePipeline
     /// be replaced and an invalid value are kept until a later result replaces them), then the
     /// invalid fallback.
     /// </summary>
-    internal T Map(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting, MemberInfo? member, List<ExcelMappingException>? errors)
+    internal T Map(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, MemberInfo? member, List<ExcelMappingException>? errors)
     {
         var plan = GetPlan();
 
@@ -102,18 +102,19 @@ public abstract class ValuePipeline<T> : ValuePipeline
         // thread's: mappers use it when they have no format provider of their own.
         var culture = sheet.Culture;
         readResult.Culture = culture;
+        var context = new CellContext(sheet, rowIndex, readResult.ColumnIndex, member, errors);
 
         // Use indexed loops: enumerating through an interface allocates for every cell.
         var transformers = plan.Transformers;
         for (int i = 0; i < transformers.Length; i++)
         {
-            readResult = transformers[i].Transform(readResult, sheet, rowIndex, member, preserveFormatting);
+            readResult = transformers[i].Transform(new CellValue(readResult), context).ToReadCellResult(readResult.ColumnIndex);
             readResult.Culture = culture;
         }
 
         if (plan.EmptyFallback is { } emptyFallback && readResult.IsEmpty())
         {
-            return emptyFallback.Fallback(new CellValue(readResult), new CellContext(sheet, rowIndex, readResult.ColumnIndex, member, errors), null);
+            return emptyFallback.Fallback(new CellValue(readResult), context, null);
         }
 
         var state = CellConversion.NotHandled;
@@ -121,21 +122,10 @@ public abstract class ValuePipeline<T> : ValuePipeline
         var invalidIndex = -1;
         object? invalidError = null;
         var mappers = plan.Mappers;
-        var cellConverters = plan.CellConverters;
         for (int i = 0; i < mappers.Length; i++)
         {
-            CellConversion conversion;
-            T value;
-            if (mappers[i] is { } mapper)
-            {
-                conversion = mapper.Convert(readResult, out value);
-            }
-            else
-            {
-                conversion = ConvertWithCellConverter(cellConverters![i]!, sheet, rowIndex, readResult, member, out value, ref invalidError);
-            }
-
-            switch (conversion)
+            object? error = null;
+            switch (mappers[i].Convert(readResult, in context, out var value, ref error))
             {
                 case CellConversion.Success:
                     return value;
@@ -146,11 +136,7 @@ public abstract class ValuePipeline<T> : ValuePipeline
                 case CellConversion.Invalid:
                     state = CellConversion.Invalid;
                     invalidIndex = i;
-                    if (mappers[i] is not null)
-                    {
-                        invalidError = null;
-                    }
-
+                    invalidError = error;
                     break;
             }
         }
@@ -162,52 +148,25 @@ public abstract class ValuePipeline<T> : ValuePipeline
 
         if (plan.InvalidFallback is { } invalidFallback)
         {
-            // Create the exception only if the fallback uses it: from the mapper, or from the error
-            // an ICellConverter<T> returned.
+            // Create the exception only if the fallback uses it.
             var exception = state == CellConversion.Invalid && plan.InvalidFallbackUsesException
-                ? mappers[invalidIndex] is { } invalidMapper
-                    ? invalidMapper.CreateException(readResult)
-                    : CellConversionResult<T>.CreateException(invalidError)
+                ? mappers[invalidIndex].CreateException(readResult, invalidError)
                 : null;
-            return invalidFallback.Fallback(new CellValue(readResult), new CellContext(sheet, rowIndex, readResult.ColumnIndex, member, errors), exception);
+            return invalidFallback.Fallback(new CellValue(readResult), context, exception);
         }
 
         return CastValue<T>(null, sheet, rowIndex, readResult.ColumnIndex, member)!;
     }
 
-    // An ICellConverter<T> gets the cell's context, and its error is kept from the conversion: it
-    // can't be asked for an exception afterwards without converting the value again.
-    private static CellConversion ConvertWithCellConverter(ICellConverter<T> converter, ExcelSheet sheet, int rowIndex, ReadCellResult readResult, MemberInfo? member, out T value, ref object? invalidError)
-    {
-        var result = converter.Convert(new CellValue(readResult), new CellContext(sheet, rowIndex, readResult.ColumnIndex, member));
-        value = result.Value;
-        switch (result.Status)
-        {
-            case CellConversionStatus.Success:
-                return CellConversion.Success;
-            case CellConversionStatus.Invalid:
-                invalidError = result.Error;
-                return CellConversion.Invalid;
-            default:
-                return CellConversion.NotHandled;
-        }
-    }
-
     // A snapshot of the pipeline, made when it's first used and again after it changes, so that
     // mapping a cell reads arrays rather than lists through interfaces.
-    private sealed class Plan(int version, ICellMapper<T>?[] mappers, ICellConverter<T>?[]? cellConverters, IPipelineTransformer[] transformers, ICellFallback<T>? emptyFallback, ICellFallback<T>? invalidFallback)
+    private sealed class Plan(int version, ICellMapper<T>[] mappers, ICellTransformer[] transformers, ICellFallback<T>? emptyFallback, ICellFallback<T>? invalidFallback)
     {
         public int Version { get; } = version;
 
-        // The mappers. The mapper for an ICellConverter<T> is null here, and its converter is in
-        // CellConverters.
-        public ICellMapper<T>?[] Mappers { get; } = mappers;
+        public ICellMapper<T>[] Mappers { get; } = mappers;
 
-        // The ICellConverter<T> of each mapper that has one (see CellConverterMapper<T>), or null
-        // if no mapper has one.
-        public ICellConverter<T>?[]? CellConverters { get; } = cellConverters;
-
-        public IPipelineTransformer[] Transformers { get; } = transformers;
+        public ICellTransformer[] Transformers { get; } = transformers;
 
         public ICellFallback<T>? EmptyFallback { get; } = emptyFallback;
 
@@ -225,22 +184,7 @@ public abstract class ValuePipeline<T> : ValuePipeline
         var plan = _plan;
         if (plan is null || plan.Version != version)
         {
-            var mappers = new ICellMapper<T>?[Mappers.Count];
-            ICellConverter<T>?[]? cellConverters = null;
-            for (int i = 0; i < mappers.Length; i++)
-            {
-                if (Mappers[i] is CellConverterMapper<T> cellConverterMapper)
-                {
-                    cellConverters ??= new ICellConverter<T>?[mappers.Length];
-                    cellConverters[i] = cellConverterMapper.Converter;
-                }
-                else
-                {
-                    mappers[i] = Mappers[i];
-                }
-            }
-
-            plan = new Plan(version, mappers, cellConverters, [.. Transformers], EmptyFallback, InvalidFallback);
+            plan = new Plan(version, [.. Mappers], [.. Transformers], EmptyFallback, InvalidFallback);
             _plan = plan;
         }
 

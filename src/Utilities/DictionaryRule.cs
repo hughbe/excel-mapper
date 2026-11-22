@@ -22,7 +22,7 @@ internal abstract class DictionaryRule
     /// Maps a member of the dictionary type to a <see cref="DictionaryMap{TKey, TValue}"/> that
     /// reads a value from each of several columns.
     /// </summary>
-    public abstract bool TryCreateMap(MemberInfo? member, Type dictionaryType, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out IManyToOneMap? map);
+    public abstract bool TryCreateMap(MemberInfo? member, Type dictionaryType, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out ICellsMap? map);
 
     /// <summary>
     /// Gets the map for values mapped one by one, such as <c>Map(p => p.Values["Name"])</c>.
@@ -94,7 +94,7 @@ internal sealed class DictionaryRule<TKey, TValue> : DictionaryRule where TKey :
 {
     public override Type KeyType => typeof(TKey);
 
-    public override bool TryCreateMap(MemberInfo? member, Type dictionaryType, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out IManyToOneMap? map)
+    public override bool TryCreateMap(MemberInfo? member, Type dictionaryType, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out ICellsMap? map)
     {
         if (TryCreateDictionaryMap(member, dictionaryType, emptyValueStrategy, isAutoMapping, out var dictionaryMap))
         {

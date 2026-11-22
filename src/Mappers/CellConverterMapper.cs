@@ -2,20 +2,31 @@ namespace ExcelMapper.Mappers;
 
 /// <summary>
 /// The mapper for an <see cref="ICellConverter{T}"/> set with <c>WithConverter(converter)</c> or
-/// <see cref="ExcelConverterAttribute"/>. A <see cref="ValuePipeline{T}"/> calls the converter
-/// itself, with the cell's context, and keeps the error it returns (see <see cref="Converter"/>);
-/// this class only carries the converter in the pipeline's list of mappers.
+/// <see cref="ExcelConverterAttribute"/>. The error the converter returns for an invalid cell is
+/// kept for <see cref="CreateException"/>, as the converter can't be asked for it again without
+/// converting the value again.
 /// </summary>
 internal sealed class CellConverterMapper<T>(ICellConverter<T> converter) : ICellMapper<T>
 {
     public ICellConverter<T> Converter { get; } = converter;
 
-    // Not called by ValuePipeline<T>, which converts with the cell's context.
-    CellConversion ICellMapper<T>.Convert(ReadCellResult cell, out T value)
-        => throw new InvalidOperationException("Cell converters are called by the pipeline.");
+    public CellConversion Convert(ReadCellResult cell, in CellContext context, out T value, ref object? error)
+    {
+        var result = Converter.Convert(new CellValue(cell), context);
+        value = result.Value;
+        switch (result.Status)
+        {
+            case CellConversionStatus.Success:
+                return CellConversion.Success;
+            case CellConversionStatus.Invalid:
+                error = result.Error;
+                return CellConversion.Invalid;
+            default:
+                return CellConversion.NotHandled;
+        }
+    }
 
-    Exception ICellMapper<T>.CreateException(ReadCellResult cell)
-        => throw new InvalidOperationException("Cell converters are called by the pipeline.");
+    public Exception? CreateException(ReadCellResult cell, object? error) => CellConversionResult<T>.CreateException(error);
 }
 
 /// <summary>

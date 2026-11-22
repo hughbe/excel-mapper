@@ -6,12 +6,12 @@ namespace ExcelMapper.Mappers;
 /// </summary>
 internal sealed class StringMapper : ICellMapper<string?>
 {
-    public CellConversion Convert(ReadCellResult cell, out string? value)
+    public CellConversion Convert(ReadCellResult cell, in CellContext context, out string? value, ref object? error)
     {
         value = cell.GetString();
         return CellConversion.SuccessUnlessReplaced;
     }
 
     // Text is never invalid.
-    public Exception CreateException(ReadCellResult cell) => new FormatException("The value couldn't be read as text.");
+    public Exception CreateException(ReadCellResult cell, object? error) => new FormatException("The value couldn't be read as text.");
 }

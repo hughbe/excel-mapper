@@ -19,9 +19,9 @@ public abstract class ValuePipeline
     /// <summary>
     /// Gets the transformers, which change each cell, in order, before it's converted.
     /// </summary>
-    internal IList<IPipelineTransformer> Transformers { get; } = new NonNullCollection<IPipelineTransformer>();
+    internal IList<ICellTransformer> Transformers { get; } = new NonNullCollection<ICellTransformer>();
 
-    private protected int TransformersVersion => ((NonNullCollection<IPipelineTransformer>)Transformers).Version;
+    private protected int TransformersVersion => ((NonNullCollection<ICellTransformer>)Transformers).Version;
 
     /// <summary>
     /// Gets the mappers, for code that configures them without knowing the pipeline's type (such
