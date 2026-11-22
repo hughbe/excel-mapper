@@ -22,6 +22,13 @@
 | `TypedConverter` | An `ICellConverter<int>` on the invalid values (4.0). |
 | `Region` | `AutoMappedClass` read as a region of the sheet (4.0). |
 
+The `NativeAot` benchmarks run each benchmark with the JIT and compiled as a native AOT app, on the current .NET, mapping the same 50,000 rows with a class map from a generated `ExcelMappingContext` (`BenchmarkContext`), as native AOT apps do:
+
+| Benchmark | What it maps |
+|---|---|
+| `ReaderOnly` | Nothing: reads every cell with ExcelDataReader directly. |
+| `Class`, `Record`, `Struct` | The 10-member class of `AutoMappedClass`, as a class, a positional record and a struct. |
+
 ## Running them
 
 ```bash
@@ -29,7 +36,11 @@ cd benchmarks
 dotnet run -c Release -- --filter '*.Mapping.*'
 ```
 
-Add `--job short` for a quicker, less precise run. On Apple Silicon, timings can vary by up to 2x between runs: compare allocations, which are reliable, and repeat timings.
+Add `--job short` for a quicker, less precise run (except for `NativeAot`, which sets its own jobs: use `--iterationCount 5 --warmupCount 2`). The `NativeAot` benchmarks need what native AOT needs to compile (on Linux, `clang` and `zlib1g-dev`), and take a minute or two to build:
+
+```bash
+dotnet run -c Release -- --filter '*.NativeAot.*'
+``` On Apple Silicon, timings can vary by up to 2x between runs: compare allocations, which are reliable, and repeat timings.
 
 ## Comparing with 3.x
 
@@ -60,3 +71,16 @@ Apple M4, .NET 9.0.10, BenchmarkDotNet 0.15.8, default job. Allocations include 
 | `OptionalMissingColumn` | 101.2 ms | 96.0 ms | 1.05x | 180.8 MB → 163.6 MB |
 
 Beyond reading the file, mapping the 10-member class allocates 5.1 MB instead of 78.0 MB (93% less), and the class map 2.8 MB instead of 46.3 MB (94% less). 3.0.3 threw and caught an exception for each of the 25,000 invalid values; 4.0 throws none.
+
+## Native AOT compared with the JIT
+
+Apple M4, .NET 9.0.10, BenchmarkDotNet 0.15.8, default job, with generated setters and constructors ([#202](https://github.com/hughbe/excel-mapper/pull/202)). Each benchmark creates the importer, so its time includes ExcelDataReader opening the file.
+
+| Benchmark | JIT | Native AOT | Ratio | Allocated (JIT → native AOT) |
+|---|---:|---:|---:|---:|
+| `ReaderOnly` | 95.2 ms | 173.7 ms | 1.82 | 161.67 MB → 161.67 MB |
+| `Class` | 112.3 ms | 198.2 ms | 1.77 | 166.64 MB → 166.67 MB |
+| `Record` | 114.1 ms | 198.7 ms | 1.74 | 166.64 MB → 166.64 MB |
+| `Struct` | 112.0 ms | 197.0 ms | 1.76 | 161.68 MB → 161.71 MB |
+
+Native AOT allocates the same as the JIT. Nearly all of its extra time is ExcelDataReader reading the file (`ReaderOnly`), which native AOT runs about 80% slower, as it can't optimize from how the code runs as the JIT does. Mapping itself adds 24.5 ms with native AOT and 17.1 ms with the JIT. Before generated setters and constructors, native AOT set members by reflection: a struct allocated 237 MB instead of 162 MB, a class 193 MB instead of 167 MB.
