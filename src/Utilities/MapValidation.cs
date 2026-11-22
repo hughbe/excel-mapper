@@ -10,9 +10,9 @@ internal static class MapValidation
     public static void FindMissingColumns(IMap map, SheetView sheet, string? path, List<string> problems)
         => MapTree.VisitCellMaps(map, path, (cellMap, memberPath) =>
         {
-            if (!cellMap.Optional)
+            if (!cellMap.Settings.Optional)
             {
-                Check(cellMap.Columns, many: cellMap is ICellsMap, sheet, memberPath, problems);
+                Check(cellMap.Settings.Columns, many: cellMap is ICellsMap, sheet, memberPath, problems);
             }
         });
 
@@ -22,7 +22,7 @@ internal static class MapValidation
         var foundCount = 0;
         MapTree.VisitCellMaps(map, null, (cellMap, _) =>
         {
-            var columns = cellMap.Columns;
+            var columns = cellMap.Settings.Columns;
             if (columns.LooksUpNames)
             {
                 lookedUpCount++;

@@ -252,9 +252,7 @@ public class ExcelClassMap : IParentMap
         object instance;
         try
         {
-            instance = plan.CreateFromMembers is { } createFromMembers
-                ? createFromMembers(members)
-                : plan.InvokeConstructor!(GetArguments(plan, members));
+            instance = plan.Construct(members);
         }
         catch (Exception ex)
         {
@@ -270,148 +268,11 @@ public class ExcelClassMap : IParentMap
             return false;
         }
 
-        // Set any members that weren't passed to the constructor.
-        for (int i = 0; i < members.Length; i++)
-        {
-            if (plan.MemberParameterIndices[i] < 0 && members[i].HasValue)
-            {
-                members[i].SetValue(instance);
-            }
-        }
-
+        plan.SetOtherMembers(instance, members);
         result = instance;
         return true;
     }
 
-    // Where constructors can't be compiled: the constructor's arguments as an array.
-    private static object?[] GetArguments(ConstructionPlan plan, BoundMember[] members)
-    {
-        var arguments = (object?[])plan.DefaultArguments.Clone();
-        for (int i = 0; i < members.Length; i++)
-        {
-            var parameterIndex = plan.MemberParameterIndices[i];
-            if (parameterIndex >= 0 && members[i].HasValue)
-            {
-                arguments[parameterIndex] = members[i].Value;
-            }
-        }
-
-        return arguments;
-    }
-
     // Made when the first row is read, after the class map is frozen.
-    private ConstructionPlan GetConstructionPlan() => _constructionPlan ??= CreateConstructionPlan();
-
-    private ConstructionPlan CreateConstructionPlan()
-    {
-        var hasReadOnlyMember = false;
-        foreach (var member in Members)
-        {
-            if (member.IsReadOnly)
-            {
-                hasReadOnlyMember = true;
-                break;
-            }
-        }
-
-        // Prefer a parameterless constructor and setting members, unless a member can only be
-        // set through a constructor.
-        if (!hasReadOnlyMember && ConstructorUtilities.HasParameterlessConstructor(Type))
-        {
-            return new ConstructionPlan(null, [], []) { CreateInstance = CompiledAccessors.GetParameterlessConstructor(Type) };
-        }
-
-        if (Type.IsInterface || Type.IsAbstract)
-        {
-            throw new ExcelMappingException($"Cannot create an instance of type \"{Type}\" as it is an interface or abstract class.");
-        }
-
-        var members = new MemberInfo[Members.Count];
-        for (int i = 0; i < members.Length; i++)
-        {
-            members[i] = Members[i].Member;
-        }
-
-        var constructor = ConstructorUtilities.FindConstructor(Type, members, out var parameterMemberIndices);
-        if (constructor is null)
-        {
-            throw new ExcelMappingException(
-                $"Cannot create an instance of type \"{Type}\". It needs a public parameterless constructor, or a public " +
-                "constructor whose parameters each match a mapped property or field (by name and type) or have a default value.");
-        }
-
-        var memberParameterIndices = new int[members.Length];
-        for (int i = 0; i < memberParameterIndices.Length; i++)
-        {
-            memberParameterIndices[i] = -1;
-        }
-        var parameters = constructor.GetParameters();
-        var defaultArguments = new object?[parameters.Length];
-        for (int i = 0; i < parameters.Length; i++)
-        {
-            if (parameterMemberIndices[i] >= 0)
-            {
-                memberParameterIndices[parameterMemberIndices[i]] = i;
-            }
-
-            // Reflection passes a zero-initialized value for null value type arguments.
-            defaultArguments[i] = parameters[i].HasDefaultValue ? parameters[i].DefaultValue : null;
-        }
-
-        for (int i = 0; i < members.Length; i++)
-        {
-            if (memberParameterIndices[i] == -1 && Members[i].IsReadOnly)
-            {
-                throw new ExcelMappingException($"Property \"{members[i].Name}\" of type \"{Type}\" is read-only and is not a parameter of the constructor {constructor}.");
-            }
-        }
-
-        var boundArguments = new BoundConstructorArgument[parameters.Length];
-        for (int i = 0; i < parameters.Length; i++)
-        {
-            var memberIndex = parameterMemberIndices[i];
-            var typedMethod = memberIndex >= 0 && Members[memberIndex].Map is IValueMap valueMap
-                ? valueMap.GetArgumentMethod(parameters[i].ParameterType)
-                : null;
-            boundArguments[i] = new BoundConstructorArgument(memberIndex, typedMethod, defaultArguments[i]);
-        }
-
-        var createFromMembers = CompiledAccessors.GetConstructor(constructor, boundArguments);
-        return new ConstructionPlan(constructor, memberParameterIndices, defaultArguments)
-        {
-            CreateFromMembers = createFromMembers,
-            InvokeConstructor = createFromMembers is null ? CompiledAccessors.GetConstructor(constructor) : null,
-        };
-    }
-
-    private sealed class ConstructionPlan(ConstructorInfo? constructor, int[] memberParameterIndices, object?[] defaultArguments)
-    {
-        /// <summary>
-        /// The constructor to call, or null to use the parameterless constructor.
-        /// </summary>
-        public ConstructorInfo? Constructor { get; } = constructor;
-
-        /// <summary>
-        /// For each member, the index of the constructor parameter it is passed to, or -1.
-        /// </summary>
-        public int[] MemberParameterIndices { get; } = memberParameterIndices;
-
-        public object?[] DefaultArguments { get; } = defaultArguments;
-
-        /// <summary>
-        /// Creates an instance using the parameterless constructor, if <see cref="Constructor"/> is null.
-        /// </summary>
-        public Func<object>? CreateInstance { get; set; }
-
-        /// <summary>
-        /// Calls <see cref="Constructor"/> with the values the bound members read, or null where
-        /// code can't be compiled.
-        /// </summary>
-        public Func<BoundMember[], object>? CreateFromMembers { get; set; }
-
-        /// <summary>
-        /// Calls <see cref="Constructor"/> with an array of arguments, where code can't be compiled.
-        /// </summary>
-        public Func<object?[], object>? InvokeConstructor { get; set; }
-    }
+    private ConstructionPlan GetConstructionPlan() => _constructionPlan ??= ConstructionPlan.Create(Type, Members);
 }

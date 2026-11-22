@@ -60,7 +60,7 @@ A single-value map is itself a `ValuePipeline<T>` (see [The value pipeline](#the
 
 ### Choosing columns
 
-Each map has a `Columns` (internal, in `src/Readers/Columns.cs`): the columns it reads, by name, by index or letter, by several names or indexes, by a predicate or regex, by an `IColumnSelector`, all columns, the columns no other member reads (`ExtraColumns`), or one cell's text split by separators (`SplitColumns`, with a `CellSplitter`). The fluent methods (`WithColumnName`, `WithColumnIndices`, `WithSeparators`, ...) and attributes choose it.
+Each map that reads cells has a `ColumnSettings` (internal, in `src/Readers`): its `Columns`, whether they can be missing (`Optional`), and whether cells are read as formatted text (`PreserveFormatting`). It also handles a missing column, skipping an optional member or throwing the error. A `Columns` is the columns themselves: by name, by index or letter, by several names or indexes, by a predicate or regex, by an `IColumnSelector`, all columns, the columns no other member reads (`ExtraColumns`), or one cell's text split by separators (`SplitColumns`, with a `CellSplitter`). The fluent methods (`WithColumnName`, `WithColumnIndices`, `WithSeparators`, ...) and attributes choose it.
 
 The columns are found once per sheet (`SheetView.FindColumn`, cached by `SheetBindings`): a single value reads the first column found, by its index; a collection or dictionary reads all of them through an `ICellsReader` (`ColumnIndicesReader`, or `SplitCellsReader` for a split cell). Each kind of `Columns` also describes itself: the `ExcelMappingException` for missing columns (naming the column and suggesting a similarly named one, unless the member is optional), its text in `ValidateHeading`, and whether it looks columns up by name, which `FindHeading` needs.
 
@@ -78,7 +78,7 @@ A class map is frozen (`IMap.Freeze`) the first time it's used with a sheet (`Sh
 
 ### Creating objects
 
-`ExcelClassMap` decides once how to create its type (a construction plan):
+`ExcelClassMap` decides once how to create its type, when the first row is read (a `ConstructionPlan`, in `src/Binding`):
 
 - With a **parameterless constructor**, it creates the object, then sets each member.
 - Otherwise (records, and classes with read-only properties), it finds the public **constructor** whose parameters match mapped members by name and type (or have default values), reads every member first, and passes them to the constructor. Members that aren't parameters are set afterwards.
@@ -136,8 +136,8 @@ The net8.0 build is annotated for trimming: the mapped type `T` and the types gi
 | `src/Abstractions` | The internal map interfaces (`IMap`, `IParentMap`, `IColumnsMap`, `IValueMap`, `ICellsMap`), `ICellMapper<T>`, and `ReadCellResult`, the cell a mapper converts |
 | `src/Reading` | Reading sheets: `SheetView`, `Worksheet`, `RowSource`, `RowCursor`, `HeadingSearch` and `ReadSettings` |
 | `src/AutoMapping` | Creating maps: `AutoMapper`, `ExpressionAutoMapper`, the rules (`TypeRule`, `CollectionRule`, `DictionaryRule`), `MemberMapper` and `MemberAttributes` (a member's attributes) and `UnderlyingTypeAdapter` |
-| `src/Binding` | Binding class maps to sheets: `SheetBindings`, `BoundMember` and its kinds, `CompiledAccessors` (compiled setters and constructors) and `ConstructorUtilities` (matching constructors to members) |
-| `src/Readers` | `Columns` and its kinds, splitting cells (`CellSplitter`), and the readers of several cells (`ICellsReader`, `ColumnIndicesReader`, `SplitCellsReader`) |
+| `src/Binding` | Binding class maps to sheets: `SheetBindings`, `BoundMember` and its kinds, `ConstructionPlan` (how a class map creates its type), `CompiledAccessors` (compiled setters and constructors) and `ConstructorUtilities` (matching constructors to members) |
+| `src/Readers` | `ColumnSettings`, `Columns` and its kinds (a file each), splitting cells (`CellSplitter`), and the readers of several cells (`ICellsReader`, `ColumnIndicesReader`, `SplitCellsReader`) |
 | `src/Mappers`, `src/Transformers`, `src/Fallbacks` | Built-in conversion, transformers and fallbacks, and the adapters for the public extension points |
 | `src/Builders` | `CollectionBuilder<T>` and `DictionaryBuilder<TKey, TValue>`: how each collection and dictionary type is built |
 | `src/Utilities` | Helpers used across the library: walking and checking map trees (`MapTree`, `MapValidation`), `ConversionOptions`, `NonNullCollection<T>`, argument checks (`ThrowHelpers`), and column, format, date, enum and reflection helpers |

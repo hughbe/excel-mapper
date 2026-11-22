@@ -24,8 +24,43 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     /// <param name="builder">Builds the dictionary.</param>
     internal DictionaryMap(Columns columns, DictionaryBuilder<TKey, TValue> builder)
     {
-        _columns = columns;
+        Settings = new ColumnSettings(columns);
         Builder = builder;
+    }
+
+    /// <summary>
+    /// Gets or sets the columns the map reads.
+    /// </summary>
+    internal Columns Columns
+    {
+        get => Settings.Columns;
+        set => Settings.Columns = value;
+    }
+
+    /// <summary>
+    /// Gets where the map reads its cells, and how.
+    /// </summary>
+    internal ColumnSettings Settings { get; }
+
+    ColumnSettings IColumnsMap.Settings => Settings;
+
+    /// <summary>
+    /// Gets or sets whether the member's columns can be missing from the sheet: the member then
+    /// keeps its value, rather than mapping the row being an error.
+    /// </summary>
+    public bool Optional
+    {
+        get => Settings.Optional;
+        set => Settings.Optional = value;
+    }
+
+    /// <summary>
+    /// Gets or sets whether cells are read as the text Excel shows, with their number format applied.
+    /// </summary>
+    public bool PreserveFormatting
+    {
+        get => Settings.PreserveFormatting;
+        set => Settings.PreserveFormatting = value;
     }
 
     /// <summary>
@@ -36,60 +71,11 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
 
     ValuePipeline IColumnsMap.Pipeline => Pipeline;
 
-    private bool _frozen;
-
     /// <inheritdoc />
     void IMap.Freeze()
     {
-        _frozen = true;
+        Settings.Freeze();
         Pipeline.Freeze();
-    }
-
-    /// <inheritdoc />
-    public bool Optional
-    {
-        get => _optional;
-        set
-        {
-            ThrowHelpers.ThrowIfFrozen(_frozen);
-            _optional = value;
-        }
-    }
-
-    private bool _optional;
-
-    /// <inheritdoc />
-    public bool PreserveFormatting
-    {
-        get => _preserveFormatting;
-        set
-        {
-            ThrowHelpers.ThrowIfFrozen(_frozen);
-            _preserveFormatting = value;
-        }
-    }
-
-    private bool _preserveFormatting;
-
-    private Columns _columns;
-
-    /// <summary>
-    /// Gets or sets the columns the values are read from.
-    /// </summary>
-    internal Columns Columns
-    {
-        get => _columns;
-        set
-        {
-            ThrowHelpers.ThrowIfFrozen(_frozen);
-            _columns = value;
-        }
-    }
-
-    Columns IColumnsMap.Columns
-    {
-        get => Columns;
-        set => Columns = value;
     }
 
     /// <summary>
@@ -113,7 +99,7 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     ICellsReader? ICellsMap.GetCellsReader(SheetView sheet) => GetCellsReader(sheet);
 
     private ICellsReader? GetCellsReader(SheetView sheet)
-        => sheet.GetCellsReader(_columns);
+        => sheet.GetCellsReader(Settings.Columns);
 
     bool ICellsMap.TryGetValue(ICellsReader? cellsReader, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out object? value)
         => TryGetValue(cellsReader, sheet, rowIndex, reader, member, errors, out value);
@@ -125,15 +111,10 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
         }
 
-        if (cellsReader == null || !cellsReader.Start(reader, PreserveFormatting, out var count))
+        if (!Settings.TryStart(cellsReader, sheet, rowIndex, reader, member, out var count))
         {
-            if (Optional)
-            {
-                value = default;
-                return false;
-            }
-
-            throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _columns, member);
+            value = default;
+            return false;
         }
 
         var items = Builder.Begin(count);
@@ -173,7 +154,7 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
 
         var result = valueMap(Pipeline);
         ThrowHelpers.ThrowIfNull(result, nameof(valueMap));
-        ThrowHelpers.ThrowIfFrozen(_frozen);
+        Settings.ThrowIfFrozen();
         Pipeline = result;
 
         return this;

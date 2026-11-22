@@ -7,19 +7,10 @@ namespace ExcelMapper.Abstractions;
 internal interface IColumnsMap : IMap
 {
     /// <summary>
-    /// The columns the map reads.
+    /// Where the map reads its cells, and how: its columns, whether they can be missing and
+    /// whether cells are read as formatted text.
     /// </summary>
-    Readers.Columns Columns { get; set; }
-
-    /// <summary>
-    /// Whether a missing column leaves the member's value, rather than being an error.
-    /// </summary>
-    bool Optional { get; set; }
-
-    /// <summary>
-    /// Whether cells are read as the text Excel shows, with their number format applied.
-    /// </summary>
-    bool PreserveFormatting { get; set; }
+    Readers.ColumnSettings Settings { get; }
 
     /// <summary>
     /// How each cell is converted: the map itself for a single value, or its elements' or values'

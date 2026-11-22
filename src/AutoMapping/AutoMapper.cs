@@ -322,7 +322,7 @@ internal static class AutoMapper
                 throw new ExcelMappingException($"Member \"{member.Name}\" has the ExcelExtraColumns attribute, but its type \"{memberType}\" is not a dictionary with string keys.");
             }
 
-            extraColumnsMap.Columns = new ExtraColumns(map);
+            extraColumnsMap.Settings.Columns = new ExtraColumns(map);
             map.Members.Add(new ClassMapMember(member, extraColumnsMap));
             classMap = null;
             return true;

@@ -15,55 +15,43 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
 {
     internal ValueMap(Columns columns)
     {
-        _columns = columns;
+        Settings = new ColumnSettings(columns);
     }
 
-    private Columns _columns;
-
     /// <summary>
-    /// Gets or sets the columns the member is read from: the first one the sheet has.
+    /// Gets or sets the columns the map reads.
     /// </summary>
     internal Columns Columns
     {
-        get => _columns;
-        set
-        {
-            ThrowIfFrozen();
-            _columns = value;
-        }
+        get => Settings.Columns;
+        set => Settings.Columns = value;
     }
 
-    Columns IColumnsMap.Columns
-    {
-        get => Columns;
-        set => Columns = value;
-    }
+    /// <summary>
+    /// Gets where the map reads its cells, and how.
+    /// </summary>
+    internal ColumnSettings Settings { get; }
 
-    /// <inheritdoc />
+    ColumnSettings IColumnsMap.Settings => Settings;
+
+    /// <summary>
+    /// Gets or sets whether the member's columns can be missing from the sheet: the member then
+    /// keeps its value, rather than mapping the row being an error.
+    /// </summary>
     public bool Optional
     {
-        get => _optional;
-        set
-        {
-            ThrowIfFrozen();
-            _optional = value;
-        }
+        get => Settings.Optional;
+        set => Settings.Optional = value;
     }
 
-    private bool _optional;
-
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets or sets whether cells are read as the text Excel shows, with their number format applied.
+    /// </summary>
     public bool PreserveFormatting
     {
-        get => _preserveFormatting;
-        set
-        {
-            ThrowIfFrozen();
-            _preserveFormatting = value;
-        }
+        get => Settings.PreserveFormatting;
+        set => Settings.PreserveFormatting = value;
     }
-
-    private bool _preserveFormatting;
 
     /// <summary>
     /// Gets the map's value pipeline: the map itself, which converts the cell's value.
@@ -71,7 +59,11 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
     ValuePipeline IColumnsMap.Pipeline => this;
 
     /// <inheritdoc />
-    void IMap.Freeze() => Freeze();
+    void IMap.Freeze()
+    {
+        Settings.Freeze();
+        Freeze();
+    }
 
     /// <inheritdoc />
     bool IMap.TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
@@ -90,7 +82,7 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
     /// <summary>
     /// Finds the member's column in the sheet, or -1 if the sheet doesn't have it.
     /// </summary>
-    internal int FindColumn(SheetView sheet) => sheet.FindColumn(_columns);
+    internal int FindColumn(SheetView sheet) => sheet.FindColumn(Settings.Columns);
 
     /// <summary>
     /// Reads and maps the cell in the given column (-1 if the sheet doesn't have the member's
@@ -101,13 +93,8 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
     {
         if (columnIndex == -1 || columnIndex >= reader.FieldCount)
         {
-            if (Optional)
-            {
-                value = default!;
-                return false;
-            }
-
-            throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _columns, member);
+            value = default!;
+            return Settings.MissingColumn(sheet, rowIndex, member);
         }
 
         value = Map(sheet, rowIndex, new ReadCellResult(columnIndex, reader, PreserveFormatting), member, errors);
