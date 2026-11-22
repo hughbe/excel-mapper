@@ -16,10 +16,10 @@ public class CultureTests
     private static readonly CultureInfo s_german = new("de-DE");
 
     [Fact]
-    public void Culture_Default_IsNull()
+    public void Culture_Default_IsInvariant()
     {
         using var importer = Helpers.GetCsvImporter("a\n1\n");
-        Assert.Null(importer.Configuration.Culture);
+        Assert.Same(CultureInfo.InvariantCulture, importer.Configuration.Culture);
     }
 
     [Fact]
@@ -45,12 +45,37 @@ public class CultureTests
     }
 
     [Fact]
-    public void ReadRows_CultureNotSet_UsesCurrentCulture()
+    public void ReadRows_CultureNotSet_UsesInvariantCulture()
+    {
+        // The machine's culture doesn't change how text is read: "1.5" isn't fifteen in Germany.
+        var date = new DateTime(2024, 3, 4, 5, 6, 7);
+        using var importer = Helpers.GetCsvImporter($"Amount,When,Text\n1.5,{date.ToString(CultureInfo.InvariantCulture)},x\n");
+
+        var row = WithCulture(s_german, () => importer.ReadSheet().ReadRows<Row>().Single());
+        Assert.Equal(1.5, row.Amount);
+        Assert.Equal(date, row.When);
+    }
+
+    [Fact]
+    public void ReadRows_CultureNotSet_ConvertsNumbersToTextWithInvariantCulture()
+    {
+        using var importer = Create(["Amount", "When", "Text"], [1.5, new DateTime(2024, 3, 4), 2.5]);
+
+        var row = WithCulture(s_german, () => importer.ReadSheet().ReadRows<Row>().Single());
+        Assert.Equal("2.5", row.Text);
+    }
+
+    [Fact]
+    public void ReadRows_CultureSetToCurrentCulture_UsesCurrentCulture()
     {
         using var importer = Helpers.GetCsvImporter("Amount;When;Text\n\"1,5\";;x\n");
         importer.Configuration.RegisterClassMap<Row>(c => c.Map(p => p.Amount));
 
-        var row = WithCulture(s_german, () => importer.ReadSheet().ReadRows<Row>().Single());
+        var row = WithCulture(s_german, () =>
+        {
+            importer.Configuration.Culture = CultureInfo.CurrentCulture;
+            return importer.ReadSheet().ReadRows<Row>().Single();
+        });
         Assert.Equal(1.5, row.Amount);
     }
 

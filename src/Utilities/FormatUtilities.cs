@@ -83,7 +83,6 @@ internal static class FormatUtilities
 
     private static string[] GetFormats(IFormatProvider? provider, ConditionalWeakTable<DateTimeFormatInfo, string[]> cache, Func<DateTimeFormatInfo, string[]> create)
     {
-        // A null provider is the current culture, which the importer's Culture setting changes.
         var info = DateTimeFormatInfo.GetInstance(provider);
 
         // Cultures' format info is read-only; a writable one may still change, so don't cache it.

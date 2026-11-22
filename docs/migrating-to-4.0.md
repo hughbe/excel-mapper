@@ -5,16 +5,17 @@ ExcelMapper 4.0 fixes several long-standing bugs and makes mapping more predicta
 ## Checklist
 
 1. [`object` members now receive typed values](#object-members-receive-typed-values)
-2. [Fractional numbers can't be mapped to integers](#fractional-numbers-cant-be-mapped-to-integers)
-3. [`WithConverter` replaces the built-in conversion](#withconverter-replaces-the-built-in-conversion)
-4. [`ReadRow` reads the heading first](#readrow-reads-the-heading-first)
-5. [Error messages use cell addresses](#error-messages-use-cell-addresses)
-6. [Sheet names are case-insensitive](#sheet-names-are-case-insensitive)
-7. [Extension types](#extension-types)
-8. [Renamed types](#renamed-types)
-9. [Renamed and removed methods](#renamed-and-removed-methods)
-10. [Smaller changes](#smaller-changes)
-11. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
+2. [Text is read with the invariant culture](#text-is-read-with-the-invariant-culture)
+3. [Fractional numbers can't be mapped to integers](#fractional-numbers-cant-be-mapped-to-integers)
+4. [`WithConverter` replaces the built-in conversion](#withconverter-replaces-the-built-in-conversion)
+5. [`ReadRow` reads the heading first](#readrow-reads-the-heading-first)
+6. [Error messages use cell addresses](#error-messages-use-cell-addresses)
+7. [Sheet names are case-insensitive](#sheet-names-are-case-insensitive)
+8. [Extension types](#extension-types)
+9. [Renamed types](#renamed-types)
+10. [Renamed and removed methods](#renamed-and-removed-methods)
+11. [Smaller changes](#smaller-changes)
+12. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
 
 ## `object` members receive typed values
 
@@ -38,6 +39,25 @@ var text = Convert.ToString(row["Amount"], CultureInfo.InvariantCulture);
 ```
 
 To keep receiving text for a member, map it to `string`, or preserve formatting (`[ExcelPreserveFormatting]` or `.MakePreserveFormatting()`) to get the text as displayed in Excel. CSV files are unaffected: every CSV cell is text.
+
+## Text is read with the invariant culture
+
+**Who's affected:** apps that read text cells (every cell of a CSV file, and text cells in a workbook) with numbers or dates in a culture other than the invariant one, such as `1,5` or `15.03.2024`, and rely on the machine's culture to parse them; and apps that map number or date cells to `string` members and expect the machine's format.
+
+**Before:** text was parsed, and numbers and dates were converted to text, with the current culture of the thread reading the rows. The same file could give different values on different machines: on a machine set to German, `1.5` was read as fifteen.
+
+**Now:** the importer's `Culture` defaults to `CultureInfo.InvariantCulture`, so results are the same on every machine. Cells Excel stores as numbers and dates aren't parsed, so they're unaffected unless mapped to text.
+
+**What to do:** set the culture the file was written in:
+
+```csharp
+importer.Configuration.Culture = CultureInfo.GetCultureInfo("de-DE");
+
+// Or, to keep 3.x's behaviour, the machine's culture:
+importer.Configuration.Culture = CultureInfo.CurrentCulture;
+```
+
+A member can have its own culture with `.WithFormatProvider(...)` (see [Culture](types.md#culture)).
 
 ## Fractional numbers can't be mapped to integers
 
@@ -269,6 +289,7 @@ If you created a map with its constructor, or implemented `IMap`, map the member
 - **Split values**: `"a,b,"` split into an array or list now includes the trailing empty value, which maps through the empty-value fallback (`null` for strings; an error for non-nullable numbers unless you add a fallback). An empty cell gives an empty collection.
 - **Registering after auto-mapping**: `RegisterClassMap<T>` now replaces a map that auto-mapping created for `T` (for example by an earlier `ReadRows<T>()`) instead of throwing. Registering twice yourself still throws.
 - **Changing class maps after reading**: a class map, and the maps of its members, can't be changed once rows have been read with it, including by `ValidateHeading` or `FindHeading`. `Map(...)` or a fluent method called afterwards throws an `InvalidOperationException`. Before 4.0, the change applied to the following rows. Configure the class map before reading, or register a new one: `RegisterClassMap<T>` replaces an auto-mapped map, and a new importer can register a different map for the same type.
+- **Enumerating rows more than once**: each enumeration of the result of `ReadRows<T>()` or `ReadRowResults<T>()` reads the same rows, from the row after the sheet's position when the method was called. Before 4.0, the result could only be enumerated once: a second enumeration continued where the first stopped, so `rows.Any()` followed by `rows.ToList()` lost the first row. To continue reading where you stopped, use `ReadRow<T>()`, or call `ReadRows<T>()` again.
 - **Columns with the same name**: a member whose name more than one column in the heading matches (such as two columns named "Name", or "Name" and "name") throws an `ExcelMappingException` naming both columns, instead of silently reading the first. Choose one with `[ExcelColumnLetter]`/`.WithColumnLetter(...)` or `[ExcelColumnIndex]`, or rename a column. The second of two columns named "Name" can no longer be found as "Name_2", and a column really named "Name_2" is found.
 - **Changing settings while reading**: a sheet takes the importer's settings (`SkipBlankLines`, `ValidateDataAnnotations`, `Culture`, ...) when it starts reading, so changing them while its rows are read only affects sheets read afterwards. Before 4.0, a change applied to the following rows.
 - **Constructor exceptions**: an exception thrown by a constructor called during mapping (for records and constructor-only types) is wrapped in an `ExcelMappingException` with the row, with the original as `InnerException`.

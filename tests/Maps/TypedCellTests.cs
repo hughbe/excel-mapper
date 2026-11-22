@@ -100,10 +100,11 @@ public class TypedCellTests
     }
 
     [Fact]
-    public void Map_NumberToString_UsesCurrentCulture()
+    public void Map_NumberToString_UsesInvariantCulture()
     {
         Assert.Equal("42", Map<string>(42));
 
+        // Not the machine's culture.
         var culture = CultureInfo.CurrentCulture;
         try
         {
@@ -111,7 +112,7 @@ public class TypedCellTests
             Assert.Equal("2.5", Map<string>(2.5));
 
             CultureInfo.CurrentCulture = new CultureInfo("de-DE");
-            Assert.Equal("2,5", Map<string>(2.5));
+            Assert.Equal("2.5", Map<string>(2.5));
         }
         finally
         {
@@ -190,7 +191,7 @@ public class TypedCellTests
         Assert.Equal(new DateOnly(2024, 3, 4), Map<DateOnly>(new DateOnly(2024, 3, 4)));
 #endif
         Assert.Equal(date, Map<DateTimeOffset>(date).DateTime);
-        Assert.Equal(date.ToString(), Map<string>(date));
+        Assert.Equal("03/04/2024 00:00:00", Map<string>(date));
     }
 
     [Fact]

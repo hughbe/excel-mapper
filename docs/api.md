@@ -49,7 +49,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 - `RegisterClassMap<TMap>()` / `RegisterClassMap(classMap)` / `RegisterClassMap(type, classMap)` - Use a class map for a type. Replaces a map created earlier by auto-mapping; throws if you already registered one
 - `RegisterClassMap<T>(c => ...)` - Configure a class map for `T` inline. It starts empty: only the members you map are read, unless you call `c.AutoMap()`
 - `TryGetClassMap<T>(out classMap)` / `TryGetClassMap(type, out classMap)` - The class map registered for a type, including one created by auto-mapping
-- `Culture` - The culture to parse text and format values with (default: the current culture)
+- `Culture` - The culture to parse text and format values with (default: `CultureInfo.InvariantCulture`)
 - `SkipBlankLines` - Skip empty rows (default: false)
 - `IgnoreSeparatorsInColumnNames` - Match `FirstName` to "First Name", "first_name" and so on (default: false)
 - `ValidateDataAnnotations` - Validate each row with data annotations such as `[Range]` (default: false)
