@@ -9,67 +9,34 @@ namespace ExcelMapper;
 /// A map that reads multiple cells of an excel sheet and maps the values of the cells to a
 /// multidimensional array property or field by their indices.
 /// </summary>
-internal class MultidimensionalIndexerMap<TValue> : IParentMap
+internal sealed class MultidimensionalIndexerMap<TValue> : IndexerMap<int[]>
 {
     [RequiresDynamicCode("Creates multidimensional arrays of TValue whose rank is only known at run time, which native AOT can't guarantee.")]
     internal MultidimensionalIndexerMap()
+        : base(IndicesComparer.Instance)
     {
     }
 
-    public Dictionary<int[], IMap> Values { get; } = [];
+    private protected override string FormatKey(int[] key) => string.Join(", ", key);
 
-    IEnumerable<KeyValuePair<object?, IMap>> IParentMap.Children
+    // Arrays don't implement equality, so keys are compared by their indices.
+    private sealed class IndicesComparer : IEqualityComparer<int[]>
     {
-        get
+        public static IndicesComparer Instance { get; } = new();
+
+        public bool Equals(int[]? x, int[]? y) => x is not null && y is not null && x.AsSpan().SequenceEqual(y);
+
+        public int GetHashCode(int[] obj)
         {
-            foreach (var value in Values)
+            var hash = 17;
+            foreach (var index in obj)
             {
-                yield return new(value.Key, value.Value);
+                hash = (hash * 31) + index;
             }
+
+            return hash;
         }
     }
-
-    IMap? IParentMap.GetChild(object key) => FindKey((int[])key) is { } existing ? Values[existing] : null;
-
-    void IParentMap.SetChild(object key, IMap map)
-    {
-        ThrowHelpers.ThrowIfFrozen(_frozen);
-        var indices = (int[])key;
-        Values[FindKey(indices) ?? indices] = map;
-    }
-
-    private bool _frozen;
-
-    /// <inheritdoc />
-    void IMap.Freeze()
-    {
-        if (_frozen)
-        {
-            return;
-        }
-
-        _frozen = true;
-        foreach (var map in Values.Values)
-        {
-            map.Freeze();
-        }
-    }
-
-    // Arrays don't implement equality, so the key is found by its indices.
-    private int[]? FindKey(int[] indices)
-    {
-        foreach (var key in Values.Keys)
-        {
-            if (key.SequenceEqual(indices))
-            {
-                return key;
-            }
-        }
-
-        return null;
-    }
-
-    string? IParentMap.GetChildPath(string? path, object? key) => $"{path}[{string.Join(", ", (int[])key!)}]";
 
     private int[] GetLengths()
     {
@@ -91,7 +58,7 @@ internal class MultidimensionalIndexerMap<TValue> : IParentMap
 
     /// <inheritdoc/>
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "The constructor requires dynamic code.")]
-    public bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
+    public override bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
