@@ -10,6 +10,8 @@
       names, unresolved references).
     -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Every warning is an error, so none build up unnoticed. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors>$(WarningsAsErrors);CS0419;CS1570;CS1571;CS1572;CS1573;CS1574;CS1580;CS1581;CS1584;CS1587;CS1589;CS1590;CS1591;CS1592;CS1710;CS1711;CS1712;CS1723;CS1734</WarningsAsErrors>
   </PropertyGroup>
 
@@ -73,6 +75,26 @@
     <!-- Code page encodings are built in on .NET 8. -->
     <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.9" />
   </ItemGroup>
+
+  <!--
+    The public API of each target framework is listed in PublicAPI/<framework>/: changing it without
+    changing the list fails the build, so every change to the public API is deliberate and shows in
+    review. New APIs go in PublicAPI.Unshipped.txt, and move to PublicAPI.Shipped.txt when a version
+    is released. See docs/Architecture.md.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!-- RS0016/RS0017: an API added or removed without updating the list; the others: the lists themselves are malformed or out of date. -->
+    <WarningsAsErrors>$(WarningsAsErrors);RS0016;RS0017;RS0022;RS0024;RS0025;RS0036;RS0037</WarningsAsErrors>
+  </PropertyGroup>
 
   <ItemGroup>
     <None Include="../README.md" Pack="true" PackagePath="\" />

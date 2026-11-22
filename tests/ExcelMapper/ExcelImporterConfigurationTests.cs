@@ -180,6 +180,37 @@ public class ExcelImporterConfigurationTests
         Assert.Throws<ArgumentNullException>("classMap", () => importer.Configuration.RegisterClassMap(null!));
     }
 
+    // Derives from the non-generic ExcelClassMap, so it can't map any members.
+    private class NonGenericClassMap : ExcelClassMap
+    {
+        public NonGenericClassMap() : base(typeof(int))
+        {
+        }
+    }
+
+    [Fact]
+    public void RegisterClassMap_NotExcelClassMapOfT_ThrowsArgumentException()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        Assert.Throws<ArgumentException>("classMap", () => importer.Configuration.RegisterClassMap(new NonGenericClassMap()));
+        Assert.False(importer.Configuration.TryGetClassMap<int>(out _));
+    }
+
+    [Fact]
+    public void RegisterClassMap_DerivedFromExcelClassMapOfT_Success()
+    {
+        // A class map that derives from a class map of T, not ExcelClassMap<T> directly.
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        var map = new DerivedTestMap();
+        importer.Configuration.RegisterClassMap(map);
+        Assert.True(importer.Configuration.TryGetClassMap<int>(out var classMap));
+        Assert.Same(map, classMap);
+    }
+
+    private class DerivedTestMap : TestMap
+    {
+    }
+
     [Fact]
     public void RegisterClassMap_ClassTypeAlreadyRegistered_ThrowsExcelMappingException()
     {

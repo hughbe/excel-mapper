@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelDataReader;
 
@@ -76,7 +77,7 @@ internal sealed class ColumnSettings(Columns columns)
     /// </summary>
     /// <returns>False if the cells are missing and the map is optional.</returns>
     /// <exception cref="ExcelMappingException">The cells are missing and the map isn't optional.</exception>
-    public bool TryStart(ICellsReader? cellsReader, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out int count)
+    public bool TryStart([NotNullWhen(true)] ICellsReader? cellsReader, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out int count)
     {
         if (cellsReader is not null && cellsReader.Start(reader, _preserveFormatting, out count))
         {

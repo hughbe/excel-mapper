@@ -53,9 +53,9 @@
       ExcelImporterConfiguration.
     - From the 4.0 API review: RegisterClassMap(Type, ExcelClassMap) is removed, as it let a map be
       registered for another type (CP0002). ExcelImporter.Reader is internal, as moving the reader
-      the sheets share broke their positions (CP0002). ExcelClassMap's constructors are private
-      protected, as a non-generic class map can't map members, which also makes it sealed outside
-      the library (CP0002, CP0009). The ExcelRange(string) constructor is removed for
+      the sheets share broke their positions (CP0002). ExcelClassMap is abstract, with protected
+      constructors: class maps derive from ExcelClassMap<T>, as a non-generic class map can't map
+      members (CP0019). The ExcelRange(string) constructor is removed for
       ExcelRange.Parse (CP0002). The column attributes' Index, Indices, Name and Names are set
       through their constructors only (CP0002), and attributes are sealed, except
       ExcelColumnIndexAttribute, which ExcelColumnLetterAttribute derives from (CP0009).
@@ -2358,13 +2358,6 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:ExcelMapper.ExcelClassMap.#ctor(System.Type)</Target>
-    <Left>lib/net8.0/ExcelMapper.dll</Left>
-    <Right>lib/net8.0/ExcelMapper.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:ExcelMapper.ExcelClassMap.get_EmptyValueStrategy</Target>
     <Left>lib/net8.0/ExcelMapper.dll</Left>
     <Right>lib/net8.0/ExcelMapper.dll</Right>
@@ -2715,13 +2708,6 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:ExcelMapper.ExcelClassMap.#ctor(System.Type)</Target>
-    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
-    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:ExcelMapper.ExcelClassMap.get_EmptyValueStrategy</Target>
     <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
@@ -3065,13 +3051,6 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:ExcelMapper.ExcelClassMap.#ctor(System.Type)</Target>
-    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
-    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:ExcelMapper.ExcelClassMap.get_EmptyValueStrategy</Target>
     <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
@@ -3492,13 +3471,6 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0009</DiagnosticId>
-    <Target>T:ExcelMapper.ExcelClassMap</Target>
-    <Left>lib/net8.0/ExcelMapper.dll</Left>
-    <Right>lib/net8.0/ExcelMapper.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0009</DiagnosticId>
     <Target>T:ExcelMapper.ExcelColumnIndicesAttribute</Target>
     <Left>lib/net8.0/ExcelMapper.dll</Left>
     <Right>lib/net8.0/ExcelMapper.dll</Right>
@@ -3579,13 +3551,6 @@
     <Target>T:ExcelMapper.ValuePipeline`1</Target>
     <Left>lib/net8.0/ExcelMapper.dll</Left>
     <Right>lib/net8.0/ExcelMapper.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0009</DiagnosticId>
-    <Target>T:ExcelMapper.ExcelClassMap</Target>
-    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
-    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
@@ -3674,13 +3639,6 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0009</DiagnosticId>
-    <Target>T:ExcelMapper.ExcelClassMap</Target>
-    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
-    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0009</DiagnosticId>
     <Target>T:ExcelMapper.ExcelColumnIndicesAttribute</Target>
     <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
@@ -3759,6 +3717,27 @@
   <Suppression>
     <DiagnosticId>CP0009</DiagnosticId>
     <Target>T:ExcelMapper.ValuePipeline`1</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0019</DiagnosticId>
+    <Target>M:ExcelMapper.ExcelClassMap.#ctor(System.Type)</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0019</DiagnosticId>
+    <Target>M:ExcelMapper.ExcelClassMap.#ctor(System.Type)</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0019</DiagnosticId>
+    <Target>M:ExcelMapper.ExcelClassMap.#ctor(System.Type)</Target>
     <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>

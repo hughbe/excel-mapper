@@ -1284,10 +1284,46 @@ public class ExcelImporterTests
     }
 
     [Fact]
+    public void StaticReadRows_PathWithConfiguration_Success()
+    {
+        // An Excel file, configured without giving the file type.
+        var rows = ExcelImporter.ReadRows<string[]>(Helpers.GetResourcePath("Primitives.xlsx"), c => c.SkipBlankLines = true);
+        Assert.NotEmpty(rows);
+    }
+
+    [Fact]
+    public void StaticReadRows_StreamWithConfigurationOnly_ReadsExcel()
+    {
+        using var stream = File.OpenRead(Helpers.GetResourcePath("Primitives.xlsx"));
+        var configured = false;
+        var rows = ExcelImporter.ReadRows<string[]>(stream, c => configured = true);
+        Assert.NotEmpty(rows);
+        Assert.True(configured);
+    }
+
+    [Fact]
+    public void StaticReadRows_PathAndFileTypeWithConfiguration_Success()
+    {
+        var rows = ExcelImporter.ReadRows<string[]>(Helpers.GetResourcePath("Primitives.csv"), ExcelImporterFileType.Csv, c => c.SkipBlankLines = true);
+        Assert.NotEmpty(rows);
+    }
+
+    [Fact]
+    public void StaticReadRows_StreamDefault_ReadsExcel()
+    {
+        using var stream = File.OpenRead(Helpers.GetResourcePath("Primitives.xlsx"));
+        Assert.NotEmpty(ExcelImporter.ReadRows<string[]>(stream));
+    }
+
+    [Fact]
     public void StaticReadRows_NullArguments_Throw()
     {
         Assert.Throws<ArgumentNullException>("path", () => ExcelImporter.ReadRows<StaticReadRowsPerson>((string)null!));
         Assert.Throws<ArgumentNullException>("stream", () => ExcelImporter.ReadRows<StaticReadRowsPerson>((Stream)null!));
+        Assert.Throws<ArgumentNullException>("configure", () => ExcelImporter.ReadRows<StaticReadRowsPerson>(Helpers.GetResourcePath("Primitives.xlsx"), (Action<ExcelImporterConfiguration>)null!));
+        Assert.Throws<ArgumentNullException>("configure", () => ExcelImporter.ReadRows<StaticReadRowsPerson>(Helpers.GetResourcePath("Primitives.csv"), ExcelImporterFileType.Csv, null!));
+        Assert.Throws<ArgumentNullException>("configure", () => ExcelImporter.ReadRows<StaticReadRowsPerson>(new MemoryStream(), (Action<ExcelImporterConfiguration>)null!));
+        Assert.Throws<ArgumentNullException>("configure", () => ExcelImporter.ReadRows<StaticReadRowsPerson>(new MemoryStream(), ExcelImporterFileType.Csv, null!));
     }
 
     public record StaticReadRowsPerson(string Name, int Age);

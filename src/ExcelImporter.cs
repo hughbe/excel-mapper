@@ -158,38 +158,145 @@ public class ExcelImporter : IDisposable
     }
 
     /// <summary>
-    /// Reads every row of the first sheet of an Excel or csv file and maps each row to
-    /// <typeparamref name="T"/>. This is a shortcut for creating an importer, reading the first
-    /// sheet and calling <see cref="ExcelSheet.ReadRows{T}()"/>.
+    /// Reads every row of the first sheet of an Excel or CSV file and maps each row to
+    /// <typeparamref name="T"/>: a shortcut for creating an importer, reading the first sheet and
+    /// calling <see cref="ExcelSheet.ReadRows{T}()"/>.
     /// </summary>
     /// <typeparam name="T">The type of the object to map each row to.</typeparam>
     /// <param name="path">A path to the file to read.</param>
-    /// <param name="fileType">The type of file.</param>
+    /// <returns>The mapped rows.</returns>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public static List<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(string path)
+    {
+        using var importer = new ExcelImporter(path, ExcelImporterFileType.Excel);
+        return ReadRows<T>(importer, null);
+    }
+
+    /// <summary>
+    /// Reads every row of the first sheet of an Excel or CSV file and maps each row to
+    /// <typeparamref name="T"/>: a shortcut for creating an importer, reading the first sheet and
+    /// calling <see cref="ExcelSheet.ReadRows{T}()"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="path">A path to the file to read.</param>
+    /// <param name="fileType">The type of file: <see cref="ExcelImporterFileType.Excel"/> unless given.</param>
+    /// <returns>The mapped rows.</returns>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public static List<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(string path, ExcelImporterFileType fileType)
+    {
+        using var importer = new ExcelImporter(path, fileType);
+        return ReadRows<T>(importer, null);
+    }
+
+    /// <summary>
+    /// Reads every row of the first sheet of an Excel or CSV file and maps each row to
+    /// <typeparamref name="T"/>: a shortcut for creating an importer, reading the first sheet and
+    /// calling <see cref="ExcelSheet.ReadRows{T}()"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="path">A path to the file to read.</param>
     /// <param name="configure">Configures the importer before reading, for example to register a class map.</param>
     /// <returns>The mapped rows.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public static List<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(string path, ExcelImporterFileType fileType = ExcelImporterFileType.Excel, Action<ExcelImporterConfiguration>? configure = null)
+    public static List<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(string path, Action<ExcelImporterConfiguration> configure)
     {
+        ThrowHelpers.ThrowIfNull(configure, nameof(configure));
+        using var importer = new ExcelImporter(path, ExcelImporterFileType.Excel);
+        return ReadRows<T>(importer, configure);
+    }
+
+    /// <summary>
+    /// Reads every row of the first sheet of an Excel or CSV file and maps each row to
+    /// <typeparamref name="T"/>: a shortcut for creating an importer, reading the first sheet and
+    /// calling <see cref="ExcelSheet.ReadRows{T}()"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="path">A path to the file to read.</param>
+    /// <param name="fileType">The type of file: <see cref="ExcelImporterFileType.Excel"/> unless given.</param>
+    /// <param name="configure">Configures the importer before reading, for example to register a class map.</param>
+    /// <returns>The mapped rows.</returns>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public static List<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(string path, ExcelImporterFileType fileType, Action<ExcelImporterConfiguration> configure)
+    {
+        ThrowHelpers.ThrowIfNull(configure, nameof(configure));
         using var importer = new ExcelImporter(path, fileType);
         return ReadRows<T>(importer, configure);
     }
 
     /// <summary>
-    /// Reads every row of the first sheet of an Excel or csv stream and maps each row to
-    /// <typeparamref name="T"/>. This is a shortcut for creating an importer, reading the first
-    /// sheet and calling <see cref="ExcelSheet.ReadRows{T}()"/>. As with disposing an importer
-    /// created from a stream, the stream is closed when reading finishes.
+    /// Reads every row of the first sheet of an Excel or CSV stream and maps each row to
+    /// <typeparamref name="T"/>: a shortcut for creating an importer, reading the first sheet and
+    /// calling <see cref="ExcelSheet.ReadRows{T}()"/>. As when an importer created from a stream
+    /// is disposed, the stream is closed when reading finishes.
     /// </summary>
     /// <typeparam name="T">The type of the object to map each row to.</typeparam>
     /// <param name="stream">A stream containing the file to read.</param>
-    /// <param name="fileType">The type of file.</param>
+    /// <returns>The mapped rows.</returns>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public static List<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Stream stream)
+    {
+        using var importer = new ExcelImporter(stream, ExcelImporterFileType.Excel);
+        return ReadRows<T>(importer, null);
+    }
+
+    /// <summary>
+    /// Reads every row of the first sheet of an Excel or CSV stream and maps each row to
+    /// <typeparamref name="T"/>: a shortcut for creating an importer, reading the first sheet and
+    /// calling <see cref="ExcelSheet.ReadRows{T}()"/>. As when an importer created from a stream
+    /// is disposed, the stream is closed when reading finishes.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="stream">A stream containing the file to read.</param>
+    /// <param name="fileType">The type of file: <see cref="ExcelImporterFileType.Excel"/> unless given.</param>
+    /// <returns>The mapped rows.</returns>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public static List<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Stream stream, ExcelImporterFileType fileType)
+    {
+        using var importer = new ExcelImporter(stream, fileType);
+        return ReadRows<T>(importer, null);
+    }
+
+    /// <summary>
+    /// Reads every row of the first sheet of an Excel or CSV stream and maps each row to
+    /// <typeparamref name="T"/>: a shortcut for creating an importer, reading the first sheet and
+    /// calling <see cref="ExcelSheet.ReadRows{T}()"/>. As when an importer created from a stream
+    /// is disposed, the stream is closed when reading finishes.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="stream">A stream containing the file to read.</param>
     /// <param name="configure">Configures the importer before reading, for example to register a class map.</param>
     /// <returns>The mapped rows.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public static List<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Stream stream, ExcelImporterFileType fileType = ExcelImporterFileType.Excel, Action<ExcelImporterConfiguration>? configure = null)
+    public static List<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Stream stream, Action<ExcelImporterConfiguration> configure)
     {
+        ThrowHelpers.ThrowIfNull(configure, nameof(configure));
+        using var importer = new ExcelImporter(stream, ExcelImporterFileType.Excel);
+        return ReadRows<T>(importer, configure);
+    }
+
+    /// <summary>
+    /// Reads every row of the first sheet of an Excel or CSV stream and maps each row to
+    /// <typeparamref name="T"/>: a shortcut for creating an importer, reading the first sheet and
+    /// calling <see cref="ExcelSheet.ReadRows{T}()"/>. As when an importer created from a stream
+    /// is disposed, the stream is closed when reading finishes.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="stream">A stream containing the file to read.</param>
+    /// <param name="fileType">The type of file: <see cref="ExcelImporterFileType.Excel"/> unless given.</param>
+    /// <param name="configure">Configures the importer before reading, for example to register a class map.</param>
+    /// <returns>The mapped rows.</returns>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public static List<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Stream stream, ExcelImporterFileType fileType, Action<ExcelImporterConfiguration> configure)
+    {
+        ThrowHelpers.ThrowIfNull(configure, nameof(configure));
         using var importer = new ExcelImporter(stream, fileType);
         return ReadRows<T>(importer, configure);
     }
