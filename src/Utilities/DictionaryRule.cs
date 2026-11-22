@@ -116,14 +116,14 @@ internal sealed class DictionaryRule<TKey, TValue> : DictionaryRule where TKey :
     /// </summary>
     public static bool TryCreateDictionaryMap(MemberInfo? member, Type dictionaryType, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out DictionaryMap<TKey, TValue>? map)
     {
-        if (!TryGetFactory(dictionaryType, out var factory))
+        if (!TryGetBuilder(dictionaryType, out var builder))
         {
             map = null;
             return false;
         }
 
         var readerFactory = MemberMapper.GetDefaultCellsReaderFactory(member) ?? s_allColumnNamesReaderFactory;
-        map = new DictionaryMap<TKey, TValue>(readerFactory, factory);
+        map = new DictionaryMap<TKey, TValue>(readerFactory, builder);
         if (!AutoMapper.TrySetupMap<TValue>(member, map, emptyValueStrategy, isAutoMapping))
         {
             map = null;
@@ -141,77 +141,77 @@ internal sealed class DictionaryRule<TKey, TValue> : DictionaryRule where TKey :
                 ?? throw new InvalidOperationException($"Expression is already mapped differently as {existingMap.GetType()}.");
         }
 
-        if (!TryGetFactory(dictionaryType, out var factory))
+        if (!TryGetBuilder(dictionaryType, out var builder))
         {
             throw new ExcelMappingException($"Could not map dictionary of type \"{dictionaryType}\".");
         }
 
-        var map = new DictionaryIndexerMap<TKey, TValue>(factory);
+        var map = new DictionaryIndexerMap<TKey, TValue>(builder);
         AutoMapper.AddExistingMap(parentMap, context, map);
         return map;
     }
 
     /// <summary>
-    /// Finds how to create a dictionary of type <paramref name="dictionaryType"/> and add values
-    /// to it.
+    /// Finds how to build a dictionary of type <paramref name="dictionaryType"/> from its values.
     /// </summary>
-    private static bool TryGetFactory(Type dictionaryType, [NotNullWhen(true)] out IDictionaryFactory<TKey, TValue>? result)
+    internal static bool TryGetBuilder(Type dictionaryType, [NotNullWhen(true)] out DictionaryBuilder<TKey, TValue>? builder)
     {
+        builder = GetBuilder(dictionaryType);
+        return builder is not null;
+    }
+
+    private static DictionaryBuilder<TKey, TValue>? GetBuilder(Type dictionaryType)
+    {
+        if (dictionaryType == typeof(Dictionary<TKey, TValue>))
+        {
+            return DictionaryBuilder<TKey, TValue>.ForDictionary();
+        }
+
+        // Immutable and frozen dictionaries are created from a copy of the values.
         if (dictionaryType == typeof(ImmutableDictionary<TKey, TValue>) || dictionaryType == typeof(IImmutableDictionary<TKey, TValue>))
         {
-            result = new ImmutableDictionaryFactory<TKey, TValue>();
-            return true;
+            return DictionaryBuilder<TKey, TValue>.FromDictionary(static values => ImmutableDictionary.CreateRange(values), copiesValues: true);
         }
-
         if (dictionaryType == typeof(ImmutableSortedDictionary<TKey, TValue>))
         {
-            result = new ImmutableSortedDictionaryFactory<TKey, TValue>();
-            return true;
+            return DictionaryBuilder<TKey, TValue>.FromDictionary(static values => ImmutableSortedDictionary.CreateRange(values), copiesValues: true);
         }
-
         if (dictionaryType == typeof(FrozenDictionary<TKey, TValue>))
         {
-            result = new FrozenDictionaryFactory<TKey, TValue>();
-            return true;
+            return DictionaryBuilder<TKey, TValue>.FromDictionary(static values => values.ToFrozenDictionary(), copiesValues: true);
         }
 
         if (dictionaryType.IsInterface)
         {
-            if (typeof(Dictionary<TKey, TValue>).IsAssignableTo(dictionaryType))
-            {
-                result = new DictionaryFactory<TKey, TValue>();
-                return true;
-            }
+            // Create a dictionary, and assign it to the member.
+            return typeof(Dictionary<TKey, TValue>).IsAssignableTo(dictionaryType) ? DictionaryBuilder<TKey, TValue>.ForDictionary() : null;
         }
-        else if (dictionaryType.GetConstructor([]) is not null)
-        {
-            if (dictionaryType.ImplementsInterface(typeof(IDictionary<TKey, TValue>)))
-            {
-                result = new IDictionaryTImplementingFactory<TKey, TValue>(dictionaryType);
-                return true;
-            }
 
-            if (dictionaryType.ImplementsInterface(typeof(IDictionary)))
+        if (dictionaryType.GetConstructor([]) is not null)
+        {
+            var create = CompiledAccessors.GetParameterlessConstructor(dictionaryType);
+            if (DictionaryBuilder<TKey, TValue>.ForInterfaces(dictionaryType, create) is { } builder)
             {
-                result = new IDictionaryImplementingFactory<TKey, TValue>(dictionaryType);
-                return true;
+                return builder;
             }
 
             // An Add(TKey, TValue) method, such as StringDictionary's.
-            if (dictionaryType.GetMethod("Add", [typeof(TKey), typeof(TValue)]) is not null)
+            if (dictionaryType.GetMethod("Add", [typeof(TKey), typeof(TValue)]) is { } addMethod)
             {
-                result = new AddDictionaryFactory<TKey, TValue>(dictionaryType);
-                return true;
+                return DictionaryBuilder<TKey, TValue>.Direct(create, CompiledAccessors.GetAction<TKey, TValue?>(addMethod));
             }
-        }
-        else if (CollectionUtilities.GetConstructorTaking(dictionaryType, typeof(Dictionary<TKey, TValue>)) is not null)
-        {
-            // A constructor that takes a dictionary, such as ReadOnlyDictionary<TKey, TValue>.
-            result = new ConstructorDictionaryFactory<TKey, TValue>(dictionaryType);
-            return true;
+
+            return null;
         }
 
-        result = default;
-        return false;
+        // A constructor that takes a dictionary, such as ReadOnlyDictionary<TKey, TValue>, which
+        // keeps it.
+        if (CollectionUtilities.GetConstructorTaking(dictionaryType, typeof(Dictionary<TKey, TValue>)) is { } constructor)
+        {
+            var construct = CompiledAccessors.GetConstructor1(constructor);
+            return DictionaryBuilder<TKey, TValue>.FromDictionary(construct, copiesValues: false);
+        }
+
+        return null;
     }
 }

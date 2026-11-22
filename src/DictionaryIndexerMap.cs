@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelDataReader;
+using ExcelMapper.Factories;
 
 namespace ExcelMapper;
 
@@ -10,50 +11,29 @@ namespace ExcelMapper;
 /// </summary>
 internal class DictionaryIndexerMap<TKey, TValue> : IDictionaryIndexerMap where TKey : notnull
 {
-    // Factories build one value at a time, so a map shared between importers (for example
-    // a class map instance registered in several importers used concurrently) must not
-    // build two values at once.
-    private readonly object _buildLock = new();
-
-    internal DictionaryIndexerMap(IDictionaryFactory<TKey, TValue> dictionaryFactory)
+    internal DictionaryIndexerMap(DictionaryBuilder<TKey, TValue> builder)
     {
-        ThrowHelpers.ThrowIfNull(dictionaryFactory, nameof(dictionaryFactory));
-        DictionaryFactory = dictionaryFactory;
+        Builder = builder;
     }
 
-    /// <summary>
-    /// The factory for creating and adding elements to the list.
-    /// </summary>
-    internal IDictionaryFactory<TKey, TValue> DictionaryFactory { get; }
+    internal DictionaryBuilder<TKey, TValue> Builder { get; }
 
-    /// <inheritdoc/>
     public Dictionary<object, IMap> Values { get; } = [];
 
-    /// <inheritdoc/>
     public bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 
-        lock (_buildLock)
+        var items = Builder.Begin(Values.Count);
+        foreach (var map in Values)
         {
-            DictionaryFactory.Begin(Values.Count);
-            try
+            if (map.Value.TryGetValue(sheet, rowIndex, reader, member, out var elementValue))
             {
-                foreach (var map in Values)
-                {
-                    if (map.Value.TryGetValue(sheet, rowIndex, reader, member, out var elementValue))
-                    {
-                        DictionaryFactory.Add((TKey)map.Key, (TValue?)elementValue);
-                    }
-                }
-
-                value = DictionaryFactory.End();
-                return true;
-            }
-            finally
-            {
-                DictionaryFactory.Reset();
+                Builder.Add(items, (TKey)map.Key, (TValue?)elementValue);
             }
         }
+
+        value = Builder.End(items);
+        return true;
     }
 }
