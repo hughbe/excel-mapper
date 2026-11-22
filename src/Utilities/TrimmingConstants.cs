@@ -20,7 +20,7 @@ internal static class TrimmingConstants
         DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields;
 
     /// <summary>
-    /// The members of a collection or dictionary type that the factories use to create it and add items.
+    /// The members of a collection or dictionary type that its builder uses to create it and add items.
     /// </summary>
     public const DynamicallyAccessedMemberTypes CollectionType =
         DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces;

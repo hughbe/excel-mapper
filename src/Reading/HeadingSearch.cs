@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.Reading;
 
 /// <summary>
 /// Finds the heading of a sheet with rows above it, such as a title or notes: see

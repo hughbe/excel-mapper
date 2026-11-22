@@ -1,6 +1,6 @@
 using ExcelDataReader;
 
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.Reading;
 
 /// <summary>
 /// Owns the position of an importer's reader. The reader is forward-only and shared by every

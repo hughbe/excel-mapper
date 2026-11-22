@@ -1,6 +1,6 @@
 using ExcelDataReader;
 
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.Reading;
 
 /// <summary>
 /// A worksheet of an importer's file: what's fixed about it, shared by its <see cref="ExcelSheet"/>

@@ -1,10 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
 using ExcelDataReader;
 
 namespace ExcelMapper.Readers;
 
 /// <summary>
-/// Reads the value of a cell.
+/// Reads the cells of a collection or dictionary from several columns.
 /// </summary>
 internal class ColumnIndicesReader : ICellsReader
 {
@@ -37,7 +36,7 @@ internal class ColumnIndicesReader : ICellsReader
     }
 
     /// <inheritdoc/>
-    public bool TryGetNext([NotNullWhen(true)] out ReadCellResult result)
+    public bool TryGetNext(out ReadCellResult result)
     {
         if (_currentIndex < ColumnIndices.Count - 1)
         {

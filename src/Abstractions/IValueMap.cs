@@ -8,7 +8,10 @@ namespace ExcelMapper.Abstractions;
 /// </summary>
 internal interface IValueMap : IColumnsMap
 {
-    BoundMember Bind(ExcelPropertyMap property, SheetView sheet);
+    /// <summary>
+    /// Binds the map to a member, for reading it from the rows of a sheet.
+    /// </summary>
+    BoundMember Bind(ClassMapMember member);
 
     /// <summary>
     /// Gets a static method <c>(TBoundMember member, TParameter defaultValue) → TParameter</c> that

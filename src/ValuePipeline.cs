@@ -19,7 +19,7 @@ public abstract class ValuePipeline
     /// <summary>
     /// Gets the transformers, which change each cell, in order, before it's converted.
     /// </summary>
-    internal IList<ICellTransformer> Transformers { get; } = new NonNullCollection<ICellTransformer>();
+    internal NonNullCollection<ICellTransformer> Transformers { get; } = [];
 
     /// <summary>
     /// Gets whether the pipeline has been used to read rows, so it can't be changed.
@@ -37,7 +37,7 @@ public abstract class ValuePipeline
     internal virtual void Freeze()
     {
         IsFrozen = true;
-        ((NonNullCollection<ICellTransformer>)Transformers).Freeze();
+        Transformers.Freeze();
         Options.Freeze();
     }
 

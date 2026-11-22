@@ -2,7 +2,7 @@ using System.Reflection;
 using ExcelDataReader;
 using ExcelMapper.Readers;
 
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.Binding;
 
 /// <summary>
 /// A member of a class map bound to a sheet: it reads the member's value from the current row and
@@ -10,8 +10,13 @@ namespace ExcelMapper.Utilities;
 /// <see cref="SheetView.GetBoundMembers(ExcelClassMap)"/>), so they can keep what was resolved for
 /// the sheet, such as the column to read. They're used by one sheet, so they aren't shared between threads.
 /// </summary>
-internal abstract class BoundMember
+internal abstract class BoundMember(ClassMapMember member)
 {
+    /// <summary>
+    /// Gets the class map's member: the property or field, and its map.
+    /// </summary>
+    protected ClassMapMember Member { get; } = member;
+
     /// <summary>
     /// Reads the member's value from the current row and sets it on <paramref name="instance"/>.
     /// </summary>
@@ -22,7 +27,16 @@ internal abstract class BoundMember
     /// <param name="errors">The errors being collected, if any. A member whose value caused an
     /// error isn't set, so that its initial value is kept.</param>
     /// <returns>Whether the member was set.</returns>
-    public abstract bool TryMap(object instance, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors);
+    public virtual bool TryMap(object instance, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
+    {
+        if (!TryGetValue(sheet, rowIndex, reader, errors, out var value))
+        {
+            return false;
+        }
+
+        Member.SetValue(instance, value!);
+        return true;
+    }
 
     /// <summary>
     /// Reads the member's value from the current row, for a constructor argument.
@@ -74,7 +88,7 @@ internal abstract class BoundMember
     /// <summary>
     /// Sets the value read by <see cref="ReadValue"/> on <paramref name="instance"/>.
     /// </summary>
-    public virtual void SetValue(object instance, ExcelPropertyMap property) => property.SetValueFactory(instance, _value!);
+    public virtual void SetValue(object instance) => Member.SetValue(instance, _value!);
 
     /// <summary>
     /// Returns the value read by <see cref="ReadValue"/>, or <paramref name="defaultValue"/>. Called
@@ -82,30 +96,25 @@ internal abstract class BoundMember
     /// </summary>
     public static object? GetValueOrDefault(BoundMember member, object? defaultValue)
         => member.HasValue ? member.Value : defaultValue;
+
+    /// <summary>
+    /// Whether reading a value added no errors to <paramref name="errors"/>: a value that caused
+    /// an error isn't used.
+    /// </summary>
+    private protected static bool AddedNoErrors(List<ExcelMappingException>? errors, int errorCount)
+        => errors is null || errors.Count == errorCount;
 }
 
 /// <summary>
 /// Any map bound to a member, mapped through <see cref="IMap.TryGetValue"/>: for example nested
 /// class maps, indexer maps, row numbers and custom maps.
 /// </summary>
-internal sealed class BoundMapMember(ExcelPropertyMap property) : BoundMember
+internal sealed class BoundMapMember(ClassMapMember member) : BoundMember(member)
 {
-    public override bool TryMap(object instance, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
-    {
-        if (!TryGetValue(sheet, rowIndex, reader, errors, out var value))
-        {
-            return false;
-        }
-
-        property.SetValueFactory(instance, value!);
-        return true;
-    }
-
     public override bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out object? value)
     {
         var errorCount = errors?.Count ?? 0;
-        if (property.Map.TryGetValue(sheet, rowIndex, reader, property.Member, errors, out value) &&
-            (errors is null || errors.Count == errorCount))
+        if (Member.Map.TryGetValue(sheet, rowIndex, reader, Member.Member, errors, out value) && AddedNoErrors(errors, errorCount))
         {
             return true;
         }
@@ -118,21 +127,10 @@ internal sealed class BoundMapMember(ExcelPropertyMap property) : BoundMember
 /// <summary>
 /// An <see cref="ICellsMap"/> bound to a member.
 /// </summary>
-internal sealed class BoundCellsMember(ICellsMap map, ExcelPropertyMap property) : BoundMember
+internal sealed class BoundCellsMember(ICellsMap map, ClassMapMember member) : BoundMember(member)
 {
     private ICellsReader? _cellsReader;
     private bool _resolved;
-
-    public override bool TryMap(object instance, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
-    {
-        if (!TryGetValue(sheet, rowIndex, reader, errors, out var value))
-        {
-            return false;
-        }
-
-        property.SetValueFactory(instance, value!);
-        return true;
-    }
 
     public override bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out object? value)
     {
@@ -145,8 +143,7 @@ internal sealed class BoundCellsMember(ICellsMap map, ExcelPropertyMap property)
         }
 
         var errorCount = errors?.Count ?? 0;
-        if (map.TryGetValue(_cellsReader, sheet, rowIndex, reader, property.Member, errors, out value) &&
-            (errors is null || errors.Count == errorCount))
+        if (map.TryGetValue(_cellsReader, sheet, rowIndex, reader, Member.Member, errors, out value) && AddedNoErrors(errors, errorCount))
         {
             return true;
         }
@@ -160,10 +157,8 @@ internal sealed class BoundCellsMember(ICellsMap map, ExcelPropertyMap property)
 /// A <see cref="ValueMap{T}"/> bound to a member: the value stays a <typeparamref name="T"/>
 /// from the map to the member's setter.
 /// </summary>
-internal sealed class BoundValueMember<T> : BoundMember
+internal sealed class BoundValueMember<T>(ValueMap<T> map, ClassMapMember member) : BoundMember(member)
 {
-    private readonly ValueMap<T> _map;
-    private readonly MemberInfo _member;
     // Created on first use: members passed to a constructor (such as get-only properties) are
     // never set.
     private Action<object, T>? _setter;
@@ -172,12 +167,6 @@ internal sealed class BoundValueMember<T> : BoundMember
     // error handling, as for unbound maps).
     private int _columnIndex = -1;
     private bool _resolved;
-
-    public BoundValueMember(ValueMap<T> map, ExcelPropertyMap property, SheetView sheet)
-    {
-        _map = map;
-        _member = property.Member;
-    }
 
     // The value read by TryReadValue, kept typed.
     private T _value = default!;
@@ -189,7 +178,7 @@ internal sealed class BoundValueMember<T> : BoundMember
             return false;
         }
 
-        (_setter ??= CompiledAccessors.GetSetter<T>(_member))(instance, value);
+        (_setter ??= CompiledAccessors.GetSetter<T>(Member.Member))(instance, value);
         return true;
     }
 
@@ -197,13 +186,12 @@ internal sealed class BoundValueMember<T> : BoundMember
     {
         if (!_resolved)
         {
-            _columnIndex = _map.FindColumn(sheet);
+            _columnIndex = map.FindColumn(sheet);
             _resolved = true;
         }
 
         var errorCount = errors?.Count ?? 0;
-        var found = _map.TryGetValue(_columnIndex, sheet, rowIndex, reader, _member, errors, out value);
-        return found && (errors is null || errors.Count == errorCount);
+        return map.TryGetValue(_columnIndex, sheet, rowIndex, reader, Member.Member, errors, out value) && AddedNoErrors(errors, errorCount);
     }
 
     public override bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out object? value)
@@ -218,8 +206,8 @@ internal sealed class BoundValueMember<T> : BoundMember
 
     public override object? Value => _value;
 
-    public override void SetValue(object instance, ExcelPropertyMap property)
-        => (_setter ??= CompiledAccessors.GetSetter<T>(_member))(instance, _value);
+    public override void SetValue(object instance)
+        => (_setter ??= CompiledAccessors.GetSetter<T>(Member.Member))(instance, _value);
 
     /// <summary>
     /// Returns the value read by <see cref="BoundMember.ReadValue"/>, or <paramref name="defaultValue"/>,

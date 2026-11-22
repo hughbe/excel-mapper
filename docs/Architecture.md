@@ -19,7 +19,7 @@ ExcelMapper reads spreadsheets with [ExcelDataReader](https://github.com/ExcelDa
                            RowSource: the reader's position
 ```
 
-The public API is the importer, sheets and regions, class maps and the fluent methods on their maps, attributes, and four extension points (`ICellConverter<T>`, `ICellTransformer`, `ICellFallback<T>` and `IColumnSelector`). Everything else, including `IMap` (the interface every map implements), `ExcelPropertyMap` (a class map's member and its map), `AutoMapper`, the readers, mappers, fallbacks, collection factories and bindings, is internal, so it can change without breaking users.
+The public API is the importer, sheets and regions, class maps and the fluent methods on their maps, attributes, and four extension points (`ICellConverter<T>`, `ICellTransformer`, `ICellFallback<T>` and `IColumnSelector`). Everything else, including `IMap` (the interface every map implements), `ClassMapMember` (a class map's member and its map), `AutoMapper`, the readers, mappers, fallbacks, collection builders and bindings, is internal, so it can change without breaking users.
 
 ## Reading sheets
 
@@ -36,7 +36,7 @@ A sheet takes the settings when it starts reading (`ReadSettings`), so changing 
 
 ## Class maps
 
-An `ExcelClassMap<T>` lists the members of `T` to map (its internal `Properties`, each an `ExcelPropertyMap` of a member and its map). Class maps are created in one of two ways:
+An `ExcelClassMap<T>` lists the members of `T` to map (its internal `Members`, each a `ClassMapMember`: the property or field, the map that reads it, and its setter). Class maps are created in one of two ways:
 
 - **Explicitly**, by deriving from `ExcelClassMap<T>` (or passing a callback to `RegisterClassMap<T>`) and calling `Map(...)`. `ExpressionAutoMapper` (internal) walks the expression: a member (`p => p.Name`), a chain of members (`p => p.Address.City`, which creates nested class maps), or an indexer with a constant argument (`p => p.Values[0]`, `p => p.Scores["Maths"]`, `p => p.Grid[0, 1]`).
 - **Automatically**, the first time a type without a registered map is read. `AutoMapper` finds the public properties and fields, and `MemberMapper` applies the member's attributes (`[ExcelColumnName]`, `[ExcelConverter]`, `[ExcelOptional]`, ...). Explicit maps use the same code to set a member up before the fluent methods change it.
@@ -50,7 +50,7 @@ Each member's map is one of:
 | `ValueMap<T>` | Single values: numbers, strings, dates, enums, `object`, and any type with a converter | One cell |
 | `CollectionMap<TElement>` | Arrays, lists, sets and other collections | Several columns, or one cell split by separators |
 | `DictionaryMap<TKey, TValue>` | Dictionaries, `ExpandoObject` and extra columns (`MapExtraColumns`) | Several columns, keyed by column name |
-| `CollectionIndexerMap<T>`, `DictionaryIndexerMap<TKey, TValue>`, `MultidimensionalIndexerMap<T>` (internal) | Elements mapped one by one: `Map(p => p.Values[0])` | One map per element |
+| `CollectionIndexerMap<T>`, `DictionaryIndexerMap<TKey, TValue>`, `MultidimensionalIndexerMap<T>` (internal, all `IndexerMap<TKey>`) | Elements mapped one by one: `Map(p => p.Values[0])` | One map per element |
 | `ExcelClassMap<T>` | Nested objects (`Map(p => p.Address)` or auto-mapping) | The nested type's own members |
 | `RowNumberMap` | `[ExcelRowNumber]` and `MapRowNumber` | The row's number |
 
@@ -66,9 +66,7 @@ The columns are found once per sheet (`SheetView.FindColumn`, cached by `SheetBi
 
 ## Binding
 
-The first time a class map is used with a sheet, `SheetView.GetBoundMembers` (through its `SheetBindings`) binds each member to the sheet:
-
-Which binding a member gets depends on its map's internal interface: `IColumnsMap` for maps that read their own `Columns`, `IValueMap` (single values) and `ICellsMap` (collections and dictionaries), which both extend it.
+The first time a class map is used with a sheet, `SheetView.GetBoundMembers` (through its `SheetBindings`) binds each member to the sheet as a `BoundMember`, which keeps what's been worked out for that sheet. The kind of bound member depends on the map's internal interface: maps that read their own `Columns` are `IColumnsMap`s, either `IValueMap` (single values) or `ICellsMap` (collections and dictionaries).
 
 - `BoundValueMember<T>` (single values): keeps the member's column and a compiled `Action<object, T>` setter, so values stay typed from the pipeline to the member, without boxing.
 - `BoundCellsMember` (collections and dictionaries): keeps the cells reader. The collection is built by the map's `CollectionBuilder<T>` or `DictionaryBuilder<TKey, TValue>`, chosen once for the member's type by its `CollectionRule`/`DictionaryRule`. Builders hold no state (the collection being built is a local), so one builder serves every sheet and thread without a lock. Collections created from a copy of their elements, such as immutable and frozen ones, gather them in a list each thread reuses.
@@ -93,7 +91,7 @@ A `ValuePipeline<T>` turns a cell into a `T`. The stages, in order:
 
 1. **Transformers** change the cell's value, for example to trim it (`WithTrim`, `WithTransformers`, `[ExcelTransformer]`).
 2. **Empty cells** use the empty fallback: by default `null` for reference and nullable types, and an error for other value types (`WithEmptyFallback`, `[ExcelDefaultValue]`, `[ExcelEmptyFallback]`).
-3. **Converters** are tried in order. Each one converts the value, says it's invalid, or doesn't handle it, so the next one tries. By default this is the built-in conversion for the member's type; `WithConverter` replaces it, `WithMapping` adds a mapping dictionary, and `WithFormats` and the other format methods configure it.
+3. **Mappers** are tried in order. Each one converts the value, says it's invalid, or doesn't handle it, so the next one tries. By default this is the built-in conversion for the member's type; `WithConverter` replaces it, `WithMapping` adds a mapping dictionary, and `WithFormats` and the other format methods configure it.
 4. **Invalid values** use the invalid fallback: by default an `ExcelMappingException` for the cell (`WithInvalidFallback`, `[ExcelInvalidValue]`, `[ExcelInvalidFallback]`).
 
 Every stage is typed, so values are converted as `T` from the cell to the member, without boxing:
@@ -104,9 +102,9 @@ Every stage is typed, so values are converted as `T` from the cell to the member
 - **Fallbacks** are `ICellFallback<T>`: the public interface, `FixedValueFallback<T>` for fixed values and `ThrowFallback<T>` for errors (which records the error instead of throwing while `ReadRowResults` collects errors).
 - **Transformers** are `ICellTransformer`, the public interface, including the built-in `TrimStringCellTransformer`.
 
-The pipeline creates one `CellContext` for each cell and gives it to every transformer, mapper and fallback.
+The pipeline creates one `CellContext` for each cell and gives it to every transformer, mapper and fallback. When a pipeline is frozen, it takes a snapshot of its stages as arrays (its plan), so mapping a cell doesn't enumerate lists through interfaces.
 
-`NullableCellConverter<T>` and `NullableCellFallback<T>` let a converter or fallback for `T` serve a `T?` member. For one given by an attribute, `TypeRule<T>.NullableAdapter` (an `UnderlyingTypeAdapter<T>`, made once per nullable type) wraps it, so a member's attributes are applied without reflection. The objects attributes give the type of are created by `MemberAttributes.CreateInstance`, which reports a type that can't be created with an `ExcelMappingException` naming the attribute and member. When a pipeline is frozen, it takes a snapshot of its stages as arrays, so mapping a cell doesn't enumerate lists through interfaces.
+`NullableCellConverter<T>` and `NullableCellFallback<T>` let a converter or fallback for `T` serve a `T?` member. For one given by an attribute, `TypeRule<T>.NullableAdapter` (an `UnderlyingTypeAdapter<T>`, made once per nullable type) wraps it, so a member's attributes are applied without reflection. The objects attributes give the type of are created by `MemberAttributes.CreateInstance`, which reports a type that can't be created with an `ExcelMappingException` naming the attribute and member.
 
 | Member type | Built-in mapper (in `src/Mappers`) |
 |---|---|
@@ -134,12 +132,15 @@ The net8.0 build is annotated for trimming: the mapped type `T` and the types gi
 
 | Path | Contents |
 |---|---|
-| `src/*.cs` | The public types (importer, sheets, regions, class maps and maps, attributes, extension points, `ValuePipeline<T>`, `ValuePipeline<T, TSelf>`, `ElementMap<T>` and the type-specific value methods in `ValuePipelineExtensions`), and the internal `IMap`, `ExcelPropertyMap` and indexer maps |
-| `src/Readers` | `Columns` and its kinds, splitting cells, and the readers of several cells (internal) |
-| `src/Mappers`, `src/Transformers`, `src/Fallbacks` | Built-in conversion, transformers and fallbacks, and the adapters for the public extension points (internal) |
-| `src/Factories` | `CollectionBuilder<T>` and `DictionaryBuilder<TKey, TValue>`: how each collection and dictionary type is built (internal) |
-| `src/Abstractions` | The interfaces of the internal types, including `IParentMap` |
-| `src/Utilities` | Auto-mapping (`AutoMapper`, `TypeRule`, `CollectionRule`, `DictionaryRule`, `MemberMapper`, `ExpressionAutoMapper`), binding (`BoundMember`, `SheetBindings`), reading (`SheetView`, `RowSource`, `Worksheet`, `RowCursor`, `HeadingSearch`), `CompiledAccessors`, constructor matching and parsing helpers |
+| `src/*.cs` | The public types (importer, sheets, regions, class maps and maps, attributes, extension points, `ValuePipeline<T>`, `ValuePipeline<T, TSelf>`, `ElementMap<T>` and the type-specific value methods in `ValuePipelineExtensions`), and the internal `ClassMapMember` and indexer maps (`IndexerMap<TKey>` and its kinds) |
+| `src/Abstractions` | The internal map interfaces (`IMap`, `IParentMap`, `IColumnsMap`, `IValueMap`, `ICellsMap`), `ICellMapper<T>`, and `ReadCellResult`, the cell a mapper converts |
+| `src/Reading` | Reading sheets: `SheetView`, `Worksheet`, `RowSource`, `RowCursor`, `HeadingSearch` and `ReadSettings` |
+| `src/AutoMapping` | Creating maps: `AutoMapper`, `ExpressionAutoMapper`, the rules (`TypeRule`, `CollectionRule`, `DictionaryRule`), `MemberMapper` and `MemberAttributes` (a member's attributes) and `UnderlyingTypeAdapter` |
+| `src/Binding` | Binding class maps to sheets: `SheetBindings`, `BoundMember` and its kinds, `CompiledAccessors` (compiled setters and constructors) and `ConstructorUtilities` (matching constructors to members) |
+| `src/Readers` | `Columns` and its kinds, splitting cells (`CellSplitter`), and the readers of several cells (`ICellsReader`, `ColumnIndicesReader`, `SplitCellsReader`) |
+| `src/Mappers`, `src/Transformers`, `src/Fallbacks` | Built-in conversion, transformers and fallbacks, and the adapters for the public extension points |
+| `src/Builders` | `CollectionBuilder<T>` and `DictionaryBuilder<TKey, TValue>`: how each collection and dictionary type is built |
+| `src/Utilities` | Helpers used across the library: walking and checking map trees (`MapTree`, `MapValidation`), `ConversionOptions`, `NonNullCollection<T>`, argument checks (`ThrowHelpers`), and column, format, date, enum and reflection helpers |
 | `tests/ExcelMapper` | Unit tests of public types, one file per type, mirroring `src/` |
 | `tests/Maps`, `tests/Fallbacks`, `tests/Transformers` | Mapping tests, which read spreadsheets and cover the internal types through the public API |
 | `tests/TrimmingTests` | A trimmed app that checks mapping works after trimming |

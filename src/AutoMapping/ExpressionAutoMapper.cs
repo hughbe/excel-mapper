@@ -4,7 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using ExcelMapper.Readers;
 
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.AutoMapping;
 
 [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
 [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]

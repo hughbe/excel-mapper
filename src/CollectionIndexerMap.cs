@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
-using ExcelMapper.Factories;
+using ExcelMapper.Builders;
 
 namespace ExcelMapper;
 
@@ -10,54 +10,12 @@ namespace ExcelMapper;
 /// A map that reads multiple cells of an excel sheet and maps the values of the cells to a
 /// list property or field by their indices.
 /// </summary>
-internal class CollectionIndexerMap<TValue> : IParentMap
+internal sealed class CollectionIndexerMap<TValue>(CollectionBuilder<TValue> builder) : IndexerMap<int>
 {
-    internal CollectionIndexerMap(CollectionBuilder<TValue> builder)
-    {
-        Builder = builder;
-    }
 
-    internal CollectionBuilder<TValue> Builder { get; }
+    internal CollectionBuilder<TValue> Builder { get; } = builder;
 
-    public Dictionary<int, IMap> Values { get; } = [];
-
-    IEnumerable<KeyValuePair<object?, IMap>> IParentMap.Children
-    {
-        get
-        {
-            foreach (var value in Values)
-            {
-                yield return new(value.Key, value.Value);
-            }
-        }
-    }
-
-    IMap? IParentMap.GetChild(object key) => Values.TryGetValue((int)key, out var map) ? map : null;
-
-    void IParentMap.SetChild(object key, IMap map)
-    {
-        ThrowHelpers.ThrowIfFrozen(_frozen);
-        Values[(int)key] = map;
-    }
-
-    private bool _frozen;
-
-    /// <inheritdoc />
-    void IMap.Freeze()
-    {
-        if (_frozen)
-        {
-            return;
-        }
-
-        _frozen = true;
-        foreach (var map in Values.Values)
-        {
-            map.Freeze();
-        }
-    }
-
-    string? IParentMap.GetChildPath(string? path, object? key) => $"{path}[{key}]";
+    private protected override string FormatKey(int key) => key.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
     private int GetLength()
     {
@@ -71,7 +29,7 @@ internal class CollectionIndexerMap<TValue> : IParentMap
         return length;
     }
 
-    public bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
+    public override bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 

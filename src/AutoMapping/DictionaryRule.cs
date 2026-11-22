@@ -3,10 +3,10 @@ using System.Collections.Frozen;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using ExcelMapper.Factories;
+using ExcelMapper.Builders;
 using ExcelMapper.Readers;
 
-namespace ExcelMapper.Utilities;
+namespace ExcelMapper.AutoMapping;
 
 /// <summary>
 /// The rule for a type with keys and values (a dictionary, or a collection of key-value pairs):

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using ExcelDataReader;
 using ExcelMapper.Readers;
-using ExcelMapper.Factories;
+using ExcelMapper.Builders;
 
 namespace ExcelMapper;
 

@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelDataReader;
 
-namespace ExcelMapper;
+namespace ExcelMapper.Abstractions;
 
 /// <summary>
 /// Represents a mapping strategy that reads one or more cells from an Excel sheet and converts them to an object.

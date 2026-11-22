@@ -2,6 +2,15 @@ namespace ExcelMapper.Mappers;
 
 internal sealed class GuidMapper : ICellMapper<Guid>, ICellMapper<Guid?>
 {
+    /// <summary>
+    /// The mapper, shared by every member: it holds no state.
+    /// </summary>
+    public static GuidMapper Instance { get; } = new();
+
+    private GuidMapper()
+    {
+    }
+
     CellConversion ICellMapper<Guid>.Convert(ReadCellResult cell, in CellContext context, out Guid value, ref object? error)
         => Guid.TryParse(cell.GetString(), out value) ? CellConversion.Success : CellConversion.Invalid;
 
