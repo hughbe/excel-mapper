@@ -55,25 +55,51 @@ public class CultureTests
     }
 
     [Fact]
-    public void ReadRows_CultureSet_RestoresCultureBetweenRowsAndAfterErrors()
+    public void ReadRows_CultureSet_LeavesTheThreadsCulture()
     {
-        using var importer = Helpers.GetCsvImporter("Amount\n1\nbad\n");
+        // The importer's culture is given to each cell, not set as the thread's culture: code
+        // that runs while a row is mapped, such as a converter, sees the caller's culture, and
+        // gets the importer's from its context.
+        using var importer = Helpers.GetCsvImporter("Amount,Label\n1,a\nbad,b\n");
         importer.Configuration.Culture = s_german;
-        importer.Configuration.RegisterClassMap<Row>(c => c.Map(p => p.Amount));
+        var cultures = new List<(CultureInfo Thread, IFormatProvider Context)>();
+        importer.Configuration.RegisterClassMap<LabelledRow>(c =>
+        {
+            c.Map(p => p.Amount);
+            c.Map(p => p.Label).WithConverter(new RecordingConverter(cultures));
+        });
 
         WithCulture(CultureInfo.InvariantCulture, () =>
         {
             var sheet = importer.ReadSheet();
-            foreach (var row in sheet.ReadRows<Row>().Take(1))
+            foreach (var row in sheet.ReadRows<LabelledRow>().Take(1))
             {
-                // The caller's code between rows runs in the caller's culture.
                 Assert.Same(CultureInfo.InvariantCulture, CultureInfo.CurrentCulture);
             }
 
-            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<Row>());
+            Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<LabelledRow>());
             Assert.Same(CultureInfo.InvariantCulture, CultureInfo.CurrentCulture);
             return 0;
         });
+
+        var (thread, context) = Assert.Single(cultures);
+        Assert.Same(CultureInfo.InvariantCulture, thread);
+        Assert.Same(s_german, context);
+    }
+
+    public class LabelledRow
+    {
+        public double Amount { get; set; }
+        public string Label { get; set; } = default!;
+    }
+
+    private sealed class RecordingConverter(List<(CultureInfo Thread, IFormatProvider Context)> cultures) : ICellConverter<string>
+    {
+        public CellConversionResult<string> Convert(CellValue value, CellContext context)
+        {
+            cultures.Add((CultureInfo.CurrentCulture, context.FormatProvider));
+            return CellConversionResult<string>.Success(value.Text!);
+        }
     }
 
 #if LIBRARY_NET8

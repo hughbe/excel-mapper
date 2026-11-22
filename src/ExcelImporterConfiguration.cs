@@ -65,7 +65,9 @@ public class ExcelImporterConfiguration
     /// and to convert numbers and dates to text. When null (the default), the current culture of
     /// the thread reading the rows is used. Set this (for example to
     /// <see cref="CultureInfo.InvariantCulture"/>) so results don't depend on the machine's
-    /// settings. A format provider set on an individual member takes precedence.
+    /// settings. A format provider set on an individual member takes precedence. The culture is
+    /// given to the built-in conversions, not set as the thread's culture: converters get it from
+    /// <see cref="CellContext.FormatProvider"/>.
     /// </summary>
     public CultureInfo? Culture { get; set; }
 
@@ -128,44 +130,14 @@ public class ExcelImporterConfiguration
         RegisterClassMap(classMap.Type, classMap);
     }
 
-    private void ValidateMap(IMap map)
-    {
-        if (map is ExcelClassMap excelClassMap)
+    private static void ValidateMap(IMap map)
+        => MapTree.VisitCellMaps(map, null, (cellMap, _) =>
         {
-            foreach (var propertyMap in excelClassMap.Properties)
-            {
-                ValidateMap(propertyMap.Map);
-            }
-        }
-        else if (map is IEnumerableIndexerMap enumerableIndexerMap)
-        {
-            foreach (var itemMap in enumerableIndexerMap.Values)
-            {
-                ValidateMap(itemMap.Value);
-            }
-        }
-        else if (map is IMultidimensionalIndexerMap multidimensionalIndexerMap)
-        {
-            foreach (var itemMap in multidimensionalIndexerMap.Values)
-            {
-                ValidateMap(itemMap.Value);
-            }
-        }
-        else if (map is IDictionaryIndexerMap dictionaryIndexerMap)
-        {
-            foreach (var itemMap in dictionaryIndexerMap.Values)
-            {
-                ValidateMap(itemMap.Value);
-            }
-        }
-        else if (map is ValuePipeline pipeline)
-        {
-            if (pipeline.MapperCount == 0)
+            if (cellMap is ValuePipeline { MapperCount: 0 })
             {
                 throw new ExcelMappingException("Cannot register a class map with a property that has no Mappers defined.");
             }
-        }
-    }
+        });
 
     /// <summary>
     /// Registers the given class map to be used when mapping a row to an object.

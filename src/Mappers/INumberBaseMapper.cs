@@ -83,7 +83,7 @@ internal class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessed
         var style = Style;
         try
         {
-            return T.TryParse(GetNumberSpan(stringValue, style), style, Provider, out value!) ? CellConversion.Success : CellConversion.Invalid;
+            return T.TryParse(GetNumberSpan(stringValue, style), style, Provider ?? cell.Culture, out value!) ? CellConversion.Success : CellConversion.Invalid;
         }
         catch
         {
@@ -105,7 +105,7 @@ internal class INumberBaseMapper<[DynamicallyAccessedMembers(DynamicallyAccessed
 
         var stringValue = cell.GetString();
         var style = Style;
-        var provider = Provider;
+        var provider = Provider ?? cell.Culture;
         try
         {
             // TryParse throws for invalid styles.

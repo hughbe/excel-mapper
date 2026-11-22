@@ -58,7 +58,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - `ExcelSheet.ValidateHeading<T>()` and `TryValidateHeading<T>()` report every missing column before reading rows. ([#128](https://github.com/hughbe/excel-mapper/pull/128))
 - `ExcelImporter.ReadRows<T>(path or stream)` reads the first sheet in one call. ([#129](https://github.com/hughbe/excel-mapper/pull/129))
 - `[ExcelColumnLetter("C")]` and `.WithColumnLetter("C")` map columns by Excel letter. ([#129](https://github.com/hughbe/excel-mapper/pull/129))
-- `ExcelImporterConfiguration.Culture` sets the culture used for parsing and converting values to text. ([#127](https://github.com/hughbe/excel-mapper/pull/127))
+- `ExcelImporterConfiguration.Culture` sets the culture used for parsing and converting values to text. It's given to the built-in conversions rather than set as the thread's culture, so converters and fallbacks run in the caller's culture and get the importer's from `CellContext.FormatProvider`. ([#127](https://github.com/hughbe/excel-mapper/pull/127), [#179](https://github.com/hughbe/excel-mapper/pull/179))
 - `ExcelImporterConfiguration.IgnoreSeparatorsInColumnNames` matches `FirstName` to columns such as "First Name"; errors for a missing column suggest a similarly named one. ([#122](https://github.com/hughbe/excel-mapper/pull/122))
 - `ExcelImporter` constructors that take an `ExcelReaderConfiguration` (passwords, CSV separators, fallback encodings). ([#122](https://github.com/hughbe/excel-mapper/pull/122))
 - `[ExcelOffset("+00:00")]` and `.WithOffset(TimeSpan)` choose the offset of `DateTimeOffset` members. ([#131](https://github.com/hughbe/excel-mapper/pull/131))
@@ -84,6 +84,8 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - The documentation moved from the README into [`docs/`](docs). ([#132](https://github.com/hughbe/excel-mapper/pull/132))
 
 ### Fixed
+
+- Mapping a nested object inside a dictionary with keys that aren't strings, such as `Map(p => p.ById[5].Street)` for a `Dictionary<int, Address>`, threw `InvalidCastException`. ([#180](https://github.com/hughbe/excel-mapper/pull/180))
 
 - Extra columns on a nested object (`MapExtraColumns(p => p.Details.Extra)`, or `[ExcelExtraColumns]` on a member of a nested type) included the columns read by members outside the nested object, such as the parent's. They now leave out every column read by the type being read, at any depth. ([#166](https://github.com/hughbe/excel-mapper/pull/166))
 - `Queue<T>`, `Stack<T>`, `ConcurrentQueue<T>`, `ConcurrentStack<T>`, `ConcurrentBag<T>` and other collections created by passing their items to a constructor that takes `IEnumerable<T>` no longer lose duplicate values: they were built through a `HashSet<T>`, because looking for a constructor taking `ISet<T>` also matched constructors taking `IEnumerable<T>`. Collections whose constructor takes `ICollection<T>` or `IReadOnlyList<T>` are now supported too. These collections also map 9% faster with less allocated, as the list holding the items is reused for each row. ([#161](https://github.com/hughbe/excel-mapper/pull/161))

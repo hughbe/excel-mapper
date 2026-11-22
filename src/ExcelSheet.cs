@@ -452,30 +452,9 @@ public class ExcelSheet
     {
         var classMap = GetOrCreateClassMap<T>();
 
-        // Map using the configured culture, if any. Mappers without their own format provider use the
-        // current culture, so set it for the duration of this row only, not while the caller's code
-        // runs between rows. Only switch if it differs, as setting the culture has a small cost.
-        var culture = Settings.Culture;
-        var previousCulture = CultureInfo.CurrentCulture;
-        var switchCulture = culture is not null && !ReferenceEquals(culture, previousCulture);
-        bool result;
-        object? valueObject;
-        if (switchCulture)
-        {
-            CultureInfo.CurrentCulture = culture!;
-            try
-            {
-                result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out valueObject);
-            }
-            finally
-            {
-                CultureInfo.CurrentCulture = previousCulture;
-            }
-        }
-        else
-        {
-            result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out valueObject);
-        }
+        // The importer's culture, if set, is given to each cell (see ValuePipeline<T>.Map), not set
+        // as the thread's culture.
+        var result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, out var valueObject);
 
         // If we've been asked to validate with data annotations, do so now.
         if (Settings.ValidateDataAnnotations && result && valueObject is not null)

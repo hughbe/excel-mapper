@@ -54,6 +54,8 @@ Each member's map is one of:
 | `ExcelClassMap<T>` | Nested objects (`Map(p => p.Address)` or auto-mapping) | The nested type's own members |
 | `RowNumberMap` | `[ExcelRowNumber]` and `MapRowNumber` | The row's number |
 
+Class maps and the indexer maps are made of other maps (`IParentMap`: their children, each with a member, index or key). `MapTree` walks the tree, so code that needs every map that reads cells, such as `ValidateHeading`, `FindHeading`, extra columns and checking a class map when it's registered, doesn't switch over the kinds of map itself.
+
 A single-value map is itself a `ValuePipeline<T>` (see [The value pipeline](#the-value-pipeline)). The collection and dictionary maps hold an `ElementMap<T>`, another pipeline, for their elements or values (`WithElementMap`, `WithValueMap`). Both derive from `ValuePipeline<T, TSelf>`, whose value methods return `TSelf`, so a chain of value methods keeps the map's type: `Map(p => p.Name).WithTrim().MakeOptional()`.
 
 ### Choosing columns
@@ -129,7 +131,7 @@ The net8.0 build is annotated for trimming: the mapped type `T` and the types gi
 | `src/Readers` | `Columns` and its kinds, splitting cells, and the readers of several cells (internal) |
 | `src/Mappers`, `src/Transformers`, `src/Fallbacks` | Built-in conversion, transformers and fallbacks, and the adapters for the public extension points (internal) |
 | `src/Factories` | `CollectionBuilder<T>` and `DictionaryBuilder<TKey, TValue>`: how each collection and dictionary type is built (internal) |
-| `src/Abstractions` | The interfaces of the internal types, and the indexer map interfaces |
+| `src/Abstractions` | The interfaces of the internal types, including `IParentMap` |
 | `src/Utilities` | Auto-mapping (`AutoMapper`, `TypeRule`, `CollectionRule`, `DictionaryRule`, `MemberMapper`, `ExpressionAutoMapper`), binding (`BoundMember`, `SheetBindings`), reading (`RowSource`, `Worksheet`, `RowCursor`, `HeadingSearch`), `CompiledAccessors`, constructor matching and parsing helpers |
 | `tests/ExcelMapper` | Unit tests of public types, one file per type, mirroring `src/` |
 | `tests/Maps`, `tests/Fallbacks`, `tests/Transformers` | Mapping tests, which read spreadsheets and cover the internal types through the public API |
