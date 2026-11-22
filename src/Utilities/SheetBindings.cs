@@ -7,7 +7,7 @@ namespace ExcelMapper.Utilities;
 /// every row: the columns members read, the readers of collections' cells, and class maps
 /// bound to it.
 /// </summary>
-internal sealed class SheetBindings(ExcelSheet sheet)
+internal sealed class SheetBindings(SheetView sheet)
 {
     // Keyed by the columns instance (the kinds of columns don't override Equals): a map whose
     // columns are replaced finds them again.

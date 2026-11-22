@@ -74,7 +74,7 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
     void IMap.Freeze() => Freeze();
 
     /// <inheritdoc />
-    bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
+    bool IMap.TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
     {
         if (TryGetValue(FindColumn(sheet), sheet, rowIndex, reader, member, errors, out var value))
         {
@@ -90,14 +90,14 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
     /// <summary>
     /// Finds the member's column in the sheet, or -1 if the sheet doesn't have it.
     /// </summary>
-    internal int FindColumn(ExcelSheet sheet) => sheet.FindColumn(_columns);
+    internal int FindColumn(SheetView sheet) => sheet.FindColumn(_columns);
 
     /// <summary>
     /// Reads and maps the cell in the given column (-1 if the sheet doesn't have the member's
     /// column), returning the value as <typeparamref name="T"/> so that value types aren't boxed
     /// again on the way to the member.
     /// </summary>
-    internal bool TryGetValue(int columnIndex, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out T value)
+    internal bool TryGetValue(int columnIndex, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out T value)
     {
         if (columnIndex == -1 || columnIndex >= reader.FieldCount)
         {
@@ -116,7 +116,7 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IValueMap
 
 
     /// <inheritdoc/>
-    BoundMember IValueMap.Bind(ExcelPropertyMap property, ExcelSheet sheet) => new BoundValueMember<T>(this, property, sheet);
+    BoundMember IValueMap.Bind(ExcelPropertyMap property, SheetView sheet) => new BoundValueMember<T>(this, property, sheet);
 
     /// <inheritdoc/>
     MethodInfo? IValueMap.GetArgumentMethod(Type parameterType)

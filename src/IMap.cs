@@ -19,7 +19,7 @@ internal interface IMap
     /// <param name="errors">The list mapping errors are added to instead of being thrown, when rows are read with <see cref="ExcelSheet.ReadRowResults{T}"/>; otherwise null.</param>
     /// <param name="value">When this method returns true, contains the mapped object. When false, contains null.</param>
     /// <returns>True if the mapping succeeded and a value was produced; false if the mapping failed or no value could be produced (e.g., optional column not found).</returns>
-    bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value);
+    bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value);
 
     /// <summary>
     /// Stops the map and the maps under it changing, the first time rows are read with it: what's

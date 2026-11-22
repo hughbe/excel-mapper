@@ -9,8 +9,8 @@ namespace ExcelMapper;
 /// </summary>
 public readonly struct CellContext
 {
-    // The sheet the rows are read with: for a region, its own sheet, with the region's heading.
-    private readonly ExcelSheet _readingSheet;
+    // The view the rows are read with: for a region, the region's, with its heading.
+    private readonly SheetView _view;
 
     /// <summary>
     /// Creates a context, for example to test a converter.
@@ -21,7 +21,7 @@ public readonly struct CellContext
         ThrowHelpers.ThrowIfNegative(rowIndex, nameof(rowIndex));
         ThrowHelpers.ThrowIfNegative(columnIndex, nameof(columnIndex));
 
-        _readingSheet = sheet;
+        _view = sheet.View;
         RowIndex = rowIndex;
         ColumnIndex = columnIndex;
         Member = member;
@@ -33,9 +33,9 @@ public readonly struct CellContext
     /// Creates the context of a cell being mapped, with the list errors are reported to when rows
     /// are read with <see cref="ExcelSheet.ReadRowResults{T}"/>.
     /// </summary>
-    internal CellContext(ExcelSheet sheet, int rowIndex, int columnIndex, MemberInfo? member, List<ExcelMappingException>? errors, ConversionOptions? options)
+    internal CellContext(SheetView sheet, int rowIndex, int columnIndex, MemberInfo? member, List<ExcelMappingException>? errors, ConversionOptions? options)
     {
-        _readingSheet = sheet;
+        _view = sheet;
         RowIndex = rowIndex;
         ColumnIndex = columnIndex;
         Member = member;
@@ -61,18 +61,18 @@ public readonly struct CellContext
     /// Gets the sheet being read. When reading a region, this is the sheet the region was created
     /// from: use <see cref="Heading"/> for the region's heading.
     /// </summary>
-    public ExcelSheet Sheet => _readingSheet?.UserSheet!;
+    public ExcelSheet Sheet => _view?.Sheet!;
 
     /// <summary>
     /// Gets the heading of the rows being read: the region's heading when reading a region,
     /// otherwise the sheet's. Null if they have no heading.
     /// </summary>
-    public ExcelHeading? Heading => _readingSheet?.Heading;
+    public ExcelHeading? Heading => _view?.Heading;
 
     /// <summary>
     /// Gets the sheet the rows are read with, which has the heading and columns of a region.
     /// </summary>
-    internal ExcelSheet ReadingSheet => _readingSheet;
+    internal SheetView View => _view;
 
     /// <summary>
     /// Gets the zero-based index of the cell's row in the worksheet.
@@ -94,7 +94,7 @@ public readonly struct CellContext
     /// Gets the culture to parse and format values with: the importer's
     /// <see cref="ExcelImporterConfiguration.Culture"/>, or the current culture if it isn't set.
     /// </summary>
-    public IFormatProvider FormatProvider => _readingSheet?.Culture ?? CultureInfo.CurrentCulture;
+    public IFormatProvider FormatProvider => _view?.Culture ?? CultureInfo.CurrentCulture;
 
     /// <summary>
     /// Gets the cell's address, such as "B11".

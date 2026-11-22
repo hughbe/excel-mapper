@@ -98,7 +98,7 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     internal DictionaryBuilder<TKey, TValue> Builder { get; }
 
     /// <inheritdoc/>
-    bool IMap.TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
+    bool IMap.TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
         if (sheet.Heading == null)
@@ -110,15 +110,15 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     }
 
 
-    ICellsReader? ICellsMap.GetCellsReader(ExcelSheet sheet) => GetCellsReader(sheet);
+    ICellsReader? ICellsMap.GetCellsReader(SheetView sheet) => GetCellsReader(sheet);
 
-    private ICellsReader? GetCellsReader(ExcelSheet sheet)
+    private ICellsReader? GetCellsReader(SheetView sheet)
         => sheet.GetCellsReader(_columns);
 
-    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out object? value)
+    bool ICellsMap.TryGetValue(ICellsReader? cellsReader, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out object? value)
         => TryGetValue(cellsReader, sheet, rowIndex, reader, member, errors, out value);
 
-    private bool TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
+    private bool TryGetValue(ICellsReader? cellsReader, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
     {
         if (sheet.Heading == null)
         {

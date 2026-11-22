@@ -8,7 +8,7 @@ namespace ExcelMapper.Abstractions;
 /// </summary>
 internal interface IValueMap : IColumnsMap
 {
-    BoundMember Bind(ExcelPropertyMap property, ExcelSheet sheet);
+    BoundMember Bind(ExcelPropertyMap property, SheetView sheet);
 
     /// <summary>
     /// Gets a static method <c>(TBoundMember member, TParameter defaultValue) → TParameter</c> that

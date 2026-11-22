@@ -7,7 +7,7 @@ namespace ExcelMapper.Utilities;
 /// </summary>
 internal static class MapValidation
 {
-    public static void FindMissingColumns(IMap map, ExcelSheet sheet, string? path, List<string> problems)
+    public static void FindMissingColumns(IMap map, SheetView sheet, string? path, List<string> problems)
         => MapTree.VisitCellMaps(map, path, (cellMap, memberPath) =>
         {
             if (!cellMap.Optional)
@@ -16,7 +16,7 @@ internal static class MapValidation
             }
         });
 
-    public static void CountNamedColumns(IMap map, ExcelSheet sheet, ref int lookedUp, ref int found)
+    public static void CountNamedColumns(IMap map, SheetView sheet, ref int lookedUp, ref int found)
     {
         var lookedUpCount = 0;
         var foundCount = 0;
@@ -39,10 +39,10 @@ internal static class MapValidation
 
 
     // A collection split from one cell reads one column.
-    private static bool Found(Columns columns, bool many, ExcelSheet sheet)
+    private static bool Found(Columns columns, bool many, SheetView sheet)
         => many && columns is not SplitColumns ? columns.FindColumns(sheet) is not null : columns.FindColumn(sheet) != -1;
 
-    private static bool HasColumns(Columns columns, bool many, ExcelSheet sheet)
+    private static bool HasColumns(Columns columns, bool many, SheetView sheet)
     {
         try
         {
@@ -54,7 +54,7 @@ internal static class MapValidation
         }
     }
 
-    private static void Check(Columns columns, bool many, ExcelSheet sheet, string? path, List<string> problems)
+    private static void Check(Columns columns, bool many, SheetView sheet, string? path, List<string> problems)
     {
         string? error = null;
         try
