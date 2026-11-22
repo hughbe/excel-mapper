@@ -34,6 +34,12 @@ public sealed class RowNumberMap : IMap
     /// </summary>
     public Type Type { get; }
 
+    /// <inheritdoc />
+    void IMap.Freeze()
+    {
+        // A row number map has nothing to change.
+    }
+
     internal static bool IsSupportedType(Type type)
     {
         var underlyingType = type.GetNullableTypeOrThis(out _);

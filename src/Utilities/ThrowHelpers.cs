@@ -1,9 +1,25 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace ExcelMapper;
 
 internal static class ThrowHelpers
 {
+    /// <summary>
+    /// Throws if a map is changed after it has been used to read rows (see <see cref="IMap.Freeze"/>).
+    /// </summary>
+    public static void ThrowIfFrozen(bool frozen)
+    {
+        if (frozen)
+        {
+            ThrowFrozen();
+        }
+    }
+
+    [DoesNotReturn]
+    private static void ThrowFrozen()
+        => throw new InvalidOperationException("A map can't be changed after it has been used to read rows. Configure the class map before reading.");
+
     public static void ThrowIfNull(object value, [CallerArgumentExpression(nameof(value))] string? paramName = null)
     {
 #if NET6_0_OR_GREATER

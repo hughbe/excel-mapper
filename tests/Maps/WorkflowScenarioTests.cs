@@ -182,7 +182,7 @@ public class WorkflowScenarioTests
     }
 
     [Fact]
-    public void ReaderFactory_ChangedAfterReading_UsesNewColumn()
+    public void ColumnName_ChangedAfterReading_ThrowsInvalidOperationException()
     {
         using var importer = Helpers.GetCsvImporter("A,B\na1,b1\na2,b2\n");
         var map = new ExcelClassMap<NameClass>();
@@ -192,8 +192,9 @@ public class WorkflowScenarioTests
 
         Assert.Equal("a1", sheet.ReadRow<NameClass>().Name);
 
-        nameMap.WithColumnName("B");
-        Assert.Equal("b2", sheet.ReadRow<NameClass>().Name);
+        // The map is frozen once rows are read with it, and keeps reading the same column.
+        Assert.Throws<InvalidOperationException>(() => nameMap.WithColumnName("B"));
+        Assert.Equal("a2", sheet.ReadRow<NameClass>().Name);
     }
 
     // ---------- Configuration ----------

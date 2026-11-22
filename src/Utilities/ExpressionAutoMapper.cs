@@ -119,7 +119,7 @@ internal static class ExpressionAutoMapper
             }
 
             // The row itself, such as Map(p => p).
-            classMap._valueMap = map;
+            classMap.SingleValueMap = map;
             return;
         }
 

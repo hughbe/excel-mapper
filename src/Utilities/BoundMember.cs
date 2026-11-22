@@ -121,7 +121,7 @@ internal sealed class BoundMapMember(ExcelPropertyMap property) : BoundMember
 internal sealed class BoundCellsMember(ICellsMap map, ExcelPropertyMap property) : BoundMember
 {
     private ICellsReader? _cellsReader;
-    private int _readerVersion = -1;
+    private bool _resolved;
 
     public override bool TryMap(object instance, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
     {
@@ -136,10 +136,12 @@ internal sealed class BoundCellsMember(ICellsMap map, ExcelPropertyMap property)
 
     public override bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out object? value)
     {
-        if (_readerVersion != map.ReaderVersion)
+        // Found on first use, inside the caller's error handling. Maps are frozen once rows are
+        // read, so the reader stays right.
+        if (!_resolved)
         {
             _cellsReader = map.GetCellsReader(sheet);
-            _readerVersion = map.ReaderVersion;
+            _resolved = true;
         }
 
         var errorCount = errors?.Count ?? 0;
@@ -167,9 +169,9 @@ internal sealed class BoundValueMember<T> : BoundMember
     private Action<object, T>? _setter;
 
     // The member's column in the sheet (-1 if missing), found on first use (inside the caller's
-    // error handling, as for unbound maps) and again if the map's columns change.
+    // error handling, as for unbound maps).
     private int _columnIndex = -1;
-    private int _readerVersion = -1;
+    private bool _resolved;
 
     public BoundValueMember(ValueMap<T> map, ExcelPropertyMap property, ExcelSheet sheet)
     {
@@ -193,20 +195,15 @@ internal sealed class BoundValueMember<T> : BoundMember
 
     private bool TryRead(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out T value)
     {
-        if (_readerVersion != _map.ReaderVersion)
+        if (!_resolved)
         {
-            Resolve(sheet);
+            _columnIndex = _map.FindColumn(sheet);
+            _resolved = true;
         }
 
         var errorCount = errors?.Count ?? 0;
         var found = _map.TryGetValue(_columnIndex, sheet, rowIndex, reader, _member, errors, out value);
         return found && (errors is null || errors.Count == errorCount);
-    }
-
-    private void Resolve(ExcelSheet sheet)
-    {
-        _columnIndex = _map.FindColumn(sheet);
-        _readerVersion = _map.ReaderVersion;
     }
 
     public override bool TryGetValue(ExcelSheet sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out object? value)
