@@ -16,7 +16,8 @@ public class ExcelColumnNameAttribute : Attribute
     /// <summary>
     /// Initializes a new instance of <see cref="ExcelColumnNameAttribute"/> with the specified column name.
     /// </summary>
-    /// <param name="name">The name of the column.</param>
+    /// <param name="columnName">The name of the column.</param>
+    /// <param name="comparison">The string comparison to use when matching the column name.</param>
     public ExcelColumnNameAttribute(string columnName, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
     {
         ColumnUtilities.ValidateColumnName(columnName);

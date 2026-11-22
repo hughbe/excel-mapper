@@ -29,6 +29,7 @@ internal sealed class ColumnNamesReaderFactory : ICellReaderFactory, ICellsReade
     /// and returns the string value of for each column.
     /// </summary>
     /// <param name="columnNames">The names of each column to read.</param>
+    /// <param name="comparison">The string comparison to use when matching column names.</param>
     public ColumnNamesReaderFactory(IReadOnlyList<string> columnNames, StringComparison comparison)
     {
         ColumnUtilities.ValidateColumnNames(columnNames);

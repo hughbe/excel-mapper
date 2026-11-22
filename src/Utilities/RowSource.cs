@@ -6,7 +6,7 @@ namespace ExcelMapper.Utilities;
 /// Owns the position of an importer's reader. The reader is forward-only and shared by every
 /// <see cref="ExcelSheet"/> of the importer, so sheets don't move it themselves: they ask for the
 /// sheet and row they need, and this reads forward or rewinds as needed. This is the only code
-/// that calls <see cref="IExcelDataReader.Read"/>, <see cref="System.Data.IDataReader.NextResult"/>
+/// that calls <see cref="System.Data.IDataReader.Read"/>, <see cref="System.Data.IDataReader.NextResult"/>
 /// or <see cref="IExcelDataReader.Reset"/>.
 /// </summary>
 internal sealed class RowSource

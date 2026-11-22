@@ -54,8 +54,14 @@ internal static class MapperUtilities
     /// (or isn't whole, for an integer type), and otherwise a <see cref="FormatException"/>. Where
     /// that can't be told without parsing, <paramref name="parse"/> is used.
     /// </summary>
+    /// <param name="text">The text that isn't a valid number.</param>
+    /// <param name="style">The number style it was parsed with.</param>
+    /// <param name="provider">The format provider it was parsed with.</param>
+    /// <param name="type">The number type.</param>
+    /// <param name="isInteger">Whether the type is an integer type.</param>
     /// <param name="canCreateException">Whether the type is a built-in number type, whose Parse
     /// method fails as described.</param>
+    /// <param name="parse">Parses the text, to get the exception where it can't be created directly.</param>
     public static CellMapperResult InvalidNumber(string? text, NumberStyles style, IFormatProvider? provider, Type type, bool isInteger, bool canCreateException, Action parse)
         => !canCreateException || text is null || GetNumberFailure(text, style, provider) is not { } isOverflow
             ? InvalidFromParse(parse)

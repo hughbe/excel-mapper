@@ -134,7 +134,6 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// <summary>
     /// Specifies a fixed fallback to be used if the value of a cell is empty or cannot be mapped.
     /// </summary>
-    /// <typeparam name="T">The type of the map.</typeparam>
     /// <param name="value">The value that will be assigned to the property or field if the value of a cell is empty or cannot be mapped.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public OneToOneMap<T> WithValueFallback(T? value)
@@ -143,7 +142,6 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// <summary>
     /// Specifies a fixed fallback to be used if the value of a cell is empty.
     /// </summary>
-    /// <typeparam name="T">The type of the map.</typeparam>
     /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell is empty.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public OneToOneMap<T> WithEmptyFallback(T? fallbackValue)
@@ -152,7 +150,6 @@ public class OneToOneMap<T> : ValuePipeline<T>, IOneToOneMap, IBindableMap
     /// <summary>
     /// Specifies a fixed fallback to be used if the value of a cell cannot be mapped.
     /// </summary>
-    /// <typeparam name="T">The type of the map.</typeparam>
     /// <param name="fallbackValue">The value that will be assigned to the property or field if the value of a cell cannot be mapped.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public OneToOneMap<T> WithInvalidFallback(T? fallbackValue)

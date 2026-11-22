@@ -28,7 +28,7 @@ public class ValuePipeline<T> : ValuePipeline
     }
 
     /// <summary>
-    /// Maps a cell to a <typeparamref name="T"/> with any pipeline: <see cref="Map"/> for a
+    /// Maps a cell to a <typeparamref name="T"/> with any pipeline: <see cref="Map(ExcelSheet, int, ReadCellResult, bool, MemberInfo?)"/> for a
     /// <see cref="ValuePipeline{T}"/>, and otherwise through the pipeline as objects.
     /// </summary>
     internal static T Map(ValuePipeline pipeline, ExcelSheet sheet, int rowIndex, ReadCellResult readResult, bool preserveFormatting, MemberInfo? member)

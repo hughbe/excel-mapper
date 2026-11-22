@@ -85,7 +85,7 @@ internal static class ReflectionUtilities
     /// Gets the element type or the IEnumerable&lt;T&gt; type of the given type.
     /// </summary>
     /// <param name="type">The type to get the element type of.</param>
-    /// <param name="elementType">The element type or IEnumerable&lt;T&gt; of the given type.</param>
+    /// <returns>The element type or IEnumerable&lt;T&gt; of the given type, or null if it has none.</returns>
     public static Type? GetElementTypeOrEnumerableType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces | DynamicallyAccessedMemberTypes.PublicMethods)] this Type type)
     {
         // Array type.

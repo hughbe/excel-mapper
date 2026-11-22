@@ -1,6 +1,6 @@
 # Migrating to 4.0
 
-ExcelMapper 4.0 fixes several long-standing bugs and makes mapping more predictable. Most code keeps working unchanged: reading rows, attributes, class maps and the fluent API are source compatible, but some **behaviour** changed, and the low-level extension types are replaced by simpler ones (see [Extension types](#extension-types)). This page lists what to check, most commonly affected first. See the [changelog](../CHANGELOG.md) for everything that's new.
+ExcelMapper 4.0 fixes several long-standing bugs and makes mapping more predictable. Most code keeps working unchanged: reading rows, attributes, class maps and the fluent API are source compatible, but some **behaviour** changed, and the low-level extension types are replaced by simpler ones (see [Extension types](#extension-types)). This page lists what to check, most commonly affected first, and ends with [what's new](#new-in-40). See the [changelog](../CHANGELOG.md) for everything that changed.
 
 ## Checklist
 
@@ -123,24 +123,97 @@ catch (ExcelMappingException ex)
 
 ## Extension types
 
-**Who's affected:** code that implements or creates ExcelMapper's low-level types directly, rather than using attributes, class maps and the fluent API.
+**Who's affected:** code that implements or uses ExcelMapper's low-level types directly: custom mappers, transformers, fallbacks, reader factories or column matchers, or code that reads a map's `Mappers`, `Properties` or `ReaderFactory`. Code that only uses attributes, class maps and the fluent methods compiles unchanged.
 
-4.0 has a smaller set of extension points, and the types they replace are internal:
+**Now:** there are four extension points, and the types they replace are internal:
 
-| 3.x | 4.0 |
-|---|---|
-| Collection factories (`ExcelMapper.Factories`, `IEnumerableFactory<T>`, `IDictionaryFactory<TKey, TValue>`, `IMultidimensionalArrayFactory<T>`) and the collection and dictionary maps' constructors | ExcelMapper creates the collection for the member's type. Get a member's map from `ExcelClassMap<T>.Map(...)`. |
-| Readers and reader factories (`ExcelMapper.Readers`, `ICellReader`, `ICellReaderFactory`, `ICellsReader`, `ICellsReaderFactory`), `IExcelColumnMatcher`, `WithReaderFactory(...)` and `WithColumnMatching(matcher)`/`WithColumnsMatching(matcher)` | [`IColumnSelector`](mapping.md#pattern-matching) with `WithColumns(selector)`, `[ExcelColumnMatching(typeof(...))]` or `[ExcelColumnsMatching(typeof(...))]`. |
-| `IToOneMap`, `IOneToOneMap`, `IManyToOneMap` and the extension classes `IOneToOneMapExtensions`, `IManyToOneMapExtensions` and `IToOneMapExtensions`, `OneToOneMap<T>`'s constructor and the maps' `ReaderFactory` properties | The column methods (`WithColumnName`, `WithColumnNames`, `MakeOptional`, ...) are methods of the maps, so calls to them compile unchanged. Code that took an `IOneToOneMap` should take the map's own type. |
-| `IValuePipelineExtensions`, `IValuePipeline<T>` as the receiver of the value methods, the collection maps' `IValuePipeline<T> Pipeline` and `WithElementMap`/`WithValueMap(Func<IValuePipeline<T>, IValuePipeline<T>>)`, `new ValuePipeline()` | `ValuePipelineExtensions`, whose methods extend `ValuePipeline<T>`. `OneToOneMap<T>` is a `ValuePipeline<T>`, and the collection maps' `Pipeline` is a `ValuePipeline<T>`, so calls and lambdas compile unchanged. Create a `ValuePipeline<T>` instead of a `ValuePipeline`. |
-| `ICellMapper`, `CellMapperResult`, `ReadCellResult`, `WithMappers(...)`, `[ExcelMapper]`, `WithConverter(ConvertUsingMapperDelegate)` and the mappers in `ExcelMapper.Mappers` | An [`ICellConverter<T>`](mapping.md#custom-converters) with `WithConverter(converter)` or `[ExcelConverter(typeof(...))]`, or `WithConverter(value => ...)`. A converter returns `NotHandled` to let the built-in conversion try. |
-| `Abstractions.ICellTransformer` and `TrimStringCellTransformer` | [`ICellTransformer`](mapping.md#custom-cell-transformers) (in the `ExcelMapper` namespace), and `WithTrim()` or `[ExcelTrimString]`. |
-| `IFallbackItem`, `FixedValueFallback`, `ThrowFallback`, `WithFallbackItem`, `WithEmptyFallbackItem` and `WithInvalidFallbackItem` | [`ICellFallback<T>`](mapping.md#advanced-fallback-strategies) with `WithEmptyFallback(fallback)`, `WithInvalidFallback(fallback)`, `[ExcelEmptyFallback]` or `[ExcelInvalidFallback]`; `WithValueFallback`, `WithEmptyFallback(value)`, `WithThrowingFallback()` and the other fluent fallback methods. |
-| A pipeline's `Mappers`, `Transformers`, `EmptyFallback` and `InvalidFallback` properties, and `OneToOneMap<T>.Pipeline` | The fluent methods above, which replace these. |
-| `ExcelMapper.Mappers.MappingDictionaryMapperBehavior` | `ExcelMapper.MappingDictionaryMapperBehavior`. |
-| `IMap`, `ExcelPropertyMap`, `ExcelClassMap.Properties`, the indexer maps, `AutoMapper.TryCreateClassMap` and `RegisterClassMap(Type, IMap)` | Map members with `ExcelClassMap<T>.Map(...)` (including `Map(p => p.Values[0])` for elements) and the fluent methods. To start from the auto-mapped class map, use `RegisterClassMap<T>(c => ...)`. `TryGetClassMap` returns an `ExcelClassMap`, and `RegisterClassMap(Type, ExcelClassMap)` registers a class map for another type. |
+| To... | 3.x | 4.0 |
+|---|---|---|
+| Convert a cell | `ICellMapper` with `WithMappers(...)` or `[ExcelMapper]`; `CellMapperResult`; `ReadCellResult`; `WithConverter(readResult => ...)` | [`ICellConverter<T>`](mapping.md#converters) with `WithConverter(converter)` or `[ExcelConverter(typeof(...))]`, or `WithConverter(value => ...)` with the cell's text |
+| Change a cell before it's converted | `Abstractions.ICellTransformer`, `TrimStringCellTransformer` | [`ICellTransformer`](mapping.md#transformers) (in the `ExcelMapper` namespace) with `WithTransformers(...)` or `[ExcelTransformer]`, and `WithTrim()` or `[ExcelTrimString]` |
+| Give empty or invalid cells a value | `IFallbackItem`, `FixedValueFallback`, `ThrowFallback`, `WithFallbackItem`, `WithEmptyFallbackItem`, `WithInvalidFallbackItem` | [`ICellFallback<T>`](mapping.md#computed-fallbacks) with `WithEmptyFallback(fallback)`/`WithInvalidFallback(fallback)` or `[ExcelEmptyFallback]`/`[ExcelInvalidFallback]`; or `WithValueFallback(value)`, `WithEmptyFallback(value)` and `WithThrowingFallback()` |
+| Choose columns in code | `ICellReaderFactory`, `ICellsReaderFactory`, `WithReaderFactory(...)`, `IExcelColumnMatcher` | [`IColumnSelector`](mapping.md#column-selectors) with `WithColumns(selector)`, `[ExcelColumnMatching(typeof(...))]` or `[ExcelColumnsMatching(typeof(...))]` |
+| Configure a member | `IOneToOneMap`, `IManyToOneMap`, `IToOneMap` and their extension classes; a pipeline's `Mappers`, `Transformers`, `EmptyFallback` and `InvalidFallback`; `OneToOneMap<T>.Pipeline` | The map `Map(...)` returns, and its fluent methods. The column methods (`WithColumnName`, `MakeOptional`, ...) are methods of the maps; the value methods are in `ValuePipelineExtensions` (was `IValuePipelineExtensions`) |
+| Map members by hand | `IMap`, `ExcelPropertyMap`, `ExcelClassMap.Properties`, the maps' constructors, the indexer maps, `AutoMapper.TryCreateClassMap`, `RegisterClassMap(Type, IMap)` | `Map(...)` in a class map, including `Map(p => p.Values[0])` for elements. Start from the auto-mapped class map with `RegisterClassMap<T>(c => ...)`. `TryGetClassMap` returns an `ExcelClassMap` |
+| Create collections | `IEnumerableFactory<T>`, `IDictionaryFactory<TKey, TValue>`, `IMultidimensionalArrayFactory<T>` | ExcelMapper creates the collection for the member's type |
 
-**What to do:** if you created a map with its constructor, or implemented `IMap` or added to `ExcelClassMap.Properties`, map the member with `Map(...)` in a class map instead. To control how values are created, use an [`ICellConverter<T>`](mapping.md#custom-converters) instead of an `ICellMapper`, and an `ICellTransformer` or `ICellFallback<T>` instead of the old transformer and fallback types. To choose columns in code, implement an [`IColumnSelector`](mapping.md#pattern-matching) instead of a reader factory or `IExcelColumnMatcher`.
+`MappingDictionaryMapperBehavior` moved from `ExcelMapper.Mappers` to the `ExcelMapper` namespace.
+
+**What to do:**
+
+A custom mapper becomes a converter. A converter gets the cell's value as Excel stores it (`value.Kind`, `value.Text`, `value.Number`, ...) and where the cell is (`context.CellAddress`, `context.Member`, ...). It isn't called for empty cells, which use the empty fallback:
+
+```csharp
+// 3.x
+public class PhoneMapper : ICellMapper
+{
+    public CellMapperResult Map(ReadCellResult readResult)
+    {
+        var digits = new string(readResult.StringValue.Where(char.IsDigit).ToArray());
+        return digits.Length == 10
+            ? CellMapperResult.Success(digits)
+            : CellMapperResult.Invalid(new FormatException("Phone numbers have 10 digits."));
+    }
+}
+
+Map(c => c.Phone).WithMappers(new PhoneMapper());
+
+// 4.0
+public class PhoneConverter : ICellConverter<string>
+{
+    public CellConversionResult<string> Convert(CellValue value, CellContext context)
+    {
+        var digits = new string(value.Text!.Where(char.IsDigit).ToArray());
+        return digits.Length == 10
+            ? CellConversionResult<string>.Success(digits)
+            : CellConversionResult<string>.Invalid(() => new FormatException("Phone numbers have 10 digits."));
+    }
+}
+
+Map(c => c.Phone).WithConverter(new PhoneConverter());  // or [ExcelConverter(typeof(PhoneConverter))]
+```
+
+`CellMapperResult.Ignore()` becomes `CellConversionResult<T>.NotHandled`, which lets the next converter try; if none converts the value, it's invalid. A converter replaces the built-in conversion (see [`WithConverter` replaces the built-in conversion](#withconverter-replaces-the-built-in-conversion)).
+
+A custom fallback becomes a typed fallback:
+
+```csharp
+// 3.x
+public class UnknownFallback : IFallbackItem
+{
+    public object PerformFallback(ExcelSheet sheet, int rowIndex, ReadCellResult readResult, Exception exception, MemberInfo member)
+        => -1;
+}
+
+// 4.0
+public class UnknownFallback : ICellFallback<int>
+{
+    public int Fallback(CellValue value, CellContext context, Exception? exception) => -1;
+}
+
+Map(e => e.Age).WithInvalidFallback(new UnknownFallback());  // or [ExcelInvalidFallback(typeof(UnknownFallback))]
+```
+
+A reader factory or column matcher becomes a column selector, which chooses columns once for each sheet and describes them for error messages:
+
+```csharp
+// 4.0
+public class QuarterColumns : IColumnSelector
+{
+    // Positions in the worksheet, as GetColumnIndex gives them.
+    public IReadOnlyList<int> SelectColumns(ExcelSheet sheet)
+        => sheet.Heading!.ColumnNames
+            .Where(name => name.StartsWith("Q"))
+            .Select(sheet.Heading.GetColumnIndex)
+            .ToArray();
+
+    public string Describe(ExcelSheet sheet) => "the columns starting with Q";
+}
+
+Map(r => r.Quarters).WithColumns(new QuarterColumns());
+```
+
+If you created a map with its constructor, or implemented `IMap`, map the member with `Map(...)` in a class map instead.
 
 ## Smaller changes
 
@@ -182,5 +255,9 @@ Worth a look while upgrading:
 - [Find the heading](reading.md#finding-the-heading) of sheets with titles or notes above it with `FindHeading`.
 - [Read part of a sheet](reading.md#reading-part-of-a-sheet), or several tables on one sheet, with `sheet.Region("B3:F20")`.
 - [Records and constructor-only types](mapping.md#records-and-constructors) map without a parameterless constructor.
-- Map by [column letter](mapping.md#column-index-mapping), choose a [culture](mapping.md#culture-for-the-whole-importer) for the whole importer, and set the [offset of `DateTimeOffset` values](types.md#date-and-time-types).
+- Map by [column letter](mapping.md#choosing-columns), choose a [culture](types.md#culture) for the whole importer, and set the [offset of `DateTimeOffset` values](types.md#offsets).
 - `ExcelImporter.ReadRows<T>("file.xlsx")` reads a file in one line.
+- Set a member to the [row number](mapping.md#row-numbers), or collect the [columns no other member reads](mapping.md#extra-columns) into a dictionary.
+- [Typed converters](mapping.md#converters) get the cell's value as Excel stores it and where the cell is, without boxing.
+- Mapping works in [trimmed apps](trimming.md), and the package includes XML documentation for IntelliSense.
+- Mapping is faster and allocates much less: see the [changelog](../CHANGELOG.md#performance).
