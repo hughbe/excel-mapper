@@ -92,9 +92,6 @@ internal abstract class DictionaryRule
 [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
 internal sealed class DictionaryRule<TKey, TValue> : DictionaryRule where TKey : notnull
 {
-    // A dictionary reads every column by default.
-    private static readonly ICellsReaderFactory s_allColumnNamesReaderFactory = new AllColumnNamesReaderFactory();
-
     public override Type KeyType => typeof(TKey);
 
     public override bool TryCreateMap(MemberInfo? member, Type dictionaryType, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out IManyToOneMap? map)
@@ -122,8 +119,9 @@ internal sealed class DictionaryRule<TKey, TValue> : DictionaryRule where TKey :
             return false;
         }
 
-        var readerFactory = MemberMapper.GetDefaultCellsReaderFactory(member) ?? s_allColumnNamesReaderFactory;
-        map = new DictionaryMap<TKey, TValue>(readerFactory, builder);
+        // A dictionary reads every column by default.
+        var columns = MemberMapper.GetDefaultCellsColumns(member) ?? AllColumns.Instance;
+        map = new DictionaryMap<TKey, TValue>(columns, builder);
         if (!AutoMapper.TrySetupMap<TValue>(member, map, emptyValueStrategy, isAutoMapping))
         {
             map = null;

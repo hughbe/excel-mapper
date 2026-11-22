@@ -21,7 +21,7 @@ internal abstract class CollectionRule
     /// Auto-maps a member of the collection type to a <see cref="CollectionMap{TElement}"/> that
     /// reads its elements from several cells.
     /// </summary>
-    public abstract bool TryCreateMap(MemberInfo? member, Type collectionType, ICellsReaderFactory readerFactory, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map);
+    public abstract bool TryCreateMap(MemberInfo? member, Type collectionType, Columns columns, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map);
 
     /// <summary>
     /// Gets the map for elements mapped one by one, such as <c>Map(p => p.Values[0])</c>.
@@ -39,9 +39,9 @@ internal abstract class CollectionRule
 [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
 internal sealed class CollectionRule<TElement> : CollectionRule
 {
-    public override bool TryCreateMap(MemberInfo? member, Type collectionType, ICellsReaderFactory readerFactory, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
+    public override bool TryCreateMap(MemberInfo? member, Type collectionType, Columns columns, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
     {
-        if (TryCreateCollectionMap(member, collectionType, readerFactory, emptyValueStrategy, out var collectionMap))
+        if (TryCreateCollectionMap(member, collectionType, columns, emptyValueStrategy, out var collectionMap))
         {
             map = collectionMap;
             return true;
@@ -56,7 +56,7 @@ internal sealed class CollectionRule<TElement> : CollectionRule
     /// <paramref name="collectionType"/>, with the element type's built-in conversion. Fails if the
     /// collection can't be created or its elements have no conversion.
     /// </summary>
-    public static bool TryCreateCollectionMap(MemberInfo? member, Type collectionType, ICellsReaderFactory readerFactory, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out CollectionMap<TElement>? map)
+    public static bool TryCreateCollectionMap(MemberInfo? member, Type collectionType, Columns columns, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out CollectionMap<TElement>? map)
     {
         if (!TryGetBuilder(collectionType, out var builder))
         {
@@ -64,7 +64,7 @@ internal sealed class CollectionRule<TElement> : CollectionRule
             return false;
         }
 
-        map = new CollectionMap<TElement>(readerFactory, builder);
+        map = new CollectionMap<TElement>(columns, builder);
         if (!AutoMapper.TrySetupMap<TElement>(member, map, emptyValueStrategy, isAutoMapping: true))
         {
             map = null;

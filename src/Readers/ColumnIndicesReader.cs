@@ -23,7 +23,6 @@ internal class ColumnIndicesReader : ICellsReader
     /// <param name="columnIndices">The zero-based indices for each column to read.</param>
     public ColumnIndicesReader(params IReadOnlyList<int> columnIndices)
     {
-        ColumnUtilities.ValidateColumnIndices(columnIndices);
         ColumnIndices = columnIndices;
     }
 

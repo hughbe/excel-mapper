@@ -16,12 +16,12 @@ namespace ExcelMapper.Utilities;
 [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
 internal static class AutoMapper
 {
-    internal static readonly ICellReaderFactory s_zeroColumnIndexReaderFactory = new ColumnIndexReaderFactory(0);
-    internal static readonly ICellsReaderFactory s_allColumnNamesReaderFactory = new AllColumnNamesReaderFactory();
+    // A whole row read as a value reads its first column.
+    internal static readonly Columns s_firstColumn = new ColumnIndexColumns(0);
 
-    internal static ValueMap<T>? CreateValueMap<T>(MemberInfo? member, ICellReaderFactory defaultCellReaderFactory, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping)
+    internal static ValueMap<T>? CreateValueMap<T>(MemberInfo? member, Columns defaultColumns, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping)
     {
-        var map = new ValueMap<T>(defaultCellReaderFactory);
+        var map = new ValueMap<T>(defaultColumns);
         if (!TrySetupMap<T>(member, map, emptyValueStrategy, isAutoMapping))
         {
             return null;
@@ -118,9 +118,9 @@ internal static class AutoMapper
     /// if the type has a built-in conversion or the member's attributes give one, otherwise as a
     /// dictionary, a collection or an object.
     /// </summary>
-    internal static bool TryCreateMap<T>(MemberInfo? member, ICellReaderFactory defaultCellReaderFactory, ICellsReaderFactory defaultCellsReaderFactory, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map)
+    internal static bool TryCreateMap<T>(MemberInfo? member, Columns defaultColumns, Columns defaultCellsColumns, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map)
     {
-        if (CreateValueMap<T>(member, defaultCellReaderFactory, emptyValueStrategy, isAutoMapping) is { } valueMap)
+        if (CreateValueMap<T>(member, defaultColumns, emptyValueStrategy, isAutoMapping) is { } valueMap)
         {
             map = valueMap;
             return true;
@@ -133,7 +133,7 @@ internal static class AutoMapper
             return true;
         }
 
-        if (rule.Collection is { } collectionRule && collectionRule.TryCreateMap(member, typeof(T), defaultCellsReaderFactory, emptyValueStrategy, out map))
+        if (rule.Collection is { } collectionRule && collectionRule.TryCreateMap(member, typeof(T), defaultCellsColumns, emptyValueStrategy, out map))
         {
             return true;
         }
@@ -158,7 +158,7 @@ internal static class AutoMapper
     {
         EnumUtilities.ValidateIsDefined(emptyValueStrategy);
 
-        if (!TryCreateMap<T>(null, new ColumnIndexReaderFactory(0), s_allColumnNamesReaderFactory, emptyValueStrategy, isAutoMapping: true, typeStack: null, out var objectMap))
+        if (!TryCreateMap<T>(null, s_firstColumn, AllColumns.Instance, emptyValueStrategy, isAutoMapping: true, typeStack: null, out var objectMap))
         {
             result = null;
             return false;
@@ -269,7 +269,7 @@ internal static class AutoMapper
     internal static void AutoMap<T>(ExcelClassMap<T> classMap)
     {
         var emptyValueStrategy = classMap.EmptyValueStrategy;
-        if (!TryCreateMap<T>(null, s_zeroColumnIndexReaderFactory, s_allColumnNamesReaderFactory, emptyValueStrategy, isAutoMapping: true, typeStack: null, out var map))
+        if (!TryCreateMap<T>(null, s_firstColumn, AllColumns.Instance, emptyValueStrategy, isAutoMapping: true, typeStack: null, out var map))
         {
             throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\".");
         }
@@ -322,7 +322,7 @@ internal static class AutoMapper
                 throw new ExcelMappingException($"Member \"{member.Name}\" has the ExcelExtraColumns attribute, but its type \"{memberType}\" is not a dictionary with string keys.");
             }
 
-            extraColumnsMap.ReaderFactory = new ExtraColumnsReaderFactory(map);
+            extraColumnsMap.Columns = new ExtraColumns(map);
             map.Properties.Add(new ExcelPropertyMap(member, extraColumnsMap));
             classMap = null;
             return true;

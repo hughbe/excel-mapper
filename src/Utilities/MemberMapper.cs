@@ -12,45 +12,46 @@ namespace ExcelMapper.Utilities;
 
 internal static class MemberMapper
 {
-    internal static ICellReaderFactory GetDefaultCellReaderFactory(MemberInfo member)
+    /// <summary>
+    /// Gets the column a single value is read from, from the member's attributes, or the column with
+    /// the member's name.
+    /// </summary>
+    internal static Columns GetDefaultColumns(MemberInfo member)
     {
         var columnNameAttributes = MemberAttributes.GetMany<ExcelColumnNameAttribute>(member);
         if (columnNameAttributes.Length == 1)
         {
-            return new ColumnNameReaderFactory(columnNameAttributes[0].Name, columnNameAttributes[0].Comparison);
+            return new ColumnNameColumns(columnNameAttributes[0].Name, columnNameAttributes[0].Comparison);
         }
 
         if (columnNameAttributes.Length > 1)
         {
-            var factories = new ColumnNameReaderFactory[columnNameAttributes.Length];
-            for (int i = 0; i < factories.Length; i++)
+            var columns = new ColumnNameColumns[columnNameAttributes.Length];
+            for (int i = 0; i < columns.Length; i++)
             {
-                factories[i] = new ColumnNameReaderFactory(columnNameAttributes[i].Name, columnNameAttributes[i].Comparison);
+                columns[i] = new ColumnNameColumns(columnNameAttributes[i].Name, columnNameAttributes[i].Comparison);
             }
 
-            return new FirstColumnNameReaderFactory(factories);
+            return new FirstColumnNameColumns(columns);
         }
 
         var columnNamesAttribute = MemberAttributes.Get<ExcelColumnNamesAttribute>(member);
         if (columnNamesAttribute != null)
         {
-            return new ColumnNamesReaderFactory([.. columnNamesAttribute.Names], columnNamesAttribute.Comparison);
+            return new ColumnNamesColumns([.. columnNamesAttribute.Names], columnNamesAttribute.Comparison);
         }
 
-        // A single [ExcelColumnNameMatching] attributes still represents one column, but multiple options.
-        var columnNameMatchingAttribute = MemberAttributes.Get<ExcelColumnMatchingAttribute>(member);
-        if (columnNameMatchingAttribute != null)
+        // A single [ExcelColumnMatching] attribute still reads one column, the first that matches.
+        var columnMatchingAttribute = MemberAttributes.Get<ExcelColumnMatchingAttribute>(member);
+        if (columnMatchingAttribute != null)
         {
-            var matcher = Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments)!;
-            return matcher is IColumnSelector selector
-                ? new ColumnSelectorReaderFactory(selector)
-                : new ColumnsMatchingReaderFactory((IExcelColumnMatcher)matcher);
+            return CreateMatchingColumns(columnMatchingAttribute.Type, columnMatchingAttribute.ConstructorArguments);
         }
 
         var columnIndexAttributes = MemberAttributes.GetMany<ExcelColumnIndexAttribute>(member);
         if (columnIndexAttributes.Length == 1)
         {
-            return new ColumnIndexReaderFactory(columnIndexAttributes[0].Index);
+            return new ColumnIndexColumns(columnIndexAttributes[0].Index);
         }
 
         if (columnIndexAttributes.Length > 1)
@@ -61,79 +62,87 @@ internal static class MemberMapper
                 indices[i] = columnIndexAttributes[i].Index;
             }
 
-            return new ColumnIndicesReaderFactory(indices);
+            return new ColumnIndicesColumns(indices);
         }
 
-        // [ExcelColumnIndices] attributes still represents one column, but multiple options.
+        // [ExcelColumnIndices] still reads one column, the first the sheet has.
         var columnIndicesAttribute = MemberAttributes.Get<ExcelColumnIndicesAttribute>(member);
         if (columnIndicesAttribute != null)
         {
-            return new ColumnIndicesReaderFactory([.. columnIndicesAttribute.Indices]);
+            return new ColumnIndicesColumns([.. columnIndicesAttribute.Indices]);
         }
 
-        return new ColumnNameReaderFactory(member.Name);
+        return new ColumnNameColumns(member.Name);
     }
 
-    internal static ICellsReaderFactory GetDefaultSplitCellsReaderFactory(MemberInfo? member, ICellReaderFactory innerReaderFactory)
+    /// <summary>
+    /// Gets how a collection member is split from one cell: the cell is in <paramref name="cell"/>,
+    /// with the separators of the member's <see cref="ExcelSeparatorsAttribute"/>, or commas.
+    /// </summary>
+    internal static SplitColumns GetDefaultSplitColumns(MemberInfo? member, Columns cell)
     {
-        if (member != null)
+        if (member != null && MemberAttributes.Get<ExcelSeparatorsAttribute>(member) is { } separatorsAttribute)
         {
-            // If the member has a ExcelSeparator attribute, use that separator.
-            if (MemberAttributes.Get<ExcelSeparatorsAttribute>(member) is { } separatorsAttribute)
+            if (separatorsAttribute.StringSeparators is { } stringSeparators)
             {
-                if (separatorsAttribute.StringSeparators is { } stringSeparators)
+                return new SplitColumns(cell, new StringSplitter
                 {
-                    return new StringSplitReaderFactory(innerReaderFactory)
-                    {
-                        Separators = [.. stringSeparators],
-                        Options = separatorsAttribute.Options
-                    };
-                }
-
-                return new CharSplitReaderFactory(innerReaderFactory)
-                {
-                    Separators = [.. separatorsAttribute.CharSeparators!],
+                    Separators = [.. stringSeparators],
                     Options = separatorsAttribute.Options
-                };
+                });
             }
+
+            return new SplitColumns(cell, new CharSplitter
+            {
+                Separators = [.. separatorsAttribute.CharSeparators!],
+                Options = separatorsAttribute.Options
+            });
         }
 
-        return new CharSplitReaderFactory(innerReaderFactory);
+        return new SplitColumns(cell, new CharSplitter());
     }
-    internal static ICellsReaderFactory? GetDefaultCellsReaderFactory(MemberInfo? member)
+
+    /// <summary>
+    /// Gets the columns a collection or dictionary member reads from its attributes, or null if it
+    /// has none (it's then split from one cell, or for a dictionary, reads every column).
+    /// </summary>
+    internal static Columns? GetDefaultCellsColumns(MemberInfo? member)
     {
-        // If no member was specified, read all the cells.
+        // A whole row read as a collection or dictionary reads every column.
         if (member == null)
         {
-            return new AllColumnNamesReaderFactory();
+            return AllColumns.Instance;
         }
 
-        // [ExcelColumnNames] attributes represent multiple columns.
         var columnNamesAttribute = MemberAttributes.Get<ExcelColumnNamesAttribute>(member);
         if (columnNamesAttribute != null)
         {
-            return new ColumnNamesReaderFactory([.. columnNamesAttribute.Names], columnNamesAttribute.Comparison);
+            return new ColumnNamesColumns([.. columnNamesAttribute.Names], columnNamesAttribute.Comparison);
         }
 
-        // [ExcelColumnsMatchingAttribute] attributes represent multiple columns.
-        var columnNameMatchingAttribute = MemberAttributes.Get<ExcelColumnsMatchingAttribute>(member);
-        if (columnNameMatchingAttribute != null)
+        var columnsMatchingAttribute = MemberAttributes.Get<ExcelColumnsMatchingAttribute>(member);
+        if (columnsMatchingAttribute != null)
         {
-            var matcher = Activator.CreateInstance(columnNameMatchingAttribute.Type, columnNameMatchingAttribute.ConstructorArguments)!;
-            return matcher is IColumnSelector selector
-                ? new ColumnSelectorReaderFactory(selector)
-                : new ColumnsMatchingReaderFactory((IExcelColumnMatcher)matcher);
+            return CreateMatchingColumns(columnsMatchingAttribute.Type, columnsMatchingAttribute.ConstructorArguments);
         }
 
-        // [ExcelColumnIndices] attributes represents multiple columns.
         var columnIndicesAttribute = MemberAttributes.Get<ExcelColumnIndicesAttribute>(member);
         if (columnIndicesAttribute != null)
         {
-            return new ColumnIndicesReaderFactory([.. columnIndicesAttribute.Indices]);
+            return new ColumnIndicesColumns([.. columnIndicesAttribute.Indices]);
         }
 
         return null;
     }
+
+    // The type of [ExcelColumnMatching] and [ExcelColumnsMatching] is an IColumnSelector, or for a
+    // pattern, RegexColumnMatcher.
+    private static Columns CreateMatchingColumns([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, object?[]? arguments)
+        => Activator.CreateInstance(type, arguments) switch
+        {
+            RegexColumnMatcher regexMatcher => new MatchingColumns(regexMatcher.Regex),
+            var selector => new SelectorColumns((IColumnSelector)selector!),
+        };
 
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]

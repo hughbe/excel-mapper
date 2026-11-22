@@ -346,4 +346,33 @@ public class FindHeadingTests
         Assert.Contains("doesn't look up any column by name", exception.Message);
         Assert.Throws<ExcelMappingException>(() => sheet.TryFindHeading<Line>(out _));
     }
+
+    [Fact]
+    public void FindHeading_ColumnsByOtherNames_ReturnsExpected()
+    {
+        // Columns found by any of several names, by a list of names, or by a pattern are looked
+        // up by name, so they identify the heading row.
+        using var importer = Helpers.GetCsvImporter("Report,,,\nFull Name,Q1,Q2,Total\nAlice,1,2,3\n");
+        var sheet = importer.ReadSheet();
+        sheet.FindHeading<OtherNames>();
+        Assert.Equal(1, sheet.HeadingIndex);
+
+        var row = sheet.ReadRows<OtherNames>().Single();
+        Assert.Equal("Alice", row.Name);
+        Assert.Equal([1, 2], row.Quarters);
+        Assert.Equal(3, row.Total);
+    }
+
+    private class OtherNames
+    {
+        [ExcelColumnName("Name")]
+        [ExcelColumnName("Full Name")]
+        public string Name { get; set; } = default!;
+
+        [ExcelColumnNames("Q1", "Q2")]
+        public int[] Quarters { get; set; } = default!;
+
+        [ExcelColumnMatching("^Tot")]
+        public int Total { get; set; }
+    }
 }
