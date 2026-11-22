@@ -150,7 +150,7 @@ public class ExcelMappableGeneratorTests
                 public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out Name result) { result = new(); return true; }
             }
 
-            // Not parsed: auto-mapping only parses reference types it can create.
+            // Parsed by its Parse method, without a parameterless constructor.
             public sealed class NoConstructor : IParsable<NoConstructor>
             {
                 public NoConstructor(string value) => Value = value;
@@ -184,15 +184,23 @@ public class ExcelMappableGeneratorTests
         Assert.Empty(diagnostics);
         Assert.Equal(
         [
-            "Row<global::Row>",
 #if LIBRARY_NET8
+            "Row<global::Row>",
             "Parsable<global::Code>",
             "ParsableClass<global::Name>",
+            "ParsableClass<global::NoConstructor>",
+            "Type<global::Convertible>",
+            "Type<global::System.Numerics.BigInteger>",
+            "Collection<global::System.Collections.ArrayList, object>",
+            "Type<object>",
+            "Dictionary<global::System.Collections.Hashtable, string, object>",
+            "Type<string>",
+            "Collection<global::System.Collections.Generic.IEnumerable<object>, object>",
 #else
-            // The netstandard builds don't parse IParsable<T> types, so register them as other types.
+            // The netstandard builds map IParsable<T> types through their members, as objects.
+            "Row<global::Row>",
             "Type<global::Code>",
             "Type<global::Name>",
-#endif
             "Type<global::NoConstructor>",
             "Type<string>",
             "Type<global::Convertible>",
@@ -201,6 +209,7 @@ public class ExcelMappableGeneratorTests
             "Type<object>",
             "Dictionary<global::System.Collections.Hashtable, string, object>",
             "Collection<global::System.Collections.Generic.IEnumerable<object>, object>",
+#endif
         ], Registrations(generated));
     }
 

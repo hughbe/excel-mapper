@@ -163,6 +163,8 @@ internal sealed class TypeRule<T> : TypeRule
     }
 
     // The built-in conversion for T, or for the underlying type of a nullable T.
+    // Keep in sync with the source generator's TypeWalker (s_builtInTypes and HasConversion), which
+    // registers the types that have a conversion here. See "Auto-mapping and the source generator" in CLAUDE.md.
     private static Action<IList<ICellMapper<T>>>? FindDefaultMappers()
     {
         var type = typeof(T).GetNullableTypeOrThis(out _);
@@ -203,11 +205,15 @@ internal sealed class TypeRule<T> : TypeRule
             };
         }
 
-        if (mapper is null && AutoMapper.CanConstructObject(type))
-        {
 #if NET7_0_OR_GREATER
-            // Numbers. Number value types (all the built-in ones) also convert nullable members
-            // without boxing.
+        // Numbers and other IParsable<T> types are created by their own Parse methods, so they
+        // needn't have a parameterless constructor. Interfaces can't be type arguments of the
+        // mappers, which call their static members.
+        var isParsedType = mapper is null && !type.IsInterface;
+        if (isParsedType)
+        {
+            // Number value types (all the built-in ones) also convert nullable members without
+            // boxing.
             if (CreateBuiltInNumberMapper(type) is { } builtInMapper)
             {
                 mapper = builtInMapper;
@@ -216,25 +222,28 @@ internal sealed class TypeRule<T> : TypeRule
             {
                 mapper = GenericTypes.Create(numberType.IsValueType ? typeof(StructNumberMapper<>) : typeof(INumberBaseMapper<>), numberType);
             }
-#else
-            // The netstandard builds don't have INumberBase<T>, so built-in numeric types use a
-            // mapper that behaves the same way (including number styles and format providers).
-            if (NumberMapper.IsSupportedType(type))
-            {
-                mapper = NumberMapper.Create(type);
-            }
-#endif
-            else if (type.ImplementsInterface(typeof(IConvertible)))
-            {
-                mapper = new ChangeTypeMapper<T>();
-            }
-#if NET7_0_OR_GREATER
-            else if (type.ImplementsGenericInterface(typeof(IParsable<>), out var parsableType))
-            {
-                mapper = GenericTypes.Create(parsableType.IsValueType ? typeof(StructParsableMapper<>) : typeof(ParsableMapper<>), parsableType);
-            }
-#endif
         }
+#else
+        // The netstandard builds don't have INumberBase<T>, so built-in numeric types use a
+        // mapper that behaves the same way (including number styles and format providers).
+        if (mapper is null && NumberMapper.IsSupportedType(type))
+        {
+            mapper = NumberMapper.Create(type);
+        }
+#endif
+
+        // Other IConvertible types are converted with Convert.ChangeType, which needs a type it can create.
+        if (mapper is null && AutoMapper.CanConstructObject(type) && type.ImplementsInterface(typeof(IConvertible)))
+        {
+            mapper = new ChangeTypeMapper<T>();
+        }
+
+#if NET7_0_OR_GREATER
+        if (mapper is null && isParsedType && type.ImplementsGenericInterface(typeof(IParsable<>), out var parsableType))
+        {
+            mapper = GenericTypes.Create(parsableType.IsValueType ? typeof(StructParsableMapper<>) : typeof(ParsableMapper<>), parsableType);
+        }
+#endif
 
         if (mapper is null)
         {

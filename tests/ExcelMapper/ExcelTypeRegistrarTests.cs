@@ -93,16 +93,15 @@ public class ExcelTypeRegistrarTests
         }
     }
 
-    // Reference types are only parsed if they have a public parameterless constructor.
-    public sealed class RegistrarName : IParsable<RegistrarName>
+    public sealed class RegistrarName(string value) : IParsable<RegistrarName>
     {
-        public string Value { get; private init; } = "";
+        public string Value { get; } = value;
 
-        public static RegistrarName Parse(string s, IFormatProvider? provider) => new() { Value = s.ToLowerInvariant() };
+        public static RegistrarName Parse(string s, IFormatProvider? provider) => new(s.ToLowerInvariant());
 
         public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out RegistrarName result)
         {
-            result = s is null ? null : new RegistrarName { Value = s.ToLowerInvariant() };
+            result = s is null ? null : new RegistrarName(s.ToLowerInvariant());
             return s is not null;
         }
     }
