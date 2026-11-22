@@ -1,6 +1,6 @@
 namespace ExcelMapper.Tests;
 
-public class ExcelUriAttributeTests
+public class ExcelUriKindAttributeTests
 {
     public static IEnumerable<object?[]> Ctor_UriKind_TestData()
     {
@@ -13,7 +13,7 @@ public class ExcelUriAttributeTests
     [MemberData(nameof(Ctor_UriKind_TestData))]
     public void Ctor_UriKind(UriKind uriKind)
     {
-        var attribute = new ExcelUriAttribute(uriKind);
+        var attribute = new ExcelUriKindAttribute(uriKind);
         Assert.Equal(uriKind, attribute.UriKind);
     }
 
@@ -23,6 +23,6 @@ public class ExcelUriAttributeTests
     [InlineData((UriKind)100)]
     public void Ctor_InvalidUriKind_ThrowsArgumentOutOfRangeException(UriKind uriKind)
     {
-        Assert.Throws<ArgumentOutOfRangeException>("uriKind", () => new ExcelUriAttribute(uriKind));
+        Assert.Throws<ArgumentOutOfRangeException>("uriKind", () => new ExcelUriKindAttribute(uriKind));
     }
 }

@@ -156,7 +156,7 @@ internal static class ExpressionAutoMapper
     }
 
     [ExcludeFromCodeCoverage]
-    private static IMap ProcessExpression<T, TProperty>(Stack<IMappedExpression> stack, IMap currentMap, IMappedExpression currentExpression, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator, FallbackStrategy emptyValueStrategy)
+    private static IMap ProcessExpression<T, TProperty>(Stack<IMappedExpression> stack, IMap currentMap, IMappedExpression currentExpression, Func<IMappedExpression, EmptyValueStrategy, IMap> memberMapCreator, EmptyValueStrategy emptyValueStrategy)
     {
         if (stack.Count == 0)
         {
@@ -170,26 +170,26 @@ internal static class ExpressionAutoMapper
         return ProcessExpression<T, TProperty>(stack, nextMap, nextExpression, memberMapCreator, emptyValueStrategy);
     }
 
-    private static IMap GetOrCreateMap<T, TProperty>(ExcelClassMap<T> classMap, Expression expression, Func<IMappedExpression, FallbackStrategy, IMap> memberMapCreator)
+    private static IMap GetOrCreateMap<T, TProperty>(ExcelClassMap<T> classMap, Expression expression, Func<IMappedExpression, EmptyValueStrategy, IMap> memberMapCreator)
     {
         var stack = BuildExpressionStack(expression);
         return ProcessExpression<T, TProperty>(stack, classMap, stack.Pop(), memberMapCreator, classMap.EmptyValueStrategy);
     }
 
-    public static OneToOneMap<TProperty> GetOrCreateOneToOneMap<T, TProperty>(ExcelClassMap<T> classMap, Expression expression)
+    public static ValueMap<TProperty> GetOrCreateValueMap<T, TProperty>(ExcelClassMap<T> classMap, Expression expression)
     {
-        static IMap memberMapCreator(IMappedExpression finalExpression, FallbackStrategy emptyValueStrategy)
+        static IMap memberMapCreator(IMappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
         {
             var member = finalExpression is MappedMemberExpression memberExpression ? memberExpression.Member : null;
-            return AutoMapper.CreateOneToOneMap<TProperty>(member, finalExpression.GetDefaultCellReaderFactory(), emptyValueStrategy, isAutoMapping: false)!;
+            return AutoMapper.CreateValueMap<TProperty>(member, finalExpression.GetDefaultCellReaderFactory(), emptyValueStrategy, isAutoMapping: false)!;
         }
 
-        return (OneToOneMap<TProperty>)GetOrCreateMap<T, TProperty>(classMap, expression, memberMapCreator);
+        return (ValueMap<TProperty>)GetOrCreateMap<T, TProperty>(classMap, expression, memberMapCreator);
     }
 
-    public static ManyToOneEnumerableMap<TElement> GetOrCreateManyToOneEnumerableMap<T, TElement>(ExcelClassMap<T> classMap, Expression expression)
+    public static CollectionMap<TElement> GetOrCreateCollectionMap<T, TElement>(ExcelClassMap<T> classMap, Expression expression)
     {
-        static IMap memberMapCreator(IMappedExpression finalExpression, FallbackStrategy emptyValueStrategy)
+        static IMap memberMapCreator(IMappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
         {
             MemberInfo? member;
             Type type;
@@ -211,12 +211,12 @@ internal static class ExpressionAutoMapper
             return map;
         }
         
-        return (ManyToOneEnumerableMap<TElement>)GetOrCreateMap<T, TElement>(classMap, expression, memberMapCreator);
+        return (CollectionMap<TElement>)GetOrCreateMap<T, TElement>(classMap, expression, memberMapCreator);
     }
 
-    public static ManyToOneDictionaryMap<TKey, TValue> GetOrCreateManyToOneDictionaryMap<T, TKey, TValue>(ExcelClassMap<T> classMap, Expression expression) where TKey : notnull
+    public static DictionaryMap<TKey, TValue> GetOrCreateDictionaryMap<T, TKey, TValue>(ExcelClassMap<T> classMap, Expression expression) where TKey : notnull
     {
-        static IMap memberMapCreator(IMappedExpression finalExpression, FallbackStrategy emptyValueStrategy)
+        static IMap memberMapCreator(IMappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
         {
             MemberInfo? member;
             Type type;
@@ -238,7 +238,7 @@ internal static class ExpressionAutoMapper
             return map;
         }
 
-        var map = (ManyToOneDictionaryMap<TKey, TValue>)GetOrCreateMap<T, TValue>(classMap, expression, memberMapCreator);
+        var map = (DictionaryMap<TKey, TValue>)GetOrCreateMap<T, TValue>(classMap, expression, memberMapCreator);
 
         // Honour [ExcelExtraColumns] on a member mapped with Map(...), as auto-mapping does.
         if (FindOwner(classMap, map, out var member) is { } owner && member is not null && Attribute.IsDefined(member, typeof(ExcelExtraColumnsAttribute)))
@@ -249,9 +249,9 @@ internal static class ExpressionAutoMapper
         return map;
     }
 
-    public static ManyToOneDictionaryMap<string, TValue> GetOrCreateExtraColumnsMap<T, TValue>(ExcelClassMap<T> classMap, Expression expression)
+    public static DictionaryMap<string, TValue> GetOrCreateExtraColumnsMap<T, TValue>(ExcelClassMap<T> classMap, Expression expression)
     {
-        var map = GetOrCreateManyToOneDictionaryMap<T, string, TValue>(classMap, expression);
+        var map = GetOrCreateDictionaryMap<T, string, TValue>(classMap, expression);
         var owner = FindOwner(classMap, map, out _) ?? throw new ArgumentException($"Extra columns can only be mapped to a property or field. Received: {expression}", nameof(expression));
         map.ReaderFactory = new ExtraColumnsReaderFactory(owner);
         return map;
@@ -259,7 +259,7 @@ internal static class ExpressionAutoMapper
 
     public static RowNumberMap GetOrCreateRowNumberMap<T, TProperty>(ExcelClassMap<T> classMap, Expression expression)
     {
-        static IMap memberMapCreator(IMappedExpression finalExpression, FallbackStrategy emptyValueStrategy)
+        static IMap memberMapCreator(IMappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
         {
             var type = finalExpression is MappedMemberExpression memberExpression ? memberExpression.Type : finalExpression.MappedValueType;
             if (!RowNumberMap.IsSupportedType(type))
@@ -342,7 +342,7 @@ internal static class ExpressionAutoMapper
 
     public static ExcelClassMap<TElement> GetOrCreateObjectMap<T, TElement>(ExcelClassMap<T> classMap, Expression expression)
     {
-        static IMap memberMapCreator(IMappedExpression finalExpression, FallbackStrategy emptyValueStrategy)
+        static IMap memberMapCreator(IMappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
         {
             if (!AutoMapper.TryCreateObjectMap<TElement>(emptyValueStrategy, out var map))
             {
@@ -361,7 +361,7 @@ internal interface IMappedExpression
     Type Type { get; }
     Type MappedValueType { get; }
     object Context { get; }
-    IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, FallbackStrategy emptyValueStrategy);
+    IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy);
     ICellReaderFactory GetDefaultCellReaderFactory();
     ICellsReaderFactory? GetDefaultCellsReaderFactory();
 }
@@ -383,7 +383,7 @@ internal class MappedParameterExpression : IMappedExpression
     }
 
     [ExcludeFromCodeCoverage]
-    public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, FallbackStrategy emptyValueStrategy)
+    public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
         => throw new NotImplementedException();
 
     public ICellReaderFactory GetDefaultCellReaderFactory() => AutoMapper.s_zeroColumnIndexReaderFactory;
@@ -412,7 +412,7 @@ internal class MappedMemberExpression : IMappedExpression
         MappedValueType = memberType ?? expression.Type;
     }
 
-    public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, FallbackStrategy emptyValueStrategy)
+    public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
         => AutoMapper.GetOrCreateNestedMap(currentMap, currentExpression.MappedValueType, currentExpression.Context, emptyValueStrategy);
 
     public ICellReaderFactory GetDefaultCellReaderFactory()
@@ -471,7 +471,7 @@ internal class MappedEnumerableIndexerExpression : IMappedExpression
         Index = (int)constantExpression.Value!;
     }
 
-    public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, FallbackStrategy emptyValueStrategy)
+    public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
         => AutoMapper.GetOrCreateArrayIndexerMap(currentMap, Type, currentExpression.Context, ActualElementType);
 
     public ICellReaderFactory GetDefaultCellReaderFactory()
@@ -515,7 +515,7 @@ internal class MappedMultidimensionalArrayIndexerExpression : IMappedExpression
         }
     }
 
-    public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, FallbackStrategy emptyValueStrategy)
+    public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
         => AutoMapper.GetOrCreateMultidimensionalIndexerMap(currentMap, Type, ActualElementType, currentExpression.Context);
 
     public ICellReaderFactory GetDefaultCellReaderFactory()
@@ -559,7 +559,7 @@ internal class MappedDictionaryIndexerExpression : IMappedExpression
         Key = constantExpression.Value!;
     }
 
-    public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, FallbackStrategy emptyValueStrategy)
+    public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
         => AutoMapper.GetOrCreateDictionaryIndexerMap(currentMap, Type, ActualKeyType, ActualValueType, currentExpression.Context);
 
     public ICellReaderFactory GetDefaultCellReaderFactory()

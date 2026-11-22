@@ -26,7 +26,7 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// when the value of a cell is empty.
     /// </summary>
     /// <param name="emptyValueStrategy">The default strategy to use when the value of a cell is empty.</param>
-    public ExcelClassMap(FallbackStrategy emptyValueStrategy) : base(typeof(T), emptyValueStrategy)
+    public ExcelClassMap(EmptyValueStrategy emptyValueStrategy) : base(typeof(T), emptyValueStrategy)
     {
     }
 
@@ -39,8 +39,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public OneToOneMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
-        => ExpressionAutoMapper.GetOrCreateOneToOneMap<T, TProperty>(this, expression.Body);
+    public ValueMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
+        => ExpressionAutoMapper.GetOrCreateValueMap<T, TProperty>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -52,7 +52,7 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public OneToOneMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression, bool ignoreCase) where TProperty : struct
+    public ValueMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression, bool ignoreCase) where TProperty : struct
         => MapEnumInternal(expression, ignoreCase);
 
     /// <summary>
@@ -65,12 +65,12 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public OneToOneMap<TProperty?> Map<TProperty>(Expression<Func<T, TProperty?>> expression, bool ignoreCase) where TProperty : struct
+    public ValueMap<TProperty?> Map<TProperty>(Expression<Func<T, TProperty?>> expression, bool ignoreCase) where TProperty : struct
         => MapEnumInternal(expression, ignoreCase);
 
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    private OneToOneMap<TProperty> MapEnumInternal<TProperty>(Expression<Func<T, TProperty>> expression, bool ignoreCase)
+    private ValueMap<TProperty> MapEnumInternal<TProperty>(Expression<Func<T, TProperty>> expression, bool ignoreCase)
     {
         var enumType = typeof(TProperty).GetNullableTypeOrThis(out _);
         if (!enumType.IsEnum)
@@ -94,8 +94,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneEnumerableMap<TElement> MapList<TElement>(Expression<Func<T, IEnumerable>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+    public CollectionMap<TElement> MapList<TElement>(Expression<Func<T, IEnumerable>> expression)
+        => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -106,8 +106,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IEnumerable<TElement>>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+    public CollectionMap<TElement> Map<TElement>(Expression<Func<T, IEnumerable<TElement>>> expression)
+        => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -118,8 +118,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ICollection<TElement>>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+    public CollectionMap<TElement> Map<TElement>(Expression<Func<T, ICollection<TElement>>> expression)
+        => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -130,8 +130,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, Collection<TElement>>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+    public CollectionMap<TElement> Map<TElement>(Expression<Func<T, Collection<TElement>>> expression)
+        => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -142,8 +142,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ReadOnlyCollection<TElement>>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+    public CollectionMap<TElement> Map<TElement>(Expression<Func<T, ReadOnlyCollection<TElement>>> expression)
+        => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -154,8 +154,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ObservableCollection<TElement>>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+    public CollectionMap<TElement> Map<TElement>(Expression<Func<T, ObservableCollection<TElement>>> expression)
+        => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -166,8 +166,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ReadOnlyObservableCollection<TElement>>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+    public CollectionMap<TElement> Map<TElement>(Expression<Func<T, ReadOnlyObservableCollection<TElement>>> expression)
+        => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -178,8 +178,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ISet<TElement>>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+    public CollectionMap<TElement> Map<TElement>(Expression<Func<T, ISet<TElement>>> expression)
+        => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
 #if NET5_0_OR_GREATER
     /// <summary>
@@ -191,8 +191,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlySet<TElement>>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+    public CollectionMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlySet<TElement>>> expression)
+        => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 #endif
 
 #if NET9_0_OR_GREATER
@@ -205,8 +205,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, ReadOnlySet<TElement>>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+    public CollectionMap<TElement> Map<TElement>(Expression<Func<T, ReadOnlySet<TElement>>> expression)
+        => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 #endif
 
     /// <summary>
@@ -218,8 +218,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IList<TElement>>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+    public CollectionMap<TElement> Map<TElement>(Expression<Func<T, IList<TElement>>> expression)
+        => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -230,8 +230,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlyCollection<TElement>>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+    public CollectionMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlyCollection<TElement>>> expression)
+        => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -242,8 +242,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlyList<TElement>>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+    public CollectionMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlyList<TElement>>> expression)
+        => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -254,8 +254,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, List<TElement>>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+    public CollectionMap<TElement> Map<TElement>(Expression<Func<T, List<TElement>>> expression)
+        => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -266,8 +266,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, Array>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+    public CollectionMap<TElement> Map<TElement>(Expression<Func<T, Array>> expression)
+        => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -278,8 +278,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneEnumerableMap<TElement> Map<TElement>(Expression<Func<T, TElement[]>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneEnumerableMap<T, TElement>(this, expression.Body);
+    public CollectionMap<TElement> Map<TElement>(Expression<Func<T, TElement[]>> expression)
+        => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -318,7 +318,7 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field. Use it to configure how values are mapped.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneDictionaryMap<string, TValue> MapExtraColumns<TValue>(Expression<Func<T, IEnumerable<KeyValuePair<string, TValue>>>> expression)
+    public DictionaryMap<string, TValue> MapExtraColumns<TValue>(Expression<Func<T, IEnumerable<KeyValuePair<string, TValue>>>> expression)
         => ExpressionAutoMapper.GetOrCreateExtraColumnsMap<T, TValue>(this, expression.Body);
 
     /// <summary>
@@ -330,8 +330,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneDictionaryMap<string, TValue> MapDictionary<TValue>(Expression<Func<T, IEnumerable>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, string, TValue>(this, expression.Body);
+    public DictionaryMap<string, TValue> MapDictionary<TValue>(Expression<Func<T, IEnumerable>> expression)
+        => ExpressionAutoMapper.GetOrCreateDictionaryMap<T, string, TValue>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -342,8 +342,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneDictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, IDictionary>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, string, TValue>(this, expression.Body);
+    public DictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, IDictionary>> expression)
+        => ExpressionAutoMapper.GetOrCreateDictionaryMap<T, string, TValue>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -354,8 +354,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneDictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, IDictionary<string, TValue>>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, string, TValue>(this, expression.Body);
+    public DictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, IDictionary<string, TValue>>> expression)
+        => ExpressionAutoMapper.GetOrCreateDictionaryMap<T, string, TValue>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -366,8 +366,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneDictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, IReadOnlyDictionary<string, TValue>>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, string, TValue>(this, expression.Body);
+    public DictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, IReadOnlyDictionary<string, TValue>>> expression)
+        => ExpressionAutoMapper.GetOrCreateDictionaryMap<T, string, TValue>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -378,8 +378,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneDictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, Dictionary<string, TValue>>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, string, TValue>(this, expression.Body);
+    public DictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, Dictionary<string, TValue>>> expression)
+        => ExpressionAutoMapper.GetOrCreateDictionaryMap<T, string, TValue>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -389,8 +389,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneDictionaryMap<string, string> Map(Expression<Func<T, StringDictionary>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, string, string>(this, expression.Body);
+    public DictionaryMap<string, string> Map(Expression<Func<T, StringDictionary>> expression)
+        => ExpressionAutoMapper.GetOrCreateDictionaryMap<T, string, string>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -400,8 +400,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneDictionaryMap<string, string> Map(Expression<Func<T, NameValueCollection>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, string, string>(this, expression.Body);
+    public DictionaryMap<string, string> Map(Expression<Func<T, NameValueCollection>> expression)
+        => ExpressionAutoMapper.GetOrCreateDictionaryMap<T, string, string>(this, expression.Body);
 
     /// <summary>
     /// Creates a map for a property or field given a MemberExpression reading the property or field.
@@ -411,8 +411,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public ManyToOneDictionaryMap<string, object> Map(Expression<Func<T, ExpandoObject>> expression)
-        => ExpressionAutoMapper.GetOrCreateManyToOneDictionaryMap<T, string, object>(this, expression.Body);
+    public DictionaryMap<string, object> Map(Expression<Func<T, ExpandoObject>> expression)
+        => ExpressionAutoMapper.GetOrCreateDictionaryMap<T, string, object>(this, expression.Body);
 
     /// <summary>
     /// Configures the existing class map used to map multiple cells in a row to the properties and fields

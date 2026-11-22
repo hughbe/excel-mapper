@@ -78,16 +78,16 @@ internal sealed class ExtraColumnsReaderFactory : ICellsReaderFactory
 
                 break;
 
-            case IOneToOneMap oneToOneMap:
-                AddUsedColumns(oneToOneMap.ReaderFactory, sheet, usedColumns);
+            case IValueMap valueMap:
+                AddUsedColumns(valueMap.ReaderFactory, sheet, usedColumns);
                 break;
 
             case IManyToOneMap { ReaderFactory: ExtraColumnsReaderFactory }:
                 // Another extra columns member: it doesn't claim any columns.
                 break;
 
-            case IManyToOneMap manyToOneMap:
-                AddUsedColumns(manyToOneMap.ReaderFactory, sheet, usedColumns);
+            case IManyToOneMap cellsMap:
+                AddUsedColumns(cellsMap.ReaderFactory, sheet, usedColumns);
                 break;
 
             case IEnumerableIndexerMap enumerableIndexerMap:

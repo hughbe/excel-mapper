@@ -3,7 +3,7 @@ namespace ExcelMapper;
 /// <summary>
 /// Defines the behavior of a Dictionary mapper when mapping keys.
 /// </summary>
-public enum MappingDictionaryMapperBehavior
+public enum MappingDictionaryBehavior
 {
     /// <summary>
     /// A failure to match is not an error.

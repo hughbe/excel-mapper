@@ -118,7 +118,7 @@ public class MapBuiltInTypesWithMappingTests
         public CellConversionResult<int> Convert(CellValue value, CellContext context) => CellConversionResult<int>.Invalid(exception);
     }
 
-    private static T[] Read<T>(Action<OneToOneMap<T>> configure, params object?[] cells)
+    private static T[] Read<T>(Action<ValueMap<T>> configure, params object?[] cells)
     {
         var rows = new object?[cells.Length + 1][];
         rows[0] = ["Value"];

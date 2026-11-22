@@ -13,7 +13,7 @@ namespace ExcelMapper;
 /// </summary>
 /// <typeparam name="TKey">The key type of the IDictionary property or field.</typeparam>
 /// <typeparam name="TValue">The value type of the IDictionary property or field.</typeparam>
-public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey : notnull
+public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey : notnull
 {
     /// <summary>
     /// Constructs a map that reads values from one or more cells and maps them to the values of the
@@ -21,7 +21,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// </summary>
     /// <param name="readerFactory">Finds the columns to read.</param>
     /// <param name="dictionaryFactory">Creates the dictionary.</param>
-    internal ManyToOneDictionaryMap(ICellsReaderFactory readerFactory, IDictionaryFactory<TKey, TValue> dictionaryFactory)
+    internal DictionaryMap(ICellsReaderFactory readerFactory, IDictionaryFactory<TKey, TValue> dictionaryFactory)
     {
         ThrowHelpers.ThrowIfNull(readerFactory, nameof(readerFactory));
         ThrowHelpers.ThrowIfNull(dictionaryFactory, nameof(dictionaryFactory));
@@ -179,7 +179,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// <param name="valueMap">The pipeline that maps the value of a single cell to an object of the element type of the property
     /// or field.</param>
     /// <returns>The map that invoked this method.</returns>
-    public ManyToOneDictionaryMap<TKey, TValue> WithValueMap(Func<ValuePipeline<TValue>, ValuePipeline<TValue>> valueMap)
+    public DictionaryMap<TKey, TValue> WithValueMap(Func<ValuePipeline<TValue>, ValuePipeline<TValue>> valueMap)
     {
         ThrowHelpers.ThrowIfNull(valueMap, nameof(valueMap));
 
@@ -195,7 +195,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// </summary>
     /// <param name="columnNames">The names of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneDictionaryMap<TKey, TValue> WithColumnNames(params IReadOnlyList<string> columnNames)
+    public DictionaryMap<TKey, TValue> WithColumnNames(params IReadOnlyList<string> columnNames)
         => WithReaderFactory(new ColumnNamesReaderFactory(columnNames));
 
     /// <summary>
@@ -204,7 +204,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// <param name="columnNames">The names of the columns.</param>
     /// <param name="comparison">How column names are compared.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneDictionaryMap<TKey, TValue> WithColumnNames(IReadOnlyList<string> columnNames, StringComparison comparison)
+    public DictionaryMap<TKey, TValue> WithColumnNames(IReadOnlyList<string> columnNames, StringComparison comparison)
         => WithReaderFactory(new ColumnNamesReaderFactory(columnNames, comparison));
 
     /// <summary>
@@ -212,7 +212,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// </summary>
     /// <param name="columnNames">The names of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneDictionaryMap<TKey, TValue> WithColumnNames(params IEnumerable<string> columnNames)
+    public DictionaryMap<TKey, TValue> WithColumnNames(params IEnumerable<string> columnNames)
     {
         ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
         return WithColumnNames([.. columnNames]);
@@ -224,7 +224,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// <param name="columnNames">The names of the columns.</param>
     /// <param name="comparison">How column names are compared.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneDictionaryMap<TKey, TValue> WithColumnNames(IEnumerable<string> columnNames, StringComparison comparison)
+    public DictionaryMap<TKey, TValue> WithColumnNames(IEnumerable<string> columnNames, StringComparison comparison)
     {
         ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
         return WithColumnNames([.. columnNames], comparison);
@@ -235,7 +235,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// </summary>
     /// <param name="predicate">Whether a column name matches.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneDictionaryMap<TKey, TValue> WithColumnsMatching(Func<string, bool> predicate)
+    public DictionaryMap<TKey, TValue> WithColumnsMatching(Func<string, bool> predicate)
         => WithReaderFactory(new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(predicate)));
 
     /// <summary>
@@ -243,7 +243,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// </summary>
     /// <param name="regex">The regular expression column names are matched against.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneDictionaryMap<TKey, TValue> WithColumnsMatching(Regex regex)
+    public DictionaryMap<TKey, TValue> WithColumnsMatching(Regex regex)
         => WithReaderFactory(new ColumnsMatchingReaderFactory(new RegexColumnMatcher(regex)));
 
     /// <summary>
@@ -251,7 +251,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// </summary>
     /// <param name="columnIndices">The zero-based indices of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneDictionaryMap<TKey, TValue> WithColumnIndices(params IReadOnlyList<int> columnIndices)
+    public DictionaryMap<TKey, TValue> WithColumnIndices(params IReadOnlyList<int> columnIndices)
         => WithReaderFactory(new ColumnIndicesReaderFactory(columnIndices));
 
     /// <summary>
@@ -259,7 +259,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// </summary>
     /// <param name="columnIndices">The zero-based indices of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneDictionaryMap<TKey, TValue> WithColumnIndices(params IEnumerable<int> columnIndices)
+    public DictionaryMap<TKey, TValue> WithColumnIndices(params IEnumerable<int> columnIndices)
     {
         ThrowHelpers.ThrowIfNull(columnIndices, nameof(columnIndices));
         return WithColumnIndices([.. columnIndices]);
@@ -270,7 +270,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// </summary>
     /// <param name="selector">The column selector.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneDictionaryMap<TKey, TValue> WithColumns(IColumnSelector selector)
+    public DictionaryMap<TKey, TValue> WithColumns(IColumnSelector selector)
     {
         ThrowHelpers.ThrowIfNull(selector, nameof(selector));
         return WithReaderFactory(new ColumnSelectorReaderFactory(selector));
@@ -281,7 +281,7 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// an error being thrown.
     /// </summary>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneDictionaryMap<TKey, TValue> MakeOptional()
+    public DictionaryMap<TKey, TValue> MakeOptional()
     {
         Optional = true;
         return this;
@@ -291,13 +291,13 @@ public class ManyToOneDictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap whe
     /// Reads the cells' values as the text Excel shows, with their number formats applied.
     /// </summary>
     /// <returns>The map on which this method was invoked.</returns>
-    public ManyToOneDictionaryMap<TKey, TValue> MakePreserveFormatting()
+    public DictionaryMap<TKey, TValue> MakePreserveFormatting()
     {
         PreserveFormatting = true;
         return this;
     }
 
-    private ManyToOneDictionaryMap<TKey, TValue> WithReaderFactory(ICellsReaderFactory readerFactory)
+    private DictionaryMap<TKey, TValue> WithReaderFactory(ICellsReaderFactory readerFactory)
     {
         ReaderFactory = readerFactory;
         return this;

@@ -51,7 +51,7 @@ Everything public is permanent: package validation flags removing or changing it
 - Name new APIs after the existing ones (`FindHeading`/`TryFindHeading`, `ValidateHeading`/`TryValidateHeading`, `Map(...).WithX(...)`), with a `Try` variant when failing is an expected outcome.
 - Validate arguments and give actionable messages: say what was wrong and what to do instead.
 - The extension points are `ICellConverter<T>`, `ICellTransformer`, `ICellFallback<T>` and `IColumnSelector`; maps are configured with `ExcelClassMap<T>.Map(...)` and the fluent methods. Add new behaviour as a fluent method or attribute on top of these, not by making a mapper, reader, factory, fallback, pipeline or map type public.
-- Where overload resolution needs the member's type, put the fluent method on `OneToOneMap<T>` as an instance method (like `WithConverter(value => ...)` and `WithValueFallback(T?)`), so `WithConverter(_ => throw ...)` and lambdas returning a convertible type compile. Overloads for a nullable member's underlying type (`ICellConverter<int>` on an `int?` member) are extensions on `OneToOneMap<T?>`: on `ValuePipeline<T?>` they're ambiguous with the `object` overloads.
+- Where overload resolution needs the member's type, put the fluent method on `ValueMap<T>` as an instance method (like `WithConverter(value => ...)` and `WithValueFallback(T?)`), so `WithConverter(_ => throw ...)` and lambdas returning a convertible type compile. Overloads for a nullable member's underlying type (`ICellConverter<int>` on an `int?` member) are extensions on `ValueMap<T?>`: on `ValuePipeline<T?>` they're ambiguous with the `object` overloads.
 - Until a major version ships, its breaking changes are allowed, but each one goes in the changelog, the migration guide and `CompatibilitySuppressions.xml` with its reason.
 
 ## Tests
@@ -63,7 +63,7 @@ Every change comes with tests, structured like the existing ones. There are two 
    - `src/CellValue.cs` → `tests/ExcelMapper/CellValueTests.cs`
    - `src/ExcelRange.cs` → `tests/ExcelMapper/ExcelRangeTests.cs`
 
-   New public members on an existing type are tested in that type's existing test file (for example a new `OneToOneMap<T>` method goes in `OneToOneMapTTests`, a new extension method in its extension class's tests).
+   New public members on an existing type are tested in that type's existing test file (for example a new `ValueMap<T>` method goes in `ValueMapTTests`, a new extension method in its extension class's tests).
 
    Internal types (no `InternalsVisibleTo`) are tested through the public API.
 

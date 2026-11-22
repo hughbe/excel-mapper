@@ -26,18 +26,18 @@ internal static class MapValidation
 
                 return;
 
-            case IOneToOneMap oneToOneMap:
-                if (!oneToOneMap.Optional)
+            case IValueMap valueMap:
+                if (!valueMap.Optional)
                 {
-                    Check(() => oneToOneMap.ReaderFactory.GetCellReader(sheet) is not null, oneToOneMap.ReaderFactory, sheet, path, problems);
+                    Check(() => valueMap.ReaderFactory.GetCellReader(sheet) is not null, valueMap.ReaderFactory, sheet, path, problems);
                 }
 
                 return;
 
-            case IManyToOneMap manyToOneMap:
-                if (!manyToOneMap.Optional)
+            case IManyToOneMap cellsMap:
+                if (!cellsMap.Optional)
                 {
-                    Check(() => manyToOneMap.ReaderFactory.GetCellsReader(sheet) is not null, manyToOneMap.ReaderFactory, sheet, path, problems);
+                    Check(() => cellsMap.ReaderFactory.GetCellsReader(sheet) is not null, cellsMap.ReaderFactory, sheet, path, problems);
                 }
 
                 return;
@@ -92,18 +92,18 @@ internal static class MapValidation
 
                 return;
 
-            case IOneToOneMap oneToOneMap when IsNameBased(oneToOneMap.ReaderFactory):
+            case IValueMap valueMap when IsNameBased(valueMap.ReaderFactory):
                 lookedUp++;
-                if (HasColumn(static (factory, sheet) => ((ICellReaderFactory)factory).GetCellReader(sheet) is not null, oneToOneMap.ReaderFactory, sheet))
+                if (HasColumn(static (factory, sheet) => ((ICellReaderFactory)factory).GetCellReader(sheet) is not null, valueMap.ReaderFactory, sheet))
                 {
                     found++;
                 }
 
                 return;
 
-            case IManyToOneMap manyToOneMap when IsNameBased(manyToOneMap.ReaderFactory):
+            case IManyToOneMap cellsMap when IsNameBased(cellsMap.ReaderFactory):
                 lookedUp++;
-                if (HasColumn(static (factory, sheet) => ((ICellsReaderFactory)factory).GetCellsReader(sheet) is not null, manyToOneMap.ReaderFactory, sheet))
+                if (HasColumn(static (factory, sheet) => ((ICellsReaderFactory)factory).GetCellsReader(sheet) is not null, cellsMap.ReaderFactory, sheet))
                 {
                     found++;
                 }

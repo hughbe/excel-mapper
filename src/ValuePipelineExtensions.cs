@@ -8,16 +8,9 @@ using ExcelMapper.Transformers;
 
 namespace ExcelMapper;
 
-/// <summary>
-/// A delegate that converts a string value read from an Excel cell to a strongly-typed value.
-/// </summary>
-/// <typeparam name="TValue">The type of value to convert to.</typeparam>
-/// <param name="stringValue">The string value read from the Excel cell, or null if the cell is empty.</param>
-/// <returns>The converted value of type <typeparamref name="TValue"/>.</returns>
-public delegate TValue ConvertUsingSimpleMapperDelegate<out TValue>(string? stringValue);
 
 /// <summary>
-/// Fluent methods for value pipelines: a member's map (<see cref="OneToOneMap{T}"/>) and the
+/// Fluent methods for value pipelines: a member's map (<see cref="ValueMap{T}"/>) and the
 /// element or value pipelines of collections and dictionaries. Each returns the pipeline it was
 /// called on.
 /// </summary>
@@ -75,7 +68,7 @@ public static class ValuePipelineExtensions
     /// <param name="comparer">The comparer uses to map fixed string values. This allows for case-insensitive mappings, for example.</param>
     /// <param name="behavior">Whether or not a failure to match is an error.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static TMap WithMapping<TMap, TValue>(this TMap map, IDictionary<string, TValue> mappingDictionary, IEqualityComparer<string>? comparer = null, MappingDictionaryMapperBehavior behavior = MappingDictionaryMapperBehavior.Optional) where TMap : ValuePipeline<TValue>
+    public static TMap WithMapping<TMap, TValue>(this TMap map, IDictionary<string, TValue> mappingDictionary, IEqualityComparer<string>? comparer = null, MappingDictionaryBehavior behavior = MappingDictionaryBehavior.Optional) where TMap : ValuePipeline<TValue>
     {
         var item = new MappingDictionaryMapper<TValue>(mappingDictionary, comparer, behavior);
         map.Mappers.Add(item);
@@ -630,7 +623,7 @@ public static class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithConverter<TMap, TValue>(
         this TMap map,
-        ConvertUsingSimpleMapperDelegate<TValue?> converter)
+        Func<string?, TValue?> converter)
         where TMap : ValuePipeline<TValue?>
     {
         ThrowHelpers.ThrowIfNull(converter, nameof(converter));

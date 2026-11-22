@@ -97,12 +97,12 @@ public class ExcelImporterConfigurationTests
 
         Assert.True(importer.Configuration.TryGetClassMap<int>(out var classMap));
         var map = Assert.IsType<TestMap>(classMap);
-        Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
+        Assert.Equal(EmptyValueStrategy.Error, map.EmptyValueStrategy);
         Assert.Equal(typeof(int), map.Type);
 
         Assert.True(importer.Configuration.TryGetClassMap(typeof(int), out classMap));
         map = Assert.IsType<TestMap>(classMap);
-        Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
+        Assert.Equal(EmptyValueStrategy.Error, map.EmptyValueStrategy);
         Assert.Equal(typeof(int), map.Type);
     }
 
@@ -118,12 +118,12 @@ public class ExcelImporterConfigurationTests
 
         Assert.True(importer.Configuration.TryGetClassMap<IntClass>(out var classMap));
         var map = Assert.IsType<ExcelClassMap<IntClass>>(classMap);
-        Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
+        Assert.Equal(EmptyValueStrategy.Error, map.EmptyValueStrategy);
         Assert.Equal(typeof(IntClass), map.Type);
 
         Assert.True(importer.Configuration.TryGetClassMap(typeof(IntClass), out classMap));
         map = Assert.IsType<ExcelClassMap<IntClass>>(classMap);
-        Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
+        Assert.Equal(EmptyValueStrategy.Error, map.EmptyValueStrategy);
         Assert.Equal(typeof(IntClass), map.Type);
     }
 
@@ -137,12 +137,12 @@ public class ExcelImporterConfigurationTests
 
         Assert.True(importer.Configuration.TryGetClassMap<IntClass>(out var classMap));
         var map = Assert.IsType<ExcelClassMap<IntClass>>(classMap);
-        Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
+        Assert.Equal(EmptyValueStrategy.Error, map.EmptyValueStrategy);
         Assert.Equal(typeof(IntClass), map.Type);
 
         Assert.True(importer.Configuration.TryGetClassMap(typeof(IntClass), out classMap));
         map = Assert.IsType<ExcelClassMap<IntClass>>(classMap);
-        Assert.Equal(FallbackStrategy.ThrowIfPrimitive, map.EmptyValueStrategy);
+        Assert.Equal(EmptyValueStrategy.Error, map.EmptyValueStrategy);
         Assert.Equal(typeof(IntClass), map.Type);
     }
 

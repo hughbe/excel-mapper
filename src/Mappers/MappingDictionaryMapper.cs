@@ -8,9 +8,9 @@ internal sealed class MappingDictionaryMapper<T> : ICellMapper<T>
 {
     public IReadOnlyDictionary<string, T> MappingDictionary { get; }
 
-    public MappingDictionaryMapperBehavior Behavior { get; }
+    public MappingDictionaryBehavior Behavior { get; }
 
-    public MappingDictionaryMapper(IDictionary<string, T> mappingDictionary, IEqualityComparer<string>? comparer, MappingDictionaryMapperBehavior behavior)
+    public MappingDictionaryMapper(IDictionary<string, T> mappingDictionary, IEqualityComparer<string>? comparer, MappingDictionaryBehavior behavior)
     {
         ThrowHelpers.ThrowIfNull(mappingDictionary, nameof(mappingDictionary));
         EnumUtilities.ValidateIsDefined(behavior);
@@ -29,7 +29,7 @@ internal sealed class MappingDictionaryMapper<T> : ICellMapper<T>
 
         // Text that isn't in the dictionary is converted by the other mappers, unless it's required.
         value = default!;
-        return Behavior == MappingDictionaryMapperBehavior.Required ? CellConversion.Invalid : CellConversion.NotHandled;
+        return Behavior == MappingDictionaryBehavior.Required ? CellConversion.Invalid : CellConversion.NotHandled;
     }
 
     public Exception CreateException(ReadCellResult cell)

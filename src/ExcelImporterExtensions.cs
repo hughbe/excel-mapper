@@ -7,7 +7,7 @@ namespace ExcelMapper;
 /// <summary>
 /// Extension methods for <see cref="ExcelImporter"/> to provide additional functionality.
 /// </summary>
-public static class ExcelImporterUtils
+public static class ExcelImporterExtensions
 {
     /// <summary>
     /// Registers all <see cref="ExcelClassMap"/> types found in the specified namespace within the calling assembly.

@@ -3,11 +3,11 @@ using System.Text.RegularExpressions;
 
 namespace ExcelMapper.Tests;
 
-public class ManyToOneEnumerableMapTests
+public class CollectionMapTests
 {
     private const string Csv = "Name,Q1,Q2,Notes\na,1,2,x|y|z\n";
 
-    private static int[] ReadQuarters(Func<ManyToOneEnumerableMap<int>, ManyToOneEnumerableMap<int>> configure, string csv = Csv)
+    private static int[] ReadQuarters(Func<CollectionMap<int>, CollectionMap<int>> configure, string csv = Csv)
     {
         var classMap = new ExcelClassMap<IntsRow>();
         var map = classMap.Map(r => r.Values);
@@ -17,7 +17,7 @@ public class ManyToOneEnumerableMapTests
         return importer.ReadSheet().ReadRows<IntsRow>().Single().Values;
     }
 
-    private static string[] ReadStrings(Func<ManyToOneEnumerableMap<string>, ManyToOneEnumerableMap<string>> configure, string csv = Csv)
+    private static string[] ReadStrings(Func<CollectionMap<string>, CollectionMap<string>> configure, string csv = Csv)
     {
         var classMap = new ExcelClassMap<StringsRow>();
         var map = classMap.Map(r => r.Values);
@@ -27,7 +27,7 @@ public class ManyToOneEnumerableMapTests
         return importer.ReadSheet().ReadRows<StringsRow>().Single().Values;
     }
 
-    private static ManyToOneEnumerableMap<string> CreateMap() => new ExcelClassMap<StringsRow>().Map(r => r.Values);
+    private static CollectionMap<string> CreateMap() => new ExcelClassMap<StringsRow>().Map(r => r.Values);
 
     [Fact]
     public void Map_Default_SplitsColumnWithMemberName()

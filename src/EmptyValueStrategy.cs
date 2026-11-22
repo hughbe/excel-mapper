@@ -1,18 +1,20 @@
 ﻿namespace ExcelMapper;
 
 /// <summary>
-/// Describes the strategy used to fallback when the value of a cell is empty or invalid.
+/// What an empty cell gives for a member that has no empty fallback of its own: see
+/// <see cref="ExcelClassMap.EmptyValueStrategy"/>.
 /// </summary>
-public enum FallbackStrategy
+public enum EmptyValueStrategy
 {
     /// <summary>
-    /// Throw an ExcelMappingException if the value of a cell is empty or invalid.
+    /// <c>null</c> for reference types and nullable types, and an error (an
+    /// <see cref="ExcelMappingException"/>) for other value types, such as <c>int</c>. The default.
     /// </summary>
-    ThrowIfPrimitive,
+    Error,
 
     /// <summary>
-    /// Return the default value of the type of a property or field if the value of a
-    /// cell is empty or invalid.
+    /// The type's default value: <c>null</c> for reference types and nullable types, and for other
+    /// value types their default, such as <c>0</c>.
     /// </summary>
-    SetToDefaultValue
+    DefaultValue
 }

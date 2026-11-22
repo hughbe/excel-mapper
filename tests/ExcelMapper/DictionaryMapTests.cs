@@ -3,11 +3,11 @@ using System.Text.RegularExpressions;
 
 namespace ExcelMapper.Tests;
 
-public class ManyToOneDictionaryMapTests
+public class DictionaryMapTests
 {
     private const string Csv = "Name,Q1,Q2\na,1,2\n";
 
-    private static Dictionary<string, int> Read(Func<ManyToOneDictionaryMap<string, int>, ManyToOneDictionaryMap<string, int>> configure, string csv = Csv)
+    private static Dictionary<string, int> Read(Func<DictionaryMap<string, int>, DictionaryMap<string, int>> configure, string csv = Csv)
     {
         var classMap = new ExcelClassMap<Row>();
         var map = classMap.Map(r => r.Values);
@@ -17,7 +17,7 @@ public class ManyToOneDictionaryMapTests
         return importer.ReadSheet().ReadRows<Row>().Single().Values;
     }
 
-    private static ManyToOneDictionaryMap<string, int> CreateMap() => new ExcelClassMap<Row>().Map(r => r.Values);
+    private static DictionaryMap<string, int> CreateMap() => new ExcelClassMap<Row>().Map(r => r.Values);
 
     [Fact]
     public void Map_Default_ReturnsExpected()

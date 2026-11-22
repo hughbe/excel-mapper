@@ -166,7 +166,7 @@ public class MapMappingDictionaryTests
     {
         [ExcelMappingDictionary("b", "extra")]
         [ExcelMappingDictionaryComparer(StringComparison.InvariantCultureIgnoreCase)]
-        [ExcelMappingDictionaryBehavior(MappingDictionaryMapperBehavior.Required)]
+        [ExcelMappingDictionaryBehavior(MappingDictionaryBehavior.Required)]
         [ExcelInvalidValue("Invalid")]
         public string StringValue { get; set; } = default!;
 
@@ -280,7 +280,7 @@ public class MapMappingDictionaryTests
                 .WithMapping(new Dictionary<string, string>
                     {
                         { "a", "12345" }
-                    }, behavior: MappingDictionaryMapperBehavior.Required)
+                    }, behavior: MappingDictionaryBehavior.Required)
                 .WithColumnIndex(0)
                 .WithInvalidFallback("Missing");
         });

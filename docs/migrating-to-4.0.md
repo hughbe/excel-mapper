@@ -11,8 +11,9 @@ ExcelMapper 4.0 fixes several long-standing bugs and makes mapping more predicta
 5. [Error messages use cell addresses](#error-messages-use-cell-addresses)
 6. [Sheet names are case-insensitive](#sheet-names-are-case-insensitive)
 7. [Extension types](#extension-types)
-8. [Smaller changes](#smaller-changes)
-9. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
+8. [Renamed types](#renamed-types)
+9. [Smaller changes](#smaller-changes)
+10. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
 
 ## `object` members receive typed values
 
@@ -137,7 +138,7 @@ catch (ExcelMappingException ex)
 | Map members by hand | `IMap`, `ExcelPropertyMap`, `ExcelClassMap.Properties`, the maps' constructors, the indexer maps, `AutoMapper.TryCreateClassMap`, `RegisterClassMap(Type, IMap)` | `Map(...)` in a class map, including `Map(p => p.Values[0])` for elements. Start from the auto-mapped class map with `RegisterClassMap<T>(c => ...)`. `TryGetClassMap` returns an `ExcelClassMap` |
 | Create collections | `IEnumerableFactory<T>`, `IDictionaryFactory<TKey, TValue>`, `IMultidimensionalArrayFactory<T>` | ExcelMapper creates the collection for the member's type |
 
-`MappingDictionaryMapperBehavior` moved from `ExcelMapper.Mappers` to the `ExcelMapper` namespace.
+`ExcelMapper.Mappers.MappingDictionaryMapperBehavior` is now `ExcelMapper.MappingDictionaryBehavior` (see [Renamed types](#renamed-types)).
 
 **What to do:**
 
@@ -214,6 +215,23 @@ Map(r => r.Quarters).WithColumns(new QuarterColumns());
 ```
 
 If you created a map with its constructor, or implemented `IMap`, map the member with `Map(...)` in a class map instead.
+
+## Renamed types
+
+**Who's affected:** code that names these types, for example in a helper method's signature or a `using static`. Code that uses `var` and lambdas compiles unchanged.
+
+| 3.x | 4.0 |
+|---|---|
+| `OneToOneMap<T>` | `ValueMap<T>` |
+| `ManyToOneEnumerableMap<T>` | `CollectionMap<T>` |
+| `ManyToOneDictionaryMap<TKey, TValue>` | `DictionaryMap<TKey, TValue>` |
+| `FallbackStrategy.ThrowIfPrimitive`, `FallbackStrategy.SetToDefaultValue` | `EmptyValueStrategy.Error`, `EmptyValueStrategy.DefaultValue` |
+| `[ExcelUri(UriKind.Relative)]` (`ExcelUriAttribute`) | `[ExcelUriKind(UriKind.Relative)]` (`ExcelUriKindAttribute`) |
+| `ExcelImporterUtils` | `ExcelImporterExtensions` |
+| `ExcelMapper.Mappers.MappingDictionaryMapperBehavior` | `ExcelMapper.MappingDictionaryBehavior` |
+| `ConvertUsingSimpleMapperDelegate<T>` | `Func<string?, T>` |
+
+**What to do:** replace the old names with the new ones.
 
 ## Smaller changes
 

@@ -8,10 +8,10 @@ using ExcelMapper.Mappers;
 namespace ExcelMapper;
 
 /// <summary>
-/// Methods for <see cref="OneToOneMap{T}"/> of particular types, which return the map itself, so that
+/// Methods for <see cref="ValueMap{T}"/> of particular types, which return the map itself, so that
 /// calls chain, for example <c>Map(e =&gt; e.Joined).WithFormats("yyyy-MM-dd").MakeOptional()</c>.
 /// </summary>
-public static class OneToOneMapExtensions
+public static class ValueMapExtensions
 {
     /// <summary>
     /// Specifies the formats used to parse text as a DateTime. Existing formats are replaced.
@@ -19,7 +19,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateTime> WithFormats(this OneToOneMap<DateTime> map, params string[] formats)
+    public static ValueMap<DateTime> WithFormats(this ValueMap<DateTime> map, params string[] formats)
     {
         ((ValuePipeline<DateTime>)map).WithFormats(formats);
         return map;
@@ -31,7 +31,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateTime> WithFormats(this OneToOneMap<DateTime> map, params IEnumerable<string> formats)
+    public static ValueMap<DateTime> WithFormats(this ValueMap<DateTime> map, params IEnumerable<string> formats)
     {
         ((ValuePipeline<DateTime>)map).WithFormats(formats);
         return map;
@@ -43,7 +43,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateTime> WithFormatProvider(this OneToOneMap<DateTime> map, IFormatProvider? provider)
+    public static ValueMap<DateTime> WithFormatProvider(this ValueMap<DateTime> map, IFormatProvider? provider)
     {
         ((ValuePipeline<DateTime>)map).WithFormatProvider(provider);
         return map;
@@ -55,7 +55,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateTime?> WithFormats(this OneToOneMap<DateTime?> map, params string[] formats)
+    public static ValueMap<DateTime?> WithFormats(this ValueMap<DateTime?> map, params string[] formats)
     {
         ((ValuePipeline<DateTime?>)map).WithFormats(formats);
         return map;
@@ -67,7 +67,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateTime?> WithFormats(this OneToOneMap<DateTime?> map, params IEnumerable<string> formats)
+    public static ValueMap<DateTime?> WithFormats(this ValueMap<DateTime?> map, params IEnumerable<string> formats)
     {
         ((ValuePipeline<DateTime?>)map).WithFormats(formats);
         return map;
@@ -79,7 +79,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateTime?> WithFormatProvider(this OneToOneMap<DateTime?> map, IFormatProvider? provider)
+    public static ValueMap<DateTime?> WithFormatProvider(this ValueMap<DateTime?> map, IFormatProvider? provider)
     {
         ((ValuePipeline<DateTime?>)map).WithFormatProvider(provider);
         return map;
@@ -91,7 +91,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateTimeOffset> WithFormats(this OneToOneMap<DateTimeOffset> map, params string[] formats)
+    public static ValueMap<DateTimeOffset> WithFormats(this ValueMap<DateTimeOffset> map, params string[] formats)
     {
         ((ValuePipeline<DateTimeOffset>)map).WithFormats(formats);
         return map;
@@ -103,7 +103,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateTimeOffset> WithFormats(this OneToOneMap<DateTimeOffset> map, params IEnumerable<string> formats)
+    public static ValueMap<DateTimeOffset> WithFormats(this ValueMap<DateTimeOffset> map, params IEnumerable<string> formats)
     {
         ((ValuePipeline<DateTimeOffset>)map).WithFormats(formats);
         return map;
@@ -115,7 +115,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateTimeOffset> WithFormatProvider(this OneToOneMap<DateTimeOffset> map, IFormatProvider? provider)
+    public static ValueMap<DateTimeOffset> WithFormatProvider(this ValueMap<DateTimeOffset> map, IFormatProvider? provider)
     {
         ((ValuePipeline<DateTimeOffset>)map).WithFormatProvider(provider);
         return map;
@@ -127,7 +127,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="offset">The offset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateTimeOffset> WithOffset(this OneToOneMap<DateTimeOffset> map, TimeSpan offset)
+    public static ValueMap<DateTimeOffset> WithOffset(this ValueMap<DateTimeOffset> map, TimeSpan offset)
     {
         ((ValuePipeline<DateTimeOffset>)map).WithOffset(offset);
         return map;
@@ -139,7 +139,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateTimeOffset?> WithFormats(this OneToOneMap<DateTimeOffset?> map, params string[] formats)
+    public static ValueMap<DateTimeOffset?> WithFormats(this ValueMap<DateTimeOffset?> map, params string[] formats)
     {
         ((ValuePipeline<DateTimeOffset?>)map).WithFormats(formats);
         return map;
@@ -151,7 +151,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateTimeOffset?> WithFormats(this OneToOneMap<DateTimeOffset?> map, params IEnumerable<string> formats)
+    public static ValueMap<DateTimeOffset?> WithFormats(this ValueMap<DateTimeOffset?> map, params IEnumerable<string> formats)
     {
         ((ValuePipeline<DateTimeOffset?>)map).WithFormats(formats);
         return map;
@@ -163,7 +163,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateTimeOffset?> WithFormatProvider(this OneToOneMap<DateTimeOffset?> map, IFormatProvider? provider)
+    public static ValueMap<DateTimeOffset?> WithFormatProvider(this ValueMap<DateTimeOffset?> map, IFormatProvider? provider)
     {
         ((ValuePipeline<DateTimeOffset?>)map).WithFormatProvider(provider);
         return map;
@@ -175,7 +175,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="offset">The offset.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateTimeOffset?> WithOffset(this OneToOneMap<DateTimeOffset?> map, TimeSpan offset)
+    public static ValueMap<DateTimeOffset?> WithOffset(this ValueMap<DateTimeOffset?> map, TimeSpan offset)
     {
         ((ValuePipeline<DateTimeOffset?>)map).WithOffset(offset);
         return map;
@@ -187,7 +187,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<TimeSpan> WithFormats(this OneToOneMap<TimeSpan> map, params string[] formats)
+    public static ValueMap<TimeSpan> WithFormats(this ValueMap<TimeSpan> map, params string[] formats)
     {
         ((ValuePipeline<TimeSpan>)map).WithFormats(formats);
         return map;
@@ -199,7 +199,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<TimeSpan> WithFormats(this OneToOneMap<TimeSpan> map, params IEnumerable<string> formats)
+    public static ValueMap<TimeSpan> WithFormats(this ValueMap<TimeSpan> map, params IEnumerable<string> formats)
     {
         ((ValuePipeline<TimeSpan>)map).WithFormats(formats);
         return map;
@@ -211,7 +211,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<TimeSpan> WithFormatProvider(this OneToOneMap<TimeSpan> map, IFormatProvider? provider)
+    public static ValueMap<TimeSpan> WithFormatProvider(this ValueMap<TimeSpan> map, IFormatProvider? provider)
     {
         ((ValuePipeline<TimeSpan>)map).WithFormatProvider(provider);
         return map;
@@ -223,7 +223,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<TimeSpan?> WithFormats(this OneToOneMap<TimeSpan?> map, params string[] formats)
+    public static ValueMap<TimeSpan?> WithFormats(this ValueMap<TimeSpan?> map, params string[] formats)
     {
         ((ValuePipeline<TimeSpan?>)map).WithFormats(formats);
         return map;
@@ -235,7 +235,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<TimeSpan?> WithFormats(this OneToOneMap<TimeSpan?> map, params IEnumerable<string> formats)
+    public static ValueMap<TimeSpan?> WithFormats(this ValueMap<TimeSpan?> map, params IEnumerable<string> formats)
     {
         ((ValuePipeline<TimeSpan?>)map).WithFormats(formats);
         return map;
@@ -247,7 +247,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<TimeSpan?> WithFormatProvider(this OneToOneMap<TimeSpan?> map, IFormatProvider? provider)
+    public static ValueMap<TimeSpan?> WithFormatProvider(this ValueMap<TimeSpan?> map, IFormatProvider? provider)
     {
         ((ValuePipeline<TimeSpan?>)map).WithFormatProvider(provider);
         return map;
@@ -260,7 +260,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateOnly> WithFormats(this OneToOneMap<DateOnly> map, params string[] formats)
+    public static ValueMap<DateOnly> WithFormats(this ValueMap<DateOnly> map, params string[] formats)
     {
         ((ValuePipeline<DateOnly>)map).WithFormats(formats);
         return map;
@@ -272,7 +272,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateOnly> WithFormats(this OneToOneMap<DateOnly> map, params IEnumerable<string> formats)
+    public static ValueMap<DateOnly> WithFormats(this ValueMap<DateOnly> map, params IEnumerable<string> formats)
     {
         ((ValuePipeline<DateOnly>)map).WithFormats(formats);
         return map;
@@ -284,7 +284,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateOnly> WithFormatProvider(this OneToOneMap<DateOnly> map, IFormatProvider? provider)
+    public static ValueMap<DateOnly> WithFormatProvider(this ValueMap<DateOnly> map, IFormatProvider? provider)
     {
         ((ValuePipeline<DateOnly>)map).WithFormatProvider(provider);
         return map;
@@ -296,7 +296,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateOnly?> WithFormats(this OneToOneMap<DateOnly?> map, params string[] formats)
+    public static ValueMap<DateOnly?> WithFormats(this ValueMap<DateOnly?> map, params string[] formats)
     {
         ((ValuePipeline<DateOnly?>)map).WithFormats(formats);
         return map;
@@ -308,7 +308,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateOnly?> WithFormats(this OneToOneMap<DateOnly?> map, params IEnumerable<string> formats)
+    public static ValueMap<DateOnly?> WithFormats(this ValueMap<DateOnly?> map, params IEnumerable<string> formats)
     {
         ((ValuePipeline<DateOnly?>)map).WithFormats(formats);
         return map;
@@ -320,7 +320,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<DateOnly?> WithFormatProvider(this OneToOneMap<DateOnly?> map, IFormatProvider? provider)
+    public static ValueMap<DateOnly?> WithFormatProvider(this ValueMap<DateOnly?> map, IFormatProvider? provider)
     {
         ((ValuePipeline<DateOnly?>)map).WithFormatProvider(provider);
         return map;
@@ -333,7 +333,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<TimeOnly> WithFormats(this OneToOneMap<TimeOnly> map, params string[] formats)
+    public static ValueMap<TimeOnly> WithFormats(this ValueMap<TimeOnly> map, params string[] formats)
     {
         ((ValuePipeline<TimeOnly>)map).WithFormats(formats);
         return map;
@@ -345,7 +345,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<TimeOnly> WithFormats(this OneToOneMap<TimeOnly> map, params IEnumerable<string> formats)
+    public static ValueMap<TimeOnly> WithFormats(this ValueMap<TimeOnly> map, params IEnumerable<string> formats)
     {
         ((ValuePipeline<TimeOnly>)map).WithFormats(formats);
         return map;
@@ -357,7 +357,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<TimeOnly> WithFormatProvider(this OneToOneMap<TimeOnly> map, IFormatProvider? provider)
+    public static ValueMap<TimeOnly> WithFormatProvider(this ValueMap<TimeOnly> map, IFormatProvider? provider)
     {
         ((ValuePipeline<TimeOnly>)map).WithFormatProvider(provider);
         return map;
@@ -369,7 +369,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<TimeOnly?> WithFormats(this OneToOneMap<TimeOnly?> map, params string[] formats)
+    public static ValueMap<TimeOnly?> WithFormats(this ValueMap<TimeOnly?> map, params string[] formats)
     {
         ((ValuePipeline<TimeOnly?>)map).WithFormats(formats);
         return map;
@@ -381,7 +381,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="formats">The formats.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<TimeOnly?> WithFormats(this OneToOneMap<TimeOnly?> map, params IEnumerable<string> formats)
+    public static ValueMap<TimeOnly?> WithFormats(this ValueMap<TimeOnly?> map, params IEnumerable<string> formats)
     {
         ((ValuePipeline<TimeOnly?>)map).WithFormats(formats);
         return map;
@@ -393,7 +393,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<TimeOnly?> WithFormatProvider(this OneToOneMap<TimeOnly?> map, IFormatProvider? provider)
+    public static ValueMap<TimeOnly?> WithFormatProvider(this ValueMap<TimeOnly?> map, IFormatProvider? provider)
     {
         ((ValuePipeline<TimeOnly?>)map).WithFormatProvider(provider);
         return map;
@@ -407,7 +407,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<T> WithFormatProvider<T>(this OneToOneMap<T> map, IFormatProvider? provider) where T : INumberBase<T>
+    public static ValueMap<T> WithFormatProvider<T>(this ValueMap<T> map, IFormatProvider? provider) where T : INumberBase<T>
     {
         ((ValuePipeline<T>)map).WithFormatProvider(provider);
         return map;
@@ -420,7 +420,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="provider">The format provider.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<T?> WithFormatProvider<T>(this OneToOneMap<T?> map, IFormatProvider? provider) where T : struct, INumberBase<T>
+    public static ValueMap<T?> WithFormatProvider<T>(this ValueMap<T?> map, IFormatProvider? provider) where T : struct, INumberBase<T>
     {
         ((ValuePipeline<T?>)map).WithFormatProvider(provider);
         return map;
@@ -433,7 +433,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="style">The number styles.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<T> WithNumberStyle<T>(this OneToOneMap<T> map, NumberStyles style) where T : INumberBase<T>
+    public static ValueMap<T> WithNumberStyle<T>(this ValueMap<T> map, NumberStyles style) where T : INumberBase<T>
     {
         ((ValuePipeline<T>)map).WithNumberStyle(style);
         return map;
@@ -446,7 +446,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="style">The number styles.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<T?> WithNumberStyle<T>(this OneToOneMap<T?> map, NumberStyles style) where T : struct, INumberBase<T>
+    public static ValueMap<T?> WithNumberStyle<T>(this ValueMap<T?> map, NumberStyles style) where T : struct, INumberBase<T>
     {
         ((ValuePipeline<T?>)map).WithNumberStyle(style);
         return map;
@@ -461,7 +461,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="converter">The converter.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<T?> WithConverter<T>(this OneToOneMap<T?> map, ICellConverter<T> converter) where T : struct
+    public static ValueMap<T?> WithConverter<T>(this ValueMap<T?> map, ICellConverter<T> converter) where T : struct
     {
         ((ValuePipeline<T?>)map).WithConverter(converter);
         return map;
@@ -474,7 +474,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="fallback">The fallback.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<T?> WithEmptyFallback<T>(this OneToOneMap<T?> map, ICellFallback<T> fallback) where T : struct
+    public static ValueMap<T?> WithEmptyFallback<T>(this ValueMap<T?> map, ICellFallback<T> fallback) where T : struct
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
         ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
@@ -489,7 +489,7 @@ public static class OneToOneMapExtensions
     /// <param name="map">The map to use.</param>
     /// <param name="fallback">The fallback.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public static OneToOneMap<T?> WithInvalidFallback<T>(this OneToOneMap<T?> map, ICellFallback<T> fallback) where T : struct
+    public static ValueMap<T?> WithInvalidFallback<T>(this ValueMap<T?> map, ICellFallback<T> fallback) where T : struct
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
         ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
