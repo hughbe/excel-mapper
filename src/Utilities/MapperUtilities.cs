@@ -11,6 +11,23 @@ internal static class MapperUtilities
     /// exception can't be created directly (see the other methods). Like all of these methods, it's
     /// only called from <see cref="ICellMapper{T}.CreateException"/>, when the exception is used.
     /// </summary>
+    /// <summary>
+    /// Whether text that parses with <see cref="NumberStyles.Integer"/> parses to the same whole
+    /// number with <paramref name="style"/>: the style allows everything Integer does (leading and
+    /// trailing white space and a leading sign), and isn't hexadecimal or binary. Then a whole number
+    /// can be parsed with Integer first, which .NET parses several times faster than styles that
+    /// allow thousands separators or a decimal point, such as the default
+    /// <see cref="NumberStyles.Number"/>.
+    /// </summary>
+    public static bool AllowsInteger(NumberStyles style)
+        => (style & NumberStyles.Integer) == NumberStyles.Integer && (style & NonDecimalStyles) == 0;
+
+#if NET8_0_OR_GREATER
+    private const NumberStyles NonDecimalStyles = NumberStyles.AllowHexSpecifier | NumberStyles.AllowBinarySpecifier;
+#else
+    private const NumberStyles NonDecimalStyles = NumberStyles.AllowHexSpecifier;
+#endif
+
     public static Exception InvalidFromParse(Action parse)
     {
         try
