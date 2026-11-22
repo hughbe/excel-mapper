@@ -19,30 +19,32 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     /// Constructs a map that reads one or more values from one or more cells and maps these values to one
     /// property and field of the type of the property or field.
     /// </summary>
-    internal CollectionMap(ICellsReaderFactory readerFactory, CollectionBuilder<TElement> builder)
+    internal CollectionMap(Columns columns, CollectionBuilder<TElement> builder)
     {
-        _readerFactory = readerFactory;
+        _columns = columns;
         Builder = builder;
     }
 
-    private ICellsReaderFactory _readerFactory;
+    private Columns _columns;
 
-    /// <inheritdoc />
-    internal ICellsReaderFactory ReaderFactory
+    /// <summary>
+    /// Gets or sets the columns the elements are read from: several columns, or one cell split
+    /// into values (<see cref="SplitColumns"/>).
+    /// </summary>
+    internal Columns Columns
     {
-        get => _readerFactory;
+        get => _columns;
         set
         {
-            ThrowHelpers.ThrowIfNull(value, nameof(value));
-            _readerFactory = value;
+            _columns = value;
             ReaderVersion++;
         }
     }
 
-    ICellsReaderFactory IManyToOneMap.ReaderFactory
+    Columns IManyToOneMap.Columns
     {
-        get => ReaderFactory;
-        set => ReaderFactory = value;
+        get => Columns;
+        set => Columns = value;
     }
 
     /// <inheritdoc />
@@ -72,7 +74,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     }
 
     /// <summary>
-    /// Incremented when <see cref="ReaderFactory"/> changes, so that readers resolved for a sheet
+    /// Incremented when <see cref="Columns"/> changes, so that readers resolved for a sheet
     /// (see <see cref="BoundCellsMember"/>) are resolved again.
     /// </summary>
     int ICellsMap.ReaderVersion => ReaderVersion;
@@ -82,7 +84,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     ICellsReader? ICellsMap.GetCellsReader(ExcelSheet sheet) => GetCellsReader(sheet);
 
     private ICellsReader? GetCellsReader(ExcelSheet sheet)
-        => sheet.GetCellsReader(_readerFactory);
+        => sheet.GetCellsReader(_columns);
 
     bool ICellsMap.TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value)
         => TryGetValue(cellsReader, sheet, rowIndex, reader, member, out value);
@@ -97,7 +99,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
                 return false;
             }
 
-            throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
+            throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _columns, member);
         }
 
         var items = Builder.Begin(count);
@@ -144,19 +146,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     /// <param name="comparison">The string comparison to use when matching the column name.</param>
     /// <returns>The map that invoked this method.</returns>
     public CollectionMap<TElement> WithColumnName(string columnName, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
-    {
-        var columnReader = new ColumnNameReaderFactory(columnName, comparison);
-        if (ReaderFactory is SplitReaderFactory splitColumnReader)
-        {
-            splitColumnReader.ReaderFactory = columnReader;
-        }
-        else
-        {
-            ReaderFactory = new CharSplitReaderFactory(columnReader);
-        }
-
-        return this;
-    }
+        => WithSplitCell(new ColumnNameColumns(columnName, comparison));
 
     /// <summary>
     /// Sets the reader for multiple values to split the value of a single cell contained in the column
@@ -165,17 +155,12 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     /// <param name="columnIndex">The zero-bassed index of the column containing the cell to split.</param>
     /// <returns>The map that invoked this method.</returns>
     public CollectionMap<TElement> WithColumnIndex(int columnIndex)
-    {
-        var factory = new ColumnIndexReaderFactory(columnIndex);
-        if (ReaderFactory is SplitReaderFactory splitColumnReader)
-        {
-            splitColumnReader.ReaderFactory = factory;
-        }
-        else
-        {
-            ReaderFactory = new CharSplitReaderFactory(factory);
-        }
+        => WithSplitCell(new ColumnIndexColumns(columnIndex));
 
+    // Splits the cell in the given column, with the separators set before, if any.
+    private CollectionMap<TElement> WithSplitCell(Columns cell)
+    {
+        Columns = new SplitColumns(cell, Columns is SplitColumns split ? split.Splitter : new CharSplitter());
         return this;
     }
 
@@ -188,18 +173,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     public CollectionMap<TElement> WithSeparators(params char[] separators)
     {
         SeparatorUtilities.ValidateSeparators(separators);
-
-        if (ReaderFactory is not SplitReaderFactory splitColumnReader)
-        {
-            throw new ExcelMappingException("The mapping comes from multiple columns, so cannot be split.");
-        }
-
-        ReaderFactory = new CharSplitReaderFactory(splitColumnReader.ReaderFactory)
-        {
-            Separators = separators,
-            Options = splitColumnReader.Options
-        };
-        return this;
+        return WithSplitter(new CharSplitter { Separators = separators });
     }
 
     /// <summary>
@@ -223,17 +197,19 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     public CollectionMap<TElement> WithSeparators(params string[] separators)
     {
         SeparatorUtilities.ValidateSeparators(separators);
+        return WithSplitter(new StringSplitter { Separators = separators });
+    }
 
-        if (ReaderFactory is not SplitReaderFactory splitColumnReader)
+    // Splits the cell with the given separators, keeping the split options.
+    private CollectionMap<TElement> WithSplitter(CellSplitter splitter)
+    {
+        if (Columns is not SplitColumns split)
         {
             throw new ExcelMappingException("The mapping comes from multiple columns, so cannot be split.");
         }
 
-        ReaderFactory = new StringSplitReaderFactory(splitColumnReader.ReaderFactory)
-        {
-            Separators = separators,
-            Options = splitColumnReader.Options
-        };
+        splitter.Options = split.Splitter.Options;
+        Columns = new SplitColumns(split.Cell, splitter);
         return this;
     }
 
@@ -255,7 +231,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     /// <param name="columnNames">The names of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public CollectionMap<TElement> WithColumnNames(params IReadOnlyList<string> columnNames)
-        => WithReaderFactory(new ColumnNamesReaderFactory(columnNames));
+        => WithColumns(new ColumnNamesColumns(columnNames));
 
     /// <summary>
     /// Reads the collection from the given columns, in order.
@@ -264,7 +240,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     /// <param name="comparison">How column names are compared.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public CollectionMap<TElement> WithColumnNames(IReadOnlyList<string> columnNames, StringComparison comparison)
-        => WithReaderFactory(new ColumnNamesReaderFactory(columnNames, comparison));
+        => WithColumns(new ColumnNamesColumns(columnNames, comparison));
 
     /// <summary>
     /// Reads the collection from the given columns, in order.
@@ -295,7 +271,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     /// <param name="predicate">Whether a column name matches.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public CollectionMap<TElement> WithColumnsMatching(Func<string, bool> predicate)
-        => WithReaderFactory(new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(predicate)));
+        => WithColumns(new MatchingColumns(predicate));
 
     /// <summary>
     /// Reads the collection from every column whose name matches <paramref name="regex"/>.
@@ -303,7 +279,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     /// <param name="regex">The regular expression column names are matched against.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public CollectionMap<TElement> WithColumnsMatching(Regex regex)
-        => WithReaderFactory(new ColumnsMatchingReaderFactory(new RegexColumnMatcher(regex)));
+        => WithColumns(new MatchingColumns(regex));
 
     /// <summary>
     /// Reads the collection from the columns at the given zero-based indices, in order.
@@ -311,7 +287,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     /// <param name="columnIndices">The zero-based indices of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public CollectionMap<TElement> WithColumnIndices(params IReadOnlyList<int> columnIndices)
-        => WithReaderFactory(new ColumnIndicesReaderFactory(columnIndices));
+        => WithColumns(new ColumnIndicesColumns(columnIndices));
 
     /// <summary>
     /// Reads the collection from the columns at the given zero-based indices, in order.
@@ -332,7 +308,7 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
     public CollectionMap<TElement> WithColumns(IColumnSelector selector)
     {
         ThrowHelpers.ThrowIfNull(selector, nameof(selector));
-        return WithReaderFactory(new ColumnSelectorReaderFactory(selector));
+        return WithColumns(new SelectorColumns(selector));
     }
 
     /// <summary>
@@ -356,9 +332,9 @@ public class CollectionMap<TElement> : IManyToOneMap, ICellsMap
         return this;
     }
 
-    private CollectionMap<TElement> WithReaderFactory(ICellsReaderFactory readerFactory)
+    private CollectionMap<TElement> WithColumns(Columns columns)
     {
-        ReaderFactory = readerFactory;
+        Columns = columns;
         return this;
     }
 }

@@ -27,7 +27,7 @@ The public API is the importer, sheets and regions, class maps and the fluent me
 |---|---|
 | `ExcelImporter` | Opens a workbook or CSV file and owns its `IExcelDataReader` and `ExcelImporterConfiguration`. `ReadSheet`/`TryReadSheet` return sheets by position or name. |
 | `RowSource` (internal) | Owns the reader's position. The reader is forward-only and shared by every sheet of the importer, so this is the only code that calls `Read`, `NextResult` and `Reset`: sheets ask it for the sheet and row they need, and it reads forward or rewinds. It also counts rows, leaving out the empty lines at the end of CSV files. |
-| `ExcelSheet` | A worksheet and a position in it. Reads the heading (`ReadHeading`, `FindHeading`), then rows (`ReadRows<T>`, `ReadRow<T>`, `ReadRowResults<T>`). It keeps its own position, so two `ExcelSheet` objects for one worksheet don't interfere. Not thread-safe. It holds the heading and data range, and maps rows; the rest is internal: `Worksheet` (what's fixed about the worksheet, such as its name, index and reader), `RowCursor` (the row it's on, and moving to the next row of data), `SheetBindings` (the readers and bound class maps worked out for it) and `HeadingSearch` (`FindHeading`). |
+| `ExcelSheet` | A worksheet and a position in it. Reads the heading (`ReadHeading`, `FindHeading`), then rows (`ReadRows<T>`, `ReadRow<T>`, `ReadRowResults<T>`). It keeps its own position, so two `ExcelSheet` objects for one worksheet don't interfere. Not thread-safe. It holds the heading and data range, and maps rows; the rest is internal: `Worksheet` (what's fixed about the worksheet, such as its name, index and reader), `RowCursor` (the row it's on, and moving to the next row of data), `SheetBindings` (the columns, readers and bound class maps worked out for it) and `HeadingSearch` (`FindHeading`). |
 | `ExcelHeading` | The heading row: column names and their indexes, for finding columns by name (`ColumnUtilities` also matches names without separators when `IgnoreSeparatorsInColumnNames` is set). |
 | `ExcelRegion` | An immutable block of a worksheet with its own heading choice (`WithHeadingAt`, `WithoutHeading`, `WithHeadingSearch`). Each read creates a private `ExcelSheet` for the region's `Worksheet`, with its own `DataRange`, heading, cursor and bindings, so regions reuse the sheet's reading, binding and heading code. Converters, column selectors and errors get that sheet, so its heading is the region's. Columns chosen by position count from the region's first column (`ExcelSheet.ColumnOffset` and `ToSheetColumn`). |
 
@@ -57,15 +57,15 @@ A single-value map is itself a `ValuePipeline<T>` (see [The value pipeline](#the
 
 ### Choosing columns
 
-Each map has a reader factory (internal) that finds its columns in a sheet: by name, by index or letter, by several names or indexes, by a predicate or regex, all columns, the columns no other member reads, or one column's text split by separators. The fluent methods (`WithColumnName`, `WithColumnIndices`, `WithSeparators`, ...) and attributes choose the factory. `IColumnSelector` is the public way to choose columns in code: `ColumnSelectorReaderFactory` asks it once per sheet.
+Each map has a `Columns` (internal, in `src/Readers/Columns.cs`): the columns it reads, by name, by index or letter, by several names or indexes, by a predicate or regex, by an `IColumnSelector`, all columns, the columns no other member reads (`ExtraColumns`), or one cell's text split by separators (`SplitColumns`, with a `CellSplitter`). The fluent methods (`WithColumnName`, `WithColumnIndices`, `WithSeparators`, ...) and attributes choose it.
 
-A factory creates a cell reader for a sheet once; the reader then reads the member's cells from each row. Missing columns throw an `ExcelMappingException` that names the column and suggests a similarly named one, unless the member is optional.
+The columns are found once per sheet (`ExcelSheet.FindColumn`, cached by `SheetBindings`): a single value reads the first column found, by its index; a collection or dictionary reads all of them through an `ICellsReader` (`ColumnIndicesReader`, or `SplitCellsReader` for a split cell). Each kind of `Columns` also describes itself: the `ExcelMappingException` for missing columns (naming the column and suggesting a similarly named one, unless the member is optional), its text in `ValidateHeading`, and whether it looks columns up by name, which `FindHeading` needs.
 
 ## Binding
 
 The first time a class map is used with a sheet, `ExcelSheet.GetBoundMembers` (through its `SheetBindings`) binds each member to the sheet:
 
-- `BoundValueMember<T>` (single values): keeps the member's cell reader and a compiled `Action<object, T>` setter, so values stay typed from the pipeline to the member, without boxing.
+- `BoundValueMember<T>` (single values): keeps the member's column and a compiled `Action<object, T>` setter, so values stay typed from the pipeline to the member, without boxing.
 - `BoundCellsMember` (collections and dictionaries): keeps the cells reader. The collection is built by the map's `CollectionBuilder<T>` or `DictionaryBuilder<TKey, TValue>`, chosen once for the member's type by its `CollectionRule`/`DictionaryRule`. Builders hold no state (the collection being built is a local), so one builder serves every sheet and thread without a lock. Collections created from a copy of their elements, such as immutable and frozen ones, gather them in a list each thread reuses.
 - `BoundMapMember` (everything else, such as nested class maps, indexers and row numbers): maps through `IMap.TryGetValue`.
 
@@ -125,7 +125,7 @@ The net8.0 build is annotated for trimming: the mapped type `T` and the types gi
 | Path | Contents |
 |---|---|
 | `src/*.cs` | The public types (importer, sheets, regions, class maps and maps, attributes, extension points, `ValuePipeline<T>`, `ValuePipeline<T, TSelf>`, `ElementMap<T>` and the type-specific value methods in `ValuePipelineExtensions`), and the internal `IMap`, `ExcelPropertyMap` and indexer maps |
-| `src/Readers` | Reader factories and readers (internal) |
+| `src/Readers` | `Columns` and its kinds, splitting cells, and the readers of several cells (internal) |
 | `src/Mappers`, `src/Transformers`, `src/Fallbacks` | Built-in conversion, transformers and fallbacks, and the adapters for the public extension points (internal) |
 | `src/Factories` | `CollectionBuilder<T>` and `DictionaryBuilder<TKey, TValue>`: how each collection and dictionary type is built (internal) |
 | `src/Abstractions` | The interfaces of the internal types, and the indexer map interfaces |

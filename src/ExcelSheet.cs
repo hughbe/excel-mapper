@@ -522,12 +522,12 @@ public class ExcelSheet
     /// The map that rows of this sheet are being mapped with (the class map of the type passed to
     /// <c>ReadRow</c>, <c>ReadRows</c> or <c>ValidateHeading</c>), as opposed to the nested maps
     /// of its members. Extra columns exclude every column it reads (see
-    /// <see cref="ExtraColumnsReaderFactory"/>).
+    /// <see cref="ExtraColumns"/>).
     /// </summary>
     /// <remarks>
     /// Members bound to the sheet keep their extra columns reader, which is correct as a nested
     /// class map belongs to one parent: <c>WithClassMap</c> copies a class map's members rather
-    /// than sharing the map. The reader factory can be shared, so its readers are kept per root map.
+    /// than sharing the map. The extra columns can be shared, so their readers are kept per root map.
     /// </remarks>
     internal IMap? RootMap { get; private set; }
 
@@ -697,14 +697,16 @@ public class ExcelSheet
     }
 
     /// <summary>
-    /// Gets the reader a factory creates for this sheet, creating it the first time.
+    /// Finds the column a single value is read from, once for this sheet. -1 if the sheet doesn't
+    /// have it.
     /// </summary>
-    internal ICellReader? GetCellReader(ICellReaderFactory factory) => _bindings.GetCellReader(factory);
+    internal int FindColumn(Columns columns) => _bindings.FindColumn(columns);
 
     /// <summary>
-    /// Gets the cells reader a factory creates for this sheet, creating it the first time.
+    /// Gets the reader of the cells a collection or dictionary is read from, once for this sheet.
+    /// Null if the sheet doesn't have the columns.
     /// </summary>
-    internal ICellsReader? GetCellsReader(ICellsReaderFactory factory) => _bindings.GetCellsReader(factory);
+    internal ICellsReader? GetCellsReader(Columns columns) => _bindings.GetCellsReader(columns);
 
     /// <summary>
     /// Gets the members of a class map bound to this sheet.

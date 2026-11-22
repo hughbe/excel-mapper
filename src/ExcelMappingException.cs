@@ -84,7 +84,7 @@ public class ExcelMappingException : Exception
     private static ExcelSheet GetReadingSheet(CellContext context)
         => context.ReadingSheet ?? throw new ArgumentException("The context has no sheet.", nameof(context));
 
-    private ExcelMappingException(string message, ExcelSheet sheet, int rowIndex, int columnIndex, Exception? innerException, string? hint)
+    internal ExcelMappingException(string message, ExcelSheet sheet, int rowIndex, int columnIndex, Exception? innerException, string? hint)
         : base(GetMessage(message, sheet, rowIndex, columnIndex) + hint, innerException)
     {
         // The message and column name use the heading of the rows being read (a region's, for
@@ -130,58 +130,12 @@ public class ExcelMappingException : Exception
     /// </summary>
     public string? CellAddress => RowIndex >= 0 && ColumnIndex >= 0 ? ExcelRange.GetCellAddress(RowIndex, ColumnIndex) : null;
 
-    internal static ExcelMappingException CreateForNoSuchColumn(ExcelSheet sheet, int rowIndex, object readerFactory, MemberInfo? member)
+    internal static ExcelMappingException CreateForNoSuchColumn(ExcelSheet sheet, int rowIndex, Readers.Columns columns, MemberInfo? member)
     {
-        var exception = CreateForNoSuchColumnCore(sheet, rowIndex, readerFactory, member);
+        var exception = columns.CreateMissingException(sheet, rowIndex, member);
         exception.Member = member;
-        if (exception.ColumnName is null && readerFactory is IColumnNameProviderCellReaderFactory columnNameProvider &&
-            columnNameProvider.GetColumnName(sheet) is { Length: > 0 } columnName)
-        {
-            exception.ColumnName = columnName;
-        }
-
+        exception.ColumnName ??= columns.ColumnName;
         return exception;
-    }
-
-    private static ExcelMappingException CreateForNoSuchColumnCore(ExcelSheet sheet, int rowIndex, object readerFactory, MemberInfo? member)
-    {
-        if (readerFactory is Readers.ColumnSelectorReaderFactory selectorFactory)
-        {
-            return new ExcelMappingException($"Could not read value for member \"{member?.Name}\" for {selectorFactory.Selector.Describe(new ColumnSelectorContext(sheet))}", sheet, rowIndex, -1);
-        }
-
-        if (readerFactory is IColumnNameProviderCellReaderFactory columnNameProvider)
-        {
-            var columnName = columnNameProvider.GetColumnName(sheet);
-            if (!string.IsNullOrEmpty(columnName))
-            {
-                return new ExcelMappingException($"Could not read value for member \"{member?.Name}\" for column \"{columnName}\"", sheet, rowIndex, -1, null, GetSimilarColumnHint(sheet, columnName!));
-            }
-        }
-        if (readerFactory is IColumnIndexProviderCellReaderFactory columnIndexProvider)
-        {
-            var columnIndex = columnIndexProvider.GetColumnIndex(sheet);
-            if (columnIndex != null && columnIndex != -1)
-            {
-                return new ExcelMappingException($"Could not read value for member \"{member?.Name}\" for column at index {columnIndex}", sheet, rowIndex, -1);
-            }
-        }
-        if (readerFactory is IColumnNamesProviderCellReaderFactory columnNamesProvider)
-        {
-            if (columnNamesProvider.GetColumnNames(sheet) is { } columnNames)
-            {
-                return CreateForMultipleColumnNames(sheet, rowIndex, member, columnNames);
-            }
-        }
-        if (readerFactory is IColumnIndicesProviderCellReaderFactory columnIndicesProvider)
-        {
-            if (columnIndicesProvider.GetColumnIndices(sheet) is { } columnIndices)
-            {
-                return CreateForMultipleColumnIndices(sheet, rowIndex, member, columnIndices);
-            }
-        }
-
-        return new ExcelMappingException($"Could not read value for member \"{member?.Name}\"", sheet, rowIndex, -1);
     }
 
     /// <summary>
@@ -243,33 +197,5 @@ public class ExcelMappingException : Exception
         }
 
         return $"{message}{columnDescription}{location} in sheet \"{sheet?.Name}\".";
-    }
-
-    private static ExcelMappingException CreateForMultipleColumnNames(ExcelSheet sheet, int rowIndex, MemberInfo? member, IReadOnlyList<string> columnNames)
-    {
-        if (columnNames.Count == 0)
-        {
-            return new ExcelMappingException($"Could not read value for member \"{member?.Name}\" (no columns matching)", sheet, rowIndex, -1);
-        }
-        if (columnNames.Count == 1)
-        {
-            return new ExcelMappingException($"Could not read value for member \"{member?.Name}\" for column \"{columnNames[0]}\"", sheet, rowIndex, -1);
-        }
-
-        return new ExcelMappingException($"Could not read value for member \"{member?.Name}\" for columns {string.Join(", ", columnNames.Select(c => $"\"{c}\""))}", sheet, rowIndex, -1);
-    }
-
-    private static ExcelMappingException CreateForMultipleColumnIndices(ExcelSheet sheet, int rowIndex, MemberInfo? member, IReadOnlyList<int> columnIndices)
-    {
-        if (columnIndices.Count == 0)
-        {
-            return new ExcelMappingException($"Could not read value for member \"{member?.Name}\" (no columns matching)", sheet, rowIndex, -1);
-        }
-        if (columnIndices.Count == 1)
-        {
-            return new ExcelMappingException($"Could not read value for member \"{member?.Name}\" for column at index {columnIndices[0]}", sheet, rowIndex, -1);
-        }
-
-        return new ExcelMappingException($"Could not read value for member \"{member?.Name}\" for columns at indices {string.Join(", ", columnIndices)}", sheet, rowIndex, -1);
     }
 }

@@ -20,11 +20,11 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
     /// Constructs a map that reads values from one or more cells and maps them to the values of the
     /// dictionary assigned to the property or field.
     /// </summary>
-    /// <param name="readerFactory">Finds the columns to read.</param>
+    /// <param name="columns">The columns to read.</param>
     /// <param name="builder">Builds the dictionary.</param>
-    internal DictionaryMap(ICellsReaderFactory readerFactory, DictionaryBuilder<TKey, TValue> builder)
+    internal DictionaryMap(Columns columns, DictionaryBuilder<TKey, TValue> builder)
     {
-        _readerFactory = readerFactory;
+        _columns = columns;
         Builder = builder;
     }
 
@@ -35,31 +35,32 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
     public ElementMap<TValue> Pipeline { get; private set; } = new ElementMap<TValue>();
 
     ValuePipeline IToOneMap.Pipeline => Pipeline;
-    
+
     /// <inheritdoc />
     public bool Optional { get; set; }
 
     /// <inheritdoc />
     public bool PreserveFormatting { get; set; }
 
-    private ICellsReaderFactory _readerFactory;
+    private Columns _columns;
 
-    /// <inheritdoc />
-    internal ICellsReaderFactory ReaderFactory
+    /// <summary>
+    /// Gets or sets the columns the values are read from.
+    /// </summary>
+    internal Columns Columns
     {
-        get => _readerFactory;
+        get => _columns;
         set
         {
-            ThrowHelpers.ThrowIfNull(value, nameof(value));
-            _readerFactory = value;
+            _columns = value;
             ReaderVersion++;
         }
     }
 
-    ICellsReaderFactory IManyToOneMap.ReaderFactory
+    Columns IManyToOneMap.Columns
     {
-        get => ReaderFactory;
-        set => ReaderFactory = value;
+        get => Columns;
+        set => Columns = value;
     }
 
     /// <summary>
@@ -80,7 +81,7 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
     }
 
     /// <summary>
-    /// Incremented when <see cref="ReaderFactory"/> changes, so that readers resolved for a sheet
+    /// Incremented when <see cref="Columns"/> changes, so that readers resolved for a sheet
     /// (see <see cref="BoundCellsMember"/>) are resolved again.
     /// </summary>
     int ICellsMap.ReaderVersion => ReaderVersion;
@@ -90,7 +91,7 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
     ICellsReader? ICellsMap.GetCellsReader(ExcelSheet sheet) => GetCellsReader(sheet);
 
     private ICellsReader? GetCellsReader(ExcelSheet sheet)
-        => sheet.GetCellsReader(_readerFactory);
+        => sheet.GetCellsReader(_columns);
 
     bool ICellsMap.TryGetValue(ICellsReader? cellsReader, ExcelSheet sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, out object? value)
         => TryGetValue(cellsReader, sheet, rowIndex, reader, member, out value);
@@ -110,7 +111,7 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
                 return false;
             }
 
-            throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _readerFactory, member);
+            throw ExcelMappingException.CreateForNoSuchColumn(sheet, rowIndex, _columns, member);
         }
 
         var items = Builder.Begin(count);
@@ -161,7 +162,7 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
     /// <param name="columnNames">The names of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public DictionaryMap<TKey, TValue> WithColumnNames(params IReadOnlyList<string> columnNames)
-        => WithReaderFactory(new ColumnNamesReaderFactory(columnNames));
+        => WithColumns(new ColumnNamesColumns(columnNames));
 
     /// <summary>
     /// Reads the dictionary from the given columns, in order.
@@ -170,7 +171,7 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
     /// <param name="comparison">How column names are compared.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public DictionaryMap<TKey, TValue> WithColumnNames(IReadOnlyList<string> columnNames, StringComparison comparison)
-        => WithReaderFactory(new ColumnNamesReaderFactory(columnNames, comparison));
+        => WithColumns(new ColumnNamesColumns(columnNames, comparison));
 
     /// <summary>
     /// Reads the dictionary from the given columns, in order.
@@ -201,7 +202,7 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
     /// <param name="predicate">Whether a column name matches.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public DictionaryMap<TKey, TValue> WithColumnsMatching(Func<string, bool> predicate)
-        => WithReaderFactory(new ColumnsMatchingReaderFactory(new PredicateColumnMatcher(predicate)));
+        => WithColumns(new MatchingColumns(predicate));
 
     /// <summary>
     /// Reads the dictionary from every column whose name matches <paramref name="regex"/>.
@@ -209,7 +210,7 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
     /// <param name="regex">The regular expression column names are matched against.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public DictionaryMap<TKey, TValue> WithColumnsMatching(Regex regex)
-        => WithReaderFactory(new ColumnsMatchingReaderFactory(new RegexColumnMatcher(regex)));
+        => WithColumns(new MatchingColumns(regex));
 
     /// <summary>
     /// Reads the dictionary from the columns at the given zero-based indices, in order.
@@ -217,7 +218,7 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
     /// <param name="columnIndices">The zero-based indices of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public DictionaryMap<TKey, TValue> WithColumnIndices(params IReadOnlyList<int> columnIndices)
-        => WithReaderFactory(new ColumnIndicesReaderFactory(columnIndices));
+        => WithColumns(new ColumnIndicesColumns(columnIndices));
 
     /// <summary>
     /// Reads the dictionary from the columns at the given zero-based indices, in order.
@@ -238,7 +239,7 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
     public DictionaryMap<TKey, TValue> WithColumns(IColumnSelector selector)
     {
         ThrowHelpers.ThrowIfNull(selector, nameof(selector));
-        return WithReaderFactory(new ColumnSelectorReaderFactory(selector));
+        return WithColumns(new SelectorColumns(selector));
     }
 
     /// <summary>
@@ -262,9 +263,9 @@ public class DictionaryMap<TKey, TValue> : IManyToOneMap, ICellsMap where TKey :
         return this;
     }
 
-    private DictionaryMap<TKey, TValue> WithReaderFactory(ICellsReaderFactory readerFactory)
+    private DictionaryMap<TKey, TValue> WithColumns(Columns columns)
     {
-        ReaderFactory = readerFactory;
+        Columns = columns;
         return this;
     }
 }

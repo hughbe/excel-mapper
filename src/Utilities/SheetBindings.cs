@@ -4,46 +4,48 @@ namespace ExcelMapper.Utilities;
 
 /// <summary>
 /// What's been worked out about a sheet's columns, so it's done once per sheet rather than for
-/// every row: the readers that reader factories create for it, and class maps bound to it.
+/// every row: the columns members read, the readers of collections' cells, and class maps
+/// bound to it.
 /// </summary>
 internal sealed class SheetBindings(ExcelSheet sheet)
 {
-    // Keyed by the factory instance (the factories are internal and don't override Equals): a map
-    // whose factory is replaced gets a new reader.
-    private Dictionary<ICellReaderFactory, ICellReader?>? _cellReaders;
-    private Dictionary<ICellsReaderFactory, ICellsReader?>? _cellsReaders;
+    // Keyed by the columns instance (the kinds of columns don't override Equals): a map whose
+    // columns are replaced finds them again.
+    private Dictionary<Columns, int>? _columns;
+    private Dictionary<Columns, ICellsReader?>? _cellsReaders;
 
-    // Extra columns depend on the root map as well as the factory, as a nested class map can be
+    // Extra columns depend on the root map as well as the columns, as a nested class map can be
     // shared between root maps (with WithClassMap).
-    private Dictionary<(ExtraColumnsReaderFactory, IMap?), ICellsReader?>? _extraColumnsReaders;
+    private Dictionary<(Columns, IMap?), ICellsReader?>? _extraColumnsReaders;
 
     /// <summary>
-    /// Gets the reader a factory creates for the sheet, creating it the first time.
+    /// Finds the column a single value is read from, the first time it's asked for.
     /// </summary>
-    public ICellReader? GetCellReader(ICellReaderFactory factory)
+    public int FindColumn(Columns columns)
     {
-        _cellReaders ??= [];
-        if (!_cellReaders.TryGetValue(factory, out var reader))
+        _columns ??= [];
+        if (!_columns.TryGetValue(columns, out var column))
         {
-            reader = factory.GetCellReader(sheet);
-            _cellReaders[factory] = reader;
+            column = columns.FindColumn(sheet);
+            _columns[columns] = column;
         }
 
-        return reader;
+        return column;
     }
 
     /// <summary>
-    /// Gets the cells reader a factory creates for the sheet, creating it the first time.
+    /// Gets the reader of the cells a collection or dictionary is read from, creating it the
+    /// first time it's asked for. Null if the sheet doesn't have the columns.
     /// </summary>
-    public ICellsReader? GetCellsReader(ICellsReaderFactory factory)
+    public ICellsReader? GetCellsReader(Columns columns)
     {
-        if (factory is ExtraColumnsReaderFactory extraColumnsFactory)
+        if (columns is ExtraColumns)
         {
             _extraColumnsReaders ??= [];
-            var key = (extraColumnsFactory, sheet.RootMap);
+            var key = (columns, sheet.RootMap);
             if (!_extraColumnsReaders.TryGetValue(key, out var extraColumnsReader))
             {
-                extraColumnsReader = extraColumnsFactory.GetCellsReader(sheet);
+                extraColumnsReader = CreateCellsReader(columns);
                 _extraColumnsReaders[key] = extraColumnsReader;
             }
 
@@ -51,13 +53,24 @@ internal sealed class SheetBindings(ExcelSheet sheet)
         }
 
         _cellsReaders ??= [];
-        if (!_cellsReaders.TryGetValue(factory, out var reader))
+        if (!_cellsReaders.TryGetValue(columns, out var reader))
         {
-            reader = factory.GetCellsReader(sheet);
-            _cellsReaders[factory] = reader;
+            reader = CreateCellsReader(columns);
+            _cellsReaders[columns] = reader;
         }
 
         return reader;
+    }
+
+    private ICellsReader? CreateCellsReader(Columns columns)
+    {
+        if (columns is SplitColumns split)
+        {
+            var column = split.FindColumn(sheet);
+            return column == -1 ? null : new SplitCellsReader(column, split.Splitter);
+        }
+
+        return columns.FindColumns(sheet) is { } found ? new ColumnIndicesReader(found) : null;
     }
 
     private sealed class BoundClassMap(int version, BoundMember[] members)

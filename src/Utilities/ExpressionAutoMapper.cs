@@ -181,7 +181,7 @@ internal static class ExpressionAutoMapper
         static IMap memberMapCreator(IMappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
         {
             var member = finalExpression is MappedMemberExpression memberExpression ? memberExpression.Member : null;
-            return AutoMapper.CreateValueMap<TProperty>(member, finalExpression.GetDefaultCellReaderFactory(), emptyValueStrategy, isAutoMapping: false)!;
+            return AutoMapper.CreateValueMap<TProperty>(member, finalExpression.GetDefaultColumns(), emptyValueStrategy, isAutoMapping: false)!;
         }
 
         return (ValueMap<TProperty>)GetOrCreateMap<T, TProperty>(classMap, expression, memberMapCreator);
@@ -203,7 +203,7 @@ internal static class ExpressionAutoMapper
                 member = null;
                 type = finalExpression.MappedValueType;
             }
-            if (!CollectionRule<TElement>.TryCreateCollectionMap(member, type, finalExpression.GetDefaultCellsReaderFactory() ?? MemberMapper.GetDefaultSplitCellsReaderFactory(member, finalExpression.GetDefaultCellReaderFactory()), emptyValueStrategy, out var map))
+            if (!CollectionRule<TElement>.TryCreateCollectionMap(member, type, finalExpression.GetDefaultCellsColumns() ?? MemberMapper.GetDefaultSplitColumns(member, finalExpression.GetDefaultColumns()), emptyValueStrategy, out var map))
             {
                 throw new ExcelMappingException($"No known way to instantiate type \"{type}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
             }
@@ -243,7 +243,7 @@ internal static class ExpressionAutoMapper
         // Honour [ExcelExtraColumns] on a member mapped with Map(...), as auto-mapping does.
         if (FindOwner(classMap, map, out var member) is { } owner && member is not null && Attribute.IsDefined(member, typeof(ExcelExtraColumnsAttribute)))
         {
-            map.ReaderFactory = new ExtraColumnsReaderFactory(owner);
+            map.Columns = new ExtraColumns(owner);
         }
 
         return map;
@@ -253,7 +253,7 @@ internal static class ExpressionAutoMapper
     {
         var map = GetOrCreateDictionaryMap<T, string, TValue>(classMap, expression);
         var owner = FindOwner(classMap, map, out _) ?? throw new ArgumentException($"Extra columns can only be mapped to a property or field. Received: {expression}", nameof(expression));
-        map.ReaderFactory = new ExtraColumnsReaderFactory(owner);
+        map.Columns = new ExtraColumns(owner);
         return map;
     }
 
@@ -362,8 +362,8 @@ internal interface IMappedExpression
     Type MappedValueType { get; }
     object Context { get; }
     IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy);
-    ICellReaderFactory GetDefaultCellReaderFactory();
-    ICellsReaderFactory? GetDefaultCellsReaderFactory();
+    Columns GetDefaultColumns();
+    Columns? GetDefaultCellsColumns();
 }
 
 [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
@@ -386,9 +386,9 @@ internal class MappedParameterExpression : IMappedExpression
     public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
         => throw new NotImplementedException();
 
-    public ICellReaderFactory GetDefaultCellReaderFactory() => AutoMapper.s_zeroColumnIndexReaderFactory;
+    public Columns GetDefaultColumns() => AutoMapper.s_firstColumn;
 
-    public ICellsReaderFactory? GetDefaultCellsReaderFactory() => AutoMapper.s_allColumnNamesReaderFactory;
+    public Columns? GetDefaultCellsColumns() => AllColumns.Instance;
 }
 
 [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
@@ -415,10 +415,10 @@ internal class MappedMemberExpression : IMappedExpression
     public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
         => TypeRule.For(currentExpression.MappedValueType).GetOrCreateNestedMap(currentMap, currentExpression.Context, emptyValueStrategy);
 
-    public ICellReaderFactory GetDefaultCellReaderFactory()
-        => MemberMapper.GetDefaultCellReaderFactory(Member);
+    public Columns GetDefaultColumns()
+        => MemberMapper.GetDefaultColumns(Member);
 
-    public ICellsReaderFactory? GetDefaultCellsReaderFactory() => MemberMapper.GetDefaultCellsReaderFactory(Member);
+    public Columns? GetDefaultCellsColumns() => MemberMapper.GetDefaultCellsColumns(Member);
 }
 
 [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
@@ -471,10 +471,10 @@ internal class MappedEnumerableIndexerExpression : IMappedExpression
     public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
         => TypeRule.For(Type).Collection!.GetOrCreateIndexerMap(currentMap, Type, currentExpression.Context);
 
-    public ICellReaderFactory GetDefaultCellReaderFactory()
-        => new ColumnIndexReaderFactory(Index);
+    public Columns GetDefaultColumns()
+        => new ColumnIndexColumns(Index);
 
-    public ICellsReaderFactory? GetDefaultCellsReaderFactory() => null;
+    public Columns? GetDefaultCellsColumns() => null;
 }
 
 [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
@@ -513,10 +513,10 @@ internal class MappedMultidimensionalArrayIndexerExpression : IMappedExpression
     public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
         => TypeRule.For(Type).Collection!.GetOrCreateMultidimensionalIndexerMap(currentMap, currentExpression.Context);
 
-    public ICellReaderFactory GetDefaultCellReaderFactory()
-        => new ColumnIndexReaderFactory(0);
+    public Columns GetDefaultColumns()
+        => AutoMapper.s_firstColumn;
 
-    public ICellsReaderFactory? GetDefaultCellsReaderFactory() => null;
+    public Columns? GetDefaultCellsColumns() => null;
 }
 
 [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
@@ -552,24 +552,24 @@ internal class MappedDictionaryIndexerExpression : IMappedExpression
     public IMap GetNextMap(IMap currentMap, IMappedExpression currentExpression, EmptyValueStrategy emptyValueStrategy)
         => TypeRule.For(Type).Dictionary!.GetOrCreateIndexerMap(currentMap, Type, currentExpression.Context);
 
-    public ICellReaderFactory GetDefaultCellReaderFactory()
+    public Columns GetDefaultColumns()
     {
         if (Key is string keyString)
         {
             if (keyString.Length == 0)
             {
-                return new ColumnIndexReaderFactory(0);
+                return AutoMapper.s_firstColumn;
             }
 
-            return new ColumnNameReaderFactory(keyString);
+            return new ColumnNameColumns(keyString);
         }
         else if (Key is int keyInt)
         {
-            return new ColumnIndexReaderFactory(keyInt);
+            return new ColumnIndexColumns(keyInt);
         }
 
-        return new ColumnNameReaderFactory(Key.ToString()!);
+        return new ColumnNameColumns(Key.ToString()!);
     }
 
-    public ICellsReaderFactory? GetDefaultCellsReaderFactory() => null;
+    public Columns? GetDefaultCellsColumns() => null;
 }

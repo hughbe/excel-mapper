@@ -105,9 +105,9 @@ internal sealed class TypeRule<T> : TypeRule
 
     public override bool TryAutoMapMember(MemberInfo member, EmptyValueStrategy emptyValueStrategy, HashSet<Type>? typeStack, [NotNullWhen(true)] out IMap? map)
     {
-        var readerFactory = MemberMapper.GetDefaultCellReaderFactory(member);
-        var cellsReaderFactory = MemberMapper.GetDefaultCellsReaderFactory(member) ?? MemberMapper.GetDefaultSplitCellsReaderFactory(member, readerFactory);
-        return AutoMapper.TryCreateMap<T>(member, readerFactory, cellsReaderFactory, emptyValueStrategy, isAutoMapping: true, typeStack, out map);
+        var columns = MemberMapper.GetDefaultColumns(member);
+        var cellsColumns = MemberMapper.GetDefaultCellsColumns(member) ?? MemberMapper.GetDefaultSplitColumns(member, columns);
+        return AutoMapper.TryCreateMap<T>(member, columns, cellsColumns, emptyValueStrategy, isAutoMapping: true, typeStack, out map);
     }
 
     public override ExcelClassMap GetOrCreateNestedMap(IMap parentMap, object? context, EmptyValueStrategy emptyValueStrategy)

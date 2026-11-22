@@ -8,5 +8,8 @@ internal interface IManyToOneMap : IToOneMap
     /// <summary>
     /// Gets or sets the factory that creates a reader for cell values.
     /// </summary>
-    public ICellsReaderFactory ReaderFactory { get; set; }
+    /// <summary>
+    /// The columns the map reads.
+    /// </summary>
+    public Readers.Columns Columns { get; set; }
 }

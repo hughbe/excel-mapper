@@ -1,4 +1,3 @@
-using System.Linq;
 using ExcelMapper.Readers;
 
 namespace ExcelMapper.Utilities;
@@ -29,7 +28,7 @@ internal static class MapValidation
             case IValueMap valueMap:
                 if (!valueMap.Optional)
                 {
-                    Check(() => valueMap.ReaderFactory.GetCellReader(sheet) is not null, valueMap.ReaderFactory, sheet, path, problems);
+                    Check(valueMap.Columns, many: false, sheet, path, problems);
                 }
 
                 return;
@@ -37,7 +36,7 @@ internal static class MapValidation
             case IManyToOneMap cellsMap:
                 if (!cellsMap.Optional)
                 {
-                    Check(() => cellsMap.ReaderFactory.GetCellsReader(sheet) is not null, cellsMap.ReaderFactory, sheet, path, problems);
+                    Check(cellsMap.Columns, many: true, sheet, path, problems);
                 }
 
                 return;
@@ -92,18 +91,18 @@ internal static class MapValidation
 
                 return;
 
-            case IValueMap valueMap when IsNameBased(valueMap.ReaderFactory):
+            case IValueMap valueMap when valueMap.Columns.LooksUpNames:
                 lookedUp++;
-                if (HasColumn(static (factory, sheet) => ((ICellReaderFactory)factory).GetCellReader(sheet) is not null, valueMap.ReaderFactory, sheet))
+                if (HasColumns(valueMap.Columns, many: false, sheet))
                 {
                     found++;
                 }
 
                 return;
 
-            case IManyToOneMap cellsMap when IsNameBased(cellsMap.ReaderFactory):
+            case IManyToOneMap cellsMap when cellsMap.Columns.LooksUpNames:
                 lookedUp++;
-                if (HasColumn(static (factory, sheet) => ((ICellsReaderFactory)factory).GetCellsReader(sheet) is not null, cellsMap.ReaderFactory, sheet))
+                if (HasColumns(cellsMap.Columns, many: true, sheet))
                 {
                     found++;
                 }
@@ -136,18 +135,15 @@ internal static class MapValidation
         }
     }
 
-    private static bool IsNameBased(object readerFactory) => readerFactory switch
-    {
-        SplitReaderFactory splitReaderFactory => IsNameBased(splitReaderFactory.ReaderFactory),
-        FirstColumnNameReaderFactory compositeReaderFactory => compositeReaderFactory.Factories.Any(IsNameBased),
-        _ => readerFactory is IColumnNameProviderCellReaderFactory or IColumnNamesProviderCellReaderFactory,
-    };
+    // A collection split from one cell reads one column.
+    private static bool Found(Columns columns, bool many, ExcelSheet sheet)
+        => many && columns is not SplitColumns ? columns.FindColumns(sheet) is not null : columns.FindColumn(sheet) != -1;
 
-    private static bool HasColumn(Func<object, ExcelSheet, bool> hasColumn, object readerFactory, ExcelSheet sheet)
+    private static bool HasColumns(Columns columns, bool many, ExcelSheet sheet)
     {
         try
         {
-            return hasColumn(readerFactory, sheet);
+            return Found(columns, many, sheet);
         }
         catch (ExcelMappingException)
         {
@@ -157,12 +153,12 @@ internal static class MapValidation
 
     private static string Combine(string? path, string name) => path is null ? name : $"{path}.{name}";
 
-    private static void Check(Func<bool> hasColumn, object readerFactory, ExcelSheet sheet, string? path, List<string> problems)
+    private static void Check(Columns columns, bool many, ExcelSheet sheet, string? path, List<string> problems)
     {
         string? error = null;
         try
         {
-            if (hasColumn())
+            if (Found(columns, many, sheet))
             {
                 return;
             }
@@ -174,49 +170,6 @@ internal static class MapValidation
         }
 
         var member = path is null ? string.Empty : $" (member {path})";
-        problems.Add(error is null ? $"{DescribeColumns(readerFactory, sheet)}{member}" : $"{error}{member}");
-    }
-
-    private static string DescribeColumns(object readerFactory, ExcelSheet sheet)
-    {
-        if (readerFactory is ColumnSelectorReaderFactory selectorFactory)
-        {
-            return selectorFactory.Selector.Describe(new ColumnSelectorContext(sheet));
-        }
-
-        if (readerFactory is IColumnNameProviderCellReaderFactory nameProvider &&
-            nameProvider.GetColumnName(sheet) is { Length: > 0 } columnName)
-        {
-            var hint = ExcelMappingException.GetSimilarColumnHint(sheet, columnName) is null
-                ? string.Empty
-                : $", did you mean \"{SimilarColumn(sheet, columnName)}\"?";
-            return $"column \"{columnName}\"{hint}";
-        }
-
-        if (readerFactory is IColumnIndexProviderCellReaderFactory indexProvider &&
-            indexProvider.GetColumnIndex(sheet) is int columnIndex and >= 0)
-        {
-            return $"column {ExcelRange.GetColumnLetters(sheet.ColumnOffset + columnIndex)} (index {columnIndex})";
-        }
-
-        if (readerFactory is IColumnNamesProviderCellReaderFactory namesProvider &&
-            namesProvider.GetColumnNames(sheet) is { Count: > 0 } columnNames)
-        {
-            return $"one of columns {string.Join(", ", columnNames.Select(n => $"\"{n}\""))}";
-        }
-
-        if (readerFactory is IColumnIndicesProviderCellReaderFactory indicesProvider &&
-            indicesProvider.GetColumnIndices(sheet) is { Count: > 0 } columnIndices)
-        {
-            return $"columns {string.Join(", ", columnIndices.Select(i => ExcelRange.GetColumnLetters(sheet.ColumnOffset + i)))}";
-        }
-
-        return "a matching column";
-    }
-
-    private static string SimilarColumn(ExcelSheet sheet, string columnName)
-    {
-        var normalizedName = ColumnUtilities.RemoveSeparators(columnName);
-        return sheet.Heading!.ColumnNames.First(c => string.Equals(ColumnUtilities.RemoveSeparators(c), normalizedName, StringComparison.OrdinalIgnoreCase));
+        problems.Add($"{error ?? columns.Describe(sheet)}{member}");
     }
 }

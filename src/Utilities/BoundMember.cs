@@ -195,13 +195,10 @@ internal sealed class BoundValueMember<T> : BoundMember
     // never set.
     private Action<object, T>? _setter;
 
-    // The cell reader for the sheet, resolved on first use (inside the caller's error handling, as
-    // for unbound maps) and again if the map's reader factory changes.
-    private ICellReader? _cellReader;
-    private int _readerVersion = -1;
-
-    // The column, if the reader is a plain column reader: the cell is then read directly.
+    // The member's column in the sheet (-1 if missing), found on first use (inside the caller's
+    // error handling, as for unbound maps) and again if the map's columns change.
     private int _columnIndex = -1;
+    private int _readerVersion = -1;
 
     public BoundValueMember(ValueMap<T> map, ExcelPropertyMap property, ExcelSheet sheet)
     {
@@ -231,16 +228,13 @@ internal sealed class BoundValueMember<T> : BoundMember
         }
 
         var errorCount = errors?.Count ?? 0;
-        var found = _columnIndex >= 0
-            ? _map.TryGetValue(_columnIndex, sheet, rowIndex, reader, _member, out value)
-            : _map.TryGetValue(_cellReader, sheet, rowIndex, reader, _member, out value);
+        var found = _map.TryGetValue(_columnIndex, sheet, rowIndex, reader, _member, out value);
         return found && (errors is null || errors.Count == errorCount);
     }
 
     private void Resolve(ExcelSheet sheet)
     {
-        _cellReader = _map.GetCellReader(sheet);
-        _columnIndex = _cellReader is ColumnIndexReader columnIndexReader ? columnIndexReader.ColumnIndex : -1;
+        _columnIndex = _map.FindColumn(sheet);
         _readerVersion = _map.ReaderVersion;
     }
 
