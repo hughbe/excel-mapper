@@ -159,7 +159,7 @@ internal static class ExpressionAutoMapper
             var columns = finalExpression.GetDefaultCellsColumns() ?? MemberMapper.GetDefaultSplitColumns(member, finalExpression.GetDefaultColumns());
             if (!CollectionRule<TElement>.TryCreateCollectionMap(member, type, columns, emptyValueStrategy, out var map))
             {
-                throw new ExcelMappingException($"No known way to instantiate type \"{type}\". It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
+                throw new ExcelMappingException($"No known way to instantiate type {TypeNames.Get(type)}. It must be a single dimensional array, be assignable from List<T> or implement ICollection<T>.");
             }
 
             return map;
@@ -175,7 +175,7 @@ internal static class ExpressionAutoMapper
             var type = GetCreatedType(finalExpression);
             if (!DictionaryRule<TKey, TValue>.TryCreateDictionaryMap(finalExpression.Member, type, emptyValueStrategy, isAutoMapping: false, out var map))
             {
-                throw new ExcelMappingException($"No known way to instantiate type \"{type}\".");
+                throw new ExcelMappingException($"No known way to instantiate type {TypeNames.Get(type)}.");
             }
 
             return map;
@@ -207,7 +207,7 @@ internal static class ExpressionAutoMapper
             var type = GetCreatedType(finalExpression);
             if (!RowNumberMap.IsSupportedType(type))
             {
-                throw new ArgumentException($"Row numbers can't be mapped to type \"{type}\". Use a numeric type such as int or long.", nameof(expression));
+                throw new ArgumentException($"Row numbers can't be mapped to type {TypeNames.Get(type)}. Use a numeric type such as int or long.", nameof(expression));
             }
 
             return new RowNumberMap(type);
@@ -222,7 +222,7 @@ internal static class ExpressionAutoMapper
         {
             if (!AutoMapper.TryCreateObjectMap<TElement>(emptyValueStrategy, out var map))
             {
-                throw new ExcelMappingException($"Could not map object of type \"{typeof(TElement)}\".");
+                throw new ExcelMappingException($"Could not map object of type {TypeNames.Get(typeof(TElement))}.");
             }
 
             return map;

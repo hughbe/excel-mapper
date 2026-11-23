@@ -37,12 +37,12 @@ public sealed class ExcelConverterAttribute : Attribute
         ThrowHelpers.ThrowIfNull(converterType, nameof(converterType));
         if (converterType.IsAbstract || converterType.IsInterface)
         {
-            throw new ArgumentException($"Converter type \"{converterType}\" can't be abstract or an interface.", nameof(converterType));
+            throw new ArgumentException($"Converter type {TypeNames.Get(converterType)} can't be abstract or an interface.", nameof(converterType));
         }
 
         if (!converterType.ImplementsGenericInterface(typeof(ICellConverter<>), out _))
         {
-            throw new ArgumentException($"Converter type \"{converterType}\" must implement ICellConverter<T>.", nameof(converterType));
+            throw new ArgumentException($"Converter type {TypeNames.Get(converterType)} must implement ICellConverter<T>.", nameof(converterType));
         }
 
         Type = converterType;

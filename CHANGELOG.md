@@ -93,7 +93,8 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Error messages are clearer ([#209](https://github.com/hughbe/excel-mapper/pull/209)):
   - A missing column's message lists the columns the heading has: `Can't find column "Value" for member "Value" in sheet "People". The heading's columns are "Valeu", "Other".` It no longer gives a row, as the column is missing from the sheet, and its `RowIndex` is -1.
   - An empty cell says so: `The cell is empty, but member "Age" of type int can't be empty ...`, with what to do. A number that's too large for its type, or has a fraction for an integer type, says which.
-  - Types are named as in C# (`int`, `int?`, `List<string>`, `Employee`) rather than `System.Int32`.
+  - Types are named as in C# (`int`, `int?`, `List<string>`, `Employee`) rather than `System.Int32`, in every message, including those about class maps, attributes, constructors and circular references, and without quotes. ([#213](https://github.com/hughbe/excel-mapper/pull/213))
+  - When a constructor throws, its message follows the row: `Could not create an instance of type Employee on row 2. Salary can't be negative.` ([#213](https://github.com/hughbe/excel-mapper/pull/213))
   - Messages for a CSV file, whose sheet has no name, don't end with `in sheet ""`.
   - Reading an empty sheet that has a heading says the sheet is empty, rather than `Sheet "Empty" does not have row 0`; rows in messages are one-based, as Excel shows them.
 - On .NET 8, a class that implements `IParsable<T>` or `INumberBase<T>` is parsed from its cell even if it has no public parameterless constructor (for example `IPAddress`, or a record with a constructor), rather than mapped through its members; its `Parse` method creates it. ([#201](https://github.com/hughbe/excel-mapper/pull/201))

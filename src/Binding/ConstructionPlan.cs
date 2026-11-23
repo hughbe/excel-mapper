@@ -121,7 +121,7 @@ internal sealed class ConstructionPlan<[DynamicallyAccessedMembers(TrimmingConst
 
         if (type.IsInterface || type.IsAbstract)
         {
-            throw new ExcelMappingException($"Cannot create an instance of type \"{type}\" as it is an interface or abstract class.");
+            throw new ExcelMappingException($"Cannot create an instance of type {TypeNames.Get(type)} as it is an interface or abstract class.");
         }
 
         var members = new MemberInfo[classMembers.Count];
@@ -161,7 +161,7 @@ internal sealed class ConstructionPlan<[DynamicallyAccessedMembers(TrimmingConst
         {
             if (memberParameterIndices[i] == -1 && classMembers[i].IsReadOnly)
             {
-                throw new ExcelMappingException($"Property \"{members[i].Name}\" of type \"{type}\" is read-only and is not a parameter of the constructor {constructor}.");
+                throw new ExcelMappingException($"Property \"{members[i].Name}\" of type {TypeNames.Get(type)} is read-only and is not a parameter of the constructor {constructor}.");
             }
         }
 

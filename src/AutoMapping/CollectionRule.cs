@@ -84,7 +84,7 @@ internal sealed class CollectionRule<TElement> : CollectionRule
 
         if (!TryGetBuilder(collectionType, out var builder))
         {
-            throw new ExcelMappingException($"Could not map array of type \"{collectionType}\".");
+            throw new ExcelMappingException($"Could not map array of type {TypeNames.Get(collectionType)}.");
         }
 
         var map = new CollectionIndexerMap<TElement>(builder);

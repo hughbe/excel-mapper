@@ -157,7 +157,7 @@ public class ExcelImporterConfiguration
                 return;
             }
 
-            throw new ExcelMappingException($"Class map already exists for type \"{classType.FullName}\"");
+            throw new ExcelMappingException($"Class map already exists for type {TypeNames.Get(classType)}.");
         }
     }
 

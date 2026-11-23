@@ -153,6 +153,32 @@ public class ErrorMessageTests
     }
 
     [Fact]
+    public void RegisterClassMap_Twice_UsesCSharpName()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\n1\n");
+        importer.Configuration.RegisterClassMap<IntRow>(c => c.Map(r => r.Value));
+
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<IntRow>(c => c.Map(r => r.Value)));
+        Assert.Equal("Class map already exists for type ErrorMessageTests.IntRow.", exception.Message);
+    }
+
+    public record ThrowingRow
+    {
+        public ThrowingRow(int value) => throw new InvalidOperationException("Too big.");
+
+        public int Value { get; }
+    }
+
+    [Fact]
+    public void ReadRows_ConstructorThrows_UsesCSharpName()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\n1\n");
+
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<ThrowingRow>().ToArray());
+        Assert.Equal("Could not create an instance of type ErrorMessageTests.ThrowingRow on row 2. Too big.", exception.Message);
+    }
+
+    [Fact]
     public void ReadRow_NoMoreRowsCsv_DoesNotNameSheet()
     {
         using var importer = Helpers.GetCsvImporter("Value\n1\n");

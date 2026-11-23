@@ -197,7 +197,7 @@ internal static class AutoMapper
         // Check for circular reference
         if (!typeStack.Add(type))
         {
-            throw new ExcelMappingException($"Circular reference detected: type \"{type.Name}\" references itself through its members. Consider applying the ExcelIgnore attribute to break the cycle.");
+            throw new ExcelMappingException($"Circular reference detected: type {TypeNames.Get(type)} references itself through its members. Consider applying the ExcelIgnore attribute to break the cycle.");
         }
 
         try
@@ -307,7 +307,7 @@ internal static class AutoMapper
         {
             if (!RowNumberMap.IsSupportedType(memberType))
             {
-                throw new ExcelMappingException($"Member \"{member.Name}\" has the ExcelRowNumber attribute, but its type \"{memberType}\" is not a numeric type such as int or long.");
+                throw new ExcelMappingException($"Member \"{member.Name}\" has the ExcelRowNumber attribute, but its type {TypeNames.Get(memberType)} is not a numeric type such as int or long.");
             }
 
             map.Members.Add(new ClassMapMember(member, new RowNumberMap(memberType)));
@@ -321,7 +321,7 @@ internal static class AutoMapper
                 dictionaryRule.KeyType != typeof(string) ||
                 !dictionaryRule.TryCreateMap(member, memberType, emptyValueStrategy, isAutoMapping: true, out var extraColumnsMap))
             {
-                throw new ExcelMappingException($"Member \"{member.Name}\" has the ExcelExtraColumns attribute, but its type \"{memberType}\" is not a dictionary with string keys.");
+                throw new ExcelMappingException($"Member \"{member.Name}\" has the ExcelExtraColumns attribute, but its type {TypeNames.Get(memberType)} is not a dictionary with string keys.");
             }
 
             extraColumnsMap.Settings.Columns = new ExtraColumns(map);

@@ -111,7 +111,7 @@ internal static class MemberAttributes
         {
             // A constructor that throws is reported as its own exception.
             var reason = exception is TargetInvocationException { InnerException: { } inner } ? inner : exception;
-            throw new ExcelMappingException($"Can't create \"{type}\" given by {attributeName} on member \"{member.Name}\": {reason.Message}", reason);
+            throw new ExcelMappingException($"Can't create {TypeNames.Get(type)} given by {attributeName} on member \"{member.Name}\": {reason.Message}", reason);
         }
     }
 }

@@ -406,7 +406,7 @@ public class MappingScenarioTests
     public void ReadRows_CircularReference_ThrowsExcelMappingException()
     {
         var ex = AssertMappingFails<CircularClass>();
-        Assert.Contains("Circular reference", ex.Message);
+        Assert.Equal("Circular reference detected: type MappingScenarioTests.CircularClass references itself through its members. Consider applying the ExcelIgnore attribute to break the cycle.", ex.Message);
     }
 
     [Fact]
