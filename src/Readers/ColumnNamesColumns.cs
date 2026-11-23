@@ -9,11 +9,14 @@ namespace ExcelMapper.Readers;
 /// </summary>
 internal sealed class ColumnNamesColumns : Columns
 {
-    public ColumnNamesColumns(IReadOnlyList<string> columnNames, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+    public ColumnNamesColumns(IEnumerable<string> columnNames, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
     {
-        ColumnUtilities.ValidateColumnNames(columnNames);
+        // Copied, so that changing the caller's array afterwards doesn't change the map.
+        ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
+        string[] names = [.. columnNames];
+        ColumnUtilities.ValidateColumnNames(names, nameof(columnNames));
         EnumUtilities.ValidateIsDefined(comparison);
-        Names = columnNames;
+        Names = names;
         Comparison = comparison;
     }
 

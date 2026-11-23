@@ -38,7 +38,7 @@ internal static class MemberMapper
         var columnNamesAttribute = MemberAttributes.Get<ExcelColumnNamesAttribute>(member);
         if (columnNamesAttribute != null)
         {
-            return new ColumnNamesColumns([.. columnNamesAttribute.Names], columnNamesAttribute.Comparison);
+            return new ColumnNamesColumns(columnNamesAttribute.Names, columnNamesAttribute.Comparison);
         }
 
         // A single [ExcelColumnMatching] attribute still reads one column, the first that matches.
@@ -69,7 +69,7 @@ internal static class MemberMapper
         var columnIndicesAttribute = MemberAttributes.Get<ExcelColumnIndicesAttribute>(member);
         if (columnIndicesAttribute != null)
         {
-            return new ColumnIndicesColumns([.. columnIndicesAttribute.Indices]);
+            return new ColumnIndicesColumns(columnIndicesAttribute.Indices);
         }
 
         return new ColumnNameColumns(member.Name);
@@ -117,7 +117,7 @@ internal static class MemberMapper
         var columnNamesAttribute = MemberAttributes.Get<ExcelColumnNamesAttribute>(member);
         if (columnNamesAttribute != null)
         {
-            return new ColumnNamesColumns([.. columnNamesAttribute.Names], columnNamesAttribute.Comparison);
+            return new ColumnNamesColumns(columnNamesAttribute.Names, columnNamesAttribute.Comparison);
         }
 
         var columnsMatchingAttribute = MemberAttributes.Get<ExcelColumnsMatchingAttribute>(member);
@@ -129,7 +129,7 @@ internal static class MemberMapper
         var columnIndicesAttribute = MemberAttributes.Get<ExcelColumnIndicesAttribute>(member);
         if (columnIndicesAttribute != null)
         {
-            return new ColumnIndicesColumns([.. columnIndicesAttribute.Indices]);
+            return new ColumnIndicesColumns(columnIndicesAttribute.Indices);
         }
 
         return null;

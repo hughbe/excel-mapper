@@ -131,10 +131,7 @@ public sealed class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IColumnsMap, IB
     /// <param name="columnNames">The names of the columns, in order of preference.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public ValueMap<T> WithColumnNames(IEnumerable<string> columnNames)
-    {
-        ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
-        return WithColumnNames(columnNames as string[] ?? [.. columnNames]);
-    }
+        => WithColumns(new ColumnNamesColumns(columnNames));
 
     /// <summary>
     /// Reads the member from the first of the given columns that the sheet has, as
@@ -144,10 +141,7 @@ public sealed class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IColumnsMap, IB
     /// <param name="comparison">How column names are compared.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public ValueMap<T> WithColumnNames(IEnumerable<string> columnNames, StringComparison comparison)
-    {
-        ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
-        return WithColumns(new ColumnNamesColumns([.. columnNames], comparison));
-    }
+        => WithColumns(new ColumnNamesColumns(columnNames, comparison));
 
     /// <summary>
     /// Reads the member from the first column whose name matches <paramref name="predicate"/>.
@@ -187,10 +181,7 @@ public sealed class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IColumnsMap, IB
     /// <param name="selector">The column selector.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public ValueMap<T> WithColumns(IColumnSelector selector)
-    {
-        ThrowHelpers.ThrowIfNull(selector, nameof(selector));
-        return WithColumns(new SelectorColumns(selector));
-    }
+        => WithColumns(new SelectorColumns(selector));
 
     /// <summary>
     /// Makes the member optional: if its column is missing, the member keeps its value instead of

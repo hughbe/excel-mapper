@@ -1,4 +1,3 @@
-using System.Linq;
 using ExcelMapper.Readers;
 using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
@@ -167,10 +166,7 @@ public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     /// <param name="columnNames">The names of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public DictionaryMap<TKey, TValue> WithColumnNames(IEnumerable<string> columnNames)
-    {
-        ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
-        return WithColumnNames(columnNames as string[] ?? columnNames.ToArray());
-    }
+        => WithColumns(new ColumnNamesColumns(columnNames));
 
     /// <summary>
     /// Reads the dictionary from the given columns, in order.
@@ -179,10 +175,7 @@ public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     /// <param name="comparison">How column names are compared.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public DictionaryMap<TKey, TValue> WithColumnNames(IEnumerable<string> columnNames, StringComparison comparison)
-    {
-        ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
-        return WithColumns(new ColumnNamesColumns([.. columnNames], comparison));
-    }
+        => WithColumns(new ColumnNamesColumns(columnNames, comparison));
 
     /// <summary>
     /// Reads the dictionary from every column whose name matches <paramref name="predicate"/>.
@@ -214,10 +207,7 @@ public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     /// <param name="columnIndices">The zero-based indices of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public DictionaryMap<TKey, TValue> WithColumnIndices(IEnumerable<int> columnIndices)
-    {
-        ThrowHelpers.ThrowIfNull(columnIndices, nameof(columnIndices));
-        return WithColumnIndices(columnIndices as int[] ?? columnIndices.ToArray());
-    }
+        => WithColumns(new ColumnIndicesColumns(columnIndices));
 
     /// <summary>
     /// Reads the dictionary from the columns <paramref name="selector"/> chooses for each sheet, in order.
@@ -225,10 +215,7 @@ public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     /// <param name="selector">The column selector.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public DictionaryMap<TKey, TValue> WithColumns(IColumnSelector selector)
-    {
-        ThrowHelpers.ThrowIfNull(selector, nameof(selector));
-        return WithColumns(new SelectorColumns(selector));
-    }
+        => WithColumns(new SelectorColumns(selector));
 
     /// <summary>
     /// Makes the member optional: if its columns are missing, the member keeps its value instead of

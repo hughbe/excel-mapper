@@ -138,6 +138,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Changing a member's columns (for example with `WithColumnName`) after reading kept using the old column. ([#120](https://github.com/hughbe/excel-mapper/pull/120))
 - Building an error message could read the heading as a side effect. ([#130](https://github.com/hughbe/excel-mapper/pull/130))
 - On the netstandard builds, argument exceptions had no parameter name, and `null` arguments to string validation threw `ArgumentException` instead of `ArgumentNullException`.
+- Changing an array after passing it to `WithColumnNames`, `WithColumnIndices` or `WithSeparators` changed the columns or separators the map used, even after the map was frozen. The maps copy the array. ([#226](https://github.com/hughbe/excel-mapper/pull/226))
 
 ### Performance
 

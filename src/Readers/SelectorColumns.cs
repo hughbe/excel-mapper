@@ -6,9 +6,15 @@ namespace ExcelMapper.Readers;
 /// <summary>
 /// The columns an <see cref="IColumnSelector"/> chooses. In a region, columns outside it are ignored.
 /// </summary>
-internal sealed class SelectorColumns(IColumnSelector selector) : Columns
+internal sealed class SelectorColumns : Columns
 {
-    public IColumnSelector Selector { get; } = selector;
+    public SelectorColumns(IColumnSelector selector)
+    {
+        ThrowHelpers.ThrowIfNull(selector, nameof(selector));
+        Selector = selector;
+    }
+
+    public IColumnSelector Selector { get; }
 
     public override int FindColumn(SheetView sheet)
     {

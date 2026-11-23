@@ -127,6 +127,19 @@ public class CollectionMapTests
     }
 
     [Fact]
+    public void ColumnMethods_ArrayChangedAfterwards_ReadGivenColumns()
+    {
+        var names = new[] { "Q1", "Q2" };
+        var indices = new[] { 1, 2 };
+        var chars = new[] { '|' };
+        var strings = new[] { "|" };
+        Assert.Equal([1, 2], ReadQuarters(m => { var result = m.WithColumnNames(names); names[0] = "Q2"; return result; }));
+        Assert.Equal([1, 2], ReadQuarters(m => { var result = m.WithColumnIndices(indices); indices[0] = 2; return result; }));
+        Assert.Equal(["x", "y", "z"], ReadStrings(m => { var result = m.WithColumnName("Notes").WithSeparators(chars); chars[0] = ','; return result; }));
+        Assert.Equal(["x", "y", "z"], ReadStrings(m => { var result = m.WithColumnName("Notes").WithSeparators(strings); strings[0] = ","; return result; }));
+    }
+
+    [Fact]
     public void WithSeparators_InvalidSeparators_Throws()
     {
         var map = CreateMap();

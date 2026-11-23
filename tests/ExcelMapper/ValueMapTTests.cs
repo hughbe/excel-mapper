@@ -43,6 +43,17 @@ public class ValueMapTTests
     }
 
     [Fact]
+    public void WithColumnNames_ArrayChangedAfterwards_ReadsGivenColumns()
+    {
+        var names = new[] { "A" };
+        using var importer = Helpers.GetCsvImporter("A,B\na,b\n");
+        importer.Configuration.RegisterClassMap<TestClass>(c => c.Map(t => t.Value).WithColumnNames(names));
+        names[0] = "B";
+
+        Assert.Equal("a", importer.ReadSheet().ReadRows<TestClass>().Single().Value);
+    }
+
+    [Fact]
     public void MakeOptional_MakePreserveFormatting_SetProperties()
     {
         var map = CreateMap();
