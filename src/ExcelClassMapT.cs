@@ -6,7 +6,6 @@ using System.Dynamic;
 using System.Linq.Expressions;
 using System.Reflection;
 using ExcelDataReader;
-using ExcelMapper.Mappers;
 
 namespace ExcelMapper;
 
@@ -55,108 +54,107 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
         => parameterType == typeof(T) ? new Func<BoundMember<TOwner, T>, T, T>(BoundMember<TOwner, T>.GetValueOrDefault).Method : null;
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map primitives such as string, int etc.
+    /// Maps a property or field read from a single cell, such as a string, number, date or enum.
     /// </summary>
-    /// <typeparam name="TProperty">The type of the property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TProperty">The type of the property or field.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Name</c>.</param>
+    /// <returns>The map of the property or field, to choose its column and configure how cells are converted.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public ValueMap<TProperty> Map<TProperty>(Expression<Func<T, TProperty>> expression)
         => ExpressionAutoMapper.GetOrCreateValueMap<T, TProperty>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map enumerables.
+    /// Maps a collection property or field of a type without its own <c>Map</c> overload, such as
+    /// <see cref="HashSet{T}"/>: its elements are read from several columns, or split from one cell.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the elements.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Tags</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its elements.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public CollectionMap<TElement> MapCollection<TElement>(Expression<Func<T, IEnumerable>> expression)
         => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map enumerables.
+    /// Maps an <see cref="IEnumerable{TElement}"/> property or field:
+    /// its elements are read from several columns, or split from one cell.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the elements.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Tags</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its elements.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public CollectionMap<TElement> Map<TElement>(Expression<Func<T, IEnumerable<TElement>>> expression)
         => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map ICollections.
+    /// Maps an <see cref="ICollection{TElement}"/> property or field:
+    /// its elements are read from several columns, or split from one cell.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the elements.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Tags</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its elements.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public CollectionMap<TElement> Map<TElement>(Expression<Func<T, ICollection<TElement>>> expression)
         => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map Collection.
+    /// Maps a <see cref="Collection{TElement}"/> property or field:
+    /// its elements are read from several columns, or split from one cell.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the elements.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Tags</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its elements.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public CollectionMap<TElement> Map<TElement>(Expression<Func<T, Collection<TElement>>> expression)
         => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map Collection.
+    /// Maps a <see cref="ReadOnlyCollection{TElement}"/> property or field:
+    /// its elements are read from several columns, or split from one cell.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the elements.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Tags</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its elements.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public CollectionMap<TElement> Map<TElement>(Expression<Func<T, ReadOnlyCollection<TElement>>> expression)
         => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map ObservableCollection.
+    /// Maps an <see cref="ObservableCollection{TElement}"/> property or field:
+    /// its elements are read from several columns, or split from one cell.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the elements.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Tags</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its elements.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public CollectionMap<TElement> Map<TElement>(Expression<Func<T, ObservableCollection<TElement>>> expression)
         => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map ReadOnlyObservableCollection.
+    /// Maps a <see cref="ReadOnlyObservableCollection{TElement}"/> property or field:
+    /// its elements are read from several columns, or split from one cell.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the elements.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Tags</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its elements.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public CollectionMap<TElement> Map<TElement>(Expression<Func<T, ReadOnlyObservableCollection<TElement>>> expression)
         => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map Collection.
+    /// Maps an <see cref="ISet{TElement}"/> property or field:
+    /// its elements are read from several columns, or split from one cell.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the elements.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Tags</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its elements.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public CollectionMap<TElement> Map<TElement>(Expression<Func<T, ISet<TElement>>> expression)
@@ -164,12 +162,12 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
 
 #if NET5_0_OR_GREATER
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map Collection.
+    /// Maps an <see cref="IReadOnlySet{TElement}"/> property or field:
+    /// its elements are read from several columns, or split from one cell.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the elements.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Tags</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its elements.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public CollectionMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlySet<TElement>>> expression)
@@ -178,12 +176,12 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
 
 #if NET9_0_OR_GREATER
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map Collection.
+    /// Maps a <see cref="ReadOnlySet{TElement}"/> property or field:
+    /// its elements are read from several columns, or split from one cell.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the elements.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Tags</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its elements.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public CollectionMap<TElement> Map<TElement>(Expression<Func<T, ReadOnlySet<TElement>>> expression)
@@ -191,84 +189,83 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
 #endif
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map ILists.
+    /// Maps an <see cref="IList{TElement}"/> property or field:
+    /// its elements are read from several columns, or split from one cell.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the elements.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Tags</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its elements.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public CollectionMap<TElement> Map<TElement>(Expression<Func<T, IList<TElement>>> expression)
         => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map IReadOnlyCollections.
+    /// Maps an <see cref="IReadOnlyCollection{TElement}"/> property or field:
+    /// its elements are read from several columns, or split from one cell.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the elements.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Tags</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its elements.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public CollectionMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlyCollection<TElement>>> expression)
         => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map IReadOnlyLists.
+    /// Maps an <see cref="IReadOnlyList{TElement}"/> property or field:
+    /// its elements are read from several columns, or split from one cell.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the elements.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Tags</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its elements.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public CollectionMap<TElement> Map<TElement>(Expression<Func<T, IReadOnlyList<TElement>>> expression)
         => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map lists.
+    /// Maps a <see cref="List{TElement}"/> property or field:
+    /// its elements are read from several columns, or split from one cell.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the elements.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Tags</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its elements.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public CollectionMap<TElement> Map<TElement>(Expression<Func<T, List<TElement>>> expression)
         => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map arrays.
+    /// Maps an array property or field:
+    /// its elements are read from several columns, or split from one cell.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the elements.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Tags</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its elements.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public CollectionMap<TElement> Map<TElement>(Expression<Func<T, Array>> expression)
         => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map arrays.
+    /// Maps an array property or field:
+    /// its elements are read from several columns, or split from one cell.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the elements.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Tags</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its elements.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public CollectionMap<TElement> Map<TElement>(Expression<Func<T, TElement[]>> expression)
         => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map objects that contain nested objects, primitives or enumerables.
+    /// Maps a property or field that is an object with members of its own, read from the same row.
     /// </summary>
-    /// <typeparam name="TElement">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TElement">The type of the object.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Address</c>.</param>
+    /// <returns>The class map of the object, to map its members.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public ExcelClassMap<TElement> MapObject<TElement>(Expression<Func<T, TElement>> expression)
@@ -281,7 +278,7 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// </summary>
     /// <typeparam name="TProperty">The type of the property or field: a numeric type such as
     /// <see cref="int"/> or <see cref="long"/>, or a nullable numeric type.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Row</c>.</param>
     /// <exception cref="ArgumentException">The property or field is not a numeric type.</exception>
     /// <remarks>A row number has nothing to configure, so nothing is returned.</remarks>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
@@ -294,102 +291,102 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// of the same class reads, keyed by column name.
     /// </summary>
     /// <typeparam name="TValue">The type of the dictionary's values.</typeparam>
-    /// <param name="expression">A MemberExpression reading a dictionary property or field with
+    /// <param name="expression">An expression reading a dictionary property or field with
     /// string keys, such as <see cref="Dictionary{TKey, TValue}"/> or <see cref="System.Dynamic.ExpandoObject"/>.</param>
-    /// <returns>The map for the given property or field. Use it to configure how values are mapped.</returns>
+    /// <returns>The map of the property or field, to configure its values.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public DictionaryMap<string, TValue> MapExtraColumns<TValue>(Expression<Func<T, IEnumerable<KeyValuePair<string, TValue>>>> expression)
         => ExpressionAutoMapper.GetOrCreateExtraColumnsMap<T, TValue>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map enumerables.
+    /// Maps a dictionary property or field of a type without its own <c>Map</c> overload: each value is
+    /// read from a column, keyed by the column's name.
     /// </summary>
-    /// <typeparam name="TValue">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TValue">The type of the values.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Scores</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its values.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public DictionaryMap<string, TValue> MapDictionary<TValue>(Expression<Func<T, IEnumerable>> expression)
         => ExpressionAutoMapper.GetOrCreateDictionaryMap<T, string, TValue>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map IDictionarys.
+    /// Maps an <see cref="System.Collections.IDictionary"/> property or field:
+    /// each value is read from a column, keyed by the column's name.
     /// </summary>
-    /// <typeparam name="TValue">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TValue">The type of the values.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Scores</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its values.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public DictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, IDictionary>> expression)
         => ExpressionAutoMapper.GetOrCreateDictionaryMap<T, string, TValue>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map IDictionarys.
+    /// Maps an <see cref="IDictionary{TKey, TValue}"/> property or field:
+    /// each value is read from a column, keyed by the column's name.
     /// </summary>
-    /// <typeparam name="TValue">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TValue">The type of the values.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Scores</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its values.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public DictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, IDictionary<string, TValue>>> expression)
         => ExpressionAutoMapper.GetOrCreateDictionaryMap<T, string, TValue>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map IReadOnlyDictionarys.
+    /// Maps an <see cref="IReadOnlyDictionary{TKey, TValue}"/> property or field:
+    /// each value is read from a column, keyed by the column's name.
     /// </summary>
-    /// <typeparam name="TValue">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TValue">The type of the values.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Scores</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its values.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public DictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, IReadOnlyDictionary<string, TValue>>> expression)
         => ExpressionAutoMapper.GetOrCreateDictionaryMap<T, string, TValue>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map IDictionarys.
+    /// Maps a <see cref="Dictionary{TKey, TValue}"/> property or field:
+    /// each value is read from a column, keyed by the column's name.
     /// </summary>
-    /// <typeparam name="TValue">The element type of property or field to map.</typeparam>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <typeparam name="TValue">The type of the values.</typeparam>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Scores</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its values.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public DictionaryMap<string, TValue> Map<TValue>(Expression<Func<T, Dictionary<string, TValue>>> expression)
         => ExpressionAutoMapper.GetOrCreateDictionaryMap<T, string, TValue>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map StringDictionary.
+    /// Maps a <see cref="StringDictionary"/> property or field:
+    /// each value is read from a column, keyed by the column's name.
     /// </summary>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Scores</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its values.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public DictionaryMap<string, string> Map(Expression<Func<T, StringDictionary>> expression)
         => ExpressionAutoMapper.GetOrCreateDictionaryMap<T, string, string>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map NameValueCollection.
+    /// Maps a <see cref="NameValueCollection"/> property or field:
+    /// each value is read from a column, keyed by the column's name.
     /// </summary>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Scores</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its values.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public DictionaryMap<string, string> Map(Expression<Func<T, NameValueCollection>> expression)
         => ExpressionAutoMapper.GetOrCreateDictionaryMap<T, string, string>(this, expression.Body);
 
     /// <summary>
-    /// Creates a map for a property or field given a MemberExpression reading the property or field.
-    /// This is used for map ExpandoObjects.
+    /// Maps an <see cref="ExpandoObject"/> property or field:
+    /// each value is read from a column, keyed by the column's name.
     /// </summary>
-    /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
+    /// <param name="expression">An expression reading the property or field, such as <c>p => p.Scores</c>.</param>
+    /// <returns>The map of the property or field, to choose its columns and configure its values.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public DictionaryMap<string, object> Map(Expression<Func<T, ExpandoObject>> expression)
@@ -419,7 +416,7 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
 
     /// <summary>
     /// Configures the existing class map used to map multiple cells in a row to the properties and fields
-    /// of a an object.
+    /// of an object.
     /// </summary>
     /// <param name="configure">Configures this class map.</param>
     /// <returns>The map that invoked this method.</returns>
@@ -433,7 +430,7 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
 
     /// <summary>
     /// Sets the new class map used to map multiple cells in a row to the properties and fields
-    /// of a an object.
+    /// of an object.
     /// </summary>
     /// <param name="classMap">The new class map used.</param>
     /// <returns>The map that invoked this method.</returns>

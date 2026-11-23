@@ -1,5 +1,4 @@
 #if NET7_0_OR_GREATER
-using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
 namespace ExcelMapper.Mappers;

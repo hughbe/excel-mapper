@@ -1,4 +1,3 @@
-
 namespace ExcelMapper.Readers;
 
 /// <summary>

@@ -417,7 +417,7 @@ public class MappingScenarioTests
         sheet.HasHeading = false;
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<InitOnlyClass>().ToArray());
-        Assert.Contains("does not have a heading", ex.Message);
+        Assert.Contains("There's no heading to find columns by name", ex.Message);
     }
 
     [Fact]

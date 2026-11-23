@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -53,7 +52,7 @@ internal sealed class MatchingColumns : Columns
     }
 
     private bool Matches(SheetView sheet, int column)
-        => _matches((sheet.Heading ?? throw NoHeading(sheet)).GetColumnName(column));
+        => _matches(sheet.GetHeadingForNames().GetColumnName(column));
 
     public override bool LooksUpNames => true;
 

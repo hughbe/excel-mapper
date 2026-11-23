@@ -1,3 +1,4 @@
+using System.Linq;
 ﻿using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
@@ -5745,6 +5746,46 @@ public class MapDictionaryTest
         sheet.HasHeading = false;
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DictionaryStringObjectClass>());
+    }
+
+    [Fact]
+    public void ReadRows_RowAsDictionaryNoHeading_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("a,b\n");
+        var sheet = importer.ReadSheet();
+        sheet.HasHeading = false;
+
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<Dictionary<string, string>>().ToArray());
+        Assert.Equal("There's no heading to read every named column from. Choose the columns by index instead.", exception.Message);
+    }
+
+    [Fact]
+    public void ReadRows_DictionaryColumnIndicesNoHeading_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("a,b\n");
+        importer.Configuration.RegisterClassMap<StringValuesClass>(c => c.Map(p => p.Values).WithColumnIndices(0, 1));
+        var sheet = importer.ReadSheet();
+        sheet.HasHeading = false;
+
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValuesClass>().ToArray());
+        Assert.Equal("There's no heading to name a dictionary's keys. A dictionary's keys are its columns' names, so it can only be read from rows with a heading.", exception.Message);
+    }
+
+    [Fact]
+    public void ReadRows_DictionaryColumnNamesNoHeading_ThrowsExcelMappingExceptionNamingSheet()
+    {
+        using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
+        importer.Configuration.RegisterClassMap<StringValuesClass>(c => c.Map(p => p.Values).WithColumnNames("Column1", "Column2"));
+        var sheet = importer.ReadSheet();
+        sheet.HasHeading = false;
+
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValuesClass>().ToArray());
+        Assert.Equal($"There's no heading to find columns by name in sheet \"{sheet.Name}\". Choose the columns by index or letter instead.", exception.Message);
+    }
+
+    public class StringValuesClass
+    {
+        public Dictionary<string, string> Values { get; set; } = [];
     }
 
     [Fact]

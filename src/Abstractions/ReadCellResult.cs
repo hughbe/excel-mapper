@@ -108,7 +108,6 @@ internal struct ReadCellResult
         return value is null || (value is string stringValue && string.IsNullOrEmpty(stringValue));
     }
 
-
     /// <summary>
     /// Gets whether to preserve number formatting options when reading string values.
     /// </summary>

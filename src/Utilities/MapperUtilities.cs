@@ -5,13 +5,6 @@ namespace ExcelMapper.Utilities;
 internal static class MapperUtilities
 {
     /// <summary>
-    /// Gets the exception for a value that couldn't be parsed by running the throwing version of
-    /// the parse that failed. This keeps the exact exception (for example FormatException or
-    /// OverflowException), but throwing and catching it is slow, so it's only used where the
-    /// exception can't be created directly (see the other methods). Like all of these methods, it's
-    /// only called from <see cref="ICellExceptionSource.CreateException"/>, when the exception is used.
-    /// </summary>
-    /// <summary>
     /// Whether text that parses with <see cref="NumberStyles.Integer"/> parses to the same whole
     /// number with <paramref name="style"/>: the style allows everything Integer does (leading and
     /// trailing white space and a leading sign), and isn't hexadecimal or binary. Then a whole number
@@ -28,6 +21,13 @@ internal static class MapperUtilities
     private const NumberStyles NonDecimalStyles = NumberStyles.AllowHexSpecifier;
 #endif
 
+    /// <summary>
+    /// Gets the exception for a value that couldn't be parsed by running the throwing version of
+    /// the parse that failed. This keeps the exact exception (for example FormatException or
+    /// OverflowException), but throwing and catching it is slow, so it's only used where the
+    /// exception can't be created directly (see the other methods). Like all of these methods, it's
+    /// only called from <see cref="ICellExceptionSource.CreateException"/>, when the exception is used.
+    /// </summary>
     public static Exception InvalidFromParse(Action parse)
     {
         try

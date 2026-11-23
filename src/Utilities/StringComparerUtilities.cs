@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace ExcelMapper.Utilities;
 
 internal static class StringComparerUtilities
