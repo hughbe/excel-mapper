@@ -60,7 +60,7 @@ internal static class HeadingSearch
             if (lookedUp == 0)
             {
                 cursor.Reset();
-                throw new ExcelMappingException($"Can't find the heading for type \"{typeof(T)}\" as it doesn't look up any column by name. Set {nameof(SheetView.HeadingIndex)} instead.");
+                throw new ExcelMappingException($"Can't find the heading for type {TypeNames.Get(typeof(T))} as it doesn't look up any column by name. Set {nameof(SheetView.HeadingIndex)} instead.");
             }
 
             if (found > 0 && problems!.Count == 0)

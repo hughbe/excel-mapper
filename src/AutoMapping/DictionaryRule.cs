@@ -142,7 +142,7 @@ internal sealed class DictionaryRule<TKey, TValue> : DictionaryRule where TKey :
 
         if (!TryGetBuilder(dictionaryType, out var builder))
         {
-            throw new ExcelMappingException($"Could not map dictionary of type \"{dictionaryType}\".");
+            throw new ExcelMappingException($"Could not map dictionary of type {TypeNames.Get(dictionaryType)}.");
         }
 
         var map = new DictionaryIndexerMap<TKey, TValue>(builder);

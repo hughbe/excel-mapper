@@ -150,7 +150,8 @@ internal sealed class ClassMapReader<[DynamicallyAccessedMembers(TrimmingConstan
         catch (Exception ex)
         {
             var inner = ex is TargetInvocationException { InnerException: { } invocationInner } ? invocationInner : ex;
-            var exception = new ExcelMappingException($"Could not create an instance of type \"{typeof(T)}\": {inner.Message}", sheet, rowIndex, -1, inner);
+            // The constructor's message follows the row, as a hint follows a cell's address.
+            var exception = new ExcelMappingException($"Could not create an instance of type {TypeNames.Get(typeof(T))}", sheet, rowIndex, -1, inner, " " + inner.Message);
             if (errors is null)
             {
                 throw exception;

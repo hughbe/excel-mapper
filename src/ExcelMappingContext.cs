@@ -50,7 +50,7 @@ public abstract class ExcelMappingContext
     {
         if (!GetRowTypes().Contains(typeof(T)))
         {
-            throw new InvalidOperationException($"Type \"{typeof(T)}\" isn't registered as a row type by {GetType()}.");
+            throw new InvalidOperationException($"Type {TypeNames.Get(typeof(T))} isn't registered as a row type by {TypeNames.Get(GetType())}.");
         }
 
         if (!_classMaps.TryGetValue(typeof(T), out var classMap))

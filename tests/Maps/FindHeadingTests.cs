@@ -343,7 +343,7 @@ public class FindHeadingTests
         using var importer = Helpers.GetCsvImporter("Title\nA,B\n1,2\n");
         var sheet = importer.ReadSheet();
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.FindHeading<Line>());
-        Assert.Contains("doesn't look up any column by name", exception.Message);
+        Assert.Equal("Can't find the heading for type FindHeadingTests.Line as it doesn't look up any column by name. Set HeadingIndex instead.", exception.Message);
         Assert.Throws<ExcelMappingException>(() => sheet.TryFindHeading<Line>(out _));
     }
 

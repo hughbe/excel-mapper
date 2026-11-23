@@ -220,7 +220,7 @@ internal static class MemberMapper
             return default!;
         }
 
-        throw new ExcelMappingException($"The value \"{attribute.MappedValue}\" given by ExcelMappingDictionaryAttribute for \"{attribute.Value}\" on member \"{member.Name}\" isn't a {typeof(T)}.");
+        throw new ExcelMappingException($"The value \"{attribute.MappedValue}\" given by ExcelMappingDictionaryAttribute for \"{attribute.Value}\" on member \"{member.Name}\" isn't a {TypeNames.Get(typeof(T))}.");
     }
 
     /// <summary>
@@ -243,7 +243,7 @@ internal static class MemberMapper
             return null;
         }
 
-        throw new ExcelMappingException($"The converter \"{converter.GetType()}\" given by ExcelConverterAttribute on member \"{member.Name}\" doesn't implement ICellConverter<{typeof(T)}>.");
+        throw new ExcelMappingException($"The converter {TypeNames.Get(converter.GetType())} given by ExcelConverterAttribute on member \"{member.Name}\" doesn't implement ICellConverter<{TypeNames.Get(typeof(T))}>.");
     }
 
     /// <summary>
@@ -327,7 +327,7 @@ internal static class MemberMapper
             return typedFallback;
         }
 
-        throw new ExcelMappingException($"The fallback \"{fallback.GetType()}\" given by {attributeName} on member \"{member.Name}\" doesn't implement ICellFallback<{typeof(T)}>.");
+        throw new ExcelMappingException($"The fallback {TypeNames.Get(fallback.GetType())} given by {attributeName} on member \"{member.Name}\" doesn't implement ICellFallback<{TypeNames.Get(typeof(T))}>.");
     }
 
     internal static void AddTransformers(ValuePipeline pipeline, MemberInfo member)
