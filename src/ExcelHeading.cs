@@ -9,8 +9,9 @@ namespace ExcelMapper;
 /// </summary>
 public sealed class ExcelHeading
 {
-    internal ExcelHeading(IDataRecord reader, ExcelRange dataRange, int maxColumns)
+    internal ExcelHeading(IDataRecord reader, ExcelRange dataRange, ReadSettings settings)
     {
+        var maxColumns = settings.MaxColumnsPerSheet;
         if (reader.FieldCount > maxColumns)
         {
             throw new ExcelMappingException(
@@ -25,7 +26,14 @@ public sealed class ExcelHeading
 
         for (var columnIndex = 0; columnIndex < length; columnIndex++)
         {
-            var columnName = reader.GetValue(columnIndex + offset)?.ToString() ?? string.Empty;
+            // A number or date in the heading is named with the importer's culture, as cells are
+            // converted to text, rather than the machine's: 1.5 is "1.5" on every machine.
+            var columnName = reader.GetValue(columnIndex + offset) switch
+            {
+                null => string.Empty,
+                string text => text,
+                var value => Convert.ToString(value, settings.Culture) ?? string.Empty,
+            };
             columnNames[columnIndex] = columnName;
 
             // A name that appears more than once maps to its first column. Mapping a member to it

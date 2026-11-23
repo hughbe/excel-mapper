@@ -100,7 +100,7 @@ This applies to cells Excel stores as dates or numbers, and text without an offs
 
 ## Culture
 
-Text is parsed, and numbers and dates are converted to text, with the invariant culture by default, so results don't depend on the machine's settings: `1.5` is one and a half, and dates are written `03/04/2024 00:00:00` (month first). For a file written in another culture, set the importer's culture:
+Text is parsed, and numbers and dates are converted to text, with the invariant culture by default, so results don't depend on the machine's settings: `1.5` is one and a half, and dates are written `03/04/2024 00:00:00` (month first). Heading cells that are numbers or dates are named the same way, so `[ExcelColumnName("2024")]` finds a heading of the number 2024 on every machine. For a file written in another culture, set the importer's culture:
 
 ```csharp
 importer.Configuration.Culture = CultureInfo.GetCultureInfo("de-DE");   // reads "1,5" and "15.03.2024"

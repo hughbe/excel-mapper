@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace ExcelMapper.Reading;
 
@@ -38,7 +38,7 @@ internal static class HeadingSearch
             }
 
             // Check the class map's columns against this row as the heading.
-            var candidate = new ExcelHeading(sheet.Worksheet.Reader, sheet.DataRange, sheet.Settings.MaxColumnsPerSheet);
+            var candidate = new ExcelHeading(sheet.Worksheet.Reader, sheet.DataRange, sheet.Settings);
             var lookedUp = 0;
             var found = 0;
             List<string>? problems = null;

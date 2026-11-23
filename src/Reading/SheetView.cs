@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using ExcelDataReader;
@@ -153,7 +153,7 @@ internal sealed class SheetView
         }
 
         // Create the heading.
-        var heading = new ExcelHeading(Reader, DataRange, Settings.MaxColumnsPerSheet);
+        var heading = new ExcelHeading(Reader, DataRange, Settings);
         Heading = heading;
         return heading;
     }
