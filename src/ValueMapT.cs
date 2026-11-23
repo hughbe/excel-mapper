@@ -58,7 +58,7 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IColumnsMap, IBindable
     }
 
     /// <inheritdoc />
-    bool IMap.TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
+    bool IMap.TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, ErrorTarget? errors, [NotNullWhen(true)] out object? result)
     {
         if (TryGetValue(FindColumn(sheet), sheet, rowIndex, reader, member, errors, out var value))
         {
@@ -81,7 +81,7 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IColumnsMap, IBindable
     /// column), returning the value as <typeparamref name="T"/> so that value types aren't boxed
     /// again on the way to the member.
     /// </summary>
-    internal bool TryGetValue(int columnIndex, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out T value)
+    internal bool TryGetValue(int columnIndex, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, ErrorTarget? errors, out T value)
     {
         if (columnIndex == -1 || columnIndex >= reader.FieldCount)
         {

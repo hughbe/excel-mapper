@@ -9,7 +9,7 @@ internal static class MapperUtilities
     /// the parse that failed. This keeps the exact exception (for example FormatException or
     /// OverflowException), but throwing and catching it is slow, so it's only used where the
     /// exception can't be created directly (see the other methods). Like all of these methods, it's
-    /// only called from <see cref="ICellMapper{T}.CreateException"/>, when the exception is used.
+    /// only called from <see cref="ICellExceptionSource.CreateException"/>, when the exception is used.
     /// </summary>
     /// <summary>
     /// Whether text that parses with <see cref="NumberStyles.Integer"/> parses to the same whole

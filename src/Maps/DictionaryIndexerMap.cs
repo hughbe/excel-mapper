@@ -16,7 +16,7 @@ internal sealed class DictionaryIndexerMap<TKey, TValue>(DictionaryBuilder<TKey,
 
     private protected override string FormatKey(object key) => $"\"{key}\"";
 
-    public override bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
+    public override bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, ErrorTarget? errors, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 

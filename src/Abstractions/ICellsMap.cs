@@ -20,5 +20,5 @@ internal interface ICellsMap : IColumnsMap
     /// Reads the collection or dictionary from the current row with a reader from
     /// <see cref="GetCellsReader"/>, as <see cref="IMap.TryGetValue"/> does.
     /// </summary>
-    bool TryGetValue(ICellsReader? cellsReader, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out object? value);
+    bool TryGetValue(ICellsReader? cellsReader, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, ErrorTarget? errors, out object? value);
 }

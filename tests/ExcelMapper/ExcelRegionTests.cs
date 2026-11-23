@@ -130,9 +130,46 @@ public class ExcelRegionTests
     {
         using var importer = Helpers.GetCsvImporter("Name\na\n");
         var region = importer.ReadSheet().Region();
-        Assert.Throws<ArgumentNullException>("classMap", () => region.ReadRows<RegionMapRow>(null!));
+        Assert.Throws<ArgumentNullException>("classMap", () => region.ReadRows<RegionMapRow>((ExcelClassMap<RegionMapRow>)null!));
         Assert.Throws<ArgumentNullException>("classMap", () => region.ReadRowResults<RegionMapRow>(null!));
         Assert.Throws<ArgumentNullException>("classMap", () => region.ValidateHeading<RegionMapRow>(null!));
         Assert.Throws<ArgumentNullException>("classMap", () => region.TryValidateHeading<RegionMapRow>(null!, out _));
+    }
+
+    private sealed class RegionCountingSink : IExcelErrorSink
+    {
+        public int Count { get; private set; }
+
+        public void Add(in ExcelMappingError error) => Count++;
+    }
+
+    public class RegionSinkRow
+    {
+        public int Value { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_Sink_ReturnsValidRowsAndReportsOthers()
+    {
+        using var importer = Helpers.GetCsvImporter("Title\nValue,Other\n1,a\nx,b\n3,c\n");
+        var sink = new RegionCountingSink();
+        var region = importer.ReadSheet().Region("A2:B5");
+
+        Assert.Equal([1, 3], region.ReadRows<RegionSinkRow>(sink).Select(r => r.Value));
+        Assert.Equal(1, sink.Count);
+
+        var map = new ExcelClassMap<RegionSinkRow>();
+        map.Map(p => p.Value);
+        Assert.Equal([1, 3], region.ReadRows(map, sink).Select(r => r.Value));
+        Assert.Equal(2, sink.Count);
+    }
+
+    [Fact]
+    public void ReadRows_NullSink_ThrowsArgumentNullException()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\n1\n");
+        var region = importer.ReadSheet().Region();
+        Assert.Throws<ArgumentNullException>("errors", () => region.ReadRows<RegionSinkRow>((IExcelErrorSink)null!));
+        Assert.Throws<ArgumentNullException>("errors", () => region.ReadRows(new ExcelClassMap<RegionSinkRow>(), null!));
     }
 }

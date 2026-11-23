@@ -61,5 +61,5 @@ internal abstract class IndexerMap<TKey>(IEqualityComparer<TKey>? comparer = nul
     }
 
     /// <inheritdoc />
-    public abstract bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value);
+    public abstract bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, ErrorTarget? errors, [NotNullWhen(true)] out object? value);
 }

@@ -146,14 +146,14 @@ public abstract class ExcelClassMap : IParentMap, IBindableMap
     public EmptyValueStrategy EmptyValueStrategy { get; private protected set; }
 
     /// <inheritdoc/>
-    bool IMap.TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
+    bool IMap.TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, ErrorTarget? errors, [NotNullWhen(true)] out object? result)
         => TryGetObject(sheet, rowIndex, reader, member, errors, out result);
 
     /// <summary>
     /// Maps a row (or for a nested object, the cells it reads) to an object (see
     /// <see cref="ExcelClassMap{T}.TryGetValue"/>).
     /// </summary>
-    private protected abstract bool TryGetObject(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result);
+    private protected abstract bool TryGetObject(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, ErrorTarget? errors, [NotNullWhen(true)] out object? result);
 
     /// <inheritdoc/>
     BoundMember<TOwner> IBindableMap.Bind<TOwner>(ClassMapMember member) => Bind<TOwner>(member);

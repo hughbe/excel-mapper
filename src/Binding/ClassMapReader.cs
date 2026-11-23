@@ -23,7 +23,7 @@ internal sealed class ClassMapReader<[DynamicallyAccessedMembers(TrimmingConstan
     /// </summary>
     /// <returns>Whether there is a value: false if a nested object's cells are missing and it's
     /// optional, or errors are being collected and the row couldn't be created.</returns>
-    public bool TryRead(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out T result)
+    public bool TryRead(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, ErrorTarget? errors, out T result)
     {
         // If the map represents a single value, use that map to get the value.
         if (classMap.SingleValueMap is { } valueMap)
@@ -58,7 +58,7 @@ internal sealed class ClassMapReader<[DynamicallyAccessedMembers(TrimmingConstan
         return TryCreateUsingConstructor(plan, members, sheet, rowIndex, reader, errors, out result);
     }
 
-    private static bool TryGetSingleValue(IMap valueMap, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out T result)
+    private static bool TryGetSingleValue(IMap valueMap, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, ErrorTarget? errors, out T result)
     {
         // The value map of Map(p => p) reads a T, without boxing.
         if (valueMap is ValueMap<T> typedMap)
@@ -76,7 +76,7 @@ internal sealed class ClassMapReader<[DynamicallyAccessedMembers(TrimmingConstan
         return false;
     }
 
-    private static void MapBoundMembers(BoundMember<T>[] members, ref T instance, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
+    private static void MapBoundMembers(BoundMember<T>[] members, ref T instance, SheetView sheet, int rowIndex, IExcelDataReader reader, ErrorTarget? errors)
     {
         if (errors is null)
         {
@@ -107,7 +107,7 @@ internal sealed class ClassMapReader<[DynamicallyAccessedMembers(TrimmingConstan
     /// <see cref="ExcelSheet.ReadRowResults{T}()"/>), a mapping error is recorded and the member has no
     /// value, so that the remaining members are still read.
     /// </summary>
-    private static void ReadMemberValue(BoundMember<T> member, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
+    private static void ReadMemberValue(BoundMember<T> member, SheetView sheet, int rowIndex, IExcelDataReader reader, ErrorTarget? errors)
     {
         if (errors is null)
         {
@@ -125,7 +125,7 @@ internal sealed class ClassMapReader<[DynamicallyAccessedMembers(TrimmingConstan
         }
     }
 
-    private static bool TryCreateUsingConstructor(ConstructionPlan<T> plan, BoundMember<T>[] members, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out T result)
+    private static bool TryCreateUsingConstructor(ConstructionPlan<T> plan, BoundMember<T>[] members, SheetView sheet, int rowIndex, IExcelDataReader reader, ErrorTarget? errors, out T result)
     {
         var errorCount = errors?.Count ?? 0;
 

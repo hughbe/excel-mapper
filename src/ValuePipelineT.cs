@@ -98,7 +98,7 @@ public abstract class ValuePipeline<T> : ValuePipeline
     /// be replaced and an invalid value are kept until a later result replaces them), then the
     /// invalid fallback.
     /// </summary>
-    internal T Map(SheetView sheet, int rowIndex, ReadCellResult readResult, MemberInfo? member, List<ExcelMappingException>? errors)
+    internal T Map(SheetView sheet, int rowIndex, ReadCellResult readResult, MemberInfo? member, ErrorTarget? errors)
     {
         var plan = GetPlan();
 
@@ -106,7 +106,7 @@ public abstract class ValuePipeline<T> : ValuePipeline
         // thread's: mappers use it when they have no format provider of their own.
         var culture = sheet.Culture;
         readResult.Culture = culture;
-        var context = new CellContext(sheet, rowIndex, readResult.ColumnIndex, member, errors, Options);
+        var context = new CellContext(sheet, rowIndex, readResult.ColumnIndex, member, Options);
 
         // Use indexed loops: enumerating through an interface allocates for every cell.
         var transformers = plan.Transformers;
@@ -118,6 +118,13 @@ public abstract class ValuePipeline<T> : ValuePipeline
 
         if (plan.EmptyFallback is { } emptyFallback && readResult.IsEmpty())
         {
+            // A collected error is reported without creating its exception (see ErrorTarget).
+            if (errors is not null && emptyFallback is ThrowFallback<T>)
+            {
+                errors.AddCell(ExcelMappingErrorKind.EmptyValue, readResult, in context, typeof(T), null, null, ThrowFallback<T>.EmptyHint);
+                return default!;
+            }
+
             return emptyFallback.Fallback(new CellValue(readResult), context, null);
         }
 
@@ -152,6 +159,15 @@ public abstract class ValuePipeline<T> : ValuePipeline
 
         if (plan.InvalidFallback is { } invalidFallback)
         {
+            // A collected error is reported without creating its exception: the mapper that
+            // found the cell invalid creates it if the target asks (see ErrorTarget).
+            if (errors is not null && invalidFallback is ThrowFallback<T>)
+            {
+                var mapper = state == CellConversion.Invalid ? mappers[invalidIndex] : null;
+                errors.AddCell(ExcelMappingErrorKind.InvalidValue, readResult, in context, typeof(T), mapper, invalidError, ThrowFallback<T>.EmptyHint);
+                return default!;
+            }
+
             // Create the exception only if the fallback uses it.
             var exception = state == CellConversion.Invalid && plan.InvalidFallbackUsesException
                 ? mappers[invalidIndex].CreateException(readResult, in context, invalidError)

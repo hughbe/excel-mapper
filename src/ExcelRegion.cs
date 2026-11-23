@@ -160,6 +160,47 @@ public sealed class ExcelRegion
     }
 
     /// <summary>
+    /// Maps each row of the region, reporting the problems in invalid rows to
+    /// <paramref name="errors"/> and skipping those rows. See
+    /// <see cref="ExcelSheet.ReadRows{T}(IExcelErrorSink)"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="errors">Receives each problem as it's found.</param>
+    /// <returns>The objects mapped from the rows without problems.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="errors"/> is null.</exception>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(IExcelErrorSink errors) => ReadRows(SheetView.AutoMapped<T>.ClassMap, errors);
+
+    /// <summary>
+    /// Maps each row of the region with <paramref name="classMap"/>, reporting the problems in
+    /// invalid rows to <paramref name="errors"/> and skipping those rows. See
+    /// <see cref="ExcelSheet.ReadRows{T}(IExcelErrorSink)"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    /// <param name="errors">Receives each problem as it's found.</param>
+    /// <returns>The objects mapped from the rows without problems.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="classMap"/> or <paramref name="errors"/> is null.</exception>
+    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap, IExcelErrorSink errors) => ReadRows(SheetView.Given(classMap), errors);
+
+    private IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, IExcelErrorSink errors)
+    {
+        ThrowHelpers.ThrowIfNull(errors, nameof(errors));
+        return ReadRowsWithSink(classMap, errors);
+    }
+
+    private IEnumerable<T> ReadRowsWithSink<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, IExcelErrorSink errors)
+    {
+        foreach (var row in CreateView(classMap).ReadRows(classMap, errors))
+        {
+            yield return row;
+        }
+    }
+
+    /// <summary>
     /// Checks that the region's heading has every column that <typeparamref name="T"/> needs.
     /// See <see cref="ExcelSheet.ValidateHeading{T}()"/>.
     /// </summary>

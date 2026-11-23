@@ -316,10 +316,11 @@ internal sealed class SheetView
 
         // Reuse one list for every row: valid rows (usually most of them) then don't allocate, and
         // only rows with errors get their own copy.
-        var errors = new List<ExcelMappingException>();
+        var target = new ExceptionListTarget();
+        var errors = target.Exceptions;
         while (AdvanceToNextRow())
         {
-            var mapped = MapCurrentRow(classMap(this), errors, out T? value);
+            var mapped = MapCurrentRow(classMap(this), target, out T? value);
 
             if (errors.Count == 0)
             {
@@ -330,6 +331,43 @@ internal sealed class SheetView
                 var rowErrors = errors.ToArray();
                 errors.Clear();
                 yield return new ExcelRowResult<T>(CurrentRowIndex, default, rowErrors);
+            }
+        }
+    }
+
+    /// <inheritdoc cref="ExcelSheet.ReadRows{T}(IExcelErrorSink)"/>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(IExcelErrorSink errors) => ReadRows(AutoMapped<T>.ClassMap, errors);
+
+    /// <inheritdoc cref="ExcelSheet.ReadRows{T}(ExcelClassMap{T}, IExcelErrorSink)"/>
+    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, IExcelErrorSink errors)
+    {
+        ThrowHelpers.ThrowIfNull(errors, nameof(errors));
+        Worksheet.ThrowIfClosed();
+
+        // As ReadRowResults does: problems with the heading are reported once, now.
+        if (HasHeading && Heading == null)
+        {
+            ReadHeading();
+        }
+
+        ValidateHeading(classMap);
+        return ReadRowsIterator(classMap, new SinkTarget(errors), CurrentRowIndex);
+    }
+
+    private IEnumerable<T> ReadRowsIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, SinkTarget target, int rowIndex)
+    {
+        // Each enumeration starts from the same row, as for ReadRows.
+        _cursor.MoveTo(rowIndex);
+        while (AdvanceToNextRow())
+        {
+            // A row with errors is reported to the sink, and skipped: partly mapped objects are
+            // never returned.
+            var errorCount = target.Count;
+            if (MapCurrentRow(classMap(this), target, out T? value) && target.Count == errorCount)
+            {
+                yield return value;
             }
         }
     }
@@ -356,7 +394,7 @@ internal sealed class SheetView
 
     // Data annotations are validated by reflection over T's properties, which ExcelClassMap<T> keeps.
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "The public properties of T, which Validator validates, are kept by ExcelClassMap<T>'s annotation.")]
-    private bool MapCurrentRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap, List<ExcelMappingException>? errors, [NotNullWhen(true)] out T? value)
+    private bool MapCurrentRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap, ErrorTarget? errors, [NotNullWhen(true)] out T? value)
     {
         // The importer's culture, if set, is given to each cell (see ValuePipeline<T>.Map), not set
         // as the thread's culture.
@@ -374,7 +412,7 @@ internal sealed class SheetView
                 {
                     foreach (var validationResult in validationResults)
                     {
-                        errors.Add(new ExcelMappingException(validationResult.ErrorMessage ?? "The value is invalid.", this, CurrentRowIndex, -1, new ValidationException(validationResult, null, valueObject)));
+                        errors.Add(new ExcelMappingException(validationResult.ErrorMessage ?? "The value is invalid.", this, CurrentRowIndex, -1, new ValidationException(validationResult, null, valueObject)), ExcelMappingErrorKind.DataAnnotation);
                     }
                 }
             }

@@ -1461,6 +1461,124 @@ public class ExcelSheetTests
         public int Value { get; set; }
     }
 
+    private sealed class CountingSink : IExcelErrorSink
+    {
+        public int Count { get; private set; }
+
+        public List<int> Rows { get; } = [];
+
+        public void Add(in ExcelMappingError error)
+        {
+            Count++;
+            Rows.Add(error.RowIndex);
+        }
+    }
+
+    public class SinkRow
+    {
+        public string Name { get; set; } = "";
+        public int Age { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_Sink_ReturnsValidRowsAndReportsOthers()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Age\nAlice,30\nBob,x\nCarol,\nDave,40\n");
+        var sink = new CountingSink();
+
+        var rows = importer.ReadSheet().ReadRows<SinkRow>(sink).ToArray();
+
+        Assert.Equal(["Alice", "Dave"], rows.Select(r => r.Name));
+        Assert.Equal([2, 3], sink.Rows);
+    }
+
+    [Fact]
+    public void ReadRows_SinkRowWithSeveralErrors_ReportsEach()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Age,Other\nAlice,x,1\n");
+        importer.Configuration.RegisterClassMap<SinkRow>(c =>
+        {
+            c.Map(p => p.Name).WithConverter(_ => throw new FormatException("bad name"));
+            c.Map(p => p.Age);
+        });
+        var sink = new CountingSink();
+
+        Assert.Empty(importer.ReadSheet().ReadRows<SinkRow>(sink));
+        Assert.Equal(2, sink.Count);
+    }
+
+    [Fact]
+    public void ReadRows_SinkEnumeratedTwice_ReportsAgain()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Age\nAlice,30\nBob,x\n");
+        var sink = new CountingSink();
+
+        var rows = importer.ReadSheet().ReadRows<SinkRow>(sink);
+        Assert.Single(rows);
+        Assert.Single(rows);
+        Assert.Equal(2, sink.Count);
+    }
+
+    [Fact]
+    public void ReadRows_SinkClassMap_UsesClassMap()
+    {
+        using var importer = Helpers.GetCsvImporter("Full Name,Age\nAlice,30\nBob,x\n");
+        var map = new ExcelClassMap<SinkRow>();
+        map.Map(p => p.Name).WithColumnName("Full Name");
+        map.Map(p => p.Age);
+        var sink = new CountingSink();
+
+        Assert.Equal("Alice", Assert.Single(importer.ReadSheet().ReadRows(map, sink)).Name);
+        Assert.Equal(1, sink.Count);
+    }
+
+    [Fact]
+    public void ReadRows_SinkMissingColumn_ThrowsWhenCalled()
+    {
+        using var importer = Helpers.GetCsvImporter("Name\nAlice\n");
+        var sheet = importer.ReadSheet();
+        Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<SinkRow>(new CountingSink()));
+    }
+
+    [Fact]
+    public void ReadRows_NullSink_ThrowsArgumentNullException()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Age\nAlice,30\n");
+        var sheet = importer.ReadSheet();
+        Assert.Throws<ArgumentNullException>("errors", () => sheet.ReadRows<SinkRow>((IExcelErrorSink)null!));
+        Assert.Throws<ArgumentNullException>("errors", () => sheet.ReadRows(new ExcelClassMap<SinkRow>(), null!));
+        Assert.Throws<ArgumentNullException>("classMap", () => sheet.ReadRows<SinkRow>(null!, new CountingSink()));
+    }
+
+    [Fact]
+    public void ReadRows_SinkInvalidCells_DoesNotAllocatePerError()
+    {
+        // An invalid cell reported to a sink creates no exception: reading invalid cells
+        // allocates about the same as reading valid ones.
+        static long Allocated(string cell)
+        {
+            var csv = "Name,Age\n" + string.Concat(Enumerable.Range(0, 2000).Select(i => $"n,{cell}\n"));
+            using var importer = Helpers.GetCsvImporter(csv);
+            var sheet = importer.ReadSheet();
+            var sink = new CountingSink();
+            var rows = sheet.ReadRows<SinkRow>(sink);
+            var before = GC.GetAllocatedBytesForCurrentThread();
+            foreach (var row in rows)
+            {
+            }
+
+            return GC.GetAllocatedBytesForCurrentThread() - before;
+        }
+
+        Allocated("1");
+        Allocated("x");
+        var valid = Allocated("1");
+        var invalid = Allocated("x");
+
+        // The valid rows allocate their objects; the invalid ones record their row numbers.
+        Assert.True(invalid <= valid + (2000 * 16), $"Invalid cells allocated {invalid} bytes, valid cells {valid}.");
+    }
+
     [Fact]
     public void Visibility_Csv_ReturnsVisible()
     {
@@ -1666,7 +1784,7 @@ public class ExcelSheetTests
     {
         using var importer = Helpers.GetCsvImporter(MapCsv);
         var sheet = importer.ReadSheet();
-        Assert.Throws<ArgumentNullException>("classMap", () => sheet.ReadRows<MapRow>(null!));
+        Assert.Throws<ArgumentNullException>("classMap", () => sheet.ReadRows<MapRow>((ExcelClassMap<MapRow>)null!));
         Assert.Throws<ArgumentNullException>("classMap", () => sheet.ReadRows<MapRow>(null!, 1, 1));
         Assert.Throws<ArgumentNullException>("classMap", () => sheet.ReadRow<MapRow>(null!));
         Assert.Throws<ArgumentNullException>("classMap", () => sheet.TryReadRow<MapRow>(null!, out _));
