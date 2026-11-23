@@ -58,6 +58,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - `WithFallback` (was `WithValueFallback`), `WithEmptyFallback` and `WithInvalidFallback` take a value of the member's type instead of an `object`, so a value of the wrong type is a compile error instead of an `InvalidCastException` when rows are read. ([#170](https://github.com/hughbe/excel-mapper/pull/170))
 - Two helper types made public by accident are internal: `CallerArgumentExpressionAttribute` on the netstandard builds (a polyfill, which the compiler ignored) and `ExcelMapper.Utilities.StringComparerUtilities`. ([#167](https://github.com/hughbe/excel-mapper/pull/167))
 - `ExcelClassMap<T>.MapList` is renamed `MapCollection`, as it maps any collection type, such as `HashSet<T>`, not only lists. ([#225](https://github.com/hughbe/excel-mapper/pull/225))
+- With `ValidateDataAnnotations` on, `ReadRows` and `ReadRow` throw an `ExcelMappingException` for a failed annotation, naming the row and member, with the `ValidationException` as its `InnerException`, as `ReadRowResults` reports it, instead of a bare `ValidationException` that didn't say which row failed. ([#235](https://github.com/hughbe/excel-mapper/pull/235))
 
 ### Added
 

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace ExcelMapper.Tests;
 
@@ -18,7 +19,21 @@ public class MapDataAnnotationsTests
         Assert.Equal(85, row1.Percentage);
 
         // Invalid cell value.
-        Assert.Throws<ValidationException>(() => sheet.ReadRow<ValidatedDataClass>());
+        Assert.IsType<ValidationException>(Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ValidatedDataClass>()).InnerException);
+    }
+
+    [Fact]
+    public void ReadRows_InvalidDataAnnotation_ThrowsExcelMappingExceptionWithRowAndMember()
+    {
+        using var importer = Helpers.GetCsvImporter("Percentage\n50\n500\n");
+        importer.Configuration.ValidateDataAnnotations = true;
+
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<ValidatedDataClass>().ToArray());
+        Assert.Equal("The field Percentage must be between 1 and 100 on row 3.", exception.Message);
+        Assert.Equal(2, exception.RowIndex);
+        Assert.Equal(nameof(ValidatedDataClass.Percentage), exception.Member!.Name);
+        var inner = Assert.IsType<ValidationException>(exception.InnerException);
+        Assert.Equal([nameof(ValidatedDataClass.Percentage)], inner.ValidationResult.MemberNames);
     }
 
     private class ValidatedDataClass
@@ -84,10 +99,10 @@ public class MapDataAnnotationsTests
         sheet.ReadHeading();
 
         // Valid cell value.
-        Assert.Throws<ValidationException>(() => sheet.ReadRow<MultipleValidatedDataClass>());
+        Assert.IsType<ValidationException>(Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<MultipleValidatedDataClass>()).InnerException);
 
         // Invalid cell value.
-        Assert.Throws<ValidationException>(() => sheet.ReadRow<MultipleValidatedDataClass>());
+        Assert.IsType<ValidationException>(Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<MultipleValidatedDataClass>()).InnerException);
     }
 
     private class MultipleValidatedDataClass
