@@ -88,7 +88,7 @@ importer.Configuration.RegisterClassMap<EmployeeMap>();
 An invalid cell throws an `ExcelMappingException` that says where it is:
 
 ```
-Cannot assign "abc" to member "Salary" of type "System.Decimal" in column "Salary" at cell C3 in sheet "Staff".
+Cannot assign "abc" to member "Salary" of type decimal in column "Salary" at cell C3 in sheet "Staff".
 ```
 
 To report every problem in a file at once, read row results:

@@ -61,7 +61,7 @@ internal sealed class MatchingColumns : Columns
     {
         if (sheet.Heading is not { } heading)
         {
-            return Missing(sheet, rowIndex, member, null);
+            return Missing(sheet, member, "a matching column");
         }
 
         // The names of the matching columns, which a row may be too short to have.
@@ -76,7 +76,7 @@ internal sealed class MatchingColumns : Columns
         }
 
         return names.Count == 0
-            ? new($"Could not read value for member \"{member?.Name}\" (no columns matching)", sheet, rowIndex, -1)
-            : Missing(sheet, rowIndex, member, DescribeNames(names));
+            ? Missing(sheet, member, "a matching column")
+            : Missing(sheet, member, DescribeNames(names) + " in this row", rowIndex: rowIndex);
     }
 }

@@ -273,7 +273,7 @@ internal static class AutoMapper
         var emptyValueStrategy = classMap.EmptyValueStrategy;
         if (!TryCreateMap<T>(null, s_firstColumn, AllColumns.Instance, emptyValueStrategy, isAutoMapping: true, typeStack: null, out var map))
         {
-            throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\".");
+            throw new ExcelMappingException($"Cannot auto-map type {TypeNames.Get(typeof(T))}.");
         }
 
         if (map is not ExcelClassMap<T>)

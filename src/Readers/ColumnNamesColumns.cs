@@ -56,7 +56,7 @@ internal sealed class ColumnNamesColumns : Columns
     public override bool LooksUpNames => true;
 
     public override ExcelMappingException CreateMissingException(SheetView sheet, int rowIndex, MemberInfo? member)
-        => Missing(sheet, rowIndex, member, DescribeNames(Names));
+        => Missing(sheet, member, DescribeNames(Names));
 
     public override string Describe(SheetView sheet) => $"one of columns {string.Join(", ", Names.Select(n => $"\"{n}\""))}";
 }

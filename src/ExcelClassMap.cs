@@ -70,6 +70,13 @@ public abstract class ExcelClassMap : IParentMap, IBindableMap
             return;
         }
 
+        // A class map that maps nothing would give an empty object for every row, which is
+        // never what's meant: usually the type's members are read-only or not public.
+        if (_valueMap is null && Members.Count == 0)
+        {
+            throw new ExcelMappingException($"The class map for type {TypeNames.Get(Type)} maps no members, so every row would be an empty object. Auto-mapping maps public fields, and public properties with a public setter or set by a public constructor; map other members with Map(...) in a class map.");
+        }
+
         _frozen = true;
         Members.Freeze();
         _valueMap?.Freeze();

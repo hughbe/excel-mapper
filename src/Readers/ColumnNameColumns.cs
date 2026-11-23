@@ -28,7 +28,7 @@ internal sealed class ColumnNameColumns : Columns
     public override string ColumnName => Name;
 
     public override ExcelMappingException CreateMissingException(SheetView sheet, int rowIndex, MemberInfo? member)
-        => new($"Could not read value for member \"{member?.Name}\" for column \"{Name}\"", sheet, rowIndex, -1, null, ExcelMappingException.GetSimilarColumnHint(sheet, Name));
+        => Missing(sheet, member, $"column \"{Name}\"", ExcelMappingException.GetSimilarColumnHint(sheet, Name));
 
     public override string Describe(SheetView sheet)
     {

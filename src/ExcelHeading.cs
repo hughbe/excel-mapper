@@ -20,30 +20,26 @@ public class ExcelHeading
 
         var (offset, length) = dataRange.Columns.GetOffsetAndLength(reader.FieldCount);
 
-        var nameMapping = new SortedList<string, int>(length, StringComparer.OrdinalIgnoreCase);
+        var nameMapping = new Dictionary<string, int>(length, StringComparer.OrdinalIgnoreCase);
         var columnNames = new string[length];
 
         for (var columnIndex = 0; columnIndex < length; columnIndex++)
         {
             var columnName = reader.GetValue(columnIndex + offset)?.ToString() ?? string.Empty;
-            columnNames[columnIndex] = columnName; // Store original name
+            columnNames[columnIndex] = columnName;
 
-            // For mapping, use unique key if duplicate
-            var mappingKey = columnName;
-            if (nameMapping.ContainsKey(mappingKey))
+            // A name that appears more than once maps to its first column. Mapping a member to it
+            // is an error, as it isn't clear which column to read (see HasDuplicateNames).
+            if (nameMapping.ContainsKey(columnName))
             {
-                // Use incremental counter for deduplication to ensure uniqueness
-                int suffix = 2;
-                do
-                {
-                    mappingKey = $"{columnName}_{suffix}";
-                    suffix++;
-                } while (nameMapping.ContainsKey(mappingKey));
+                // Blank heading cells aren't names: members can't be mapped to them.
+                HasDuplicateNames |= columnName.Length != 0;
+                continue;
             }
 
             // Store the index of the column in the sheet (not relative to the data range) so
             // that it can be passed directly to the underlying reader.
-            nameMapping.Add(mappingKey, columnIndex + offset);
+            nameMapping.Add(columnName, columnIndex + offset);
         }
 
         ColumnOffset = offset;
@@ -62,7 +58,13 @@ public class ExcelHeading
     /// </summary>
     public IReadOnlyList<string> ColumnNames { get; }
 
-    private SortedList<string, int> NameMapping { get; }
+    private Dictionary<string, int> NameMapping { get; }
+
+    /// <summary>
+    /// Whether two columns have the same name, ignoring case, so looking up a column by name must
+    /// check that it's the only one.
+    /// </summary>
+    internal bool HasDuplicateNames { get; }
 
     /// <summary>
     /// Gets the name of the column at the given zero-based index in the sheet.
@@ -93,7 +95,7 @@ public class ExcelHeading
 
     /// <summary>
     /// Gets the zero-based index in the sheet of the column with the given name. This method throws an ExcelMappingException
-    /// if the column does not exist.
+    /// if the column does not exist. If more than one column has the name, this is the first.
     /// </summary>
     /// <param name="columnName">The name of the column to get the zero-based index of.</param>
     /// <returns>The zero-based index of the column with the given name.</returns>
@@ -103,7 +105,7 @@ public class ExcelHeading
 
         if (!NameMapping.TryGetValue(columnName, out int index))
         {
-            var foundColumns = string.Join(", ", NameMapping.Keys.Select(static c => $"\"{c}\""));
+            var foundColumns = string.Join(", ", ColumnNames.Select(static c => $"\"{c}\""));
             throw new ExcelMappingException($"Column \"{columnName}\" does not exist in [{foundColumns}]");
         }
 
@@ -114,7 +116,8 @@ public class ExcelHeading
     /// Tries to get the zero-based index in the sheet of the column with the given name.
     /// </summary>
     /// <param name="columnName">The name of the column to get the zero-based index of.</param>
-    /// <param name="index">The zero-based index of the column with the given name.</param>
+    /// <param name="index">The zero-based index of the column with the given name. If more than one
+    /// column has the name, this is the first.</param>
     /// <returns>Whether or not the column exists.</returns>
     public bool TryGetColumnIndex(string columnName, out int index)
     {
@@ -149,8 +152,7 @@ public class ExcelHeading
     {
         ThrowHelpers.ThrowIfNull(predicate, nameof(predicate));
 
-        // Search in column order (not the sorted lookup order) and match against the
-        // original column names (not the de-duplicated lookup keys).
+        // Search in column order.
         for (var i = 0; i < ColumnNames.Count; i++)
         {
             if (predicate(ColumnNames[i]))

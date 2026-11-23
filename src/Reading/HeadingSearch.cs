@@ -49,7 +49,7 @@ internal static class HeadingSearch
                 if (found > 0)
                 {
                     problems = [];
-                    MapValidation.FindMissingColumns(classMap, sheet, null, problems);
+                    MapValidation.FindMissingColumns(classMap, sheet, null, problems, reportAmbiguous: false);
                 }
             }
             finally
@@ -82,10 +82,10 @@ internal static class HeadingSearch
         // Leave the sheet as it was: the next read starts from the beginning of the sheet again.
         cursor.Reset();
         heading = null;
-        var searched = $"the first {maxRows} rows{(startRowIndex == 0 ? string.Empty : $" from row {startRowIndex + 1}")} of sheet \"{sheet.Name}\"";
+        var searched = $"the first {maxRows} rows{(startRowIndex == 0 ? string.Empty : $" from row {startRowIndex + 1}")} of {ExcelMappingException.DescribeSheet(sheet.Name)}";
         error = closestRowIndex == -1
-            ? $"Could not find the heading for type \"{typeof(T)}\": none of {searched} has any of its columns."
-            : $"Could not find the heading for type \"{typeof(T)}\" in {searched}. The closest is row {closestRowIndex + 1}, which is missing {string.Join("; ", closestProblems!)}.";
+            ? $"Could not find the heading for type {TypeNames.Get(typeof(T))}: none of {searched} has any of its columns."
+            : $"Could not find the heading for type {TypeNames.Get(typeof(T))} in {searched}. The closest is row {closestRowIndex + 1}, which is missing {string.Join("; ", closestProblems!)}.";
         return false;
     }
 }

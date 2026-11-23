@@ -77,19 +77,29 @@ internal static class MapperUtilities
     /// method fails as described.</param>
     /// <param name="parse">Parses the text, to get the exception where it can't be created directly.</param>
     public static Exception InvalidNumber(string? text, NumberStyles style, IFormatProvider? provider, Type type, bool isInteger, bool canCreateException, Action parse)
-        => !canCreateException || text is null || GetNumberFailure(text, style, provider) is not { } isOverflow
+        => !canCreateException || text is null || GetNumberFailure(text, style, provider, isInteger) is not { } failure
             ? InvalidFromParse(parse)
-            : isOverflow
-                ? new OverflowException($"The value \"{text}\" is too large or too small for {type.Name}{(isInteger ? ", or isn't a whole number" : "")}.")
-                : new FormatException($"The value \"{text}\" isn't a valid {type.Name}.");
+            : failure switch
+            {
+                NumberFailure.NotWhole => new OverflowException($"The value \"{text}\" isn't a whole number, so it can't be {TypeNames.Get(type)}."),
+                NumberFailure.OutOfRange => new OverflowException($"The value \"{text}\" is too large or too small for {TypeNames.Get(type)}."),
+                _ => new FormatException($"The value \"{text}\" isn't a valid {TypeNames.Get(type)}."),
+            };
+
+    private enum NumberFailure
+    {
+        NotANumber,
+        OutOfRange,
+        NotWhole,
+    }
 
     // The exception for a number in a cell that isn't whole, mapped to an integer type.
     public static Exception NotWholeNumber(double value, Type type)
-        => new FormatException($"The value {value} is not a whole number, so it can't be converted to {type}.");
+        => new FormatException($"The value {value} isn't a whole number, so it can't be {TypeNames.Get(type)}.");
 
-    // Whether the text a built-in number type's TryParse rejected is a number out of range (true)
-    // or not a number (false), or null if that can't be told without parsing.
-    private static bool? GetNumberFailure(string text, NumberStyles style, IFormatProvider? provider)
+    // Why a built-in number type's TryParse rejected the text: a number out of range, or with a
+    // fraction for an integer type, or not a number; or null if that can't be told without parsing.
+    private static NumberFailure? GetNumberFailure(string text, NumberStyles style, IFormatProvider? provider, bool isInteger)
     {
         // Hex and binary numbers aren't parsed by decimal and double.
         if ((style & ~NumberStyles.Any) != 0)
@@ -99,17 +109,17 @@ internal static class MapperUtilities
 
         // A number that decimal or double can parse, with the same style, is a number the type
         // can't hold.
-        if (decimal.TryParse(text, style, provider, out _))
+        if (decimal.TryParse(text, style, provider, out var exact))
         {
-            return true;
+            return isInteger && exact != decimal.Truncate(exact) ? NumberFailure.NotWhole : NumberFailure.OutOfRange;
         }
 
         if (!double.TryParse(text, style, provider, out var number))
         {
-            return false;
+            return NumberFailure.NotANumber;
         }
 
         // Infinity and NaN symbols, or a number too large for a double.
-        return double.IsNaN(number) || double.IsInfinity(number) ? null : true;
+        return double.IsNaN(number) || double.IsInfinity(number) ? null : NumberFailure.OutOfRange;
     }
 }

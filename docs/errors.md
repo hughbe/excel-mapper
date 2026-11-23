@@ -4,7 +4,7 @@ What errors look like, how to check a file before reading it, how to report ever
 
 ## Error messages
 
-When a sheet, column or cell can't be mapped, ExcelMapper throws an `ExcelMappingException` that says where the problem is, as Excel shows it: a cell address when the column is known, otherwise a one-based row number.
+When a sheet, column or cell can't be mapped, ExcelMapper throws an `ExcelMappingException` that says where the problem is, as Excel shows it: a cell address when the column is known, otherwise a one-based row number. Types are named as C# names them (`int`, `List<string>`), and a missing column's message lists the columns the heading has. A CSV file's sheet has no name, so its messages don't give one.
 
 ```csharp
 try
@@ -13,7 +13,7 @@ try
 }
 catch (ExcelMappingException ex)
 {
-    // Cannot assign "abc" to member "YearsOfService" of type "System.Int32" in column "YearsOfService" at cell C3 in sheet "Employees".
+    // Cannot assign "abc" to member "YearsOfService" of type int in column "YearsOfService" at cell C3 in sheet "Employees".
     Console.WriteLine(ex.Message);
 
     Console.WriteLine(ex.CellAddress);      // "C3" (null if unknown)
@@ -67,24 +67,27 @@ foreach (var result in results.Where(r => !r.IsValid))
 ```
 
 - `Value` is the mapped object, or `default` if the row has errors: partly mapped objects are never returned.
-- `Errors` lists every problem in the row: invalid or empty values, missing columns, exceptions thrown by a constructor, and failed data annotations when `ValidateDataAnnotations` is on.
+- `Errors` lists every problem in the row: invalid or empty values, exceptions thrown by a constructor, and failed data annotations when `ValidateDataAnnotations` is on.
 - `RowIndex` is the row's zero-based index in the sheet.
-- Problems with the mapping itself, such as a type that can't be auto-mapped, still throw.
-- A missing column is reported on every row, so call `ValidateHeading` first to report it once.
+- Problems with the sheet or the mapping itself throw when `ReadRowResults` is called, rather than being reported on every row: columns the type needs that the heading doesn't have (with the same message as `ValidateHeading`), and a type that can't be auto-mapped.
 
 `ReadRowResults` costs the same as `ReadRows` for valid rows.
 
 ## Troubleshooting
 
-**`Could not read value for member "FirstName" for column "FirstName"`.** The sheet has no column with that name. Check the message for a suggested column, then:
+**`Can't find column "FirstName" for member "FirstName"`.** The heading has no column with that name: the message lists the columns it has, and suggests one whose name only differs by spaces or separators. Then:
 - rename the member's column with `[ExcelColumnName]`, or accept several names (see [Choosing columns](mapping.md#choosing-columns));
 - set `importer.Configuration.IgnoreSeparatorsInColumnNames = true` to match "First Name", "first_name" and so on;
 - make the member optional if the column isn't always there ([Missing and ignored columns](mapping.md#missing-and-ignored-columns));
 - check where the heading is: see [Where the heading is](reading.md#where-the-heading-is) and [Finding the heading](reading.md#finding-the-heading).
 
-**`Cannot assign "" to member ...` for an empty cell.** The member's type can't be empty, such as `int` or `DateTime`. Make it nullable (`int?`), or give it an empty fallback ([Empty and invalid cells](mapping.md#empty-and-invalid-cells)).
+**`More than one column matches "Name" (columns A and B)`.** The heading has two columns with the member's name (ignoring case, and separators if `IgnoreSeparatorsInColumnNames` is set), so it isn't clear which to read. Choose one with `[ExcelColumnLetter]` or `.WithColumnLetter(...)`, or rename one of the columns.
 
-**`Cannot assign "N/A" to member ...` for text that isn't a valid value.** Give the member an invalid fallback, map the text with [value mapping](mapping.md#value-mapping), or [convert it yourself](mapping.md#converters).
+**`The class map for type Order maps no members`.** Nothing in the type is mapped, so every row would be an empty object: its properties are read-only or have private setters, are all `[ExcelIgnore]`, or a class map registered for it has no `Map(...)` calls. Give the properties public setters or a constructor that takes them, or map them in a class map (`Map(p => p.Total)` works with a private setter).
+
+**`The cell is empty, but member "Age" of type int can't be empty`.** The member's type can't be empty, such as `int` or `DateTime`. Make it nullable (`int?`), or give it an empty fallback ([Empty and invalid cells](mapping.md#empty-and-invalid-cells)).
+
+**`Cannot assign "N/A" to member ...` for text that isn't a valid value.** For a number that's too large for its type, or has a fraction for an integer type, the message says so. Give the member an invalid fallback, map the text with [value mapping](mapping.md#value-mapping), or [convert it yourself](mapping.md#converters).
 
 **A fractional number such as `2.7` is invalid for an `int` member.** Excel stores every number as a `double`, and ExcelMapper doesn't silently drop or round the fraction (3.x did). Map to `decimal` or `double`, give the member an invalid fallback, or round it in a converter: `.WithConverter(value => (int)Math.Round(double.Parse(value)))`.
 

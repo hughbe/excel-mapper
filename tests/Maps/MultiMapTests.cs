@@ -212,15 +212,15 @@ public class MultiMapTests
     }    
 
     [Fact]
-    public void ReadRow_AutoMappedSubReadOnlyCollectionBase_Success()
+    public void ReadRow_AutoMappedSubReadOnlyCollectionBase_ThrowsExcelMappingException()
     {
+        // Nothing in the type can be mapped, so every row would be an empty object.
         using var importer = Helpers.GetImporter("MultiMap.xlsx");
-        
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        var row1 = sheet.ReadRow<SubReadOnlyCollectionBase>();
-        Assert.Empty(row1);
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SubReadOnlyCollectionBase>());
+        Assert.StartsWith("The class map for type", exception.Message);
     }
 
     private class SubReadOnlyCollectionBase : ReadOnlyCollectionBase

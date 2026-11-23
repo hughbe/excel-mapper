@@ -317,8 +317,34 @@ public class ExcelHeadingTests
         var sheet = importer.ReadSheet();
         var heading = sheet.ReadHeading();
 
-        // The second column is stored internally as "Name_2" but should be matched as "Name".
         Assert.False(heading.TryGetFirstColumnMatchingIndex(n => n == "Name_2", out _));
         Assert.Equal(0, heading.GetFirstColumnMatchingIndex(n => n == "Name"));
+    }
+
+    [Fact]
+    public void TryGetColumnIndex_DuplicatedColumnSuffix_ReturnsFalse()
+    {
+        // The heading doesn't invent names for repeated columns.
+        using var importer = Helpers.GetCsvImporter("Name,Name\n1,2\n");
+        var heading = importer.ReadSheet().ReadHeading();
+        Assert.False(heading.TryGetColumnIndex("Name_2", out _));
+    }
+
+    [Fact]
+    public void GetColumnIndex_ColumnNamedLikeSuffix_ReturnsColumn()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Name,Name_2\n1,2,3\n");
+        var heading = importer.ReadSheet().ReadHeading();
+        Assert.Equal(0, heading.GetColumnIndex("Name"));
+        Assert.Equal(2, heading.GetColumnIndex("Name_2"));
+    }
+
+    [Fact]
+    public void GetColumnIndex_MissingColumn_ListsColumnsInOrder()
+    {
+        using var importer = Helpers.GetCsvImporter("B,A,B\n1,2,3\n");
+        var heading = importer.ReadSheet().ReadHeading();
+        var exception = Assert.Throws<ExcelMappingException>(() => heading.GetColumnIndex("C"));
+        Assert.Equal("Column \"C\" does not exist in [\"B\", \"A\", \"B\"]", exception.Message);
     }
 }
