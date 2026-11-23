@@ -40,7 +40,9 @@ Add `--job short` for a quicker, less precise run (except for `NativeAot`, which
 
 ```bash
 dotnet run -c Release -- --filter '*.NativeAot.*'
-``` On Apple Silicon, timings can vary by up to 2x between runs: compare allocations, which are reliable, and repeat timings.
+```
+
+On Apple Silicon, timings can vary by up to 2x between runs: compare allocations, which are reliable, and repeat timings.
 
 ## Comparing with 3.x
 
@@ -54,23 +56,26 @@ CI builds this too, so it keeps compiling.
 
 ## 4.0 compared with 3.0.3
 
-Apple M4, .NET 9.0.10, BenchmarkDotNet 0.15.8, default job. Allocations include ExcelDataReader's 165.6 MB for reading the file (`ReaderOnly`). The last three rows are from a later run on the same machine.
+Apple M4, .NET 9.0.10, BenchmarkDotNet 0.15.8, default job, 4.0 at [#218](https://github.com/hughbe/excel-mapper/pull/218). 3.0.3 was run twice, and each row gives its faster run. Allocations include ExcelDataReader's 165.6 MB for reading the file (`ReaderOnly`), which is most of the time too.
 
 | Benchmark | 3.0.3 | 4.0 | Faster | Allocated (3.0.3 → 4.0) |
 |---|---:|---:|---:|---:|
-| `ReaderOnly` | 92.7 ms | 93.2 ms | | 165.6 MB → 165.6 MB |
-| `AutoMappedClass` | 494.8 ms | 114.3 ms | 4.3x | 243.5 MB → 170.6 MB |
-| `FluentClassMap` | 116.9 ms | 103.0 ms | 1.1x | 211.8 MB → 168.3 MB |
-| `InvalidValuesWithFallback` | 216.3 ms | 24.0 ms | 9.0x | 85.7 MB → 59.7 MB |
-| `TypedNumbers` | 64.1 ms | 55.3 ms | 1.2x | 60.9 MB → 36.7 MB |
-| `SplitCollection` | 45.4 ms | 40.1 ms | 1.1x | 94.5 MB → 74.9 MB |
-| `DictionaryOfColumns` | 57.3 ms | 54.3 ms | 1.1x | 124.9 MB → 106.1 MB |
-| `AutoMapping` | 42.9 µs | 11.2 µs | 3.8x | 66.2 KB → 41.5 KB |
-| `TypedDates` | 53.6 ms | 49.7 ms | 1.1x | 45.4 MB → 29.0 MB |
-| `SkipBlankLines` | 38.4 ms | 35.2 ms | 1.1x | 118.6 MB → 104.5 MB |
-| `OptionalMissingColumn` | 101.2 ms | 96.0 ms | 1.05x | 180.8 MB → 163.6 MB |
+| `ReaderOnly` | 94.9 ms | 93.8 ms | | 165.6 MB → 165.6 MB |
+| `AutoMappedClass` | 137.6 ms | 112.3 ms | 1.2x | 243.5 MB → 170.6 MB |
+| `AutoMappedStruct` | 137.0 ms | 112.5 ms | 1.2x | 243.5 MB → 165.6 MB |
+| `FluentClassMap` | 118.4 ms | 103.5 ms | 1.1x | 211.8 MB → 168.3 MB |
+| `InvalidValuesWithFallback` | 216.6 ms | 24.2 ms | 9.0x | 85.7 MB → 59.7 MB |
+| `TypedNumbers` | 61.2 ms | 58.3 ms | 1.05x | 60.9 MB → 36.7 MB |
+| `SplitCollection` | 44.7 ms | 37.5 ms | 1.2x | 94.5 MB → 74.9 MB |
+| `DictionaryOfColumns` | 58.7 ms | 45.1 ms | 1.3x | 124.9 MB → 99.5 MB |
+| `AutoMapping` | 44.5 µs | 11.6 µs | 3.8x | 66.2 KB → 41.9 KB |
+| `TypedDates` | 53.2 ms | 52.3 ms | 1.02x | 46.5 MB → 29.7 MB |
+| `SkipBlankLines` | 38.2 ms | 34.5 ms | 1.1x | 121.4 MB → 107.0 MB |
+| `OptionalMissingColumn` | 101.2 ms | 97.4 ms | 1.04x | 185.1 MB → 167.5 MB |
 
-Beyond reading the file, mapping the 10-member class allocates 5.1 MB instead of 78.0 MB (93% less), and the class map 2.8 MB instead of 46.3 MB (94% less). 3.0.3 threw and caught an exception for each of the 25,000 invalid values; 4.0 throws none.
+Most of each mapping benchmark's time is ExcelDataReader reading the file (`ReaderOnly`), which is the same for both versions. Beyond it, mapping the 10-member class takes 18.5 ms instead of 42.7 ms (2.3 times faster) and allocates 5.1 MB instead of 77.9 MB (93% less); a struct allocates nothing beyond reading the file. 3.0.3 threw and caught an exception for each of the 25,000 invalid values; 4.0 throws none.
+
+An earlier version of this table gave 3.0.3's `AutoMappedClass` as 494.8 ms, and 4.0 as 4.3 times faster: two later runs of 3.0.3 took 138 to 142 ms, so that run was wrong.
 
 ## Native AOT compared with the JIT
 

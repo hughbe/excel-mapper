@@ -10,7 +10,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - **Map more types:** records and constructor-only types, row numbers, the columns no other member reads, and dates and times written as text in more formats.
 - **Native AOT:** a source generator in the package writes an `ExcelMappingContext`, so apps compiled with native AOT map rows without reflection or warnings.
 - **Extend it simply:** typed converters, transformers, fallbacks and column selectors replace the old low-level types.
-- **Faster:** compared with 3.0.3, an auto-mapped 10-member class maps 4 times faster, and ExcelMapper's own allocations for it are 93% lower; invalid cells with a fallback map 9 times faster, as they no longer throw and catch exceptions; and auto-mapping a type is nearly 4 times faster. See the [benchmarks](benchmarks/README.md#40-compared-with-303).
+- **Faster:** compared with 3.0.3, mapping an auto-mapped 10-member class takes less than half the time beyond reading the file (20% less in all, as ExcelDataReader reading the file is most of it), and ExcelMapper's own allocations for it are 93% lower; invalid cells with a fallback map 9 times faster, as they no longer throw and catch exceptions; and auto-mapping a type is nearly 4 times faster. See the [benchmarks](benchmarks/README.md#40-compared-with-303).
 
 4.0 contains breaking changes. Most code compiles unchanged, but some behaviour changed: see [Migrating to 4.0](docs/migrating-to-4.0.md) for what to check when upgrading from 3.x.
 
