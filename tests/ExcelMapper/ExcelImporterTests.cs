@@ -18,6 +18,33 @@ public class ExcelImporterTests
     }
 
     [Fact]
+    public void Ctor_String_FileOpenForWriting_Success()
+    {
+        // As Excel does with a workbook it has open.
+        var filePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".xlsx");
+        File.Copy(Helpers.GetResourcePath("Primitives.xlsx"), filePath);
+        try
+        {
+            using (new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
+            {
+                // Only Windows enforces sharing between readers and writers, so only there does a
+                // file opened just for reading fail.
+                if (OperatingSystem.IsWindows())
+                {
+                    Assert.Throws<IOException>(() => File.OpenRead(filePath).Dispose());
+                }
+
+                using var importer = new ExcelImporter(filePath);
+                Assert.Equal("Primitives", importer.ReadSheet().Name);
+            }
+        }
+        finally
+        {
+            File.Delete(filePath);
+        }
+    }
+
+    [Fact]
     public void Ctor_String_Xlsm()
     {
         var filePath = Helpers.GetResourcePath("Primitives.xlsm");
