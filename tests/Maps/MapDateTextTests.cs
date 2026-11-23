@@ -110,6 +110,21 @@ public class MapDateTextTests
         public DateTime Date { get; set; }
     }
 
+    [Theory]
+    [InlineData("2024-03-04T10:30:15Z", 10, DateTimeKind.Utc)]
+    [InlineData("2024-03-04T10:30:15+01:00", 9, DateTimeKind.Utc)]
+    [InlineData("2024-03-04T10:30:15-08:00", 18, DateTimeKind.Utc)]
+    [InlineData("2024-03-04T10:30:15", 10, DateTimeKind.Unspecified)]
+    [InlineData("03/04/2024 10:30:15", 10, DateTimeKind.Unspecified)]
+    public void ReadRows_DateTimeTextWithOffset_ConvertsToUtc(string text, int hour, DateTimeKind kind)
+    {
+        // Not to the machine's local time, so every machine reads the same value.
+        using var importer = Helpers.GetCsvImporter($"Date\n{text}\n");
+        var date = importer.ReadSheet().ReadRows<SingleDateRow>().Single().Date;
+        Assert.Equal(new DateTime(2024, 3, 4, hour, 30, 15), date);
+        Assert.Equal(kind, date.Kind);
+    }
+
     public class FormatsRow
     {
         [ExcelFormats("dd/MM/yyyy")]

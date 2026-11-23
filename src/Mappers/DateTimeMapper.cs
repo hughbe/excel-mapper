@@ -20,7 +20,9 @@ internal sealed class DateTimeMapper : ICellMapper<DateTime>, ICellMapper<DateTi
     // The format tried first when the member has no formats of its own.
     private static readonly string[] s_defaultFormats = ["G"];
 
-    private const DateTimeStyles Style = DateTimeStyles.None;
+    // Text with an offset ("Z", "+01:00") is converted to UTC, rather than to the machine's local
+    // time, so a file gives the same values on every machine. Text without one is left as it is.
+    private const DateTimeStyles Style = DateTimeStyles.AdjustToUniversal;
 
     CellConversion ICellMapper<DateTime>.Convert(ReadCellResult cell, in CellContext context, out DateTime value, ref object? error)
     {

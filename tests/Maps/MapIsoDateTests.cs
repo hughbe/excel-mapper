@@ -66,8 +66,8 @@ public class MapIsoDateTests
             for (int i = 0; i < Texts.Length; i++)
             {
                 var text = Texts[i];
-                var expectedValid = DateTime.TryParseExact(text, "G", culture, DateTimeStyles.None, out var expected)
-                    || DateTime.TryParseExact(text, s_isoFormats, culture, DateTimeStyles.None, out expected);
+                var expectedValid = DateTime.TryParseExact(text, "G", culture, DateTimeStyles.AdjustToUniversal, out var expected)
+                    || DateTime.TryParseExact(text, s_isoFormats, culture, DateTimeStyles.AdjustToUniversal, out expected);
                 if (!expectedValid)
                 {
                     // Other default formats, such as the culture's short date, may still read it.
@@ -90,8 +90,8 @@ public class MapIsoDateTests
             for (int i = 0; i < Texts.Length; i++)
             {
                 var text = Texts[i];
-                if (DateTimeOffset.TryParseExact(text, "G", culture, DateTimeStyles.None, out var expected)
-                    || DateTimeOffset.TryParseExact(text, s_isoFormats, culture, DateTimeStyles.None, out expected))
+                if (DateTimeOffset.TryParseExact(text, "G", culture, DateTimeStyles.AssumeUniversal, out var expected)
+                    || DateTimeOffset.TryParseExact(text, s_isoFormats, culture, DateTimeStyles.AssumeUniversal, out expected))
                 {
                     Assert.True(results[i].IsValid, $"{text} in {culture.Name}");
                     Assert.Equal((expected.DateTime, expected.Offset), (results[i].Value!.Value.DateTime, results[i].Value!.Value.Offset));

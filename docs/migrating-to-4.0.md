@@ -6,16 +6,17 @@ ExcelMapper 4.0 fixes several long-standing bugs and makes mapping more predicta
 
 1. [`object` members now receive typed values](#object-members-receive-typed-values)
 2. [Text is read with the invariant culture](#text-is-read-with-the-invariant-culture)
-3. [Fractional numbers can't be mapped to integers](#fractional-numbers-cant-be-mapped-to-integers)
-4. [`WithConverter` replaces the built-in conversion](#withconverter-replaces-the-built-in-conversion)
-5. [`ReadRow` reads the heading first](#readrow-reads-the-heading-first)
-6. [Error messages use cell addresses](#error-messages-use-cell-addresses)
-7. [Sheet names are case-insensitive](#sheet-names-are-case-insensitive)
-8. [Extension types](#extension-types)
-9. [Renamed types](#renamed-types)
-10. [Renamed and removed methods](#renamed-and-removed-methods)
-11. [Smaller changes](#smaller-changes)
-12. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
+3. [Dates don't depend on the machine's time zone](#dates-dont-depend-on-the-machines-time-zone)
+4. [Fractional numbers can't be mapped to integers](#fractional-numbers-cant-be-mapped-to-integers)
+5. [`WithConverter` replaces the built-in conversion](#withconverter-replaces-the-built-in-conversion)
+6. [`ReadRow` reads the heading first](#readrow-reads-the-heading-first)
+7. [Error messages use cell addresses](#error-messages-use-cell-addresses)
+8. [Sheet names are case-insensitive](#sheet-names-are-case-insensitive)
+9. [Extension types](#extension-types)
+10. [Renamed types](#renamed-types)
+11. [Renamed and removed methods](#renamed-and-removed-methods)
+12. [Smaller changes](#smaller-changes)
+13. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
 
 ## `object` members receive typed values
 
@@ -58,6 +59,23 @@ importer.Configuration.Culture = CultureInfo.CurrentCulture;
 ```
 
 A member can have its own culture with `.WithFormatProvider(...)` (see [Culture](types.md#culture)).
+
+## Dates don't depend on the machine's time zone
+
+**Who's affected:** code that maps text with an offset (`2024-03-04T10:30:15Z`, `+01:00`) to `DateTime`, or maps Excel dates or text without an offset to `DateTimeOffset`, and relies on the machine's local time zone.
+
+**Before:** `2024-03-04T10:30:15Z` mapped to `DateTime` was converted to the machine's local time (`Kind` `Local`), and a `DateTimeOffset` without an offset in the file got the machine's local offset, so the same file gave different values on servers in different time zones.
+
+**Now:** `DateTime` values with an offset are converted to UTC (`Kind` `Utc`); text without one is left as it is. `DateTimeOffset` values without an offset are UTC (`+00:00`), and `[ExcelOffset]`/`WithOffset` choose another, for Excel dates and text alike. Text with its own offset keeps it.
+
+**What to do:** if the file's dates are in a known time zone, give the member its offset:
+
+```csharp
+[ExcelOffset("-08:00")]
+public DateTimeOffset StartsAt { get; set; }
+```
+
+To get local time, convert after reading: `value.ToLocalTime()`.
 
 ## Fractional numbers can't be mapped to integers
 
