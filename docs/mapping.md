@@ -75,6 +75,8 @@ importer.Configuration.RegisterClassMap<Employee>(c =>
 
 A class map reads only the members it maps, and attributes on those members still apply. To start from what auto-mapping would map and change only some members, call `AutoMap()` first: members mapped after it replace the auto-mapped ones.
 
+Mapping a member again in the same class map configures the map it already has, so settings can be added in several places: `Map(p => p.Name).WithColumnName("Full Name")` followed by `Map(p => p.Name).MakeOptional()` reads an optional "Full Name" column. A member that `AutoMap()` mapped, or that was mapped as another kind of map (such as `Map` and then `MapCollection`), gets a new map instead.
+
 ```csharp
 importer.Configuration.RegisterClassMap<Employee>(c =>
 {

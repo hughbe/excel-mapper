@@ -105,14 +105,24 @@ internal static class ExpressionAutoMapper
     /// it's not mapped yet, along with the maps of the objects, collections and dictionaries it's
     /// read through: for <c>p => p.Address.Street</c>, the class map of <c>Address</c>.
     /// </summary>
-    private static IMap GetOrCreateMap<T>(ExcelClassMap<T> classMap, Expression expression, Func<MappedExpression, EmptyValueStrategy, IMap> createMap)
+    /// <remarks>
+    /// A member already mapped with <c>Map(...)</c> to the same kind of map keeps its map, so that
+    /// <c>Map(p => p.Name).WithColumnName("Full Name")</c> followed by <c>Map(p => p.Name).MakeOptional()</c>
+    /// configures one map. A member that auto-mapping mapped (with <c>AutoMap()</c>), or that was
+    /// mapped to another kind of map, gets a new one.
+    /// </remarks>
+    private static TMap GetOrCreateMap<T, TMap>(ExcelClassMap<T> classMap, Expression expression, Func<MappedExpression, EmptyValueStrategy, IMap> createMap, out bool created) where TMap : class, IMap
     {
+        // As when a member's map is replaced, a class map that has read rows can't change.
+        ThrowHelpers.ThrowIfFrozen(classMap.IsFrozen);
+
         var emptyValueStrategy = classMap.EmptyValueStrategy;
         if (SkipConvert(expression, out var convertedType) is ParameterExpression parameter)
         {
             // The row itself, such as Map(p => p).
-            var valueMap = createMap(new MappedParameterExpression(convertedType ?? parameter.Type), emptyValueStrategy);
+            var valueMap = (TMap)createMap(new MappedParameterExpression(convertedType ?? parameter.Type), emptyValueStrategy);
             classMap.SingleValueMap = valueMap;
+            created = true;
             return valueMap;
         }
 
@@ -132,8 +142,16 @@ internal static class ExpressionAutoMapper
         }
 
         // A member of a class map, or an element mapped by its index or key.
-        var map = createMap(current, emptyValueStrategy);
-        ((IParentMap)parentMap).SetChild(current.Key, map);
+        var parent = (IParentMap)parentMap;
+        if (parent.GetMappedChild(current.Key) is TMap existing)
+        {
+            created = false;
+            return existing;
+        }
+
+        var map = (TMap)createMap(current, emptyValueStrategy);
+        parent.SetChild(current.Key, map);
+        created = true;
         return map;
     }
 
@@ -155,7 +173,7 @@ internal static class ExpressionAutoMapper
             return map;
         }
 
-        return (ValueMap<TProperty>)GetOrCreateMap(classMap, expression, createMap);
+        return GetOrCreateMap<T, ValueMap<TProperty>>(classMap, expression, createMap, out _);
     }
 
     // Why a member mapped with Map(...) can't be read from a cell, and what to do instead: the
@@ -191,7 +209,7 @@ internal static class ExpressionAutoMapper
             return map;
         }
 
-        return (CollectionMap<TElement>)GetOrCreateMap(classMap, expression, createMap);
+        return GetOrCreateMap<T, CollectionMap<TElement>>(classMap, expression, createMap, out _);
     }
 
     public static DictionaryMap<TKey, TValue> GetOrCreateDictionaryMap<T, TKey, TValue>(ExcelClassMap<T> classMap, Expression expression) where TKey : notnull
@@ -207,10 +225,11 @@ internal static class ExpressionAutoMapper
             return map;
         }
 
-        var map = (DictionaryMap<TKey, TValue>)GetOrCreateMap(classMap, expression, createMap);
+        var map = GetOrCreateMap<T, DictionaryMap<TKey, TValue>>(classMap, expression, createMap, out var created);
 
-        // Honour [ExcelExtraColumns] on a member mapped with Map(...), as auto-mapping does.
-        if (MapTree.FindOwner(classMap, map, out var member) is { } owner && member is not null && Attribute.IsDefined(member, typeof(ExcelExtraColumnsAttribute)))
+        // Honour [ExcelExtraColumns] on a member mapped with Map(...), as auto-mapping does: when
+        // it's first mapped, so that columns chosen afterwards stay chosen.
+        if (created && MapTree.FindOwner(classMap, map, out var member) is { } owner && member is not null && Attribute.IsDefined(member, typeof(ExcelExtraColumnsAttribute)))
         {
             map.Columns = new ExtraColumns(owner);
         }
@@ -239,7 +258,7 @@ internal static class ExpressionAutoMapper
             return new RowNumberMap(type);
         }
 
-        return (RowNumberMap)GetOrCreateMap(classMap, expression, createMap);
+        return GetOrCreateMap<T, RowNumberMap>(classMap, expression, createMap, out _);
     }
 
     public static ExcelClassMap<TElement> GetOrCreateObjectMap<T, TElement>(ExcelClassMap<T> classMap, Expression expression)
@@ -254,7 +273,7 @@ internal static class ExpressionAutoMapper
             return map;
         }
 
-        return (ExcelClassMap<TElement>)GetOrCreateMap(classMap, expression, createMap);
+        return GetOrCreateMap<T, ExcelClassMap<TElement>>(classMap, expression, createMap, out _);
     }
 }
 

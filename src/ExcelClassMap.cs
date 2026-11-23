@@ -57,6 +57,11 @@ public abstract class ExcelClassMap : IParentMap, IBindableMap
 
     private bool _frozen;
 
+    /// <summary>
+    /// Gets whether the class map has been used to read rows, so it can't change.
+    /// </summary>
+    internal bool IsFrozen => _frozen;
+
     /// <inheritdoc />
     void IMap.Freeze() => Freeze();
 
@@ -120,6 +125,19 @@ public abstract class ExcelClassMap : IParentMap, IBindableMap
         return null;
     }
 
+    IMap? IParentMap.GetMappedChild(object key)
+    {
+        foreach (var member in Members)
+        {
+            if (member.Member.Equals(key))
+            {
+                return member.MappedExplicitly ? member.Map : null;
+            }
+        }
+
+        return null;
+    }
+
     void IParentMap.SetChild(object key, IMap map)
     {
         var member = (MemberInfo)key;
@@ -132,7 +150,8 @@ public abstract class ExcelClassMap : IParentMap, IBindableMap
             }
         }
 
-        Members.Add(new ClassMapMember(member, map));
+        // Only Map(...) sets children: auto-mapping adds its members directly.
+        Members.Add(new ClassMapMember(member, map, mappedExplicitly: true));
     }
 
     string? IParentMap.GetChildPath(string? path, object? key)

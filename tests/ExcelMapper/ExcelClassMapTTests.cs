@@ -315,4 +315,107 @@ public class ExcelClassMapTTests
         public string Street { get; set; } = default!;
         public int Zip { get; set; }
     }
+
+    [Fact]
+    public void Map_SameMemberTwice_ConfiguresOneMap()
+    {
+        var classMap = new ExcelClassMap<ReuseRow>();
+        var first = classMap.Map(r => r.Name).WithColumnName("Full Name");
+        var second = classMap.Map(r => r.Name).MakeOptional();
+        Assert.Same(first, second);
+
+        using var importer = Helpers.GetCsvImporter("Full Name\nAlice\n");
+        importer.Configuration.RegisterClassMap(classMap);
+        var row = importer.ReadSheet().ReadRows<ReuseRow>().Single();
+        Assert.Equal("Alice", row.Name);
+        Assert.True(first.Optional);
+    }
+
+    [Fact]
+    public void Map_AfterAutoMap_ReplacesAutoMappedMapThenReusesIt()
+    {
+        var classMap = new ExcelClassMap<NameRow>();
+        classMap.AutoMap();
+        var mapped = classMap.Map(r => r.Name).WithColumnName("Full Name");
+        Assert.Same(mapped, classMap.Map(r => r.Name));
+
+        // The auto-mapped map, which reads "Name", is replaced.
+        using var importer = Helpers.GetCsvImporter("Full Name\nAlice\n");
+        Assert.Equal("Alice", importer.ReadSheet().ReadRows(classMap).Single().Name);
+    }
+
+    public class NameRow
+    {
+        public string? Name { get; set; }
+    }
+
+    [Fact]
+    public void Map_SameMemberAsAnotherKindOfMap_ReplacesMap()
+    {
+        // Map gives a value map that can't read a HashSet; MapCollection replaces it.
+        var classMap = new ExcelClassMap<TagsRow>();
+        classMap.Map(r => r.Tags);
+        classMap.MapCollection<string>(r => r.Tags);
+
+        using var importer = Helpers.GetCsvImporter("Tags\n\"a,b\"\n");
+        Assert.Equal(["a", "b"], importer.ReadSheet().ReadRows(classMap).Single().Tags.Order());
+    }
+
+    public class TagsRow
+    {
+        public HashSet<string> Tags { get; set; } = [];
+    }
+
+    [Fact]
+    public void Map_NestedMemberAndIndexerTwice_ReuseMaps()
+    {
+        var classMap = new ExcelClassMap<ReuseRow>();
+        Assert.Same(classMap.Map(r => r.Address.Street), classMap.Map(r => r.Address.Street));
+        Assert.Same(classMap.Map(r => r.Scores[0]), classMap.Map(r => r.Scores[0]));
+        Assert.NotSame(classMap.Map(r => r.Scores[0]), classMap.Map(r => r.Scores[1]));
+    }
+
+    [Fact]
+    public void MapObject_AfterNestedMember_KeepsNestedMember()
+    {
+        var classMap = new ExcelClassMap<AddressRow>();
+        classMap.Map(r => r.Address.Street).WithColumnName("Road");
+        classMap.MapObject(r => r.Address);
+
+        using var importer = Helpers.GetCsvImporter("Road\nHigh Street\n");
+        Assert.Equal("High Street", importer.ReadSheet().ReadRows(classMap).Single().Address.Street);
+    }
+
+    public class AddressRow
+    {
+        public ReuseAddress Address { get; set; } = new();
+    }
+
+    [Fact]
+    public void Map_AfterReadingRows_ThrowsInvalidOperationException()
+    {
+        var classMap = new ExcelClassMap<ReuseRow>();
+        classMap.Map(r => r.Name);
+        using var importer = Helpers.GetCsvImporter("Name\nAlice\n");
+        _ = importer.ReadSheet().ReadRows(classMap).ToArray();
+
+        // Even a member the class map already maps: its map can't change either.
+        Assert.Throws<InvalidOperationException>(() => classMap.Map(r => r.Name));
+    }
+
+    public class ReuseRow
+    {
+        public string? Name { get; set; }
+
+        public HashSet<string> Tags { get; set; } = [];
+
+        public ReuseAddress Address { get; set; } = new();
+
+        public int[] Scores { get; set; } = [];
+    }
+
+    public class ReuseAddress
+    {
+        public string? Street { get; set; }
+    }
 }

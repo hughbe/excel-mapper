@@ -33,6 +33,9 @@ internal abstract class IndexerMap<TKey>(IEqualityComparer<TKey>? comparer = nul
 
     IMap? IParentMap.GetChild(object key) => Values.TryGetValue((TKey)key, out var map) ? map : null;
 
+    // Elements mapped one by one are only ever mapped with Map(...).
+    IMap? IParentMap.GetMappedChild(object key) => ((IParentMap)this).GetChild(key);
+
     void IParentMap.SetChild(object key, IMap map)
     {
         ThrowHelpers.ThrowIfFrozen(_frozen);
