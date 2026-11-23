@@ -155,7 +155,7 @@ public class CollectionMapTests
     {
         const string csv = "Name,Q1,Q2,Notes\na,1,2,x||y|\n";
         // Empty values use the empty fallback: null for strings.
-        Assert.Equal(["x", null, "y", null], ReadStrings(m => m.WithColumnName("Notes").WithSeparators('|'), csv));
+        Assert.Equal<string?[]>(["x", null, "y", null], ReadStrings(m => m.WithColumnName("Notes").WithSeparators('|'), csv));
         Assert.Equal(["x", "y"], ReadStrings(m => m.WithColumnName("Notes").WithSeparators('|').WithSplitOptions(StringSplitOptions.RemoveEmptyEntries), csv));
         Assert.Equal(["x", "y"], ReadStrings(m => m.WithColumnName("Notes").WithSeparators("|").WithSplitOptions(StringSplitOptions.RemoveEmptyEntries), csv));
     }
@@ -164,7 +164,7 @@ public class CollectionMapTests
     public void WithSplitOptions_TrimEntries_TrimsValues()
     {
         const string csv = "Name,Q1,Q2,Notes\na,1,2,x | y |  | z\n";
-        Assert.Equal(["x", "y", null, "z"], ReadStrings(m => m.WithColumnName("Notes").WithSeparators('|').WithSplitOptions(StringSplitOptions.TrimEntries), csv));
+        Assert.Equal<string?[]>(["x", "y", null, "z"], ReadStrings(m => m.WithColumnName("Notes").WithSeparators('|').WithSplitOptions(StringSplitOptions.TrimEntries), csv));
         Assert.Equal(["x", "y", "z"], ReadStrings(m => m.WithColumnName("Notes").WithSeparators('|').WithSplitOptions(StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries), csv));
     }
 
