@@ -5,7 +5,7 @@ namespace ExcelMapper.Fallbacks;
 /// cell as an error.
 /// </summary>
 /// <remarks>
-/// When errors are collected rather than thrown, <see cref="ValuePipeline{T}.Map"/> reports the
+/// When errors are collected rather than thrown, <see cref="CellPipeline{T}.Map"/> reports the
 /// cell to them itself instead of calling this, so that the exception is only created if it's
 /// needed: throwing and catching an exception for every invalid cell would be slow.
 /// </remarks>

@@ -10,16 +10,16 @@ namespace ExcelMapper;
 public static partial class ValuePipelineExtensions
 {
 #if NET7_0_OR_GREATER
-    private static void AddNumberMapperIfMissing<T>(ValuePipeline<T> pipeline) where T : struct, System.Numerics.INumberBase<T>
+    private static void AddNumberMapperIfMissing<T>(CellPipeline<T> pipeline) where T : struct, System.Numerics.INumberBase<T>
         => pipeline.AddMapperIfMissing<T, StructNumberMapper<T>>(static () => new StructNumberMapper<T>());
 
-    private static void AddNumberMapperIfMissing<T>(ValuePipeline<T?> pipeline) where T : struct, System.Numerics.INumberBase<T>
+    private static void AddNumberMapperIfMissing<T>(CellPipeline<T?> pipeline) where T : struct, System.Numerics.INumberBase<T>
         => pipeline.AddMapperIfMissing<T?, StructNumberMapper<T>>(static () => new StructNumberMapper<T>());
 #else
-    private static void AddNumberMapperIfMissing<T>(ValuePipeline<T> pipeline) where T : struct
+    private static void AddNumberMapperIfMissing<T>(CellPipeline<T> pipeline) where T : struct
         => pipeline.AddMapperIfMissing<T, NumberMapper<T>>(static () => new NumberMapper<T>());
 
-    private static void AddNumberMapperIfMissing<T>(ValuePipeline<T?> pipeline) where T : struct
+    private static void AddNumberMapperIfMissing<T>(CellPipeline<T?> pipeline) where T : struct
         => pipeline.AddMapperIfMissing<T?, NumberMapper<T>>(static () => new NumberMapper<T>());
 #endif
 

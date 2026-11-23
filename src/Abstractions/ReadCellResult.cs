@@ -20,7 +20,7 @@ internal struct ReadCellResult
     /// <summary>
     /// The culture to parse and format the cell's text with: the importer's
     /// <see cref="ExcelImporterConfiguration.Culture"/>, set when the cell is mapped
-    /// (<see cref="ValuePipeline{T}.Map"/>). Invariant if it isn't set.
+    /// (<see cref="CellPipeline{T}.Map"/>). Invariant if it isn't set.
     /// </summary>
     public IFormatProvider Culture
     {

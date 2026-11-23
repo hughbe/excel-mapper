@@ -20,7 +20,7 @@ public abstract class ValuePipeline<T, TSelf> where TSelf : ValuePipeline<T, TSe
     /// <summary>
     /// Gets the pipeline the value methods configure, which converts the cells.
     /// </summary>
-    internal ValuePipeline<T> Pipeline { get; } = new();
+    internal CellPipeline<T> Pipeline { get; } = new();
 
     private TSelf Self => (TSelf)this;
 

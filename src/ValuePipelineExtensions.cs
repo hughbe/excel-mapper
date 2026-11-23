@@ -344,7 +344,7 @@ public static partial class ValuePipelineExtensions
 
     // A converter (WithConverter) replaces the built-in conversion, so setting the options of the
     // built-in conversion after one adds it back, after the converter.
-    private static void AddMapperIfMissing<T>(this ValuePipeline<T> pipeline, ICellMapper<T> mapper)
+    private static void AddMapperIfMissing<T>(this CellPipeline<T> pipeline, ICellMapper<T> mapper)
     {
         if (!pipeline.Mappers.Contains(mapper))
         {
@@ -352,7 +352,7 @@ public static partial class ValuePipelineExtensions
         }
     }
 
-    private static void AddMapperIfMissing<T, TCellMapper>(this ValuePipeline<T> pipeline, Func<TCellMapper> createMapper) where TCellMapper : ICellMapper<T>
+    private static void AddMapperIfMissing<T, TCellMapper>(this CellPipeline<T> pipeline, Func<TCellMapper> createMapper) where TCellMapper : ICellMapper<T>
     {
         foreach (var existing in pipeline.Mappers)
         {
@@ -365,7 +365,7 @@ public static partial class ValuePipelineExtensions
         pipeline.Mappers.Add(createMapper());
     }
 
-    private static void SetFormats(this ValuePipeline pipeline, string[] formats)
+    private static void SetFormats(this CellPipeline pipeline, string[] formats)
     {
         FormatUtilities.ValidateFormats(formats);
         pipeline.Options.Formats = formats;

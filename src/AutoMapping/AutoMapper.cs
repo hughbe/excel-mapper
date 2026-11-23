@@ -32,7 +32,7 @@ internal static class AutoMapper
 
     internal static bool TrySetupMap<T>(MemberInfo? member, IColumnsMap map, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping)
     {
-        var pipeline = (ValuePipeline<T>)map.Pipeline;
+        var pipeline = (CellPipeline<T>)map.Pipeline;
 
         // Setup mappers - ExcelConverter, ExcelMappingDictionary, etc.
         var addDefaultMappers = true;

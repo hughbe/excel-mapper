@@ -7,12 +7,12 @@ namespace ExcelMapper;
 
 /// <summary>
 /// How the cells of a member of type <typeparamref name="T"/> are converted: see
-/// <see cref="ValuePipeline"/>.
+/// <see cref="CellPipeline"/>.
 /// </summary>
 /// <typeparam name="T">The type of the member, or of the elements or values of a collection.</typeparam>
-internal sealed class ValuePipeline<T> : ValuePipeline
+internal sealed class CellPipeline<T> : CellPipeline
 {
-    internal ValuePipeline()
+    internal CellPipeline()
     {
     }
 

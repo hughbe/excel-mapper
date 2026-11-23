@@ -57,7 +57,7 @@ public sealed class CollectionMap<TElement> : ICellsMap
     /// </summary>
     internal ElementMap<TElement> Elements { get; private set; } = new ElementMap<TElement>();
 
-    ValuePipeline IColumnsMap.Pipeline => Elements.Pipeline;
+    CellPipeline IColumnsMap.Pipeline => Elements.Pipeline;
 
     /// <inheritdoc />
     void IMap.Freeze()
