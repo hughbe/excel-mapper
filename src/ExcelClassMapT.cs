@@ -442,12 +442,14 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
             return this;
         }
 
+        // The members, or for a class map read as a single value (Map(p => p)), its value map.
         Members.Clear();
         foreach (var member in classMap.Members)
         {
             Members.Add(member);
         }
 
+        SingleValueMap = classMap.SingleValueMap;
         return this;
     }
 }
