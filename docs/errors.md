@@ -132,7 +132,7 @@ Console.WriteLine($"{counter.Count} problems");
 
 **Blank rows cause errors.** Set `importer.Configuration.SkipBlankLines = true`.
 
-**`Circular reference detected: type "Person" references itself through its members`.** A type that contains itself can't be auto-mapped. Mark the member `[ExcelIgnore]`, or map the type with a class map.
+**`Circular reference detected: type Person references itself through its members`.** A type that contains itself can't be auto-mapped. Mark the member `[ExcelIgnore]`, or map the type with a class map.
 
 **`No data is available for encoding 1252`** when you create an `IExcelDataReader` yourself. `ExcelImporter` registers code page encodings, but only once one has been created. Register them first: `Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)`.
 
