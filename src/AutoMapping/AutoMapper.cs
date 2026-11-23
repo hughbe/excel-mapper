@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Linq;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Readers;
 
@@ -41,7 +40,7 @@ internal static class AutoMapper
             addDefaultMappers = MemberMapper.AddMappers(pipeline, member);
         }
 
-        // If no mappers are speciified, try to get a well-known mapper for the type.
+        // If no mappers are specified, try to get a well-known mapper for the type.
         if (addDefaultMappers)
         {
             // If we are auto mapping and no well-known mapper is found, fail the auto mapping.
@@ -171,7 +170,7 @@ internal static class AutoMapper
             return true;
         }
 
-        // Wrap the class map in a BuiltinClassMap to satisfy the generic type.
+        // A value, collection or dictionary read from the whole row: wrap it in a class map.
         result = new ExcelClassMap<T>(emptyValueStrategy)
         {
             SingleValueMap = objectMap
@@ -230,7 +229,7 @@ internal static class AutoMapper
         foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
             if (ShouldAutoMapProperty(type, property) && !IsMapped(map, property) &&
-                !TryAutoMapAndAddMember(property, property.PropertyType, map, emptyValueStrategy, typeStack, out _))
+                !TryAutoMapAndAddMember(property, property.PropertyType, map, emptyValueStrategy, typeStack))
             {
                 return false;
             }
@@ -239,7 +238,7 @@ internal static class AutoMapper
         foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
         {
             if (!IsMapped(map, field) &&
-                !TryAutoMapAndAddMember(field, field.FieldType, map, emptyValueStrategy, typeStack, out _))
+                !TryAutoMapAndAddMember(field, field.FieldType, map, emptyValueStrategy, typeStack))
             {
                 return false;
             }
@@ -288,18 +287,11 @@ internal static class AutoMapper
         TryAddMembers(classMap, emptyValueStrategy, [typeof(T)]);
     }
 
-    private static bool TryAutoMapAndAddMember<T>(
-        MemberInfo member, 
-        Type memberType, 
-        ExcelClassMap<T> map, 
-        EmptyValueStrategy emptyValueStrategy, 
-        HashSet<Type>? typeStack,
-        [NotNullWhen(false)] out ExcelClassMap<T>? classMap)
+    private static bool TryAutoMapAndAddMember<T>(MemberInfo member, Type memberType, ExcelClassMap<T> map, EmptyValueStrategy emptyValueStrategy, HashSet<Type>? typeStack)
     {
         // Ignore members with ExcelIgnoreAttribute.
         if (MemberAttributes.IsDefined<ExcelIgnoreAttribute>(member))
         {
-            classMap = null;
             return true; // Continue processing other members
         }
 
@@ -311,7 +303,6 @@ internal static class AutoMapper
             }
 
             map.Members.Add(new ClassMapMember(member, new RowNumberMap(memberType)));
-            classMap = null;
             return true;
         }
 
@@ -326,19 +317,16 @@ internal static class AutoMapper
 
             extraColumnsMap.Settings.Columns = new ExtraColumns(map);
             map.Members.Add(new ClassMapMember(member, extraColumnsMap));
-            classMap = null;
             return true;
         }
 
         // Infer the mapping for each member (property/field) belonging to the type.
         if (!TypeRule.For(memberType).TryAutoMapMember(member, emptyValueStrategy, typeStack, out var memberMap))
         {
-            classMap = null!;
             return false;
         }
 
         map.Members.Add(new ClassMapMember(member, memberMap));
-        classMap = null;
         return true;
     }
 

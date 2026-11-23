@@ -17,7 +17,6 @@ internal static class ColumnUtilities
             throw new ArgumentException("Column indices cannot be empty.", paramName);
         }
 
-
         foreach (var columnIndex in columnIndices)
         {
             ThrowHelpers.ThrowIfNegative(columnIndex, paramName);
@@ -26,7 +25,6 @@ internal static class ColumnUtilities
 
     public static void ValidateColumnName(string columnName, [CallerArgumentExpression(nameof(columnName))] string? paramName = null)
     {
-        ThrowHelpers.ThrowIfNull(columnName, paramName);
         ThrowHelpers.ThrowIfNullOrEmpty(columnName, paramName);
     }
 
@@ -51,13 +49,7 @@ internal static class ColumnUtilities
 
     public static bool TryGetColumnIndex(SheetView sheet, string columnName, StringComparison comparison, out int columnIndex)
     {
-        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
-        if (sheet.Heading == null)
-        {
-            throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
-        }
-
-        var heading = sheet.Heading;
+        var heading = sheet.GetHeadingForNames();
         if (TryGetExactColumnIndex(sheet, heading, columnName, comparison, out columnIndex))
         {
             // Only headings with a repeated name need checking, so other lookups don't scan.

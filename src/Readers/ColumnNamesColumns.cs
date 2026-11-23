@@ -36,11 +36,7 @@ internal sealed class ColumnNamesColumns : Columns
 
     public override int[]? FindColumns(SheetView sheet)
     {
-        if (sheet.Heading == null)
-        {
-            throw NoHeading(sheet);
-        }
-
+        sheet.GetHeadingForNames();
         var columns = new int[Names.Count];
         for (int i = 0; i < columns.Length; i++)
         {

@@ -134,7 +134,7 @@ public class ValidateHeadingTests
 
         Assert.False(sheet.TryValidateHeading<Employee>(out var problems));
         Assert.Equal(3, problems.Count);
-        Assert.All(problems, p => Assert.Contains("does not have a heading", p));
+        Assert.All(problems, p => Assert.Contains("There's no heading to find columns by name", p));
     }
 
     public record Person(string Name, int Age);

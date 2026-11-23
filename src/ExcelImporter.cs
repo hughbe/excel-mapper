@@ -16,7 +16,6 @@ public sealed class ExcelImporter : IDisposable
     /// </summary>
     internal IExcelDataReader Reader { get; }
 
-
     /// <summary>
     /// Gets the configuration for the importer to allow customizing the importer. For example you
     /// can register custom class maps and specify whether sheets have a header.
@@ -120,7 +119,6 @@ public sealed class ExcelImporter : IDisposable
     {
     }
 
-    
     /// <summary>
     /// Constructs an importer that reads an Excel or csv file from a stream.
     /// </summary>
@@ -396,10 +394,7 @@ public sealed class ExcelImporter : IDisposable
     /// <returns>False if there are no more sheets in the document, else true.</returns>
     public bool TryReadSheet([NotNullWhen(true)] out ExcelSheet? sheet)
     {
-        if (Reader.IsClosed)
-        {
-            throw new ExcelMappingException($"The underlying reader is closed.");
-        }
+        ThrowIfClosed();
 
         sheet = null;
         if (!RowSource.TryMoveToSheet(SheetIndex + 1))
@@ -420,10 +415,7 @@ public sealed class ExcelImporter : IDisposable
     /// <returns>True if the sheet was found, else false.</returns>
     public bool TryReadSheet(string sheetName, [NotNullWhen(true)] out ExcelSheet? sheet)
     {
-        if (Reader.IsClosed)
-        {
-            throw new ExcelMappingException($"The underlying reader is closed.");
-        }
+        ThrowIfClosed();
 
         sheet = null;
         ResetReader();
@@ -451,10 +443,7 @@ public sealed class ExcelImporter : IDisposable
     /// <returns>True if the sheet was found, else false.</returns>
     public bool TryReadSheet(int sheetIndex, [NotNullWhen(true)] out ExcelSheet? sheet)
     {
-        if (Reader.IsClosed)
-        {
-            throw new ExcelMappingException($"The underlying reader is closed.");
-        }
+        ThrowIfClosed();
 
         ThrowHelpers.ThrowIfNegative(sheetIndex, nameof(sheetIndex));
 
@@ -468,6 +457,17 @@ public sealed class ExcelImporter : IDisposable
         sheet = new ExcelSheet(new Worksheet(Reader, sheetIndex, this));
         ResetReader();
         return true;
+    }
+
+    /// <summary>
+    /// Throws if the importer's reader has been closed, for example by disposing the importer.
+    /// </summary>
+    internal void ThrowIfClosed()
+    {
+        if (Reader.IsClosed)
+        {
+            throw new ExcelMappingException("The underlying reader is closed.");
+        }
     }
 
     // Start reading sheets in order from the first sheet again. The reader itself is moved when
