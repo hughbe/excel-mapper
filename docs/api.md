@@ -5,8 +5,8 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 ## Reading files
 
 **`ExcelImporter`** - Opens a workbook (`.xlsx`, `.xls`, `.xlsb`) or CSV file. Dispose it when you're done.
-- `ExcelImporter.ReadRows<T>(path or stream)`, optionally with a file type and a `configure` callback - Read every row of the first sheet in one call
-- `new ExcelImporter(path or stream)`, `(..., ExcelImporterFileType)`, `(..., ExcelImporterFileType, ExcelReaderConfiguration)` - Open a file, optionally as CSV or with ExcelDataReader options (passwords, CSV separators, fallback encoding); `new ExcelImporter(IExcelDataReader)` wraps a reader you created
+- `ExcelImporter.ReadRows<T>(path or stream)`, optionally with a file type and a `configure` callback - Read every row of the first sheet in one call. A path ending in `.csv`, `.tsv` or `.txt` is read as CSV
+- `new ExcelImporter(path or stream)` (a path ending in `.csv`, `.tsv` or `.txt` is CSV), `(..., ExcelImporterFileType)`, `(..., ExcelImporterFileType, ExcelReaderConfiguration)` - Open a file, optionally as CSV or with ExcelDataReader options (passwords, CSV separators, fallback encoding); `new ExcelImporter(IExcelDataReader)` wraps a reader you created
 - `ReadSheet()` / `ReadSheet(name)` / `ReadSheet(index)` - The next sheet, or a sheet by name (case-insensitive) or zero-based index
 - `TryReadSheet(out sheet)` / `TryReadSheet(name, out sheet)` / `TryReadSheet(index, out sheet)` - The same, returning false instead of throwing
 - `ReadSheets()` - Every sheet, in order

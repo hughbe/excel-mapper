@@ -94,11 +94,40 @@ public class ExcelImporterTests
     }
 
     [Fact]
-    public void Ctor_CsvFile_ThrowsHeaderException()
+    public void Ctor_CsvFile_ReadsCsv()
     {
         var filePath = Helpers.GetResourcePath("Primitives.csv");
-        Assert.Throws<HeaderException>(() => new ExcelImporter(filePath));
+        using var importer = new ExcelImporter(filePath);
+        Assert.Equal(1, importer.NumberOfSheets);
+        Assert.NotEmpty(importer.ReadSheet().ReadRows<string[]>());
+    }
+
+    [Fact]
+    public void Ctor_CsvFileAsExcel_ThrowsHeaderException()
+    {
+        var filePath = Helpers.GetResourcePath("Primitives.csv");
         Assert.Throws<HeaderException>(() => new ExcelImporter(filePath, ExcelImporterFileType.Excel));
+    }
+
+    [Theory]
+    [InlineData(".csv")]
+    [InlineData(".CSV")]
+    [InlineData(".tsv")]
+    [InlineData(".txt")]
+    public void Ctor_CsvExtension_ReadsCsv(string extension)
+    {
+        var filePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + extension);
+        File.WriteAllText(filePath, "Name\tAge\nAlice\t34\n");
+        try
+        {
+            using var importer = new ExcelImporter(filePath);
+            var row = Assert.Single(importer.ReadSheet().ReadRows<Dictionary<string, string>>());
+            Assert.Equal("34", row["Age"]);
+        }
+        finally
+        {
+            File.Delete(filePath);
+        }
     }
 
     [Fact]
