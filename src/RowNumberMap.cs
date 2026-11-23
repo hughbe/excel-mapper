@@ -47,7 +47,7 @@ public sealed class RowNumberMap : IMap
     }
 
     /// <inheritdoc/>
-    bool IMap.TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
+    bool IMap.TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, ErrorTarget? errors, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 

@@ -29,7 +29,7 @@ internal sealed class CollectionIndexerMap<TValue>(CollectionBuilder<TValue> bui
         return length;
     }
 
-    public override bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? value)
+    public override bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, ErrorTarget? errors, [NotNullWhen(true)] out object? value)
     {
         ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
 

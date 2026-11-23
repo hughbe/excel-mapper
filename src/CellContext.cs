@@ -25,21 +25,18 @@ public readonly struct CellContext
         RowIndex = rowIndex;
         ColumnIndex = columnIndex;
         Member = member;
-        Errors = null;
         _options = null;
     }
 
     /// <summary>
-    /// Creates the context of a cell being mapped, with the list errors are reported to when rows
-    /// are read with <see cref="ExcelSheet.ReadRowResults{T}()"/>.
+    /// Creates the context of a cell being mapped.
     /// </summary>
-    internal CellContext(SheetView sheet, int rowIndex, int columnIndex, MemberInfo? member, List<ExcelMappingException>? errors, ConversionOptions? options)
+    internal CellContext(SheetView sheet, int rowIndex, int columnIndex, MemberInfo? member, ConversionOptions? options)
     {
         _view = sheet;
         RowIndex = rowIndex;
         ColumnIndex = columnIndex;
         Member = member;
-        Errors = errors;
         _options = options;
     }
 
@@ -50,12 +47,6 @@ public readonly struct CellContext
     /// on), from the pipeline converting the cell.
     /// </summary>
     internal ConversionOptions Options => _options ?? ConversionOptions.Default;
-
-    /// <summary>
-    /// Gets the list errors are added to instead of being thrown, when rows are read with
-    /// <see cref="ExcelSheet.ReadRowResults{T}()"/>; otherwise null.
-    /// </summary>
-    internal List<ExcelMappingException>? Errors { get; }
 
     /// <summary>
     /// Gets the sheet being read. When reading a region, this is the sheet the region was created

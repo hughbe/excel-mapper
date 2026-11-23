@@ -33,7 +33,7 @@ internal abstract class BoundMember<TOwner>(ClassMapMember member)
     /// <param name="errors">The errors being collected, if any. A member whose value caused an
     /// error isn't set, so that its initial value is kept.</param>
     /// <returns>Whether the member was set.</returns>
-    public abstract bool TryMap(ref TOwner instance, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors);
+    public abstract bool TryMap(ref TOwner instance, SheetView sheet, int rowIndex, IExcelDataReader reader, ErrorTarget? errors);
 
     /// <summary>
     /// Whether <see cref="ReadValue"/> read a value from the current row.
@@ -51,7 +51,7 @@ internal abstract class BoundMember<TOwner>(ClassMapMember member)
     /// <param name="reader">The reader, on the row being read.</param>
     /// <param name="errors">The errors being collected, if any. There is no value if reading it
     /// recorded an error.</param>
-    public void ReadValue(SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
+    public void ReadValue(SheetView sheet, int rowIndex, IExcelDataReader reader, ErrorTarget? errors)
     {
         // Cleared first, in case reading throws.
         HasValue = false;
@@ -59,7 +59,7 @@ internal abstract class BoundMember<TOwner>(ClassMapMember member)
     }
 
     // Reads the value for ReadValue and keeps it.
-    private protected abstract bool TryReadValue(SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors);
+    private protected abstract bool TryReadValue(SheetView sheet, int rowIndex, IExcelDataReader reader, ErrorTarget? errors);
 
     /// <summary>
     /// The value read by <see cref="ReadValue"/>, as an object.
@@ -82,7 +82,7 @@ internal abstract class BoundMember<TOwner>(ClassMapMember member)
     /// Whether reading a value added no errors to <paramref name="errors"/>: a value that caused
     /// an error isn't used.
     /// </summary>
-    private protected static bool AddedNoErrors(List<ExcelMappingException>? errors, int errorCount)
+    private protected static bool AddedNoErrors(ErrorTarget? errors, int errorCount)
         => errors is null || errors.Count == errorCount;
 }
 
@@ -104,11 +104,11 @@ internal abstract class BoundMember<TOwner, TValue>(ClassMapMember member) : Bou
     /// </summary>
     /// <returns>Whether there is a value: false if the column is missing and the member is optional,
     /// or reading the value recorded an error.</returns>
-    private protected abstract bool TryRead(SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out TValue value);
+    private protected abstract bool TryRead(SheetView sheet, int rowIndex, IExcelDataReader reader, ErrorTarget? errors, out TValue value);
 
     private ExcelMemberSetter<TOwner, TValue> Setter => _setter ??= CompiledAccessors.GetSetter<TOwner, TValue>(Member.Member);
 
-    public sealed override bool TryMap(ref TOwner instance, SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
+    public sealed override bool TryMap(ref TOwner instance, SheetView sheet, int rowIndex, IExcelDataReader reader, ErrorTarget? errors)
     {
         if (!TryRead(sheet, rowIndex, reader, errors, out var value))
         {
@@ -119,7 +119,7 @@ internal abstract class BoundMember<TOwner, TValue>(ClassMapMember member) : Bou
         return true;
     }
 
-    private protected sealed override bool TryReadValue(SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors)
+    private protected sealed override bool TryReadValue(SheetView sheet, int rowIndex, IExcelDataReader reader, ErrorTarget? errors)
         => TryRead(sheet, rowIndex, reader, errors, out _value);
 
     public sealed override object? Value => _value;
@@ -145,7 +145,7 @@ internal sealed class BoundValueMember<TOwner, T>(ValueMap<T> map, ClassMapMembe
     private int _columnIndex = -1;
     private bool _resolved;
 
-    private protected override bool TryRead(SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out T value)
+    private protected override bool TryRead(SheetView sheet, int rowIndex, IExcelDataReader reader, ErrorTarget? errors, out T value)
     {
         if (!_resolved)
         {
@@ -163,7 +163,7 @@ internal sealed class BoundValueMember<TOwner, T>(ValueMap<T> map, ClassMapMembe
 /// </summary>
 internal sealed class BoundClassMember<TOwner, [DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> map, ClassMapMember member) : BoundMember<TOwner, T>(member)
 {
-    private protected override bool TryRead(SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out T value)
+    private protected override bool TryRead(SheetView sheet, int rowIndex, IExcelDataReader reader, ErrorTarget? errors, out T value)
     {
         var errorCount = errors?.Count ?? 0;
         return map.TryGetValue(sheet, rowIndex, reader, Member.Member, errors, out value) && AddedNoErrors(errors, errorCount);
@@ -175,7 +175,7 @@ internal sealed class BoundClassMember<TOwner, [DynamicallyAccessedMembers(Trimm
 /// </summary>
 internal abstract class BoundObjectMember<TOwner>(ClassMapMember member) : BoundMember<TOwner, object?>(member)
 {
-    private protected sealed override bool TryRead(SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out object? value)
+    private protected sealed override bool TryRead(SheetView sheet, int rowIndex, IExcelDataReader reader, ErrorTarget? errors, out object? value)
     {
         var errorCount = errors?.Count ?? 0;
         if (TryGetValue(sheet, rowIndex, reader, errors, out value) && AddedNoErrors(errors, errorCount))
@@ -188,7 +188,7 @@ internal abstract class BoundObjectMember<TOwner>(ClassMapMember member) : Bound
     }
 
     // Reads the value from the member's map.
-    private protected abstract bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out object? value);
+    private protected abstract bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, ErrorTarget? errors, out object? value);
 }
 
 /// <summary>
@@ -197,7 +197,7 @@ internal abstract class BoundObjectMember<TOwner>(ClassMapMember member) : Bound
 /// </summary>
 internal sealed class BoundMapMember<TOwner>(ClassMapMember member) : BoundObjectMember<TOwner>(member)
 {
-    private protected override bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out object? value)
+    private protected override bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, ErrorTarget? errors, out object? value)
         => Member.Map.TryGetValue(sheet, rowIndex, reader, Member.Member, errors, out value);
 }
 
@@ -209,7 +209,7 @@ internal sealed class BoundCellsMember<TOwner>(ICellsMap map, ClassMapMember mem
     private ICellsReader? _cellsReader;
     private bool _resolved;
 
-    private protected override bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, List<ExcelMappingException>? errors, out object? value)
+    private protected override bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, ErrorTarget? errors, out object? value)
     {
         // Found on first use, inside the caller's error handling. Maps are frozen once rows are
         // read, so the reader stays right.

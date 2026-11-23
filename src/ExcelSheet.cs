@@ -258,6 +258,41 @@ public class ExcelSheet
     public IEnumerable<ExcelRowResult<T>> ReadRowResults<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap) => View.ReadRowResults(SheetView.Given(classMap));
 
     /// <summary>
+    /// Maps each row of the sheet to an object, reporting the problems in invalid rows to
+    /// <paramref name="errors"/> and skipping those rows, rather than throwing at the first. Unlike
+    /// <see cref="ReadRowResults{T}()"/>, an empty or invalid cell is reported without creating an
+    /// exception, so checking a large file with many invalid cells doesn't allocate for each
+    /// (see <see cref="ExcelMappingError.ToException"/>).
+    /// </summary>
+    /// <remarks>
+    /// Columns the type needs that the heading doesn't have, and problems with the mapping itself
+    /// such as a type that can't be auto-mapped, throw when this method is called. As with
+    /// <see cref="ReadRows{T}()"/>, rows are mapped as the result is enumerated, and each
+    /// enumeration reads the same rows.
+    /// </remarks>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="errors">Receives each problem as it's found.</param>
+    /// <returns>The objects mapped from the rows without problems.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="errors"/> is null.</exception>
+    [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
+    [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
+    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(IExcelErrorSink errors) => View.ReadRows<T>(errors);
+
+    /// <summary>
+    /// Maps each row of the sheet with <paramref name="classMap"/>, reporting the problems in
+    /// invalid rows to <paramref name="errors"/> and skipping those rows. See
+    /// <see cref="ReadRows{T}(IExcelErrorSink)"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to map each row to.</typeparam>
+    /// <param name="classMap">The class map to map rows with, such as one from an
+    /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
+    /// auto-map a class map, so it works with native AOT.</param>
+    /// <param name="errors">Receives each problem as it's found.</param>
+    /// <returns>The objects mapped from the rows without problems.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="classMap"/> or <paramref name="errors"/> is null.</exception>
+    public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap, IExcelErrorSink errors) => View.ReadRows(SheetView.Given(classMap), errors);
+
+    /// <summary>
     /// Checks that the sheet has every column needed to map rows to <typeparamref name="T"/>, and
     /// throws an <see cref="ExcelMappingException"/> listing all of the missing columns if not.
     /// Call this before reading rows to report every missing column at once, rather than one at a

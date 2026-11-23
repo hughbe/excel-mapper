@@ -39,10 +39,10 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// Maps a row (or for a nested object, the cells it reads) to a <typeparamref name="T"/> (see
     /// <see cref="ClassMapReader{T}.TryRead"/>).
     /// </summary>
-    internal bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, out T result)
+    internal bool TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, ErrorTarget? errors, out T result)
         => (_reader ??= new ClassMapReader<T>(this)).TryRead(sheet, rowIndex, reader, member, errors, out result);
 
-    private protected sealed override bool TryGetObject(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, List<ExcelMappingException>? errors, [NotNullWhen(true)] out object? result)
+    private protected sealed override bool TryGetObject(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, ErrorTarget? errors, [NotNullWhen(true)] out object? result)
     {
         var found = TryGetValue(sheet, rowIndex, reader, member, errors, out var value);
         result = found ? value : null;

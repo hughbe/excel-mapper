@@ -18,6 +18,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 - `ReadRows<T>(startIndex, count)` - A block of rows
 - `ReadRow<T>()` / `TryReadRow<T>(out value)` - The next row
 - `ReadRowResults<T>()` - Every row, with every invalid cell reported in each result instead of thrown ([Collecting errors](errors.md#collecting-errors))
+- `ReadRows<T>(IExcelErrorSink errors)` - The rows without problems, giving each problem to `errors` without creating an exception for it ([Checking large files](errors.md#checking-large-files))
 - `ReadHeading()` - Read the heading row now (the read methods do this when needed)
 - `FindHeading<T>()` / `FindHeading<T>(maxRows)` / `TryFindHeading<T>(out heading)` - Find the heading row of a sheet with titles, notes or blank rows above it ([Finding the heading](reading.md#finding-the-heading))
 - `ValidateHeading<T>()` / `TryValidateHeading<T>(out missingColumns)` - Check every column `T` needs is present, before reading rows
@@ -28,7 +29,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 - `Name`, `Index`, `Visibility`, `NumberOfColumns`, `CurrentRowIndex`
 
 **`ExcelRegion`** - An immutable block of a sheet, read with its own heading. Each read starts at the top of the region.
-- `ReadRows<T>()`, `ReadRowResults<T>()`, `ValidateHeading<T>()`, `TryValidateHeading<T>(out missingColumns)` - As on `ExcelSheet`, also with an `ExcelClassMap<T>`
+- `ReadRows<T>()`, `ReadRows<T>(errors)`, `ReadRowResults<T>()`, `ValidateHeading<T>()`, `TryValidateHeading<T>(out missingColumns)` - As on `ExcelSheet`, also with an `ExcelClassMap<T>`
 - `WithHeadingAt(rowIndex)` / `WithoutHeading()` / `WithHeadingSearch()` / `WithHeadingSearch(maxRows)` - Where the heading is: a row of the sheet, none, or found as for `FindHeading`
 - `Sheet`, `Range` - The sheet and block
 
@@ -61,6 +62,10 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 - `GetClassMap<T>()` - The class map of a registered row type, auto-mapped from the registered types; it can't be changed
 
 ## Results and errors
+
+**`IExcelErrorSink`** - Receives the problems found by `ReadRows<T>(IExcelErrorSink)`: implement `Add(in ExcelMappingError error)`.
+
+**`ExcelMappingError`** - A problem given to an `IExcelErrorSink`, only valid during `Add`: `Kind` (`ExcelMappingErrorKind.EmptyValue`, `InvalidValue`, `DataAnnotation` or `Exception`), `Sheet`, `RowIndex`, `ColumnIndex`, `ColumnName`, `Member`, the cell's `Value`, and `ToException()`.
 
 **`ExcelRowResult<T>`** - A row read by `ReadRowResults<T>()`.
 - `IsValid` - Whether the row mapped without errors

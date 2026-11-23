@@ -73,6 +73,40 @@ foreach (var result in results.Where(r => !r.IsValid))
 
 `ReadRowResults` costs the same as `ReadRows` for valid rows.
 
+## Checking large files
+
+`ReadRowResults` creates an `ExcelMappingException` for every invalid cell. To check a large file with many invalid cells without allocating for each, pass an `IExcelErrorSink` to `ReadRows`. It returns the rows without problems, and gives the sink each problem as it's found:
+
+```csharp
+public sealed class ErrorCounter : IExcelErrorSink
+{
+    public int Count { get; private set; }
+
+    public void Add(in ExcelMappingError error)
+    {
+        Count++;
+        if (Count <= 100)
+        {
+            // Creating the exception gives its message, and allocates.
+            Console.WriteLine(error.ToException().Message);
+        }
+    }
+}
+
+var counter = new ErrorCounter();
+foreach (var employee in sheet.ReadRows<Employee>(counter))
+{
+    Process(employee);
+}
+
+Console.WriteLine($"{counter.Count} problems");
+```
+
+- `ExcelMappingError` has the problem's `Kind` (`EmptyValue`, `InvalidValue`, `DataAnnotation` or `Exception`), `Sheet`, `RowIndex`, `ColumnIndex`, `ColumnName`, `Member` and the cell's `Value`. None of them allocate, except `Value.Text` for a cell that isn't text, such as a number.
+- It's only valid during `Add`, as it refers to the cell while the reader is on its row: copy what you need, or call `ToException()`, which creates the exception `ReadRowResults` would collect.
+- A row with a problem is skipped; a row can report several problems.
+- As with `ReadRowResults`, columns the type needs that the heading doesn't have, and a type that can't be auto-mapped, throw when `ReadRows` is called.
+
 ## Troubleshooting
 
 **`Can't find column "FirstName" for member "FirstName"`.** The heading has no column with that name: the message lists the columns it has, and suggests one whose name only differs by spaces or separators. Then:
