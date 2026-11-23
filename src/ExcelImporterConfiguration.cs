@@ -16,7 +16,7 @@ namespace ExcelMapper;
 /// changing them part way through doesn't change how the rest of the sheet is read. Sheets and
 /// regions read afterwards use the new settings.
 /// </remarks>
-public class ExcelImporterConfiguration
+public sealed class ExcelImporterConfiguration
 {
     private ConcurrentDictionary<Type, ExcelClassMap> ClassMaps { get; } = new();
 
@@ -222,7 +222,7 @@ public class ExcelImporterConfiguration
     private static void ValidateMap(IMap map)
         => MapTree.VisitCellMaps(map, null, (cellMap, _) =>
         {
-            if (cellMap is ValuePipeline { HasMappers: false })
+            if (cellMap is IColumnsMap { Pipeline.HasMappers: false } and not ICellsMap)
             {
                 throw new ExcelMappingException("Cannot register a class map with a property that has no Mappers defined.");
             }

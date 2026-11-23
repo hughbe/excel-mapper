@@ -56,7 +56,7 @@ Each member's map is one of:
 
 Class maps and the indexer maps are made of other maps (`IParentMap`: their children, each with a member, index or key). `MapTree` walks the tree, so code that needs every map that reads cells, such as `ValidateHeading`, `FindHeading`, extra columns and checking a class map when it's registered, doesn't switch over the kinds of map itself.
 
-A single-value map is itself a `ValuePipeline<T>` (see [The value pipeline](#the-value-pipeline)). The collection and dictionary maps hold an `ElementMap<T>`, another pipeline, for their elements or values (`WithElementMap`, `WithValueMap`). Both derive from `ValuePipeline<T, TSelf>`, whose value methods return `TSelf`, so a chain of value methods keeps the map's type: `Map(p => p.Name).WithTrim().MakeOptional()`.
+A single-value map (`ValueMap<T>`) converts its cells with an internal `ValuePipeline<T>` (see [The value pipeline](#the-value-pipeline)). The collection and dictionary maps hold an `ElementMap<T>` for their elements or values (`WithElementMap`, `WithValueMap`), which has its own pipeline. Both maps derive from the public `ValuePipeline<T, TSelf>`, which holds the pipeline (`Pipeline`) and whose value methods configure it and return `TSelf`, so a chain of value methods keeps the map's type: `Map(p => p.Name).WithTrim().MakeOptional()`. The pipeline classes themselves (`ValuePipeline`, `ValuePipeline<T>`) are internal.
 
 ### Choosing columns
 
@@ -137,7 +137,7 @@ The public API of each target framework is listed in `src/PublicAPI/<framework>/
 
 | Path | Contents |
 |---|---|
-| `src/*.cs` | The public types: importer, sheets, regions, class maps and maps, attributes, extension points, `ValuePipeline<T>`, `ValuePipeline<T, TSelf>`, `ElementMap<T>` and the type-specific value methods in `ValuePipelineExtensions` |
+| `src/*.cs` | The public types: importer, sheets, regions, class maps and maps, attributes, extension points, `ValuePipeline<T, TSelf>`, `ElementMap<T>` and the type-specific value methods in `ValuePipelineExtensions` |
 | `src/Maps` | The internal maps: `ClassMapMember` (a member of a class map and its map), the indexer maps (`IndexerMap<TKey>` and its kinds) and `RowNumberMap` |
 | `src/Abstractions` | The internal map interfaces (`IMap`, `IParentMap`, `IColumnsMap`, `ICellsMap`, `IBindableMap`), `ICellMapper<T>`, and `ReadCellResult`, the cell a mapper converts |
 | `src/Reading` | Reading sheets: `SheetView`, `Worksheet`, `RowSource`, `RowCursor`, `HeadingSearch`, `ReadSettings`, and `ErrorTarget` (where collected errors go) |

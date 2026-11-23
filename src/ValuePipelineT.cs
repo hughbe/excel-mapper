@@ -10,9 +10,9 @@ namespace ExcelMapper;
 /// <see cref="ValuePipeline"/>.
 /// </summary>
 /// <typeparam name="T">The type of the member, or of the elements or values of a collection.</typeparam>
-public abstract class ValuePipeline<T> : ValuePipeline
+internal sealed class ValuePipeline<T> : ValuePipeline
 {
-    private protected ValuePipeline()
+    internal ValuePipeline()
     {
     }
 

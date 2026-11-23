@@ -15,7 +15,7 @@ namespace ExcelMapper;
 /// </summary>
 /// <typeparam name="TKey">The key type of the IDictionary property or field.</typeparam>
 /// <typeparam name="TValue">The value type of the IDictionary property or field.</typeparam>
-public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
+public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
 {
     /// <summary>
     /// Constructs a map that reads values from one or more cells and maps them to the values of the
@@ -60,15 +60,15 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     /// Gets the map that maps the value of a single cell to an object of the element type of the property
     /// or field.
     /// </summary>
-    internal ElementMap<TValue> Pipeline { get; private set; } = new ElementMap<TValue>();
+    internal ElementMap<TValue> Values { get; private set; } = new ElementMap<TValue>();
 
-    ValuePipeline IColumnsMap.Pipeline => Pipeline;
+    ValuePipeline IColumnsMap.Pipeline => Values.Pipeline;
 
     /// <inheritdoc />
     void IMap.Freeze()
     {
         Settings.Freeze();
-        Pipeline.Freeze();
+        Values.Pipeline.Freeze();
     }
 
     /// <summary>
@@ -120,7 +120,7 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
                 TKey? convertedKey = elementKey is TKey key ? key : (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
                 if (convertedKey != null)
                 {
-                    var elementValue = Pipeline.Map(sheet, rowIndex, valueResult, member, errors);
+                    var elementValue = Values.Pipeline.Map(sheet, rowIndex, valueResult, member, errors);
                     Builder.Add(items, convertedKey, elementValue);
                 }
             }
@@ -145,10 +145,10 @@ public class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     {
         ThrowHelpers.ThrowIfNull(valueMap, nameof(valueMap));
 
-        var result = valueMap(Pipeline);
+        var result = valueMap(Values);
         ThrowHelpers.ThrowIfNull(result, nameof(valueMap));
         Settings.ThrowIfFrozen();
-        Pipeline = result;
+        Values = result;
 
         return this;
     }

@@ -4,18 +4,23 @@ using ExcelMapper.Transformers;
 namespace ExcelMapper;
 
 /// <summary>
-/// The value methods of a <see cref="ValuePipeline{T}"/>, which return the map they're called on
+/// How a map converts cells to <typeparamref name="T"/>, with value methods that return the map they're called on
 /// (<typeparamref name="TSelf"/>), so that calls chain: for example
 /// <c>Map(e => e.Name).WithTrim().MakeOptional()</c>. Methods for particular types, such as
 /// <c>WithFormats</c>, are in <see cref="ValuePipelineExtensions"/>.
 /// </summary>
 /// <typeparam name="T">The type of the member, or of the elements or values of a collection.</typeparam>
 /// <typeparam name="TSelf">The type of the map: <see cref="ValueMap{T}"/> or <see cref="ElementMap{T}"/>.</typeparam>
-public abstract class ValuePipeline<T, TSelf> : ValuePipeline<T> where TSelf : ValuePipeline<T, TSelf>
+public abstract class ValuePipeline<T, TSelf> where TSelf : ValuePipeline<T, TSelf>
 {
     private protected ValuePipeline()
     {
     }
+
+    /// <summary>
+    /// Gets the pipeline the value methods configure, which converts the cells.
+    /// </summary>
+    internal ValuePipeline<T> Pipeline { get; } = new();
 
     private TSelf Self => (TSelf)this;
 
@@ -25,7 +30,7 @@ public abstract class ValuePipeline<T, TSelf> : ValuePipeline<T> where TSelf : V
     /// <returns>The map on which this method was invoked.</returns>
     public TSelf WithTrim()
     {
-        Transformers.Add(TrimStringCellTransformer.Instance);
+        Pipeline.Transformers.Add(TrimStringCellTransformer.Instance);
         return Self;
     }
 
@@ -46,10 +51,10 @@ public abstract class ValuePipeline<T, TSelf> : ValuePipeline<T> where TSelf : V
             }
         }
 
-        Transformers.Clear();
+        Pipeline.Transformers.Clear();
         foreach (var transformer in transformers)
         {
-            Transformers.Add(transformer);
+            Pipeline.Transformers.Add(transformer);
         }
 
         return Self;
@@ -114,7 +119,7 @@ public abstract class ValuePipeline<T, TSelf> : ValuePipeline<T> where TSelf : V
             values = copy;
         }
 
-        Mappers.Add(new MappingDictionaryMapper<T>(values, comparer, behavior));
+        Pipeline.Mappers.Add(new MappingDictionaryMapper<T>(values, comparer, behavior));
         return Self;
     }
 
@@ -131,8 +136,8 @@ public abstract class ValuePipeline<T, TSelf> : ValuePipeline<T> where TSelf : V
         ThrowHelpers.ThrowIfNull(converter, nameof(converter));
 
         // An ICellConverter<T>, so that values are converted without boxing.
-        Mappers.Clear();
-        Mappers.Add(new CellConverterMapper<T>(new DelegateCellConverter<T>(converter)));
+        Pipeline.Mappers.Clear();
+        Pipeline.Mappers.Add(new CellConverterMapper<T>(new DelegateCellConverter<T>(converter)));
         return Self;
     }
 
@@ -143,7 +148,7 @@ public abstract class ValuePipeline<T, TSelf> : ValuePipeline<T> where TSelf : V
     /// <returns>The map on which this method was invoked.</returns>
     public TSelf WithFallback(T? value)
     {
-        SetFixedFallback(value, empty: true, invalid: true);
+        Pipeline.SetFixedFallback(value, empty: true, invalid: true);
         return Self;
     }
 
@@ -154,7 +159,7 @@ public abstract class ValuePipeline<T, TSelf> : ValuePipeline<T> where TSelf : V
     /// <returns>The map on which this method was invoked.</returns>
     public TSelf WithEmptyFallback(T? fallbackValue)
     {
-        SetFixedFallback(fallbackValue, empty: true, invalid: false);
+        Pipeline.SetFixedFallback(fallbackValue, empty: true, invalid: false);
         return Self;
     }
 
@@ -165,7 +170,7 @@ public abstract class ValuePipeline<T, TSelf> : ValuePipeline<T> where TSelf : V
     /// <returns>The map on which this method was invoked.</returns>
     public TSelf WithInvalidFallback(T? fallbackValue)
     {
-        SetFixedFallback(fallbackValue, empty: false, invalid: true);
+        Pipeline.SetFixedFallback(fallbackValue, empty: false, invalid: true);
         return Self;
     }
 
@@ -175,7 +180,7 @@ public abstract class ValuePipeline<T, TSelf> : ValuePipeline<T> where TSelf : V
     /// <returns>The map on which this method was invoked.</returns>
     public TSelf WithThrowingFallback()
     {
-        SetThrowingFallback(empty: true, invalid: true);
+        Pipeline.SetThrowingFallback(empty: true, invalid: true);
         return Self;
     }
 
@@ -185,7 +190,7 @@ public abstract class ValuePipeline<T, TSelf> : ValuePipeline<T> where TSelf : V
     /// <returns>The map on which this method was invoked.</returns>
     public TSelf WithThrowingEmptyFallback()
     {
-        SetThrowingFallback(empty: true, invalid: false);
+        Pipeline.SetThrowingFallback(empty: true, invalid: false);
         return Self;
     }
 
@@ -195,7 +200,7 @@ public abstract class ValuePipeline<T, TSelf> : ValuePipeline<T> where TSelf : V
     /// <returns>The map on which this method was invoked.</returns>
     public TSelf WithThrowingInvalidFallback()
     {
-        SetThrowingFallback(empty: false, invalid: true);
+        Pipeline.SetThrowingFallback(empty: false, invalid: true);
         return Self;
     }
 }

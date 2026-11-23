@@ -26,8 +26,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormats<TMap>(this ValuePipeline<DateTime, TMap> map, params string[] formats) where TMap : ValuePipeline<DateTime, TMap>
     {
-        map.SetFormats(formats);
-        map.AddMapperIfMissing(DateTimeMapper.Instance);
+        map.Pipeline.SetFormats(formats);
+        map.Pipeline.AddMapperIfMissing(DateTimeMapper.Instance);
         return (TMap)map;
     }
 
@@ -55,8 +55,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormats<TMap>(this ValuePipeline<DateTime?, TMap> map, params string[] formats) where TMap : ValuePipeline<DateTime?, TMap>
     {
-        map.SetFormats(formats);
-        map.AddMapperIfMissing(DateTimeMapper.Instance);
+        map.Pipeline.SetFormats(formats);
+        map.Pipeline.AddMapperIfMissing(DateTimeMapper.Instance);
         return (TMap)map;
     }
 
@@ -86,8 +86,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithOffset<TMap>(this ValuePipeline<DateTimeOffset, TMap> map, TimeSpan offset) where TMap : ValuePipeline<DateTimeOffset, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Offset = offset;
-        map.AddMapperIfMissing(DateTimeOffsetMapper.Instance);
+        map.Pipeline.Options.Offset = offset;
+        map.Pipeline.AddMapperIfMissing(DateTimeOffsetMapper.Instance);
         return (TMap)map;
     }
 
@@ -103,8 +103,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithOffset<TMap>(this ValuePipeline<DateTimeOffset?, TMap> map, TimeSpan offset) where TMap : ValuePipeline<DateTimeOffset?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Offset = offset;
-        map.AddMapperIfMissing(DateTimeOffsetMapper.Instance);
+        map.Pipeline.Options.Offset = offset;
+        map.Pipeline.AddMapperIfMissing(DateTimeOffsetMapper.Instance);
         return (TMap)map;
     }
 
@@ -118,8 +118,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormats<TMap>(this ValuePipeline<DateTimeOffset, TMap> map, params string[] formats) where TMap : ValuePipeline<DateTimeOffset, TMap>
     {
-        map.SetFormats(formats);
-        map.AddMapperIfMissing(DateTimeOffsetMapper.Instance);
+        map.Pipeline.SetFormats(formats);
+        map.Pipeline.AddMapperIfMissing(DateTimeOffsetMapper.Instance);
         return (TMap)map;
     }
 
@@ -147,8 +147,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormats<TMap>(this ValuePipeline<DateTimeOffset?, TMap> map, params string[] formats) where TMap : ValuePipeline<DateTimeOffset?, TMap>
     {
-        map.SetFormats(formats);
-        map.AddMapperIfMissing(DateTimeOffsetMapper.Instance);
+        map.Pipeline.SetFormats(formats);
+        map.Pipeline.AddMapperIfMissing(DateTimeOffsetMapper.Instance);
         return (TMap)map;
     }
 
@@ -176,8 +176,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormats<TMap>(this ValuePipeline<TimeSpan, TMap> map, params string[] formats) where TMap : ValuePipeline<TimeSpan, TMap>
     {
-        map.SetFormats(formats);
-        map.AddMapperIfMissing(TimeSpanMapper.Instance);
+        map.Pipeline.SetFormats(formats);
+        map.Pipeline.AddMapperIfMissing(TimeSpanMapper.Instance);
         return (TMap)map;
     }
 
@@ -205,8 +205,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormats<TMap>(this ValuePipeline<TimeSpan?, TMap> map, params string[] formats) where TMap : ValuePipeline<TimeSpan?, TMap>
     {
-        map.SetFormats(formats);
-        map.AddMapperIfMissing(TimeSpanMapper.Instance);
+        map.Pipeline.SetFormats(formats);
+        map.Pipeline.AddMapperIfMissing(TimeSpanMapper.Instance);
         return (TMap)map;
     }
 
@@ -235,8 +235,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormats<TMap>(this ValuePipeline<DateOnly, TMap> map, params string[] formats) where TMap : ValuePipeline<DateOnly, TMap>
     {
-        map.SetFormats(formats);
-        map.AddMapperIfMissing(DateOnlyMapper.Instance);
+        map.Pipeline.SetFormats(formats);
+        map.Pipeline.AddMapperIfMissing(DateOnlyMapper.Instance);
         return (TMap)map;
     }
 
@@ -264,8 +264,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormats<TMap>(this ValuePipeline<DateOnly?, TMap> map, params string[] formats) where TMap : ValuePipeline<DateOnly?, TMap>
     {
-        map.SetFormats(formats);
-        map.AddMapperIfMissing(DateOnlyMapper.Instance);
+        map.Pipeline.SetFormats(formats);
+        map.Pipeline.AddMapperIfMissing(DateOnlyMapper.Instance);
         return (TMap)map;
     }
 
@@ -293,8 +293,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormats<TMap>(this ValuePipeline<TimeOnly, TMap> map, params string[] formats) where TMap : ValuePipeline<TimeOnly, TMap>
     {
-        map.SetFormats(formats);
-        map.AddMapperIfMissing(TimeOnlyMapper.Instance);
+        map.Pipeline.SetFormats(formats);
+        map.Pipeline.AddMapperIfMissing(TimeOnlyMapper.Instance);
         return (TMap)map;
     }
 
@@ -322,8 +322,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormats<TMap>(this ValuePipeline<TimeOnly?, TMap> map, params string[] formats) where TMap : ValuePipeline<TimeOnly?, TMap>
     {
-        map.SetFormats(formats);
-        map.AddMapperIfMissing(TimeOnlyMapper.Instance);
+        map.Pipeline.SetFormats(formats);
+        map.Pipeline.AddMapperIfMissing(TimeOnlyMapper.Instance);
         return (TMap)map;
     }
 
@@ -344,17 +344,17 @@ public static partial class ValuePipelineExtensions
 
     // A converter (WithConverter) replaces the built-in conversion, so setting the options of the
     // built-in conversion after one adds it back, after the converter.
-    private static void AddMapperIfMissing<T>(this ValuePipeline<T> map, ICellMapper<T> mapper)
+    private static void AddMapperIfMissing<T>(this ValuePipeline<T> pipeline, ICellMapper<T> mapper)
     {
-        if (!map.Mappers.Contains(mapper))
+        if (!pipeline.Mappers.Contains(mapper))
         {
-            map.Mappers.Add(mapper);
+            pipeline.Mappers.Add(mapper);
         }
     }
 
-    private static void AddMapperIfMissing<T, TCellMapper>(this ValuePipeline<T> map, Func<TCellMapper> createMapper) where TCellMapper : ICellMapper<T>
+    private static void AddMapperIfMissing<T, TCellMapper>(this ValuePipeline<T> pipeline, Func<TCellMapper> createMapper) where TCellMapper : ICellMapper<T>
     {
-        foreach (var existing in map.Mappers)
+        foreach (var existing in pipeline.Mappers)
         {
             if (existing is TCellMapper)
             {
@@ -362,13 +362,13 @@ public static partial class ValuePipelineExtensions
             }
         }
 
-        map.Mappers.Add(createMapper());
+        pipeline.Mappers.Add(createMapper());
     }
 
-    private static void SetFormats(this ValuePipeline map, string[] formats)
+    private static void SetFormats(this ValuePipeline pipeline, string[] formats)
     {
         FormatUtilities.ValidateFormats(formats);
-        map.Options.Formats = formats;
+        pipeline.Options.Formats = formats;
     }
 
     /// <summary>
@@ -381,8 +381,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<DateTime, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<DateTime, TMap>
     {
-        map.Options.Provider = provider;
-        map.AddMapperIfMissing(DateTimeMapper.Instance);
+        map.Pipeline.Options.Provider = provider;
+        map.Pipeline.AddMapperIfMissing(DateTimeMapper.Instance);
         return (TMap)map;
     }
 
@@ -396,8 +396,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<DateTime?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<DateTime?, TMap>
     {
-        map.Options.Provider = provider;
-        map.AddMapperIfMissing(DateTimeMapper.Instance);
+        map.Pipeline.Options.Provider = provider;
+        map.Pipeline.AddMapperIfMissing(DateTimeMapper.Instance);
         return (TMap)map;
     }
 
@@ -411,8 +411,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<DateTimeOffset, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<DateTimeOffset, TMap>
     {
-        map.Options.Provider = provider;
-        map.AddMapperIfMissing(DateTimeOffsetMapper.Instance);
+        map.Pipeline.Options.Provider = provider;
+        map.Pipeline.AddMapperIfMissing(DateTimeOffsetMapper.Instance);
         return (TMap)map;
     }
 
@@ -426,8 +426,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<DateTimeOffset?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<DateTimeOffset?, TMap>
     {
-        map.Options.Provider = provider;
-        map.AddMapperIfMissing(DateTimeOffsetMapper.Instance);
+        map.Pipeline.Options.Provider = provider;
+        map.Pipeline.AddMapperIfMissing(DateTimeOffsetMapper.Instance);
         return (TMap)map;
     }
 
@@ -441,8 +441,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<TimeSpan, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<TimeSpan, TMap>
     {
-        map.Options.Provider = provider;
-        map.AddMapperIfMissing(TimeSpanMapper.Instance);
+        map.Pipeline.Options.Provider = provider;
+        map.Pipeline.AddMapperIfMissing(TimeSpanMapper.Instance);
         return (TMap)map;
     }
 
@@ -456,8 +456,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<TimeSpan?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<TimeSpan?, TMap>
     {
-        map.Options.Provider = provider;
-        map.AddMapperIfMissing(TimeSpanMapper.Instance);
+        map.Pipeline.Options.Provider = provider;
+        map.Pipeline.AddMapperIfMissing(TimeSpanMapper.Instance);
         return (TMap)map;
     }
 
@@ -472,8 +472,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<DateOnly, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<DateOnly, TMap>
     {
-        map.Options.Provider = provider;
-        map.AddMapperIfMissing(DateOnlyMapper.Instance);
+        map.Pipeline.Options.Provider = provider;
+        map.Pipeline.AddMapperIfMissing(DateOnlyMapper.Instance);
         return (TMap)map;
     }
 
@@ -487,8 +487,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<DateOnly?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<DateOnly?, TMap>
     {
-        map.Options.Provider = provider;
-        map.AddMapperIfMissing(DateOnlyMapper.Instance);
+        map.Pipeline.Options.Provider = provider;
+        map.Pipeline.AddMapperIfMissing(DateOnlyMapper.Instance);
         return (TMap)map;
     }
 
@@ -502,8 +502,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<TimeOnly, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<TimeOnly, TMap>
     {
-        map.Options.Provider = provider;
-        map.AddMapperIfMissing(TimeOnlyMapper.Instance);
+        map.Pipeline.Options.Provider = provider;
+        map.Pipeline.AddMapperIfMissing(TimeOnlyMapper.Instance);
         return (TMap)map;
     }
 
@@ -517,8 +517,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<TimeOnly?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<TimeOnly?, TMap>
     {
-        map.Options.Provider = provider;
-        map.AddMapperIfMissing(TimeOnlyMapper.Instance);
+        map.Pipeline.Options.Provider = provider;
+        map.Pipeline.AddMapperIfMissing(TimeOnlyMapper.Instance);
         return (TMap)map;
     }
 #endif
@@ -537,8 +537,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormatProvider<T, TMap>(this ValuePipeline<T, TMap> map, IFormatProvider? provider) where T : INumberBase<T> where TMap : ValuePipeline<T, TMap>
     {
-        map.Options.Provider = provider;
-        map.AddMapperIfMissing<T, INumberBaseMapper<T>>(static () => new INumberBaseMapper<T>());
+        map.Pipeline.Options.Provider = provider;
+        map.Pipeline.AddMapperIfMissing<T, INumberBaseMapper<T>>(static () => new INumberBaseMapper<T>());
         return (TMap)map;
     }
 
@@ -554,8 +554,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithFormatProvider<T, TMap>(this ValuePipeline<T?, TMap> map, IFormatProvider? provider) where T : struct, INumberBase<T> where TMap : ValuePipeline<T?, TMap>
     {
-        map.Options.Provider = provider;
-        map.AddMapperIfMissing<T?, StructNumberMapper<T>>(static () => new StructNumberMapper<T>());
+        map.Pipeline.Options.Provider = provider;
+        map.Pipeline.AddMapperIfMissing<T?, StructNumberMapper<T>>(static () => new StructNumberMapper<T>());
         return (TMap)map;
     }
 
@@ -571,8 +571,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithNumberStyle<T, TMap>(this ValuePipeline<T, TMap> map, NumberStyles style) where T : INumberBase<T> where TMap : ValuePipeline<T, TMap>
     {
-        map.Options.NumberStyle = style;
-        map.AddMapperIfMissing<T, INumberBaseMapper<T>>(static () => new INumberBaseMapper<T>());
+        map.Pipeline.Options.NumberStyle = style;
+        map.Pipeline.AddMapperIfMissing<T, INumberBaseMapper<T>>(static () => new INumberBaseMapper<T>());
         return (TMap)map;
     }
 
@@ -588,8 +588,8 @@ public static partial class ValuePipelineExtensions
     /// <returns>The map on which this method was invoked.</returns>
     public static TMap WithNumberStyle<T, TMap>(this ValuePipeline<T?, TMap> map, NumberStyles style) where T : struct, INumberBase<T> where TMap : ValuePipeline<T?, TMap>
     {
-        map.Options.NumberStyle = style;
-        map.AddMapperIfMissing<T?, StructNumberMapper<T>>(static () => new StructNumberMapper<T>());
+        map.Pipeline.Options.NumberStyle = style;
+        map.Pipeline.AddMapperIfMissing<T?, StructNumberMapper<T>>(static () => new StructNumberMapper<T>());
         return (TMap)map;
     }
 #endif
@@ -604,8 +604,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithIgnoreCase<TEnum, TMap>(this ValuePipeline<TEnum, TMap> map) where TEnum : struct, Enum where TMap : ValuePipeline<TEnum, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.IgnoreCase = true;
-        map.AddMapperIfMissing<TEnum, EnumMapper<TEnum>>(static () => new EnumMapper<TEnum>());
+        map.Pipeline.Options.IgnoreCase = true;
+        map.Pipeline.AddMapperIfMissing<TEnum, EnumMapper<TEnum>>(static () => new EnumMapper<TEnum>());
         return (TMap)map;
     }
 
@@ -619,8 +619,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithIgnoreCase<TEnum, TMap>(this ValuePipeline<TEnum?, TMap> map) where TEnum : struct, Enum where TMap : ValuePipeline<TEnum?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.IgnoreCase = true;
-        map.AddMapperIfMissing<TEnum?, EnumMapper<TEnum>>(static () => new EnumMapper<TEnum>());
+        map.Pipeline.Options.IgnoreCase = true;
+        map.Pipeline.AddMapperIfMissing<TEnum?, EnumMapper<TEnum>>(static () => new EnumMapper<TEnum>());
         return (TMap)map;
     }
 
@@ -637,8 +637,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithUriKind<TUri, TMap>(this ValuePipeline<TUri, TMap> map, UriKind uriKind) where TUri : Uri? where TMap : ValuePipeline<TUri, TMap>
     {
         EnumUtilities.ValidateIsDefined(uriKind);
-        map.Options.UriKind = uriKind;
-        map.AddMapperIfMissing((ICellMapper<TUri>)(object)UriMapper.Instance);
+        map.Pipeline.Options.UriKind = uriKind;
+        map.Pipeline.AddMapperIfMissing((ICellMapper<TUri>)(object)UriMapper.Instance);
         return (TMap)map;
     }
 
@@ -658,8 +658,8 @@ public static partial class ValuePipelineExtensions
         ThrowHelpers.ThrowIfNull(map, nameof(map));
         ThrowHelpers.ThrowIfNull(converter, nameof(converter));
 
-        map.Mappers.Clear();
-        map.Mappers.Add(new CellConverterMapper<T>(converter));
+        map.Pipeline.Mappers.Clear();
+        map.Pipeline.Mappers.Add(new CellConverterMapper<T>(converter));
         return (TMap)map;
     }
 
@@ -678,8 +678,8 @@ public static partial class ValuePipelineExtensions
         ThrowHelpers.ThrowIfNull(map, nameof(map));
         ThrowHelpers.ThrowIfNull(converter, nameof(converter));
 
-        map.Mappers.Clear();
-        map.Mappers.Add(new CellConverterMapper<T?>(new NullableCellConverter<T>(converter)));
+        map.Pipeline.Mappers.Clear();
+        map.Pipeline.Mappers.Add(new CellConverterMapper<T?>(new NullableCellConverter<T>(converter)));
         return (TMap)map;
     }
 
@@ -695,7 +695,7 @@ public static partial class ValuePipelineExtensions
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
         ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
-        map.EmptyFallback = fallback;
+        map.Pipeline.EmptyFallback = fallback;
         return (TMap)map;
     }
 
@@ -711,7 +711,7 @@ public static partial class ValuePipelineExtensions
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
         ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
-        map.EmptyFallback = new NullableCellFallback<T>(fallback);
+        map.Pipeline.EmptyFallback = new NullableCellFallback<T>(fallback);
         return (TMap)map;
     }
 
@@ -727,7 +727,7 @@ public static partial class ValuePipelineExtensions
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
         ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
-        map.InvalidFallback = fallback;
+        map.Pipeline.InvalidFallback = fallback;
         return (TMap)map;
     }
 
@@ -743,7 +743,7 @@ public static partial class ValuePipelineExtensions
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
         ThrowHelpers.ThrowIfNull(fallback, nameof(fallback));
-        map.InvalidFallback = new NullableCellFallback<T>(fallback);
+        map.Pipeline.InvalidFallback = new NullableCellFallback<T>(fallback);
         return (TMap)map;
     }
 }

@@ -8,7 +8,7 @@ namespace ExcelMapper;
 /// <summary>
 /// An importer that reads the sheets in an Excel file or stream.
 /// </summary>
-public class ExcelImporter : IDisposable
+public sealed class ExcelImporter : IDisposable
 {
     /// <summary>
     /// Gets the inner reader that the importer wraps. It's internal: the importer's sheets share it,
