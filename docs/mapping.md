@@ -441,6 +441,8 @@ public class Employee
 }
 ```
 
+An attribute's value is converted to the member's type when the class map is created, if that doesn't change it: `[ExcelDefaultValue(0)]` works for a `double` or `decimal` member (attribute arguments can't be `decimal`), and `[ExcelDefaultValue(1)]` for an enum member. A value that can't be the member's type, such as `1.5` for an `int` or `null` for a non-nullable member, throws an `ExcelMappingException` naming the member when the class map is created. The same goes for the values of `[ExcelMappingDictionary]`.
+
 `.WithFallback(value)` sets both. `.WithThrowingEmptyFallback()`, `.WithThrowingInvalidFallback()` and `.WithThrowingFallback()` make empty or invalid cells errors, for example for a nullable member that mustn't be empty. To give every empty cell of a class map its type's default value, pass `EmptyValueStrategy.DefaultValue` to the `ExcelClassMap<T>` constructor.
 
 ### Computed fallbacks

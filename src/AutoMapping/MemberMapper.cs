@@ -168,20 +168,26 @@ internal static class MemberMapper
 
         // If the member has any ExcelMappingDictionary attributes, add a MappingDictionaryMapper.
         var mappingDictionaryAttributes = MemberAttributes.GetMany<ExcelMappingDictionaryAttribute>(member);
-        Dictionary<string, T>? mappingDictionary = null;
-        foreach (var mappingDictionaryAttribute in mappingDictionaryAttributes)
-        {
-            mappingDictionary ??= new Dictionary<string, T>();
-            mappingDictionary.Add(mappingDictionaryAttribute.Value, GetMappedValue<T>(mappingDictionaryAttribute, member));
-        }
-
-        if (mappingDictionary != null)
+        if (mappingDictionaryAttributes.Length != 0)
         {
             // If the member has a ExcelMappingDictionaryComparer attribute, get the comparer.
             IEqualityComparer<string>? comparer = null;
             if (MemberAttributes.Get<ExcelMappingDictionaryComparerAttribute>(member) is { } comparerAttribute)
             {
                 comparer = StringComparerUtilities.FromComparison(comparerAttribute.Comparison);
+            }
+
+            // Keyed with the comparer, so that text the comparer treats as the same is a duplicate.
+            var mappingDictionary = new Dictionary<string, T>(comparer);
+            foreach (var mappingDictionaryAttribute in mappingDictionaryAttributes)
+            {
+                var text = mappingDictionaryAttribute.Value;
+                if (mappingDictionary.ContainsKey(text))
+                {
+                    throw new ExcelMappingException($"Member \"{member.Name}\" has more than one ExcelMappingDictionaryAttribute for \"{text}\".");
+                }
+
+                mappingDictionary.Add(text, MemberAttributes.ConvertValue<T>(mappingDictionaryAttribute.MappedValue, nameof(ExcelMappingDictionaryAttribute), member, text));
             }
 
             // If the member has a ExcelMappingDictionaryBehavior attribute, get the behavior.
@@ -201,23 +207,6 @@ internal static class MemberMapper
         }
 
         return addDefaultMappers;
-    }
-
-    // Attribute arguments are objects, so the value is checked against the member's type when the
-    // class map is created.
-    private static T GetMappedValue<T>(ExcelMappingDictionaryAttribute attribute, MemberInfo member)
-    {
-        if (attribute.MappedValue is T value)
-        {
-            return value;
-        }
-
-        if (attribute.MappedValue is null && default(T) is null)
-        {
-            return default!;
-        }
-
-        throw new ExcelMappingException($"The value \"{attribute.MappedValue}\" given by ExcelMappingDictionaryAttribute for \"{attribute.Value}\" on member \"{member.Name}\" isn't a {TypeNames.Get(typeof(T))}.");
     }
 
     /// <summary>
@@ -280,7 +269,7 @@ internal static class MemberMapper
         // If the member has a ExcelDefaultValue attribute, add the fallback.
         if (MemberAttributes.Get<ExcelDefaultValueAttribute>(member) is { } defaultValueAttribute)
         {
-            return new FixedValueFallback<T>(defaultValueAttribute.Value);
+            return new FixedValueFallback<T>(MemberAttributes.ConvertValue<T>(defaultValueAttribute.Value, nameof(ExcelDefaultValueAttribute), member));
         }
 
         // If the member has a ExcelEmptyFallback attribute, add the fallback.
@@ -299,7 +288,7 @@ internal static class MemberMapper
         // If the member has a ExcelInvalidValue attribute, add the fallback.
         if (MemberAttributes.Get<ExcelInvalidValueAttribute>(member) is { } invalidValueAttribute)
         {
-            return new FixedValueFallback<T>(invalidValueAttribute.Value);
+            return new FixedValueFallback<T>(MemberAttributes.ConvertValue<T>(invalidValueAttribute.Value, nameof(ExcelInvalidValueAttribute), member));
         }
 
         // If the member has a ExcelInvalidFallback attribute, add the fallback.
