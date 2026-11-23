@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Reflection;
 
 namespace ExcelMapper.AutoMapping;
@@ -114,4 +115,88 @@ internal static class MemberAttributes
             throw new ExcelMappingException($"Can't create {TypeNames.Get(type)} given by {attributeName} on member \"{member.Name}\": {reason.Message}", reason);
         }
     }
+
+    /// <summary>
+    /// Converts a value an attribute gives for a member, such as <see cref="ExcelDefaultValueAttribute.Value"/>,
+    /// to the member's type when the class map is created. Attribute arguments are objects, and
+    /// can't be <see cref="decimal"/>, so a number is converted to another number type if that
+    /// doesn't change it: <c>[ExcelDefaultValue(0)]</c> works for a <see cref="double"/> or
+    /// <see cref="decimal"/> member, and an integer for an enum member.
+    /// </summary>
+    /// <exception cref="ExcelMappingException">The value can't be the member's type.</exception>
+    public static T ConvertValue<T>(object? value, string attributeName, MemberInfo member, string? key = null)
+    {
+        if (value is T typedValue)
+        {
+            return typedValue;
+        }
+
+        if (value is null)
+        {
+            if (default(T) is null)
+            {
+                return default!;
+            }
+        }
+        else if (TryConvertNumber(value, Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T), out var converted))
+        {
+            return (T)converted;
+        }
+
+        var givenFor = key is null ? string.Empty : $" for \"{key}\"";
+        throw new ExcelMappingException($"The value {DescribeValue(value)} given by {attributeName}{givenFor} on member \"{member.Name}\" can't be converted to {TypeNames.Get(typeof(T))}.");
+    }
+
+    // A number converted to another number type, or an integer to an enum, if the value is the same.
+    private static bool TryConvertNumber(object value, Type type, [NotNullWhen(true)] out object? converted)
+    {
+        converted = null;
+        if (!IsNumber(value.GetType()))
+        {
+            return false;
+        }
+
+        if (type.IsEnum)
+        {
+            if (Type.GetTypeCode(value.GetType()) is TypeCode.Single or TypeCode.Double or TypeCode.Decimal)
+            {
+                return false;
+            }
+
+            converted = Enum.ToObject(type, value);
+            return true;
+        }
+
+        if (!IsNumber(type))
+        {
+            return false;
+        }
+
+        try
+        {
+            var result = Convert.ChangeType(value, type, CultureInfo.InvariantCulture);
+
+            // Rounding (1.5 to an int) changes the value, so it isn't a conversion.
+            if (!Equals(Convert.ChangeType(result, value.GetType(), CultureInfo.InvariantCulture), value))
+            {
+                return false;
+            }
+
+            converted = result;
+            return true;
+        }
+        catch (OverflowException)
+        {
+            return false;
+        }
+    }
+
+    private static bool IsNumber(Type type) => Type.GetTypeCode(type) is >= TypeCode.SByte and <= TypeCode.Decimal;
+
+    private static string DescribeValue(object? value) => value switch
+    {
+        null => "null",
+        string text => $"\"{text}\"",
+        _ => Convert.ToString(value, CultureInfo.InvariantCulture) ?? value.GetType().Name,
+    };
 }

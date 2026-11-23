@@ -330,4 +330,67 @@ public class MapMappingDictionaryTests
         [ExcelMappingDictionary("none", null)]
         public int? Value { get; set; }
     }
+
+    [Fact]
+    public void ReadRows_MappedValueOfAnotherNumberType_ReturnsConvertedValue()
+    {
+        using var importer = Helpers.GetCsvImporter("Long,Decimal\nyes,half\n");
+        var row = importer.ReadSheet().ReadRows<MappedNumbers>().Single();
+        Assert.Equal(1L, row.Long);
+        Assert.Equal(0.5m, row.Decimal);
+    }
+
+    public class MappedNumbers
+    {
+        [ExcelMappingDictionary("yes", 1)]
+        public long Long { get; set; }
+
+        [ExcelMappingDictionary("half", 0.5)]
+        public decimal Decimal { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_MappedValueChangedByConversion_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\nyes\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<MappedFraction>().ToArray());
+        Assert.Equal("The value 1.5 given by ExcelMappingDictionaryAttribute for \"yes\" on member \"Value\" can't be converted to int.", exception.Message);
+    }
+
+    public class MappedFraction
+    {
+        [ExcelMappingDictionary("yes", 1.5)]
+        public int Value { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_SameTextMappedTwice_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\nyes\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<SameTextTwice>().ToArray());
+        Assert.Equal("Member \"Value\" has more than one ExcelMappingDictionaryAttribute for \"yes\".", exception.Message);
+    }
+
+    public class SameTextTwice
+    {
+        [ExcelMappingDictionary("yes", "a")]
+        [ExcelMappingDictionary("yes", "b")]
+        public string? Value { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_SameTextMappedTwiceIgnoringCase_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\nyes\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<SameTextTwiceIgnoringCase>().ToArray());
+        Assert.Equal("Member \"Value\" has more than one ExcelMappingDictionaryAttribute for \"YES\".", exception.Message);
+    }
+
+    public class SameTextTwiceIgnoringCase
+    {
+        [ExcelMappingDictionary("yes", "a")]
+        [ExcelMappingDictionary("YES", "b")]
+        [ExcelMappingDictionaryComparer(StringComparison.OrdinalIgnoreCase)]
+        public string? Value { get; set; }
+    }
 }
