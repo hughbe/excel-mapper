@@ -143,7 +143,7 @@ public class MapExpressionsUnsupportedTests
     {
         var map = new ExcelClassMap<NonDisposableArrayElementClass>();
         Assert.Throws<ExcelMappingException>(() => map.Map(p => p.Value));
-        Assert.Throws<ExcelMappingException>(() => map.MapList<NonConstructibleArrayElement>(p => p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapCollection<NonConstructibleArrayElement>(p => p.Value));
     }
 
     private class NonDisposableArrayElementClass
@@ -161,7 +161,7 @@ public class MapExpressionsUnsupportedTests
     {
         var map = new ExcelClassMap<ObjectClass>();
         Assert.Throws<ExcelMappingException>(() => map.Map(p => (NonConstructibleArrayElement[])p.Value));
-        Assert.Throws<ExcelMappingException>(() => map.MapList<NonConstructibleArrayElement>(p => (NonConstructibleArrayElement[])p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapCollection<NonConstructibleArrayElement>(p => (NonConstructibleArrayElement[])p.Value));
     }
 
     [Fact]
@@ -169,7 +169,7 @@ public class MapExpressionsUnsupportedTests
     {
         var map = new ExcelClassMap<IDisposableArrayElementClass>();
         Assert.Throws<ExcelMappingException>(() => map.Map(p => p.Value));
-        Assert.Throws<ExcelMappingException>(() => map.MapList<IDisposable>(p => p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapCollection<IDisposable>(p => p.Value));
     }
 
     private class IDisposableArrayElementClass
@@ -182,21 +182,21 @@ public class MapExpressionsUnsupportedTests
     {
         var map = new ExcelClassMap<ObjectClass>();
         Assert.Throws<ExcelMappingException>(() => map.Map(p => (IDisposable[])p.Value));
-        Assert.Throws<ExcelMappingException>(() => map.MapList<IDisposable>(p => (IDisposable[])p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapCollection<IDisposable>(p => (IDisposable[])p.Value));
     }
 
     [Fact]
     public void Map_MultidimensionalArrayValue_ThrowsExcelMappingException()
     {
         var map = new ExcelClassMap<StringMultidimensionalArrayClass>();
-        Assert.Throws<ExcelMappingException>(() => map.MapList<string>(p => p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapCollection<string>(p => p.Value));
     }
 
     [Fact]
     public void Map_MultidimensionalArrayElementCantBeMapped_ThrowsExcelMappingException()
     {
         var map = new ExcelClassMap<IDisposableStringMultidimensionalArrayClass>();
-        Assert.Throws<ExcelMappingException>(() => map.MapList<IDisposable>(p => p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapCollection<IDisposable>(p => p.Value));
     }
 
     private class IDisposableStringMultidimensionalArrayClass
@@ -209,14 +209,14 @@ public class MapExpressionsUnsupportedTests
     {
         var map = new ExcelClassMap<NonConstructibleListIndexClass>();
         Assert.Throws<ExcelMappingException>(() => map.Map(p => (IList<string>)p.Value));
-        Assert.Throws<ExcelMappingException>(() => map.MapList<string>(p => p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapCollection<string>(p => p.Value));
     }
 
     [Fact]
     public void Map_CastListCantBeConstructed_ThrowsExcelMappingException()
     {
         var map = new ExcelClassMap<ObjectClass>();
-        Assert.Throws<ExcelMappingException>(() => map.MapList<string>(p => (NonConstructibleList)p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapCollection<string>(p => (NonConstructibleList)p.Value));
     }
 
     private class NonConstructibleListIndexClass
@@ -234,7 +234,7 @@ public class MapExpressionsUnsupportedTests
     {
         var map = new ExcelClassMap<NonConstructibleListElementClass>();
         Assert.Throws<ExcelMappingException>(() => map.Map(p => (IList<NonConstructibleListElement>)p.Value));
-        Assert.Throws<ExcelMappingException>(() => map.MapList<NonConstructibleListElement>(p => p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapCollection<NonConstructibleListElement>(p => p.Value));
     }
 
     private class NonConstructibleListElementClass
@@ -251,7 +251,7 @@ public class MapExpressionsUnsupportedTests
     public void Map_CastListElementCantBeConstructed_ThrowsExcelMappingException()
     {
         var map = new ExcelClassMap<ObjectClass>();
-        Assert.Throws<ExcelMappingException>(() => map.MapList<NonConstructibleListElement>(p => (List<NonConstructibleListElement>)p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapCollection<NonConstructibleListElement>(p => (List<NonConstructibleListElement>)p.Value));
     }
 
     [Fact]
@@ -283,7 +283,7 @@ public class MapExpressionsUnsupportedTests
     {
         var map = new ExcelClassMap<IDisposableListElementClass>();
         Assert.Throws<ExcelMappingException>(() => map.Map(p => (IList<IDisposable>)p.Value));
-        Assert.Throws<ExcelMappingException>(() => map.MapList<IDisposable>(p => p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapCollection<IDisposable>(p => p.Value));
     }
 
     private class IDisposableListElementClass
@@ -295,7 +295,7 @@ public class MapExpressionsUnsupportedTests
     public void Map_CastListElementCantBeMapped_ThrowsExcelMappingException()
     {
         var map = new ExcelClassMap<ObjectClass>();
-        Assert.Throws<ExcelMappingException>(() => map.MapList<IDisposable>(p => (List<IDisposable>)p.Value));
+        Assert.Throws<ExcelMappingException>(() => map.MapCollection<IDisposable>(p => (List<IDisposable>)p.Value));
     }
 
     [Fact]

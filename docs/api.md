@@ -90,7 +90,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 **`ExcelClassMap<T>`** - How rows map to `T`. Derive from it and call `Map(...)` in the constructor, or configure one with `RegisterClassMap<T>(c => ...)`. Members you don't map aren't read.
 - `Map(p => p.Member)` - A single value, collection or dictionary member; returns the member's map (below). Indexers map elements one by one: `Map(p => p.Values[0])`, `Map(p => p.Scores["Maths"])`
 - `Map(p => p.Status).WithIgnoreCase()` - An enum, matched ignoring case (also on an enum collection's `WithElementMap`)
-- `MapList<TElement>(p => p.Items)` - A non-generic collection, such as `ArrayList`
+- `MapCollection<TElement>(p => p.Items)` - A collection whose type the `Map` overloads don't cover, such as `HashSet<T>` or `ArrayList`
 - `MapDictionary<TValue>(p => p.Values)` - A dictionary member whose type the `Map` overloads don't cover, with values of type `TValue`
 - `MapObject<TElement>(p => p.Address)` - A nested object, mapped from the same row; returns its class map
 - `AutoMap()` - Map every member auto-mapping would, from its type and attributes, except members already mapped; members mapped afterwards replace the auto-mapped ones

@@ -247,6 +247,8 @@ Attributes such as `[ExcelFormats]` and `[ExcelConverter]` on a collection membe
 
 **Collection types.** Arrays (including multidimensional arrays mapped by index, such as `Map(p => p.Grid[0, 1])`), `List<T>` and the list, collection and enumerable interfaces, `Collection<T>`, `ReadOnlyCollection<T>`, `ObservableCollection<T>`, `LinkedList<T>`, `HashSet<T>`, `SortedSet<T>`, `ISet<T>`, `Queue<T>`, `Stack<T>`, the concurrent collections, `BlockingCollection<T>`, the immutable collections, `FrozenSet<T>` (.NET 8), and the non-generic `ArrayList`, `Queue`, `Stack` and `StringCollection`. Your own collection types work if they have a parameterless constructor and an `Add` method, or a constructor that takes an `IEnumerable<T>`, `ICollection<T>` or `IReadOnlyList<T>`.
 
+In a class map, `Map(p => p.Tags)` gives a collection map for arrays, `List<T>`, the collection classes in `System.Collections.ObjectModel` and the collection interfaces. For another collection type, such as `HashSet<T>`, use `MapCollection<string>(p => p.Tags)`.
+
 To map elements one by one from different columns, map them by index: `Map(p => p.Values[0]).WithColumnName("First")`.
 
 ## Dictionaries

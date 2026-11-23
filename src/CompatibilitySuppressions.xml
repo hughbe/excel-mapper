@@ -71,6 +71,8 @@
       ValuePipeline<T, TSelf>, the base of ValueMap<T> and ElementMap<T> with the value methods,
       holds the pipeline instead of deriving from it.
     - ExcelImporter is sealed (CP0009): it has nothing to override. Wrap one instead of deriving.
+    - ExcelClassMap<T>.MapList is renamed MapCollection (CP0002), as it maps any collection type,
+      such as HashSet<T>, not only lists.
   -->
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>

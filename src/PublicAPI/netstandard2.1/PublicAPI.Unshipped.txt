@@ -121,7 +121,7 @@ ExcelMapper.ExcelClassMap<T>.Map<TValue>(System.Linq.Expressions.Expression<Syst
 ExcelMapper.ExcelClassMap<T>.Map<TValue>(System.Linq.Expressions.Expression<System.Func<T, System.Collections.IDictionary!>!>! expression) -> ExcelMapper.DictionaryMap<string!, TValue>!
 ExcelMapper.ExcelClassMap<T>.MapDictionary<TValue>(System.Linq.Expressions.Expression<System.Func<T, System.Collections.IEnumerable!>!>! expression) -> ExcelMapper.DictionaryMap<string!, TValue>!
 ExcelMapper.ExcelClassMap<T>.MapExtraColumns<TValue>(System.Linq.Expressions.Expression<System.Func<T, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, TValue>>!>!>! expression) -> ExcelMapper.DictionaryMap<string!, TValue>!
-ExcelMapper.ExcelClassMap<T>.MapList<TElement>(System.Linq.Expressions.Expression<System.Func<T, System.Collections.IEnumerable!>!>! expression) -> ExcelMapper.CollectionMap<TElement>!
+ExcelMapper.ExcelClassMap<T>.MapCollection<TElement>(System.Linq.Expressions.Expression<System.Func<T, System.Collections.IEnumerable!>!>! expression) -> ExcelMapper.CollectionMap<TElement>!
 ExcelMapper.ExcelClassMap<T>.MapObject<TElement>(System.Linq.Expressions.Expression<System.Func<T, TElement>!>! expression) -> ExcelMapper.ExcelClassMap<TElement>!
 ExcelMapper.ExcelClassMap<T>.MapRowNumber<TProperty>(System.Linq.Expressions.Expression<System.Func<T, TProperty>!>! expression) -> void
 ExcelMapper.ExcelClassMap<T>.WithClassMap(ExcelMapper.ExcelClassMap<T>! classMap) -> ExcelMapper.ExcelClassMap<T>!
