@@ -103,6 +103,8 @@ foreach (var result in sheet.ReadRowResults<Employee>())
 }
 ```
 
+To check a large file without creating an exception for each problem, pass an `IExcelErrorSink` to `ReadRows` (see [Checking large files](https://github.com/hughbe/excel-mapper/blob/main/docs/errors.md#checking-large-files)).
+
 ## Documentation
 
 - **[Reading Files](https://github.com/hughbe/excel-mapper/blob/main/docs/reading.md)** - Workbooks and CSV files, sheets, headings, rows, data ranges and regions

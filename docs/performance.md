@@ -33,7 +33,7 @@ With native AOT, read rows with a class map from a generated `ExcelMappingContex
 
    Call `.ToList()` only when you need every row at once.
 
-2. **Give invalid cells a fallback when they're expected.** An invalid cell without a fallback throws an `ExcelMappingException`, which is expensive if many cells are invalid. With a fallback (`[ExcelInvalidValue]`, `.WithInvalidFallback(...)`), nothing is thrown. To collect errors rather than stop at the first, use `ReadRowResults<T>()`: it costs the same as `ReadRows<T>()` for valid rows, and doesn't throw for invalid ones.
+2. **Give invalid cells a fallback when they're expected.** An invalid cell without a fallback throws an `ExcelMappingException`, which is expensive if many cells are invalid. With a fallback (`[ExcelInvalidValue]`, `.WithInvalidFallback(...)`), nothing is thrown. To collect errors rather than stop at the first, use `ReadRowResults<T>()`: it costs the same as `ReadRows<T>()` for valid rows, and doesn't throw for invalid ones. For a large file with many invalid cells, pass an `IExcelErrorSink` to `ReadRows<T>` instead: it creates no exception for a problem unless you ask for one ([Checking large files](errors.md#checking-large-files)).
 
 3. **Use typed members.** Numbers, dates, strings and enums are converted without boxing. `object` members, `Dictionary<string, object>` and `ExpandoObject` box every value.
 

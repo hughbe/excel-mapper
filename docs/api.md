@@ -4,7 +4,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 
 ## Reading files
 
-**`ExcelImporter`** - Opens a workbook (`.xlsx`, `.xls`) or CSV file. Dispose it when you're done.
+**`ExcelImporter`** - Opens a workbook (`.xlsx`, `.xls`, `.xlsb`) or CSV file. Dispose it when you're done.
 - `ExcelImporter.ReadRows<T>(path or stream)`, optionally with a file type and a `configure` callback - Read every row of the first sheet in one call
 - `new ExcelImporter(path or stream)`, `(..., ExcelImporterFileType)`, `(..., ExcelImporterFileType, ExcelReaderConfiguration)` - Open a file, optionally as CSV or with ExcelDataReader options (passwords, CSV separators, fallback encoding); `new ExcelImporter(IExcelDataReader)` wraps a reader you created
 - `ReadSheet()` / `ReadSheet(name)` / `ReadSheet(index)` - The next sheet, or a sheet by name (case-insensitive) or zero-based index
@@ -47,7 +47,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 - `ToString()` - An Excel address when the range can be written as one; `default(ExcelRange)` is every row and column
 
 **`ExcelImporterConfiguration`** - An importer's settings and class maps.
-- `RegisterClassMap<TMap>()` / `RegisterClassMap(classMap)` / `RegisterClassMap(type, classMap)` - Use a class map for a type. Replaces a map created earlier by auto-mapping; throws if you already registered one
+- `RegisterClassMap<TMap>()` / `RegisterClassMap(classMap)` - Use a class map for its type. Replaces a map created earlier by auto-mapping; throws if you already registered one
 - `RegisterClassMap<T>(c => ...)` - Configure a class map for `T` inline. It starts empty: only the members you map are read, unless you call `c.AutoMap()`
 - `TryGetClassMap<T>(out classMap)` / `TryGetClassMap(type, out classMap)` - The class map registered for a type, including one created by auto-mapping
 - `Culture` - The culture to parse text and format values with (default: `CultureInfo.InvariantCulture`)
@@ -60,6 +60,10 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 
 **`ExcelMappingContext`** - Class maps for native AOT ([Native AOT apps](trimming.md#native-aot-apps)). Declare a `partial` class deriving from it with `[ExcelMappable(typeof(T))]` for each row type, and the source generator writes it; or register types in `RegisterTypes(ExcelTypeRegistrar)` yourself.
 - `GetClassMap<T>()` - The class map of a registered row type, auto-mapped from the registered types; it can't be changed
+
+**`ExcelMappableAttribute`** - `[ExcelMappable(typeof(T))]` on a `partial` context: the source generator registers `T` and every type its members use, and adds a property with `T`'s class map.
+
+**`ExcelTypeRegistrar`** - Registers types in `RegisterTypes`, for a context written by hand: `Row<T>()`, `Type<T>()`, `Nullable<T>()`, `Enum<TEnum>()`, `Parsable<T>()`, `ParsableClass<T>()`, `Collection<TCollection, TElement>()`, `Array<TElement>()` and `Dictionary<TDictionary, TKey, TValue>()`. `Setter` and `Constructor` register code that sets a member (`ExcelMemberSetter<TOwner, TValue>`) or calls a constructor (`ExcelConstructor<TOwner>`, with `ExcelConstructorArguments<TOwner>`), which the generator writes so native AOT apps don't use reflection.
 
 ## Results and errors
 

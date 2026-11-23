@@ -32,8 +32,7 @@ A missing column is otherwise reported when the first row is read, one column at
 var sheet = importer.ReadSheet();
 
 // Throws an ExcelMappingException listing every missing column:
-// Sheet "Employees" is missing columns needed to map type "Employee":
-//   column "Salary" (member Salary); column "Zip" (member Address.Zip).
+// Sheet "Employees" is missing columns needed to map type Employee: column "Salary" (member Salary); column "Zip" (member Address.Zip).
 sheet.ValidateHeading<Employee>();
 
 // Or get the list without an exception

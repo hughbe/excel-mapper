@@ -189,7 +189,7 @@ If no column is chosen, the member is missing, as when a named column isn't foun
 
 ### Missing and ignored columns
 
-A missing column throws an `ExcelMappingException` that names it and suggests a similarly named column. Make a member optional to leave it unset instead (it keeps its initial value), or ignore it to never read it:
+A missing column throws an `ExcelMappingException` that names it, lists the heading's columns, and suggests one whose name differs only by spaces or separators. Make a member optional to leave it unset instead (it keeps its initial value), or ignore it to never read it:
 
 ```csharp
 public class Employee
@@ -423,7 +423,7 @@ By default:
 - **An empty cell** gives `null` for reference types and nullable types, and an error for other value types (such as `int` and `DateTime`).
 - **An invalid cell**, one that can't be converted to the member's type (such as `"N/A"` for an `int`), is an error.
 
-An error throws an `ExcelMappingException` that names the cell, or is collected by [`ReadRowResults`](errors.md#collecting-errors). Give a fallback to use a value instead:
+An error throws an `ExcelMappingException` that names the cell, or is collected by [`ReadRowResults`](errors.md#collecting-errors) or given to an [`IExcelErrorSink`](errors.md#checking-large-files). Give a fallback to use a value instead:
 
 | Name          | Age |
 |---------------|-----|
