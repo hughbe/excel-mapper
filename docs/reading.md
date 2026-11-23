@@ -9,11 +9,12 @@ Opening workbooks and CSV files, choosing sheets, reading rows, and telling Exce
 ```csharp
 new ExcelImporter("data.xlsx");                          // a path
 new ExcelImporter(stream);                               // a stream
-new ExcelImporter("data.csv", ExcelImporterFileType.Csv); // a CSV file
+new ExcelImporter("data.csv");                          // a CSV file, from its extension
+new ExcelImporter(stream, ExcelImporterFileType.Csv);     // a CSV stream
 new ExcelImporter(reader);                               // an IExcelDataReader you created
 ```
 
-`.xlsx`, `.xls` and `.xlsb` workbooks are detected automatically. CSV files must be opened with `ExcelImporterFileType.Csv` (otherwise ExcelDataReader throws a `HeaderException`); their separator (comma, semicolon, tab, pipe or `#`) is detected automatically. For passwords, a specific CSV separator or a fallback encoding, see [Reader options](../README.md#reader-options).
+`.xlsx`, `.xls` and `.xlsb` workbooks are detected automatically. A path ending in `.csv`, `.tsv` or `.txt` is read as CSV; for a stream, or a CSV file with another extension, pass `ExcelImporterFileType.Csv` (otherwise ExcelDataReader throws a `HeaderException`). The separator (comma, semicolon, tab, pipe or `#`) is detected automatically. For passwords, a specific CSV separator or a fallback encoding, see [Reader options](../README.md#reader-options).
 
 To configure ExcelDataReader yourself, create the `IExcelDataReader` and pass it to `new ExcelImporter(reader)`. Don't move the reader afterwards: the importer's sheets share it.
 

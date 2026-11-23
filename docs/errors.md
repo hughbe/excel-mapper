@@ -136,6 +136,6 @@ Console.WriteLine($"{counter.Count} problems");
 
 **`No data is available for encoding 1252`** when you create an `IExcelDataReader` yourself. `ExcelImporter` registers code page encodings, but only once one has been created. Register them first: `Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)`.
 
-**`HeaderException` when opening a CSV file.** Open it with `ExcelImporterFileType.Csv` ([Opening a file](reading.md#opening-a-file)).
+**`HeaderException` when opening a CSV file.** A stream, or a file whose extension isn't `.csv`, `.tsv` or `.txt`, is read as a workbook: open it with `ExcelImporterFileType.Csv` ([Opening a file](reading.md#opening-a-file)).
 
 **`Cannot auto-map type` in a trimmed app.** The type's members were removed by the trimmer: see [Trimming](trimming.md).
