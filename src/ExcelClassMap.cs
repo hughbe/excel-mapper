@@ -77,6 +77,10 @@ public abstract class ExcelClassMap : IParentMap, IBindableMap
             throw new ExcelMappingException($"The class map for type {TypeNames.Get(Type)} maps no members, so every row would be an empty object. Auto-mapping maps public fields, and public properties with a public setter or set by a public constructor; map other members with Map(...) in a class map.");
         }
 
+        // A class map used without registering it (such as one passed to ReadRows) is checked
+        // here, as RegisterClassMap checks it.
+        CellPipeline.ThrowIfNoConversion(this);
+
         _frozen = true;
         Members.Freeze();
         _valueMap?.Freeze();
