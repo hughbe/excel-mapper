@@ -51,12 +51,6 @@ internal abstract class CellPipeline
     internal abstract bool HasMappers { get; }
 
     /// <summary>
-    /// Gives empty cells, invalid cells or both a fixed value, for the untyped fluent methods
-    /// (<c>WithEmptyFallback(object)</c> and so on).
-    /// </summary>
-    internal abstract void SetFixedFallback(object? value, bool empty, bool invalid);
-
-    /// <summary>
     /// Makes empty cells, invalid cells or both errors.
     /// </summary>
     internal abstract void SetThrowingFallback(bool empty, bool invalid);
