@@ -46,7 +46,7 @@ internal sealed class ColumnIndicesColumns : Columns
     }
 
     public override ExcelMappingException CreateMissingException(SheetView sheet, int rowIndex, MemberInfo? member)
-        => Missing(sheet, rowIndex, member, Indices.Count == 1 ? $"column at index {Indices[0]}" : $"columns at indices {string.Join(", ", Indices)}");
+        => Missing(sheet, member, Describe(sheet));
 
     public override string Describe(SheetView sheet)
         => $"columns {string.Join(", ", Indices.Select(i => ExcelRange.GetColumnLetters(sheet.ColumnOffset + i)))}";

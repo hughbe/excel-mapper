@@ -429,7 +429,7 @@ public class MapDateTimeOffsetTests
         // The inner exception depends on the library build (the netstandard builds use Convert.ChangeType).
         Assert.IsType<FormatException>(ex.InnerException);
 #endif
-        Assert.Equal($"Cannot assign \"{new DateTime(2025, 01, 01, 1, 1, 1)}\" to member \"Value\" of type \"System.Int32\" in column \"Date\" at cell A2 in sheet \"Sheet1\".", ex.Message);
+        Assert.Equal($"Cannot assign \"{new DateTime(2025, 01, 01, 1, 1, 1)}\" to member \"Value\" of type int in column \"Date\" at cell A2 in sheet \"Sheet1\".", ex.Message);
     }
 
     private class DateTimeOffsetValueInt

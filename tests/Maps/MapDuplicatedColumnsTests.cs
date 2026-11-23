@@ -121,11 +121,12 @@ public class MapDuplicatedColumnsTests
     }
 
     [Fact]
-    public void ReadRowResults_Duplicated_ReturnsErrors()
+    public void ReadRowResults_Duplicated_ThrowsOnce()
     {
+        // A problem with the heading, so it's reported once rather than as each row's error.
         using var importer = Helpers.GetCsvImporter("Name,Name\na,b\nc,d\n");
-        var results = importer.ReadSheet().ReadRowResults<NameRow>().ToArray();
-        Assert.All(results, r => Assert.StartsWith("More than one column matches \"Name\"", Assert.Single(r.Errors).Message));
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRowResults<NameRow>());
+        Assert.Contains("More than one column matches \"Name\" (columns A and B)", exception.Message);
     }
 
     [Fact]

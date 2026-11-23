@@ -20,9 +20,9 @@ internal sealed class SplitColumns(Columns cell, CellSplitter splitter) : Column
     public override ExcelMappingException CreateMissingException(SheetView sheet, int rowIndex, MemberInfo? member)
         => Cell switch
         {
-            ColumnNameColumns or FirstColumnNameColumns => Missing(sheet, rowIndex, member, $"column \"{Cell.ColumnName}\""),
-            ColumnIndexColumns index => Missing(sheet, rowIndex, member, $"column at index {index.Index}"),
-            _ => Missing(sheet, rowIndex, member, null),
+            ColumnNameColumns or FirstColumnNameColumns => Cell.CreateMissingException(sheet, rowIndex, member),
+            ColumnIndexColumns index => index.CreateMissingException(sheet, rowIndex, member),
+            _ => base.CreateMissingException(sheet, rowIndex, member),
         };
 
     public override string Describe(SheetView sheet)

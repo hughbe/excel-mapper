@@ -128,6 +128,8 @@ sheet.HasHeading = false;
 
 **Now:** `... at cell B11 in sheet "Sheet1".` when the column is known, otherwise `... on row 11 ...` (one-based, as Excel shows it).
 
+Other messages are reworded too: a missing column's message starts `Can't find column "Name" for member "Name"` and lists the heading's columns, an empty cell's starts `The cell is empty, but member ...`, types are named as in C# (`int` rather than `System.Int32`), and messages for a CSV file don't name its sheet.
+
 **What to do:** use the exception's properties instead of parsing the message:
 
 ```csharp
@@ -292,6 +294,7 @@ If you created a map with its constructor, or implemented `IMap`, map the member
 - **Enumerating rows more than once**: each enumeration of the result of `ReadRows<T>()` or `ReadRowResults<T>()` reads the same rows, from the row after the sheet's position when the method was called. Before 4.0, the result could only be enumerated once: a second enumeration continued where the first stopped, so `rows.Any()` followed by `rows.ToList()` lost the first row. To continue reading where you stopped, use `ReadRow<T>()`, or call `ReadRows<T>()` again.
 - **Columns with the same name**: a member whose name more than one column in the heading matches (such as two columns named "Name", or "Name" and "name") throws an `ExcelMappingException` naming both columns, instead of silently reading the first. Choose one with `[ExcelColumnLetter]`/`.WithColumnLetter(...)` or `[ExcelColumnIndex]`, or rename a column. The second of two columns named "Name" can no longer be found as "Name_2", and a column really named "Name_2" is found.
 - **Types with nothing to map**: reading rows of a type, or a nested member's type, that maps no members (no public setters or fields, every member `[ExcelIgnore]`, or a registered class map with no `Map(...)` calls) throws an `ExcelMappingException` naming the type, instead of giving an empty object for every row. Map the members in a class map, or ignore the member whose type it is.
+- **Missing columns in `ReadRowResults`**: a column the type needs that the heading doesn't have throws an `ExcelMappingException` when `ReadRowResults` is called (with the message `ValidateHeading` gives), instead of being reported as an error of every row. Make the member optional if the column may be missing.
 - **Changing settings while reading**: a sheet takes the importer's settings (`SkipBlankLines`, `ValidateDataAnnotations`, `Culture`, ...) when it starts reading, so changing them while its rows are read only affects sheets read afterwards. Before 4.0, a change applied to the following rows.
 - **Constructor exceptions**: an exception thrown by a constructor called during mapping (for records and constructor-only types) is wrapped in an `ExcelMappingException` with the row, with the original as `InnerException`.
 - **Fallback values**: `WithFallback` (was `WithValueFallback`), `WithEmptyFallback` and `WithInvalidFallback` take a value of the member's type, where they took an `object`. A value of the wrong type, such as `WithEmptyFallback("none")` on an `int` member, is now a compile error instead of an `InvalidCastException` when rows are read. `WithEmptyFallback(null)` on a member that can't be null throws an `ArgumentNullException`: give the value, such as `WithEmptyFallback(0)`.

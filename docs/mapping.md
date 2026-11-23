@@ -166,7 +166,7 @@ public class PrefixSelector(string prefix) : IColumnSelector
             .Select(context.Heading.GetColumnIndex)
             .ToArray();
 
-    // Used in error messages: Could not read value for member "Bonuses" for columns starting with "Bonus_".
+    // Used in error messages: Can't find columns starting with "Bonus_" for member "Bonuses".
     public string Describe(ColumnSelectorContext context) => $"columns starting with \"{prefix}\"";
 }
 

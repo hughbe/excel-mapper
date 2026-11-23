@@ -133,16 +133,24 @@ internal sealed class SheetView
     {
         if (!HasHeading)
         {
-            throw new ExcelMappingException($"Sheet \"{Name}\" has no heading.");
+            throw new ExcelMappingException($"{ExcelMappingException.DescribeSheet(Name, capitalize: true)} has no heading.");
         }
 
         if (Heading != null)
         {
-            throw new ExcelMappingException($"Already read heading in sheet \"{Name}\".");
+            throw new ExcelMappingException($"The heading of {ExcelMappingException.DescribeSheet(Name)} has already been read.");
         }
 
         // Read up to the heading row.
-        _cursor.MoveTo(_cursor.GetRowIndex(_dataRange.Rows.Start));
+        var headingRowIndex = _cursor.GetRowIndex(_dataRange.Rows.Start);
+        if (!_cursor.TryMoveTo(headingRowIndex))
+        {
+            // The cursor is on the sheet's last row, if any.
+            var rowCount = _cursor.RowIndex + 1;
+            throw new ExcelMappingException(rowCount == 0
+                ? $"{ExcelMappingException.DescribeSheet(Name, capitalize: true)} is empty, so it has no heading. Set HasHeading to false to read a sheet without one."
+                : $"{ExcelMappingException.DescribeSheet(Name, capitalize: true)} has no row {headingRowIndex + 1} to read the heading from: it has {rowCount} row{(rowCount == 1 ? "" : "s")}.");
+        }
 
         // Create the heading.
         var heading = new ExcelHeading(Reader, DataRange, Settings.MaxColumnsPerSheet);
@@ -238,7 +246,7 @@ internal sealed class SheetView
         {
             if (!TryReadRow(classMap, out T? row))
             {
-                throw new ExcelMappingException($"Sheet \"{Name}\" does not have row {startIndex + i}.");
+                throw new ExcelMappingException($"{ExcelMappingException.DescribeSheet(Name, capitalize: true)} does not have row {startIndex + i + 1}.");
             }
 
             yield return row;
@@ -255,7 +263,7 @@ internal sealed class SheetView
     {
         if (!TryReadRow(classMap, out T? value))
         {
-            throw new ExcelMappingException($"No more rows in sheet \"{Name}\".");
+            throw new ExcelMappingException($"There are no more rows in {ExcelMappingException.DescribeSheet(Name)}.");
         }
 
         return value;
@@ -293,6 +301,10 @@ internal sealed class SheetView
         {
             ReadHeading();
         }
+
+        // A column the sheet doesn't have is a problem with the sheet rather than its rows, so
+        // it's reported once, as ValidateHeading does, rather than as an error of every row.
+        ValidateHeading(classMap);
 
         return ReadRowResultsIterator(classMap, CurrentRowIndex);
     }
@@ -386,7 +398,7 @@ internal sealed class SheetView
             // Otherwise reading a named column throws a clear error.
             if (!AutoMapper.TryCreateClassMap<T>(EmptyValueStrategy.Error, out var map))
             {
-                throw new ExcelMappingException($"Cannot auto-map type \"{typeof(T)}\".");
+                throw new ExcelMappingException($"Cannot auto-map type {TypeNames.Get(typeof(T))}.");
             }
 
             classMap = Configuration.RegisterAutoMappedClassMap(typeof(T), map);
@@ -453,7 +465,7 @@ internal sealed class SheetView
         if (!TryValidateHeading(classMap, out var problems))
         {
             throw new ExcelMappingException(
-                $"Sheet \"{Name}\" is missing columns needed to map type \"{typeof(T)}\": {string.Join("; ", problems)}.");
+                $"{ExcelMappingException.DescribeSheet(Name, capitalize: true)} is missing columns needed to map type {TypeNames.Get(typeof(T))}: {string.Join("; ", problems)}.");
         }
     }
 

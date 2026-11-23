@@ -25,7 +25,7 @@ public class MapIgnoreSeparatorsInColumnNamesTests
         var sheet = importer.ReadSheet();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<Contact>().ToArray());
-        Assert.Contains("for column \"FirstName\"", ex.Message);
+        Assert.Contains("Can't find column \"FirstName\"", ex.Message);
         Assert.EndsWith("Did you mean column \"First Name\"? Use ExcelColumnName or WithColumnName, or set IgnoreSeparatorsInColumnNames in the importer's configuration.", ex.Message);
     }
 

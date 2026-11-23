@@ -278,13 +278,12 @@ public class BoundMemberTests
     }
 
     [Fact]
-    public void ReadRowResults_SingleValueColumnMissing_RecordsError()
+    public void ReadRowResults_SingleValueColumnMissing_Throws()
     {
         using var importer = Helpers.GetCsvImporter("Value\n2024-03-04\n");
         importer.Configuration.RegisterClassMap<DateTime>(c => c.Map(d => d).WithColumnName("Missing"));
-        var result = importer.ReadSheet().ReadRowResults<DateTime>().Single();
-        Assert.False(result.IsValid);
-        Assert.Single(result.Errors);
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRowResults<DateTime>());
+        Assert.Equal("The sheet is missing columns needed to map type DateTime: column \"Missing\".", exception.Message);
     }
 
     [Fact]

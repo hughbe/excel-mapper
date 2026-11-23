@@ -38,7 +38,7 @@ public class ValidateHeadingTests
         Assert.Equal(["column \"Age\" (member Age)", "column \"Salary\" (member Salary)"], problems);
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ValidateHeading<Employee>());
-        Assert.Equal($"Sheet \"\" is missing columns needed to map type \"{typeof(Employee)}\": column \"Age\" (member Age); column \"Salary\" (member Salary).", ex.Message);
+        Assert.Equal($"The sheet is missing columns needed to map type ValidateHeadingTests.Employee: column \"Age\" (member Age); column \"Salary\" (member Salary).", ex.Message);
     }
 
     [Fact]

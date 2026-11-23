@@ -531,3 +531,4 @@ static ExcelMapper.ValuePipelineExtensions.WithNumberStyle<TMap>(this ExcelMappe
 static ExcelMapper.ValuePipelineExtensions.WithOffset<TMap>(this ExcelMapper.ValuePipeline<System.DateTimeOffset, TMap!>! map, System.TimeSpan offset) -> TMap!
 static ExcelMapper.ValuePipelineExtensions.WithOffset<TMap>(this ExcelMapper.ValuePipeline<System.DateTimeOffset?, TMap!>! map, System.TimeSpan offset) -> TMap!
 static ExcelMapper.ValuePipelineExtensions.WithUriKind<TUri, TMap>(this ExcelMapper.ValuePipeline<TUri, TMap!>! map, System.UriKind uriKind) -> TMap!
+override ExcelMapper.ExcelMappingException.Message.get -> string!

@@ -39,7 +39,7 @@ internal sealed class RowCursor(Worksheet worksheet)
     {
         if (!TryMoveTo(index))
         {
-            throw new ExcelMappingException($"Sheet \"{worksheet.Name}\" does not have row {index}.");
+            throw new ExcelMappingException($"{ExcelMappingException.DescribeSheet(worksheet.Name, capitalize: true)} does not have row {index + 1}.");
         }
     }
 

@@ -22,7 +22,7 @@ public class AutoMapTests
     {
         using var importer = Helpers.GetCsvImporter("Value\n1\n");
         var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<EmptyClass>().ToArray());
-        Assert.Equal($"The class map for type \"{typeof(EmptyClass)}\" maps no members, so every row would be an empty object. Auto-mapping maps public fields, and public properties with a public setter or set by a public constructor; map other members with Map(...) in a class map.", exception.Message);
+        Assert.Equal("The class map for type AutoMapTests.EmptyClass maps no members, so every row would be an empty object. Auto-mapping maps public fields, and public properties with a public setter or set by a public constructor; map other members with Map(...) in a class map.", exception.Message);
     }
 
     [Fact]
@@ -44,7 +44,7 @@ public class AutoMapTests
     {
         using var importer = Helpers.GetCsvImporter("Value\n1\n");
         var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<NestedEmptyClass>().ToArray());
-        Assert.Contains($"\"{typeof(EmptyClass)}\"", exception.Message);
+        Assert.Contains("type AutoMapTests.EmptyClass maps", exception.Message);
     }
 
     [Fact]

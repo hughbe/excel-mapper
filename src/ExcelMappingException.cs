@@ -93,7 +93,7 @@ public class ExcelMappingException : Exception
     }
 
     internal ExcelMappingException(string message, SheetView? sheet, int rowIndex, int columnIndex, Exception? innerException, string? hint)
-        : base(GetMessage(message, sheet, rowIndex, columnIndex) + hint, innerException)
+        : base(message, innerException)
     {
         // The message and column name use the heading of the rows being read (a region's when
         // reading a region), but the sheet is the user's.
@@ -103,8 +103,28 @@ public class ExcelMappingException : Exception
         if (columnIndex >= 0 && sheet?.Heading is { } heading && heading.TryGetColumnName(columnIndex, out var columnName))
         {
             ColumnName = columnName;
+            _headingColumnName = columnName;
         }
+
+        // The full message is only built if it's read: ReadRowResults can create an error for
+        // every invalid cell of a file, and callers often only need some of their messages.
+        _sheetName = sheet?.Name;
+        _hint = hint;
+        _hasLocation = true;
     }
+
+    // What the full message is built from (see Message).
+    private readonly bool _hasLocation;
+    private readonly string? _sheetName;
+    private readonly string? _headingColumnName;
+    private readonly string? _hint;
+    private string? _message;
+
+    /// <summary>
+    /// Gets the message, which says where the problem is: the cell's address and column, and the
+    /// sheet, where they're known.
+    /// </summary>
+    public override string Message => _hasLocation ? _message ??= GetMessage(base.Message, _sheetName, _headingColumnName, RowIndex, ColumnIndex, _hint) : base.Message;
 
     /// <summary>
     /// The name of the column in the heading that was being read, or the name of a column that
@@ -175,19 +195,14 @@ public class ExcelMappingException : Exception
         return null;
     }
 
-    private static string GetMessage(string message, SheetView? sheet, int rowIndex, int columnIndex)
+    // The hint, such as what to do, follows the location. The message is built in one go, as an
+    // error can be created for every invalid cell of a file.
+    private static string GetMessage(string message, string? sheetName, string? headingColumnName, int rowIndex, int columnIndex, string? hint)
     {
-        string columnDescription = string.Empty;
-        if (columnIndex >= 0)
-        {
-            // Only use a heading that has already been read: building an error message must not
-            // move the reader. The column may also lie outside the heading's data range, in which
-            // case only its cell address is reported.
-            if (sheet?.Heading is { } heading && heading.TryGetColumnName(columnIndex, out var columnName))
-            {
-                columnDescription = $" in column \"{columnName}\"";
-            }
-        }
+        // The column's name in a heading that had already been read when the error was created
+        // (building an error message must not move the reader). The column may also lie outside
+        // the heading's data range, in which case only its cell address is reported.
+        var columnDescription = headingColumnName is null ? string.Empty : $" in column \"{headingColumnName}\"";
 
         // Report the location as Excel shows it: a cell address such as "B11" if the column is
         // known, otherwise a one-based row number.
@@ -209,6 +224,15 @@ public class ExcelMappingException : Exception
             location = string.Empty;
         }
 
-        return $"{message}{columnDescription}{location} in sheet \"{sheet?.Name}\".";
+        // A CSV file's only sheet has no name.
+        var sheetDescription = string.IsNullOrEmpty(sheetName) ? string.Empty : $" in sheet \"{sheetName}\"";
+        return $"{message}{columnDescription}{location}{sheetDescription}.{hint}";
     }
+
+    /// <summary>
+    /// Names a sheet in a message: <c>sheet "Orders"</c>, or <c>the sheet</c> for a CSV file's
+    /// sheet, which has no name.
+    /// </summary>
+    internal static string DescribeSheet(string name, bool capitalize = false)
+        => name.Length != 0 ? $"{(capitalize ? 'S' : 's')}heet \"{name}\"" : capitalize ? "The sheet" : "the sheet";
 }
