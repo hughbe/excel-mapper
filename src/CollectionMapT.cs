@@ -178,8 +178,9 @@ public sealed class CollectionMap<TElement> : ICellsMap
     /// <returns>The map that invoked this method.</returns>
     public CollectionMap<TElement> WithSeparators(params char[] separators)
     {
+        // Copied, so that changing the caller's array afterwards doesn't change the map.
         SeparatorUtilities.ValidateSeparators(separators);
-        return WithSplitter(new CharSplitter { Separators = separators });
+        return WithSplitter(new CharSplitter { Separators = [.. separators] });
     }
 
     /// <summary>
@@ -202,8 +203,9 @@ public sealed class CollectionMap<TElement> : ICellsMap
     /// <returns>The map that invoked this method.</returns>
     public CollectionMap<TElement> WithSeparators(params string[] separators)
     {
+        // Copied, so that changing the caller's array afterwards doesn't change the map.
         SeparatorUtilities.ValidateSeparators(separators);
-        return WithSplitter(new StringSplitter { Separators = separators });
+        return WithSplitter(new StringSplitter { Separators = [.. separators] });
     }
 
     /// <summary>
@@ -268,10 +270,7 @@ public sealed class CollectionMap<TElement> : ICellsMap
     /// <param name="columnNames">The names of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public CollectionMap<TElement> WithColumnNames(IEnumerable<string> columnNames)
-    {
-        ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
-        return WithColumnNames(columnNames as string[] ?? columnNames.ToArray());
-    }
+        => WithColumns(new ColumnNamesColumns(columnNames));
 
     /// <summary>
     /// Reads the collection from the given columns, in order.
@@ -280,10 +279,7 @@ public sealed class CollectionMap<TElement> : ICellsMap
     /// <param name="comparison">How column names are compared.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public CollectionMap<TElement> WithColumnNames(IEnumerable<string> columnNames, StringComparison comparison)
-    {
-        ThrowHelpers.ThrowIfNull(columnNames, nameof(columnNames));
-        return WithColumns(new ColumnNamesColumns([.. columnNames], comparison));
-    }
+        => WithColumns(new ColumnNamesColumns(columnNames, comparison));
 
     /// <summary>
     /// Reads the collection from every column whose name matches <paramref name="predicate"/>.
@@ -315,10 +311,7 @@ public sealed class CollectionMap<TElement> : ICellsMap
     /// <param name="columnIndices">The zero-based indices of the columns.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public CollectionMap<TElement> WithColumnIndices(IEnumerable<int> columnIndices)
-    {
-        ThrowHelpers.ThrowIfNull(columnIndices, nameof(columnIndices));
-        return WithColumnIndices(columnIndices as int[] ?? columnIndices.ToArray());
-    }
+        => WithColumns(new ColumnIndicesColumns(columnIndices));
 
     /// <summary>
     /// Reads the collection from the columns <paramref name="selector"/> chooses for each sheet, in order.
@@ -326,10 +319,7 @@ public sealed class CollectionMap<TElement> : ICellsMap
     /// <param name="selector">The column selector.</param>
     /// <returns>The map on which this method was invoked.</returns>
     public CollectionMap<TElement> WithColumns(IColumnSelector selector)
-    {
-        ThrowHelpers.ThrowIfNull(selector, nameof(selector));
-        return WithColumns(new SelectorColumns(selector));
-    }
+        => WithColumns(new SelectorColumns(selector));
 
     /// <summary>
     /// Makes the member optional: if its columns are missing, the member keeps its value instead of

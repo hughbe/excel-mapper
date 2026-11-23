@@ -9,10 +9,13 @@ namespace ExcelMapper.Readers;
 /// </summary>
 internal sealed class ColumnIndicesColumns : Columns
 {
-    public ColumnIndicesColumns(IReadOnlyList<int> columnIndices)
+    public ColumnIndicesColumns(IEnumerable<int> columnIndices)
     {
-        ColumnUtilities.ValidateColumnIndices(columnIndices);
-        Indices = columnIndices;
+        // Copied, so that changing the caller's array afterwards doesn't change the map.
+        ThrowHelpers.ThrowIfNull(columnIndices, nameof(columnIndices));
+        int[] indices = [.. columnIndices];
+        ColumnUtilities.ValidateColumnIndices(indices, nameof(columnIndices));
+        Indices = indices;
     }
 
     public IReadOnlyList<int> Indices { get; }

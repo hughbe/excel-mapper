@@ -57,6 +57,15 @@ public class DictionaryMapTests
     }
 
     [Fact]
+    public void ColumnMethods_ArrayChangedAfterwards_ReadGivenColumns()
+    {
+        var names = new[] { "Q1" };
+        var indices = new[] { 1 };
+        Assert.Equal(new Dictionary<string, int> { ["Q1"] = 1 }, Read(m => { var result = m.WithColumnNames(names); names[0] = "Q2"; return result; }));
+        Assert.Equal(new Dictionary<string, int> { ["Q1"] = 1 }, Read(m => { var result = m.WithColumnIndices(indices); indices[0] = 2; return result; }));
+    }
+
+    [Fact]
     public void WithColumns_Invoke_ReadsChosenColumns()
     {
         Assert.Equal(new Dictionary<string, int> { ["Q1"] = 1 }, Read(m => m.WithColumns(new PositionsSelector(1))));
