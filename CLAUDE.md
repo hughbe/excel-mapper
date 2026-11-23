@@ -26,6 +26,8 @@ Always build `src` in Release before finishing: code must compile for `netstanda
 
 Incremental builds can hide warnings from files that didn't change: use `dotnet build src --no-incremental` to see them all.
 
+Unused `using` directives fail the build (IDE0005, turned on in `src/.editorconfig`). A `using` that only some target frameworks need goes inside the same `#if` as the code that needs it.
+
 The netstandard builds are used by .NET Framework and older .NET apps and take different code paths, so run the tests against them too (CI does). Tests of APIs that only exist in the net8.0 build (for example `DateOnly`, `INumberBase<T>` types or `WithNumberStyle`) are wrapped in `#if LIBRARY_NET8`; wrap only the net8-only parts so the rest still runs against netstandard. Note any feature that differs between builds in the changelog's platform notes and `docs/migrating-to-4.0.md`.
 
 ## Code conventions

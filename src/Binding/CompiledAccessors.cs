@@ -3,7 +3,9 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
+#if NET8_0_OR_GREATER
 using System.Runtime.CompilerServices;
+#endif
 
 namespace ExcelMapper.Binding;
 

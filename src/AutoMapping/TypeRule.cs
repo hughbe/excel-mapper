@@ -3,7 +3,9 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Linq;
+#if NET7_0_OR_GREATER
 using System.Numerics;
+#endif
 using ExcelMapper.Mappers;
 
 namespace ExcelMapper.AutoMapping;

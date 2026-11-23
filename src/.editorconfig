@@ -1,0 +1,5 @@
+# Code style rules the build enforces (see EnforceCodeStyleInBuild in ExcelMapper.csproj).
+[*.cs]
+
+# Unused usings. The build has warnings as errors, so an unused using fails it.
+dotnet_diagnostic.IDE0005.severity = warning

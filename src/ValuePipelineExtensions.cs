@@ -1,5 +1,7 @@
-﻿using System.Globalization;
+﻿#if NET7_0_OR_GREATER
+using System.Globalization;
 using System.Numerics;
+#endif
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
 

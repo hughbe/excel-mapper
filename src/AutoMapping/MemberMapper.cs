@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
