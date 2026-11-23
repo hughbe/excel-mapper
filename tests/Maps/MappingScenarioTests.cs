@@ -278,7 +278,7 @@ public class MappingScenarioTests
     }
 
     [Fact]
-    public void WithColumnNameMatching_Regex_Success()
+    public void WithColumnMatching_Regex_Success()
     {
         using var importer = Helpers.GetCsvImporter("Id,Full Name\n1,Alice\n");
         importer.Configuration.RegisterClassMap<NameClass>(c => c.Map(p => p.Name).WithColumnMatching(new Regex("name", RegexOptions.IgnoreCase)));

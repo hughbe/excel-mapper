@@ -160,7 +160,7 @@ public class ExcelHeadingTests
     }
 
     [Fact]
-    public void GetColumnName_GetFirstColumnMatchingIndex_Roundtrips()
+    public void GetColumnName_GetColumnIndexPredicate_Roundtrips()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         var sheet = importer.ReadSheet();
@@ -188,7 +188,7 @@ public class ExcelHeadingTests
     [Theory]
     [InlineData("")]
     [InlineData("NoSuchColumn")]
-    public void GetFirstColumnMatchingIndex_NoSuchColumnMatching_ThrowsExcelMappingException(string columnName)
+    public void GetColumnIndex_PredicateNoSuchColumnMatching_ThrowsExcelMappingException(string columnName)
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         var sheet = importer.ReadSheet();
@@ -279,7 +279,7 @@ public class ExcelHeadingTests
     }
 
     [Fact]
-    public void TryGetFirstColumnMatchingIndex_Invoke_Roundtrips()
+    public void TryGetColumnIndex_PredicateInvoke_Roundtrips()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         var sheet = importer.ReadSheet();
@@ -296,7 +296,7 @@ public class ExcelHeadingTests
     }
 
     [Fact]
-    public void TryGetFirstColumnMatchingIndex_NullPredicate_ThrowsArgumentNullException()
+    public void TryGetColumnIndex_NullPredicate_ThrowsArgumentNullException()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         var sheet = importer.ReadSheet();
@@ -308,7 +308,7 @@ public class ExcelHeadingTests
     [Theory]
     [InlineData("")]
     [InlineData("NoSuchColumn")]
-    public void TryGetFirstColumnMatchingIndex_NoSuchColumnName_ReturnsFalse(string columnName)
+    public void TryGetColumnIndex_PredicateNoSuchColumnName_ReturnsFalse(string columnName)
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         var sheet = importer.ReadSheet();
@@ -338,7 +338,7 @@ public class ExcelHeadingTests
     }
 
     [Fact]
-    public void GetFirstColumnMatchingIndex_NotAlphabetical_ReturnsFirstColumnInOrder()
+    public void GetColumnIndex_PredicateNotAlphabetical_ReturnsFirstColumnInOrder()
     {
         using var importer = Helpers.GetCsvImporter("Zeta,Alpha,Beta\n1,2,3\n");
         var sheet = importer.ReadSheet();
@@ -351,7 +351,7 @@ public class ExcelHeadingTests
     }
 
     [Fact]
-    public void GetFirstColumnMatchingIndex_DuplicatedColumn_MatchesOriginalName()
+    public void GetColumnIndex_PredicateDuplicatedColumn_MatchesOriginalName()
     {
         using var importer = Helpers.GetCsvImporter("Name,Name\n1,2\n");
         var sheet = importer.ReadSheet();

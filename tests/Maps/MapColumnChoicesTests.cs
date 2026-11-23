@@ -97,7 +97,7 @@ public class MapColumnChoicesTests
     }
 
     [Fact]
-    public void ReadRows_ColumnNameMatchingWithoutHeading_Throws()
+    public void ReadRows_ColumnMatchingWithoutHeading_Throws()
     {
         using var importer = Helpers.GetCsvImporter("1,2\n");
         importer.Configuration.RegisterClassMap<Single>(c => c.Map(r => r.Value).WithColumnMatching(new Regex("A")));
