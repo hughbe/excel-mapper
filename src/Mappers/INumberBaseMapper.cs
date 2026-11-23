@@ -100,7 +100,7 @@ internal class INumberBaseMapper<T> : ICellMapper<T> where T : INumberBase<T>
             // Excel stores every number as a double. A fractional number isn't silently truncated
             // for an integer type: "2.7" as text can't be parsed as an int, so neither can 2.7.
             return s_isInteger && !double.IsInteger(doubleValue) && double.IsFinite(doubleValue)
-                ? MapperUtilities.NotWholeNumber(doubleValue, typeof(T))
+                ? MapperUtilities.NotWholeNumber(doubleValue, typeof(T), cell.Culture)
                 : MapperUtilities.InvalidFromParse(() => T.CreateChecked(doubleValue));
         }
 

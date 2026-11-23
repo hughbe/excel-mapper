@@ -93,9 +93,11 @@ internal static class MapperUtilities
         NotWhole,
     }
 
-    // The exception for a number in a cell that isn't whole, mapped to an integer type.
-    public static Exception NotWholeNumber(double value, Type type)
-        => new FormatException($"The value {value} isn't a whole number, so it can't be {TypeNames.Get(type)}.");
+    // The exception for a number in a cell that isn't whole, mapped to an integer type: an
+    // OverflowException, as for text such as "2.5" (see InvalidNumber), with the number written
+    // in the importer's culture, as the cell's text is.
+    public static Exception NotWholeNumber(double value, Type type, IFormatProvider provider)
+        => new OverflowException($"The value {value.ToString(provider)} isn't a whole number, so it can't be {TypeNames.Get(type)}.");
 
     // Why a built-in number type's TryParse rejected the text: a number out of range, or with a
     // fraction for an integer type, or not a number; or null if that can't be told without parsing.

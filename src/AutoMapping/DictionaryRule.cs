@@ -19,6 +19,11 @@ internal abstract class DictionaryRule
     public abstract Type KeyType { get; }
 
     /// <summary>
+    /// Gets the type of the dictionary's values.
+    /// </summary>
+    public abstract Type ValueType { get; }
+
+    /// <summary>
     /// Maps a member of the dictionary type to a <see cref="DictionaryMap{TKey, TValue}"/> that
     /// reads a value from each of several columns.
     /// </summary>
@@ -94,6 +99,8 @@ internal abstract class DictionaryRule
 internal sealed class DictionaryRule<TKey, TValue> : DictionaryRule where TKey : notnull
 {
     public override Type KeyType => typeof(TKey);
+
+    public override Type ValueType => typeof(TValue);
 
     public override bool TryCreateMap(MemberInfo? member, Type dictionaryType, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out ICellsMap? map)
     {

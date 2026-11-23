@@ -156,6 +156,18 @@ public class ExcelClassMapTTests
     }
 
     [Fact]
+    public void WithClassMap_SingleValueClassMap_ReadsValue()
+    {
+        var inner = new ExcelClassMap<int>();
+        inner.Map(p => p);
+        var outer = new ExcelClassMap<int>();
+        Assert.Same(outer, outer.WithClassMap(inner));
+
+        using var importer = Helpers.GetCsvImporter("A\n5\n");
+        Assert.Equal([5], importer.ReadSheet().ReadRows(outer).ToArray());
+    }
+
+    [Fact]
     public void WithClassMap_NullClassMap_ThrowsArgumentNullException()
     {
         var map = new ExcelClassMap<TestClass>();
