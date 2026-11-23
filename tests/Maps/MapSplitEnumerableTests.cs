@@ -637,7 +637,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<ArrayListClass>(c =>
         {
-            c.MapList<string>(p => p.Value);
+            c.MapCollection<string>(p => p.Value);
         });
 
         var sheet = importer.ReadSheet();
@@ -665,7 +665,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<ArrayListClass>(c =>
         {
-            c.MapList<int>(p => p.Value)
+            c.MapCollection<int>(p => p.Value)
                 .WithElementMap(p => p
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2)
@@ -731,7 +731,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CollectionBaseClass>(c =>
         {
-            c.MapList<string>(p => p.Value);
+            c.MapCollection<string>(p => p.Value);
         });
 
         var sheet = importer.ReadSheet();
@@ -759,7 +759,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CollectionBaseClass>(c =>
         {
-            c.MapList<int>(p => p.Value)
+            c.MapCollection<int>(p => p.Value)
                 .WithElementMap(p => p
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2)
@@ -821,7 +821,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<StackClass>(c =>
         {
-            c.MapList<string>(p => p.Value);
+            c.MapCollection<string>(p => p.Value);
         });
 
         var sheet = importer.ReadSheet();
@@ -849,7 +849,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<StackClass>(c =>
         {
-            c.MapList<int>(p => p.Value)
+            c.MapCollection<int>(p => p.Value)
                 .WithElementMap(p => p
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2)
@@ -910,7 +910,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<QueueClass>(c =>
         {
-            c.MapList<string>(p => p.Value);
+            c.MapCollection<string>(p => p.Value);
         });
 
         var sheet = importer.ReadSheet();
@@ -938,7 +938,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<QueueClass>(c =>
         {
-            c.MapList<int>(p => p.Value)
+            c.MapCollection<int>(p => p.Value)
                 .WithElementMap(p => p
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2)
@@ -999,7 +999,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<StringCollectionClass>(c =>
         {
-            c.MapList<string>(p => p.Value);
+            c.MapCollection<string>(p => p.Value);
         });
 
         var sheet = importer.ReadSheet();
@@ -1027,7 +1027,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<StringCollectionClass>(c =>
         {
-            c.MapList<string>(p => p.Value)
+            c.MapCollection<string>(p => p.Value)
                 .WithElementMap(p => p
                     .WithEmptyFallback("-1")
                     .WithInvalidFallback("-2")
@@ -1158,7 +1158,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<CollectionClass>(c =>
         {
-            c.MapList<int>(p => p.Value)
+            c.MapCollection<int>(p => p.Value)
                 .WithElementMap(p => p
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2)
@@ -1222,7 +1222,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<KeyedCollectionClass>(c =>
         {
-            c.MapList<int>(p => p.Value);
+            c.MapCollection<int>(p => p.Value);
         });
 
         var sheet = importer.ReadSheet();
@@ -1248,7 +1248,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<KeyedCollectionClass>(c =>
         {
-            c.MapList<int>(p => p.Value)
+            c.MapCollection<int>(p => p.Value)
                 .WithElementMap(p => p
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2)
@@ -1333,7 +1333,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<ReadOnlyCollectionClass>(c =>
         {
-            c.MapList<int>(p => p.Value)
+            c.MapCollection<int>(p => p.Value)
                 .WithElementMap(p => p
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2)
@@ -1418,7 +1418,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<ObservableCollectionClass>(c =>
         {
-            c.MapList<int>(p => p.Value)
+            c.MapCollection<int>(p => p.Value)
                 .WithElementMap(p => p
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2)
@@ -1503,7 +1503,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<ReadOnlyObservableCollectionClass>(c =>
         {
-            c.MapList<int>(p => p.Value)
+            c.MapCollection<int>(p => p.Value)
                 .WithElementMap(p => p
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2)
@@ -1562,7 +1562,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<LinkedListClass>(c =>
         {
-            c.MapList<int>(p => p.Value);
+            c.MapCollection<int>(p => p.Value);
         });
 
         var sheet = importer.ReadSheet();
@@ -1588,7 +1588,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<LinkedListClass>(c =>
         {
-            c.MapList<int>(p => p.Value)
+            c.MapCollection<int>(p => p.Value)
                 .WithElementMap(p => p
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2)
@@ -1647,7 +1647,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<ISetIntClass>(c =>
         {
-            c.MapList<int>(p => p.Value);
+            c.MapCollection<int>(p => p.Value);
         });
 
         var sheet = importer.ReadSheet();
@@ -1673,7 +1673,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<ISetIntClass>(c =>
         {
-            c.MapList<int>(p => p.Value)
+            c.MapCollection<int>(p => p.Value)
                 .WithElementMap(p => p
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2)
@@ -1732,7 +1732,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<IReadOnlySetIntClass>(c =>
         {
-            c.MapList<int>(p => p.Value);
+            c.MapCollection<int>(p => p.Value);
         });
 
         var sheet = importer.ReadSheet();
@@ -1758,7 +1758,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<IReadOnlySetIntClass>(c =>
         {
-            c.MapList<int>(p => p.Value)
+            c.MapCollection<int>(p => p.Value)
                 .WithElementMap(p => p
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2)
@@ -1856,7 +1856,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<SetIntClass>(c =>
         {
-            c.MapList<int>(p => p.Value);
+            c.MapCollection<int>(p => p.Value);
         });
 
         var sheet = importer.ReadSheet();
@@ -1882,7 +1882,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<SetIntClass>(c =>
         {
-            c.MapList<int>(p => p.Value)
+            c.MapCollection<int>(p => p.Value)
                 .WithElementMap(p => p
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2)
@@ -1942,7 +1942,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<ReadOnlySetIntClass>(c =>
         {
-            c.MapList<int>(p => p.Value);
+            c.MapCollection<int>(p => p.Value);
         });
 
         var sheet = importer.ReadSheet();
@@ -1968,7 +1968,7 @@ public class MapSplitEnumerableTests
         using var importer = Helpers.GetImporter("SplitWithComma.xlsx");
         importer.Configuration.RegisterClassMap<ReadOnlySetIntClass>(c =>
         {
-            c.MapList<int>(p => p.Value)
+            c.MapCollection<int>(p => p.Value)
                 .WithElementMap(p => p
                     .WithEmptyFallback(-1)
                     .WithInvalidFallback(-2)
@@ -4062,7 +4062,7 @@ public class MapSplitEnumerableTests
     {
         public DefaultIEnumerableClassMap()
         {
-            MapList<object>(p => p.Value);
+            MapCollection<object>(p => p.Value);
         }
     }
 
@@ -4164,7 +4164,7 @@ public class MapSplitEnumerableTests
     {
         public DefaultIListClassMap()
         {
-            MapList<object>(p => p.Value);
+            MapCollection<object>(p => p.Value);
         }
     }
 
