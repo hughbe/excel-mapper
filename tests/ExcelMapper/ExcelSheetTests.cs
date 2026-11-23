@@ -1584,6 +1584,40 @@ public class ExcelSheetTests
     }
 
     [Fact]
+    public void ReadRows_SinkOutOfRangeNumberCells_DoesNotAllocatePerError()
+    {
+        // A number cell out of its type's range is found invalid without an exception, so it
+        // allocates about the same as a valid one.
+        static long Allocated(double cell)
+        {
+            object?[][] rows = [["Byte"], .. Enumerable.Range(0, 2000).Select(_ => new object?[] { cell })];
+            using var importer = XlsxBuilder.Create(rows);
+            var sheet = importer.ReadSheet();
+            var sink = new CountingSink();
+            var read = sheet.ReadRows<ByteCellRow>(sink);
+            var before = GC.GetAllocatedBytesForCurrentThread();
+            foreach (var row in read)
+            {
+            }
+
+            return GC.GetAllocatedBytesForCurrentThread() - before;
+        }
+
+        Allocated(7);
+        Allocated(300);
+        var valid = Allocated(7);
+        var invalid = Allocated(300);
+        // Each invalid row records its row number, as for invalid text. An exception for each cell
+        // would be about 550 bytes.
+        Assert.True(invalid <= valid + (2000 * 32), $"Out of range cells allocated {invalid} bytes, valid cells {valid}.");
+    }
+
+    private class ByteCellRow
+    {
+        public byte Byte { get; set; }
+    }
+
+    [Fact]
     public void Visibility_Csv_ReturnsVisible()
     {
         using var stream = Helpers.GetResource("Primitives.csv");

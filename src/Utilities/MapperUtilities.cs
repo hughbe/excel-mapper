@@ -93,6 +93,41 @@ internal static class MapperUtilities
         NotWhole,
     }
 
+    /// <summary>
+    /// Whether a number cell's value can be converted to a built-in number type without
+    /// overflowing, so that it's checked rather than caught: converting a double to an integer
+    /// type or <see cref="decimal"/> throws an <see cref="OverflowException"/> if it's out of range
+    /// (or NaN or infinite), and to <see cref="float"/> or <see cref="double"/> never does.
+    /// Fractions are rejected before this for integer types.
+    /// </summary>
+    public static bool IsInRange(double value, TypeCode typeCode) => typeCode switch
+    {
+        TypeCode.SByte => value >= sbyte.MinValue && value <= sbyte.MaxValue,
+        TypeCode.Byte => value >= byte.MinValue && value <= byte.MaxValue,
+        TypeCode.Int16 => value >= short.MinValue && value <= short.MaxValue,
+        TypeCode.UInt16 => value >= ushort.MinValue && value <= ushort.MaxValue,
+        TypeCode.Int32 => value >= int.MinValue && value <= int.MaxValue,
+        TypeCode.UInt32 => value >= uint.MinValue && value <= uint.MaxValue,
+        // 2^63, 2^64 and 2^96 are the first values out of range, and are exact as doubles, unlike
+        // long.MaxValue, ulong.MaxValue and decimal.MaxValue.
+        TypeCode.Int64 => value >= -TwoTo63 && value < TwoTo63,
+        TypeCode.UInt64 => value >= 0 && value < TwoTo64,
+        TypeCode.Decimal => value > -TwoTo96 && value < TwoTo96,
+        _ => true,
+    };
+
+    internal const double TwoTo63 = 9223372036854775808.0;
+    private const double TwoTo64 = 18446744073709551616.0;
+    private const double TwoTo96 = 79228162514264337593543950336.0;
+
+    /// <summary>
+    /// The exception for a number cell out of the range of its type, created without converting
+    /// it: an <see cref="OverflowException"/>, as for text out of range (see <see cref="InvalidNumber"/>),
+    /// with the number written in the importer's culture, as the cell's text is.
+    /// </summary>
+    public static Exception OutOfRange(double value, Type type, IFormatProvider provider)
+        => new OverflowException($"The value {value.ToString(provider)} is too large or too small for {TypeNames.Get(type)}.");
+
     // The exception for a number in a cell that isn't whole, mapped to an integer type: an
     // OverflowException, as for text such as "2.5" (see InvalidNumber), with the number written
     // in the importer's culture, as the cell's text is.

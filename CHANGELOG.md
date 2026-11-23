@@ -178,6 +178,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Collections and dictionaries are built without a lock per row, without reflection for `Add` methods and constructors, and without throwaway copies (`ImmutableArray`, frozen collections, queues and stacks, and constructors that copy their argument): up to 96 fewer bytes per row. ([#145](https://github.com/hughbe/excel-mapper/pull/145))
 - Every class map is bound the same way, including records, nested objects, collections and dictionaries: records are 12% faster with 200 fewer bytes per row. ([#143](https://github.com/hughbe/excel-mapper/pull/143))
 - Reading rows does less for each row: the class map is looked up once per read rather than for every row, and the reader's position is checked once. Reading 50,000 narrow CSV rows is about 2–3% faster. ([#232](https://github.com/hughbe/excel-mapper/pull/232))
+- A number cell out of its type's range, such as 300 for a `byte`, is found invalid with a range check instead of throwing and catching an `OverflowException`, so a file with many of them reads about 9 times faster, and an error sink gets them without an exception allocated for each. ([#233](https://github.com/hughbe/excel-mapper/pull/233))
 
 ### Platform notes
 
