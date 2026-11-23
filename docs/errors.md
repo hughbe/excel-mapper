@@ -83,7 +83,7 @@ foreach (var result in results.Where(r => !r.IsValid))
 
 **`More than one column matches "Name" (columns A and B)`.** The heading has two columns with the member's name (ignoring case, and separators if `IgnoreSeparatorsInColumnNames` is set), so it isn't clear which to read. Choose one with `[ExcelColumnLetter]` or `.WithColumnLetter(...)`, or rename one of the columns.
 
-**`The class map for type "Order" maps no members`.** Nothing in the type is mapped, so every row would be an empty object: its properties are read-only or have private setters, are all `[ExcelIgnore]`, or a class map registered for it has no `Map(...)` calls. Give the properties public setters or a constructor that takes them, or map them in a class map (`Map(p => p.Total)` works with a private setter).
+**`The class map for type Order maps no members`.** Nothing in the type is mapped, so every row would be an empty object: its properties are read-only or have private setters, are all `[ExcelIgnore]`, or a class map registered for it has no `Map(...)` calls. Give the properties public setters or a constructor that takes them, or map them in a class map (`Map(p => p.Total)` works with a private setter).
 
 **`The cell is empty, but member "Age" of type int can't be empty`.** The member's type can't be empty, such as `int` or `DateTime`. Make it nullable (`int?`), or give it an empty fallback ([Empty and invalid cells](mapping.md#empty-and-invalid-cells)).
 

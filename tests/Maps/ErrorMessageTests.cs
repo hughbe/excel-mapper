@@ -132,7 +132,6 @@ public class ErrorMessageTests
     public class GenericRow
     {
         public List<int?> Values { get; set; } = [];
-        public Dictionary<string, int[]> Lookup { get; set; } = [];
     }
 
     [Fact]
