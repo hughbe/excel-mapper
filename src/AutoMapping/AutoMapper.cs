@@ -101,11 +101,11 @@ internal static class AutoMapper
         // Empty nullable values should be set to null.
         if (default(T) is null)
         {
-            return new FixedValueFallback<T>(null);
+            return new FixedValueFallback<T>(default!);
         }
         else if (emptyValueStrategy == EmptyValueStrategy.DefaultValue)
         {
-            return new FixedValueFallback<T>(default(T));
+            return new FixedValueFallback<T>(default!);
         }
 
         // Throw if we can't set to null or default value.

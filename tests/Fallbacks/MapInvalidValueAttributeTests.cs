@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace ExcelMapper.Tests;
 
 public class MapInvalidValueAttributeTests
@@ -135,31 +137,15 @@ public class MapInvalidValueAttributeTests
     }
 
     [Fact]
-    public void ReadRow_AutoMappedInvalidValueStringInvalidValue_Success()
+    public void ReadRow_AutoMappedInvalidValueStringInvalidValue_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
 
         var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
 
-        // Valid value
-        var row1 = sheet.ReadRow<InvalidValueStringInvalidClass>();
-        Assert.Equal("value", row1.Value);
-
-        // Valid value
-        var row2 = sheet.ReadRow<InvalidValueStringInvalidClass>();
-        Assert.Equal("  value  ", row2.Value);
-
-        // Empty value
-        var row3 = sheet.ReadRow<InvalidValueStringInvalidClass>();
-        Assert.Null(row3.Value);
-
-        // Last row.
-        var row4 = sheet.ReadRow<InvalidValueStringInvalidClass>();
-        Assert.Equal("value", row4.Value);
-
-        // No more rows.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidValueStringInvalidClass>());
+        // The value can't be the member's type, which is found when the class map is created.
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidValueStringInvalidClass>());
+        Assert.Contains("given by ExcelInvalidValueAttribute on member \"Value\" can't be converted to", exception.Message);
     }
 
     public class InvalidValueStringInvalidClass
@@ -169,35 +155,13 @@ public class MapInvalidValueAttributeTests
     }
 
     [Fact]
-    public void ReadRow_InvalidMappedStringInvalidValue_Success()
+    public void ReadRow_InvalidMappedStringInvalidValue_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
-        importer.Configuration.RegisterClassMap<InvalidValueStringInvalidClass>(c =>
-        {
-            c.Map(o => o.Value);
-        });
 
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        // Valid value
-        var row1 = sheet.ReadRow<InvalidValueStringInvalidClass>();
-        Assert.Equal("value", row1.Value);
-
-        // Valid value
-        var row2 = sheet.ReadRow<InvalidValueStringInvalidClass>();
-        Assert.Equal("  value  ", row2.Value);
-
-        // Empty value
-        var row3 = sheet.ReadRow<InvalidValueStringInvalidClass>();
-        Assert.Null(row3.Value);
-
-        // Last row.
-        var row4 = sheet.ReadRow<InvalidValueStringInvalidClass>();
-        Assert.Equal("value", row4.Value);
-
-        // No more rows.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidValueStringInvalidClass>());
+        // The value can't be the member's type, which is found when the member is mapped.
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<InvalidValueStringInvalidClass>(c => c.Map(o => o.Value)));
+        Assert.Contains("given by ExcelInvalidValueAttribute on member \"Value\" can't be converted to", exception.Message);
     }
 
     [Fact]
@@ -227,22 +191,15 @@ public class MapInvalidValueAttributeTests
     }
 
     [Fact]
-    public void ReadRow_AutoMappedIntEmptyNullValue_Success()
+    public void ReadRow_AutoMappedIntEmptyNullValue_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
 
         var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
 
-        // Valid cell value.
-        var row1 = sheet.ReadRow<InvalidValueIntNullClass>();
-        Assert.Equal(2, row1.Value);
-
-        // Empty cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidValueIntNullClass>());
-
-        // Invalid cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidValueIntNullClass>());
+        // The value can't be the member's type, which is found when the class map is created.
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidValueIntNullClass>());
+        Assert.Equal("The value null given by ExcelInvalidValueAttribute on member \"Value\" can't be converted to int.", exception.Message);
     }
 
     public class InvalidValueIntNullClass
@@ -276,45 +233,25 @@ public class MapInvalidValueAttributeTests
     }
 
     [Fact]
-    public void ReadRow_InvalidMappedEmptyNullValue_Success()
+    public void ReadRow_InvalidMappedEmptyNullValue_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
-        importer.Configuration.RegisterClassMap<InvalidValueIntNullClass>(c =>
-        {
-            c.Map(o => o.Value);
-        });
 
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
-
-        // Valid cell value.
-        var row1 = sheet.ReadRow<InvalidValueIntNullClass>();
-        Assert.Equal(2, row1.Value);
-
-        // Empty cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidValueIntNullClass>());
-
-        // Invalid cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidValueIntNullClass>());
+        // The value can't be the member's type, which is found when the member is mapped.
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<InvalidValueIntNullClass>(c => c.Map(o => o.Value)));
+        Assert.Equal("The value null given by ExcelInvalidValueAttribute on member \"Value\" can't be converted to int.", exception.Message);
     }
 
     [Fact]
-    public void ReadRow_AutoMappedEmptyInvalidValue_Success()
+    public void ReadRow_AutoMappedEmptyInvalidValue_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
 
         var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
 
-        // Valid cell value.
-        var row1 = sheet.ReadRow<InvalidValueIntInvalidClass>();
-        Assert.Equal(2, row1.Value);
-
-        // Empty cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidValueIntInvalidClass>());
-
-        // Invalid cell value.
-        Assert.Throws<InvalidCastException>(() => sheet.ReadRow<InvalidValueIntInvalidClass>());
+        // The value can't be the member's type, which is found when the class map is created.
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidValueIntInvalidClass>());
+        Assert.Contains("given by ExcelInvalidValueAttribute on member \"Value\" can't be converted to", exception.Message);
     }
 
     public class InvalidValueIntInvalidClass
@@ -324,25 +261,25 @@ public class MapInvalidValueAttributeTests
     }
 
     [Fact]
-    public void ReadRow_InvalidMappedEmptyInvalidValue_Success()
+    public void ReadRow_InvalidMappedEmptyInvalidValue_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetImporter("Numbers.xlsx");
-        importer.Configuration.RegisterClassMap<InvalidValueIntInvalidClass>(c =>
-        {
-            c.Map(o => o.Value);
-        });
 
-        var sheet = importer.ReadSheet();
-        sheet.ReadHeading();
+        // The value can't be the member's type, which is found when the member is mapped.
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.Configuration.RegisterClassMap<InvalidValueIntInvalidClass>(c => c.Map(o => o.Value)));
+        Assert.Contains("given by ExcelInvalidValueAttribute on member \"Value\" can't be converted to", exception.Message);
+    }
 
-        // Valid cell value.
-        var row1 = sheet.ReadRow<InvalidValueIntInvalidClass>();
-        Assert.Equal(2, row1.Value);
+    [Fact]
+    public void ReadRows_NumberInvalidValueOfAnotherNumberType_ReturnsConvertedValue()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\ninvalid\n");
+        Assert.Equal(-1m, importer.ReadSheet().ReadRows<DecimalInvalidValue>().Single().Value);
+    }
 
-        // Empty cell value.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InvalidValueIntInvalidClass>());
-
-        // Invalid cell value.
-        Assert.Throws<InvalidCastException>(() => sheet.ReadRow<InvalidValueIntInvalidClass>());
+    public class DecimalInvalidValue
+    {
+        [ExcelInvalidValue(-1)]
+        public decimal Value { get; set; }
     }
 }

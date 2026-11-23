@@ -102,8 +102,10 @@ public sealed class ExcelRegion
     }
 
     /// <summary>
-    /// Maps each row of the region to an object. Reading starts at the top of the region each time the
-    /// result is enumerated.
+    /// Maps each row of the region to an object. As for <see cref="ExcelSheet.ReadRows{T}()"/>, the
+    /// heading is read (or found) when this method is called, so problems with it throw then, and
+    /// rows are mapped as the result is enumerated. Reading starts at the top of the region each time
+    /// the result is enumerated.
     /// </summary>
     /// <typeparam name="T">The type of the object to map each row to.</typeparam>
     /// <returns>The objects mapped from each row.</returns>
@@ -122,13 +124,10 @@ public sealed class ExcelRegion
     /// <returns>The objects mapped from each row.</returns>
     public IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap) => ReadRows(SheetView.Given(classMap));
 
+    // The heading is found and read now, as ExcelSheet.ReadRows does, so problems with it are
+    // reported when the method is called. Each enumeration starts at the top of the region.
     private IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap)
-    {
-        foreach (var row in CreateView(classMap).ReadRows(classMap))
-        {
-            yield return row;
-        }
-    }
+        => CreateView(classMap).ReadRows(classMap);
 
     /// <summary>
     /// Maps each row of the region, reporting every invalid cell instead of stopping at the first.
@@ -152,12 +151,7 @@ public sealed class ExcelRegion
     public IEnumerable<ExcelRowResult<T>> ReadRowResults<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap) => ReadRowResults(SheetView.Given(classMap));
 
     private IEnumerable<ExcelRowResult<T>> ReadRowResults<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap)
-    {
-        foreach (var result in CreateView(classMap).ReadRowResults(classMap))
-        {
-            yield return result;
-        }
-    }
+        => CreateView(classMap).ReadRowResults(classMap);
 
     /// <summary>
     /// Maps each row of the region, reporting the problems in invalid rows to
@@ -189,15 +183,7 @@ public sealed class ExcelRegion
     private IEnumerable<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, IExcelErrorSink errors)
     {
         ThrowHelpers.ThrowIfNull(errors, nameof(errors));
-        return ReadRowsWithSink(classMap, errors);
-    }
-
-    private IEnumerable<T> ReadRowsWithSink<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, IExcelErrorSink errors)
-    {
-        foreach (var row in CreateView(classMap).ReadRows(classMap, errors))
-        {
-            yield return row;
-        }
+        return CreateView(classMap).ReadRows(classMap, errors);
     }
 
     /// <summary>

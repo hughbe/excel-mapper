@@ -148,7 +148,7 @@ public abstract class ValuePipeline<T, TSelf> where TSelf : ValuePipeline<T, TSe
     /// <returns>The map on which this method was invoked.</returns>
     public TSelf WithFallback(T? value)
     {
-        Pipeline.SetFixedFallback(value, empty: true, invalid: true);
+        Pipeline.SetFixedFallback(value!, empty: true, invalid: true);
         return Self;
     }
 
@@ -159,7 +159,7 @@ public abstract class ValuePipeline<T, TSelf> where TSelf : ValuePipeline<T, TSe
     /// <returns>The map on which this method was invoked.</returns>
     public TSelf WithEmptyFallback(T? fallbackValue)
     {
-        Pipeline.SetFixedFallback(fallbackValue, empty: true, invalid: false);
+        Pipeline.SetFixedFallback(fallbackValue!, empty: true, invalid: false);
         return Self;
     }
 
@@ -170,7 +170,7 @@ public abstract class ValuePipeline<T, TSelf> where TSelf : ValuePipeline<T, TSe
     /// <returns>The map on which this method was invoked.</returns>
     public TSelf WithInvalidFallback(T? fallbackValue)
     {
-        Pipeline.SetFixedFallback(fallbackValue, empty: false, invalid: true);
+        Pipeline.SetFixedFallback(fallbackValue!, empty: false, invalid: true);
         return Self;
     }
 

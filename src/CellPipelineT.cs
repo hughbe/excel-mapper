@@ -63,7 +63,10 @@ internal sealed class CellPipeline<T> : CellPipeline
         _plan = CreatePlan();
     }
 
-    internal override void SetFixedFallback(object? value, bool empty, bool invalid)
+    /// <summary>
+    /// Gives empty cells, invalid cells or both a fixed value (<c>WithEmptyFallback(value)</c> and so on).
+    /// </summary>
+    internal void SetFixedFallback(T value, bool empty, bool invalid)
     {
         var fallback = new FixedValueFallback<T>(value);
         if (empty)
