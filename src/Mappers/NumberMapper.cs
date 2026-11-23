@@ -80,7 +80,12 @@ internal abstract class NumberMapper
             return MapperUtilities.NotWholeNumber(doubleValue, Type);
         }
 
-        // Numbers out of range, and other typed values such as booleans and dates.
+        if (value is double outOfRange && !MapperUtilities.IsInRange(outOfRange, _typeCode))
+        {
+            return MapperUtilities.OutOfRange(outOfRange, Type);
+        }
+
+        // Other typed values, such as booleans and dates.
         if (value is not null and not string)
         {
             var type = Type;
@@ -237,6 +242,13 @@ internal sealed class NumberMapper<T> : NumberMapper, ICellMapper<T>, ICellMappe
             if (cellValue is double doubleValue)
             {
                 if (IsInteger(TypeCode) && Math.Floor(doubleValue) != doubleValue && !double.IsNaN(doubleValue) && !double.IsInfinity(doubleValue))
+                {
+                    value = default;
+                    return CellConversion.Invalid;
+                }
+
+                // Checked rather than caught: an exception for every out of range cell is slow.
+                if (!MapperUtilities.IsInRange(doubleValue, TypeCode))
                 {
                     value = default;
                     return CellConversion.Invalid;

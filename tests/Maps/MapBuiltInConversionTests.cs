@@ -332,6 +332,36 @@ public class MapBuiltInConversionTests
         Assert.IsType(exceptionType, exception.InnerException);
     }
 
+    [Theory]
+    [InlineData(typeof(sbyte), -128.0, 127.0, -129.0, 128.0)]
+    [InlineData(typeof(byte), 0.0, 255.0, -1.0, 256.0)]
+    [InlineData(typeof(short), -32768.0, 32767.0, -32769.0, 32768.0)]
+    [InlineData(typeof(ushort), 0.0, 65535.0, -1.0, 65536.0)]
+    [InlineData(typeof(int), -2147483648.0, 2147483647.0, -2147483649.0, 2147483648.0)]
+    [InlineData(typeof(uint), 0.0, 4294967295.0, -1.0, 4294967296.0)]
+    // The largest doubles below 2^63, 2^64 and 2^96, and those powers of two.
+    [InlineData(typeof(long), -9223372036854775808.0, 9223372036854774784.0, -9223372036854777856.0, 9223372036854775808.0)]
+    [InlineData(typeof(ulong), 0.0, 18446744073709549568.0, -1.0, 18446744073709551616.0)]
+    [InlineData(typeof(decimal), -79228162514264328797450928128.0, 79228162514264328797450928128.0, -79228162514264337593543950336.0, 79228162514264337593543950336.0)]
+    public void ReadRows_NumberCellAtTypeBounds_ReturnsExpected(Type type, double min, double max, double belowMin, double aboveMax)
+    {
+        using var importer = XlsxBuilder.Create(["Value"], [min], [max], [belowMin], [aboveMax]);
+        var results = (IEnumerable<object>)typeof(MapBuiltInConversionTests).GetMethod(nameof(ReadResults), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
+            .MakeGenericMethod(type).Invoke(null, [importer])!;
+        Assert.Equal([true, true, false, false], results.Select(r => (bool)r.GetType().GetProperty("IsValid")!.GetValue(r)!));
+
+        var errors = results.Skip(2).Select(r => ((IReadOnlyList<ExcelMappingException>)r.GetType().GetProperty("Errors")!.GetValue(r)!).Single());
+        Assert.All(errors, e => Assert.IsType<OverflowException>(e.InnerException));
+    }
+
+    private static IEnumerable<object> ReadResults<T>(ExcelImporter importer)
+        => importer.ReadSheet().ReadRowResults<ValueRow<T>>().Cast<object>().ToArray();
+
+    public class ValueRow<T>
+    {
+        public T? Value { get; set; }
+    }
+
     [Fact]
     public void ReadRows_NumberCellInvalidWithFallback_ReturnsFallback()
     {

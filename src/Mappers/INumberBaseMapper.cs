@@ -59,6 +59,20 @@ internal class INumberBaseMapper<T> : ICellMapper<T> where T : INumberBase<T>
                 return CellConversion.Invalid;
             }
 
+            // Out of range values are checked rather than caught, as an exception for every out of
+            // range cell is slow. Only other number types (a user's) need catching.
+            if (s_range != NumberRange.Unknown)
+            {
+                if (!IsInRange(doubleValue))
+                {
+                    value = default!;
+                    return CellConversion.Invalid;
+                }
+
+                value = T.CreateChecked(doubleValue);
+                return CellConversion.Success;
+            }
+
             try
             {
                 value = T.CreateChecked(doubleValue);
@@ -101,6 +115,8 @@ internal class INumberBaseMapper<T> : ICellMapper<T> where T : INumberBase<T>
             // for an integer type: "2.7" as text can't be parsed as an int, so neither can 2.7.
             return s_isInteger && !double.IsInteger(doubleValue) && double.IsFinite(doubleValue)
                 ? MapperUtilities.NotWholeNumber(doubleValue, typeof(T))
+                : s_range != NumberRange.Unknown && !IsInRange(doubleValue)
+                ? MapperUtilities.OutOfRange(doubleValue, typeof(T))
                 : MapperUtilities.InvalidFromParse(() => T.CreateChecked(doubleValue));
         }
 
@@ -119,6 +135,51 @@ internal class INumberBaseMapper<T> : ICellMapper<T> where T : INumberBase<T>
 
         return MapperUtilities.InvalidNumber(stringValue, style, provider, typeof(T), s_isInteger, s_isBuiltIn, () => T.Parse(GetNumberSpan(stringValue, style), style, provider));
     }
+
+    // Which doubles T.CreateChecked converts without an OverflowException, for the built-in number
+    // types: Unknown for other types, whose conversions are caught.
+    private enum NumberRange
+    {
+        Unknown,
+        Any,
+        Finite,
+        TypeCode,
+        Int128,
+        UInt128,
+    }
+
+    private static readonly NumberRange s_range = GetRange();
+
+    private static NumberRange GetRange()
+    {
+        var type = typeof(T);
+        return Type.GetTypeCode(type) is >= TypeCode.SByte and <= TypeCode.Decimal ? NumberRange.TypeCode
+            : type == typeof(Half) || type == typeof(Complex) ? NumberRange.Any
+            : type == typeof(BigInteger) ? NumberRange.Finite
+            : type == typeof(Int128) ? NumberRange.Int128
+            : type == typeof(UInt128) ? NumberRange.UInt128
+            : type == typeof(nint) || type == typeof(nuint) ? NumberRange.TypeCode
+            : NumberRange.Unknown;
+    }
+
+    // nint and nuint have the range of the int types of the process's pointer size.
+    private static readonly TypeCode s_typeCode =
+        typeof(T) == typeof(nint) ? (IntPtr.Size == 8 ? TypeCode.Int64 : TypeCode.Int32)
+        : typeof(T) == typeof(nuint) ? (IntPtr.Size == 8 ? TypeCode.UInt64 : TypeCode.UInt32)
+        : Type.GetTypeCode(typeof(T));
+
+    // 2^127 and 2^128 are the first values out of range, and are exact as doubles.
+    private const double TwoTo127 = 170141183460469231731687303715884105728.0;
+    private const double TwoTo128 = 340282366920938463463374607431768211456.0;
+
+    private static bool IsInRange(double value) => s_range switch
+    {
+        NumberRange.TypeCode => MapperUtilities.IsInRange(value, s_typeCode),
+        NumberRange.Finite => double.IsFinite(value),
+        NumberRange.Int128 => value >= -TwoTo127 && value < TwoTo127,
+        NumberRange.UInt128 => value >= 0 && value < TwoTo128,
+        _ => true,
+    };
 
     // Whether T is a built-in integer type, which parses NumberStyles.Integer on a fast path.
     // Other number types (such as BigInteger, or a user's) aren't parsed twice.
