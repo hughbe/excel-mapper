@@ -146,6 +146,8 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Two `[ExcelMappingDictionary]` attributes for the same text (or text the member's comparer treats as the same) throw an `ExcelMappingException` naming the member and the text, instead of an `ArgumentException` without either. ([#227](https://github.com/hughbe/excel-mapper/pull/227))
 - Reading a dictionary from columns with the same name, such as a row as a `Dictionary<string, string>` when two columns are named "Name", threw an `ArgumentException: An item with the same key has already been added`. It throws an `ExcelMappingException` naming both columns. ([#228](https://github.com/hughbe/excel-mapper/pull/228))
 - A dictionary with keys that aren't strings, such as `Dictionary<int, string>`, parses its column names with the importer's culture instead of the machine's, and a name that isn't a valid key throws an `ExcelMappingException` naming the column instead of a `FormatException`. ([#228](https://github.com/hughbe/excel-mapper/pull/228))
+- Leaving a `foreach` over `ExcelImporter.ReadSheets()` early left the importer part way through its sheets, so the next `ReadSheet()` returned a later sheet instead of the first. ([#229](https://github.com/hughbe/excel-mapper/pull/229))
+- `ExcelRegion`'s reading methods read (or search for) the region's heading when they're called, as `ExcelSheet`'s do, so a missing heading or columns throws then. `ReadRows(sink)` and `ReadRowResults` documented this but threw when the result was enumerated. ([#229](https://github.com/hughbe/excel-mapper/pull/229))
 
 ### Performance
 
