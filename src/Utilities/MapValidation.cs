@@ -7,12 +7,16 @@ namespace ExcelMapper.Utilities;
 /// </summary>
 internal static class MapValidation
 {
-    public static void FindMissingColumns(IMap map, SheetView sheet, string? path, List<string> problems)
+    // Adds a problem for each column the map needs that the sheet doesn't have.
+    // reportAmbiguous: whether a column name that more than one column matches is a problem. It
+    // is when validating a heading; when searching for one, the row is still the heading, and
+    // reading it reports which column to choose.
+    public static void FindMissingColumns(IMap map, SheetView sheet, string? path, List<string> problems, bool reportAmbiguous = true)
         => MapTree.VisitCellMaps(map, path, (cellMap, memberPath) =>
         {
             if (!cellMap.Settings.Optional)
             {
-                Check(cellMap.Settings.Columns, many: cellMap is ICellsMap, sheet, memberPath, problems);
+                Check(cellMap.Settings.Columns, many: cellMap is ICellsMap, sheet, memberPath, problems, reportAmbiguous);
             }
         });
 
@@ -48,13 +52,14 @@ internal static class MapValidation
         {
             return Found(columns, many, sheet);
         }
-        catch (ExcelMappingException)
+        catch (ExcelMappingException exception)
         {
-            return false;
+            // A column whose name appears twice is there: reading it reports which to choose.
+            return exception.IsAmbiguousColumn;
         }
     }
 
-    private static void Check(Columns columns, bool many, SheetView sheet, string? path, List<string> problems)
+    private static void Check(Columns columns, bool many, SheetView sheet, string? path, List<string> problems, bool reportAmbiguous)
     {
         string? error = null;
         try
@@ -66,6 +71,11 @@ internal static class MapValidation
         }
         catch (ExcelMappingException exception)
         {
+            if (exception.IsAmbiguousColumn && !reportAmbiguous)
+            {
+                return;
+            }
+
             // For example, a column looked up by name in a sheet without a heading.
             error = exception.Message;
         }

@@ -133,6 +133,11 @@ public class ExcelMappingException : Exception
     public string? ColumnName { get; internal set; }
 
     /// <summary>
+    /// Whether the exception is for a column name that more than one column matches.
+    /// </summary>
+    internal bool IsAmbiguousColumn { get; set; }
+
+    /// <summary>
     /// The property or field that was being mapped, if known.
     /// </summary>
     public MemberInfo? Member { get; internal set; }

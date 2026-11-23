@@ -206,7 +206,7 @@ ExcelMapper.ExcelImporter.TryReadSheet(int sheetIndex, out ExcelMapper.ExcelShee
 ExcelMapper.ExcelImporter.TryReadSheet(out ExcelMapper.ExcelSheet? sheet) -> bool
 ExcelMapper.ExcelImporter.TryReadSheet(string! sheetName, out ExcelMapper.ExcelSheet? sheet) -> bool
 ExcelMapper.ExcelImporterConfiguration
-ExcelMapper.ExcelImporterConfiguration.Culture.get -> System.Globalization.CultureInfo?
+ExcelMapper.ExcelImporterConfiguration.Culture.get -> System.Globalization.CultureInfo!
 ExcelMapper.ExcelImporterConfiguration.Culture.set -> void
 ExcelMapper.ExcelImporterConfiguration.IgnoreSeparatorsInColumnNames.get -> bool
 ExcelMapper.ExcelImporterConfiguration.IgnoreSeparatorsInColumnNames.set -> void

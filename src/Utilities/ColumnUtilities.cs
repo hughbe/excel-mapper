@@ -57,29 +57,57 @@ internal static class ColumnUtilities
             throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
         }
 
-        if (TryGetExactColumnIndex(sheet, sheet.Heading, columnName, comparison, out columnIndex))
+        var heading = sheet.Heading;
+        if (TryGetExactColumnIndex(sheet, heading, columnName, comparison, out columnIndex))
         {
+            // Only headings with a repeated name need checking, so other lookups don't scan.
+            if (heading.HasDuplicateNames)
+            {
+                var columnNames = heading.ColumnNames;
+                for (int i = columnIndex - heading.ColumnOffset + 1; i < columnNames.Count; i++)
+                {
+                    if (string.Equals(columnNames[i], columnName, comparison))
+                    {
+                        throw AmbiguousColumn(sheet, columnName, columnIndex, i + heading.ColumnOffset);
+                    }
+                }
+            }
+
             return true;
         }
 
         // Optionally fall back to ignoring separators, for example matching "First Name" to FirstName.
+        columnIndex = -1;
         if (sheet.Settings.IgnoreSeparatorsInColumnNames)
         {
             var normalizedName = RemoveSeparators(columnName);
-            var columnNames = sheet.Heading.ColumnNames;
+            var columnNames = heading.ColumnNames;
             for (int i = 0; i < columnNames.Count; i++)
             {
                 if (string.Equals(RemoveSeparators(columnNames[i]), normalizedName, comparison))
                 {
-                    columnIndex = i + sheet.Heading.ColumnOffset;
-                    return true;
+                    if (columnIndex != -1)
+                    {
+                        throw AmbiguousColumn(sheet, columnName, columnIndex, i + heading.ColumnOffset);
+                    }
+
+                    columnIndex = i + heading.ColumnOffset;
                 }
             }
+
+            return columnIndex != -1;
         }
 
-        columnIndex = -1;
         return false;
     }
+
+    // Two columns match a name, so it isn't clear which to read.
+    private static ExcelMappingException AmbiguousColumn(SheetView sheet, string columnName, int firstColumnIndex, int secondColumnIndex)
+        => new($"More than one column matches \"{columnName}\" (columns {ExcelRange.GetColumnLetters(firstColumnIndex)} and {ExcelRange.GetColumnLetters(secondColumnIndex)}), so it isn't clear which to read. Rename one of the columns, or choose one by its letter or index (ExcelColumnLetter or WithColumnLetter)", sheet, -1, -1)
+        {
+            ColumnName = columnName,
+            IsAmbiguousColumn = true,
+        };
 
     private static bool IsSeparator(char c) => char.IsWhiteSpace(c) || c == '_' || c == '-' || c == '.';
 
@@ -115,8 +143,10 @@ internal static class ColumnUtilities
     private static bool TryGetExactColumnIndex(SheetView sheet, ExcelHeading heading, string columnName, StringComparison comparison, out int columnIndex)
     {
         // ExcelSheet.TryGetColumnIndex defaults to OrdinalIgnoreCase.
-        // Ordinal comparison can be optimised by ensuring the column name is in the correct case.
-        if (comparison == StringComparison.OrdinalIgnoreCase || comparison == StringComparison.Ordinal)
+        // Ordinal comparison can be optimised by ensuring the column name is in the correct case,
+        // unless the heading repeats a name in another case ("name" and "Name"), when the
+        // dictionary only has the first.
+        if (comparison == StringComparison.OrdinalIgnoreCase || (comparison == StringComparison.Ordinal && !heading.HasDuplicateNames))
         {
             if (!heading.TryGetColumnIndex(columnName, out columnIndex))
             {
