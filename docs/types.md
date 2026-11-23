@@ -56,7 +56,7 @@ Dates and times written as **text** (every CSV cell, or text cells in a workbook
 | `TimeOnly` | the culture's short time (`"t"`) and long time (`"T"`); 24-hour times | `10:30`, `10:30:15`, `9:05`, `14:30:15.25` |
 | `TimeSpan` | the constant format (`"c"`) | `1:30`, `01:30:00`, `1.02:03:04` |
 
-Text such as `3/4/2024 10:30 AM` matches en-US patterns whether it uses an ordinary space or the narrow no-break space .NET uses on Linux, macOS and recent Windows. A `DateTime` with an offset (`Z`, `+01:00`) is converted to local time, as `DateTime.Parse` does; map to `DateTimeOffset` to keep the offset.
+Text such as `3/4/2024 10:30 AM` matches en-US patterns whether it uses an ordinary space or the narrow no-break space .NET uses on Linux, macOS and recent Windows. A `DateTime` with an offset (`Z`, `+01:00`) is converted to UTC, with `Kind` `Utc`, rather than to the machine's local time, so every machine reads the same value; text without an offset is left as it is, with `Kind` `Unspecified`. Map to `DateTimeOffset` to keep the offset.
 
 To accept exactly the formats you give, and nothing else, set them with `[ExcelFormats]` or `.WithFormats(...)`:
 
@@ -86,17 +86,17 @@ importer.Configuration.RegisterClassMap<Event>(c => c.Map(e => e.Date).WithForma
 
 ### Offsets
 
-Excel dates have no time zone. Mapped to a `DateTimeOffset`, they get the machine's local offset, so the same file can give different results on different servers. Choose the offset instead:
+Excel dates have no time zone, and neither does text such as `2024-03-04 10:30`. Mapped to a `DateTimeOffset`, they're UTC by default (`+00:00`), so every machine reads the same value. Choose another offset for a member:
 
 ```csharp
 public class Event
 {
-    [ExcelOffset("+00:00")]          // or .WithOffset(TimeSpan.Zero)
+    [ExcelOffset("-08:00")]          // or .WithOffset(TimeSpan.FromHours(-8))
     public DateTimeOffset StartsAt { get; set; }
 }
 ```
 
-This applies to cells Excel stores as dates or numbers. Text with its own offset, parsed with a format such as `"yyyy-MM-ddTHH:mm:sszzz"`, keeps it.
+This applies to cells Excel stores as dates or numbers, and text without an offset. Text with its own offset (`2024-03-04T10:30:15+01:00`, or a format such as `"yyyy-MM-ddTHH:mm:sszzz"`) keeps it.
 
 ## Culture
 

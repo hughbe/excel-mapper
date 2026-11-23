@@ -15,7 +15,7 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<DateTimeOffset>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19), TimeSpan.Zero), row1);
 
         // Empty cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeOffset>());
@@ -38,7 +38,7 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<DateTimeOffset>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19), TimeSpan.Zero), row1);
 
         // Empty cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeOffset>());
@@ -54,8 +54,8 @@ public class MapDateTimeOffsetTests
         importer.Configuration.RegisterClassMap<DateTimeOffset>(c =>
         {
             c.Map(p => p)
-                .WithEmptyFallback(new DateTimeOffset(new DateTime(2017, 07, 20)))
-                .WithInvalidFallback(new DateTimeOffset(new DateTime(2017, 07, 21)));
+                .WithEmptyFallback(new DateTimeOffset(new DateTime(2017, 07, 20), TimeSpan.Zero))
+                .WithInvalidFallback(new DateTimeOffset(new DateTime(2017, 07, 21), TimeSpan.Zero));
         });
 
         var sheet = importer.ReadSheet();
@@ -63,15 +63,15 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<DateTimeOffset>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19), TimeSpan.Zero), row1);
 
         // Empty cell value.
         var row2 = sheet.ReadRow<DateTimeOffset>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 20)), row2);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 20), TimeSpan.Zero), row2);
 
         // Invalid cell value.
         var row3 = sheet.ReadRow<DateTimeOffset>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 21)), row3);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 21), TimeSpan.Zero), row3);
     }
 
     [Fact]
@@ -84,7 +84,7 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<DateTimeOffset?>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19), TimeSpan.Zero), row1);
 
         // Empty cell value.
         var row2 = sheet.ReadRow<DateTimeOffset?>();
@@ -108,7 +108,7 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<DateTimeOffset?>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19), TimeSpan.Zero), row1);
 
         // Empty cell value.
         var row2 = sheet.ReadRow<DateTimeOffset?>();
@@ -125,8 +125,8 @@ public class MapDateTimeOffsetTests
         importer.Configuration.RegisterClassMap<DateTimeOffset?>(c =>
         {
             c.Map(p => p)
-                .WithEmptyFallback(new DateTimeOffset(new DateTime(2017, 07, 20)))
-                .WithInvalidFallback(new DateTimeOffset(new DateTime(2017, 07, 21)));
+                .WithEmptyFallback(new DateTimeOffset(new DateTime(2017, 07, 20), TimeSpan.Zero))
+                .WithInvalidFallback(new DateTimeOffset(new DateTime(2017, 07, 21), TimeSpan.Zero));
         });
 
         var sheet = importer.ReadSheet();
@@ -134,15 +134,15 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<DateTimeOffset?>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19), TimeSpan.Zero), row1);
 
         // Empty cell value.
         var row2 = sheet.ReadRow<DateTimeOffset?>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 20)), row2);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 20), TimeSpan.Zero), row2);
 
         // Invalid cell value.
         var row3 = sheet.ReadRow<DateTimeOffset?>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 21)), row3);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 21), TimeSpan.Zero), row3);
     }
 
     [Fact]
@@ -155,10 +155,10 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<FormatsDateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1.CustomValue);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19), TimeSpan.Zero), row1.CustomValue);
 
         var row2 = sheet.ReadRow<FormatsDateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 18)), row2.CustomValue);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 18), TimeSpan.Zero), row2.CustomValue);
 
         // Empty cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FormatsDateTimeOffsetValue>());
@@ -181,10 +181,10 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<FormatsDateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1.CustomValue);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19), TimeSpan.Zero), row1.CustomValue);
 
         var row2 = sheet.ReadRow<FormatsDateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 18)), row2.CustomValue);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 18), TimeSpan.Zero), row2.CustomValue);
 
         // Empty cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<FormatsDateTimeOffsetValue>());
@@ -209,7 +209,7 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<DateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1.Value);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19), TimeSpan.Zero), row1.Value);
 
         // Empty cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeOffsetValue>());
@@ -232,7 +232,7 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<DateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1.Value);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19), TimeSpan.Zero), row1.Value);
 
         // Empty cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeOffsetValue>());
@@ -248,8 +248,8 @@ public class MapDateTimeOffsetTests
         importer.Configuration.RegisterClassMap<DateTimeOffsetValue>(c =>
         {
             c.Map(o => o.Value)
-                .WithEmptyFallback(new DateTimeOffset(new DateTime(2017, 07, 20)))
-                .WithInvalidFallback(new DateTimeOffset(new DateTime(2017, 07, 21)));
+                .WithEmptyFallback(new DateTimeOffset(new DateTime(2017, 07, 20), TimeSpan.Zero))
+                .WithInvalidFallback(new DateTimeOffset(new DateTime(2017, 07, 21), TimeSpan.Zero));
         });
 
         var sheet = importer.ReadSheet();
@@ -257,15 +257,15 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<DateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1.Value);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19), TimeSpan.Zero), row1.Value);
 
         // Empty cell value.
         var row2 = sheet.ReadRow<DateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 20)), row2.Value);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 20), TimeSpan.Zero), row2.Value);
 
         // Invalid cell value.
         var row3 = sheet.ReadRow<DateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 21)), row3.Value);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 21), TimeSpan.Zero), row3.Value);
     }
 
     private class DateTimeOffsetValue
@@ -288,10 +288,10 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<CustomDateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1.CustomValue);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19), TimeSpan.Zero), row1.CustomValue);
 
         var row2 = sheet.ReadRow<CustomDateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 18)), row2.CustomValue);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 18), TimeSpan.Zero), row2.CustomValue);
 
         // Empty cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeOffsetValue>());
@@ -320,10 +320,10 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<CustomDateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1.CustomValue);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19), TimeSpan.Zero), row1.CustomValue);
 
         var row2 = sheet.ReadRow<CustomDateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 18)), row2.CustomValue);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 18), TimeSpan.Zero), row2.CustomValue);
 
         // Empty cell value.
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DateTimeOffsetValue>());
@@ -342,7 +342,7 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<NullableDateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1.Value);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19), TimeSpan.Zero), row1.Value);
 
         // Empty cell value.
         var row2 = sheet.ReadRow<NullableDateTimeOffsetValue>();
@@ -366,7 +366,7 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<NullableDateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1.Value);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19), TimeSpan.Zero), row1.Value);
 
         // Empty cell value.
         var row2 = sheet.ReadRow<NullableDateTimeOffsetValue>();
@@ -383,8 +383,8 @@ public class MapDateTimeOffsetTests
         importer.Configuration.RegisterClassMap<NullableDateTimeOffsetValue>(c =>
         {
             c.Map(o => o.Value)
-                .WithEmptyFallback(new DateTimeOffset(new DateTime(2017, 07, 20)))
-                .WithInvalidFallback(new DateTimeOffset(new DateTime(2017, 07, 21)));
+                .WithEmptyFallback(new DateTimeOffset(new DateTime(2017, 07, 20), TimeSpan.Zero))
+                .WithInvalidFallback(new DateTimeOffset(new DateTime(2017, 07, 21), TimeSpan.Zero));
         });
 
         var sheet = importer.ReadSheet();
@@ -392,15 +392,15 @@ public class MapDateTimeOffsetTests
 
         // Valid cell value.
         var row1 = sheet.ReadRow<NullableDateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19)), row1.Value);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 19), TimeSpan.Zero), row1.Value);
 
         // Empty cell value.
         var row2 = sheet.ReadRow<NullableDateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 20)), row2.Value);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 20), TimeSpan.Zero), row2.Value);
 
         // Invalid cell value.
         var row3 = sheet.ReadRow<NullableDateTimeOffsetValue>();
-        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 21)), row3.Value);
+        Assert.Equal(new DateTimeOffset(new DateTime(2017, 07, 21), TimeSpan.Zero), row3.Value);
     }
 
     private class NullableDateTimeOffsetValue
@@ -462,12 +462,50 @@ public class MapDateTimeOffsetTests
     }
 
     [Fact]
-    public void ReadRows_DateCellDefaultOffset_UsesLocalOffset()
+    public void ReadRows_DateCellDefaultOffset_UsesUtc()
     {
+        // Not the machine's local offset, so every machine reads the same value.
         using var importer = XlsxBuilder.Create(["When"], [s_offsetDate]);
         var when = importer.ReadSheet().ReadRows<OffsetRow>().Single().When;
         Assert.Equal(s_offsetDate, when.DateTime);
-        Assert.Equal(TimeZoneInfo.Local.GetUtcOffset(s_offsetDate), when.Offset);
+        Assert.Equal(TimeSpan.Zero, when.Offset);
+    }
+
+    [Theory]
+    [InlineData("2024-03-04T10:30:15", 10, 0)]
+    [InlineData("2024-03-04 10:30", 10, 0)]
+    [InlineData("03/04/2024 10:30:15", 10, 0)]
+    [InlineData("2024-03-04T10:30:15Z", 10, 0)]
+    [InlineData("2024-03-04T10:30:15+05:30", 10, 5.5)]
+    [InlineData("2024-03-04T10:30:15-08:00", 10, -8)]
+    public void ReadRows_TextDefaultOffset_UsesTextOffsetOrUtc(string text, int hour, double offsetHours)
+    {
+        using var importer = Helpers.GetCsvImporter($"When\n{text}\n");
+        var when = importer.ReadSheet().ReadRows<OffsetRow>().Single().When;
+        Assert.Equal(hour, when.Hour);
+        Assert.Equal(TimeSpan.FromHours(offsetHours), when.Offset);
+    }
+
+    [Theory]
+    [InlineData("2024-03-04T10:30:15", -8)]
+    [InlineData("03/04/2024 10:30:15", -8)]
+    [InlineData("2024-03-04T10:30:15Z", 0)]
+    [InlineData("2024-03-04T10:30:15+05:30", 5.5)]
+    public void ReadRows_TextWithMemberOffset_UsesTextOffsetOrMembers(string text, double offsetHours)
+    {
+        // The member's offset is for dates without one of their own.
+        using var importer = Helpers.GetCsvImporter($"When\n{text}\n");
+        var when = importer.ReadSheet().ReadRows<OffsetNegativeRow>().Single().When;
+        Assert.Equal(10, when.Hour);
+        Assert.Equal(TimeSpan.FromHours(offsetHours), when.Offset);
+    }
+
+    [Fact]
+    public void ReadRows_InvalidTextWithMemberOffset_IsInvalid()
+    {
+        using var importer = Helpers.GetCsvImporter("When\nnot a date\n");
+        var error = Assert.Single(Assert.Single(importer.ReadSheet().ReadRowResults<OffsetNegativeRow>()).Errors);
+        Assert.IsType<FormatException>(error.InnerException);
     }
 
     [Fact]

@@ -117,7 +117,7 @@ Values (also available on collection elements and dictionary values, through `Wi
 - `.WithFormats("yyyy-MM-dd", ...)` - Date, time and duration formats
 - `.WithFormatProvider(provider)` - The culture for dates, times, durations and numbers
 - `.WithNumberStyle(NumberStyles.Currency)` - How numbers are parsed (on the netstandard builds, for the built-in number types)
-- `.WithOffset(TimeSpan)` - The offset of `DateTimeOffset` values (dates in Excel have no time zone)
+- `.WithOffset(TimeSpan)` - The offset of `DateTimeOffset` values without one (UTC by default)
 - `.WithUriKind(UriKind.Relative)` - Which URIs are valid (absolute only by default)
 - `.WithTrim()` / `.WithTransformers(ICellTransformer...)` - Change cells before they're converted
 
@@ -160,7 +160,7 @@ For a nullable member (`int?`), converters and fallbacks can be for the underlyi
 | `[ExcelEmptyFallback(typeof(Fallback))]` / `[ExcelInvalidFallback(typeof(Fallback))]` | Compute the value of empty or invalid cells with an `ICellFallback<T>` |
 | `[ExcelFormats("yyyy-MM-dd", ...)]` | Date, time and duration formats |
 | `[ExcelNumberStyle(NumberStyles.Currency)]` | How numbers are parsed |
-| `[ExcelOffset("+01:00")]` | The offset of `DateTimeOffset` values |
+| `[ExcelOffset("+01:00")]` | The offset of `DateTimeOffset` values without one (UTC by default) |
 | `[ExcelUriKind(UriKind.Relative)]` | Which URIs are valid: `Absolute` (the default), `Relative` or `RelativeOrAbsolute` |
 | `[ExcelMappingDictionary("text", value)]` | Map fixed text to a value (repeat for each value) |
 | `[ExcelMappingDictionaryComparer(StringComparison.OrdinalIgnoreCase)]` | How the text is compared |

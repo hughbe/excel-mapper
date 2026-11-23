@@ -20,7 +20,9 @@ internal sealed class DateTimeOffsetMapper : ICellMapper<DateTimeOffset>, ICellM
     // The format tried first when the member has no formats of its own.
     private static readonly string[] s_defaultFormats = ["G"];
 
-    private const DateTimeStyles Style = DateTimeStyles.None;
+    // A date without an offset gets the member's offset (WithOffset), or UTC, rather than the
+    // machine's local offset, so a file gives the same values on every machine.
+    private const DateTimeStyles Style = DateTimeStyles.AssumeUniversal;
 
     CellConversion ICellMapper<DateTimeOffset>.Convert(ReadCellResult cell, in CellContext context, out DateTimeOffset value, ref object? error)
     {
@@ -29,9 +31,7 @@ internal sealed class DateTimeOffsetMapper : ICellMapper<DateTimeOffset>, ICellM
         {
             try
             {
-                value = context.Options.Offset is { } offset
-                    ? new DateTimeOffset(DateTime.SpecifyKind(dateTimeValue, DateTimeKind.Unspecified), offset)
-                    : new DateTimeOffset(dateTimeValue);
+                value = new DateTimeOffset(DateTime.SpecifyKind(dateTimeValue, DateTimeKind.Unspecified), context.Options.Offset ?? TimeSpan.Zero);
                 return CellConversion.Success;
             }
             catch (ArgumentOutOfRangeException)
@@ -46,6 +46,16 @@ internal sealed class DateTimeOffsetMapper : ICellMapper<DateTimeOffset>, ICellM
         var style = Style;
         try
         {
+            // Text without an offset of its own gets the member's offset. Parsed as a DateTime
+            // first, whose kind says whether the text had one: only for members with an offset.
+            if (context.Options.Offset is { } memberOffset &&
+                TryParseDateTime(stringValue, context, provider, out var dateTime) &&
+                dateTime.Kind == DateTimeKind.Unspecified)
+            {
+                value = new DateTimeOffset(dateTime, memberOffset);
+                return CellConversion.Success;
+            }
+
             // ISO 8601 text, the most common in CSV files, is parsed with the one default format
             // it can match before the culture's patterns, which is several times faster.
             if (context.Options.Formats is null && FormatUtilities.GetIsoDateTimeFormat(stringValue) is { } isoFormat &&
@@ -66,6 +76,14 @@ internal sealed class DateTimeOffsetMapper : ICellMapper<DateTimeOffset>, ICellM
         }
     }
 
+    // Parses the text as a DateTimeOffset member's formats would, as a DateTime whose kind is
+    // Unspecified if the text has no offset.
+    private static bool TryParseDateTime(string? text, in CellContext context, IFormatProvider provider, out DateTime value)
+        => (context.Options.Formats is null && FormatUtilities.GetIsoDateTimeFormat(text) is { } isoFormat &&
+                DateTime.TryParseExact(text, isoFormat, provider, DateTimeStyles.None, out value)) ||
+            DateTime.TryParseExact(text, context.Options.Formats ?? s_defaultFormats, provider, DateTimeStyles.None, out value) ||
+            (context.Options.Formats is null && FormatUtilities.HasDigit(text) && DateTime.TryParseExact(text, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, DateTimeStyles.None, out value));
+
     CellConversion ICellMapper<DateTimeOffset?>.Convert(ReadCellResult cell, in CellContext context, out DateTimeOffset? value, ref object? error)
     {
         var conversion = ((ICellMapper<DateTimeOffset>)this).Convert(cell, in context, out var result, ref error);
@@ -79,10 +97,8 @@ internal sealed class DateTimeOffsetMapper : ICellMapper<DateTimeOffset>, ICellM
         var cellValue = cell.GetValue();
         if (cellValue is DateTime dateTimeValue || ExcelDateUtilities.TryGetDateTime(cellValue, out dateTimeValue))
         {
-            var offset = context.Options.Offset;
-            return MapperUtilities.InvalidFromParse(() => _ = offset is { } value
-                ? new DateTimeOffset(DateTime.SpecifyKind(dateTimeValue, DateTimeKind.Unspecified), value)
-                : new DateTimeOffset(dateTimeValue));
+            var offset = context.Options.Offset ?? TimeSpan.Zero;
+            return MapperUtilities.InvalidFromParse(() => _ = new DateTimeOffset(DateTime.SpecifyKind(dateTimeValue, DateTimeKind.Unspecified), offset));
         }
 
         var stringValue = cell.GetString();

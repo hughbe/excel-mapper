@@ -126,7 +126,7 @@ Console.WriteLine($"{counter.Count} problems");
 
 **Dates from a CSV file are invalid, or the day and month are swapped.** Text is parsed with the importer's culture, invariant by default (month first). Set `importer.Configuration.Culture`, or give the member its formats ([Dates and times](types.md#dates-and-times)).
 
-**`DateTimeOffset` values have a different offset on another machine.** Excel dates have no time zone, so they get the local offset: set one with `[ExcelOffset]` ([Offsets](types.md#offsets)).
+**`DateTimeOffset` values are UTC when the file means local time.** Excel dates, and text without an offset, have no time zone, so they're read as UTC: give the member the offset they were written in with `[ExcelOffset]` ([Offsets](types.md#offsets)).
 
 **The heading row, or a title, is mapped as data.** The heading isn't in the first row: set `HeadingIndex` or call `FindHeading<T>()` ([Where the heading is](reading.md#where-the-heading-is)).
 

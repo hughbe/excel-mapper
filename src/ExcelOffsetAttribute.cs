@@ -3,9 +3,9 @@ using System.Globalization;
 namespace ExcelMapper;
 
 /// <summary>
-/// Specifies the offset from UTC given to cells that Excel stores as dates, when mapping them to a
-/// <see cref="DateTimeOffset"/>. Excel dates have no time zone, so by default the machine's local
-/// offset is used.
+/// Specifies the offset from UTC given to dates without one, when mapping them to a
+/// <see cref="DateTimeOffset"/>: cells that Excel stores as dates (which have no time zone), and
+/// text without an offset. By default they're UTC. Text with its own offset keeps it.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
 public sealed class ExcelOffsetAttribute : Attribute

@@ -54,11 +54,11 @@ internal static class MapperUtilities
 
     /// <summary>
     /// Creates the exception for a date or time that couldn't be parsed with
-    /// <paramref name="formats"/>: a <see cref="FormatException"/>, created without throwing it. Styles other than whitespace can make ParseExact throw an
+    /// <paramref name="formats"/>: a <see cref="FormatException"/>, created without throwing it. Styles other than whitespace and UTC can make ParseExact throw an
     /// <see cref="ArgumentException"/> instead, so they use <paramref name="parse"/>.
     /// </summary>
     public static Exception InvalidDate(string? text, DateTimeStyles style, string typeName, string[] formats, Action parse)
-        => (style & ~DateTimeStyles.AllowWhiteSpaces) != 0
+        => (style & ~(DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal)) != 0
             ? InvalidFromParse(parse)
             : InvalidFormat(text, FormatUtilities.DescribeFormats(typeName, formats), parse);
 
