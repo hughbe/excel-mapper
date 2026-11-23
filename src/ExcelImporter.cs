@@ -85,7 +85,9 @@ public class ExcelImporter : IDisposable
         Stream? stream = null;
         try
         {
-            stream = File.OpenRead(path);
+            // Excel keeps a workbook it has open for writing, so a file that only shares reading
+            // (File.OpenRead) can't be opened while someone is editing it.
+            stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             Reader = CreateReader(stream, fileType, readerConfiguration);
             _ownedStream = stream;
             stream = null; // Transfer ownership - prevent disposal in catch block
