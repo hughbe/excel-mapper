@@ -162,7 +162,7 @@ catch (ExcelMappingException ex)
 |---|---|---|
 | Convert a cell | `ICellMapper` with `WithMappers(...)` or `[ExcelMapper]`; `CellMapperResult`; `ReadCellResult`; `WithConverter(readResult => ...)` | [`ICellConverter<T>`](mapping.md#converters) with `WithConverter(converter)` or `[ExcelConverter(typeof(...))]`, or `WithConverter(value => ...)` with the cell's text |
 | Change a cell before it's converted | `Abstractions.ICellTransformer`, `TrimStringCellTransformer` | [`ICellTransformer`](mapping.md#transformers) (in the `ExcelMapper` namespace) with `WithTransformers(...)` or `[ExcelTransformer]`, and `WithTrim()` or `[ExcelTrimString]` |
-| Give empty or invalid cells a value | `IFallbackItem`, `FixedValueFallback`, `ThrowFallback`, `WithFallbackItem`, `WithEmptyFallbackItem`, `WithInvalidFallbackItem` | [`ICellFallback<T>`](mapping.md#computed-fallbacks) with `WithEmptyFallback(fallback)`/`WithInvalidFallback(fallback)` or `[ExcelEmptyFallback]`/`[ExcelInvalidFallback]`; or `WithValueFallback(value)`, `WithEmptyFallback(value)` and `WithThrowingFallback()` |
+| Give empty or invalid cells a value | `IFallbackItem`, `FixedValueFallback`, `ThrowFallback`, `WithFallbackItem`, `WithEmptyFallbackItem`, `WithInvalidFallbackItem` | [`ICellFallback<T>`](mapping.md#computed-fallbacks) with `WithEmptyFallback(fallback)`/`WithInvalidFallback(fallback)` or `[ExcelEmptyFallback]`/`[ExcelInvalidFallback]`; or `WithFallback(value)`, `WithEmptyFallback(value)` and `WithThrowingFallback()` |
 | Choose columns in code | `ICellReaderFactory`, `ICellsReaderFactory`, `WithReaderFactory(...)`, `IExcelColumnMatcher` | [`IColumnSelector`](mapping.md#column-selectors) with `WithColumns(selector)`, `[ExcelColumnMatching(typeof(...))]` or `[ExcelColumnsMatching(typeof(...))]` |
 | Configure a member | `IOneToOneMap`, `IManyToOneMap`, `IToOneMap` and their extension classes; a pipeline's `Mappers`, `Transformers`, `EmptyFallback` and `InvalidFallback`; `OneToOneMap<T>.Pipeline` | The map `Map(...)` returns, and its fluent methods. The column methods (`WithColumnName`, `MakeOptional`, ...) are methods of the maps; the value methods are methods of the maps too, and the ones for particular types, such as `WithFormats`, are in `ValuePipelineExtensions` (was `IValuePipelineExtensions`) |
 | Map members by hand | `IMap`, `ExcelPropertyMap`, `ExcelClassMap.Properties`, the maps' constructors, the indexer maps, `AutoMapper.TryCreateClassMap`, `RegisterClassMap(Type, IMap)` | `Map(...)` in a class map, including `Map(p => p.Values[0])` for elements, or attributes on the type's members. To start from the auto-mapped class map (`AutoMapper.TryCreateClassMap`), call `AutoMap()` on a class map, for example `RegisterClassMap<T>(c => { c.AutoMap(); c.Map(...); })`. `TryGetClassMap` returns an `ExcelClassMap` |
@@ -303,7 +303,7 @@ If you created a map with its constructor, or implemented `IMap`, map the member
 - **Dates written as text**: without set formats, ISO 8601 (`2024-03-04`) and the culture's short date, short date and time, and time patterns are now accepted, where only the culture's full date and time (`"G"`, or `"d"`/`"t"` for `DateOnly`/`TimeOnly`) was before. Values that were invalid, and so used an `[ExcelInvalidValue]` or other fallback, may now map. To accept only specific formats, set them with `[ExcelFormats]` or `.WithFormats(...)`.
 - **Dates stored as numbers**: a number in a cell without a date format now maps to date and time types (as an Excel serial date) instead of being invalid.
 - **Number parsing is the same on every build**: on .NET Framework and other netstandard runtimes, `[ExcelNumberStyle]` now takes effect (it was silently ignored), and integers accept thousands separators such as `"1,234"`, as on .NET 8. On every build, floating-point types accept exponents such as `"1E5"`. These only accept more input than before, except where an `[ExcelNumberStyle]` attribute on netstandard now restricts what's accepted.
-- **netstandard builds**: argument exceptions now include the parameter name, and `null` passed to string arguments throws `ArgumentNullException` (previously `ArgumentException`), matching the .NET 8 build. The public `CallerArgumentExpressionAttribute` type that 3.x accidentally exposed is gone.
+- **netstandard builds**: argument exceptions now include the parameter name, and `null` passed to string arguments throws `ArgumentNullException` (previously `ArgumentException`), matching the .NET 8 build. The public `CallerArgumentExpressionAttribute` type that 3.x accidentally exposed is gone, as is `ExcelMapper.Utilities.StringComparerUtilities`.
 
 ## You can remove the code page registration
 
@@ -327,13 +327,14 @@ The package contains `net8.0`, `netstandard2.1` and `netstandard2.0` builds. If 
 
 Worth a look while upgrading:
 
-- [Collect every error in a file](errors.md#collecting-errors) with `ReadRowResults`, and [check columns up front](errors.md#checking-columns-before-reading) with `ValidateHeading`.
+- [Collect every error in a file](errors.md#collecting-errors) with `ReadRowResults`, [check large files](errors.md#checking-large-files) without an exception for each problem with an `IExcelErrorSink`, and [check columns up front](errors.md#checking-columns-before-reading) with `ValidateHeading`.
 - [Find the heading](reading.md#finding-the-heading) of sheets with titles or notes above it with `FindHeading`.
 - [Read part of a sheet](reading.md#reading-part-of-a-sheet), or several tables on one sheet, with `sheet.Region("B3:F20")`.
 - [Records and constructor-only types](mapping.md#records-and-constructors) map without a parameterless constructor.
 - Map by [column letter](mapping.md#choosing-columns), choose a [culture](types.md#culture) for the whole importer, and set the [offset of `DateTimeOffset` values](types.md#offsets).
 - `ExcelImporter.ReadRows<T>("file.xlsx")` reads a file in one line.
 - Set a member to the [row number](mapping.md#row-numbers), or collect the [columns no other member reads](mapping.md#extra-columns) into a dictionary.
+- Start a class map from what auto-mapping would map with [`AutoMap()`](mapping.md#three-ways-to-map), and change only some members.
 - [Typed converters](mapping.md#converters) get the cell's value as Excel stores it and where the cell is, without boxing.
-- Mapping works in [trimmed apps](trimming.md), and the package includes XML documentation for IntelliSense.
+- Mapping works in [trimmed apps](trimming.md), and in [native AOT apps](trimming.md#native-aot-apps) with a mapping context the package's source generator writes. The package includes XML documentation for IntelliSense.
 - Mapping is faster and allocates much less: see the [changelog](../CHANGELOG.md#performance).
