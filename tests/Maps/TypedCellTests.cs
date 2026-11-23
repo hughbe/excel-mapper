@@ -62,9 +62,9 @@ public class TypedCellTests
     public void Map_FractionalNumberToInteger_ThrowsExcelMappingException()
     {
         // Excel stores numbers as doubles. The fractional part isn't silently dropped, matching
-        // text cells where "2.7" can't be parsed as an int.
+        // text cells where "2.7" can't be parsed as an int, with the same exception.
         var ex = MapFails<int>(2.7);
-        Assert.IsType<FormatException>(ex.InnerException);
+        Assert.IsType<OverflowException>(ex.InnerException);
         MapFails<long>(-0.5);
         MapFails<byte>(1.25);
 #if LIBRARY_NET8
