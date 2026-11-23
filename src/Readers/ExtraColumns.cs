@@ -1,5 +1,3 @@
-using System.Linq;
-
 namespace ExcelMapper.Readers;
 
 /// <summary>
@@ -22,7 +20,7 @@ internal sealed class ExtraColumns : Columns
 
     public override int[] FindColumns(SheetView sheet)
     {
-        var heading = sheet.Heading ?? throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Extra columns can only be read from sheets with a heading.");
+        var heading = sheet.GetHeadingForExtraColumns();
 
         var usedColumns = new HashSet<int>();
         AddUsedColumns(sheet.RootMap ?? ClassMap, sheet, usedColumns);

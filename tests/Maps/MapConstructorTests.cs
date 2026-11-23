@@ -287,4 +287,22 @@ public class MapConstructorTests
         var row = importer.ReadSheet().ReadRows<AttributedRecord>().Single();
         Assert.Equal(new AttributedRecord("Alice", 0), row);
     }
+
+    [Fact]
+    public void ReadRows_NoUsableConstructor_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\n1\n");
+        importer.Configuration.RegisterClassMap<NoUsableConstructor<int>>(c => c.Map(p => p.Value));
+        var sheet = importer.ReadSheet();
+
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<NoUsableConstructor<int>>().ToArray());
+        Assert.Equal("Cannot create an instance of type MapConstructorTests.NoUsableConstructor<int>. It needs a public parameterless constructor, or a public constructor whose parameters each match a mapped property or field (by name and type) or have a default value.", exception.Message);
+    }
+
+    public class NoUsableConstructor<T>(string other)
+    {
+        public string Other { get; } = other;
+
+        public T? Value { get; set; }
+    }
 }

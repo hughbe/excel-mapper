@@ -87,9 +87,6 @@ internal abstract class Columns
         return $" The heading's columns are {listed}{more}.";
     }
 
-    private protected static ExcelMappingException NoHeading(SheetView sheet)
-        => new($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index mapping instead.");
-
     private protected static string DescribeNames(IReadOnlyList<string> names)
         => names.Count == 1 ? $"column \"{names[0]}\"" : $"columns {string.Join(", ", names.Select(n => $"\"{n}\""))}";
 }

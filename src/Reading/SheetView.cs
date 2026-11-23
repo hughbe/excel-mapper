@@ -40,8 +40,6 @@ internal sealed class SheetView
     /// <inheritdoc cref="ExcelSheet.Name"/>
     public string Name => Worksheet.Name;
 
-
-
     /// <inheritdoc cref="ExcelSheet.NumberOfColumns"/>
     public int NumberOfColumns => Worksheet.NumberOfColumns;
 
@@ -87,9 +85,6 @@ internal sealed class SheetView
 
     private ExcelRange _dataRange = new();
 
-
-
-
     /// <inheritdoc cref="ExcelSheet.DataRange"/>
     public ExcelRange DataRange
     {
@@ -108,6 +103,34 @@ internal sealed class SheetView
 
     /// <inheritdoc cref="ExcelSheet.Heading"/>
     public ExcelHeading? Heading { get; set; }
+
+    /// <summary>
+    /// Gets the heading, to find columns by name, or throws if the rows have none.
+    /// </summary>
+    public ExcelHeading GetHeadingForNames()
+        => Heading ?? throw NoHeading("to find columns by name", " Choose the columns by index or letter instead.");
+
+    /// <summary>
+    /// Gets the heading, to read every column with a name, or throws if the rows have none.
+    /// </summary>
+    public ExcelHeading GetHeadingForAllColumns()
+        => Heading ?? throw NoHeading("to read every named column from", " Choose the columns by index instead.");
+
+    /// <summary>
+    /// Gets the heading, whose names are a dictionary's keys, or throws if the rows have none.
+    /// </summary>
+    public ExcelHeading GetHeadingForKeys()
+        => Heading ?? throw NoHeading("to name a dictionary's keys", " A dictionary's keys are its columns' names, so it can only be read from rows with a heading.");
+
+    /// <summary>
+    /// Gets the heading, to find the extra columns no member reads, or throws if the rows have none.
+    /// </summary>
+    public ExcelHeading GetHeadingForExtraColumns()
+        => Heading ?? throw NoHeading("to read extra columns from", " Extra columns are the heading's columns that no other member reads.");
+
+    // The sheet's name follows the message, then the hint.
+    private ExcelMappingException NoHeading(string purpose, string hint)
+        => new($"There's no heading {purpose}", this, -1, -1, null, hint);
 
     /// <inheritdoc cref="ExcelSheet.CurrentRowIndex"/>
     public int CurrentRowIndex => _cursor.RowIndex;

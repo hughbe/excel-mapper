@@ -1,5 +1,3 @@
-using System.Linq;
-
 namespace ExcelMapper.Readers;
 
 /// <summary>
@@ -18,7 +16,7 @@ internal sealed class AllColumns : Columns
 
     public override int[] FindColumns(SheetView sheet)
     {
-        var heading = sheet.Heading ?? throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
+        var heading = sheet.GetHeadingForAllColumns();
 
         // Use the positions of the columns rather than looking them up by name, so that columns
         // with the same name are each read.

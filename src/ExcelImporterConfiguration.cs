@@ -85,7 +85,6 @@ public sealed class ExcelImporterConfiguration
 
     private CultureInfo _culture = CultureInfo.InvariantCulture;
 
-
     internal ExcelImporterConfiguration() { }
 
     /// <summary>

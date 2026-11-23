@@ -1,7 +1,5 @@
 ﻿using System.Globalization;
-using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using ExcelMapper.Fallbacks;
 using ExcelMapper.Mappers;
 
@@ -522,7 +520,6 @@ public static partial class ValuePipelineExtensions
         return (TMap)map;
     }
 #endif
-
 
 #if NET7_0_OR_GREATER
     /// <summary>
