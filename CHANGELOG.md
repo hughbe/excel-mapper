@@ -142,6 +142,8 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Reading columns by name, or a dictionary, from rows without a heading gave `The sheet "" does not have a heading. Use a column index map instead.` for a CSV file, with five wordings across the library. The message now says what needed the heading, names the sheet as other errors do, and says what to do instead: `There's no heading to find columns by name in sheet "People". Choose the columns by index or letter instead.` ([#224](https://github.com/hughbe/excel-mapper/pull/224))
 - Errors for a type that can't be created name it as C# does (`List<int>` rather than ``System.Collections.Generic.List`1[System.Int32]``), as other errors do. ([#224](https://github.com/hughbe/excel-mapper/pull/224))
 - Changing an array after passing it to `WithColumnNames`, `WithColumnIndices` or `WithSeparators` changed the columns or separators the map used, even after the map was frozen. The maps copy the array. ([#226](https://github.com/hughbe/excel-mapper/pull/226))
+- Leaving a `foreach` over `ExcelImporter.ReadSheets()` early left the importer part way through its sheets, so the next `ReadSheet()` returned a later sheet instead of the first. ([#229](https://github.com/hughbe/excel-mapper/pull/229))
+- `ExcelRegion`'s reading methods read (or search for) the region's heading when they're called, as `ExcelSheet`'s do, so a missing heading or columns throws then. `ReadRows(sink)` and `ReadRowResults` documented this but threw when the result was enumerated. ([#229](https://github.com/hughbe/excel-mapper/pull/229))
 
 ### Performance
 
