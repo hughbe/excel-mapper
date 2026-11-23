@@ -51,10 +51,25 @@ internal abstract class CellPipeline
     internal abstract bool HasMappers { get; }
 
     /// <summary>
-    /// Gives empty cells, invalid cells or both a fixed value, for the untyped fluent methods
-    /// (<c>WithEmptyFallback(object)</c> and so on).
+    /// Gets or sets what to say about a member mapped with <c>Map(...)</c> whose type has no
+    /// built-in conversion, such as <c>of type HashSet&lt;string&gt; ...</c>, if it isn't given a
+    /// converter: see <see cref="ThrowIfNoConversion"/>.
     /// </summary>
-    internal abstract void SetFixedFallback(object? value, bool empty, bool invalid);
+    internal string? NoConversion { get; set; }
+
+    /// <summary>
+    /// Throws if a member of <paramref name="map"/> can't convert cells: it was mapped with
+    /// <c>Map(...)</c>, its type has no built-in conversion, and it wasn't given a converter.
+    /// </summary>
+    internal static void ThrowIfNoConversion(IMap map)
+        => MapTree.VisitCellMaps(map, null, static (cellMap, path) =>
+        {
+            if (cellMap is IColumnsMap { Pipeline.HasMappers: false } and not ICellsMap)
+            {
+                var what = path is null ? "The row" : $"Member \"{path}\"";
+                throw new ExcelMappingException($"{what} {cellMap.Pipeline.NoConversion ?? "has no conversion from a cell. Give it one with WithConverter or [ExcelConverter]."}");
+            }
+        });
 
     /// <summary>
     /// Makes empty cells, invalid cells or both errors.

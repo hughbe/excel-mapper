@@ -329,6 +329,19 @@ public class ExcelImporterTests
     }
 
     [Fact]
+    public void ReadSheets_LeftEarly_ReadSheetStartsFromFirstSheet()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        foreach (var sheet in importer.ReadSheets())
+        {
+            Assert.Equal("Primitives", sheet.Name);
+            break;
+        }
+
+        Assert.Equal("Primitives", importer.ReadSheet().Name);
+    }
+
+    [Fact]
     public void ReadSheet_AllSheets_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");

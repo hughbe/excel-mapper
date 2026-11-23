@@ -17,6 +17,11 @@ namespace ExcelMapper.AutoMapping;
 internal abstract class CollectionRule
 {
     /// <summary>
+    /// Gets the type of the collection's elements.
+    /// </summary>
+    public abstract Type ElementType { get; }
+
+    /// <summary>
     /// Auto-maps a member of the collection type to a <see cref="CollectionMap{TElement}"/> that
     /// reads its elements from several cells.
     /// </summary>
@@ -38,6 +43,8 @@ internal abstract class CollectionRule
 [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
 internal sealed class CollectionRule<TElement> : CollectionRule
 {
+    public override Type ElementType => typeof(TElement);
+
     public override bool TryCreateMap(MemberInfo? member, Type collectionType, Columns columns, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
     {
         if (TryCreateCollectionMap(member, collectionType, columns, emptyValueStrategy, out var collectionMap))
