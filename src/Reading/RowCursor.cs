@@ -51,7 +51,12 @@ internal sealed class RowCursor(Worksheet worksheet)
     public bool TryMoveTo(int index)
     {
         worksheet.ThrowIfClosed();
+        return Move(index);
+    }
 
+    // Moves to a row, once the reader is known to be open.
+    private bool Move(int index)
+    {
         var rowSource = worksheet.RowSource;
         var moved = rowSource.TryMoveTo(worksheet.Index, index);
         RowIndex = moved ? index : rowSource.LastRowIndex;
@@ -71,8 +76,8 @@ internal sealed class RowCursor(Worksheet worksheet)
     {
         worksheet.ThrowIfClosed();
 
-        // Ensure we're on the correct sheet and row.
-        MoveTo(RowIndex);
+        // Moving to the next row also moves the shared reader back to this sheet if another sheet
+        // of the importer moved it, so the cursor doesn't move to its current row first.
 
         // Check if we've reached the end of the data range. Only count the rows for ranges
         // relative to the end of the sheet: otherwise read until there are no more rows.
@@ -95,14 +100,14 @@ internal sealed class RowCursor(Worksheet worksheet)
 
         if (RowIndex + 1 < startRowIndex)
         {
-            if (startRowIndex >= endRowIndex || !TryMoveTo(startRowIndex - 1))
+            if (startRowIndex >= endRowIndex || !Move(startRowIndex - 1))
             {
                 return false;
             }
         }
 
         // Read the next row.
-        if (!TryMoveTo(RowIndex + 1))
+        if (!Move(RowIndex + 1))
         {
             return false;
         }
@@ -117,7 +122,7 @@ internal sealed class RowCursor(Worksheet worksheet)
             while (IsBlankRow(startColumnIndex, endColumnIndex))
             {
                 // Don't skip past the end of the data range.
-                if (RowIndex + 1 >= endRowIndex || !TryMoveTo(RowIndex + 1))
+                if (RowIndex + 1 >= endRowIndex || !Move(RowIndex + 1))
                 {
                     return false;
                 }
