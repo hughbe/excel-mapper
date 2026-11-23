@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections;
 
 namespace ExcelMapper.Tests;
@@ -5,33 +6,86 @@ namespace ExcelMapper.Tests;
 public class AutoMapTests
 {
     [Fact]
-    public void ReadRow_AutoMappedEmptyClass_Success()
+    public void ReadRow_AutoMappedEmptyClass_ThrowsExcelMappingException()
     {
+        // Nothing in the type can be mapped, so every row would be an empty object.
         using var importer = Helpers.GetImporter("Strings.xlsx");
-
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
-        // Valid value
-        var row1 = sheet.ReadRow<EmptyClass>();
-        Assert.IsType<EmptyClass>(row1);
-
-        // Valid value
-        var row2 = sheet.ReadRow<EmptyClass>();
-        Assert.IsType<EmptyClass>(row2);
-
-        // Empty value
-        var row3 = sheet.ReadRow<EmptyClass>();
-        Assert.IsType<EmptyClass>(row3);
-
-        // Last row.
-        var row4 = sheet.ReadRow<EmptyClass>();
-        Assert.IsType<EmptyClass>(row4);
-
-        // No more rows.
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EmptyClass>());
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<EmptyClass>());
+        Assert.StartsWith("The class map for type", exception.Message);
     }
     
+    [Fact]
+    public void ReadRows_AutoMappedEmptyClass_MessageNamesType()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\n1\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<EmptyClass>().ToArray());
+        Assert.Equal($"The class map for type \"{typeof(EmptyClass)}\" maps no members, so every row would be an empty object. Auto-mapping maps public fields, and public properties with a public setter or set by a public constructor; map other members with Map(...) in a class map.", exception.Message);
+    }
+
+    [Fact]
+    public void ReadRows_AutoMappedPrivateSetters_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\n1\n");
+        Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<PrivateSetterClass>().ToArray());
+    }
+
+    [Fact]
+    public void ReadRows_AutoMappedEveryMemberIgnored_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\n1\n");
+        Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<IgnoredClass>().ToArray());
+    }
+
+    [Fact]
+    public void ReadRows_AutoMappedNestedEmptyClass_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\n1\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<NestedEmptyClass>().ToArray());
+        Assert.Contains($"\"{typeof(EmptyClass)}\"", exception.Message);
+    }
+
+    [Fact]
+    public void ReadRows_RegisteredEmptyClassMap_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\n1\n");
+        importer.Configuration.RegisterClassMap<PublicSetterClass>(c => { });
+        Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<PublicSetterClass>().ToArray());
+    }
+
+    [Fact]
+    public void ReadRows_ClassMapWithPrivateSetterMapped_ReturnsExpected()
+    {
+        // A member auto-mapping skips can be mapped in a class map.
+        using var importer = Helpers.GetCsvImporter("Value\n1\n");
+        importer.Configuration.RegisterClassMap<PrivateSetterClass>(c => c.Map(p => p.Value));
+        Assert.Equal(1, importer.ReadSheet().ReadRows<PrivateSetterClass>().Single().Value);
+    }
+
+    private class PrivateSetterClass
+    {
+        public int Value { get; private set; }
+    }
+
+    private class IgnoredClass
+    {
+        [ExcelIgnore]
+        public int Value { get; set; }
+    }
+
+    private class NestedEmptyClass
+    {
+        public int Value { get; set; }
+        public EmptyClass Nested { get; set; } = new();
+    }
+
+    private class PublicSetterClass
+    {
+        public int Value { get; set; }
+    }
+
     private class EmptyClass
     {
     }
