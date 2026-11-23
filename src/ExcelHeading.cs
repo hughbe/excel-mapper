@@ -7,7 +7,7 @@ namespace ExcelMapper;
 /// <summary>
 /// An object that represents the heading read from a sheet.
 /// </summary>
-public class ExcelHeading
+public sealed class ExcelHeading
 {
     internal ExcelHeading(IDataRecord reader, ExcelRange dataRange, int maxColumns)
     {

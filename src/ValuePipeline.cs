@@ -5,11 +5,11 @@ namespace ExcelMapper;
 
 /// <summary>
 /// How the cells of a member are converted to its type: the transformers, converters and
-/// fallbacks set with the value methods in <see cref="ValuePipelineExtensions"/>. A member's map
-/// (<see cref="ValueMap{T}"/>) is a pipeline, and collections and dictionaries have one for
-/// their elements or values.
+/// fallbacks set with the value methods of <see cref="ValuePipeline{T, TSelf}"/> and
+/// <see cref="ValuePipelineExtensions"/>. A member's map (<see cref="ValueMap{T}"/>) has one, and
+/// so do the elements or values of collections and dictionaries (<see cref="ElementMap{T}"/>).
 /// </summary>
-public abstract class ValuePipeline
+internal abstract class ValuePipeline
 {
     // Pipelines are typed: see ValuePipeline<T>.
     private protected ValuePipeline()

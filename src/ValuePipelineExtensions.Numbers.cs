@@ -10,17 +10,17 @@ namespace ExcelMapper;
 public static partial class ValuePipelineExtensions
 {
 #if NET7_0_OR_GREATER
-    private static void AddNumberMapperIfMissing<T>(ValuePipeline<T> map) where T : struct, System.Numerics.INumberBase<T>
-        => map.AddMapperIfMissing<T, StructNumberMapper<T>>(static () => new StructNumberMapper<T>());
+    private static void AddNumberMapperIfMissing<T>(ValuePipeline<T> pipeline) where T : struct, System.Numerics.INumberBase<T>
+        => pipeline.AddMapperIfMissing<T, StructNumberMapper<T>>(static () => new StructNumberMapper<T>());
 
-    private static void AddNumberMapperIfMissing<T>(ValuePipeline<T?> map) where T : struct, System.Numerics.INumberBase<T>
-        => map.AddMapperIfMissing<T?, StructNumberMapper<T>>(static () => new StructNumberMapper<T>());
+    private static void AddNumberMapperIfMissing<T>(ValuePipeline<T?> pipeline) where T : struct, System.Numerics.INumberBase<T>
+        => pipeline.AddMapperIfMissing<T?, StructNumberMapper<T>>(static () => new StructNumberMapper<T>());
 #else
-    private static void AddNumberMapperIfMissing<T>(ValuePipeline<T> map) where T : struct
-        => map.AddMapperIfMissing<T, NumberMapper<T>>(static () => new NumberMapper<T>());
+    private static void AddNumberMapperIfMissing<T>(ValuePipeline<T> pipeline) where T : struct
+        => pipeline.AddMapperIfMissing<T, NumberMapper<T>>(static () => new NumberMapper<T>());
 
-    private static void AddNumberMapperIfMissing<T>(ValuePipeline<T?> map) where T : struct
-        => map.AddMapperIfMissing<T?, NumberMapper<T>>(static () => new NumberMapper<T>());
+    private static void AddNumberMapperIfMissing<T>(ValuePipeline<T?> pipeline) where T : struct
+        => pipeline.AddMapperIfMissing<T?, NumberMapper<T>>(static () => new NumberMapper<T>());
 #endif
 
     /// <summary>
@@ -33,8 +33,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<sbyte, TMap> map, NumberStyles style) where TMap : ValuePipeline<sbyte, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -49,8 +49,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<sbyte, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<sbyte, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -64,8 +64,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<sbyte?, TMap> map, NumberStyles style) where TMap : ValuePipeline<sbyte?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -80,8 +80,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<sbyte?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<sbyte?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -95,8 +95,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<byte, TMap> map, NumberStyles style) where TMap : ValuePipeline<byte, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -111,8 +111,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<byte, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<byte, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -126,8 +126,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<byte?, TMap> map, NumberStyles style) where TMap : ValuePipeline<byte?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -142,8 +142,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<byte?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<byte?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -157,8 +157,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<short, TMap> map, NumberStyles style) where TMap : ValuePipeline<short, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -173,8 +173,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<short, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<short, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -188,8 +188,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<short?, TMap> map, NumberStyles style) where TMap : ValuePipeline<short?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -204,8 +204,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<short?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<short?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -219,8 +219,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<ushort, TMap> map, NumberStyles style) where TMap : ValuePipeline<ushort, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -235,8 +235,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<ushort, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<ushort, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -250,8 +250,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<ushort?, TMap> map, NumberStyles style) where TMap : ValuePipeline<ushort?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -266,8 +266,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<ushort?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<ushort?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -281,8 +281,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<int, TMap> map, NumberStyles style) where TMap : ValuePipeline<int, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -297,8 +297,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<int, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<int, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -312,8 +312,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<int?, TMap> map, NumberStyles style) where TMap : ValuePipeline<int?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -328,8 +328,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<int?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<int?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -343,8 +343,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<uint, TMap> map, NumberStyles style) where TMap : ValuePipeline<uint, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -359,8 +359,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<uint, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<uint, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -374,8 +374,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<uint?, TMap> map, NumberStyles style) where TMap : ValuePipeline<uint?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -390,8 +390,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<uint?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<uint?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -405,8 +405,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<long, TMap> map, NumberStyles style) where TMap : ValuePipeline<long, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -421,8 +421,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<long, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<long, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -436,8 +436,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<long?, TMap> map, NumberStyles style) where TMap : ValuePipeline<long?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -452,8 +452,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<long?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<long?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -467,8 +467,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<ulong, TMap> map, NumberStyles style) where TMap : ValuePipeline<ulong, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -483,8 +483,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<ulong, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<ulong, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -498,8 +498,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<ulong?, TMap> map, NumberStyles style) where TMap : ValuePipeline<ulong?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -514,8 +514,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<ulong?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<ulong?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -529,8 +529,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<float, TMap> map, NumberStyles style) where TMap : ValuePipeline<float, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -545,8 +545,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<float, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<float, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -560,8 +560,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<float?, TMap> map, NumberStyles style) where TMap : ValuePipeline<float?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -576,8 +576,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<float?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<float?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -591,8 +591,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<double, TMap> map, NumberStyles style) where TMap : ValuePipeline<double, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -607,8 +607,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<double, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<double, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -622,8 +622,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<double?, TMap> map, NumberStyles style) where TMap : ValuePipeline<double?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -638,8 +638,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<double?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<double?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -653,8 +653,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<decimal, TMap> map, NumberStyles style) where TMap : ValuePipeline<decimal, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -669,8 +669,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<decimal, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<decimal, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -684,8 +684,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithNumberStyle<TMap>(this ValuePipeline<decimal?, TMap> map, NumberStyles style) where TMap : ValuePipeline<decimal?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.NumberStyle = style;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.NumberStyle = style;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 
@@ -700,8 +700,8 @@ public static partial class ValuePipelineExtensions
     public static TMap WithFormatProvider<TMap>(this ValuePipeline<decimal?, TMap> map, IFormatProvider? provider) where TMap : ValuePipeline<decimal?, TMap>
     {
         ThrowHelpers.ThrowIfNull(map, nameof(map));
-        map.Options.Provider = provider;
-        AddNumberMapperIfMissing(map);
+        map.Pipeline.Options.Provider = provider;
+        AddNumberMapperIfMissing(map.Pipeline);
         return (TMap)map;
     }
 }

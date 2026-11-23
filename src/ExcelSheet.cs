@@ -15,7 +15,7 @@ namespace ExcelMapper;
 /// <see cref="ReadRows{T}()"/> and then process the collection in parallel.
 /// </para>
 /// </remarks>
-public class ExcelSheet
+public sealed class ExcelSheet
 {
     /// <summary>
     /// Creates a sheet for a worksheet.

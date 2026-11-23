@@ -11,7 +11,7 @@ namespace ExcelMapper;
 /// Maps a member to an Excel column of type T with a one-to-one relationship.
 /// </summary>
 /// <typeparam name="T">The type of the member.</typeparam>
-public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IColumnsMap, IBindableMap
+public sealed class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IColumnsMap, IBindableMap
 {
     internal ValueMap(Columns columns)
     {
@@ -45,16 +45,13 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IColumnsMap, IBindable
     /// </summary>
     public bool PreserveFormatting => Settings.PreserveFormatting;
 
-    /// <summary>
-    /// Gets the map's value pipeline: the map itself, which converts the cell's value.
-    /// </summary>
-    ValuePipeline IColumnsMap.Pipeline => this;
+    ValuePipeline IColumnsMap.Pipeline => Pipeline;
 
     /// <inheritdoc />
     void IMap.Freeze()
     {
         Settings.Freeze();
-        Freeze();
+        Pipeline.Freeze();
     }
 
     /// <inheritdoc />
@@ -89,7 +86,7 @@ public class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IColumnsMap, IBindable
             return Settings.MissingColumn(sheet, rowIndex, member);
         }
 
-        value = Map(sheet, rowIndex, new ReadCellResult(columnIndex, reader, PreserveFormatting), member, errors);
+        value = Pipeline.Map(sheet, rowIndex, new ReadCellResult(columnIndex, reader, PreserveFormatting), member, errors);
         return true;
     }
 

@@ -431,7 +431,6 @@ ExcelMapper.ValueMap<T>.WithColumnNames(params string![]! columnNames) -> ExcelM
 ExcelMapper.ValueMap<T>.WithColumnNames(System.Collections.Generic.IEnumerable<string!>! columnNames) -> ExcelMapper.ValueMap<T>!
 ExcelMapper.ValueMap<T>.WithColumnNames(System.Collections.Generic.IEnumerable<string!>! columnNames, System.StringComparison comparison) -> ExcelMapper.ValueMap<T>!
 ExcelMapper.ValueMap<T>.WithColumns(ExcelMapper.IColumnSelector! selector) -> ExcelMapper.ValueMap<T>!
-ExcelMapper.ValuePipeline
 ExcelMapper.ValuePipeline<T, TSelf>
 ExcelMapper.ValuePipeline<T, TSelf>.WithConverter(System.Func<string?, T>! converter) -> TSelf!
 ExcelMapper.ValuePipeline<T, TSelf>.WithEmptyFallback(T? fallbackValue) -> TSelf!
@@ -446,7 +445,6 @@ ExcelMapper.ValuePipeline<T, TSelf>.WithThrowingFallback() -> TSelf!
 ExcelMapper.ValuePipeline<T, TSelf>.WithThrowingInvalidFallback() -> TSelf!
 ExcelMapper.ValuePipeline<T, TSelf>.WithTransformers(params ExcelMapper.ICellTransformer![]! transformers) -> TSelf!
 ExcelMapper.ValuePipeline<T, TSelf>.WithTrim() -> TSelf!
-ExcelMapper.ValuePipeline<T>
 ExcelMapper.ValuePipelineExtensions
 override ExcelMapper.CellValue.ToString() -> string!
 override ExcelMapper.ExcelRange.Equals(object? obj) -> bool

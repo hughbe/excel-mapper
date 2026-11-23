@@ -13,7 +13,7 @@ namespace ExcelMapper;
 /// Reads multiple cells of an excel sheet and maps the value of the cell to the
 /// type of the property or field.
 /// </summary>
-public class CollectionMap<TElement> : ICellsMap
+public sealed class CollectionMap<TElement> : ICellsMap
 {
     /// <summary>
     /// Constructs a map that reads one or more values from one or more cells and maps these values to one
@@ -55,15 +55,15 @@ public class CollectionMap<TElement> : ICellsMap
     /// <summary>
     /// The mapping pipeline for each element in the list.
     /// </summary>
-    internal ElementMap<TElement> Pipeline { get; private set; } = new ElementMap<TElement>();
+    internal ElementMap<TElement> Elements { get; private set; } = new ElementMap<TElement>();
 
-    ValuePipeline IColumnsMap.Pipeline => Pipeline;
+    ValuePipeline IColumnsMap.Pipeline => Elements.Pipeline;
 
     /// <inheritdoc />
     void IMap.Freeze()
     {
         Settings.Freeze();
-        Pipeline.Freeze();
+        Elements.Pipeline.Freeze();
     }
 
     /// <summary>
@@ -102,7 +102,7 @@ public class CollectionMap<TElement> : ICellsMap
             var index = 0;
             while (cellsReader.TryGetNext(out var result))
             {
-                var elementValue = Pipeline.Map(sheet, rowIndex, result, member, errors);
+                var elementValue = Elements.Pipeline.Map(sheet, rowIndex, result, member, errors);
                 Builder.Add(items, index++, elementValue);
             }
         }
@@ -126,10 +126,10 @@ public class CollectionMap<TElement> : ICellsMap
     {
         ThrowHelpers.ThrowIfNull(elementMap, nameof(elementMap));
 
-        var result = elementMap(Pipeline);
+        var result = elementMap(Elements);
         ThrowHelpers.ThrowIfNull(result, nameof(elementMap));
         Settings.ThrowIfFrozen();
-        Pipeline = result;
+        Elements = result;
         return this;
     }
 
