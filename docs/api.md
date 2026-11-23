@@ -49,7 +49,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 **`ExcelImporterConfiguration`** - An importer's settings and class maps.
 - `RegisterClassMap<TMap>()` / `RegisterClassMap(classMap)` - Use a class map for its type. Replaces a map created earlier by auto-mapping; throws if you already registered one
 - `RegisterClassMap<T>(c => ...)` - Configure a class map for `T` inline. It starts empty: only the members you map are read, unless you call `c.AutoMap()`
-- `TryGetClassMap<T>(out classMap)` / `TryGetClassMap(type, out classMap)` - The class map registered for a type, including one created by auto-mapping
+- `TryGetClassMap<T>(out classMap)` (an `ExcelClassMap<T>`) / `TryGetClassMap(type, out classMap)` - The class map registered for a type, including one created by auto-mapping
 - `Culture` - The culture to parse text and format values with (default: `CultureInfo.InvariantCulture`)
 - `SkipBlankLines` - Skip empty rows (default: false)
 - `IgnoreSeparatorsInColumnNames` - Match `FirstName` to "First Name", "first_name" and so on (default: false)
@@ -113,7 +113,7 @@ Columns:
 Values (also available on collection elements and dictionary values, through `WithElementMap` and `WithValueMap`):
 - `.WithConverter(value => ...)` - Convert the cell's text with a delegate, replacing the built-in conversion
 - `.WithConverter(ICellConverter<T>)` - Convert with a converter, which gets the typed cell value and where it is ([Custom converters](mapping.md#converters))
-- `.WithMapping(dictionary, comparer, behavior)` - Map fixed text to values
+- `.WithMapping(dictionary)`, optionally with a `comparer` and a `MappingDictionaryBehavior` - Map fixed text to values
 - `.WithFormats("yyyy-MM-dd", ...)` - Date, time and duration formats
 - `.WithFormatProvider(provider)` - The culture for dates, times, durations and numbers
 - `.WithNumberStyle(NumberStyles.Currency)` - How numbers are parsed (on the netstandard builds, for the built-in number types)
@@ -133,7 +133,7 @@ For a nullable member (`int?`), converters and fallbacks can be for the underlyi
 - `.WithColumnNames("A", "B")` / `.WithColumnIndices(0, 1)` - Read these columns
 - `.WithColumnsMatching(predicate)` / `.WithColumnsMatching(regex)` - Read every matching column
 - `.WithColumns(selector)` - Read the columns an `IColumnSelector` chooses
-- `.WithColumnName("Tags")` / `.WithColumnIndex(0)` / `.WithColumnLetter("B")` with `.WithSeparators(',', ';')` - Split one cell (collections only; `,` by default)
+- `.WithColumnName("Tags")` / `.WithColumnIndex(0)` / `.WithColumnLetter("B")` with `.WithSeparators(',', ';')` and `.WithSplitOptions(StringSplitOptions.RemoveEmptyEntries)` - Split one cell (collections only; `,` by default)
 - `.WithElementMap(e => ...)` / `.WithValueMap(v => ...)` - Configure each element or value with the value methods above
 - `.MakeOptional()`, `.MakePreserveFormatting()` - As for single values
 
@@ -141,13 +141,13 @@ For a nullable member (`int?`), converters and fallbacks can be for the underlyi
 
 | Attribute | Purpose |
 |-----------|---------|
-| `[ExcelColumnName("Name")]` | A column by name (ignoring case; pass a `StringComparison` to change that) |
-| `[ExcelColumnNames("Name1", "Name2")]` | For a single value, the first of these columns the sheet has; for a collection or dictionary, all of them |
+| `[ExcelColumnName("Name")]` | A column by name (ignoring case; set `Comparison` to change that) |
+| `[ExcelColumnNames("Name1", "Name2")]` | For a single value, the first of these columns the sheet has; for a collection or dictionary, all of them (set `Comparison` to change how names are compared) |
 | `[ExcelColumnIndex(0)]` / `[ExcelColumnLetter("C")]` | A column by position |
 | `[ExcelColumnIndices(0, 1)]` | For a single value, the first of these columns the sheet has; for a collection or dictionary, all of them |
-| `[ExcelColumnMatching("regex")]` / `[ExcelColumnMatching(typeof(Selector))]` | The first column matching a pattern, or chosen by an `IColumnSelector` |
-| `[ExcelColumnsMatching("regex")]` / `[ExcelColumnsMatching(typeof(Selector))]` | Every column matching a pattern, or chosen by an `IColumnSelector` (collections and dictionaries) |
-| `[ExcelSeparators(',', ';')]` | Split one cell into a collection with these separators |
+| `[ExcelColumnMatching("regex")]` / `[ExcelColumnMatching(typeof(Selector))]` | The first column matching a pattern (set `RegexOptions` for its options), or chosen by an `IColumnSelector` |
+| `[ExcelColumnsMatching("regex")]` / `[ExcelColumnsMatching(typeof(Selector))]` | Every column matching a pattern (set `RegexOptions` for its options), or chosen by an `IColumnSelector` (collections and dictionaries) |
+| `[ExcelSeparators(',', ';')]` | Split one cell into a collection with these separators (set `Options` to remove empty or trim values) |
 | `[ExcelOptional]` | Leave the member unset if the column is missing |
 | `[ExcelIgnore]` | Don't map the member |
 | `[ExcelRowNumber]` | Set a numeric member to the row's number |

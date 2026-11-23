@@ -56,16 +56,49 @@ public abstract class ValuePipeline<T, TSelf> : ValuePipeline<T> where TSelf : V
     }
 
     /// <summary>
+    /// Maps fixed text to values, for example codes or abbreviations, matched case-sensitively. Text
+    /// that isn't in the dictionary is converted as usual.
+    /// </summary>
+    /// <typeparam name="TValue">The type of the dictionary's values, for example <c>string</c> for a <c>string?</c> member.</typeparam>
+    /// <param name="mappingDictionary">The text to map, and the value for each.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public TSelf WithMapping<TValue>(IDictionary<string, TValue> mappingDictionary) where TValue : T
+        => WithMapping(mappingDictionary, null, MappingDictionaryBehavior.Optional);
+
+    /// <summary>
+    /// Maps fixed text to values, for example codes or abbreviations. Text that isn't in the
+    /// dictionary is converted as usual.
+    /// </summary>
+    /// <typeparam name="TValue">The type of the dictionary's values, for example <c>string</c> for a <c>string?</c> member.</typeparam>
+    /// <param name="mappingDictionary">The text to map, and the value for each.</param>
+    /// <param name="comparer">How text is compared, for example to ignore case, or null to compare case-sensitively.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public TSelf WithMapping<TValue>(IDictionary<string, TValue> mappingDictionary, IEqualityComparer<string>? comparer) where TValue : T
+        => WithMapping(mappingDictionary, comparer, MappingDictionaryBehavior.Optional);
+
+    /// <summary>
+    /// Maps fixed text to values, for example codes or abbreviations, matched case-sensitively. Text
+    /// that isn't in the dictionary is converted as usual, unless <paramref name="behavior"/> is
+    /// <see cref="MappingDictionaryBehavior.Required"/>.
+    /// </summary>
+    /// <typeparam name="TValue">The type of the dictionary's values, for example <c>string</c> for a <c>string?</c> member.</typeparam>
+    /// <param name="mappingDictionary">The text to map, and the value for each.</param>
+    /// <param name="behavior">Whether text that isn't in the dictionary is invalid.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public TSelf WithMapping<TValue>(IDictionary<string, TValue> mappingDictionary, MappingDictionaryBehavior behavior) where TValue : T
+        => WithMapping(mappingDictionary, null, behavior);
+
+    /// <summary>
     /// Maps fixed text to values, for example codes or abbreviations. Text that isn't in the
     /// dictionary is converted as usual, unless <paramref name="behavior"/> is
     /// <see cref="MappingDictionaryBehavior.Required"/>.
     /// </summary>
     /// <typeparam name="TValue">The type of the dictionary's values, for example <c>string</c> for a <c>string?</c> member.</typeparam>
     /// <param name="mappingDictionary">The text to map, and the value for each.</param>
-    /// <param name="comparer">How text is compared, for example to ignore case. Case-sensitive by default.</param>
+    /// <param name="comparer">How text is compared, for example to ignore case, or null to compare case-sensitively.</param>
     /// <param name="behavior">Whether text that isn't in the dictionary is invalid.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public TSelf WithMapping<TValue>(IDictionary<string, TValue> mappingDictionary, IEqualityComparer<string>? comparer = null, MappingDictionaryBehavior behavior = MappingDictionaryBehavior.Optional) where TValue : T
+    public TSelf WithMapping<TValue>(IDictionary<string, TValue> mappingDictionary, IEqualityComparer<string>? comparer, MappingDictionaryBehavior behavior) where TValue : T
     {
         ThrowHelpers.ThrowIfNull(mappingDictionary, nameof(mappingDictionary));
 

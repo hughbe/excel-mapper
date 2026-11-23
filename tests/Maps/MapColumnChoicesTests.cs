@@ -59,7 +59,7 @@ public class MapColumnChoicesTests
 
     public class OrdinalNames
     {
-        [ExcelColumnName("Full Name", StringComparison.Ordinal)]
+        [ExcelColumnName("Full Name", Comparison = StringComparison.Ordinal)]
         [ExcelColumnName("Other Name")]
         public string? Name { get; set; }
     }

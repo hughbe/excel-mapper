@@ -51,7 +51,8 @@ ExcelMapper.CollectionMap<TElement>.WithColumnIndex(int columnIndex) -> ExcelMap
 ExcelMapper.CollectionMap<TElement>.WithColumnIndices(params int[]! columnIndices) -> ExcelMapper.CollectionMap<TElement>!
 ExcelMapper.CollectionMap<TElement>.WithColumnIndices(System.Collections.Generic.IEnumerable<int>! columnIndices) -> ExcelMapper.CollectionMap<TElement>!
 ExcelMapper.CollectionMap<TElement>.WithColumnLetter(string! columnLetter) -> ExcelMapper.CollectionMap<TElement>!
-ExcelMapper.CollectionMap<TElement>.WithColumnName(string! columnName, System.StringComparison comparison = System.StringComparison.OrdinalIgnoreCase) -> ExcelMapper.CollectionMap<TElement>!
+ExcelMapper.CollectionMap<TElement>.WithColumnName(string! columnName) -> ExcelMapper.CollectionMap<TElement>!
+ExcelMapper.CollectionMap<TElement>.WithColumnName(string! columnName, System.StringComparison comparison) -> ExcelMapper.CollectionMap<TElement>!
 ExcelMapper.CollectionMap<TElement>.WithColumnNames(params string![]! columnNames) -> ExcelMapper.CollectionMap<TElement>!
 ExcelMapper.CollectionMap<TElement>.WithColumnNames(System.Collections.Generic.IEnumerable<string!>! columnNames) -> ExcelMapper.CollectionMap<TElement>!
 ExcelMapper.CollectionMap<TElement>.WithColumnNames(System.Collections.Generic.IEnumerable<string!>! columnNames, System.StringComparison comparison) -> ExcelMapper.CollectionMap<TElement>!
@@ -63,6 +64,7 @@ ExcelMapper.CollectionMap<TElement>.WithSeparators(params char[]! separators) ->
 ExcelMapper.CollectionMap<TElement>.WithSeparators(params string![]! separators) -> ExcelMapper.CollectionMap<TElement>!
 ExcelMapper.CollectionMap<TElement>.WithSeparators(System.Collections.Generic.IEnumerable<char>! separators) -> ExcelMapper.CollectionMap<TElement>!
 ExcelMapper.CollectionMap<TElement>.WithSeparators(System.Collections.Generic.IEnumerable<string!>! separators) -> ExcelMapper.CollectionMap<TElement>!
+ExcelMapper.CollectionMap<TElement>.WithSplitOptions(System.StringSplitOptions options) -> ExcelMapper.CollectionMap<TElement>!
 ExcelMapper.ColumnSelectorContext
 ExcelMapper.ColumnSelectorContext.ColumnSelectorContext() -> void
 ExcelMapper.ColumnSelectorContext.ColumnSelectorContext(ExcelMapper.ExcelSheet! sheet) -> void
@@ -121,7 +123,7 @@ ExcelMapper.ExcelClassMap<T>.MapDictionary<TValue>(System.Linq.Expressions.Expre
 ExcelMapper.ExcelClassMap<T>.MapExtraColumns<TValue>(System.Linq.Expressions.Expression<System.Func<T, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, TValue>>!>!>! expression) -> ExcelMapper.DictionaryMap<string!, TValue>!
 ExcelMapper.ExcelClassMap<T>.MapList<TElement>(System.Linq.Expressions.Expression<System.Func<T, System.Collections.IEnumerable!>!>! expression) -> ExcelMapper.CollectionMap<TElement>!
 ExcelMapper.ExcelClassMap<T>.MapObject<TElement>(System.Linq.Expressions.Expression<System.Func<T, TElement>!>! expression) -> ExcelMapper.ExcelClassMap<TElement>!
-ExcelMapper.ExcelClassMap<T>.MapRowNumber<TProperty>(System.Linq.Expressions.Expression<System.Func<T, TProperty>!>! expression) -> ExcelMapper.RowNumberMap!
+ExcelMapper.ExcelClassMap<T>.MapRowNumber<TProperty>(System.Linq.Expressions.Expression<System.Func<T, TProperty>!>! expression) -> void
 ExcelMapper.ExcelClassMap<T>.WithClassMap(ExcelMapper.ExcelClassMap<T>! classMap) -> ExcelMapper.ExcelClassMap<T>!
 ExcelMapper.ExcelClassMap<T>.WithClassMap(System.Action<ExcelMapper.ExcelClassMap<T>!>! configure) -> ExcelMapper.ExcelClassMap<T>!
 ExcelMapper.ExcelColumnIndexAttribute
@@ -136,25 +138,28 @@ ExcelMapper.ExcelColumnLetterAttribute.Letter.get -> string!
 ExcelMapper.ExcelColumnMatchingAttribute
 ExcelMapper.ExcelColumnMatchingAttribute.ConstructorArguments.get -> object?[]?
 ExcelMapper.ExcelColumnMatchingAttribute.ConstructorArguments.set -> void
-ExcelMapper.ExcelColumnMatchingAttribute.ExcelColumnMatchingAttribute(string! pattern, System.Text.RegularExpressions.RegexOptions options = System.Text.RegularExpressions.RegexOptions.None) -> void
+ExcelMapper.ExcelColumnMatchingAttribute.ExcelColumnMatchingAttribute(string! pattern) -> void
 ExcelMapper.ExcelColumnMatchingAttribute.ExcelColumnMatchingAttribute(System.Type! matcherType) -> void
+ExcelMapper.ExcelColumnMatchingAttribute.RegexOptions.get -> System.Text.RegularExpressions.RegexOptions
+ExcelMapper.ExcelColumnMatchingAttribute.RegexOptions.set -> void
 ExcelMapper.ExcelColumnMatchingAttribute.Type.get -> System.Type!
 ExcelMapper.ExcelColumnNameAttribute
 ExcelMapper.ExcelColumnNameAttribute.Comparison.get -> System.StringComparison
 ExcelMapper.ExcelColumnNameAttribute.Comparison.set -> void
-ExcelMapper.ExcelColumnNameAttribute.ExcelColumnNameAttribute(string! columnName, System.StringComparison comparison = System.StringComparison.OrdinalIgnoreCase) -> void
+ExcelMapper.ExcelColumnNameAttribute.ExcelColumnNameAttribute(string! columnName) -> void
 ExcelMapper.ExcelColumnNameAttribute.Name.get -> string!
 ExcelMapper.ExcelColumnNamesAttribute
 ExcelMapper.ExcelColumnNamesAttribute.Comparison.get -> System.StringComparison
 ExcelMapper.ExcelColumnNamesAttribute.Comparison.set -> void
 ExcelMapper.ExcelColumnNamesAttribute.ExcelColumnNamesAttribute(params string![]! columnNames) -> void
-ExcelMapper.ExcelColumnNamesAttribute.ExcelColumnNamesAttribute(string![]! columnNames, System.StringComparison comparison) -> void
 ExcelMapper.ExcelColumnNamesAttribute.Names.get -> System.Collections.Generic.IReadOnlyList<string!>!
 ExcelMapper.ExcelColumnsMatchingAttribute
 ExcelMapper.ExcelColumnsMatchingAttribute.ConstructorArguments.get -> object?[]?
 ExcelMapper.ExcelColumnsMatchingAttribute.ConstructorArguments.set -> void
-ExcelMapper.ExcelColumnsMatchingAttribute.ExcelColumnsMatchingAttribute(string! pattern, System.Text.RegularExpressions.RegexOptions options = System.Text.RegularExpressions.RegexOptions.None) -> void
+ExcelMapper.ExcelColumnsMatchingAttribute.ExcelColumnsMatchingAttribute(string! pattern) -> void
 ExcelMapper.ExcelColumnsMatchingAttribute.ExcelColumnsMatchingAttribute(System.Type! matcherType) -> void
+ExcelMapper.ExcelColumnsMatchingAttribute.RegexOptions.get -> System.Text.RegularExpressions.RegexOptions
+ExcelMapper.ExcelColumnsMatchingAttribute.RegexOptions.set -> void
 ExcelMapper.ExcelColumnsMatchingAttribute.Type.get -> System.Type!
 ExcelMapper.ExcelConstructor<TOwner>
 ExcelMapper.ExcelConstructorArguments<TOwner>
@@ -213,14 +218,14 @@ ExcelMapper.ExcelImporterConfiguration.IgnoreSeparatorsInColumnNames.set -> void
 ExcelMapper.ExcelImporterConfiguration.MaxColumnsPerSheet.get -> int
 ExcelMapper.ExcelImporterConfiguration.MaxColumnsPerSheet.set -> void
 ExcelMapper.ExcelImporterConfiguration.RegisterClassMap(ExcelMapper.ExcelClassMap! classMap) -> void
-ExcelMapper.ExcelImporterConfiguration.RegisterClassMap<T>() -> void
 ExcelMapper.ExcelImporterConfiguration.RegisterClassMap<T>(System.Action<ExcelMapper.ExcelClassMap<T>!>! configure) -> void
+ExcelMapper.ExcelImporterConfiguration.RegisterClassMap<TMap>() -> void
 ExcelMapper.ExcelImporterConfiguration.RegisterClassMapsInNamespace(string! namespaceString) -> System.Collections.Generic.IReadOnlyList<ExcelMapper.ExcelClassMap!>!
 ExcelMapper.ExcelImporterConfiguration.RegisterClassMapsInNamespace(System.Reflection.Assembly! assembly, string! namespaceString) -> System.Collections.Generic.IReadOnlyList<ExcelMapper.ExcelClassMap!>!
 ExcelMapper.ExcelImporterConfiguration.SkipBlankLines.get -> bool
 ExcelMapper.ExcelImporterConfiguration.SkipBlankLines.set -> void
 ExcelMapper.ExcelImporterConfiguration.TryGetClassMap(System.Type! classType, out ExcelMapper.ExcelClassMap? classMap) -> bool
-ExcelMapper.ExcelImporterConfiguration.TryGetClassMap<T>(out ExcelMapper.ExcelClassMap? classMap) -> bool
+ExcelMapper.ExcelImporterConfiguration.TryGetClassMap<T>(out ExcelMapper.ExcelClassMap<T>? classMap) -> bool
 ExcelMapper.ExcelImporterConfiguration.ValidateDataAnnotations.get -> bool
 ExcelMapper.ExcelImporterConfiguration.ValidateDataAnnotations.set -> void
 ExcelMapper.ExcelImporterFileType
@@ -408,8 +413,6 @@ ExcelMapper.IExcelErrorSink.Add(in ExcelMapper.ExcelMappingError error) -> void
 ExcelMapper.MappingDictionaryBehavior
 ExcelMapper.MappingDictionaryBehavior.Optional = 0 -> ExcelMapper.MappingDictionaryBehavior
 ExcelMapper.MappingDictionaryBehavior.Required = 1 -> ExcelMapper.MappingDictionaryBehavior
-ExcelMapper.RowNumberMap
-ExcelMapper.RowNumberMap.Type.get -> System.Type!
 ExcelMapper.ValueMap<T>
 ExcelMapper.ValueMap<T>.MakeOptional() -> ExcelMapper.ValueMap<T>!
 ExcelMapper.ValueMap<T>.MakePreserveFormatting() -> ExcelMapper.ValueMap<T>!
@@ -431,7 +434,10 @@ ExcelMapper.ValuePipeline<T, TSelf>.WithConverter(System.Func<string?, T>! conve
 ExcelMapper.ValuePipeline<T, TSelf>.WithEmptyFallback(T? fallbackValue) -> TSelf!
 ExcelMapper.ValuePipeline<T, TSelf>.WithFallback(T? value) -> TSelf!
 ExcelMapper.ValuePipeline<T, TSelf>.WithInvalidFallback(T? fallbackValue) -> TSelf!
-ExcelMapper.ValuePipeline<T, TSelf>.WithMapping<TValue>(System.Collections.Generic.IDictionary<string!, TValue>! mappingDictionary, System.Collections.Generic.IEqualityComparer<string!>? comparer = null, ExcelMapper.MappingDictionaryBehavior behavior = ExcelMapper.MappingDictionaryBehavior.Optional) -> TSelf!
+ExcelMapper.ValuePipeline<T, TSelf>.WithMapping<TValue>(System.Collections.Generic.IDictionary<string!, TValue>! mappingDictionary) -> TSelf!
+ExcelMapper.ValuePipeline<T, TSelf>.WithMapping<TValue>(System.Collections.Generic.IDictionary<string!, TValue>! mappingDictionary, ExcelMapper.MappingDictionaryBehavior behavior) -> TSelf!
+ExcelMapper.ValuePipeline<T, TSelf>.WithMapping<TValue>(System.Collections.Generic.IDictionary<string!, TValue>! mappingDictionary, System.Collections.Generic.IEqualityComparer<string!>? comparer) -> TSelf!
+ExcelMapper.ValuePipeline<T, TSelf>.WithMapping<TValue>(System.Collections.Generic.IDictionary<string!, TValue>! mappingDictionary, System.Collections.Generic.IEqualityComparer<string!>? comparer, ExcelMapper.MappingDictionaryBehavior behavior) -> TSelf!
 ExcelMapper.ValuePipeline<T, TSelf>.WithThrowingEmptyFallback() -> TSelf!
 ExcelMapper.ValuePipeline<T, TSelf>.WithThrowingFallback() -> TSelf!
 ExcelMapper.ValuePipeline<T, TSelf>.WithThrowingInvalidFallback() -> TSelf!

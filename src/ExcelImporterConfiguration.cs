@@ -107,15 +107,26 @@ public class ExcelImporterConfiguration
     /// <typeparam name="T">The type of the object to get the class map for.</typeparam>
     /// <param name="classMap">The class map for the given type if it exists, else null.</param>
     /// <returns>True if a class map exists for the given type, else false.</returns>
-    public bool TryGetClassMap<T>([NotNullWhen(true)] out ExcelClassMap? classMap) => TryGetClassMap(typeof(T), out classMap);
+    public bool TryGetClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>([NotNullWhen(true)] out ExcelClassMap<T>? classMap)
+    {
+        // Every class map registered for T is an ExcelClassMap<T> (see RegisterClassMap).
+        if (ClassMaps.TryGetValue(typeof(T), out var map))
+        {
+            classMap = (ExcelClassMap<T>)map;
+            return true;
+        }
+
+        classMap = null;
+        return false;
+    }
 
     /// <summary>
     /// Registers a class map of the given type to be used when mapping a row to an object.
     /// </summary>
-    /// <typeparam name="T">The type of the class map to use.</typeparam>
-    public void RegisterClassMap<T>() where T : ExcelClassMap, new()
+    /// <typeparam name="TMap">The type of the class map to use.</typeparam>
+    public void RegisterClassMap<TMap>() where TMap : ExcelClassMap, new()
     {
-        T classMap = Activator.CreateInstance<T>();
+        var classMap = new TMap();
         RegisterClassMap(classMap);
     }
 

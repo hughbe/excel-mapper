@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelDataReader;
 
-namespace ExcelMapper;
+namespace ExcelMapper.Maps;
 
 /// <summary>
 /// A map that sets a property or field to the number of the row being read, rather than to
@@ -13,7 +13,7 @@ namespace ExcelMapper;
 /// Create one with <see cref="ExcelRowNumberAttribute"/> or
 /// <see cref="ExcelClassMap{T}.MapRowNumber{TProperty}(System.Linq.Expressions.Expression{Func{T, TProperty}})"/>.
 /// </remarks>
-public sealed class RowNumberMap : IMap
+internal sealed class RowNumberMap : IMap
 {
     private readonly TypeCode _typeCode;
 

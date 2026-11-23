@@ -69,9 +69,10 @@ public class ExcelColumnsMatchingAttributeTests
     }
     
     [Fact]
-    public void Ctor_String_RegexOptions_IgnoreCase()
+    public void RegexOptions_Set_RecreatesRegex()
     {
-        var attribute = new ExcelColumnsMatchingAttribute(@"Year \d+$", RegexOptions.IgnoreCase);
+        var attribute = new ExcelColumnsMatchingAttribute(@"Year \d+$") { RegexOptions = RegexOptions.IgnoreCase };
+        Assert.Equal(RegexOptions.IgnoreCase, attribute.RegexOptions);
         Assert.Equal("RegexColumnMatcher", attribute.Type.Name);
         var regex = Assert.IsType<Regex>(Assert.Single(attribute.ConstructorArguments!));
         Assert.Equal(RegexOptions.IgnoreCase, regex.Options);
@@ -79,6 +80,26 @@ public class ExcelColumnsMatchingAttributeTests
         Assert.Matches(regex, "year 2024");
     }
     
+    [Fact]
+    public void RegexOptions_Default_ReturnsNone()
+    {
+        Assert.Equal(RegexOptions.None, new ExcelColumnsMatchingAttribute("a").RegexOptions);
+    }
+
+    [Fact]
+    public void RegexOptions_SetInvalid_ThrowsArgumentOutOfRangeException()
+    {
+        var attribute = new ExcelColumnsMatchingAttribute("a");
+        Assert.Throws<ArgumentOutOfRangeException>(() => attribute.RegexOptions = (RegexOptions)(-1));
+    }
+
+    [Fact]
+    public void RegexOptions_SetWithSelectorType_ThrowsInvalidOperationException()
+    {
+        var attribute = new ExcelColumnsMatchingAttribute(typeof(Selector));
+        Assert.Throws<InvalidOperationException>(() => attribute.RegexOptions = RegexOptions.IgnoreCase);
+    }
+
     [Fact]
     public void Ctor_NullPattern_ThrowsArgumentNullException()
     {

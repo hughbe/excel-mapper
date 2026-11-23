@@ -151,6 +151,60 @@ public class CollectionMapTests
     }
 
     [Fact]
+    public void WithSplitOptions_RemoveEmptyEntries_RemovesEmptyValues()
+    {
+        const string csv = "Name,Q1,Q2,Notes\na,1,2,x||y|\n";
+        // Empty values use the empty fallback: null for strings.
+        Assert.Equal(["x", null, "y", null], ReadStrings(m => m.WithColumnName("Notes").WithSeparators('|'), csv));
+        Assert.Equal(["x", "y"], ReadStrings(m => m.WithColumnName("Notes").WithSeparators('|').WithSplitOptions(StringSplitOptions.RemoveEmptyEntries), csv));
+        Assert.Equal(["x", "y"], ReadStrings(m => m.WithColumnName("Notes").WithSeparators("|").WithSplitOptions(StringSplitOptions.RemoveEmptyEntries), csv));
+    }
+
+    [Fact]
+    public void WithSplitOptions_TrimEntries_TrimsValues()
+    {
+        const string csv = "Name,Q1,Q2,Notes\na,1,2,x | y |  | z\n";
+        Assert.Equal(["x", "y", null, "z"], ReadStrings(m => m.WithColumnName("Notes").WithSeparators('|').WithSplitOptions(StringSplitOptions.TrimEntries), csv));
+        Assert.Equal(["x", "y", "z"], ReadStrings(m => m.WithColumnName("Notes").WithSeparators('|').WithSplitOptions(StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries), csv));
+    }
+
+    [Fact]
+    public void WithSplitOptions_BeforeWithSeparators_KeepsOptions()
+    {
+        const string csv = "Name,Q1,Q2,Notes\na,1,2,x||y\n";
+        Assert.Equal(["x", "y"], ReadStrings(m => m.WithColumnName("Notes").WithSplitOptions(StringSplitOptions.RemoveEmptyEntries).WithSeparators('|'), csv));
+    }
+
+    [Fact]
+    public void WithSplitOptions_AfterReading_ThrowsInvalidOperationException()
+    {
+        // The splitter is copied rather than changed, so a frozen map can't be changed through it.
+        var classMap = new ExcelClassMap<StringsRow>();
+        var map = classMap.Map(r => r.Values).WithColumnName("Notes").WithSeparators('|');
+        using var importer = Helpers.GetCsvImporter(Csv);
+        importer.Configuration.RegisterClassMap(classMap);
+        importer.ReadSheet().ReadRows<StringsRow>().ToArray();
+
+        Assert.Throws<InvalidOperationException>(() => map.WithSplitOptions(StringSplitOptions.RemoveEmptyEntries));
+    }
+
+    [Theory]
+    [InlineData((StringSplitOptions)4)]
+    [InlineData((StringSplitOptions)(-1))]
+    public void WithSplitOptions_InvalidOptions_ThrowsArgumentOutOfRangeException(StringSplitOptions options)
+    {
+        var map = CreateMap();
+        Assert.Throws<ArgumentOutOfRangeException>("options", () => map.WithSplitOptions(options));
+    }
+
+    [Fact]
+    public void WithSplitOptions_MultipleColumns_ThrowsExcelMappingException()
+    {
+        var map = CreateMap().WithColumnNames("Q1", "Q2");
+        Assert.Throws<ExcelMappingException>(() => map.WithSplitOptions(StringSplitOptions.RemoveEmptyEntries));
+    }
+
+    [Fact]
     public void WithElementMap_ValidMap_Success()
     {
         var map = CreateMap();

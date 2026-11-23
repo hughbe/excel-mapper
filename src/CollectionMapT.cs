@@ -134,13 +134,20 @@ public class CollectionMap<TElement> : ICellsMap
     }
 
     /// <summary>
-    /// Sets the reader for multiple values to split the value of a single cell contained in the column
-    /// with a given name.
+    /// Splits the value of the cell in the column with the given name, ignoring case.
+    /// </summary>
+    /// <param name="columnName">The name of the column containing the cell to split.</param>
+    /// <returns>The map that invoked this method.</returns>
+    public CollectionMap<TElement> WithColumnName(string columnName)
+        => WithColumnName(columnName, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Splits the value of the cell in the column with the given name.
     /// </summary>
     /// <param name="columnName">The name of the column containing the cell to split.</param>
     /// <param name="comparison">The string comparison to use when matching the column name.</param>
     /// <returns>The map that invoked this method.</returns>
-    public CollectionMap<TElement> WithColumnName(string columnName, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+    public CollectionMap<TElement> WithColumnName(string columnName, StringComparison comparison)
         => WithSplitCell(new ColumnNameColumns(columnName, comparison));
 
     /// <summary>
@@ -201,6 +208,29 @@ public class CollectionMap<TElement> : ICellsMap
     {
         SeparatorUtilities.ValidateSeparators(separators);
         return WithSplitter(new StringSplitter { Separators = separators });
+    }
+
+    /// <summary>
+    /// Sets how a split cell's values are split: whether empty values are removed
+    /// (<see cref="StringSplitOptions.RemoveEmptyEntries"/>) and, on .NET 5 and later, whether each
+    /// value is trimmed (<c>StringSplitOptions.TrimEntries</c>). As <see cref="ExcelSeparatorsAttribute.Options"/>.
+    /// </summary>
+    /// <param name="options">The split options.</param>
+    /// <returns>The map that invoked this method.</returns>
+    /// <exception cref="ExcelMappingException">The collection is read from several columns rather
+    /// than split from one cell.</exception>
+    public CollectionMap<TElement> WithSplitOptions(StringSplitOptions options)
+    {
+        SeparatorUtilities.ValidateOptions(options);
+        if (Columns is not SplitColumns split)
+        {
+            throw new ExcelMappingException("The mapping comes from multiple columns, so cannot be split.");
+        }
+
+        var splitter = split.Splitter.Copy();
+        splitter.Options = options;
+        Columns = new SplitColumns(split.Cell, splitter);
+        return this;
     }
 
     // Splits the cell with the given separators, keeping the split options.

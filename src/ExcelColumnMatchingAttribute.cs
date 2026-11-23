@@ -45,16 +45,43 @@ public sealed class ExcelColumnMatchingAttribute : Attribute
     }
     
     /// <summary>
-    /// Initializes a new instance of <see cref="ExcelColumnMatchingAttribute"/> with the specified regex matcher.
+    /// Initializes a new instance of <see cref="ExcelColumnMatchingAttribute"/> that matches column names with a
+    /// regular expression, with the options in <see cref="RegexOptions"/>.
     /// </summary>
     /// <param name="pattern">The regular expression pattern to match.</param>
-    /// <param name="options">A bitwise combination of the enumeration values that modify the regular expression.</param>
-    public ExcelColumnMatchingAttribute(string pattern, RegexOptions options = RegexOptions.None)
+    public ExcelColumnMatchingAttribute(string pattern)
     {
         ThrowHelpers.ThrowIfNull(pattern, nameof(pattern));
         ThrowHelpers.ThrowIfNullOrEmpty(pattern, nameof(pattern));
 
+        _pattern = pattern;
         Type = typeof(RegexColumnMatcher);
-        ConstructorArguments = [new Regex(pattern, options)];
+        ConstructorArguments = [new Regex(pattern)];
+    }
+
+    // The pattern given to the constructor, if any.
+    private readonly string? _pattern;
+    private RegexOptions _regexOptions;
+
+    /// <summary>
+    /// Gets or sets the options of the regular expression given to the constructor, such as
+    /// <c>[ExcelColumnMatching("^Q\\d$", RegexOptions = RegexOptions.IgnoreCase)]</c>.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The attribute was given a selector type rather
+    /// than a pattern.</exception>
+    public RegexOptions RegexOptions
+    {
+        get => _regexOptions;
+        set
+        {
+            if (_pattern is null)
+            {
+                throw new InvalidOperationException("RegexOptions only applies to an attribute given a pattern.");
+            }
+
+            // Validated by the Regex constructor.
+            ConstructorArguments = [new Regex(_pattern, value)];
+            _regexOptions = value;
+        }
     }
 }

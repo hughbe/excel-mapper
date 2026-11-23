@@ -282,11 +282,11 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <typeparam name="TProperty">The type of the property or field: a numeric type such as
     /// <see cref="int"/> or <see cref="long"/>, or a nullable numeric type.</typeparam>
     /// <param name="expression">A MemberExpression reading the property or field.</param>
-    /// <returns>The map for the given property or field.</returns>
     /// <exception cref="ArgumentException">The property or field is not a numeric type.</exception>
+    /// <remarks>A row number has nothing to configure, so nothing is returned.</remarks>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public RowNumberMap MapRowNumber<TProperty>(Expression<Func<T, TProperty>> expression)
+    public void MapRowNumber<TProperty>(Expression<Func<T, TProperty>> expression)
         => ExpressionAutoMapper.GetOrCreateRowNumberMap<T, TProperty>(this, expression.Body);
 
     /// <summary>

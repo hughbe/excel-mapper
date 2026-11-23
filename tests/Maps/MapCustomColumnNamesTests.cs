@@ -78,8 +78,8 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesMultipleOrdinalIgnoreCasePropertyClass
     {
-        [ExcelColumnName("NoSuchColumn", StringComparison.OrdinalIgnoreCase)]
-        [ExcelColumnName("StringValue", StringComparison.OrdinalIgnoreCase)]
+        [ExcelColumnName("NoSuchColumn", Comparison = StringComparison.OrdinalIgnoreCase)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.OrdinalIgnoreCase)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -109,8 +109,8 @@ public class MapCustomColumnNamesTests
     
     private class CustomNamesMultipleOrdinalIgnoreCaseFieldClass
     {
-        [ExcelColumnName("NoSuchColumn", StringComparison.OrdinalIgnoreCase)]
-        [ExcelColumnName("StringValue", StringComparison.OrdinalIgnoreCase)]
+        [ExcelColumnName("NoSuchColumn", Comparison = StringComparison.OrdinalIgnoreCase)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.OrdinalIgnoreCase)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -188,8 +188,8 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesMultipleOrdinalPropertyClass
     {
-        [ExcelColumnName("NoSuchColumn", StringComparison.Ordinal)]
-        [ExcelColumnName("StringValue", StringComparison.Ordinal)]
+        [ExcelColumnName("NoSuchColumn", Comparison = StringComparison.Ordinal)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.Ordinal)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -219,8 +219,8 @@ public class MapCustomColumnNamesTests
     
     private class CustomNamesMultipleOrdinalFieldClass
     {
-        [ExcelColumnName("NoSuchColumn", StringComparison.Ordinal)]
-        [ExcelColumnName("StringValue", StringComparison.Ordinal)]
+        [ExcelColumnName("NoSuchColumn", Comparison = StringComparison.Ordinal)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.Ordinal)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -294,8 +294,8 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesMultipleCurrentCultureIgnoreCasePropertyClass
     {
-        [ExcelColumnName("NoSuchColumn", StringComparison.CurrentCultureIgnoreCase)]
-        [ExcelColumnName("StringValue", StringComparison.CurrentCultureIgnoreCase)]
+        [ExcelColumnName("NoSuchColumn", Comparison = StringComparison.CurrentCultureIgnoreCase)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.CurrentCultureIgnoreCase)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -325,8 +325,8 @@ public class MapCustomColumnNamesTests
     
     private class CustomNamesMultipleCurrentCultureIgnoreCaseFieldClass
     {
-        [ExcelColumnName("NoSuchColumn", StringComparison.CurrentCultureIgnoreCase)]
-        [ExcelColumnName("StringValue", StringComparison.CurrentCultureIgnoreCase)]
+        [ExcelColumnName("NoSuchColumn", Comparison = StringComparison.CurrentCultureIgnoreCase)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.CurrentCultureIgnoreCase)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -404,8 +404,8 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesMultipleCurrentCulturePropertyClass
     {
-        [ExcelColumnName("NoSuchColumn", StringComparison.CurrentCulture)]
-        [ExcelColumnName("StringValue", StringComparison.CurrentCulture)]
+        [ExcelColumnName("NoSuchColumn", Comparison = StringComparison.CurrentCulture)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.CurrentCulture)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -435,8 +435,8 @@ public class MapCustomColumnNamesTests
     
     private class CustomNamesMultipleCurrentCultureFieldClass
     {
-        [ExcelColumnName("NoSuchColumn", StringComparison.CurrentCulture)]
-        [ExcelColumnName("StringValue", StringComparison.CurrentCulture)]
+        [ExcelColumnName("NoSuchColumn", Comparison = StringComparison.CurrentCulture)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.CurrentCulture)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -510,8 +510,8 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesMultipleInvariantCultureIgnoreCasePropertyClass
     {
-        [ExcelColumnName("NoSuchColumn", StringComparison.InvariantCultureIgnoreCase)]
-        [ExcelColumnName("StringValue", StringComparison.InvariantCultureIgnoreCase)]
+        [ExcelColumnName("NoSuchColumn", Comparison = StringComparison.InvariantCultureIgnoreCase)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.InvariantCultureIgnoreCase)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -541,8 +541,8 @@ public class MapCustomColumnNamesTests
     
     private class CustomNamesMultipleInvariantCultureIgnoreCaseFieldClass
     {
-        [ExcelColumnName("NoSuchColumn", StringComparison.InvariantCultureIgnoreCase)]
-        [ExcelColumnName("StringValue", StringComparison.InvariantCultureIgnoreCase)]
+        [ExcelColumnName("NoSuchColumn", Comparison = StringComparison.InvariantCultureIgnoreCase)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.InvariantCultureIgnoreCase)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -620,8 +620,8 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesMultipleInvariantCulturePropertyClass
     {
-        [ExcelColumnName("NoSuchColumn", StringComparison.InvariantCulture)]
-        [ExcelColumnName("StringValue", StringComparison.InvariantCulture)]
+        [ExcelColumnName("NoSuchColumn", Comparison = StringComparison.InvariantCulture)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.InvariantCulture)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -651,8 +651,8 @@ public class MapCustomColumnNamesTests
     
     private class CustomNamesMultipleInvariantCultureFieldClass
     {
-        [ExcelColumnName("NoSuchColumn", StringComparison.InvariantCulture)]
-        [ExcelColumnName("StringValue", StringComparison.InvariantCulture)]
+        [ExcelColumnName("NoSuchColumn", Comparison = StringComparison.InvariantCulture)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.InvariantCulture)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -794,7 +794,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesSingleOrdinalIgnoreCasePropertyClass
     {
-        [ExcelColumnNames(["NoSuchColumn", "StringValue"], StringComparison.OrdinalIgnoreCase)]
+        [ExcelColumnNames("NoSuchColumn", "StringValue", Comparison = StringComparison.OrdinalIgnoreCase)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -828,7 +828,7 @@ public class MapCustomColumnNamesTests
     
     private class CustomNamesSingleOrdinalIgnoreCaseFieldClass
     {
-        [ExcelColumnNames(["NoSuchColumn", "StringValue"], StringComparison.OrdinalIgnoreCase)]
+        [ExcelColumnNames("NoSuchColumn", "StringValue", Comparison = StringComparison.OrdinalIgnoreCase)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -918,7 +918,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesSingleOrdinalPropertyClass
     {
-        [ExcelColumnNames(["NoSuchColumn", "StringValue"], StringComparison.Ordinal)]
+        [ExcelColumnNames("NoSuchColumn", "StringValue", Comparison = StringComparison.Ordinal)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -952,7 +952,7 @@ public class MapCustomColumnNamesTests
     
     private class CustomNamesSingleOrdinalFieldClass
     {
-        [ExcelColumnNames(["NoSuchColumn", "StringValue"], StringComparison.Ordinal)]
+        [ExcelColumnNames("NoSuchColumn", "StringValue", Comparison = StringComparison.Ordinal)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -1038,7 +1038,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesSingleCurrentCultureIgnoreCasePropertyClass
     {
-        [ExcelColumnNames(["NoSuchColumn", "StringValue"], StringComparison.CurrentCultureIgnoreCase)]
+        [ExcelColumnNames("NoSuchColumn", "StringValue", Comparison = StringComparison.CurrentCultureIgnoreCase)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -1072,7 +1072,7 @@ public class MapCustomColumnNamesTests
     
     private class CustomNamesSingleCurrentCultureIgnoreCaseFieldClass
     {
-        [ExcelColumnNames(["NoSuchColumn", "StringValue"], StringComparison.CurrentCultureIgnoreCase)]
+        [ExcelColumnNames("NoSuchColumn", "StringValue", Comparison = StringComparison.CurrentCultureIgnoreCase)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -1162,7 +1162,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesSingleCurrentCulturePropertyClass
     {
-        [ExcelColumnNames(["NoSuchColumn", "StringValue"], StringComparison.CurrentCulture)]
+        [ExcelColumnNames("NoSuchColumn", "StringValue", Comparison = StringComparison.CurrentCulture)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -1196,7 +1196,7 @@ public class MapCustomColumnNamesTests
     
     private class CustomNamesSingleCurrentCultureFieldClass
     {
-        [ExcelColumnNames(["NoSuchColumn", "StringValue"], StringComparison.CurrentCulture)]
+        [ExcelColumnNames("NoSuchColumn", "StringValue", Comparison = StringComparison.CurrentCulture)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -1282,7 +1282,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesSingleInvariantCultureIgnoreCasePropertyClass
     {
-        [ExcelColumnNames(["NoSuchColumn", "StringValue"], StringComparison.InvariantCultureIgnoreCase)]
+        [ExcelColumnNames("NoSuchColumn", "StringValue", Comparison = StringComparison.InvariantCultureIgnoreCase)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -1316,7 +1316,7 @@ public class MapCustomColumnNamesTests
     
     private class CustomNamesSingleInvariantCultureIgnoreCaseFieldClass
     {
-        [ExcelColumnNames(["NoSuchColumn", "StringValue"], StringComparison.InvariantCultureIgnoreCase)]
+        [ExcelColumnNames("NoSuchColumn", "StringValue", Comparison = StringComparison.InvariantCultureIgnoreCase)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -1406,7 +1406,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesSingleInvariantCulturePropertyClass
     {
-        [ExcelColumnNames(["NoSuchColumn", "StringValue"], StringComparison.InvariantCulture)]
+        [ExcelColumnNames("NoSuchColumn", "StringValue", Comparison = StringComparison.InvariantCulture)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -1440,7 +1440,7 @@ public class MapCustomColumnNamesTests
     
     private class CustomNamesSingleInvariantCultureFieldClass
     {
-        [ExcelColumnNames(["NoSuchColumn", "StringValue"], StringComparison.InvariantCulture)]
+        [ExcelColumnNames("NoSuchColumn", "StringValue", Comparison = StringComparison.InvariantCulture)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -1638,7 +1638,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesEnumerableOrdinalIgnoreCasePropertyClass
     {
-        [ExcelColumnNames(["Year 2023", "Year 2024"], StringComparison.OrdinalIgnoreCase)]
+        [ExcelColumnNames("Year 2023", "Year 2024", Comparison = StringComparison.OrdinalIgnoreCase)]
         public object?[] CustomName { get; set; } = default!;
     }
 
@@ -1689,7 +1689,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesEnumerableOrdinalIgnoreCaseFieldClass
     {
-        [ExcelColumnNames(["Year 2023", "Year 2024"], StringComparison.OrdinalIgnoreCase)]
+        [ExcelColumnNames("Year 2023", "Year 2024", Comparison = StringComparison.OrdinalIgnoreCase)]
         public object?[] CustomName = default!;
     }
 
@@ -1830,7 +1830,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesEnumerableOrdinalPropertyClass
     {
-        [ExcelColumnNames(["Year 2023", "Year 2024"], StringComparison.Ordinal)]
+        [ExcelColumnNames("Year 2023", "Year 2024", Comparison = StringComparison.Ordinal)]
         public object?[] CustomName { get; set; } = default!;
     }
 
@@ -1881,7 +1881,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesEnumerableOrdinalFieldClass
     {
-        [ExcelColumnNames(["Year 2023", "Year 2024"], StringComparison.Ordinal)]
+        [ExcelColumnNames("Year 2023", "Year 2024", Comparison = StringComparison.Ordinal)]
         public object?[] CustomName = default!;
     }
 
@@ -2016,7 +2016,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesEnumerableCurrentCultureIgnoreCasePropertyClass
     {
-        [ExcelColumnNames(["Year 2023", "Year 2024"], StringComparison.CurrentCultureIgnoreCase)]
+        [ExcelColumnNames("Year 2023", "Year 2024", Comparison = StringComparison.CurrentCultureIgnoreCase)]
         public object?[] CustomName { get; set; } = default!;
     }
 
@@ -2067,7 +2067,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesEnumerableCurrentCultureIgnoreCaseFieldClass
     {
-        [ExcelColumnNames(["Year 2023", "Year 2024"], StringComparison.CurrentCultureIgnoreCase)]
+        [ExcelColumnNames("Year 2023", "Year 2024", Comparison = StringComparison.CurrentCultureIgnoreCase)]
         public object?[] CustomName = default!;
     }
 
@@ -2208,7 +2208,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesEnumerableCurrentCulturePropertyClass
     {
-        [ExcelColumnNames(["Year 2023", "Year 2024"], StringComparison.CurrentCulture)]
+        [ExcelColumnNames("Year 2023", "Year 2024", Comparison = StringComparison.CurrentCulture)]
         public object?[] CustomName { get; set; } = default!;
     }
 
@@ -2259,7 +2259,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesEnumerableCurrentCultureFieldClass
     {
-        [ExcelColumnNames(["Year 2023", "Year 2024"], StringComparison.CurrentCulture)]
+        [ExcelColumnNames("Year 2023", "Year 2024", Comparison = StringComparison.CurrentCulture)]
         public object?[] CustomName = default!;
     }
 
@@ -2394,7 +2394,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesEnumerableInvariantCultureIgnoreCasePropertyClass
     {
-        [ExcelColumnNames(["Year 2023", "Year 2024"], StringComparison.InvariantCultureIgnoreCase)]
+        [ExcelColumnNames("Year 2023", "Year 2024", Comparison = StringComparison.InvariantCultureIgnoreCase)]
         public object?[] CustomName { get; set; } = default!;
     }
 
@@ -2445,7 +2445,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesEnumerableInvariantCultureIgnoreCaseFieldClass
     {
-        [ExcelColumnNames(["Year 2023", "Year 2024"], StringComparison.InvariantCultureIgnoreCase)]
+        [ExcelColumnNames("Year 2023", "Year 2024", Comparison = StringComparison.InvariantCultureIgnoreCase)]
         public object?[] CustomName = default!;
     }
 
@@ -2586,7 +2586,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesEnumerableInvariantCulturePropertyClass
     {
-        [ExcelColumnNames(["Year 2023", "Year 2024"], StringComparison.InvariantCulture)]
+        [ExcelColumnNames("Year 2023", "Year 2024", Comparison = StringComparison.InvariantCulture)]
         public object?[] CustomName { get; set; } = default!;
     }
 
@@ -2637,7 +2637,7 @@ public class MapCustomColumnNamesTests
 
     private class CustomNamesEnumerableInvariantCultureFieldClass
     {
-        [ExcelColumnNames(["Year 2023", "Year 2024"], StringComparison.InvariantCulture)]
+        [ExcelColumnNames("Year 2023", "Year 2024", Comparison = StringComparison.InvariantCulture)]
         public object?[] CustomName = default!;
     }
 
