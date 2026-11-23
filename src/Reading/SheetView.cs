@@ -210,8 +210,15 @@ internal sealed class SheetView
         // Each enumeration starts from the same row, so the result can be enumerated more than
         // once, as with any IEnumerable<T>: calling Any() and then ToList() doesn't lose a row.
         _cursor.MoveTo(rowIndex);
-        while (TryReadRow(classMap, out T? row))
+        ExcelClassMap<T>? map = null;
+        while (AdvanceToNextRow())
         {
+            map = UseClassMapForRow(map, classMap);
+            if (!MapCurrentRow(map, null, out T? row))
+            {
+                yield break;
+            }
+
             yield return row;
         }
     }
@@ -265,9 +272,10 @@ internal sealed class SheetView
     {
         // Each enumeration reads the same rows.
         _cursor.MoveTo(startIndex - 1);
+        ExcelClassMap<T>? map = null;
         for (int i = 0; i < count; i++)
         {
-            if (!TryReadRow(classMap, out T? row))
+            if (!AdvanceToNextRow() || !MapCurrentRow(map = UseClassMapForRow(map, classMap), null, out T? row))
             {
                 throw new ExcelMappingException($"{ExcelMappingException.DescribeSheet(Name, capitalize: true)} does not have row {startIndex + i + 1}.");
             }
@@ -341,9 +349,11 @@ internal sealed class SheetView
         // only rows with errors get their own copy.
         var target = new ExceptionListTarget();
         var errors = target.Exceptions;
+        ExcelClassMap<T>? map = null;
         while (AdvanceToNextRow())
         {
-            var mapped = MapCurrentRow(classMap(this), target, out T? value);
+            map = UseClassMapForRow(map, classMap);
+            var mapped = MapCurrentRow(map, target, out T? value);
 
             if (errors.Count == 0)
             {
@@ -383,16 +393,36 @@ internal sealed class SheetView
     {
         // Each enumeration starts from the same row, as for ReadRows.
         _cursor.MoveTo(rowIndex);
+        ExcelClassMap<T>? map = null;
         while (AdvanceToNextRow())
         {
+            map = UseClassMapForRow(map, classMap);
+
             // A row with errors is reported to the sink, and skipped: partly mapped objects are
             // never returned.
             var errorCount = target.Count;
-            if (MapCurrentRow(classMap(this), target, out T? value) && target.Count == errorCount)
+            if (MapCurrentRow(map, target, out T? value) && target.Count == errorCount)
             {
                 yield return value;
             }
         }
+    }
+
+    /// <summary>
+    /// Gets the class map to map a row with, while reading several rows: looked up (and frozen)
+    /// on the first row, as <paramref name="classMap"/> does, and reused for the rest. Looking up a
+    /// registered or auto-mapped class map for every row cost about 5% of reading narrow rows.
+    /// </summary>
+    private ExcelClassMap<T> UseClassMapForRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T>? map, Func<SheetView, ExcelClassMap<T>> classMap)
+    {
+        if (map is null)
+        {
+            return classMap(this);
+        }
+
+        // Another read of this sheet, between two rows of this one, may have used another map.
+        RootMap = map;
+        return map;
     }
 
     private bool AdvanceToNextRow()
