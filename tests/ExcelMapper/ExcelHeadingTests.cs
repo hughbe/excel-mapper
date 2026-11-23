@@ -1,4 +1,6 @@
-﻿namespace ExcelMapper.Tests;
+﻿using System.Globalization;
+using System.Linq;
+namespace ExcelMapper.Tests;
 
 public class ExcelHeadingTests
 {
@@ -12,6 +14,44 @@ public class ExcelHeadingTests
         var columnNames = heading.ColumnNames;
         Assert.Equal(["Int Value", "StringValue", "Bool Value", "Enum Value", "DateValue", "ArrayValue", "MappedValue", "TrimmedValue"], columnNames);
         Assert.Same(columnNames, heading.ColumnNames);
+    }
+
+    [Fact]
+    public void ColumnNames_NumbersAndDates_UseImporterCulture()
+    {
+        // Not the machine's culture, so a heading is named the same on every machine.
+        var previous = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
+            using var importer = XlsxBuilder.Create([1.5, 2024.0, new DateTime(2024, 3, 4), true, "Name"], [1, 2, 3, 4, "a"]);
+            Assert.Equal(["1.5", "2024", "03/04/2024 00:00:00", "True", "Name"], importer.ReadSheet().ReadHeading().ColumnNames);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previous;
+        }
+    }
+
+    [Fact]
+    public void ColumnNames_NumbersWithCulture_UseCulture()
+    {
+        using var importer = XlsxBuilder.Create([1.5, "Name"], [1, "a"]);
+        importer.Configuration.Culture = CultureInfo.GetCultureInfo("de-DE");
+        Assert.Equal(["1,5", "Name"], importer.ReadSheet().ReadHeading().ColumnNames);
+    }
+
+    public class YearRow
+    {
+        [ExcelColumnName("2024")]
+        public int Sales { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_NumberHeading_MatchesColumnName()
+    {
+        using var importer = XlsxBuilder.Create([2023.0, 2024.0], [1, 2]);
+        Assert.Equal(2, importer.ReadSheet().ReadRows<YearRow>().Single().Sales);
     }
 
     [Fact]
