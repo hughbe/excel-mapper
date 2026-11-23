@@ -144,7 +144,7 @@ public class ExcelHeadingTests
         var sheet = importer.ReadSheet();
         var heading = sheet.ReadHeading();
 
-        Assert.Throws<ArgumentNullException>("columnName", () => heading.GetColumnIndex(null!));
+        Assert.Throws<ArgumentNullException>("columnName", () => heading.GetColumnIndex((string)null!));
     }
 
     [Theory]
@@ -170,7 +170,7 @@ public class ExcelHeadingTests
         for (int i = 0; i < columnNames.Length; i++)
         {
             var scopedIndex = i;
-            Assert.Equal(i, heading.GetFirstColumnMatchingIndex(e => e == columnNames[scopedIndex]));
+            Assert.Equal(i, heading.GetColumnIndex(e => e == columnNames[scopedIndex]));
             Assert.Equal(columnNames[i], heading.GetColumnName(i));
         }
     }
@@ -182,7 +182,7 @@ public class ExcelHeadingTests
         var sheet = importer.ReadSheet();
         var heading = sheet.ReadHeading();
 
-        Assert.Throws<ArgumentNullException>("predicate", () => heading.GetFirstColumnMatchingIndex(null!));
+        Assert.Throws<ArgumentNullException>("predicate", () => heading.GetColumnIndex((Func<string, bool>)null!));
     }
 
     [Theory]
@@ -194,7 +194,7 @@ public class ExcelHeadingTests
         var sheet = importer.ReadSheet();
         var heading = sheet.ReadHeading();
 
-        Assert.Throws<ExcelMappingException>(() => heading.GetFirstColumnMatchingIndex(e => e == columnName));
+        Assert.Throws<ExcelMappingException>(() => heading.GetColumnIndex(e => e == columnName));
     }
 
     [Fact]
@@ -262,7 +262,7 @@ public class ExcelHeadingTests
         var sheet = importer.ReadSheet();
         var heading = sheet.ReadHeading();
 
-        Assert.Throws<ArgumentNullException>("columnName", () => heading.TryGetColumnIndex(null!, out _));
+        Assert.Throws<ArgumentNullException>("columnName", () => heading.TryGetColumnIndex((string)null!, out _));
     }
 
     [Theory]
@@ -289,7 +289,7 @@ public class ExcelHeadingTests
         for (int i = 0; i < columnNames.Length; i++)
         {
             var scopedIndex = i;
-            Assert.True(heading.TryGetFirstColumnMatchingIndex(e => e == columnNames[scopedIndex], out int index));
+            Assert.True(heading.TryGetColumnIndex(e => e == columnNames[scopedIndex], out int index));
             Assert.Equal(i, index);
             Assert.Equal(columnNames[i], heading.GetColumnName(i));
         }
@@ -302,7 +302,7 @@ public class ExcelHeadingTests
         var sheet = importer.ReadSheet();
         var heading = sheet.ReadHeading();
 
-        Assert.Throws<ArgumentNullException>("predicate", () => heading.TryGetFirstColumnMatchingIndex(null!, out _));
+        Assert.Throws<ArgumentNullException>("predicate", () => heading.TryGetColumnIndex((Func<string, bool>)null!, out _));
     }
 
     [Theory]
@@ -314,7 +314,7 @@ public class ExcelHeadingTests
         var sheet = importer.ReadSheet();
         var heading = sheet.ReadHeading();
 
-        Assert.False(heading.TryGetFirstColumnMatchingIndex(e => e == columnName, out int index));
+        Assert.False(heading.TryGetColumnIndex(e => e == columnName, out int index));
         Assert.Equal(-1, index);
     }
 
@@ -334,7 +334,7 @@ public class ExcelHeadingTests
         Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => heading.GetColumnName(0));
         Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => heading.GetColumnName(3));
         Assert.False(heading.TryGetColumnIndex("Junk", out _));
-        Assert.Equal(1, heading.GetFirstColumnMatchingIndex(_ => true));
+        Assert.Equal(1, heading.GetColumnIndex(_ => true));
     }
 
     [Fact]
@@ -344,10 +344,10 @@ public class ExcelHeadingTests
         var sheet = importer.ReadSheet();
         var heading = sheet.ReadHeading();
 
-        Assert.Equal(0, heading.GetFirstColumnMatchingIndex(_ => true));
-        Assert.True(heading.TryGetFirstColumnMatchingIndex(_ => true, out var index));
+        Assert.Equal(0, heading.GetColumnIndex(_ => true));
+        Assert.True(heading.TryGetColumnIndex(_ => true, out var index));
         Assert.Equal(0, index);
-        Assert.Equal(2, heading.GetFirstColumnMatchingIndex(n => n.StartsWith("B")));
+        Assert.Equal(2, heading.GetColumnIndex(n => n.StartsWith("B")));
     }
 
     [Fact]
@@ -357,8 +357,8 @@ public class ExcelHeadingTests
         var sheet = importer.ReadSheet();
         var heading = sheet.ReadHeading();
 
-        Assert.False(heading.TryGetFirstColumnMatchingIndex(n => n == "Name_2", out _));
-        Assert.Equal(0, heading.GetFirstColumnMatchingIndex(n => n == "Name"));
+        Assert.False(heading.TryGetColumnIndex(n => n == "Name_2", out _));
+        Assert.Equal(0, heading.GetColumnIndex(n => n == "Name"));
     }
 
     [Fact]
@@ -385,6 +385,15 @@ public class ExcelHeadingTests
         using var importer = Helpers.GetCsvImporter("B,A,B\n1,2,3\n");
         var heading = importer.ReadSheet().ReadHeading();
         var exception = Assert.Throws<ExcelMappingException>(() => heading.GetColumnIndex("C"));
-        Assert.Equal("Column \"C\" does not exist in [\"B\", \"A\", \"B\"]", exception.Message);
+        Assert.Equal("The heading has no column \"C\". Its columns are \"B\", \"A\", \"B\".", exception.Message);
+    }
+
+    [Fact]
+    public void GetColumnIndex_NoColumnMatchesPredicate_ThrowsExcelMappingExceptionListingColumns()
+    {
+        using var importer = Helpers.GetCsvImporter("A,B\n1,2\n");
+        var heading = importer.ReadSheet().ReadHeading();
+        var exception = Assert.Throws<ExcelMappingException>(() => heading.GetColumnIndex(n => n == "C"));
+        Assert.Equal("No column's name matches the predicate. The heading's columns are \"A\", \"B\".", exception.Message);
     }
 }
