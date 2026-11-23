@@ -625,7 +625,7 @@ public class MultiMapTests
             Map<string>(p => p.MultiMapIndex)
                 .WithColumnIndices(3, 4);
 
-            MapList<string>(p => p.IEnumerableNonGeneric)
+            MapCollection<string>(p => p.IEnumerableNonGeneric)
                 .WithColumnNames("IListString1", "IListString2");
 
             Map(p => p.IEnumerableInt)
@@ -634,10 +634,10 @@ public class MultiMapTests
                     .WithFallback(default(int))
                 );
 
-            MapList<string>(p => p.ICollectionNonGeneric)
+            MapCollection<string>(p => p.ICollectionNonGeneric)
                 .WithColumnNames("IListString1", "IListString2");
 
-            MapList<string>(p => p.ICollectionString)
+            MapCollection<string>(p => p.ICollectionString)
                 .WithColumnNames("IListString1", "IListString2");
 
             Map(p => p.ICollectionBool)
@@ -646,10 +646,10 @@ public class MultiMapTests
                     .WithFallback(default(bool))
                 );
 
-            MapList<string>(p => p.IReadOnlyCollectionString)
+            MapCollection<string>(p => p.IReadOnlyCollectionString)
                 .WithColumnNames("IListString1", "IListString2");
 
-            MapList<string>(p => p.IListNonGeneric)
+            MapCollection<string>(p => p.IListNonGeneric)
                 .WithColumnNames("IListString1", "IListString2");
 
             Map(p => p.IListString)
@@ -672,13 +672,13 @@ public class MultiMapTests
             Map<string>(p => p.Array)
                 .WithColumnNames("ListString1", "ListString2");
 
-            MapList<string>(p => p.ArrayList)
+            MapCollection<string>(p => p.ArrayList)
                 .WithColumnNames("ListString1", "ListString2");
 
-            MapList<string>(p => p.StackNonGeneric)
+            MapCollection<string>(p => p.StackNonGeneric)
                 .WithColumnNames("ListString1", "ListString2");
 
-            MapList<string>(p => p.QueueNonGeneric)
+            MapCollection<string>(p => p.QueueNonGeneric)
                 .WithColumnNames("ListString1", "ListString2");
 
             Map(p => p.ListString)
@@ -698,25 +698,25 @@ public class MultiMapTests
                 .WithColumnNames("ListString1", "ListString2");
 #endif
 
-            MapList<string>(p => p.ImmutableArrayString)
+            MapCollection<string>(p => p.ImmutableArrayString)
                 .WithColumnNames("ListString1", "ListString2");
                 
-            MapList<string>(p => p.ImmutableListString)
+            MapCollection<string>(p => p.ImmutableListString)
                 .WithColumnNames("ListString1", "ListString2");
                 
-            MapList<string>(p => p.ImmutableStackString)
+            MapCollection<string>(p => p.ImmutableStackString)
                 .WithColumnNames("ListString1", "ListString2");
                 
-            MapList<string>(p => p.ImmutableQueueString)
+            MapCollection<string>(p => p.ImmutableQueueString)
                 .WithColumnNames("ListString1", "ListString2");
                 
-            MapList<string>(p => p.ImmutableSortedSetString)
+            MapCollection<string>(p => p.ImmutableSortedSetString)
                 .WithColumnNames("ListString1", "ListString2");
                 
-            MapList<string>(p => p.ImmutableHashSetString)
+            MapCollection<string>(p => p.ImmutableHashSetString)
                 .WithColumnNames("ListString1", "ListString2");
                 
-            MapList<string>(p => p.FrozenSetString)
+            MapCollection<string>(p => p.FrozenSetString)
                 .WithColumnNames("ListString1", "ListString2");
 
             Map(p => p.ObservableCollectionString)

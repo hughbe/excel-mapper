@@ -158,7 +158,7 @@ internal static class ClassMapCases
         check("Class map: list", () =>
         {
             using var importer = new ExcelImporter(Csv.Of("A,B\n1,2\n"), ExcelImporterFileType.Csv);
-            importer.Configuration.RegisterClassMap<Listed>(c => c.MapList<int>(l => l.Values).WithColumnNames("A", "B"));
+            importer.Configuration.RegisterClassMap<Listed>(c => c.MapCollection<int>(l => l.Values).WithColumnNames("A", "B"));
             return string.Join(",", importer.ReadSheet().ReadRows<Listed>().Single().Values);
         }, "1,2");
 

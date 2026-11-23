@@ -290,6 +290,7 @@ If you created a map with its constructor, or implemented `IMap`, map the member
 | `Map(p => p.Status, ignoreCase: true)` | `Map(p => p.Status).WithIgnoreCase()`, which only compiles for enums (the old overload compiled for any struct and threw when used) |
 | `.WithColumnNameMatching("Name", "Full Name")` (the first of several columns) | `.WithColumnNames("Name", "Full Name")`, as `[ExcelColumnNames]` means. `WithColumnNameMatching` still takes a predicate or regex. |
 | `.WithValueFallback(value)` | `.WithFallback(value)` |
+| `MapList<TElement>(p => p.Items)` | `MapCollection<TElement>(p => p.Items)`: it maps any collection, not only lists |
 | `map.Optional = true`, `map.PreserveFormatting = true` | `map.MakeOptional()`, `map.MakePreserveFormatting()`; the properties are read-only |
 | `collectionMap.Pipeline`, `dictionaryMap.Pipeline` | `.WithElementMap(e => ...)`, `.WithValueMap(v => ...)` |
 | `configuration.RegisterClassMap(typeof(T), classMap)` | `configuration.RegisterClassMap(classMap)`, which registers the class map for its own type: the removed overload let a map be registered for a different type |

@@ -75,7 +75,7 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
     /// <returns>The map for the given property or field.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public CollectionMap<TElement> MapList<TElement>(Expression<Func<T, IEnumerable>> expression)
+    public CollectionMap<TElement> MapCollection<TElement>(Expression<Func<T, IEnumerable>> expression)
         => ExpressionAutoMapper.GetOrCreateCollectionMap<T, TElement>(this, expression.Body);
 
     /// <summary>
