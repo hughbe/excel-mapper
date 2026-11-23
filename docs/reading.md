@@ -54,7 +54,9 @@ var block = sheet.ReadRows<Employee>(startIndex: 5, count: 10);
 - `ReadRows(startIndex, count)` reads rows by their zero-based index in the sheet. With the heading in the first row (index 0), the first data row is index 1. It throws if the rows don't exist.
 - To report every invalid cell instead of stopping at the first, use `ReadRowResults<T>()` (see [Collecting errors](errors.md#collecting-errors)).
 
-A blank row is mapped like any other row: reference and nullable members get `null`, and other members use their empty fallback, or throw. Set `importer.Configuration.SkipBlankLines = true` to skip blank rows instead. Empty lines at the end of a CSV file are always ignored.
+A row is blank if every cell in it is empty. Blank rows after the last row with a value aren't rows: workbooks often have formatted, empty rows below a table, and CSV files empty lines at the end. A blank row between rows with values is mapped like any other row: reference and nullable members get `null`, and other members use their empty fallback, or throw. Set `importer.Configuration.SkipBlankLines = true` to skip those too.
+
+A one-column sheet whose last rows are empty therefore ends at its last value: give the sheet another column, or a `DataRange`, if those rows matter.
 
 ## Where the heading is
 
@@ -138,7 +140,7 @@ Regions have `ReadRows<T>()`, `ReadRowResults<T>()`, `ValidateHeading<T>()` and 
 
 - **Regions are immutable**, and each read starts at the top of the region. Reading one doesn't use or change the sheet's heading, `DataRange` or position, so a region can be read any number of times, alongside other regions and the sheet.
 - **Positions count from the region's first column.** In region `B2:C3`, `[ExcelColumnIndex(0)]` and `[ExcelColumnLetter("A")]` are column B, so one type can map tables of the same shape anywhere on a sheet. Error messages give cell addresses in the sheet.
-- **Blank rows** are mapped like other rows unless `SkipBlankLines` is set. A region of columns `A:B` includes rows whose values are all in other columns.
+- **Blank rows** between rows with values are mapped like other rows unless `SkipBlankLines` is set, and blank rows at the end of the sheet aren't rows. A region of columns `A:B` includes rows whose values are all in other columns.
 
 ## Restricting the sheet's data
 

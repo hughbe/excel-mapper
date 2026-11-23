@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Linq;
 using static ExcelMapper.Tests.XlsxBuilder;
 
@@ -15,15 +15,17 @@ public class TypedCellTests
         public T Value { get; set; } = default!;
     }
 
+    // The second column keeps the row from being blank when the cell is empty, as a blank row at
+    // the end of a sheet isn't a row.
     private static T Map<T>(object? cell)
     {
-        using var importer = Create(["Value"], [cell]);
+        using var importer = Create(["Value", "Other"], [cell, 1]);
         return importer.ReadSheet().ReadRows<Holder<T>>().Single().Value;
     }
 
     private static ExcelMappingException MapFails<T>(object? cell)
     {
-        using var importer = Create(["Value"], [cell]);
+        using var importer = Create(["Value", "Other"], [cell, 1]);
         var sheet = importer.ReadSheet();
         return Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<Holder<T>>().ToArray());
     }

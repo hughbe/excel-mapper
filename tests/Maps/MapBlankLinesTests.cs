@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 
 namespace ExcelMapper.Tests;
 
@@ -227,9 +227,69 @@ public class MapBlankLinesTests
     [Fact]
     public void ReadRows_XlsxBlankRows_ReturnsExpected()
     {
-        using var importer = XlsxBuilder.Create(["Name"], ["a"], [null], ["b"], [null]);
+        // A blank row between rows is mapped; blank rows at the end aren't rows.
+        using var importer = XlsxBuilder.Create(["Name"], ["a"], [null], ["b"], [null], [null]);
         var rows = importer.ReadSheet().ReadRows<StringRow>().ToArray();
-        Assert.Equal(["a", null, "b", null], rows.Select(r => r.Name));
+        Assert.Equal(["a", null, "b"], rows.Select(r => r.Name));
+    }
+
+    [Fact]
+    public void ReadRows_XlsxBlankRowsBetweenRows_MapsEachBlankRow()
+    {
+        using var importer = XlsxBuilder.Create(["Name", "Age"], ["a", 1], [null, null], [null, null], [null, null], ["b", 2], [null, null]);
+        importer.Configuration.RegisterClassMap<PersonRow>(c =>
+        {
+            c.Map(r => r.Name);
+            c.Map(r => r.Age).WithEmptyFallback(-1);
+        });
+        var rows = importer.ReadSheet().ReadRows<PersonRow>().ToArray();
+        Assert.Equal(["a", null, null, null, "b"], rows.Select(r => r.Name));
+        Assert.Equal([1, -1, -1, -1, 2], rows.Select(r => r.Age));
+    }
+
+    [Fact]
+    public void ReadRows_XlsxOnlyBlankRowsAfterHeading_ReturnsNoRows()
+    {
+        using var importer = XlsxBuilder.Create(["Name"], [null], [null]);
+        Assert.Empty(importer.ReadSheet().ReadRows<StringRow>());
+    }
+
+    [Fact]
+    public void ReadRows_XlsxTrailingBlankRows_NotCountedFromEnd()
+    {
+        // Rows counted from the end leave out the blank rows at the end.
+        using var importer = XlsxBuilder.Create(["Name"], ["a"], [null], ["b"], [null], [null]);
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(..^1, Range.All);
+        Assert.Equal(["a", null], sheet.ReadRows<StringRow>().Select(r => r.Name));
+    }
+
+    [Fact]
+    public void ReadRows_XlsxBlankRowsBetweenRowsPreserveFormatting_AreEmpty()
+    {
+        using var importer = XlsxBuilder.Create(["Name"], ["a"], [null], ["b"]);
+        importer.Configuration.RegisterClassMap<StringRow>(c => c.Map(r => r.Name).MakePreserveFormatting());
+        Assert.Equal(["a", null, "b"], importer.ReadSheet().ReadRows<StringRow>().Select(r => r.Name));
+    }
+
+    [Fact]
+    public void ReadRows_XlsxBlankRowsBetweenRowsWithRowNumbers_NumberEveryRow()
+    {
+        using var importer = XlsxBuilder.Create(["Name"], ["a"], [null], [null], ["b"], [null]);
+        importer.Configuration.RegisterClassMap<NumberedRow>(c =>
+        {
+            c.Map(r => r.Name);
+            c.MapRowNumber(r => r.Row);
+        });
+        var rows = importer.ReadSheet().ReadRows<NumberedRow>().ToArray();
+        Assert.Equal([2, 3, 4, 5], rows.Select(r => r.Row));
+        Assert.Equal(["a", null, null, "b"], rows.Select(r => r.Name));
+    }
+
+    public class NumberedRow
+    {
+        public string? Name { get; set; }
+        public int Row { get; set; }
     }
 
     [Fact]
