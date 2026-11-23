@@ -373,14 +373,14 @@ public class ExcelSheetTests
     }
 
     [Fact]
-    public void ReadHeading_Closed_ThrowsExcelMappingException()
+    public void ReadHeading_Closed_ThrowsObjectDisposedException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
         var sheet = importer.ReadSheet();
         importer.Dispose();
 
-        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadHeading());
-        Assert.Equal("The underlying reader is closed.", ex.Message);
+        var ex = Assert.Throws<ObjectDisposedException>(() => sheet.ReadHeading());
+        Assert.Equal(nameof(ExcelImporter), ex.ObjectName);
     }
 
     [Fact]
@@ -678,14 +678,14 @@ public class ExcelSheetTests
     }
 
     [Fact]
-    public void ReadRows_Closed_ThrowsExcelMappingException()
+    public void ReadRows_Closed_ThrowsObjectDisposedException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
         var sheet = importer.ReadSheet();
         importer.Dispose();
 
-        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>());
-        Assert.Equal("The underlying reader is closed.", ex.Message);
+        var ex = Assert.Throws<ObjectDisposedException>(() => sheet.ReadRows<StringValue>());
+        Assert.Equal(nameof(ExcelImporter), ex.ObjectName);
     }
 
     public static IEnumerable<object[]> ReadRows_IndexCount_TestData()
@@ -773,14 +773,14 @@ public class ExcelSheetTests
     }
 
     [Fact]
-    public void ReadRows_IntIntClosed_ThrowsExcelMappingException()
+    public void ReadRows_IntIntClosed_ThrowsObjectDisposedException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
         var sheet = importer.ReadSheet();
         importer.Dispose();
 
-        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>(0, 1));
-        Assert.Equal("The underlying reader is closed.", ex.Message);
+        var ex = Assert.Throws<ObjectDisposedException>(() => sheet.ReadRows<StringValue>(0, 1));
+        Assert.Equal(nameof(ExcelImporter), ex.ObjectName);
     }
 
     [Fact]
@@ -1144,25 +1144,25 @@ public class ExcelSheetTests
     }
 
     [Fact]
-    public void ReadRow_Closed_ThrowsExcelMappingException()
+    public void ReadRow_Closed_ThrowsObjectDisposedException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
         var sheet = importer.ReadSheet();
         importer.Dispose();
 
-        var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<StringValue>());
-        Assert.Equal("The underlying reader is closed.", ex.Message);
+        var ex = Assert.Throws<ObjectDisposedException>(() => sheet.ReadRow<StringValue>());
+        Assert.Equal(nameof(ExcelImporter), ex.ObjectName);
     }
 
     [Fact]
-    public void TryReadRow_Closed_ThrowsExcelMappingException()
+    public void TryReadRow_Closed_ThrowsObjectDisposedException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
         var sheet = importer.ReadSheet();
         importer.Dispose();
 
-        var ex = Assert.Throws<ExcelMappingException>(() => sheet.TryReadRow<StringValue>(out var row));
-        Assert.Equal("The underlying reader is closed.", ex.Message);
+        var ex = Assert.Throws<ObjectDisposedException>(() => sheet.TryReadRow<StringValue>(out var row));
+        Assert.Equal(nameof(ExcelImporter), ex.ObjectName);
     }
 
     [Fact]
@@ -1271,16 +1271,16 @@ public class ExcelSheetTests
     }
 
     [Fact]
-    public void FindHeading_Closed_ThrowsExcelMappingException()
+    public void FindHeading_Closed_ThrowsObjectDisposedException()
     {
         using var importer = Helpers.GetImporter("Strings.xlsx");
         var sheet = importer.ReadSheet();
         importer.Dispose();
 
-        var ex = Assert.Throws<ExcelMappingException>(() => sheet.FindHeading<StringValue>());
-        Assert.Equal("The underlying reader is closed.", ex.Message);
-        ex = Assert.Throws<ExcelMappingException>(() => sheet.TryFindHeading<StringValue>(out _));
-        Assert.Equal("The underlying reader is closed.", ex.Message);
+        var ex = Assert.Throws<ObjectDisposedException>(() => sheet.FindHeading<StringValue>());
+        Assert.Equal(nameof(ExcelImporter), ex.ObjectName);
+        ex = Assert.Throws<ObjectDisposedException>(() => sheet.TryFindHeading<StringValue>(out _));
+        Assert.Equal(nameof(ExcelImporter), ex.ObjectName);
     }
 
     private class BlankLinesClass

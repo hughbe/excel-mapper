@@ -58,6 +58,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - `WithFallback` (was `WithValueFallback`), `WithEmptyFallback` and `WithInvalidFallback` take a value of the member's type instead of an `object`, so a value of the wrong type is a compile error instead of an `InvalidCastException` when rows are read. ([#170](https://github.com/hughbe/excel-mapper/pull/170))
 - Two helper types made public by accident are internal: `CallerArgumentExpressionAttribute` on the netstandard builds (a polyfill, which the compiler ignored) and `ExcelMapper.Utilities.StringComparerUtilities`. ([#167](https://github.com/hughbe/excel-mapper/pull/167))
 - `ExcelClassMap<T>.MapList` is renamed `MapCollection`, as it maps any collection type, such as `HashSet<T>`, not only lists. ([#225](https://github.com/hughbe/excel-mapper/pull/225))
+- Using an importer, or its sheets and regions, after disposing it (or after closing the `IExcelDataReader` it was created with) throws an `ObjectDisposedException` instead of an `ExcelMappingException`. ([#237](https://github.com/hughbe/excel-mapper/pull/237))
 
 ### Added
 
