@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelDataReader;
@@ -67,7 +66,6 @@ public sealed class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IColumnsMap, IB
         return false;
     }
 
-
     /// <summary>
     /// Finds the member's column in the sheet, or -1 if the sheet doesn't have it.
     /// </summary>
@@ -89,7 +87,6 @@ public sealed class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IColumnsMap, IB
         value = Pipeline.Map(sheet, rowIndex, new ReadCellResult(columnIndex, reader, PreserveFormatting), member, errors);
         return true;
     }
-
 
     /// <inheritdoc/>
     BoundMember<TOwner> IBindableMap.Bind<TOwner>(ClassMapMember member) => new BoundValueMember<TOwner, T>(this, member);

@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
-using ExcelMapper.AutoMapping;
 
 namespace ExcelMapper;
 

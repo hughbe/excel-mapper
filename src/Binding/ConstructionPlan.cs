@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
@@ -134,7 +135,7 @@ internal sealed class ConstructionPlan<[DynamicallyAccessedMembers(TrimmingConst
         if (constructor is null)
         {
             throw new ExcelMappingException(
-                $"Cannot create an instance of type \"{type}\". It needs a public parameterless constructor, or a public " +
+                $"Cannot create an instance of type {TypeNames.Get(type)}. It needs a public parameterless constructor, or a public " +
                 "constructor whose parameters each match a mapped property or field (by name and type) or have a default value.");
         }
 
@@ -161,7 +162,7 @@ internal sealed class ConstructionPlan<[DynamicallyAccessedMembers(TrimmingConst
         {
             if (memberParameterIndices[i] == -1 && classMembers[i].IsReadOnly)
             {
-                throw new ExcelMappingException($"Property \"{members[i].Name}\" of type {TypeNames.Get(type)} is read-only and is not a parameter of the constructor {constructor}.");
+                throw new ExcelMappingException($"Property \"{members[i].Name}\" of type {TypeNames.Get(type)} is read-only and is not a parameter of the constructor {TypeNames.Get(type)}({string.Join(", ", parameters.Select(p => TypeNames.Get(p.ParameterType)))}).");
             }
         }
 

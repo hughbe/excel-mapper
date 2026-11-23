@@ -41,7 +41,6 @@ internal static class MapValidation
         found += foundCount;
     }
 
-
     // A collection split from one cell reads one column.
     private static bool Found(Columns columns, bool many, SheetView sheet)
         => many && columns is not SplitColumns ? columns.FindColumns(sheet) is not null : columns.FindColumn(sheet) != -1;

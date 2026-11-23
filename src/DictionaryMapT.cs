@@ -1,6 +1,5 @@
 using ExcelMapper.Readers;
 using System.Text.RegularExpressions;
-using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelDataReader;
@@ -78,15 +77,8 @@ public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     /// <inheritdoc/>
     bool IMap.TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, ErrorTarget? errors, [NotNullWhen(true)] out object? value)
     {
-        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
-        if (sheet.Heading == null)
-        {
-            throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
-        }
-
         return TryGetValue(GetCellsReader(sheet), sheet, rowIndex, reader, member, errors, out value);
     }
-
 
     ICellsReader? ICellsMap.GetCellsReader(SheetView sheet) => GetCellsReader(sheet);
 
@@ -98,11 +90,7 @@ public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
 
     private bool TryGetValue(ICellsReader? cellsReader, SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, ErrorTarget? errors, [NotNullWhen(true)] out object? value)
     {
-        if (sheet.Heading == null)
-        {
-            throw new ExcelMappingException($"The sheet \"{sheet.Name}\" does not have a heading. Use a column index map instead.");
-        }
-
+        var heading = sheet.GetHeadingForKeys();
         if (!Settings.TryStart(cellsReader, sheet, rowIndex, reader, member, out var count))
         {
             value = default;
@@ -115,7 +103,7 @@ public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
             while (cellsReader.TryGetNext(out var valueResult))
             {
                 // The key is the column's name.
-                var elementKey = sheet.Heading.GetColumnName(valueResult.ColumnIndex);
+                var elementKey = heading.GetColumnName(valueResult.ColumnIndex);
                 TKey? convertedKey = elementKey is TKey key ? key : (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
                 if (convertedKey != null)
                 {

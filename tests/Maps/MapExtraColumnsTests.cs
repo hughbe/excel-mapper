@@ -453,7 +453,8 @@ public class MapExtraColumnsTests
         using var importer = Helpers.GetCsvImporter("a,London\n");
         var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<NoHeadingRow>().ToArray());
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<NoHeadingRow>().ToArray());
+        Assert.Equal("There's no heading to read extra columns from. Extra columns are the heading's columns that no other member reads.", exception.Message);
     }
 
     public class NoHeadingRow

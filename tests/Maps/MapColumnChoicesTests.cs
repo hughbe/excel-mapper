@@ -104,7 +104,7 @@ public class MapColumnChoicesTests
         var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<Single>().ToArray());
-        Assert.Contains("does not have a heading", exception.Message);
+        Assert.Contains("There's no heading to find columns by name", exception.Message);
 
         using var other = Helpers.GetCsvImporter("1,2\n");
         other.Configuration.RegisterClassMap<Single>(c => c.Map(r => r.Value).WithColumnNameMatching(n => n == "A"));

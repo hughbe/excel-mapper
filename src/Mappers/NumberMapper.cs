@@ -53,8 +53,6 @@ internal abstract class NumberMapper
     // The number style used when the member has none of its own.
     private protected NumberStyles DefaultStyle { get; }
 
-
-
     /// <summary>
     /// Gets whether the type is one of the built-in numeric types this mapper supports.
     /// </summary>

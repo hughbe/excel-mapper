@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using ExcelMapper.AutoMapping;
 using ExcelMapper.Mappers;
 
 namespace ExcelMapper;

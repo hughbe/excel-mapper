@@ -1,7 +1,5 @@
 using System.Reflection;
 using ExcelMapper.Fallbacks;
-using ExcelMapper.Mappers;
-using ExcelMapper.Transformers;
 
 namespace ExcelMapper;
 

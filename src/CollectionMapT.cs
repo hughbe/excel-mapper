@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -74,11 +73,8 @@ public sealed class CollectionMap<TElement> : ICellsMap
     /// <inheritdoc />
     bool IMap.TryGetValue(SheetView sheet, int rowIndex, IExcelDataReader reader, MemberInfo? member, ErrorTarget? errors, [NotNullWhen(true)] out object? value)
     {
-        ThrowHelpers.ThrowIfNull(sheet, nameof(sheet));
-
         return TryGetValue(GetCellsReader(sheet), sheet, rowIndex, reader, member, errors, out value);
     }
-
 
     ICellsReader? ICellsMap.GetCellsReader(SheetView sheet) => GetCellsReader(sheet);
 
@@ -154,7 +150,7 @@ public sealed class CollectionMap<TElement> : ICellsMap
     /// Sets the reader for multiple values to split the value of a single cell contained in the column
     /// at the given zero-based index.
     /// </summary>
-    /// <param name="columnIndex">The zero-bassed index of the column containing the cell to split.</param>
+    /// <param name="columnIndex">The zero-based index of the column containing the cell to split.</param>
     /// <returns>The map that invoked this method.</returns>
     public CollectionMap<TElement> WithColumnIndex(int columnIndex)
         => WithSplitCell(new ColumnIndexColumns(columnIndex));
