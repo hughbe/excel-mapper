@@ -10,7 +10,7 @@ internal sealed class Worksheet
 {
     public Worksheet(IExcelDataReader reader, int index, ExcelImporter importer)
     {
-        Reader = reader;
+        _reader = reader;
         Name = reader.Name;
 
         // CSV readers have no concept of sheet visibility and return a null state.
@@ -25,7 +25,13 @@ internal sealed class Worksheet
         Importer = importer;
     }
 
-    public IExcelDataReader Reader { get; }
+    // The importer's reader, which is on the sheet's rows only while RowSource has moved it there.
+    private readonly IExcelDataReader _reader;
+
+    /// <summary>
+    /// Gets the reader of the current row's cells (see <see cref="RowSource.CurrentReader"/>).
+    /// </summary>
+    public IExcelDataReader Reader => RowSource.CurrentReader;
 
     public string Name { get; }
 
@@ -43,7 +49,7 @@ internal sealed class Worksheet
 
     public void ThrowIfClosed()
     {
-        if (Reader.IsClosed)
+        if (_reader.IsClosed)
         {
             throw new ExcelMappingException("The underlying reader is closed.");
         }

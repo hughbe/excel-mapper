@@ -522,7 +522,7 @@ public class MapDateTimeOffsetTests
     [Fact]
     public void ReadRows_NullableAndSerialNumberWithOffset_UsesOffset()
     {
-        using var importer = XlsxBuilder.Create(["When"], [s_offsetDate.ToOADate()], [null]);
+        using var importer = XlsxBuilder.Create(["When"], [s_offsetDate.ToOADate()], [null], [s_offsetDate.ToOADate()]);
         importer.Configuration.RegisterClassMap<OffsetNullableRow>(c => c.Map(p => p.When).WithOffset(TimeSpan.Zero));
 
         var rows = importer.ReadSheet().ReadRows<OffsetNullableRow>().ToArray();

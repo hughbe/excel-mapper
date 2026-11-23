@@ -130,7 +130,7 @@ Console.WriteLine($"{counter.Count} problems");
 
 **The heading row, or a title, is mapped as data.** The heading isn't in the first row: set `HeadingIndex` or call `FindHeading<T>()` ([Where the heading is](reading.md#where-the-heading-is)).
 
-**Blank rows cause errors.** Set `importer.Configuration.SkipBlankLines = true`.
+**Blank rows cause errors.** Blank rows at the end of a sheet are ignored, but blank rows between rows with values are mapped, so an `int` member's empty cell is an error. Set `importer.Configuration.SkipBlankLines = true` to skip them.
 
 **`Circular reference detected: type Person references itself through its members`.** A type that contains itself can't be auto-mapped. Mark the member `[ExcelIgnore]`, or map the type with a class map.
 

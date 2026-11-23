@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Linq;
 
 namespace ExcelMapper.Tests;
@@ -11,7 +11,7 @@ public class MapDateFormatOptionsTests
     [Fact]
     public void ReadRows_NullableWithFormats_ReturnsExpected()
     {
-        using var importer = Helpers.GetCsvImporter("DateTime,Offset,TimeSpan\n20240304,20240304,01-30\n,,\n");
+        using var importer = Helpers.GetCsvImporter("DateTime,Offset,TimeSpan\n20240304,20240304,01-30\n,,\n20240304,20240304,01-30\n");
         importer.Configuration.RegisterClassMap<NullableRow>(c =>
         {
             c.Map(r => r.DateTime).WithFormats("yyyyMMdd");
@@ -67,7 +67,7 @@ public class MapDateFormatOptionsTests
     [Fact]
     public void ReadRows_NullableWithFormatProvider_UsesProvider()
     {
-        using var importer = Helpers.GetCsvImporter("DateTime,Offset,TimeSpan\n04/03/2024,04/03/2024,\"1:02:03,5\"\n,,\n");
+        using var importer = Helpers.GetCsvImporter("DateTime,Offset,TimeSpan\n04/03/2024,04/03/2024,\"1:02:03,5\"\n,,\n04/03/2024,04/03/2024,\"1:02:03,5\"\n");
         importer.Configuration.Culture = CultureInfo.GetCultureInfo("en-US");
         var british = CultureInfo.GetCultureInfo("en-GB");
         var french = CultureInfo.GetCultureInfo("fr-FR");

@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Linq;
 
 namespace ExcelMapper.Tests;
@@ -78,14 +78,15 @@ public class MapBuiltInConversionTests
     [Fact]
     public void ReadRows_EmptyValues_UseEmptyFallbacks()
     {
-        using var importer = Helpers.GetCsvImporter("Value,Name,When\n,,\n");
+        // A blank row at the end of a file isn't a row, so a row with values follows it.
+        using var importer = Helpers.GetCsvImporter("Value,Name,When\n,,\n1,a,2024-03-04\n");
         importer.Configuration.RegisterClassMap<Mixed>(c =>
         {
             c.Map(r => r.Value).WithEmptyFallback(5);
             c.Map(r => r.Name);
             c.Map(r => r.When).WithEmptyFallback(new DateTime(2024, 1, 1));
         });
-        var row = importer.ReadSheet().ReadRows<Mixed>().Single();
+        var row = importer.ReadSheet().ReadRows<Mixed>().First();
         Assert.Equal(5, row.Value);
         Assert.Null(row.Name);
         Assert.Equal(new DateTime(2024, 1, 1), row.When);
@@ -118,7 +119,7 @@ public class MapBuiltInConversionTests
     public void ReadRows_NullableMembers_ReturnsExpected()
     {
         var id = Guid.NewGuid();
-        using var importer = Helpers.GetCsvImporter($"Number,Flag,When,Id,Day\n5,yes,2024-03-04,{id},Monday\n,,,,\n");
+        using var importer = Helpers.GetCsvImporter($"Number,Flag,When,Id,Day\n5,yes,2024-03-04,{id},Monday\n,,,,\n5,yes,2024-03-04,{id},Monday\n");
         var rows = importer.ReadSheet().ReadRows<NullableRow>().ToArray();
         Assert.Equal(5, rows[0].Number);
         Assert.True(rows[0].Flag);
@@ -227,7 +228,7 @@ public class MapBuiltInConversionTests
     [Fact]
     public void ReadRows_NullableDateAndTime_ReturnsExpected()
     {
-        using var importer = Helpers.GetCsvImporter("Duration,Offset\n01:00:00,2024-03-04T10:30:00Z\n,\n");
+        using var importer = Helpers.GetCsvImporter("Duration,Offset\n01:00:00,2024-03-04T10:30:00Z\n,\n01:00:00,2024-03-04T10:30:00Z\n");
         var rows = importer.ReadSheet().ReadRows<NullableDateAndTimeRow>().ToArray();
         Assert.Equal(TimeSpan.FromHours(1), rows[0].Duration);
         Assert.Equal(new DateTimeOffset(2024, 3, 4, 10, 30, 0, TimeSpan.Zero), rows[0].Offset);
@@ -263,7 +264,7 @@ public class MapBuiltInConversionTests
     [Fact]
     public void ReadRows_DateOnlyAndTimeOnly_ReturnsExpected()
     {
-        using var importer = Helpers.GetCsvImporter("Date,Time\n2024-03-04,14:30\n,\n");
+        using var importer = Helpers.GetCsvImporter("Date,Time\n2024-03-04,14:30\n,\n2024-03-04,14:30\n");
         var rows = importer.ReadSheet().ReadRows<DateOnlyRow>().ToArray();
         Assert.Equal(new DateOnly(2024, 3, 4), rows[0].Date);
         Assert.Equal(new TimeOnly(14, 30), rows[0].Time);
@@ -360,7 +361,7 @@ public class MapBuiltInConversionTests
     [Fact]
     public void ReadRows_NullableNumbers_ReturnsExpected()
     {
-        using var importer = Helpers.GetCsvImporter("Int64,Decimal\n5,1.5\n,\n");
+        using var importer = Helpers.GetCsvImporter("Int64,Decimal\n5,1.5\n,\n5,1.5\n");
         var rows = importer.ReadSheet().ReadRows<NullableNumbers>().ToArray();
         Assert.Equal(5, rows[0].Int64);
         Assert.Equal(1.5m, rows[0].Decimal);

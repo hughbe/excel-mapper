@@ -854,7 +854,8 @@ public class ExcelSheetTests
         Assert.Equal(3, rows[2].IntValue);
         Assert.Equal("C", rows[3].StringValue);
         Assert.Equal(0, rows[3].IntValue);
-        Assert.Equal(999, sheet.CurrentRowIndex);
+        // The sheet's formatted blank rows after the last value aren't rows.
+        Assert.Equal(9, sheet.CurrentRowIndex);
     }
 
     [Fact]
@@ -899,8 +900,10 @@ public class ExcelSheetTests
         Assert.Equal(0, row4.IntValue);
         Assert.Equal(9, sheet.CurrentRowIndex);
 
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
-        Assert.Equal(10, sheet.CurrentRowIndex);
+        // The sheet's blank rows after row 10 aren't rows, so there are no more.
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
+        Assert.Contains("no more rows", exception.Message);
+        Assert.Equal(9, sheet.CurrentRowIndex);
     }
 
     [Fact]
@@ -932,7 +935,8 @@ public class ExcelSheetTests
         Assert.Equal(9, sheet.CurrentRowIndex);
 
         Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<BlankLinesClass>());
-        Assert.Equal(999, sheet.CurrentRowIndex);
+        // The sheet's formatted blank rows after the last value aren't rows.
+        Assert.Equal(9, sheet.CurrentRowIndex);
     }
 
     [Fact]
