@@ -5831,4 +5831,65 @@ public class MapDictionaryTest
                 .MakeOptional();
         }
     }
+
+    [Fact]
+    public void ReadRows_RowAsDictionaryRepeatedColumnName_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("A,B,A\n1,2,3\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<Dictionary<string, string>>().ToArray());
+        Assert.Equal("Columns A and C are both named \"A\", so they can't both be keys of the dictionary. Choose its columns with WithColumnNames or [ExcelColumnNames], or rename one of the columns.", exception.Message);
+        Assert.IsType<ArgumentException>(exception.InnerException);
+    }
+
+    [Fact]
+    public void ReadRows_DictionaryMemberRepeatedColumnName_ThrowsExcelMappingException()
+    {
+        // "Name" and "name" are different keys of a Dictionary<string, string>, so only the same name clashes.
+        using var importer = Helpers.GetCsvImporter("name,Name,Name\n1,2,3\n");
+        importer.Configuration.RegisterClassMap<StringValuesClass>(c => c.Map(p => p.Values).WithColumnIndices(0, 1, 2));
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<StringValuesClass>().ToArray());
+        Assert.StartsWith("Columns B and C are both named \"Name\"", exception.Message);
+        Assert.Equal("Values", exception.Member!.Name);
+    }
+
+    [Fact]
+    public void ReadRows_IntKeysFromDifferentNamesWithSameValue_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("1,01\na,b\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<IntKeysClass>().ToArray());
+        Assert.StartsWith("The name \"01\" of column B gives a key the dictionary already has", exception.Message);
+    }
+
+    [Fact]
+    public void ReadRows_IntKeysNotNumbers_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("1,X\na,b\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<IntKeysClass>().ToArray());
+        Assert.Equal("The name \"X\" of column B can't be converted to int, the type of the dictionary's keys.", exception.Message);
+        Assert.IsType<FormatException>(exception.InnerException);
+    }
+
+    [Fact]
+    public void ReadRows_DecimalKeys_UseImportersCulture()
+    {
+        using var importer = Helpers.GetCsvImporter("1.5;2.5\na;b\n");
+        var row = importer.ReadSheet().ReadRows<DecimalKeysClass>().Single();
+        Assert.Equal(new Dictionary<decimal, string> { [1.5m] = "a", [2.5m] = "b" }, row.Values);
+
+        using var german = Helpers.GetCsvImporter("1,5;2,5\na;b\n");
+        german.Configuration.Culture = new System.Globalization.CultureInfo("de-DE");
+        Assert.Equal(new Dictionary<decimal, string> { [1.5m] = "a", [2.5m] = "b" }, german.ReadSheet().ReadRows<DecimalKeysClass>().Single().Values);
+    }
+
+    public class IntKeysClass
+    {
+        [ExcelColumnIndices(0, 1)]
+        public Dictionary<int, string> Values { get; set; } = [];
+    }
+
+    public class DecimalKeysClass
+    {
+        [ExcelColumnIndices(0, 1)]
+        public Dictionary<decimal, string> Values { get; set; } = [];
+    }
 }

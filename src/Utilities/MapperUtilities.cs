@@ -122,14 +122,17 @@ internal static class MapperUtilities
 
     /// <summary>
     /// The exception for a number cell out of the range of its type, created without converting
-    /// it: an <see cref="OverflowException"/>, as for text out of range (see <see cref="InvalidNumber"/>).
+    /// it: an <see cref="OverflowException"/>, as for text out of range (see <see cref="InvalidNumber"/>),
+    /// with the number written in the importer's culture, as the cell's text is.
     /// </summary>
-    public static Exception OutOfRange(double value, Type type)
-        => new OverflowException($"The value {value.ToString(CultureInfo.InvariantCulture)} is too large or too small for {TypeNames.Get(type)}.");
+    public static Exception OutOfRange(double value, Type type, IFormatProvider provider)
+        => new OverflowException($"The value {value.ToString(provider)} is too large or too small for {TypeNames.Get(type)}.");
 
-    // The exception for a number in a cell that isn't whole, mapped to an integer type.
-    public static Exception NotWholeNumber(double value, Type type)
-        => new FormatException($"The value {value} isn't a whole number, so it can't be {TypeNames.Get(type)}.");
+    // The exception for a number in a cell that isn't whole, mapped to an integer type: an
+    // OverflowException, as for text such as "2.5" (see InvalidNumber), with the number written
+    // in the importer's culture, as the cell's text is.
+    public static Exception NotWholeNumber(double value, Type type, IFormatProvider provider)
+        => new OverflowException($"The value {value.ToString(provider)} isn't a whole number, so it can't be {TypeNames.Get(type)}.");
 
     // Why a built-in number type's TryParse rejected the text: a number out of range, or with a
     // fraction for an integer type, or not a number; or null if that can't be told without parsing.

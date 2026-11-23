@@ -103,12 +103,17 @@ public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
             while (cellsReader.TryGetNext(out var valueResult))
             {
                 // The key is the column's name.
-                var elementKey = heading.GetColumnName(valueResult.ColumnIndex);
-                TKey? convertedKey = elementKey is TKey key ? key : (TKey?)Convert.ChangeType(elementKey, typeof(TKey));
-                if (convertedKey != null)
+                var columnName = heading.GetColumnName(valueResult.ColumnIndex);
+                var key = columnName is TKey stringKey ? stringKey : ConvertKey(columnName, sheet, valueResult.ColumnIndex, member);
+                var elementValue = Values.Pipeline.Map(sheet, rowIndex, valueResult, member, errors);
+                try
                 {
-                    var elementValue = Values.Pipeline.Map(sheet, rowIndex, valueResult, member, errors);
-                    Builder.Add(items, convertedKey, elementValue);
+                    Builder.Add(items, key, elementValue);
+                }
+                catch (ArgumentException exception)
+                {
+                    // Dictionaries reject a key they already have: two columns with the same name.
+                    throw DuplicateKey(heading, sheet, valueResult.ColumnIndex, columnName, member, exception);
                 }
             }
         }
@@ -119,6 +124,56 @@ public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
 
         value = Builder.End(items);
         return true;
+    }
+
+    // A column name as a key of another type, such as int, parsed with the importer's culture.
+    private static TKey ConvertKey(string columnName, SheetView sheet, int columnIndex, MemberInfo? member)
+    {
+        var keyType = Nullable.GetUnderlyingType(typeof(TKey)) ?? typeof(TKey);
+        try
+        {
+            return (TKey)Convert.ChangeType(columnName, keyType, sheet.Culture);
+        }
+        catch (Exception exception) when (exception is FormatException or InvalidCastException or OverflowException)
+        {
+            throw new ExcelMappingException($"The name \"{columnName}\" of column {ExcelRange.GetColumnLetters(columnIndex)} can't be converted to {TypeNames.Get(typeof(TKey))}, the type of the dictionary's keys", sheet, -1, -1, exception)
+            {
+                Member = member,
+            };
+        }
+    }
+
+    private static ExcelMappingException DuplicateKey(ExcelHeading heading, SheetView sheet, int columnIndex, string columnName, MemberInfo? member, ArgumentException exception)
+    {
+        // The earlier column with the same name, which the dictionary already has: exactly the
+        // same, or for a dictionary that ignores case, the same ignoring case.
+        var firstColumnIndex = FindEarlierColumn(heading, columnIndex, columnName, StringComparison.Ordinal);
+        if (firstColumnIndex == -1)
+        {
+            firstColumnIndex = FindEarlierColumn(heading, columnIndex, columnName, StringComparison.OrdinalIgnoreCase);
+        }
+
+        // Otherwise two names gave the same key, such as "1" and "01" for int keys.
+        var message = firstColumnIndex == -1
+            ? $"The name \"{columnName}\" of column {ExcelRange.GetColumnLetters(columnIndex)} gives a key the dictionary already has"
+            : $"Columns {ExcelRange.GetColumnLetters(firstColumnIndex)} and {ExcelRange.GetColumnLetters(columnIndex)} are both named \"{columnName}\", so they can't both be keys of the dictionary";
+        return new ExcelMappingException(message, sheet, -1, -1, exception, " Choose its columns with WithColumnNames or [ExcelColumnNames], or rename one of the columns.")
+        {
+            Member = member,
+        };
+    }
+
+    private static int FindEarlierColumn(ExcelHeading heading, int columnIndex, string columnName, StringComparison comparison)
+    {
+        for (var i = 0; i + heading.ColumnOffset < columnIndex && i < heading.ColumnNames.Count; i++)
+        {
+            if (string.Equals(heading.ColumnNames[i], columnName, comparison))
+            {
+                return i + heading.ColumnOffset;
+            }
+        }
+
+        return -1;
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using ExcelDataReader;
 
@@ -581,5 +582,53 @@ public class ExcelImporterConfigurationTests
     public class RowWithoutMappers
     {
         public int A { get; set; }
+    }
+
+    [Theory]
+    [MemberData(nameof(RegisterClassMap_NoConversion_TestData))]
+    public void RegisterClassMap_MemberWithNoConversion_ThrowsExcelMappingException(Action<ExcelImporterConfiguration> register, string message)
+    {
+        using var importer = Helpers.GetCsvImporter("A\n1\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => register(importer.Configuration));
+        Assert.Equal(message, exception.Message);
+    }
+
+    public static IEnumerable<object[]> RegisterClassMap_NoConversion_TestData()
+    {
+        yield return [(Action<ExcelImporterConfiguration>)(c => c.RegisterClassMap<NoConversionRow>(m => m.Map(r => r.Tags))), "Member \"Tags\" of type HashSet<string> is a collection that Map can't read from a cell: map it with MapCollection<string>(...)."];
+        yield return [(Action<ExcelImporterConfiguration>)(c => c.RegisterClassMap<NoConversionRow>(m => m.Map(r => r.Scores))), "Member \"Scores\" of type SortedDictionary<string, int> is a dictionary that Map can't read from a cell: map it with MapDictionary<int>(...)."];
+        yield return [(Action<ExcelImporterConfiguration>)(c => c.RegisterClassMap<NoConversionRow>(m => m.Map(r => r.Address))), "Member \"Address\" of type ExcelImporterConfigurationTests.NoConversionAddress has no conversion from a cell. Give it one with WithConverter or [ExcelConverter], or map its own members with MapObject(...)."];
+    }
+
+    [Fact]
+    public void ReadRows_UnregisteredClassMapMemberWithNoConversion_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Tags\na\n");
+        var classMap = new ExcelClassMap<NoConversionRow>();
+        classMap.Map(r => r.Tags);
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows(classMap).ToArray());
+        Assert.StartsWith("Member \"Tags\" of type HashSet<string> is a collection", exception.Message);
+    }
+
+    [Fact]
+    public void RegisterClassMap_MapCollectionForHashSet_ReadsCollection()
+    {
+        using var importer = Helpers.GetCsvImporter("Tags\n\"a,b\"\n");
+        importer.Configuration.RegisterClassMap<NoConversionRow>(m => m.MapCollection<string>(r => r.Tags));
+        Assert.Equal(["a", "b"], importer.ReadSheet().ReadRows<NoConversionRow>().Single().Tags.Order());
+    }
+
+    public class NoConversionRow
+    {
+        public HashSet<string> Tags { get; set; } = [];
+
+        public SortedDictionary<string, int> Scores { get; set; } = [];
+
+        public NoConversionAddress Address { get; set; } = new();
+    }
+
+    public class NoConversionAddress
+    {
+        public string? Street { get; set; }
     }
 }

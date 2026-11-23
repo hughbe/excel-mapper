@@ -154,7 +154,7 @@ public sealed class ExcelImporterConfiguration
     public void RegisterClassMap(ExcelClassMap classMap)
     {
         ThrowHelpers.ThrowIfNull(classMap, nameof(classMap));
-        ValidateMap(classMap);
+        CellPipeline.ThrowIfNoConversion(classMap);
 
         var classType = classMap.Type;
         if (!ClassMaps.TryAdd(classType, classMap))
@@ -217,15 +217,6 @@ public sealed class ExcelImporterConfiguration
 
         return classMaps;
     }
-
-    private static void ValidateMap(IMap map)
-        => MapTree.VisitCellMaps(map, null, (cellMap, _) =>
-        {
-            if (cellMap is IColumnsMap { Pipeline.HasMappers: false } and not ICellsMap)
-            {
-                throw new ExcelMappingException("Cannot register a class map with a property that has no Mappers defined.");
-            }
-        });
 
     /// <summary>
     /// Registers a map created by auto-mapping. Unlike a map registered by the user, this can be

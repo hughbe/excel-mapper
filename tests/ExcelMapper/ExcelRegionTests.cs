@@ -69,17 +69,54 @@ public class ExcelRegionTests
     }
 
     [Fact]
-    public void ReadRows_IsLazy()
+    public void ReadRows_DoesNotMoveSheet()
     {
         using var importer = Helpers.GetCsvImporter("A\n1\n");
         var region = importer.ReadSheet().Region();
 
-        // Nothing is read until the result is enumerated.
+        // A region reads through its own view: the sheet's position doesn't change.
         var rows = region.ReadRows<StringValue>();
         var results = region.ReadRowResults<StringValue>();
         Assert.Equal(-1, region.Sheet.CurrentRowIndex);
         Assert.NotNull(rows);
         Assert.NotNull(results);
+    }
+
+    [Fact]
+    public void ReadMethods_MissingColumn_ThrowWhenCalled()
+    {
+        using var importer = Helpers.GetCsvImporter("A\n1\n");
+        var region = importer.ReadSheet().Region();
+
+        // As for a sheet, problems with the heading are reported when the method is called,
+        // rather than when the result is enumerated.
+        Assert.Throws<ExcelMappingException>(() => region.ReadRowResults<RegionMapRow>());
+        var exception = Assert.Throws<ExcelMappingException>(() => region.ReadRows<RegionMapRow>(new CountingSink()));
+        Assert.StartsWith("The sheet is missing columns needed to map type ExcelRegionTests.RegionMapRow", exception.Message);
+    }
+
+    [Fact]
+    public void ReadRows_HeadingNotFound_ThrowsWhenCalled()
+    {
+        using var importer = Helpers.GetCsvImporter("A\n1\n");
+        var region = importer.ReadSheet().Region().WithHeadingSearch();
+        Assert.Throws<ExcelMappingException>(() => region.ReadRows<RegionMapRow>());
+    }
+
+    [Fact]
+    public void ReadRows_EnumeratedTwice_ReadsRegionAgain()
+    {
+        using var importer = Helpers.GetCsvImporter("A\n1\n2\n");
+        var rows = importer.ReadSheet().Region().ReadRows<StringValue>();
+        Assert.Equal(["1", "2"], rows.Select(r => r.Value));
+        Assert.Equal(["1", "2"], rows.Select(r => r.Value));
+    }
+
+    private sealed class CountingSink : IExcelErrorSink
+    {
+        public int Count { get; private set; }
+
+        public void Add(in ExcelMappingError error) => Count++;
     }
 
     private class StringValue

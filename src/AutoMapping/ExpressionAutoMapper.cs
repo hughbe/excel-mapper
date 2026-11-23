@@ -145,9 +145,35 @@ internal static class ExpressionAutoMapper
     public static ValueMap<TProperty> GetOrCreateValueMap<T, TProperty>(ExcelClassMap<T> classMap, Expression expression)
     {
         static IMap createMap(MappedExpression finalExpression, EmptyValueStrategy emptyValueStrategy)
-            => AutoMapper.CreateValueMap<TProperty>(finalExpression.Member, finalExpression.GetDefaultColumns(), emptyValueStrategy, isAutoMapping: false)!;
+        {
+            var map = AutoMapper.CreateValueMap<TProperty>(finalExpression.Member, finalExpression.GetDefaultColumns(), emptyValueStrategy, isAutoMapping: false)!;
+            if (!map.Pipeline.HasMappers)
+            {
+                map.Pipeline.NoConversion = DescribeNoConversion(typeof(TProperty), TypeRule<TProperty>.Instance);
+            }
+
+            return map;
+        }
 
         return (ValueMap<TProperty>)GetOrCreateMap(classMap, expression, createMap);
+    }
+
+    // Why a member mapped with Map(...) can't be read from a cell, and what to do instead: the
+    // collection and dictionary overloads of Map only cover common types.
+    private static string DescribeNoConversion(Type type, TypeRule rule)
+    {
+        var typeName = TypeNames.Get(type);
+        if (rule.Dictionary is { } dictionary)
+        {
+            return $"of type {typeName} is a dictionary that Map can't read from a cell: map it with MapDictionary<{TypeNames.Get(dictionary.ValueType)}>(...).";
+        }
+
+        if (rule.Collection is { } collection)
+        {
+            return $"of type {typeName} is a collection that Map can't read from a cell: map it with MapCollection<{TypeNames.Get(collection.ElementType)}>(...).";
+        }
+
+        return $"of type {typeName} has no conversion from a cell. Give it one with WithConverter or [ExcelConverter], or map its own members with MapObject(...).";
     }
 
     public static CollectionMap<TElement> GetOrCreateCollectionMap<T, TElement>(ExcelClassMap<T> classMap, Expression expression)
