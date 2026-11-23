@@ -77,7 +77,7 @@ internal abstract class NumberMapper
         // an integer type: "2.7" as text can't be parsed as an int, so neither can 2.7.
         if (value is double doubleValue && IsInteger(_typeCode) && Math.Floor(doubleValue) != doubleValue && !double.IsNaN(doubleValue) && !double.IsInfinity(doubleValue))
         {
-            return MapperUtilities.NotWholeNumber(doubleValue, Type);
+            return MapperUtilities.NotWholeNumber(doubleValue, Type, cell.Culture);
         }
 
         // Numbers out of range, and other typed values such as booleans and dates.

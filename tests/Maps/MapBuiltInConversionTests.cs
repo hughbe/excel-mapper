@@ -322,7 +322,7 @@ public class MapBuiltInConversionTests
     [Theory]
     [InlineData(300.0, typeof(OverflowException))]
     [InlineData(-1.0, typeof(OverflowException))]
-    [InlineData(2.5, typeof(FormatException))]
+    [InlineData(2.5, typeof(OverflowException))]
     public void ReadRows_NumberCellInvalidForType_Throws(double value, Type exceptionType)
     {
         using var importer = XlsxBuilder.Create(["Byte"], [value]);
@@ -330,6 +330,17 @@ public class MapBuiltInConversionTests
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<ByteRow>().ToArray());
         Assert.Equal("A2", exception.CellAddress);
         Assert.IsType(exceptionType, exception.InnerException);
+    }
+
+    [Theory]
+    [InlineData("", "2.5")]
+    [InlineData("de-DE", "2,5")]
+    public void ReadRows_FractionalNumberCellForInteger_MessageUsesImportersCulture(string culture, string number)
+    {
+        using var importer = XlsxBuilder.Create(["Byte"], [2.5]);
+        importer.Configuration.Culture = new System.Globalization.CultureInfo(culture);
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<ByteRow>().ToArray());
+        Assert.Equal($"The value {number} isn't a whole number, so it can't be byte.", exception.InnerException!.Message);
     }
 
     [Fact]
