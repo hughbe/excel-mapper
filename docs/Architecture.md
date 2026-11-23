@@ -138,7 +138,7 @@ The public API of each target framework is listed in `src/PublicAPI/<framework>/
 | Path | Contents |
 |---|---|
 | `src/*.cs` | The public types: importer, sheets, regions, class maps and maps, attributes, extension points, `ValuePipeline<T>`, `ValuePipeline<T, TSelf>`, `ElementMap<T>` and the type-specific value methods in `ValuePipelineExtensions` |
-| `src/Maps` | The internal maps: `ClassMapMember` (a member of a class map and its map) and the indexer maps (`IndexerMap<TKey>` and its kinds) |
+| `src/Maps` | The internal maps: `ClassMapMember` (a member of a class map and its map), the indexer maps (`IndexerMap<TKey>` and its kinds) and `RowNumberMap` |
 | `src/Abstractions` | The internal map interfaces (`IMap`, `IParentMap`, `IColumnsMap`, `ICellsMap`, `IBindableMap`), `ICellMapper<T>`, and `ReadCellResult`, the cell a mapper converts |
 | `src/Reading` | Reading sheets: `SheetView`, `Worksheet`, `RowSource`, `RowCursor`, `HeadingSearch`, `ReadSettings`, and `ErrorTarget` (where collected errors go) |
 | `src/AutoMapping` | Creating maps: `AutoMapper`, `ExpressionAutoMapper`, the rules (`TypeRule`, `CollectionRule`, `DictionaryRule`), `MemberMapper` and `MemberAttributes` (a member's attributes) and `UnderlyingTypeAdapter` |

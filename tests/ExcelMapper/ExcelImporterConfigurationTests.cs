@@ -100,8 +100,8 @@ public class ExcelImporterConfigurationTests
         Assert.Equal(EmptyValueStrategy.Error, map.EmptyValueStrategy);
         Assert.Equal(typeof(int), map.Type);
 
-        Assert.True(importer.Configuration.TryGetClassMap(typeof(int), out classMap));
-        map = Assert.IsType<TestMap>(classMap);
+        Assert.True(importer.Configuration.TryGetClassMap(typeof(int), out var untypedClassMap));
+        map = Assert.IsType<TestMap>(untypedClassMap);
         Assert.Equal(EmptyValueStrategy.Error, map.EmptyValueStrategy);
         Assert.Equal(typeof(int), map.Type);
     }
@@ -121,8 +121,8 @@ public class ExcelImporterConfigurationTests
         Assert.Equal(EmptyValueStrategy.Error, map.EmptyValueStrategy);
         Assert.Equal(typeof(IntClass), map.Type);
 
-        Assert.True(importer.Configuration.TryGetClassMap(typeof(IntClass), out classMap));
-        map = Assert.IsType<ExcelClassMap<IntClass>>(classMap);
+        Assert.True(importer.Configuration.TryGetClassMap(typeof(IntClass), out var untypedClassMap));
+        map = Assert.IsType<ExcelClassMap<IntClass>>(untypedClassMap);
         Assert.Equal(EmptyValueStrategy.Error, map.EmptyValueStrategy);
         Assert.Equal(typeof(IntClass), map.Type);
     }
@@ -140,8 +140,8 @@ public class ExcelImporterConfigurationTests
         Assert.Equal(EmptyValueStrategy.Error, map.EmptyValueStrategy);
         Assert.Equal(typeof(IntClass), map.Type);
 
-        Assert.True(importer.Configuration.TryGetClassMap(typeof(IntClass), out classMap));
-        map = Assert.IsType<ExcelClassMap<IntClass>>(classMap);
+        Assert.True(importer.Configuration.TryGetClassMap(typeof(IntClass), out var untypedClassMap));
+        map = Assert.IsType<ExcelClassMap<IntClass>>(untypedClassMap);
         Assert.Equal(EmptyValueStrategy.Error, map.EmptyValueStrategy);
         Assert.Equal(typeof(IntClass), map.Type);
     }
@@ -169,8 +169,8 @@ public class ExcelImporterConfigurationTests
         Assert.True(importer.Configuration.TryGetClassMap<int>(out var classMap));
         Assert.Same(map, classMap);
 
-        Assert.True(importer.Configuration.TryGetClassMap(typeof(int), out classMap));
-        Assert.Same(map, classMap);
+        Assert.True(importer.Configuration.TryGetClassMap(typeof(int), out var untypedClassMap));
+        Assert.Same(map, untypedClassMap);
     }
 
     [Fact]
@@ -441,8 +441,8 @@ public class ExcelImporterConfigurationTests
         Assert.False(importer.Configuration.TryGetClassMap<TestMap>(out var classMap));
         Assert.Null(classMap);
 
-        Assert.False(importer.Configuration.TryGetClassMap(typeof(TestMap), out classMap));
-        Assert.Null(classMap);
+        Assert.False(importer.Configuration.TryGetClassMap(typeof(TestMap), out var untypedClassMap));
+        Assert.Null(untypedClassMap);
     }
 
     [Fact]
@@ -457,8 +457,8 @@ public class ExcelImporterConfigurationTests
         Assert.True(importer.Configuration.TryGetClassMap<int>(out var classMap));
         Assert.Equal(typeof(int), classMap.Type);
 
-        Assert.True(importer.Configuration.TryGetClassMap<IntValueClass>(out classMap));
-        Assert.Equal(typeof(IntValueClass), classMap.Type);
+        Assert.True(importer.Configuration.TryGetClassMap<IntValueClass>(out var valueClassMap));
+        Assert.Equal(typeof(IntValueClass), valueClassMap.Type);
     }
 
     private class IntValueClass
@@ -474,8 +474,8 @@ public class ExcelImporterConfigurationTests
         Assert.False(importer.Configuration.TryGetClassMap<TestMap>(out var classMap));
         Assert.Null(classMap);
 
-        Assert.False(importer.Configuration.TryGetClassMap(typeof(TestMap), out classMap));
-        Assert.Null(classMap);
+        Assert.False(importer.Configuration.TryGetClassMap(typeof(TestMap), out var untypedClassMap));
+        Assert.Null(untypedClassMap);
     }
 
     private class TestMap : ExcelClassMap<int>

@@ -14,40 +14,16 @@ public class ExcelColumnNameAttributeTests
         Assert.Equal(StringComparison.OrdinalIgnoreCase, attribute.Comparison);
     }
 
-    [Theory]
-    [InlineData("columnname", StringComparison.CurrentCulture)]
-    [InlineData("ColumnName", StringComparison.CurrentCultureIgnoreCase)]
-    [InlineData("  ColumnName  ", StringComparison.InvariantCulture)]
-    [InlineData("    ", StringComparison.InvariantCultureIgnoreCase)]
-    [InlineData("ColumnName", StringComparison.Ordinal)]
-    [InlineData("columnname", StringComparison.OrdinalIgnoreCase)]
-    public void Ctor_String_StringComparison(string name, StringComparison comparison)
-    {
-        var attribute = new ExcelColumnNameAttribute(name, comparison);
-        Assert.Equal(name, attribute.Name);
-        Assert.Equal(comparison, attribute.Comparison);
-    }
-
     [Fact]
     public void Ctor_NullColumnName_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>("columnName", () => new ExcelColumnNameAttribute(null!));
-        Assert.Throws<ArgumentNullException>("columnName", () => new ExcelColumnNameAttribute(null!, StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
     public void Ctor_EmptyColumnName_ThrowsArgumentException()
     {
         Assert.Throws<ArgumentException>("columnName", () => new ExcelColumnNameAttribute(string.Empty));
-        Assert.Throws<ArgumentException>("columnName", () => new ExcelColumnNameAttribute(string.Empty, StringComparison.OrdinalIgnoreCase));
-    }
-
-    [Theory]
-    [InlineData(StringComparison.CurrentCulture - 1)]
-    [InlineData(StringComparison.OrdinalIgnoreCase + 1)]
-    public void Ctor_InvalidStringComparison_ThrowsArgumentOutOfRangeException(StringComparison comparison)
-    {
-        Assert.Throws<ArgumentOutOfRangeException>("comparison", () => new ExcelColumnNameAttribute("Name", comparison));
     }
 
     [Theory]

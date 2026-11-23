@@ -207,12 +207,12 @@ public class Employee
     public string Name { get; set; }
     public string[] Skills { get; set; }    // ["C#", "Python", "SQL"]
 
-    [ExcelSeparators(';', '|')]             // or .WithSeparators(';', '|'); strings work too
+    [ExcelSeparators(';', '|', Options = StringSplitOptions.RemoveEmptyEntries)]   // or .WithSeparators(';', '|').WithSplitOptions(...)
     public List<string> Tags { get; set; }
 }
 ```
 
-An empty cell gives an empty collection, and a trailing separator (`"a,b,"`) gives a trailing empty value, as `string.Split` does.
+An empty cell gives an empty collection, and a trailing separator (`"a,b,"`) gives a trailing empty value, as `string.Split` does: an empty value uses the element's empty fallback (`null` for strings). `StringSplitOptions.RemoveEmptyEntries` leaves empty values out, and `TrimEntries` (.NET 5 and later) trims each value.
 
 **Several columns**, each giving one element:
 

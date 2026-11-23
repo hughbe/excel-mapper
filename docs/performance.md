@@ -37,7 +37,7 @@ With native AOT, read rows with a class map from a generated `ExcelMappingContex
 
 3. **Use typed members.** Numbers, dates, strings and enums are converted without boxing. `object` members, `Dictionary<string, object>` and `ExpandoObject` box every value.
 
-4. **Prefer converters for custom conversion.** `WithConverter(value => ...)` and `ICellConverter<T>` convert without boxing. `WithMapping(dictionary)` boxes values, which is fine for a few columns.
+4. **Prefer converters for custom conversion.** `WithConverter(value => ...)` and `ICellConverter<T>` convert without boxing. `WithMapping(dictionary)` doesn't box either.
 
 5. **Only preserve formatting where you need it.** `[ExcelPreserveFormatting]` formats each cell's value as Excel displays it, which costs more than reading the value.
 

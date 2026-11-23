@@ -21,6 +21,17 @@ internal static class SeparatorUtilities
         }
     }
 
+    // RemoveEmptyEntries and TrimEntries, which the netstandard builds don't name.
+    private const StringSplitOptions AllSplitOptions = (StringSplitOptions)3;
+
+    public static void ValidateOptions(StringSplitOptions options, [CallerArgumentExpression(nameof(options))] string? paramName = null)
+    {
+        if ((options & ~AllSplitOptions) != 0)
+        {
+            throw new ArgumentOutOfRangeException(paramName, options, "Split options can only remove empty entries and trim entries.");
+        }
+    }
+
     public static void ValidateSeparators(char[] separators, [CallerArgumentExpression(nameof(separators))] string? paramName = null)
     {
         ThrowHelpers.ThrowIfNull(separators, paramName);

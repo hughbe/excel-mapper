@@ -118,7 +118,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameOrdinalIgnoreCasePropertyClass
     {
-        [ExcelColumnName("StringValue", StringComparison.OrdinalIgnoreCase)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.OrdinalIgnoreCase)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -152,7 +152,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameOrdinalIgnoreCaseFieldClass
     {
-        [ExcelColumnName("StringValue", StringComparison.OrdinalIgnoreCase)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.OrdinalIgnoreCase)]
         public string CustomName = default!;
     }
 
@@ -214,7 +214,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameOrdinalPropertyClass
     {
-        [ExcelColumnName("StringValue", StringComparison.Ordinal)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.Ordinal)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -248,7 +248,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameOrdinalFieldClass
     {
-        [ExcelColumnName("StringValue", StringComparison.Ordinal)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.Ordinal)]
         public string CustomName = default!;
     }
 
@@ -334,7 +334,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameCurrentCultureIgnoreCasePropertyClass
     {
-        [ExcelColumnName("StringValue", StringComparison.CurrentCultureIgnoreCase)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.CurrentCultureIgnoreCase)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -368,7 +368,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameCurrentCultureIgnoreCaseFieldClass
     {
-        [ExcelColumnName("StringValue", StringComparison.CurrentCultureIgnoreCase)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.CurrentCultureIgnoreCase)]
         public string CustomName = default!;
     }
 
@@ -430,7 +430,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameCurrentCulturePropertyClass
     {
-        [ExcelColumnName("StringValue", StringComparison.CurrentCulture)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.CurrentCulture)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -464,7 +464,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameCurrentCultureFieldClass
     {
-        [ExcelColumnName("StringValue", StringComparison.CurrentCulture)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.CurrentCulture)]
         public string CustomName = default!;
     }
 
@@ -550,7 +550,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameInvariantCultureIgnoreCasePropertyClass
     {
-        [ExcelColumnName("StringValue", StringComparison.InvariantCultureIgnoreCase)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.InvariantCultureIgnoreCase)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -584,7 +584,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameInvariantCultureIgnoreCaseFieldClass
     {
-        [ExcelColumnName("StringValue", StringComparison.InvariantCultureIgnoreCase)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.InvariantCultureIgnoreCase)]
         public string CustomName = default!;
     }
 
@@ -646,7 +646,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameInvariantCulturePropertyClass
     {
-        [ExcelColumnName("StringValue", StringComparison.InvariantCulture)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.InvariantCulture)]
         public string CustomName { get; set; } = default!;
     }
 
@@ -680,7 +680,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameInvariantCultureFieldClass
     {
-        [ExcelColumnName("StringValue", StringComparison.InvariantCulture)]
+        [ExcelColumnName("StringValue", Comparison = StringComparison.InvariantCulture)]
         public string CustomName = default!;
     }
 
@@ -1261,7 +1261,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameEnumerableOrdinalIgnoreCasePropertyClass
     {
-        [ExcelColumnName("Value", StringComparison.OrdinalIgnoreCase)]
+        [ExcelColumnName("Value", Comparison = StringComparison.OrdinalIgnoreCase)]
         public object?[] CustomValue { get; set; } = default!;
     }
 
@@ -1319,7 +1319,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameEnumerableOrdinalIgnoreCaseFieldClass
     {
-        [ExcelColumnName("Value", StringComparison.OrdinalIgnoreCase)]
+        [ExcelColumnName("Value", Comparison = StringComparison.OrdinalIgnoreCase)]
         public object?[] CustomValue = default!;
     }
 
@@ -1481,7 +1481,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameEnumerableOrdinalPropertyClass
     {
-        [ExcelColumnName("Value", StringComparison.Ordinal)]
+        [ExcelColumnName("Value", Comparison = StringComparison.Ordinal)]
         public object?[] CustomValue { get; set; } = default!;
     }
 
@@ -1539,7 +1539,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameEnumerableOrdinalFieldClass
     {
-        [ExcelColumnName("Value", StringComparison.Ordinal)]
+        [ExcelColumnName("Value", Comparison = StringComparison.Ordinal)]
         public object?[] CustomValue = default!;
     }
 
@@ -1649,7 +1649,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameEnumerableCurrentCultureIgnoreCasePropertyClass
     {
-        [ExcelColumnName("Value", StringComparison.CurrentCultureIgnoreCase)]
+        [ExcelColumnName("Value", Comparison = StringComparison.CurrentCultureIgnoreCase)]
         public object?[] CustomValue { get; set; } = default!;
     }
 
@@ -1707,7 +1707,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameEnumerableCurrentCultureIgnoreCaseFieldClass
     {
-        [ExcelColumnName("Value", StringComparison.CurrentCultureIgnoreCase)]
+        [ExcelColumnName("Value", Comparison = StringComparison.CurrentCultureIgnoreCase)]
         public object?[] CustomValue = default!;
     }
 
@@ -1869,7 +1869,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameEnumerableCurrentCulturePropertyClass
     {
-        [ExcelColumnName("Value", StringComparison.CurrentCulture)]
+        [ExcelColumnName("Value", Comparison = StringComparison.CurrentCulture)]
         public object?[] CustomValue { get; set; } = default!;
     }
 
@@ -1927,7 +1927,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameEnumerableCurrentCultureFieldClass
     {
-        [ExcelColumnName("Value", StringComparison.CurrentCulture)]
+        [ExcelColumnName("Value", Comparison = StringComparison.CurrentCulture)]
         public object?[] CustomValue = default!;
     }
 
@@ -2037,7 +2037,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameEnumerableInvariantCultureIgnoreCasePropertyClass
     {
-        [ExcelColumnName("Value", StringComparison.InvariantCultureIgnoreCase)]
+        [ExcelColumnName("Value", Comparison = StringComparison.InvariantCultureIgnoreCase)]
         public object?[] CustomValue { get; set; } = default!;
     }
 
@@ -2095,7 +2095,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameEnumerableInvariantCultureIgnoreCaseFieldClass
     {
-        [ExcelColumnName("Value", StringComparison.InvariantCultureIgnoreCase)]
+        [ExcelColumnName("Value", Comparison = StringComparison.InvariantCultureIgnoreCase)]
         public object?[] CustomValue = default!;
     }
 
@@ -2257,7 +2257,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameEnumerableInvariantCulturePropertyClass
     {
-        [ExcelColumnName("Value", StringComparison.InvariantCulture)]
+        [ExcelColumnName("Value", Comparison = StringComparison.InvariantCulture)]
         public object?[] CustomValue { get; set; } = default!;
     }
 
@@ -2315,7 +2315,7 @@ public class MapCustomColumnIndexTests
 
     private class CustomNameEnumerableInvariantCultureFieldClass
     {
-        [ExcelColumnName("Value", StringComparison.InvariantCulture)]
+        [ExcelColumnName("Value", Comparison = StringComparison.InvariantCulture)]
         public object?[] CustomValue = default!;
     }
 

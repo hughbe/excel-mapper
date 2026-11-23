@@ -168,7 +168,7 @@ public class MapDuplicatedColumnsTests
 
     private class OrdinalNameRow
     {
-        [ExcelColumnName("Name", StringComparison.Ordinal)]
+        [ExcelColumnName("Name", Comparison = StringComparison.Ordinal)]
         public string Name { get; set; } = default!;
     }
 

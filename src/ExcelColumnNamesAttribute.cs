@@ -23,25 +23,13 @@ public sealed class ExcelColumnNamesAttribute : Attribute
     }
 
     /// <summary>
-    /// Initializes a new instance of <see cref="ExcelColumnNamesAttribute"/> with the specified column name.
-    /// </summary>
-    /// <param name="comparison">The string comparison to use when matching column names.</param>
-    /// <param name="columnNames">The names of the columns.</param>
-    public ExcelColumnNamesAttribute(string[] columnNames, StringComparison comparison)
-    {
-        ColumnUtilities.ValidateColumnNames(columnNames);
-        EnumUtilities.ValidateIsDefined(comparison);
-        Names = columnNames;
-        _comparison = comparison;
-    }
-
-    /// <summary>
     /// Gets the names of the columns.
     /// </summary>
     public IReadOnlyList<string> Names { get; }
 
     /// <summary>
-    /// Gets or sets the string comparison to use when matching column names.
+    /// Gets or sets the string comparison to use when matching column names, such as
+    /// <c>[ExcelColumnNames("Dept", "Department", Comparison = StringComparison.Ordinal)]</c>.
     /// </summary>
     /// <remarks>The default is <see cref="StringComparison.OrdinalIgnoreCase"/>.</remarks>
     public StringComparison Comparison

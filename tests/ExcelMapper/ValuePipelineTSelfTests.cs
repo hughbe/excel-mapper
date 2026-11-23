@@ -75,6 +75,32 @@ public class ValuePipelineTSelfTests : ExcelClassMap<ValuePipelineTSelfTests.Row
     }
 
     [Fact]
+    public void WithMapping_Overloads_MapText()
+    {
+        var values = new Dictionary<string, string> { { "a", "mapped" } };
+        Assert.Equal("mapped", ReadText(m => m.WithMapping(values), "a"));
+        Assert.Equal("A", ReadText(m => m.WithMapping(values), "A"));
+        Assert.Equal("mapped", ReadText(m => m.WithMapping(values, StringComparer.OrdinalIgnoreCase), "A"));
+        Assert.Equal("b", ReadText(m => m.WithMapping(values, MappingDictionaryBehavior.Optional), "b"));
+        Assert.Equal("mapped", ReadText(m => m.WithMapping(values, StringComparer.OrdinalIgnoreCase, MappingDictionaryBehavior.Required), "A"));
+    }
+
+    [Fact]
+    public void WithMapping_Required_TextNotInDictionaryIsInvalid()
+    {
+        var values = new Dictionary<string, string> { { "a", "mapped" } };
+        Assert.Equal("invalid", ReadText(m => m.WithMapping(values, MappingDictionaryBehavior.Required).WithInvalidFallback("invalid"), "b"));
+        Assert.Equal("invalid", ReadText(m => m.WithMapping(values, null, MappingDictionaryBehavior.Required).WithInvalidFallback("invalid"), "b"));
+    }
+
+    private static string? ReadText(Func<ValueMap<string?>, ValueMap<string?>> configure, string text)
+    {
+        using var importer = Helpers.GetCsvImporter($"Text\n{text}\n");
+        importer.Configuration.RegisterClassMap<Row>(c => configure(c.Map(r => r.Text)));
+        return importer.ReadSheet().ReadRows<Row>().Single().Text;
+    }
+
+    [Fact]
     public void WithMapping_InvalidArguments_Throws()
     {
         var map = Map(r => r.Text);

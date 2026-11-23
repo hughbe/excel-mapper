@@ -22,6 +22,11 @@ internal abstract class CellSplitter
     /// Finds the next value, when the values were counted without splitting.
     /// </summary>
     public abstract (int Advance, int ValueStart, int ValueLength) GetNextValue(ReadOnlySpan<char> remaining);
+
+    /// <summary>
+    /// Copies the splitter, to change its options without changing a map that shares it.
+    /// </summary>
+    public abstract CellSplitter Copy();
 }
 
 /// <summary>
@@ -30,6 +35,8 @@ internal abstract class CellSplitter
 internal sealed class CharSplitter : CellSplitter
 {
     private char[] _separators = [','];
+
+    public override CellSplitter Copy() => new CharSplitter { Separators = _separators, Options = Options };
 
     /// <summary>
     /// Gets or sets the separators used to split the string value of the cell.
@@ -126,6 +133,8 @@ internal sealed class CharSplitter : CellSplitter
 internal sealed class StringSplitter : CellSplitter
 {
     private string[] _separators = [","];
+
+    public override CellSplitter Copy() => new StringSplitter { Separators = _separators, Options = Options };
 
     /// <summary>
     /// Gets or sets the separators used to split the string value of the cell.

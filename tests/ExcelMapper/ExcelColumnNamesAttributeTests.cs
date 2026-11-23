@@ -19,59 +19,28 @@ public class ExcelColumnNamesAttributeTests
         Assert.Same(columnNames, attribute.Names);
     }
 
-    public static IEnumerable<object[]> Ctor_IReadOnlyListString_StringComparison_TestData()
-    {
-        yield return new object[] { new string[] { "ColumnName1" }, StringComparison.CurrentCulture };
-        yield return new object[] { new string[] { "ColumnName1", "ColumnName2" }, StringComparison.CurrentCultureIgnoreCase };
-        yield return new object[] { new string[] { " " }, StringComparison.InvariantCulture };
-        yield return new object[] { new string[] { "ColumnName", "ColumnName" }, StringComparison.InvariantCultureIgnoreCase };
-        yield return new object[] { new string[] { "ColumnName" }, StringComparison.Ordinal };
-        yield return new object[] { new string[] { "ColumnName" }, StringComparison.OrdinalIgnoreCase };
-    }
-
-    [Theory]
-    [MemberData(nameof(Ctor_IReadOnlyListString_StringComparison_TestData))]
-    public void Ctor_IReadOnlyListString_StringComparison(string[] columnNames, StringComparison comparison)
-    {
-        var attribute = new ExcelColumnNamesAttribute(columnNames, comparison);
-        Assert.Same(columnNames, attribute.Names);
-        Assert.Equal(comparison, attribute.Comparison);
-    }
-
     [Fact]
     public void Ctor_NullColumnNames_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>("columnNames", () => new ExcelColumnNamesAttribute(null!));
-        Assert.Throws<ArgumentNullException>("columnNames", () => new ExcelColumnNamesAttribute(null!, StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
     public void Ctor_EmptyColumnNames_ThrowsArgumentException()
     {
         Assert.Throws<ArgumentException>("columnNames", () => new ExcelColumnNamesAttribute([]));
-        Assert.Throws<ArgumentException>("columnNames", () => new ExcelColumnNamesAttribute([], StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
     public void Ctor_NullValueInColumnNames_ThrowsArgumentException()
     {
         Assert.Throws<ArgumentException>("columnNames", () => new ExcelColumnNamesAttribute([null!]));
-        Assert.Throws<ArgumentException>("columnNames", () => new ExcelColumnNamesAttribute([null!], StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
     public void Ctor_EmptyValueInColumnNames_ThrowsArgumentException()
     {
         Assert.Throws<ArgumentException>("columnNames", () => new ExcelColumnNamesAttribute([""]));
-        Assert.Throws<ArgumentException>("columnNames", () => new ExcelColumnNamesAttribute([""], StringComparison.OrdinalIgnoreCase));
-    }
-
-    [Theory]
-    [InlineData(StringComparison.CurrentCulture - 1)]
-    [InlineData(StringComparison.OrdinalIgnoreCase + 1)]
-    public void Ctor_InvalidComparison_ThrowsArgumentOutOfRangeException(StringComparison comparison)
-    {
-        Assert.Throws<ArgumentOutOfRangeException>("comparison", () => new ExcelColumnNamesAttribute(["ColumnName"], comparison));
     }
 
     public static IEnumerable<object[]> Names_Set_TestData()

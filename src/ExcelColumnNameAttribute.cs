@@ -13,16 +13,14 @@ public sealed class ExcelColumnNameAttribute : Attribute
     private StringComparison _comparison = StringComparison.OrdinalIgnoreCase;
 
     /// <summary>
-    /// Initializes a new instance of <see cref="ExcelColumnNameAttribute"/> with the specified column name.
+    /// Initializes a new instance of <see cref="ExcelColumnNameAttribute"/> with the specified column
+    /// name, matched ignoring case unless <see cref="Comparison"/> is set.
     /// </summary>
     /// <param name="columnName">The name of the column.</param>
-    /// <param name="comparison">The string comparison to use when matching the column name.</param>
-    public ExcelColumnNameAttribute(string columnName, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+    public ExcelColumnNameAttribute(string columnName)
     {
         ColumnUtilities.ValidateColumnName(columnName);
-        EnumUtilities.ValidateIsDefined(comparison);
         Name = columnName;
-        _comparison = comparison;
     }
 
     /// <summary>
@@ -31,8 +29,9 @@ public sealed class ExcelColumnNameAttribute : Attribute
     public string Name { get; }
 
     /// <summary>
-    /// Gets or sets the string comparison to use when matching the column name.
-    /// The default is <see cref="StringComparison.Ordinal"/>.
+    /// Gets or sets the string comparison to use when matching the column name, such as
+    /// <c>[ExcelColumnName("Name", Comparison = StringComparison.Ordinal)]</c>. The default is
+    /// <see cref="StringComparison.OrdinalIgnoreCase"/>.
     /// </summary>
     public StringComparison Comparison
     {
