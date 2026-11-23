@@ -269,8 +269,17 @@ internal static class CompiledAccessors
     /// Gets a delegate that creates a <typeparamref name="T"/>, a struct or a class with a public
     /// parameterless constructor, without boxing it.
     /// </summary>
+    /// <remarks>
+    /// Compiled once per type: compiling takes tens of microseconds, and every importer that reads
+    /// a type asks for its constructor.
+    /// </remarks>
     public static Func<T> GetParameterlessConstructor<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>()
-        => CanCompile ? Expression.Lambda<Func<T>>(Expression.New(typeof(T))).Compile() : Activator.CreateInstance<T>;
+        => ParameterlessConstructor<T>.Instance;
+
+    private static class ParameterlessConstructor<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>
+    {
+        public static readonly Func<T> Instance = CanCompile ? Expression.Lambda<Func<T>>(Expression.New(typeof(T))).Compile() : Activator.CreateInstance<T>;
+    }
 
     /// <summary>
     /// Gets a delegate that creates an instance of a type with a public parameterless constructor, or
