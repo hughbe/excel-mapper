@@ -142,6 +142,8 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Reading columns by name, or a dictionary, from rows without a heading gave `The sheet "" does not have a heading. Use a column index map instead.` for a CSV file, with five wordings across the library. The message now says what needed the heading, names the sheet as other errors do, and says what to do instead: `There's no heading to find columns by name in sheet "People". Choose the columns by index or letter instead.` ([#224](https://github.com/hughbe/excel-mapper/pull/224))
 - Errors for a type that can't be created name it as C# does (`List<int>` rather than ``System.Collections.Generic.List`1[System.Int32]``), as other errors do. ([#224](https://github.com/hughbe/excel-mapper/pull/224))
 - Changing an array after passing it to `WithColumnNames`, `WithColumnIndices` or `WithSeparators` changed the columns or separators the map used, even after the map was frozen. The maps copy the array. ([#226](https://github.com/hughbe/excel-mapper/pull/226))
+- Reading a dictionary from columns with the same name, such as a row as a `Dictionary<string, string>` when two columns are named "Name", threw an `ArgumentException: An item with the same key has already been added`. It throws an `ExcelMappingException` naming both columns. ([#228](https://github.com/hughbe/excel-mapper/pull/228))
+- A dictionary with keys that aren't strings, such as `Dictionary<int, string>`, parses its column names with the importer's culture instead of the machine's, and a name that isn't a valid key throws an `ExcelMappingException` naming the column instead of a `FormatException`. ([#228](https://github.com/hughbe/excel-mapper/pull/228))
 
 ### Performance
 
