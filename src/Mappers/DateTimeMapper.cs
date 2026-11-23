@@ -41,6 +41,14 @@ internal sealed class DateTimeMapper : ICellMapper<DateTime>, ICellMapper<DateTi
         var style = Style;
         try
         {
+            // ISO 8601 text, the most common in CSV files, is parsed with the one default format
+            // it can match before the culture's patterns, which is several times faster.
+            if (context.Options.Formats is null && FormatUtilities.GetIsoDateTimeFormat(stringValue) is { } isoFormat &&
+                DateTime.TryParseExact(stringValue, isoFormat, provider, style, out value))
+            {
+                return CellConversion.Success;
+            }
+
             return DateTime.TryParseExact(stringValue, (context.Options.Formats ?? s_defaultFormats), provider, style, out value) ||
                 (context.Options.Formats is null && FormatUtilities.HasDigit(stringValue) && DateTime.TryParseExact(stringValue, FormatUtilities.GetDefaultDateTimeFormats(provider), provider, style, out value))
                 ? CellConversion.Success
