@@ -20,6 +20,40 @@ internal static class FormatUtilities
     private static readonly ConditionalWeakTable<DateTimeFormatInfo, string[]> s_defaultDateTimeFormats = new();
 
     /// <summary>
+    /// Gets the one ISO 8601 format (see <see cref="GetDefaultDateTimeFormats"/>) that text of this
+    /// shape can match, or null if it doesn't look like ISO 8601. Default formats are tried in
+    /// turn, and a format that fails is almost as slow as one that succeeds, so parsing ISO text
+    /// with only the format it can match first is several times faster. The result is the same:
+    /// a culture's own patterns never read ISO text differently.
+    /// </summary>
+    public static string? GetIsoDateTimeFormat(string? text)
+    {
+        // "yyyy-MM-dd", then "T" or a space and "HH:mm", then optionally ":ss" and more.
+        if (text is null || text.Length < 10 || text[4] != '-' || text[7] != '-')
+        {
+            return null;
+        }
+
+        if (text.Length == 10)
+        {
+            return s_isoDateTimeFormats[0];
+        }
+
+        if (text.Length < 16 || text[13] != ':')
+        {
+            return null;
+        }
+
+        var hasSeconds = text.Length >= 19 && text[16] == ':';
+        return text[10] switch
+        {
+            'T' => hasSeconds ? s_isoDateTimeFormats[2] : s_isoDateTimeFormats[1],
+            ' ' => hasSeconds ? s_isoDateTimeFormats[4] : s_isoDateTimeFormats[3],
+            _ => null,
+        };
+    }
+
+    /// <summary>
     /// Gets the formats also tried for <see cref="DateTime"/> and <see cref="DateTimeOffset"/> text
     /// when the formats haven't been set: the culture's short date ("d") and short date and time
     /// ("g"), the culture's patterns with ordinary spaces, and ISO 8601.

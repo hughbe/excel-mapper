@@ -37,6 +37,13 @@ internal sealed class DateOnlyMapper : ICellMapper<DateOnly>, ICellMapper<DateOn
         var style = Style;
         try
         {
+            // ISO 8601 text, the most common in CSV files, is parsed with its format first.
+            if (context.Options.Formats is null && stringValue is { Length: 10 } &&
+                DateOnly.TryParseExact(stringValue, FormatUtilities.DefaultDateOnlyFormats[0], provider, style, out value))
+            {
+                return CellConversion.Success;
+            }
+
             return DateOnly.TryParseExact(stringValue, (context.Options.Formats ?? s_defaultFormats), provider, style, out value) ||
                 (context.Options.Formats is null && FormatUtilities.HasDigit(stringValue) && DateOnly.TryParseExact(stringValue, FormatUtilities.DefaultDateOnlyFormats, provider, style, out value))
                 ? CellConversion.Success
