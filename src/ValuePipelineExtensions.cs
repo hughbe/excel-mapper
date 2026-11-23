@@ -75,8 +75,9 @@ public static partial class ValuePipelineExtensions
     }
 
     /// <summary>
-    /// Specifies the offset from UTC given to cells that Excel stores as dates. Excel dates have no
-    /// time zone, so by default the machine's local offset is used. Use <see cref="TimeSpan.Zero"/> for UTC.
+    /// Specifies the offset from UTC given to dates without one: cells that Excel stores as dates
+    /// (which have no time zone), and text without an offset. By default they're UTC. Text with
+    /// its own offset keeps it.
     /// </summary>
     /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>
@@ -91,8 +92,9 @@ public static partial class ValuePipelineExtensions
     }
 
     /// <summary>
-    /// Specifies the offset from UTC given to cells that Excel stores as dates. Excel dates have no
-    /// time zone, so by default the machine's local offset is used. Use <see cref="TimeSpan.Zero"/> for UTC.
+    /// Specifies the offset from UTC given to dates without one: cells that Excel stores as dates
+    /// (which have no time zone), and text without an offset. By default they're UTC. Text with
+    /// its own offset keeps it.
     /// </summary>
     /// <typeparam name="TMap">The type of the map.</typeparam>
     /// <param name="map">The map to use.</param>

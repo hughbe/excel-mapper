@@ -5,8 +5,8 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 ## Reading files
 
 **`ExcelImporter`** - Opens a workbook (`.xlsx`, `.xls`, `.xlsb`) or CSV file. Dispose it when you're done.
-- `ExcelImporter.ReadRows<T>(path or stream)`, optionally with a file type and a `configure` callback - Read every row of the first sheet in one call
-- `new ExcelImporter(path or stream)`, `(..., ExcelImporterFileType)`, `(..., ExcelImporterFileType, ExcelReaderConfiguration)` - Open a file, optionally as CSV or with ExcelDataReader options (passwords, CSV separators, fallback encoding); `new ExcelImporter(IExcelDataReader)` wraps a reader you created
+- `ExcelImporter.ReadRows<T>(path or stream)`, optionally with a file type and a `configure` callback - Read every row of the first sheet in one call. A path ending in `.csv`, `.tsv` or `.txt` is read as CSV
+- `new ExcelImporter(path or stream)` (a path ending in `.csv`, `.tsv` or `.txt` is CSV), `(..., ExcelImporterFileType)`, `(..., ExcelImporterFileType, ExcelReaderConfiguration)` - Open a file, optionally as CSV or with ExcelDataReader options (passwords, CSV separators, fallback encoding); `new ExcelImporter(IExcelDataReader)` wraps a reader you created
 - `ReadSheet()` / `ReadSheet(name)` / `ReadSheet(index)` - The next sheet, or a sheet by name (case-insensitive) or zero-based index
 - `TryReadSheet(out sheet)` / `TryReadSheet(name, out sheet)` / `TryReadSheet(index, out sheet)` - The same, returning false instead of throwing
 - `ReadSheets()` - Every sheet, in order
@@ -117,7 +117,7 @@ Values (also available on collection elements and dictionary values, through `Wi
 - `.WithFormats("yyyy-MM-dd", ...)` - Date, time and duration formats
 - `.WithFormatProvider(provider)` - The culture for dates, times, durations and numbers
 - `.WithNumberStyle(NumberStyles.Currency)` - How numbers are parsed (on the netstandard builds, for the built-in number types)
-- `.WithOffset(TimeSpan)` - The offset of `DateTimeOffset` values (dates in Excel have no time zone)
+- `.WithOffset(TimeSpan)` - The offset of `DateTimeOffset` values without one (UTC by default)
 - `.WithUriKind(UriKind.Relative)` - Which URIs are valid (absolute only by default)
 - `.WithTrim()` / `.WithTransformers(ICellTransformer...)` - Change cells before they're converted
 
@@ -160,7 +160,7 @@ For a nullable member (`int?`), converters and fallbacks can be for the underlyi
 | `[ExcelEmptyFallback(typeof(Fallback))]` / `[ExcelInvalidFallback(typeof(Fallback))]` | Compute the value of empty or invalid cells with an `ICellFallback<T>` |
 | `[ExcelFormats("yyyy-MM-dd", ...)]` | Date, time and duration formats |
 | `[ExcelNumberStyle(NumberStyles.Currency)]` | How numbers are parsed |
-| `[ExcelOffset("+01:00")]` | The offset of `DateTimeOffset` values |
+| `[ExcelOffset("+01:00")]` | The offset of `DateTimeOffset` values without one (UTC by default) |
 | `[ExcelUriKind(UriKind.Relative)]` | Which URIs are valid: `Absolute` (the default), `Relative` or `RelativeOrAbsolute` |
 | `[ExcelMappingDictionary("text", value)]` | Map fixed text to a value (repeat for each value) |
 | `[ExcelMappingDictionaryComparer(StringComparison.OrdinalIgnoreCase)]` | How the text is compared |

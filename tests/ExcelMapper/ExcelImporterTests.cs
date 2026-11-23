@@ -18,6 +18,33 @@ public class ExcelImporterTests
     }
 
     [Fact]
+    public void Ctor_String_FileOpenForWriting_Success()
+    {
+        // As Excel does with a workbook it has open.
+        var filePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".xlsx");
+        File.Copy(Helpers.GetResourcePath("Primitives.xlsx"), filePath);
+        try
+        {
+            using (new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
+            {
+                // Only Windows enforces sharing between readers and writers, so only there does a
+                // file opened just for reading fail.
+                if (OperatingSystem.IsWindows())
+                {
+                    Assert.Throws<IOException>(() => File.OpenRead(filePath).Dispose());
+                }
+
+                using var importer = new ExcelImporter(filePath);
+                Assert.Equal("Primitives", importer.ReadSheet().Name);
+            }
+        }
+        finally
+        {
+            File.Delete(filePath);
+        }
+    }
+
+    [Fact]
     public void Ctor_String_Xlsm()
     {
         var filePath = Helpers.GetResourcePath("Primitives.xlsm");
@@ -94,11 +121,40 @@ public class ExcelImporterTests
     }
 
     [Fact]
-    public void Ctor_CsvFile_ThrowsHeaderException()
+    public void Ctor_CsvFile_ReadsCsv()
     {
         var filePath = Helpers.GetResourcePath("Primitives.csv");
-        Assert.Throws<HeaderException>(() => new ExcelImporter(filePath));
+        using var importer = new ExcelImporter(filePath);
+        Assert.Equal(1, importer.NumberOfSheets);
+        Assert.NotEmpty(importer.ReadSheet().ReadRows<string[]>());
+    }
+
+    [Fact]
+    public void Ctor_CsvFileAsExcel_ThrowsHeaderException()
+    {
+        var filePath = Helpers.GetResourcePath("Primitives.csv");
         Assert.Throws<HeaderException>(() => new ExcelImporter(filePath, ExcelImporterFileType.Excel));
+    }
+
+    [Theory]
+    [InlineData(".csv")]
+    [InlineData(".CSV")]
+    [InlineData(".tsv")]
+    [InlineData(".txt")]
+    public void Ctor_CsvExtension_ReadsCsv(string extension)
+    {
+        var filePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + extension);
+        File.WriteAllText(filePath, "Name\tAge\nAlice\t34\n");
+        try
+        {
+            using var importer = new ExcelImporter(filePath);
+            var row = Assert.Single(importer.ReadSheet().ReadRows<Dictionary<string, string>>());
+            Assert.Equal("34", row["Age"]);
+        }
+        finally
+        {
+            File.Delete(filePath);
+        }
     }
 
     [Fact]

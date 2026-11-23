@@ -6,16 +6,17 @@ ExcelMapper 4.0 fixes several long-standing bugs and makes mapping more predicta
 
 1. [`object` members now receive typed values](#object-members-receive-typed-values)
 2. [Text is read with the invariant culture](#text-is-read-with-the-invariant-culture)
-3. [Fractional numbers can't be mapped to integers](#fractional-numbers-cant-be-mapped-to-integers)
-4. [`WithConverter` replaces the built-in conversion](#withconverter-replaces-the-built-in-conversion)
-5. [`ReadRow` reads the heading first](#readrow-reads-the-heading-first)
-6. [Error messages use cell addresses](#error-messages-use-cell-addresses)
-7. [Sheet names are case-insensitive](#sheet-names-are-case-insensitive)
-8. [Extension types](#extension-types)
-9. [Renamed types](#renamed-types)
-10. [Renamed and removed methods](#renamed-and-removed-methods)
-11. [Smaller changes](#smaller-changes)
-12. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
+3. [Dates don't depend on the machine's time zone](#dates-dont-depend-on-the-machines-time-zone)
+4. [Fractional numbers can't be mapped to integers](#fractional-numbers-cant-be-mapped-to-integers)
+5. [`WithConverter` replaces the built-in conversion](#withconverter-replaces-the-built-in-conversion)
+6. [`ReadRow` reads the heading first](#readrow-reads-the-heading-first)
+7. [Error messages use cell addresses](#error-messages-use-cell-addresses)
+8. [Sheet names are case-insensitive](#sheet-names-are-case-insensitive)
+9. [Extension types](#extension-types)
+10. [Renamed types](#renamed-types)
+11. [Renamed and removed methods](#renamed-and-removed-methods)
+12. [Smaller changes](#smaller-changes)
+13. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
 
 ## `object` members receive typed values
 
@@ -58,6 +59,23 @@ importer.Configuration.Culture = CultureInfo.CurrentCulture;
 ```
 
 A member can have its own culture with `.WithFormatProvider(...)` (see [Culture](types.md#culture)).
+
+## Dates don't depend on the machine's time zone
+
+**Who's affected:** code that maps text with an offset (`2024-03-04T10:30:15Z`, `+01:00`) to `DateTime`, or maps Excel dates or text without an offset to `DateTimeOffset`, and relies on the machine's local time zone.
+
+**Before:** `2024-03-04T10:30:15Z` mapped to `DateTime` was converted to the machine's local time (`Kind` `Local`), and a `DateTimeOffset` without an offset in the file got the machine's local offset, so the same file gave different values on servers in different time zones.
+
+**Now:** `DateTime` values with an offset are converted to UTC (`Kind` `Utc`); text without one is left as it is. `DateTimeOffset` values without an offset are UTC (`+00:00`), and `[ExcelOffset]`/`WithOffset` choose another, for Excel dates and text alike. Text with its own offset keeps it.
+
+**What to do:** if the file's dates are in a known time zone, give the member its offset:
+
+```csharp
+[ExcelOffset("-08:00")]
+public DateTimeOffset StartsAt { get; set; }
+```
+
+To get local time, convert after reading: `value.ToLocalTime()`.
 
 ## Fractional numbers can't be mapped to integers
 
@@ -301,6 +319,7 @@ If you created a map with its constructor, or implemented `IMap`, map the member
 - **Constructor exceptions**: an exception thrown by a constructor called during mapping (for records and constructor-only types) is wrapped in an `ExcelMappingException` with the row, with the original as `InnerException`.
 - **Fallback values**: `WithFallback` (was `WithValueFallback`), `WithEmptyFallback` and `WithInvalidFallback` take a value of the member's type, where they took an `object`. A value of the wrong type, such as `WithEmptyFallback("none")` on an `int` member, is now a compile error instead of an `InvalidCastException` when rows are read. `WithEmptyFallback(null)` on a member that can't be null throws an `ArgumentNullException`: give the value, such as `WithEmptyFallback(0)`.
 - **Trimming**: `[ExcelTrimString]`/`.WithTrim()` no longer turn date and number cells into text, so they keep their type.
+- **CSV files by path**: `new ExcelImporter(path)` and `ExcelImporter.ReadRows<T>(path)` read a file ending in `.csv`, `.tsv` or `.txt` as CSV, where they threw a `HeaderException`. A workbook saved with one of those extensions must be opened with `ExcelImporterFileType.Excel`.
 - **`bool`**: "yes" and "no" (any case) are now valid, where they were invalid.
 - **Dates written as text**: without set formats, ISO 8601 (`2024-03-04`) and the culture's short date, short date and time, and time patterns are now accepted, where only the culture's full date and time (`"G"`, or `"d"`/`"t"` for `DateOnly`/`TimeOnly`) was before. Values that were invalid, and so used an `[ExcelInvalidValue]` or other fallback, may now map. To accept only specific formats, set them with `[ExcelFormats]` or `.WithFormats(...)`.
 - **Dates stored as numbers**: a number in a cell without a date format now maps to date and time types (as an Excel serial date) instead of being invalid.

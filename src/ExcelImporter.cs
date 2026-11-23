@@ -55,12 +55,25 @@ public class ExcelImporter : IDisposable
     }
 
     /// <summary>
-    /// Constructs an importer that reads an Excel file from a path.
+    /// Constructs an importer that reads an Excel or CSV file from a path. A file whose extension
+    /// is .csv, .tsv or .txt is read as CSV, and any other file as an Excel workbook.
     /// </summary>
-    /// <param name="path">A path to an Excel file.</param>
-    public ExcelImporter(string path) : this(path, ExcelImporterFileType.Excel)
+    /// <param name="path">A path to an Excel or CSV file.</param>
+    public ExcelImporter(string path) : this(path, GetFileType(path))
     {
     }
+
+    /// <summary>
+    /// The type of the file at <paramref name="path"/>, from its extension: CSV for .csv, .tsv and
+    /// .txt files, which ExcelDataReader can't tell from their contents, otherwise Excel.
+    /// </summary>
+    internal static ExcelImporterFileType GetFileType(string? path)
+        => Path.GetExtension(path) is { } extension
+            && (extension.Equals(".csv", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".tsv", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".txt", StringComparison.OrdinalIgnoreCase))
+            ? ExcelImporterFileType.Csv
+            : ExcelImporterFileType.Excel;
 
     /// <summary>
     /// Constructs an importer that reads an Excel or csv file from a path.
@@ -85,7 +98,9 @@ public class ExcelImporter : IDisposable
         Stream? stream = null;
         try
         {
-            stream = File.OpenRead(path);
+            // Excel keeps a workbook it has open for writing, so a file that only shares reading
+            // (File.OpenRead) can't be opened while someone is editing it.
+            stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             Reader = CreateReader(stream, fileType, readerConfiguration);
             _ownedStream = stream;
             stream = null; // Transfer ownership - prevent disposal in catch block
@@ -163,13 +178,14 @@ public class ExcelImporter : IDisposable
     /// calling <see cref="ExcelSheet.ReadRows{T}()"/>.
     /// </summary>
     /// <typeparam name="T">The type of the object to map each row to.</typeparam>
-    /// <param name="path">A path to the file to read.</param>
+    /// <param name="path">A path to the file to read: a .csv, .tsv or .txt file is read as CSV, and any
+    /// other file as an Excel workbook.</param>
     /// <returns>The mapped rows.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
     public static List<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(string path)
     {
-        using var importer = new ExcelImporter(path, ExcelImporterFileType.Excel);
+        using var importer = new ExcelImporter(path);
         return ReadRows<T>(importer, null);
     }
 
@@ -180,7 +196,7 @@ public class ExcelImporter : IDisposable
     /// </summary>
     /// <typeparam name="T">The type of the object to map each row to.</typeparam>
     /// <param name="path">A path to the file to read.</param>
-    /// <param name="fileType">The type of file: <see cref="ExcelImporterFileType.Excel"/> unless given.</param>
+    /// <param name="fileType">The type of file.</param>
     /// <returns>The mapped rows.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
@@ -196,7 +212,8 @@ public class ExcelImporter : IDisposable
     /// calling <see cref="ExcelSheet.ReadRows{T}()"/>.
     /// </summary>
     /// <typeparam name="T">The type of the object to map each row to.</typeparam>
-    /// <param name="path">A path to the file to read.</param>
+    /// <param name="path">A path to the file to read: a .csv, .tsv or .txt file is read as CSV, and any
+    /// other file as an Excel workbook.</param>
     /// <param name="configure">Configures the importer before reading, for example to register a class map.</param>
     /// <returns>The mapped rows.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
@@ -204,7 +221,7 @@ public class ExcelImporter : IDisposable
     public static List<T> ReadRows<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(string path, Action<ExcelImporterConfiguration> configure)
     {
         ThrowHelpers.ThrowIfNull(configure, nameof(configure));
-        using var importer = new ExcelImporter(path, ExcelImporterFileType.Excel);
+        using var importer = new ExcelImporter(path);
         return ReadRows<T>(importer, configure);
     }
 
@@ -215,7 +232,7 @@ public class ExcelImporter : IDisposable
     /// </summary>
     /// <typeparam name="T">The type of the object to map each row to.</typeparam>
     /// <param name="path">A path to the file to read.</param>
-    /// <param name="fileType">The type of file: <see cref="ExcelImporterFileType.Excel"/> unless given.</param>
+    /// <param name="fileType">The type of file.</param>
     /// <param name="configure">Configures the importer before reading, for example to register a class map.</param>
     /// <returns>The mapped rows.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
@@ -252,7 +269,7 @@ public class ExcelImporter : IDisposable
     /// </summary>
     /// <typeparam name="T">The type of the object to map each row to.</typeparam>
     /// <param name="stream">A stream containing the file to read.</param>
-    /// <param name="fileType">The type of file: <see cref="ExcelImporterFileType.Excel"/> unless given.</param>
+    /// <param name="fileType">The type of file.</param>
     /// <returns>The mapped rows.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
@@ -289,7 +306,7 @@ public class ExcelImporter : IDisposable
     /// </summary>
     /// <typeparam name="T">The type of the object to map each row to.</typeparam>
     /// <param name="stream">A stream containing the file to read.</param>
-    /// <param name="fileType">The type of file: <see cref="ExcelImporterFileType.Excel"/> unless given.</param>
+    /// <param name="fileType">The type of file.</param>
     /// <param name="configure">Configures the importer before reading, for example to register a class map.</param>
     /// <returns>The mapped rows.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
