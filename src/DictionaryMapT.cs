@@ -62,7 +62,7 @@ public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     /// </summary>
     internal ElementMap<TValue> Values { get; private set; } = new ElementMap<TValue>();
 
-    ValuePipeline IColumnsMap.Pipeline => Values.Pipeline;
+    CellPipeline IColumnsMap.Pipeline => Values.Pipeline;
 
     /// <inheritdoc />
     void IMap.Freeze()

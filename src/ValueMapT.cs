@@ -45,7 +45,7 @@ public sealed class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IColumnsMap, IB
     /// </summary>
     public bool PreserveFormatting => Settings.PreserveFormatting;
 
-    ValuePipeline IColumnsMap.Pipeline => Pipeline;
+    CellPipeline IColumnsMap.Pipeline => Pipeline;
 
     /// <inheritdoc />
     void IMap.Freeze()

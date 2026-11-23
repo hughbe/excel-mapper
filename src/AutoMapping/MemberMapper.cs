@@ -146,7 +146,7 @@ internal static class MemberMapper
 
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    internal static bool AddMappers<T>(ValuePipeline<T> pipeline, MemberInfo member)
+    internal static bool AddMappers<T>(CellPipeline<T> pipeline, MemberInfo member)
     {
         var addDefaultMappers = true;
 
@@ -252,7 +252,7 @@ internal static class MemberMapper
     /// <see cref="ExcelUriKindAttribute"/> and <see cref="ExcelOffsetAttribute"/>) to the pipeline's
     /// options.
     /// </summary>
-    internal static void ApplyConversionOptions(ValuePipeline pipeline, MemberInfo member)
+    internal static void ApplyConversionOptions(CellPipeline pipeline, MemberInfo member)
     {
         var options = pipeline.Options;
         if (MemberAttributes.Get<ExcelFormatsAttribute>(member) is { } formatsAttribute)
@@ -330,7 +330,7 @@ internal static class MemberMapper
         throw new ExcelMappingException($"The fallback {TypeNames.Get(fallback.GetType())} given by {attributeName} on member \"{member.Name}\" doesn't implement ICellFallback<{TypeNames.Get(typeof(T))}>.");
     }
 
-    internal static void AddTransformers(ValuePipeline pipeline, MemberInfo member)
+    internal static void AddTransformers(CellPipeline pipeline, MemberInfo member)
     {
         // If the member has a ExcelTrimString attribute, add the transformer.
         if (MemberAttributes.Get<ExcelTrimStringAttribute>(member) is { } trimStringAttribute)

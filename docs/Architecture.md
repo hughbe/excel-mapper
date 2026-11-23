@@ -56,7 +56,7 @@ Each member's map is one of:
 
 Class maps and the indexer maps are made of other maps (`IParentMap`: their children, each with a member, index or key). `MapTree` walks the tree, so code that needs every map that reads cells, such as `ValidateHeading`, `FindHeading`, extra columns and checking a class map when it's registered, doesn't switch over the kinds of map itself.
 
-A single-value map (`ValueMap<T>`) converts its cells with an internal `ValuePipeline<T>` (see [The value pipeline](#the-value-pipeline)). The collection and dictionary maps hold an `ElementMap<T>` for their elements or values (`WithElementMap`, `WithValueMap`), which has its own pipeline. Both maps derive from the public `ValuePipeline<T, TSelf>`, which holds the pipeline (`Pipeline`) and whose value methods configure it and return `TSelf`, so a chain of value methods keeps the map's type: `Map(p => p.Name).WithTrim().MakeOptional()`. The pipeline classes themselves (`ValuePipeline`, `ValuePipeline<T>`) are internal.
+A single-value map (`ValueMap<T>`) converts its cells with an internal `CellPipeline<T>` (see [The value pipeline](#the-value-pipeline)). The collection and dictionary maps hold an `ElementMap<T>` for their elements or values (`WithElementMap`, `WithValueMap`), which has its own pipeline. Both maps derive from the public `ValuePipeline<T, TSelf>`, which holds the pipeline (`Pipeline`) and whose value methods configure it and return `TSelf`, so a chain of value methods keeps the map's type: `Map(p => p.Name).WithTrim().MakeOptional()`. The pipeline classes themselves (`CellPipeline`, `CellPipeline<T>`, in `src`) are internal; their names differ from `ValuePipeline<T, TSelf>` so the two aren't confused.
 
 ### Choosing columns
 
@@ -88,7 +88,7 @@ A class map is frozen (`IMap.Freeze`) the first time it's used with a sheet (`Sh
 
 ## The value pipeline
 
-A `ValuePipeline<T>` turns a cell into a `T`. The stages, in order:
+A `CellPipeline<T>` turns a cell into a `T`. The stages, in order:
 
 1. **Transformers** change the cell's value, for example to trim it (`WithTrim`, `WithTransformers`, `[ExcelTransformer]`).
 2. **Empty cells** use the empty fallback: by default `null` for reference and nullable types, and an error for other value types (`WithEmptyFallback`, `[ExcelDefaultValue]`, `[ExcelEmptyFallback]`).
@@ -123,7 +123,7 @@ The pipeline creates one `CellContext` for each cell and gives it to every trans
 
 - **`ExcelMappingException`** reports the cell (`CellAddress`, `ColumnName`, `Member`, one-based row in the message) and wraps the converter's exception.
 - **Exceptions are created only when they're used.** A mapper reports an invalid cell without an exception, and the pipeline asks it for one (`ICellMapper<T>.CreateException`) only if the fallback uses it. A converter can return `CellConversionResult<T>.Invalid(() => exception)`. Fixed-value fallbacks don't use the exception, so an invalid cell with a fallback doesn't create one.
-- **Collecting errors.** `ReadRowResults<T>` and `ReadRows<T>(IExcelErrorSink)` pass an `ErrorTarget` (in `src/Reading`) down while they map a row, through `IMap.TryGetValue`, the bound members and `ValuePipeline<T>.Map`: errors are added to it rather than thrown, so every invalid cell in the row is reported, along with data-annotation failures (`ValidateDataAnnotations`). A member whose value had an error isn't set, so it keeps its initial value, and a row with errors isn't returned. `ReadRowResults` uses an `ExceptionListTarget`, which creates each cell's exception. A sink uses a `SinkTarget`, which gives it an `ExcelMappingError`, a `ref struct` holding the cell and the mapper that rejected it, so the exception (`CellErrors.Create`) is only made if the sink calls `ToException()`.
+- **Collecting errors.** `ReadRowResults<T>` and `ReadRows<T>(IExcelErrorSink)` pass an `ErrorTarget` (in `src/Reading`) down while they map a row, through `IMap.TryGetValue`, the bound members and `CellPipeline<T>.Map`: errors are added to it rather than thrown, so every invalid cell in the row is reported, along with data-annotation failures (`ValidateDataAnnotations`). A member whose value had an error isn't set, so it keeps its initial value, and a row with errors isn't returned. `ReadRowResults` uses an `ExceptionListTarget`, which creates each cell's exception. A sink uses a `SinkTarget`, which gives it an `ExcelMappingError`, a `ref struct` holding the cell and the mapper that rejected it, so the exception (`CellErrors.Create`) is only made if the sink calls `ToException()`.
 
 ## Trimming
 

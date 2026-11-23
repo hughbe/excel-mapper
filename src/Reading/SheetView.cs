@@ -396,7 +396,7 @@ internal sealed class SheetView
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "The public properties of T, which Validator validates, are kept by ExcelClassMap<T>'s annotation.")]
     private bool MapCurrentRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap, ErrorTarget? errors, [NotNullWhen(true)] out T? value)
     {
-        // The importer's culture, if set, is given to each cell (see ValuePipeline<T>.Map), not set
+        // The importer's culture, if set, is given to each cell (see CellPipeline<T>.Map), not set
         // as the thread's culture.
         var result = classMap.TryGetValue(this, CurrentRowIndex, Reader, null, errors, out value);
 

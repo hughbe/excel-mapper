@@ -16,5 +16,5 @@ internal interface IColumnsMap : IMap
     /// How each cell is converted: the map itself for a single value, or its elements' or values'
     /// <see cref="ElementMap{T}"/>.
     /// </summary>
-    ValuePipeline Pipeline { get; }
+    CellPipeline Pipeline { get; }
 }

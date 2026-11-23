@@ -9,10 +9,10 @@ namespace ExcelMapper;
 /// <see cref="ValuePipelineExtensions"/>. A member's map (<see cref="ValueMap{T}"/>) has one, and
 /// so do the elements or values of collections and dictionaries (<see cref="ElementMap{T}"/>).
 /// </summary>
-internal abstract class ValuePipeline
+internal abstract class CellPipeline
 {
-    // Pipelines are typed: see ValuePipeline<T>.
-    private protected ValuePipeline()
+    // Pipelines are typed: see CellPipeline<T>.
+    private protected CellPipeline()
     {
     }
 

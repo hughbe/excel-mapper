@@ -29,7 +29,7 @@ internal enum CellConversion
 
 /// <summary>
 /// Converts a cell to <typeparamref name="T"/> without boxing. A member's
-/// <see cref="ValuePipeline{T}"/> tries its mappers in order.
+/// <see cref="CellPipeline{T}"/> tries its mappers in order.
 /// </summary>
 /// <typeparam name="T">The type of the member, or of the elements or values of a collection.</typeparam>
 internal interface ICellMapper<T> : ICellExceptionSource
