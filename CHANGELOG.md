@@ -100,6 +100,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Sheets without a heading can be auto-mapped when columns aren't looked up by name, for example primitives or `[ExcelColumnIndex]` members. ([#119](https://github.com/hughbe/excel-mapper/pull/119))
 - `ExcelMappingException` is thrown, instead of `NullReferenceException`, when an empty value can't be assigned to a non-nullable value type. ([#116](https://github.com/hughbe/excel-mapper/pull/116))
 - Trimming annotations for the net8.0 build: the type passed to `ReadRows<T>`, `RegisterClassMap<T>` and `ExcelClassMap<T>`, and types given in attributes, are kept by the trimmer, so mapping works in trimmed apps; reflection-based APIs are marked `[RequiresUnreferencedCode]`/`[RequiresDynamicCode]` so trimmed and AOT apps get warnings where they call them. See [Trimming and Native AOT](docs/trimming.md). ([#138](https://github.com/hughbe/excel-mapper/pull/138))
+- An index or dictionary key in a mapping expression can be a variable or field the expression captures, such as a loop variable in `for (var i = 0; i < 4; i++) c.Map(p => p.Quarters[i])`, as well as a constant. ([#240](https://github.com/hughbe/excel-mapper/pull/240))
 
 ### Changed
 
@@ -122,6 +123,9 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Updated ExcelDataReader to 3.9.0 and ExcelNumberFormat to 1.2.0. ([#115](https://github.com/hughbe/excel-mapper/pull/115))
 - The documentation moved from the README into [`docs/`](docs). ([#132](https://github.com/hughbe/excel-mapper/pull/132))
 - Mapping a member again in a class map (`Map(p => p.Name)` twice) returns the map it already has, so settings made in each call add up, instead of replacing it and losing the first call's settings. A member mapped by `AutoMap()`, or as another kind of map, still gets a new map. ([#238](https://github.com/hughbe/excel-mapper/pull/238))
+- A column name with white space before or after it, such as "Name " (often in headings, and invisible in Excel), matches a member when no column matches exactly, where it was a missing column. ([#239](https://github.com/hughbe/excel-mapper/pull/239))
+- A member with attributes that choose its columns in different ways, such as `[ExcelColumnName]` and `[ExcelColumnIndex]`, throws an `ExcelMappingException` naming both when it's mapped, instead of silently ignoring one. ([#241](https://github.com/hughbe/excel-mapper/pull/241))
+- With `ValidateDataAnnotations` on, the nested objects a row maps (with `MapObject`, or auto-mapped members with members of their own) are validated with their data annotations too, where only the row's own object was. A failure names the object, such as `The Street field is required in Address`. ([#242](https://github.com/hughbe/excel-mapper/pull/242))
 - The docs and IntelliSense say that disposing an importer created from a stream closes the stream, and that `ExcelReaderConfiguration.LeaveOpen` keeps it open. ([#243](https://github.com/hughbe/excel-mapper/pull/243))
 
 ### Fixed

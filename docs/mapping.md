@@ -24,7 +24,7 @@ var employees = sheet.ReadRows<Employee>().ToArray();
 Console.WriteLine(employees[1].Salary); // 78000
 ```
 
-Public instance properties with a setter, and public instance fields, are mapped. Read-only properties are mapped only through a constructor (see [Records and constructors](#records-and-constructors)); static members and indexers are ignored. A type with nothing to map, such as one whose properties all have private setters, throws an `ExcelMappingException` when rows are read, rather than giving an empty object for every row. Set `importer.Configuration.IgnoreSeparatorsInColumnNames = true` to also match `FirstName` to columns such as "First Name", "first_name" or "First-Name" (an exact match is preferred).
+Public instance properties with a setter, and public instance fields, are mapped. Read-only properties are mapped only through a constructor (see [Records and constructors](#records-and-constructors)); static members and indexers are ignored. A type with nothing to map, such as one whose properties all have private setters, throws an `ExcelMappingException` when rows are read, rather than giving an empty object for every row. Column names are matched ignoring case and, if there's no exact match, white space before and after the name, which is often in headings but can't be seen in Excel: `Name` matches a column "Name ". Set `importer.Configuration.IgnoreSeparatorsInColumnNames = true` to also match `FirstName` to columns such as "First Name", "first_name" or "First-Name" (an exact match is preferred).
 
 If more than one column matches a member's name (two columns named "Name", or "Name" and "name"), reading it throws an `ExcelMappingException` naming both columns, as it isn't clear which to read. Choose one by its letter or index (`[ExcelColumnLetter("B")]`, `.WithColumnLetter("B")`), or rename one of the columns. Columns with the same name that no member reads, such as several blank heading cells, are fine.
 
@@ -136,6 +136,8 @@ Class maps work the same way: `c.Map(p => p.Name)` maps the `Name` parameter.
 | A column by position | `[ExcelColumnIndex(0)]` or `[ExcelColumnLetter("A")]` | `.WithColumnIndex(0)` or `.WithColumnLetter("A")` |
 | The first of several positions | `[ExcelColumnIndices(2, 1)]` | (attribute only: positions rarely vary between files, so use `.WithColumnIndex(...)`) |
 | Columns chosen in code | `[ExcelColumnMatching(typeof(Selector))]` | `.WithColumns(selector)` |
+
+A member chooses its columns one way: by name, by matching, or by position. Several attributes of one kind work together (repeat `[ExcelColumnName]` for the first of several names, or combine `[ExcelColumnIndex]` and `[ExcelColumnLetter]`), but mixing kinds, such as `[ExcelColumnName]` with `[ExcelColumnIndex]`, throws an `ExcelMappingException` when the member is mapped, as one of them would be ignored.
 
 Collections and dictionaries read several columns, or split one cell: see [Collections](types.md#collections) and [Dictionaries](types.md#dictionaries).
 
@@ -505,4 +507,4 @@ catch (ExcelMappingException ex) when (ex.InnerException is ValidationException)
 }
 ```
 
-`ReadRows` throws an `ExcelMappingException` for the first failure, with the row and the member, and the `ValidationException` as its `InnerException`. `ReadRowResults` reports every failure of every row as an error instead. Nested objects aren't validated: `Validator` only checks the object's own members.
+`ReadRows` throws an `ExcelMappingException` for the first failure, with the row and the member, and the `ValidationException` as its `InnerException`. `ReadRowResults` reports every failure of every row as an error instead. Nested objects the class map reads (with `MapObject`, or auto-mapped members with members of their own) are validated too, and their failures say which object: `The Street field is required in Address`.
