@@ -59,4 +59,74 @@ public class MapListIndexerTests
         public ReadOnlyCollection<int> ReadOnly { get; set; } = new([]);
         public ImmutableList<int> Immutable { get; set; } = [];
     }
+
+    [Fact]
+    public void ReadRows_IndexesFromLoopVariable_ReturnsExpected()
+    {
+        // An index can be a variable the expression captures, such as a loop's.
+        using var importer = Helpers.GetCsvImporter("Q1,Q2,Q3\n1,2,3\n");
+        importer.Configuration.RegisterClassMap<CapturedIndexRow>(c =>
+        {
+            for (var i = 0; i < 3; i++)
+            {
+                c.Map(r => r.Array[i]).WithColumnName($"Q{i + 1}");
+                c.Map(r => r.List[i]).WithColumnName($"Q{3 - i}");
+            }
+        });
+
+        var row = importer.ReadSheet().ReadRows<CapturedIndexRow>().Single();
+        Assert.Equal([1, 2, 3], row.Array);
+        Assert.Equal([3, 2, 1], row.List);
+    }
+
+    [Fact]
+    public void ReadRows_KeysAndGridIndexesFromVariablesAndFields_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("Maths,English,A\n90,80,x\n");
+        var keys = new[] { "Maths", "English" };
+        short row = 0;
+        importer.Configuration.RegisterClassMap<CapturedIndexRow>(c =>
+        {
+            foreach (var key in keys)
+            {
+                c.Map(r => r.Scores[key]);
+            }
+
+            c.Map(r => r.Grid[row, s_column]).WithColumnName("A");
+        });
+
+        var result = importer.ReadSheet().ReadRows<CapturedIndexRow>().Single();
+        Assert.Equal(new Dictionary<string, int> { ["Maths"] = 90, ["English"] = 80 }, result.Scores);
+        Assert.Equal("x", result.Grid[0, 1]);
+    }
+
+    private static readonly int s_column = 1;
+
+    [Fact]
+    public void Map_NegativeCapturedIndex_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<CapturedIndexRow>();
+        var index = -1;
+        var exception = Assert.Throws<ArgumentException>("expression", () => map.Map(r => r.Array[index]));
+        Assert.StartsWith("Array and list indices must be non-negative. Received: -1 in ", exception.Message);
+    }
+
+    [Fact]
+    public void Map_IndexFromRow_ThrowsArgumentException()
+    {
+        var map = new ExcelClassMap<CapturedIndexRow>();
+        var exception = Assert.Throws<ArgumentException>("expression", () => map.Map(r => r.Array[r.Array.Length]));
+        Assert.StartsWith("An index must be a constant, or a variable or field captured by the expression", exception.Message);
+    }
+
+    public class CapturedIndexRow
+    {
+        public int[] Array { get; set; } = [];
+
+        public List<int> List { get; set; } = [];
+
+        public Dictionary<string, int> Scores { get; set; } = [];
+
+        public string?[,] Grid { get; set; } = new string?[1, 2];
+    }
 }

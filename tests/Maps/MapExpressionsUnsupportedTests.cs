@@ -445,14 +445,6 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
-    public void Map_ArrayWithVariableIndex_ThrowsArgumentException()
-    {
-        var map = new ExcelClassMap<ArrayClass>();
-        var index = 0;
-        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[index]));
-    }
-
-    [Fact]
     public void Map_ArrayWithMemberIndex_ThrowsArgumentException()
     {
         var map = new ExcelClassMap<ArrayClass>();
@@ -580,22 +572,6 @@ public class MapExpressionsUnsupportedTests
     private class ChainedStringMultidimensionalArrayClass
     {
         public int[][] GetNestedArray() => [[1, 2], [3, 4]];
-    }
-
-    [Fact]
-    public void Map_MultidimensionalWithVariableIndexFirst_ThrowsArgumentException()
-    {
-        var map = new ExcelClassMap<StringMultidimensionalArrayClass>();
-        var index = 0;
-        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[index, 0]));
-    }
-
-    [Fact]
-    public void Map_MultidimensionalWithVariableIndexSecond_ThrowsArgumentException()
-    {
-        var map = new ExcelClassMap<StringMultidimensionalArrayClass>();
-        var index = 0;
-        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[0, index]));
     }
 
     [Fact]
@@ -826,14 +802,6 @@ public class MapExpressionsUnsupportedTests
     }
 
     [Fact]
-    public void Map_ListWithVariableIndex_ThrowsArgumentException()
-    {
-        var map = new ExcelClassMap<ListIndexClass>();
-        var index = 0;
-        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[index]));
-    }
-
-    [Fact]
     public void Map_ListWithMemberIndex_ThrowsArgumentException()
     {
         var map = new ExcelClassMap<ListIndexClass>();
@@ -1007,14 +975,6 @@ public class MapExpressionsUnsupportedTests
     {
         var map = new ExcelClassMap<DictionaryClass>();
         Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[null!]));
-    }
-
-    [Fact]
-    public void Map_DictionaryWithVariableKey_ThrowsArgumentException()
-    {
-        var map = new ExcelClassMap<DictionaryClass>();
-        var key = "key";
-        Assert.Throws<ArgumentException>("expression", () => map.Map(p => p.Value[key]));
     }
 
     [Fact]
