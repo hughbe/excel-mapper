@@ -505,4 +505,4 @@ catch (ExcelMappingException ex) when (ex.InnerException is ValidationException)
 }
 ```
 
-`ReadRows` throws an `ExcelMappingException` for the first failure, with the row and the member, and the `ValidationException` as its `InnerException`. `ReadRowResults` reports every failure of every row as an error instead. Nested objects aren't validated: `Validator` only checks the object's own members.
+`ReadRows` throws an `ExcelMappingException` for the first failure, with the row and the member, and the `ValidationException` as its `InnerException`. `ReadRowResults` reports every failure of every row as an error instead. Nested objects the class map reads (with `MapObject`, or auto-mapped members with members of their own) are validated too, and their failures say which object: `The Street field is required in Address`.
