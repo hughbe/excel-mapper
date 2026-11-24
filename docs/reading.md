@@ -42,7 +42,7 @@ foreach (var sheet in importer.ReadSheets())
 }
 ```
 
-Each `ReadSheet` throws an `ExcelMappingException` if there's no such sheet; `TryReadSheet(out sheet)`, `TryReadSheet(name, out sheet)` and `TryReadSheet(index, out sheet)` return `false` instead. `importer.NumberOfSheets` is the number of sheets.
+`ReadSheet()` and `ReadSheet(name)` throw an `ExcelMappingException` if there's no such sheet, and `ReadSheet(index)` an `ArgumentOutOfRangeException`; `TryReadSheet(out sheet)`, `TryReadSheet(name, out sheet)` and `TryReadSheet(index, out sheet)` return `false` instead. `importer.NumberOfSheets` is the number of sheets.
 
 You can read several sheets at once, including several `ExcelSheet` objects for the same worksheet: each keeps its own position. The file is read forward only, so going back to an earlier row re-reads it from the start. Reading one sheet's rows at a time is fastest; alternating between sheets row by row works, but re-reads the file each time.
 
@@ -67,7 +67,7 @@ var block = sheet.ReadRows<Employee>(startIndex: 5, count: 10);
 
 A row is blank if every cell in it is empty. Blank rows after the last row with a value aren't rows: workbooks often have formatted, empty rows below a table, and CSV files empty lines at the end. A blank row between rows with values is mapped like any other row: reference and nullable members get `null`, and other members use their empty fallback, or throw. Set `importer.Configuration.SkipBlankLines = true` to skip those too.
 
-A one-column sheet whose last rows are empty therefore ends at its last value: give the sheet another column, or a `DataRange`, if those rows matter.
+A one-column sheet whose last rows are empty therefore ends at its last value, even with a `DataRange` that includes them: give those rows a value in another column if they matter.
 
 ## Where the heading is
 
@@ -147,7 +147,7 @@ A region's first row is its heading. Change that with:
 - `WithoutHeading()`: every row is data, and columns are found by position.
 - `WithHeadingSearch()` or `WithHeadingSearch(maxRows)`: the heading is found as by [`FindHeading`](#finding-the-heading), within the region.
 
-Regions have `ReadRows<T>()`, `ReadRowResults<T>()`, `ValidateHeading<T>()` and `TryValidateHeading<T>()`.
+Regions have `ReadRows<T>()`, `ReadRows<T>(errors)` with an [`IExcelErrorSink`](errors.md#checking-large-files), `ReadRowResults<T>()`, `ValidateHeading<T>()` and `TryValidateHeading<T>()`, each of which also takes a class map. Like a sheet's, they read (or find) the heading when they're called.
 
 - **Regions are immutable**, and each read starts at the top of the region. Reading one doesn't use or change the sheet's heading, `DataRange` or position, so a region can be read any number of times, alongside other regions and the sheet.
 - **Positions count from the region's first column.** In region `B2:C3`, `[ExcelColumnIndex(0)]` and `[ExcelColumnLetter("A")]` are column B, so one type can map tables of the same shape anywhere on a sheet. Error messages give cell addresses in the sheet.
@@ -184,8 +184,8 @@ new ExcelRange(rowStart: 1, rowEnd: 99, columnStart: 0, columnEnd: null);   // z
 new ExcelRange(..^1, Range.All);               // System.Range: every row but the last
 ```
 
-Addresses must be within Excel's limits (rows 1 to 1,048,576, columns A to XFD): for larger CSV files, use the index or `Range` constructors. Row ranges counted from the end (`^1`) read a CSV file one extra time to count its rows. `default(ExcelRange)` is every row and column.
+Addresses must be within Excel's limits (rows 1 to 1,048,576, columns A to XFD): for larger CSV files, use the index or `Range` constructors. Row ranges counted from the end (`^1`) read the sheet one extra time to count its rows. `default(ExcelRange)` is every row and column.
 
 ## Limits
 
-To protect against files with an excessive number of columns, a sheet with more than `importer.Configuration.MaxColumnsPerSheet` columns (10,000 by default) throws an `ExcelMappingException` before anything is allocated for them. Excel itself allows 16,384. Raise the limit only for files you trust.
+To protect against files with an excessive number of columns, reading the heading of a sheet with more than `importer.Configuration.MaxColumnsPerSheet` columns (10,000 by default) throws an `ExcelMappingException` before the heading's column names are created. A sheet without a heading only reads the columns its members choose, so it isn't limited. Excel itself allows 16,384. Raise the limit only for files you trust.
