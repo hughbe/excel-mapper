@@ -172,4 +172,44 @@ public class MapColumnChoicesTests
         public string? B { get; set; } = "initial";
         public string[] Values { get; set; } = ["initial"];
     }
+
+    [Theory]
+    [InlineData("\"Name \",Other\nAlice,x\n")]
+    [InlineData("\" Name\",Other\nAlice,x\n")]
+    [InlineData("\"  Name  \",Other\nAlice,x\n")]
+    public void ReadRows_HeadingNameWithOuterWhiteSpace_FindsColumn(string csv)
+    {
+        using var importer = Helpers.GetCsvImporter(csv);
+        var sheet = importer.ReadSheet();
+        sheet.ValidateHeading<NamedRow>();
+        Assert.Equal("Alice", sheet.ReadRows<NamedRow>().Single().Name);
+    }
+
+    [Fact]
+    public void ReadRows_ExactAndPaddedHeadingNames_PrefersExactName()
+    {
+        using var importer = Helpers.GetCsvImporter("\"Name \",Name\nPadded,Exact\n");
+        Assert.Equal("Exact", importer.ReadSheet().ReadRows<NamedRow>().Single().Name);
+    }
+
+    [Fact]
+    public void ReadRows_TwoPaddedHeadingNames_ThrowsAmbiguousColumn()
+    {
+        using var importer = Helpers.GetCsvImporter("\"Name \",\" Name\"\na,b\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<NamedRow>().ToArray());
+        Assert.StartsWith("More than one column matches \"Name\" (columns A and B)", exception.Message);
+    }
+
+    [Fact]
+    public void ReadRows_PaddedHeadingNameWithOrdinalComparison_MatchesCase()
+    {
+        using var importer = Helpers.GetCsvImporter("\"name \"\nAlice\n");
+        importer.Configuration.RegisterClassMap<NamedRow>(c => c.Map(r => r.Name).WithColumnName("Name", StringComparison.Ordinal));
+        Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<NamedRow>().ToArray());
+    }
+
+    public class NamedRow
+    {
+        public string? Name { get; set; }
+    }
 }
