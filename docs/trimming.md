@@ -56,14 +56,19 @@ public partial class AppMappingContext : ExcelMappingContext
 var employees = sheet.ReadRows(AppMappingContext.Default.Employee).ToList();
 ```
 
-The generator registers each type and every type its members use (except members with `[ExcelIgnore]`), and the code that sets each member and calls each public constructor, so native AOT apps set members and create records without reflection (which boxes values and allocates); it adds a property for each type's class map, named after the type (`DictionaryStringInt32` for `Dictionary<string, int>`, `Int32Array` for `int[]`), and a static `Default` instance. A member of the context with the same name is kept, and `GetClassMap<T>()` gives the class map too. It reports these errors:
+The generator registers each type and every type its members use (except members with `[ExcelIgnore]`), and the code that sets each member and calls each public constructor, so native AOT apps set members and create records without reflection (which boxes values and allocates); it adds a property for each type's class map, named after the type (`DictionaryStringInt32` for `Dictionary<string, int>`, `Int32Array` for `int[]`), and a static `Default` instance. A member of the context with the same name is kept, and `GetClassMap<T>()` gives the class map too. It reports these errors, and warnings for types that auto-mapping can't map, which would make reading their rows throw:
 
-| Error | Meaning |
+| Diagnostic | Meaning |
 |---|---|
-| EXM001 | The context, and each type it's declared in, must be `partial`. |
-| EXM002 | A class with `[ExcelMappable]` must derive from `ExcelMappingContext`. |
-| EXM003 | The context declares `RegisterTypes`, which the generator writes. |
-| EXM004 | `[ExcelMappable]` names an open generic type, such as `typeof(List<>)`. |
+| EXM001 (error) | The context, and each type it's declared in, must be `partial`. |
+| EXM002 (error) | A class with `[ExcelMappable]` must derive from `ExcelMappingContext`. |
+| EXM003 (error) | The context declares `RegisterTypes`, which the generator writes. |
+| EXM004 (error) | `[ExcelMappable]` names an open generic type, such as `typeof(List<>)`. |
+| EXM005 (warning) | A type, or the type of a member, has nothing auto-mapping can set: no public setters, fields or constructor parameters, or every member is `[ExcelIgnore]`. |
+| EXM006 (warning) | Auto-mapping can't create a type: an interface or abstract class, or a class with neither a public parameterless constructor nor a public constructor whose parameters match its members. |
+| EXM007 (warning) | A type contains itself through its members, such as a `Node` with a `Node Next` property. Ignore the member with `[ExcelIgnore]`. |
+
+The warnings are reported on the `[ExcelMappable]` attribute of the row type that uses the type. They're warnings rather than errors so that a difference from auto-mapping can't stop a build; to make them errors, set `<WarningsAsErrors>$(WarningsAsErrors);EXM005;EXM006;EXM007</WarningsAsErrors>`.
 
 Every reading method takes a class map: `ReadRows(classMap)`, `ReadRow(classMap)`, `ReadRowResults(classMap)`, `ValidateHeading(classMap)`, `FindHeading(classMap)` and the others, on sheets and regions. They read with the class map you give them rather than looking one up or auto-mapping, so they don't warn.
 
