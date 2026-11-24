@@ -126,6 +126,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - A column name with white space before or after it, such as "Name " (often in headings, and invisible in Excel), matches a member when no column matches exactly, where it was a missing column. ([#239](https://github.com/hughbe/excel-mapper/pull/239))
 - A member with attributes that choose its columns in different ways, such as `[ExcelColumnName]` and `[ExcelColumnIndex]`, throws an `ExcelMappingException` naming both when it's mapped, instead of silently ignoring one. ([#241](https://github.com/hughbe/excel-mapper/pull/241))
 - With `ValidateDataAnnotations` on, the nested objects a row maps (with `MapObject`, or auto-mapped members with members of their own) are validated with their data annotations too, where only the row's own object was. A failure names the object, such as `The Street field is required in Address`. ([#242](https://github.com/hughbe/excel-mapper/pull/242))
+- The docs and IntelliSense say that disposing an importer created from a stream closes the stream, and that `ExcelReaderConfiguration.LeaveOpen` keeps it open. ([#243](https://github.com/hughbe/excel-mapper/pull/243))
 
 ### Fixed
 
