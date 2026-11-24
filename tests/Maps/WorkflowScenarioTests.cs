@@ -221,14 +221,14 @@ public class WorkflowScenarioTests
     public record ValidatedRecord([property: Range(0, 120)] int Age, [property: Required] string Name);
 
     [Fact]
-    public void ReadRows_ValidateDataAnnotationsOnRecord_ThrowsValidationException()
+    public void ReadRows_ValidateDataAnnotationsOnRecord_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetCsvImporter("Name,Age\nAlice,30\nBob,500\n");
         importer.Configuration.ValidateDataAnnotations = true;
         var sheet = importer.ReadSheet();
 
         Assert.Equal(new ValidatedRecord(30, "Alice"), sheet.ReadRow<ValidatedRecord>());
-        Assert.Throws<ValidationException>(() => sheet.ReadRow<ValidatedRecord>());
+        Assert.IsType<ValidationException>(Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ValidatedRecord>()).InnerException);
     }
 
     [Fact]

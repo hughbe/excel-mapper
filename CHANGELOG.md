@@ -59,6 +59,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Two helper types made public by accident are internal: `CallerArgumentExpressionAttribute` on the netstandard builds (a polyfill, which the compiler ignored) and `ExcelMapper.Utilities.StringComparerUtilities`. ([#167](https://github.com/hughbe/excel-mapper/pull/167))
 - `ExcelClassMap<T>.MapList` is renamed `MapCollection`, as it maps any collection type, such as `HashSet<T>`, not only lists. ([#225](https://github.com/hughbe/excel-mapper/pull/225))
 - `ValueMap.WithColumnNameMatching` is renamed `WithColumnMatching`, as `[ExcelColumnMatching]` is named, and `ExcelHeading.GetFirstColumnMatchingIndex` and `TryGetFirstColumnMatchingIndex` are overloads of `GetColumnIndex` and `TryGetColumnIndex` taking a predicate. `GetColumnIndex`'s error lists the heading's columns as other errors do. ([#234](https://github.com/hughbe/excel-mapper/pull/234))
+- With `ValidateDataAnnotations` on, `ReadRows` and `ReadRow` throw an `ExcelMappingException` for a failed annotation, naming the row and member, with the `ValidationException` as its `InnerException`, as `ReadRowResults` reports it, instead of a bare `ValidationException` that didn't say which row failed. ([#235](https://github.com/hughbe/excel-mapper/pull/235))
 
 ### Added
 

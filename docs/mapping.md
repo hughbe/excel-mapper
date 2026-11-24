@@ -495,10 +495,12 @@ try
 {
     var employees = sheet.ReadRows<Employee>().ToArray();
 }
-catch (ValidationException ex)
+catch (ExcelMappingException ex) when (ex.InnerException is ValidationException)
 {
-    Console.WriteLine(ex.Message); // "The field Percentage must be between 1 and 100."
+    // "The field Percentage must be between 1 and 100 on row 3 in sheet "Employees"."
+    Console.WriteLine(ex.Message);
+    Console.WriteLine(ex.Member?.Name); // "Percentage"
 }
 ```
 
-`ReadRows` throws the first `ValidationException`. `ReadRowResults` reports every failure of every row as an error instead.
+`ReadRows` throws an `ExcelMappingException` for the first failure, with the row and the member, and the `ValidationException` as its `InnerException`. `ReadRowResults` reports every failure of every row as an error instead. Nested objects aren't validated: `Validator` only checks the object's own members.
