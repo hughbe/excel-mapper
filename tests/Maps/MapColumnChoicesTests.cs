@@ -211,6 +211,8 @@ public class MapColumnChoicesTests
     public class NamedRow
     {
         public string? Name { get; set; }
+    }
+
     [Fact]
     public void ReadRows_NameAndIndexAttributes_ThrowsExcelMappingException()
     {
