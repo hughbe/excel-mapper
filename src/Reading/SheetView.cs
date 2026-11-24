@@ -446,8 +446,6 @@ internal sealed class SheetView
         return _cursor.MoveNext(_dataRange, FirstDataRow, Settings.SkipBlankLines);
     }
 
-    // Data annotations are validated by reflection over T's properties, which ExcelClassMap<T> keeps.
-    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "The public properties of T, which Validator validates, are kept by ExcelClassMap<T>'s annotation.")]
     private bool MapCurrentRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap, ErrorTarget? errors, [NotNullWhen(true)] out T? value)
     {
         // The importer's culture, if set, is given to each cell (see CellPipeline<T>.Map), not set
@@ -457,45 +455,81 @@ internal sealed class SheetView
         // If we've been asked to validate with data annotations, do so now.
         if (Settings.ValidateDataAnnotations && result && value is not null)
         {
-            object valueObject = value;
-            if (errors is not null)
-            {
-                // Report every validation failure rather than only the first.
-                var validationResults = new List<ValidationResult>();
-                if (!Validator.TryValidateObject(valueObject, new ValidationContext(valueObject), validationResults, validateAllProperties: true))
-                {
-                    foreach (var validationResult in validationResults)
-                    {
-                        errors.Add(CreateValidationError<T>(validationResult, valueObject), ExcelMappingErrorKind.DataAnnotation);
-                    }
-                }
-            }
-            else if (!Validator.TryValidateObject(valueObject, new ValidationContext(valueObject), null, validateAllProperties: true))
-            {
-                // The first failure, with the row, as for other problems with a row. Valid rows
-                // (usually most of them) don't collect the failures.
-                var validationResults = new List<ValidationResult>(1);
-                Validator.TryValidateObject(valueObject, new ValidationContext(valueObject), validationResults, validateAllProperties: true);
-                throw CreateValidationError<T>(validationResults[0], valueObject);
-            }
+            ValidateAnnotations(classMap, value, errors, path: null);
         }
 
         return result;
     }
 
+    /// <summary>
+    /// Validates an object with its data annotations, then the nested objects its class map maps
+    /// (<c>MapObject</c>, or auto-mapped members with members of their own), which
+    /// <see cref="Validator"/> doesn't check: their annotations apply as the row's do.
+    /// </summary>
+    // Data annotations are validated by reflection over the class maps' types' properties, which
+    // ExcelClassMap<T> keeps.
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "The public properties of a class map's type, which Validator validates, are kept by ExcelClassMap<T>'s annotation.")]
+    private void ValidateAnnotations(ExcelClassMap classMap, object value, ErrorTarget? errors, string? path)
+    {
+        if (errors is not null)
+        {
+            // Report every validation failure rather than only the first.
+            var validationResults = new List<ValidationResult>();
+            if (!Validator.TryValidateObject(value, new ValidationContext(value), validationResults, validateAllProperties: true))
+            {
+                foreach (var validationResult in validationResults)
+                {
+                    errors.Add(CreateValidationError(classMap.Type, validationResult, value, path), ExcelMappingErrorKind.DataAnnotation);
+                }
+            }
+        }
+        else if (!Validator.TryValidateObject(value, new ValidationContext(value), null, validateAllProperties: true))
+        {
+            // The first failure, with the row, as for other problems with a row. Valid rows
+            // (usually most of them) don't collect the failures.
+            var validationResults = new List<ValidationResult>(1);
+            Validator.TryValidateObject(value, new ValidationContext(value), validationResults, validateAllProperties: true);
+            throw CreateValidationError(classMap.Type, validationResults[0], value, path);
+        }
+
+        // An indexed loop: enumerating the collection through its interface allocates.
+        var members = classMap.Members;
+        for (int i = 0; i < members.Count; i++)
+        {
+            var member = members[i];
+            if (member.Map is ExcelClassMap nestedMap && GetValue(member.Member, value) is { } nestedValue)
+            {
+                ValidateAnnotations(nestedMap, nestedValue, errors, path is null ? member.Member.Name : $"{path}.{member.Member.Name}");
+            }
+        }
+    }
+
+    private static object? GetValue(MemberInfo member, object value) => member switch
+    {
+        PropertyInfo property => property.GetValue(value),
+        FieldInfo field => field.GetValue(value),
+        _ => null,
+    };
+
     // A failed data annotation, for the row being read and the member it's on, with the
-    // ValidationException that Validator.ValidateObject would throw as its inner exception.
-    private ExcelMappingException CreateValidationError<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ValidationResult validationResult, object value)
+    // ValidationException that Validator.ValidateObject would throw as its inner exception. A
+    // nested object's failure says which object: "The Street field is required in Address".
+    private ExcelMappingException CreateValidationError([DynamicallyAccessedMembers(TrimmingConstants.MappedType)] Type type, ValidationResult validationResult, object value, string? path)
     {
         MemberInfo? member = null;
         foreach (var memberName in validationResult.MemberNames)
         {
-            member = (MemberInfo?)typeof(T).GetProperty(memberName) ?? typeof(T).GetField(memberName);
+            member = (MemberInfo?)type.GetProperty(memberName) ?? type.GetField(memberName);
             break;
         }
 
         // The row follows the message, which usually ends with a full stop ("must be between 1 and 100.").
         var message = validationResult.ErrorMessage?.TrimEnd('.') ?? "The value is invalid";
+        if (path is not null)
+        {
+            message = $"{message} in {path}";
+        }
+
         return new ExcelMappingException(message, this, CurrentRowIndex, -1, new ValidationException(validationResult, null, value))
         {
             Member = member,

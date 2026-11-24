@@ -33,6 +33,8 @@
     <Compile Remove="**/*.cs" />
     <Compile Include="Mapping.cs;Program.cs" />
     <PackageReference Include="ExcelDataReader.Mapping" Version="$(EXCELMAPPER_VERSION)" />
+    <!-- 3.0.3 depends on IndexRange 1.1.0, which brings Microsoft.Bcl.Memory 9.0.0: 9.0.14 fixed GHSA-73j8-2gch-69rq. -->
+    <PackageReference Include="Microsoft.Bcl.Memory" Version="9.0.14" />
     <!-- The ExcelDataReader version src/ uses, so the comparison is of ExcelMapper alone. -->
     <PackageReference Include="ExcelDataReader" Version="3.9.0" />
   </ItemGroup>

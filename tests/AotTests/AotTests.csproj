@@ -16,6 +16,14 @@
     <WarningsAsErrors>$(WarningsAsErrors);IL2026;IL2104;IL3050;IL3053</WarningsAsErrors>
   </PropertyGroup>
 
+  <!--
+    The AOT compiler, rather than the version the installed SDK knows of, which can be older: 8.0.33
+    fixed CVE-2026-111497 (GHSA-p3jp-9v83-76w9). Update it with each .NET 8 patch.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="8.0.34" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="../../src/ExcelMapper.csproj" />
     <ProjectReference Include="../../gen/ExcelMapper.SourceGeneration.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
