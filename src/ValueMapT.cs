@@ -145,7 +145,7 @@ public sealed class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IColumnsMap, IB
     /// </summary>
     /// <param name="predicate">Whether a column name matches.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ValueMap<T> WithColumnNameMatching(Func<string, bool> predicate)
+    public ValueMap<T> WithColumnMatching(Func<string, bool> predicate)
         => WithColumns(new MatchingColumns(predicate));
 
     /// <summary>
@@ -153,7 +153,7 @@ public sealed class ValueMap<T> : ValuePipeline<T, ValueMap<T>>, IColumnsMap, IB
     /// </summary>
     /// <param name="regex">The regular expression column names are matched against.</param>
     /// <returns>The map on which this method was invoked.</returns>
-    public ValueMap<T> WithColumnNameMatching(Regex regex)
+    public ValueMap<T> WithColumnMatching(Regex regex)
         => WithColumns(new MatchingColumns(regex));
 
     /// <summary>
