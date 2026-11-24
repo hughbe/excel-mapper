@@ -59,13 +59,13 @@ public class ExcelRegionTests
     }
 
     [Fact]
-    public void ReadRows_Closed_ThrowsExcelMappingException()
+    public void ReadRows_Closed_ThrowsObjectDisposedException()
     {
         var importer = Helpers.GetCsvImporter("A\n1\n");
         var region = importer.ReadSheet().Region();
         importer.Dispose();
-        var exception = Assert.Throws<ExcelMappingException>(() => region.ReadRows<StringValue>().GetEnumerator().MoveNext());
-        Assert.Equal("The underlying reader is closed.", exception.Message);
+        var exception = Assert.Throws<ObjectDisposedException>(() => region.ReadRows<StringValue>().GetEnumerator().MoveNext());
+        Assert.Equal(nameof(ExcelImporter), exception.ObjectName);
     }
 
     [Fact]

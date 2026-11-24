@@ -424,7 +424,7 @@ public class MatchingMapTests
             int i = 0;
 
             Map(o => o.Value)
-                .WithColumnNameMatching(s =>
+                .WithColumnMatching(s =>
                 {
                     if (s == "Int Value" && i == 0)
                     {
@@ -448,7 +448,7 @@ public class MatchingMapTests
         public NoColumnMatchingPredicateClassMap()
         {
             Map(o => o.Value)
-                .WithColumnNameMatching(_ => false);
+                .WithColumnMatching(_ => false);
         }
     }
 
@@ -457,7 +457,7 @@ public class MatchingMapTests
         public NoColumnMatchingPredicateOptionalClassMap()
         {
             Map(o => o.Value)
-                .WithColumnNameMatching(_ => false)
+                .WithColumnMatching(_ => false)
                 .MakeOptional();
         }
     }

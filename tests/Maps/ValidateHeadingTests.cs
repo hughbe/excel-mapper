@@ -160,6 +160,6 @@ public class ValidateHeadingTests
         var importer = Helpers.GetCsvImporter("Value\n1\n");
         var sheet = importer.ReadSheet();
         importer.Dispose();
-        Assert.Throws<ExcelMappingException>(() => sheet.ValidateHeading<int>());
+        Assert.Throws<ObjectDisposedException>(() => sheet.ValidateHeading<int>());
     }
 }

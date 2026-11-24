@@ -76,12 +76,12 @@ public class MapColumnChoicesTests
     public void ReadRows_NoColumnNameMatches_ThrowsNoColumnsMatching()
     {
         using var importer = Helpers.GetCsvImporter("A,B\n1,2\n");
-        importer.Configuration.RegisterClassMap<Single>(c => c.Map(r => r.Value).WithColumnNameMatching(n => n == "Missing"));
+        importer.Configuration.RegisterClassMap<Single>(c => c.Map(r => r.Value).WithColumnMatching(n => n == "Missing"));
         var sheet = importer.ReadSheet();
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<Single>().ToArray());
         Assert.Contains("Can't find a matching column", exception.Message);
         using var validating = Helpers.GetCsvImporter("A,B\n1,2\n");
-        validating.Configuration.RegisterClassMap<Single>(c => c.Map(r => r.Value).WithColumnNameMatching(n => n == "Missing"));
+        validating.Configuration.RegisterClassMap<Single>(c => c.Map(r => r.Value).WithColumnMatching(n => n == "Missing"));
         Assert.False(validating.ReadSheet().TryValidateHeading<Single>(out var problems));
         Assert.Single(problems);
     }
@@ -97,17 +97,17 @@ public class MapColumnChoicesTests
     }
 
     [Fact]
-    public void ReadRows_ColumnNameMatchingWithoutHeading_Throws()
+    public void ReadRows_ColumnMatchingWithoutHeading_Throws()
     {
         using var importer = Helpers.GetCsvImporter("1,2\n");
-        importer.Configuration.RegisterClassMap<Single>(c => c.Map(r => r.Value).WithColumnNameMatching(new Regex("A")));
+        importer.Configuration.RegisterClassMap<Single>(c => c.Map(r => r.Value).WithColumnMatching(new Regex("A")));
         var sheet = importer.ReadSheet();
         sheet.HasHeading = false;
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<Single>().ToArray());
         Assert.Contains("There's no heading to find columns by name", exception.Message);
 
         using var other = Helpers.GetCsvImporter("1,2\n");
-        other.Configuration.RegisterClassMap<Single>(c => c.Map(r => r.Value).WithColumnNameMatching(n => n == "A"));
+        other.Configuration.RegisterClassMap<Single>(c => c.Map(r => r.Value).WithColumnMatching(n => n == "A"));
         var otherSheet = other.ReadSheet();
         otherSheet.HasHeading = false;
         Assert.Throws<ExcelMappingException>(() => otherSheet.ReadRows<Single>().ToArray());
