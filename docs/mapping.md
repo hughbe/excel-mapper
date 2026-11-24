@@ -130,7 +130,7 @@ Class maps work the same way: `c.Map(p => p.Name)` maps the `Name` parameter.
 | A column by name (ignoring case) | `[ExcelColumnName("Full Name")]` | `.WithColumnName("Full Name")` |
 | A column by name, compared another way | `[ExcelColumnName("Name", Comparison = StringComparison.Ordinal)]` | `.WithColumnName("Name", StringComparison.Ordinal)` |
 | The first of several possible columns | `[ExcelColumnNames("Dept", "Department")]` | `.WithColumnNames("Dept", "Department")` |
-| A column whose name matches a pattern | `[ExcelColumnMatching(@"\d{4} Salary")]` | `.WithColumnNameMatching(regex)` or `(name => ...)` |
+| A column whose name matches a pattern | `[ExcelColumnMatching(@"\d{4} Salary")]` | `.WithColumnMatching(regex)` or `(name => ...)` |
 | A column by position | `[ExcelColumnIndex(0)]` or `[ExcelColumnLetter("A")]` | `.WithColumnIndex(0)` or `.WithColumnLetter("A")` |
 | The first of several positions | `[ExcelColumnIndices(2, 1)]` | (attribute only: positions rarely vary between files, so use `.WithColumnIndex(...)`) |
 | Columns chosen in code | `[ExcelColumnMatching(typeof(Selector))]` | `.WithColumns(selector)` |

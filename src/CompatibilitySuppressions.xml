@@ -71,6 +71,9 @@
       ValuePipeline<T, TSelf>, the base of ValueMap<T> and ElementMap<T> with the value methods,
       holds the pipeline instead of deriving from it.
     - ExcelImporter is sealed (CP0009): it has nothing to override. Wrap one instead of deriving.
+    - ValueMap<T>.WithColumnNameMatching is renamed WithColumnMatching, as [ExcelColumnMatching] is
+      named, and ExcelHeading.GetFirstColumnMatchingIndex and TryGetFirstColumnMatchingIndex are
+      overloads of GetColumnIndex and TryGetColumnIndex that take a predicate (CP0002).
     - ExcelClassMap<T>.MapList is renamed MapCollection (CP0002), as it maps any collection type,
       such as HashSet<T>, not only lists.
   -->
@@ -2680,6 +2683,20 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ExcelHeading.GetFirstColumnMatchingIndex(System.Func{System.String,System.Boolean})</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ExcelHeading.TryGetFirstColumnMatchingIndex(System.Func{System.String,System.Boolean},System.Int32@)</Target>
+    <Left>lib/net8.0/ExcelMapper.dll</Left>
+    <Right>lib/net8.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:ExcelMapper.ExcelImporter.get_Reader</Target>
     <Left>lib/net8.0/ExcelMapper.dll</Left>
     <Right>lib/net8.0/ExcelMapper.dll</Right>
@@ -3002,6 +3019,20 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ExcelHeading.GetFirstColumnMatchingIndex(System.Func{System.String,System.Boolean})</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ExcelHeading.TryGetFirstColumnMatchingIndex(System.Func{System.String,System.Boolean},System.Int32@)</Target>
+    <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:ExcelMapper.ExcelImporter.get_Reader</Target>
     <Left>lib/netstandard2.0/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.0/ExcelMapper.dll</Right>
@@ -3318,6 +3349,20 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:ExcelMapper.ExcelColumnsMatchingAttribute.#ctor(System.String,System.Text.RegularExpressions.RegexOptions)</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ExcelHeading.GetFirstColumnMatchingIndex(System.Func{System.String,System.Boolean})</Target>
+    <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
+    <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ExcelMapper.ExcelHeading.TryGetFirstColumnMatchingIndex(System.Func{System.String,System.Boolean},System.Int32@)</Target>
     <Left>lib/netstandard2.1/ExcelMapper.dll</Left>
     <Right>lib/netstandard2.1/ExcelMapper.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
