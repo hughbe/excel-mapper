@@ -137,6 +137,8 @@ Class maps work the same way: `c.Map(p => p.Name)` maps the `Name` parameter.
 | The first of several positions | `[ExcelColumnIndices(2, 1)]` | (attribute only: positions rarely vary between files, so use `.WithColumnIndex(...)`) |
 | Columns chosen in code | `[ExcelColumnMatching(typeof(Selector))]` | `.WithColumns(selector)` |
 
+A member chooses its columns one way: by name, by matching, or by position. Several attributes of one kind work together (repeat `[ExcelColumnName]` for the first of several names, or combine `[ExcelColumnIndex]` and `[ExcelColumnLetter]`), but mixing kinds, such as `[ExcelColumnName]` with `[ExcelColumnIndex]`, throws an `ExcelMappingException` when the member is mapped, as one of them would be ignored.
+
 Collections and dictionaries read several columns, or split one cell: see [Collections](types.md#collections) and [Dictionaries](types.md#dictionaries).
 
 Positions are zero-based and count from the first column of the sheet (or of the [region](reading.md#reading-part-of-a-sheet) being read). They work without a heading:
