@@ -68,8 +68,31 @@ internal static class ColumnUtilities
             return true;
         }
 
-        // Optionally fall back to ignoring separators, for example matching "First Name" to FirstName.
+        // Then ignoring white space before and after the names: headings often have it ("Name "),
+        // and it can't be seen in Excel. This is only checked when there's no exact match, once
+        // per sheet, and Trim doesn't allocate for a name without it.
         columnIndex = -1;
+        var trimmedName = columnName.Trim();
+        var names = heading.ColumnNames;
+        for (int i = 0; i < names.Count; i++)
+        {
+            if (string.Equals(names[i].Trim(), trimmedName, comparison))
+            {
+                if (columnIndex != -1)
+                {
+                    throw AmbiguousColumn(sheet, columnName, columnIndex, i + heading.ColumnOffset);
+                }
+
+                columnIndex = i + heading.ColumnOffset;
+            }
+        }
+
+        if (columnIndex != -1)
+        {
+            return true;
+        }
+
+        // Optionally fall back to ignoring separators, for example matching "First Name" to FirstName.
         if (sheet.Settings.IgnoreSeparatorsInColumnNames)
         {
             var normalizedName = RemoveSeparators(columnName);

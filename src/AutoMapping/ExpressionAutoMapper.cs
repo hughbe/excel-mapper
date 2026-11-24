@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Reflection;
 using System.Linq;
 using System.Linq.Expressions;
@@ -74,6 +75,65 @@ internal static class ExpressionAutoMapper
         return expression;
     }
     
+    /// <summary>
+    /// Gets the value of an index or dictionary key in a mapping expression, as
+    /// <paramref name="type"/>: a constant, such as <c>p => p.Values[0]</c>, or a variable or
+    /// field the expression captures, such as <c>i</c> in <c>for (var i = 0; ...) Map(p => p.Values[i])</c>.
+    /// Anything else, such as a method call or a member of the row, isn't allowed: the value must be
+    /// known when the class map is created.
+    /// </summary>
+    internal static bool TryGetIndexValue(Expression expression, Type type, out object? value)
+    {
+        if (!TryEvaluate(expression, out value))
+        {
+            return false;
+        }
+
+        // The value of a variable converted in the expression, such as a short index.
+        if (value is not null && value.GetType() != type && value is IConvertible && (Nullable.GetUnderlyingType(type) ?? type) is { IsPrimitive: true } primitiveType)
+        {
+            value = Convert.ChangeType(value, primitiveType, CultureInfo.InvariantCulture);
+        }
+
+        return true;
+    }
+
+    private static bool TryEvaluate(Expression expression, out object? value)
+    {
+        switch (SkipConvert(expression, out _))
+        {
+            case ConstantExpression constant:
+                value = constant.Value;
+                return true;
+
+            // A captured variable is a field of the closure: a constant. A static field, or a field
+            // or property of a captured object, is read now.
+            case MemberExpression member:
+                object? target = null;
+                if (member.Expression is not null && !TryEvaluate(member.Expression, out target))
+                {
+                    break;
+                }
+
+                if (member.Member is FieldInfo field)
+                {
+                    value = field.GetValue(target);
+                    return true;
+                }
+
+                if (member.Member is PropertyInfo { GetMethod: not null } property && property.GetIndexParameters().Length == 0)
+                {
+                    value = property.GetValue(target);
+                    return true;
+                }
+
+                break;
+        }
+
+        value = null;
+        return false;
+    }
+
     private static bool IsArrayIndexerExpression(Expression expression)
         => expression is BinaryExpression binaryExpression && binaryExpression.NodeType == ExpressionType.ArrayIndex;
 
@@ -392,36 +452,30 @@ internal sealed class MappedEnumerableIndexerExpression : MappedAccessExpression
         Type = expression.Left.Type!;
         MappedValueType = mappedElementType ?? Type.GetElementType()!;
 
-        var indexExpression = ExpressionAutoMapper.SkipConvert(expression.Right, out var _);
-        if (indexExpression is not ConstantExpression constantExpression)
-        {
-            throw new ArgumentException($"The indexer must be a constant expression. Received {expression}.", nameof(expression));
-        }
-        if ((int)constantExpression.Value! < 0)
-        {
-            throw new ArgumentException($"Array and list indexers must be non-negative. Received: {constantExpression.Value!}", nameof(expression));
-        }
-
-        Index = (int)constantExpression.Value!;
+        Index = GetIndex(expression.Right, expression);
     }
 
     public MappedEnumerableIndexerExpression(MethodCallExpression expression, Type? mappedElementType)
     {
-        var indexExpression = ExpressionAutoMapper.SkipConvert(expression.Arguments[0], out var _);
-
         Type = expression.Object!.Type;
         MappedValueType = mappedElementType ?? Type.GetElementTypeOrEnumerableType()!;
+        Index = GetIndex(expression.Arguments[0], expression);
+    }
 
-        if (indexExpression is not ConstantExpression constantExpression)
+    // An array or list index: a constant, or a variable the expression captures.
+    internal static int GetIndex(Expression indexExpression, Expression expression)
+    {
+        if (!ExpressionAutoMapper.TryGetIndexValue(indexExpression, typeof(int), out var value) || value is not int index)
         {
-            throw new ArgumentException($"The indexer must be a constant expression. Received {expression}.", nameof(expression));
-        }
-        if ((int)constantExpression.Value! < 0)
-        {
-            throw new ArgumentException($"Array and list indexers must be non-negative. Received: {constantExpression.Value!}", nameof(expression));
+            throw new ArgumentException($"An index must be a constant, or a variable or field captured by the expression, rather than computed from the row or a method call. Received: {expression}.", nameof(expression));
         }
 
-        Index = (int)constantExpression.Value!;
+        if (index < 0)
+        {
+            throw new ArgumentException($"Array and list indices must be non-negative. Received: {index} in {expression}.", nameof(expression));
+        }
+
+        return index;
     }
 
     public override IMap GetOrCreateSourceMap(IMap parentMap, MappedAccessExpression source, EmptyValueStrategy emptyValueStrategy)
@@ -449,17 +503,7 @@ internal sealed class MappedMultidimensionalArrayIndexerExpression : MappedAcces
         Indices = new int[arguments.Count];
         for (int i = 0; i < arguments.Count; i++)
         {
-            var indexExpression = ExpressionAutoMapper.SkipConvert(arguments[i], out var _);
-            if (indexExpression is not ConstantExpression constantExpression)
-            {
-                throw new ArgumentException($"Array indices must be constant expressions. Received: {indexExpression}.", nameof(expression));
-            }
-            if ((int)constantExpression.Value! < 0)
-            {
-                throw new ArgumentException($"Array indices must be non-negative. Received: {constantExpression.Value!}", nameof(expression));
-            }
-
-            Indices[i] = (int)constantExpression.Value!;
+            Indices[i] = MappedEnumerableIndexerExpression.GetIndex(arguments[i], expression);
         }
     }
 
@@ -479,14 +523,14 @@ internal sealed class MappedDictionaryIndexerExpression : MappedAccessExpression
 
     public MappedDictionaryIndexerExpression(MethodCallExpression expression, Type valueType)
     {
-        var keyExpression = ExpressionAutoMapper.SkipConvert(expression.Arguments[0], out var _);
-        if (keyExpression is not ConstantExpression constantExpression)
+        var keyArgument = expression.Arguments[0];
+        if (!ExpressionAutoMapper.TryGetIndexValue(keyArgument, keyArgument.Type, out var key))
         {
-            throw new ArgumentException($"Dictionary indexer key must be a constant expression. Received: {expression}.", nameof(expression));
+            throw new ArgumentException($"A dictionary key must be a constant, or a variable or field captured by the expression, rather than computed from the row or a method call. Received: {expression}.", nameof(expression));
         }
-        if (constantExpression.Value == null)
+        if (key is null)
         {
-            throw new ArgumentException($"Dictionary indexer key cannot be null. Received: {constantExpression.Value!}", nameof(expression));
+            throw new ArgumentException($"A dictionary key can't be null. Received: {expression}.", nameof(expression));
         }
 
         Type = expression.Object!.Type;
@@ -494,7 +538,7 @@ internal sealed class MappedDictionaryIndexerExpression : MappedAccessExpression
 
         MappedValueType = valueType ?? actualValueType!;
 
-        Key = constantExpression.Value!;
+        Key = key;
     }
 
     public override IMap GetOrCreateSourceMap(IMap parentMap, MappedAccessExpression source, EmptyValueStrategy emptyValueStrategy)

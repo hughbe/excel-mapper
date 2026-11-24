@@ -15,6 +15,8 @@ internal static class MemberMapper
     /// </summary>
     internal static Columns GetDefaultColumns(MemberInfo member)
     {
+        ThrowIfConflictingColumnAttributes(member);
+
         var columnNameAttributes = MemberAttributes.GetMany<ExcelColumnNameAttribute>(member);
         if (columnNameAttributes.Length == 1)
         {
@@ -72,6 +74,52 @@ internal static class MemberMapper
         return new ColumnNameColumns(member.Name);
     }
 
+    // The attributes that choose a member's columns. [ExcelColumnLetter] is an [ExcelColumnIndex].
+    private static readonly Type[] s_columnAttributes =
+    [
+        typeof(ExcelColumnNameAttribute),
+        typeof(ExcelColumnNamesAttribute),
+        typeof(ExcelColumnMatchingAttribute),
+        typeof(ExcelColumnsMatchingAttribute),
+        typeof(ExcelColumnIndexAttribute),
+        typeof(ExcelColumnIndicesAttribute),
+    ];
+
+    /// <summary>
+    /// Throws if a member has more than one kind of attribute choosing its columns, such as
+    /// <see cref="ExcelColumnNameAttribute"/> and <see cref="ExcelColumnIndexAttribute"/>: only
+    /// one would be used, so the others would be ignored without saying so. Several attributes of
+    /// one kind, such as two <see cref="ExcelColumnNameAttribute"/>s, are allowed.
+    /// </summary>
+    private static void ThrowIfConflictingColumnAttributes(MemberInfo member)
+    {
+        Type? firstKind = null;
+        Attribute? first = null;
+        foreach (var attribute in MemberAttributes.GetMany<Attribute>(member))
+        {
+            var kind = Array.Find(s_columnAttributes, t => t.IsInstanceOfType(attribute));
+            if (kind is null || kind == firstKind)
+            {
+                continue;
+            }
+
+            if (first is not null)
+            {
+                throw new ExcelMappingException($"Member \"{member.Name}\" has both [{AttributeName(first)}] and [{AttributeName(attribute)}], which choose its columns in different ways, so one would be ignored. Keep one of them.");
+            }
+
+            firstKind = kind;
+            first = attribute;
+        }
+    }
+
+    // The name an attribute is written with: [ExcelColumnLetter] rather than [ExcelColumnIndex].
+    private static string AttributeName(Attribute attribute)
+    {
+        var name = attribute.GetType().Name;
+        return name.EndsWith("Attribute", StringComparison.Ordinal) ? name[..^"Attribute".Length] : name;
+    }
+
     /// <summary>
     /// Gets how a collection member is split from one cell: the cell is in <paramref name="cell"/>,
     /// with the separators of the member's <see cref="ExcelSeparatorsAttribute"/>, or commas.
@@ -110,6 +158,8 @@ internal static class MemberMapper
         {
             return AllColumns.Instance;
         }
+
+        ThrowIfConflictingColumnAttributes(member);
 
         var columnNamesAttribute = MemberAttributes.Get<ExcelColumnNamesAttribute>(member);
         if (columnNamesAttribute != null)
