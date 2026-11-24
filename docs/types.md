@@ -11,7 +11,7 @@ The types ExcelMapper maps, and how each one is read from a cell. How to choose 
 | Dates and times | `DateTime`, `DateTimeOffset`, `TimeSpan`; on .NET 8 also `DateOnly`, `TimeOnly` |
 | Other values | `bool`, enums, `Guid`, `Uri`, `Version`, `object`; on .NET 8 any `IParsable<T>` type, such as `IPAddress` (created by its `Parse` method, so it needn't have a parameterless constructor); any `IConvertible` type with a parameterless constructor |
 | Collections | Arrays, lists, sets, queues, stacks, immutable and concurrent collections, and your own (see [Collections](#collections)) |
-| Dictionaries | Dictionaries with string keys, `ExpandoObject` and the non-generic dictionaries (see [Dictionaries](#dictionaries)) |
+| Dictionaries | Dictionaries with string keys (or keys of another type, such as `int`, parsed from the column names), `ExpandoObject` and the non-generic dictionaries (see [Dictionaries](#dictionaries)) |
 | Objects | Classes, structs and records, mapped member by member, including [nested objects](#nested-objects) |
 
 Nullable versions of every value type are supported: an empty cell is `null`. The ".NET 8" types need the library's `net8.0` build, used by .NET 8 and later; on .NET Framework and other platforms that use the netstandard builds they aren't available.
