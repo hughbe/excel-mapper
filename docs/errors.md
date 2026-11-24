@@ -114,7 +114,7 @@ Console.WriteLine($"{counter.Count} problems");
 - make the member optional if the column isn't always there ([Missing and ignored columns](mapping.md#missing-and-ignored-columns));
 - check where the heading is: see [Where the heading is](reading.md#where-the-heading-is) and [Finding the heading](reading.md#finding-the-heading).
 
-**`More than one column matches "Name" (columns A and B)`.** The heading has two columns with the member's name (ignoring case, and separators if `IgnoreSeparatorsInColumnNames` is set), so it isn't clear which to read. Choose one with `[ExcelColumnLetter]` or `.WithColumnLetter(...)`, or rename one of the columns.
+**`More than one column matches "Name" (columns A and B)`.** The heading has two columns with the member's name (ignoring case and white space around the name, and separators if `IgnoreSeparatorsInColumnNames` is set), so it isn't clear which to read. Choose one with `[ExcelColumnLetter]` or `.WithColumnLetter(...)`, or rename one of the columns.
 
 **`The class map for type Order maps no members`.** Nothing in the type is mapped, so every row would be an empty object: its properties are read-only or have private setters, are all `[ExcelIgnore]`, or a class map registered for it has no `Map(...)` calls. Give the properties public setters or a constructor that takes them, or map them in a class map (`Map(p => p.Total)` works with a private setter).
 
