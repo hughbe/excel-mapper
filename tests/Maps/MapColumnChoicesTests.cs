@@ -212,4 +212,70 @@ public class MapColumnChoicesTests
     {
         public string? Name { get; set; }
     }
+
+    [Fact]
+    public void ReadRows_NameAndIndexAttributes_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("A,B\n1,2\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<NameAndIndexRow>().ToArray());
+        Assert.Equal("Member \"Value\" has both [ExcelColumnName] and [ExcelColumnIndex], which choose its columns in different ways, so one would be ignored. Keep one of them.", exception.Message);
+    }
+
+    public class NameAndIndexRow
+    {
+        [ExcelColumnName("A")]
+        [ExcelColumnIndex(1)]
+        public int Value { get; set; }
+    }
+
+    [Fact]
+    public void Map_NameAndLetterAttributes_ThrowsExcelMappingExceptionNamingLetter()
+    {
+        var classMap = new ExcelClassMap<NameAndLetterRow>();
+        var exception = Assert.Throws<ExcelMappingException>(() => classMap.Map(r => r.Value));
+        Assert.Equal("Member \"Value\" has both [ExcelColumnName] and [ExcelColumnLetter], which choose its columns in different ways, so one would be ignored. Keep one of them.", exception.Message);
+    }
+
+    public class NameAndLetterRow
+    {
+        [ExcelColumnName("A")]
+        [ExcelColumnLetter("B")]
+        public int Value { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_CollectionNamesAndMatchingAttributes_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("A,B\n1,2\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<NamesAndMatchingRow>().ToArray());
+        Assert.StartsWith("Member \"Values\" has both [ExcelColumnNames] and [ExcelColumnsMatching]", exception.Message);
+    }
+
+    public class NamesAndMatchingRow
+    {
+        [ExcelColumnNames("A", "B")]
+        [ExcelColumnsMatching("^[AB]$")]
+        public int[] Values { get; set; } = [];
+    }
+
+    [Fact]
+    public void ReadRows_SeveralAttributesOfOneKind_ReturnsExpected()
+    {
+        // Several names, or an index and a letter, choose columns the same way.
+        using var importer = Helpers.GetCsvImporter("A,B\n1,2\n");
+        var row = importer.ReadSheet().ReadRows<SameKindRow>().Single();
+        Assert.Equal(2, row.Named);
+        Assert.Equal(1, row.Indexed);
+    }
+
+    public class SameKindRow
+    {
+        [ExcelColumnName("Missing")]
+        [ExcelColumnName("B")]
+        public int Named { get; set; }
+
+        [ExcelColumnIndex(5)]
+        [ExcelColumnLetter("A")]
+        public int Indexed { get; set; }
+    }
 }

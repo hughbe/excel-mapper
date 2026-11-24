@@ -249,7 +249,7 @@ Attributes such as `[ExcelFormats]` and `[ExcelConverter]` on a collection membe
 
 In a class map, `Map(p => p.Tags)` gives a collection map for arrays, `List<T>`, the collection classes in `System.Collections.ObjectModel` and the collection interfaces. For another collection type, such as `HashSet<T>`, use `MapCollection<string>(p => p.Tags)`.
 
-To map elements one by one from different columns, map them by index: `Map(p => p.Values[0]).WithColumnName("First")`.
+To map elements one by one from different columns, map them by index: `Map(p => p.Values[0]).WithColumnName("First")`. The index (or a dictionary key) can be a constant or a variable, such as a loop's: `for (var i = 0; i < 4; i++) c.Map(p => p.Quarters[i]).WithColumnName($"Q{i + 1}")`. It can't be computed from the row.
 
 ## Dictionaries
 
