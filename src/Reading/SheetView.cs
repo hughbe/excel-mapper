@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Reflection;
 using ExcelDataReader;
 using ExcelMapper.Readers;
 
@@ -465,17 +466,40 @@ internal sealed class SheetView
                 {
                     foreach (var validationResult in validationResults)
                     {
-                        errors.Add(new ExcelMappingException(validationResult.ErrorMessage ?? "The value is invalid.", this, CurrentRowIndex, -1, new ValidationException(validationResult, null, valueObject)), ExcelMappingErrorKind.DataAnnotation);
+                        errors.Add(CreateValidationError<T>(validationResult, valueObject), ExcelMappingErrorKind.DataAnnotation);
                     }
                 }
             }
-            else
+            else if (!Validator.TryValidateObject(valueObject, new ValidationContext(valueObject), null, validateAllProperties: true))
             {
-                Validator.ValidateObject(valueObject, new ValidationContext(valueObject), validateAllProperties: true);
+                // The first failure, with the row, as for other problems with a row. Valid rows
+                // (usually most of them) don't collect the failures.
+                var validationResults = new List<ValidationResult>(1);
+                Validator.TryValidateObject(valueObject, new ValidationContext(valueObject), validationResults, validateAllProperties: true);
+                throw CreateValidationError<T>(validationResults[0], valueObject);
             }
         }
 
         return result;
+    }
+
+    // A failed data annotation, for the row being read and the member it's on, with the
+    // ValidationException that Validator.ValidateObject would throw as its inner exception.
+    private ExcelMappingException CreateValidationError<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ValidationResult validationResult, object value)
+    {
+        MemberInfo? member = null;
+        foreach (var memberName in validationResult.MemberNames)
+        {
+            member = (MemberInfo?)typeof(T).GetProperty(memberName) ?? typeof(T).GetField(memberName);
+            break;
+        }
+
+        // The row follows the message, which usually ends with a full stop ("must be between 1 and 100.").
+        var message = validationResult.ErrorMessage?.TrimEnd('.') ?? "The value is invalid";
+        return new ExcelMappingException(message, this, CurrentRowIndex, -1, new ValidationException(validationResult, null, value))
+        {
+            Member = member,
+        };
     }
 
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]

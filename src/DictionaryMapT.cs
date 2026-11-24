@@ -58,7 +58,7 @@ public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     /// Gets the map that maps the value of a single cell to an object of the element type of the property
     /// or field.
     /// </summary>
-    internal ElementMap<TValue> Values { get; private set; } = new ElementMap<TValue>();
+    internal ElementMap<TValue> Values { get; } = new ElementMap<TValue>();
 
     CellPipeline IColumnsMap.Pipeline => Values.Pipeline;
 
@@ -177,21 +177,17 @@ public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     }
 
     /// <summary>
-    /// Sets the map that maps the value of a single cell to an object of the element type of the property
-    /// or field.
+    /// Configures how each value is converted from its cell, with the value methods a single
+    /// member has: for example <c>.WithValueMap(v =&gt; v.WithTrim().WithEmptyFallback(0))</c>.
     /// </summary>
-    /// <param name="valueMap">The pipeline that maps the value of a single cell to an object of the element type of the property
-    /// or field.</param>
-    /// <returns>The map that invoked this method.</returns>
-    public DictionaryMap<TKey, TValue> WithValueMap(Func<ElementMap<TValue>, ElementMap<TValue>> valueMap)
+    /// <param name="configure">Configures the values' map.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public DictionaryMap<TKey, TValue> WithValueMap(Action<ElementMap<TValue>> configure)
     {
-        ThrowHelpers.ThrowIfNull(valueMap, nameof(valueMap));
-
-        var result = valueMap(Values);
-        ThrowHelpers.ThrowIfNull(result, nameof(valueMap));
+        ThrowHelpers.ThrowIfNull(configure, nameof(configure));
         Settings.ThrowIfFrozen();
-        Values = result;
 
+        configure(Values);
         return this;
     }
 

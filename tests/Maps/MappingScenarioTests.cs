@@ -278,10 +278,10 @@ public class MappingScenarioTests
     }
 
     [Fact]
-    public void WithColumnNameMatching_Regex_Success()
+    public void WithColumnMatching_Regex_Success()
     {
         using var importer = Helpers.GetCsvImporter("Id,Full Name\n1,Alice\n");
-        importer.Configuration.RegisterClassMap<NameClass>(c => c.Map(p => p.Name).WithColumnNameMatching(new Regex("name", RegexOptions.IgnoreCase)));
+        importer.Configuration.RegisterClassMap<NameClass>(c => c.Map(p => p.Name).WithColumnMatching(new Regex("name", RegexOptions.IgnoreCase)));
         Assert.Equal("Alice", importer.ReadSheet().ReadRows<NameClass>().Single().Name);
     }
 
@@ -291,7 +291,7 @@ public class MappingScenarioTests
         var map = new ExcelClassMap<ColumnsClass>();
         Assert.Throws<ArgumentNullException>("predicate", () => map.Map(p => p.Values).WithColumnsMatching((Func<string, bool>)null!));
         Assert.Throws<ArgumentNullException>("regex", () => map.Map(p => p.Values).WithColumnsMatching((Regex)null!));
-        Assert.Throws<ArgumentNullException>("regex", () => new ExcelClassMap<NameClass>().Map(p => p.Name).WithColumnNameMatching((Regex)null!));
+        Assert.Throws<ArgumentNullException>("regex", () => new ExcelClassMap<NameClass>().Map(p => p.Name).WithColumnMatching((Regex)null!));
     }
 
     // ---------- Scenarios that should fail clearly ----------

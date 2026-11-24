@@ -37,7 +37,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 - `ColumnNames` - The column names, in order
 - `GetColumnIndex(name)` / `TryGetColumnIndex(name, out index)` - A column's position in the sheet
 - `GetColumnName(index)` - The name of the column at a position
-- `GetFirstColumnMatchingIndex(predicate)` / `TryGetFirstColumnMatchingIndex(predicate, out index)` - The first column whose name matches
+- `GetColumnIndex(predicate)` / `TryGetColumnIndex(predicate, out index)` - The first column whose name matches
 
 **`ExcelRange`** - A block of rows and columns, as zero-based ranges.
 - `ExcelRange.Parse("A1:B10")`, `ExcelRange.TryParse(address, out range)` - From an Excel address, including whole rows (`"1:5"`) and columns (`"A:C"`)
@@ -104,7 +104,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 Columns:
 - `.WithColumnName("Name")` / `.WithColumnName("Name", StringComparison.Ordinal)` - A column by name (ignoring case by default)
 - `.WithColumnNames("Name1", "Name2")` - The first of these columns that the sheet has
-- `.WithColumnNameMatching(name => name.StartsWith("Total"))` / `.WithColumnNameMatching(regex)` - The first column whose name matches
+- `.WithColumnMatching(name => name.StartsWith("Total"))` / `.WithColumnMatching(regex)` - The first column whose name matches
 - `.WithColumnIndex(0)` / `.WithColumnLetter("C")` - A column by position
 - `.WithColumns(selector)` - The first column an `IColumnSelector` chooses
 - `.MakeOptional()` - Leave the member unset if the column is missing

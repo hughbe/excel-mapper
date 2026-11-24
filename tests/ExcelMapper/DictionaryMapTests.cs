@@ -73,18 +73,16 @@ public class DictionaryMapTests
     }
 
     [Fact]
-    public void WithValueMap_ValidMap_Success()
+    public void WithValueMap_Invoke_ConfiguresValues()
     {
+        // The callback configures the map's own values, every time.
         var map = CreateMap();
-        var newPipeline = Helpers.ValuesOf(CreateMap());
-        Assert.Same(map, map.WithValueMap(v =>
-        {
-            Assert.Same(v, Helpers.ValuesOf(map));
-            return newPipeline;
-        }));
-        Assert.Same(newPipeline, Helpers.ValuesOf(map));
-        Assert.Throws<ArgumentNullException>("valueMap", () => map.WithValueMap(null!));
-        Assert.Throws<ArgumentNullException>("valueMap", () => map.WithValueMap(_ => null!));
+        var values = Helpers.ValuesOf(map);
+        Assert.Same(map, map.WithValueMap(v => Assert.Same(values, v)));
+        Assert.Same(values, Helpers.ValuesOf(map));
+
+        Assert.Equal(new Dictionary<string, int> { ["Q1"] = 1, ["Q2"] = -1 }, Read(m => m.WithColumnNames("Q1", "Q2").WithValueMap(v => v.WithInvalidFallback(-1)), "Q1,Q2\n1,x\n"));
+        Assert.Throws<ArgumentNullException>("configure", () => map.WithValueMap(null!));
     }
 
     [Fact]

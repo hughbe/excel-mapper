@@ -218,18 +218,16 @@ public class CollectionMapTests
     }
 
     [Fact]
-    public void WithElementMap_ValidMap_Success()
+    public void WithElementMap_Invoke_ConfiguresElements()
     {
+        // The callback configures the map's own elements, every time.
         var map = CreateMap();
-        var newPipeline = Helpers.ElementsOf(CreateMap());
-        Assert.Same(map, map.WithElementMap(e =>
-        {
-            Assert.Same(e, Helpers.ElementsOf(map));
-            return newPipeline;
-        }));
-        Assert.Same(newPipeline, Helpers.ElementsOf(map));
-        Assert.Throws<ArgumentNullException>("elementMap", () => map.WithElementMap(null!));
-        Assert.Throws<ArgumentNullException>("elementMap", () => map.WithElementMap(_ => null!));
+        var elements = Helpers.ElementsOf(map);
+        Assert.Same(map, map.WithElementMap(e => Assert.Same(elements, e)));
+        Assert.Same(elements, Helpers.ElementsOf(map));
+
+        Assert.Equal(["x", "y"], ReadStrings(m => m.WithElementMap(e => e.WithTrim()), "Values\n\" x , y \"\n"));
+        Assert.Throws<ArgumentNullException>("configure", () => map.WithElementMap(null!));
     }
 
     [Fact]

@@ -130,7 +130,7 @@ Class maps work the same way: `c.Map(p => p.Name)` maps the `Name` parameter.
 | A column by name (ignoring case) | `[ExcelColumnName("Full Name")]` | `.WithColumnName("Full Name")` |
 | A column by name, compared another way | `[ExcelColumnName("Name", Comparison = StringComparison.Ordinal)]` | `.WithColumnName("Name", StringComparison.Ordinal)` |
 | The first of several possible columns | `[ExcelColumnNames("Dept", "Department")]` | `.WithColumnNames("Dept", "Department")` |
-| A column whose name matches a pattern | `[ExcelColumnMatching(@"\d{4} Salary")]` | `.WithColumnNameMatching(regex)` or `(name => ...)` |
+| A column whose name matches a pattern | `[ExcelColumnMatching(@"\d{4} Salary")]` | `.WithColumnMatching(regex)` or `(name => ...)` |
 | A column by position | `[ExcelColumnIndex(0)]` or `[ExcelColumnLetter("A")]` | `.WithColumnIndex(0)` or `.WithColumnLetter("A")` |
 | The first of several positions | `[ExcelColumnIndices(2, 1)]` | (attribute only: positions rarely vary between files, so use `.WithColumnIndex(...)`) |
 | Columns chosen in code | `[ExcelColumnMatching(typeof(Selector))]` | `.WithColumns(selector)` |
@@ -495,10 +495,12 @@ try
 {
     var employees = sheet.ReadRows<Employee>().ToArray();
 }
-catch (ValidationException ex)
+catch (ExcelMappingException ex) when (ex.InnerException is ValidationException)
 {
-    Console.WriteLine(ex.Message); // "The field Percentage must be between 1 and 100."
+    // "The field Percentage must be between 1 and 100 on row 3 in sheet "Employees"."
+    Console.WriteLine(ex.Message);
+    Console.WriteLine(ex.Member?.Name); // "Percentage"
 }
 ```
 
-`ReadRows` throws the first `ValidationException`. `ReadRowResults` reports every failure of every row as an error instead.
+`ReadRows` throws an `ExcelMappingException` for the first failure, with the row and the member, and the `ValidationException` as its `InnerException`. `ReadRowResults` reports every failure of every row as an error instead. Nested objects aren't validated: `Validator` only checks the object's own members.

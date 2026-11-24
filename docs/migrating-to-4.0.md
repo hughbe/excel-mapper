@@ -288,11 +288,13 @@ If you created a map with its constructor, or implemented `IMap`, map the member
 | 3.x | 4.0 |
 |---|---|
 | `Map(p => p.Status, ignoreCase: true)` | `Map(p => p.Status).WithIgnoreCase()`, which only compiles for enums (the old overload compiled for any struct and threw when used) |
-| `.WithColumnNameMatching("Name", "Full Name")` (the first of several columns) | `.WithColumnNames("Name", "Full Name")`, as `[ExcelColumnNames]` means. `WithColumnNameMatching` still takes a predicate or regex. |
+| `.WithColumnNameMatching("Name", "Full Name")` (the first of several columns) | `.WithColumnNames("Name", "Full Name")`, as `[ExcelColumnNames]` means |
+| `.WithColumnNameMatching(name => ...)` | `.WithColumnMatching(name => ...)`, as `[ExcelColumnMatching]` is named; it also takes a `Regex` |
+| `heading.GetFirstColumnMatchingIndex(name => ...)`, `TryGetFirstColumnMatchingIndex(...)` | `heading.GetColumnIndex(name => ...)`, `TryGetColumnIndex(name => ..., out index)` |
 | `.WithValueFallback(value)` | `.WithFallback(value)` |
 | `MapList<TElement>(p => p.Items)` | `MapCollection<TElement>(p => p.Items)`: it maps any collection, not only lists |
 | `map.Optional = true`, `map.PreserveFormatting = true` | `map.MakeOptional()`, `map.MakePreserveFormatting()`; the properties are read-only |
-| `collectionMap.Pipeline`, `dictionaryMap.Pipeline` | `.WithElementMap(e => ...)`, `.WithValueMap(v => ...)` |
+| `collectionMap.Pipeline`, `dictionaryMap.Pipeline` | `.WithElementMap(e => ...)`, `.WithValueMap(v => ...)`, which configure the map's own elements or values. A block lambda that returned the pipeline drops its `return`. |
 | `configuration.RegisterClassMap(typeof(T), classMap)` | `configuration.RegisterClassMap(classMap)`, which registers the class map for its own type: the removed overload let a map be registered for a different type |
 | `importer.RegisterClassMapsInNamespace(...)` | `importer.Configuration.RegisterClassMapsInNamespace(...)`, next to `RegisterClassMap` |
 | `importer.Reader` | Removed: the importer's sheets share the reader, and moving it broke their positions. Pass your own `IExcelDataReader` to `new ExcelImporter(reader)` to configure it. |
@@ -317,6 +319,7 @@ If you created a map with its constructor, or implemented `IMap`, map the member
 - **Types with nothing to map**: reading rows of a type, or a nested member's type, that maps no members (no public setters or fields, every member `[ExcelIgnore]`, or a registered class map with no `Map(...)` calls) throws an `ExcelMappingException` naming the type, instead of giving an empty object for every row. Map the members in a class map, or ignore the member whose type it is.
 - **Missing columns in `ReadRowResults`**: a column the type needs that the heading doesn't have throws an `ExcelMappingException` when `ReadRowResults` is called (with the message `ValidateHeading` gives), instead of being reported as an error of every row. Make the member optional if the column may be missing.
 - **Changing settings while reading**: a sheet takes the importer's settings (`SkipBlankLines`, `ValidateDataAnnotations`, `Culture`, ...) when it starts reading, so changing them while its rows are read only affects sheets read afterwards. Before 4.0, a change applied to the following rows.
+- **Data annotations**: with `ValidateDataAnnotations` on, `ReadRows` and `ReadRow` throw an `ExcelMappingException` for a failed annotation, with the row and member, and the `ValidationException` as its `InnerException`, instead of the bare `ValidationException`. Catch `ExcelMappingException` (`when (ex.InnerException is ValidationException)` to catch only these).
 - **Disposed importers**: reading from an importer, or its sheets and regions, after it's disposed throws an `ObjectDisposedException`, as .NET types do, instead of an `ExcelMappingException` saying the reader is closed.
 - **Constructor exceptions**: an exception thrown by a constructor called during mapping (for records and constructor-only types) is wrapped in an `ExcelMappingException` with the row, with the original as `InnerException`.
 - **Fallback values**: `WithFallback` (was `WithValueFallback`), `WithEmptyFallback` and `WithInvalidFallback` take a value of the member's type, where they took an `object`. A value of the wrong type, such as `WithEmptyFallback("none")` on an `int` member, is now a compile error instead of an `InvalidCastException` when rows are read. `WithEmptyFallback(null)` on a member that can't be null throws an `ArgumentNullException`: give the value, such as `WithEmptyFallback(0)`.

@@ -59,7 +59,7 @@ ExcelMapper.CollectionMap<TElement>.WithColumnNames(System.Collections.Generic.I
 ExcelMapper.CollectionMap<TElement>.WithColumns(ExcelMapper.IColumnSelector! selector) -> ExcelMapper.CollectionMap<TElement>!
 ExcelMapper.CollectionMap<TElement>.WithColumnsMatching(System.Func<string!, bool>! predicate) -> ExcelMapper.CollectionMap<TElement>!
 ExcelMapper.CollectionMap<TElement>.WithColumnsMatching(System.Text.RegularExpressions.Regex! regex) -> ExcelMapper.CollectionMap<TElement>!
-ExcelMapper.CollectionMap<TElement>.WithElementMap(System.Func<ExcelMapper.ElementMap<TElement>!, ExcelMapper.ElementMap<TElement>!>! elementMap) -> ExcelMapper.CollectionMap<TElement>!
+ExcelMapper.CollectionMap<TElement>.WithElementMap(System.Action<ExcelMapper.ElementMap<TElement>!>! configure) -> ExcelMapper.CollectionMap<TElement>!
 ExcelMapper.CollectionMap<TElement>.WithSeparators(params char[]! separators) -> ExcelMapper.CollectionMap<TElement>!
 ExcelMapper.CollectionMap<TElement>.WithSeparators(params string![]! separators) -> ExcelMapper.CollectionMap<TElement>!
 ExcelMapper.CollectionMap<TElement>.WithSeparators(System.Collections.Generic.IEnumerable<char>! separators) -> ExcelMapper.CollectionMap<TElement>!
@@ -84,7 +84,7 @@ ExcelMapper.DictionaryMap<TKey, TValue>.WithColumnNames(System.Collections.Gener
 ExcelMapper.DictionaryMap<TKey, TValue>.WithColumns(ExcelMapper.IColumnSelector! selector) -> ExcelMapper.DictionaryMap<TKey, TValue>!
 ExcelMapper.DictionaryMap<TKey, TValue>.WithColumnsMatching(System.Func<string!, bool>! predicate) -> ExcelMapper.DictionaryMap<TKey, TValue>!
 ExcelMapper.DictionaryMap<TKey, TValue>.WithColumnsMatching(System.Text.RegularExpressions.Regex! regex) -> ExcelMapper.DictionaryMap<TKey, TValue>!
-ExcelMapper.DictionaryMap<TKey, TValue>.WithValueMap(System.Func<ExcelMapper.ElementMap<TValue>!, ExcelMapper.ElementMap<TValue>!>! valueMap) -> ExcelMapper.DictionaryMap<TKey, TValue>!
+ExcelMapper.DictionaryMap<TKey, TValue>.WithValueMap(System.Action<ExcelMapper.ElementMap<TValue>!>! configure) -> ExcelMapper.DictionaryMap<TKey, TValue>!
 ExcelMapper.ElementMap<T>
 ExcelMapper.EmptyValueStrategy
 ExcelMapper.EmptyValueStrategy.DefaultValue = 1 -> ExcelMapper.EmptyValueStrategy
@@ -187,9 +187,9 @@ ExcelMapper.ExcelHeading
 ExcelMapper.ExcelHeading.ColumnNames.get -> System.Collections.Generic.IReadOnlyList<string!>!
 ExcelMapper.ExcelHeading.GetColumnIndex(string! columnName) -> int
 ExcelMapper.ExcelHeading.GetColumnName(int columnIndex) -> string!
-ExcelMapper.ExcelHeading.GetFirstColumnMatchingIndex(System.Func<string!, bool>! predicate) -> int
+ExcelMapper.ExcelHeading.GetColumnIndex(System.Func<string!, bool>! predicate) -> int
 ExcelMapper.ExcelHeading.TryGetColumnIndex(string! columnName, out int index) -> bool
-ExcelMapper.ExcelHeading.TryGetFirstColumnMatchingIndex(System.Func<string!, bool>! predicate, out int index) -> bool
+ExcelMapper.ExcelHeading.TryGetColumnIndex(System.Func<string!, bool>! predicate, out int index) -> bool
 ExcelMapper.ExcelIgnoreAttribute
 ExcelMapper.ExcelIgnoreAttribute.ExcelIgnoreAttribute() -> void
 ExcelMapper.ExcelImporter
@@ -422,8 +422,8 @@ ExcelMapper.ValueMap<T>.WithColumnIndex(int columnIndex) -> ExcelMapper.ValueMap
 ExcelMapper.ValueMap<T>.WithColumnLetter(string! columnLetter) -> ExcelMapper.ValueMap<T>!
 ExcelMapper.ValueMap<T>.WithColumnName(string! columnName) -> ExcelMapper.ValueMap<T>!
 ExcelMapper.ValueMap<T>.WithColumnName(string! columnName, System.StringComparison comparison) -> ExcelMapper.ValueMap<T>!
-ExcelMapper.ValueMap<T>.WithColumnNameMatching(System.Func<string!, bool>! predicate) -> ExcelMapper.ValueMap<T>!
-ExcelMapper.ValueMap<T>.WithColumnNameMatching(System.Text.RegularExpressions.Regex! regex) -> ExcelMapper.ValueMap<T>!
+ExcelMapper.ValueMap<T>.WithColumnMatching(System.Func<string!, bool>! predicate) -> ExcelMapper.ValueMap<T>!
+ExcelMapper.ValueMap<T>.WithColumnMatching(System.Text.RegularExpressions.Regex! regex) -> ExcelMapper.ValueMap<T>!
 ExcelMapper.ValueMap<T>.WithColumnNames(params string![]! columnNames) -> ExcelMapper.ValueMap<T>!
 ExcelMapper.ValueMap<T>.WithColumnNames(System.Collections.Generic.IEnumerable<string!>! columnNames) -> ExcelMapper.ValueMap<T>!
 ExcelMapper.ValueMap<T>.WithColumnNames(System.Collections.Generic.IEnumerable<string!>! columnNames, System.StringComparison comparison) -> ExcelMapper.ValueMap<T>!
