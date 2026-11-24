@@ -113,12 +113,14 @@ public sealed class ExcelHeading
 
         if (!NameMapping.TryGetValue(columnName, out int index))
         {
-            var foundColumns = string.Join(", ", ColumnNames.Select(static c => $"\"{c}\""));
-            throw new ExcelMappingException($"Column \"{columnName}\" does not exist in [{foundColumns}]");
+            throw new ExcelMappingException($"The heading has no column \"{columnName}\". Its columns are {DescribeColumns()}.");
         }
 
         return index;
     }
+
+    // The heading's column names, for error messages.
+    private string DescribeColumns() => string.Join(", ", ColumnNames.Select(static c => $"\"{c}\""));
 
     /// <summary>
     /// Tries to get the zero-based index in the sheet of the column with the given name.
@@ -134,29 +136,29 @@ public sealed class ExcelHeading
     }
 
     /// <summary>
-    /// Gets the zero-based index of the column with the given name if it matches the supplied predicate.
-    /// This method throws an ExcelMappingException if the column does not exist.
+    /// Gets the zero-based index in the sheet of the first column whose name matches
+    /// <paramref name="predicate"/>. This method throws an ExcelMappingException if no column matches.
     /// </summary>
-    /// <param name="predicate">The predicate containing the names of the column to get the zero-based index of.</param>
-    /// <returns>The zero-based index of the column with the given name.</returns>
-    public int GetFirstColumnMatchingIndex(Func<string, bool> predicate)
+    /// <param name="predicate">Whether a column's name matches.</param>
+    /// <returns>The zero-based index in the sheet of the first matching column.</returns>
+    public int GetColumnIndex(Func<string, bool> predicate)
     {
-        if (!TryGetFirstColumnMatchingIndex(predicate, out var index))
+        if (!TryGetColumnIndex(predicate, out var index))
         {
-            var foundColumns = string.Join(", ", ColumnNames.Select(static c => $"\"{c}\""));
-            throw new ExcelMappingException($"No Columns found matching predicate from [{foundColumns}]");
+            throw new ExcelMappingException($"No column's name matches the predicate. The heading's columns are {DescribeColumns()}.");
         }
 
         return index;
     }
 
     /// <summary>
-    /// Tries to get the zero-based index of the column with the given name if it matches the supplied predicate.
+    /// Tries to get the zero-based index in the sheet of the first column whose name matches
+    /// <paramref name="predicate"/>.
     /// </summary>
-    /// <param name="predicate">The predicate containing the names of the column to get the zero-based index of.</param>
-    /// <param name="index">The zero-based index of the column with the given name.</param>
-    /// <returns>Whether or not the column exists.</returns>
-    public bool TryGetFirstColumnMatchingIndex(Func<string, bool> predicate, out int index)
+    /// <param name="predicate">Whether a column's name matches.</param>
+    /// <param name="index">The zero-based index in the sheet of the first matching column, or -1.</param>
+    /// <returns>Whether a column matches.</returns>
+    public bool TryGetColumnIndex(Func<string, bool> predicate, out int index)
     {
         ThrowHelpers.ThrowIfNull(predicate, nameof(predicate));
 

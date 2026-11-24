@@ -34,8 +34,8 @@ public class ValueMapTTests
         Assert.Throws<ArgumentException>("columnName", () => map.WithColumnName(""));
         Assert.Throws<ArgumentOutOfRangeException>("comparison", () => map.WithColumnName("Name", (StringComparison)99));
         Assert.Throws<ArgumentNullException>("columnNames", () => map.WithColumnNames((string[])null!));
-        Assert.Throws<ArgumentNullException>("predicate", () => map.WithColumnNameMatching((Func<string, bool>)null!));
-        Assert.Throws<ArgumentNullException>("regex", () => map.WithColumnNameMatching((System.Text.RegularExpressions.Regex)null!));
+        Assert.Throws<ArgumentNullException>("predicate", () => map.WithColumnMatching((Func<string, bool>)null!));
+        Assert.Throws<ArgumentNullException>("regex", () => map.WithColumnMatching((System.Text.RegularExpressions.Regex)null!));
         Assert.Throws<ArgumentOutOfRangeException>("columnIndex", () => map.WithColumnIndex(-1));
         Assert.Throws<ArgumentNullException>("columnLetter", () => map.WithColumnLetter(null!));
         Assert.Throws<ArgumentException>("columnLetter", () => map.WithColumnLetter("1"));

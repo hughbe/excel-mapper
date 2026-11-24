@@ -58,6 +58,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - `WithFallback` (was `WithValueFallback`), `WithEmptyFallback` and `WithInvalidFallback` take a value of the member's type instead of an `object`, so a value of the wrong type is a compile error instead of an `InvalidCastException` when rows are read. ([#170](https://github.com/hughbe/excel-mapper/pull/170))
 - Two helper types made public by accident are internal: `CallerArgumentExpressionAttribute` on the netstandard builds (a polyfill, which the compiler ignored) and `ExcelMapper.Utilities.StringComparerUtilities`. ([#167](https://github.com/hughbe/excel-mapper/pull/167))
 - `ExcelClassMap<T>.MapList` is renamed `MapCollection`, as it maps any collection type, such as `HashSet<T>`, not only lists. ([#225](https://github.com/hughbe/excel-mapper/pull/225))
+- `ValueMap.WithColumnNameMatching` is renamed `WithColumnMatching`, as `[ExcelColumnMatching]` is named, and `ExcelHeading.GetFirstColumnMatchingIndex` and `TryGetFirstColumnMatchingIndex` are overloads of `GetColumnIndex` and `TryGetColumnIndex` taking a predicate. `GetColumnIndex`'s error lists the heading's columns as other errors do. ([#234](https://github.com/hughbe/excel-mapper/pull/234))
 
 ### Added
 
@@ -91,7 +92,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - `[ExcelOffset("+00:00")]` and `.WithOffset(TimeSpan)` choose the offset of `DateTimeOffset` members, for dates without one. ([#131](https://github.com/hughbe/excel-mapper/pull/131), [#217](https://github.com/hughbe/excel-mapper/pull/217))
 - `ExcelMappingException.CellAddress`, `ColumnName` and `Member`. ([#117](https://github.com/hughbe/excel-mapper/pull/117), [#130](https://github.com/hughbe/excel-mapper/pull/130))
 - `ExcelRange` equality operators, `ToString()` (an Excel address such as `"A1:B10"`) and `$` absolute references. ([#117](https://github.com/hughbe/excel-mapper/pull/117))
-- `WithColumnsMatching(Func<string, bool>)`, `WithColumnsMatching(Regex)` and `WithColumnNameMatching(Regex)`. ([#119](https://github.com/hughbe/excel-mapper/pull/119))
+- `WithColumnsMatching(Func<string, bool>)`, `WithColumnsMatching(Regex)` and `WithColumnMatching(Regex)`. ([#119](https://github.com/hughbe/excel-mapper/pull/119))
 - Dates and times written as text (in CSV files, for example) are accepted in more formats by default: ISO 8601 (`2024-03-04`, `2024-03-04T10:30:15Z`) and the culture's short date and short date and time for `DateTime` and `DateTimeOffset`, ISO 8601 for `DateOnly`, and the culture's long time and 24-hour times for `TimeOnly`. Set formats with `[ExcelFormats]` or `WithFormats` to accept only those. ([#139](https://github.com/hughbe/excel-mapper/pull/139))
 - Numbers in cells without a date format map to `DateTime`, `DateTimeOffset` and `DateOnly` (Excel serial dates), `TimeOnly` (fraction of a day) and `TimeSpan` (days); time cells map to `TimeSpan`; `bool` accepts "yes" and "no". ([#123](https://github.com/hughbe/excel-mapper/pull/123))
 - Sheets without a heading can be auto-mapped when columns aren't looked up by name, for example primitives or `[ExcelColumnIndex]` members. ([#119](https://github.com/hughbe/excel-mapper/pull/119))
@@ -132,7 +133,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Rows after an empty line in a CSV file were silently dropped, a sheet with empty lines above its heading returned no rows, and row ranges counted from the end of a CSV file (such as `..^1`) were off by the number of empty lines. Empty lines at the end of a CSV file are still ignored. ([#137](https://github.com/hughbe/excel-mapper/pull/137))
 - A `DataRange` ending after the last row of the sheet mapped the last row twice. ([#137](https://github.com/hughbe/excel-mapper/pull/137))
 - A `DataRange` that skips leading columns read values from the wrong columns. ([#116](https://github.com/hughbe/excel-mapper/pull/116))
-- Column matching threw when the `DataRange` didn't include every column; `GetFirstColumnMatchingIndex` returned the alphabetically first match. ([#116](https://github.com/hughbe/excel-mapper/pull/116))
+- Column matching threw when the `DataRange` didn't include every column; `ExcelHeading.GetColumnIndex(predicate)` (was `GetFirstColumnMatchingIndex`) returned the alphabetically first match. ([#116](https://github.com/hughbe/excel-mapper/pull/116))
 - The `DataRange` row start was ignored for sheets without a heading; `SkipBlankLines` checked columns outside the `DataRange`. ([#116](https://github.com/hughbe/excel-mapper/pull/116))
 - `SkipBlankLines` read past the end of the `DataRange`; `ReadRows(startIndex, count)` returned later rows when the reader was already past `startIndex`; CSV sheets reported `VeryHidden`. ([#113](https://github.com/hughbe/excel-mapper/pull/113))
 - Sharing a class map between importers on different threads could corrupt results, and kept every sheet it had read in memory. ([#120](https://github.com/hughbe/excel-mapper/pull/120))
