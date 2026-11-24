@@ -54,7 +54,7 @@ public sealed class CollectionMap<TElement> : ICellsMap
     /// <summary>
     /// The mapping pipeline for each element in the list.
     /// </summary>
-    internal ElementMap<TElement> Elements { get; private set; } = new ElementMap<TElement>();
+    internal ElementMap<TElement> Elements { get; } = new ElementMap<TElement>();
 
     CellPipeline IColumnsMap.Pipeline => Elements.Pipeline;
 
@@ -112,20 +112,17 @@ public sealed class CollectionMap<TElement> : ICellsMap
     }
 
     /// <summary>
-    /// Sets the map that maps the value of a single cell to an object of the element type of the property
-    /// or field.
+    /// Configures how each element is converted from its cell, with the value methods a single
+    /// member has: for example <c>.WithElementMap(e =&gt; e.WithTrim().WithEmptyFallback(0))</c>.
     /// </summary>
-    /// <param name="elementMap">The pipeline that maps the value of a single cell to an object of the element type of the property
-    /// or field.</param>
-    /// <returns>The map that invoked this method.</returns>
-    public CollectionMap<TElement> WithElementMap(Func<ElementMap<TElement>, ElementMap<TElement>> elementMap)
+    /// <param name="configure">Configures the elements' map.</param>
+    /// <returns>The map on which this method was invoked.</returns>
+    public CollectionMap<TElement> WithElementMap(Action<ElementMap<TElement>> configure)
     {
-        ThrowHelpers.ThrowIfNull(elementMap, nameof(elementMap));
-
-        var result = elementMap(Elements);
-        ThrowHelpers.ThrowIfNull(result, nameof(elementMap));
+        ThrowHelpers.ThrowIfNull(configure, nameof(configure));
         Settings.ThrowIfFrozen();
-        Elements = result;
+
+        configure(Elements);
         return this;
     }
 
