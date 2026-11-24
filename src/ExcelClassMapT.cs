@@ -55,6 +55,8 @@ public class ExcelClassMap<[DynamicallyAccessedMembers(TrimmingConstants.MappedT
 
     /// <summary>
     /// Maps a property or field read from a single cell, such as a string, number, date or enum.
+    /// Mapping a member this class map already maps with <c>Map(...)</c> returns the same map, so
+    /// its settings add up; a member <see cref="AutoMap"/> mapped gets a new map.
     /// </summary>
     /// <typeparam name="TProperty">The type of the property or field.</typeparam>
     /// <param name="expression">An expression reading the property or field, such as <c>p => p.Name</c>.</param>

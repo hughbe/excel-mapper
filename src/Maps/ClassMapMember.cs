@@ -14,18 +14,21 @@ internal sealed class ClassMapMember
     /// </summary>
     /// <param name="member">The property or field of the class map's type.</param>
     /// <param name="map">The map that reads the member's value.</param>
+    /// <param name="mappedExplicitly">Whether the member was mapped with <c>Map(...)</c>, rather
+    /// than by auto-mapping.</param>
     /// <exception cref="ArgumentException"><paramref name="member"/> is a read-only property that
     /// doesn't match a constructor parameter.</exception>
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification =
         "Only read-only properties check the constructors of their type, which is the type of the class map " +
         "they're added to, and ExcelClassMap keeps that type's public constructors. If they were removed anyway, " +
         "this throws an ArgumentException rather than mapping incorrectly.")]
-    public ClassMapMember(MemberInfo member, IMap map)
+    public ClassMapMember(MemberInfo member, IMap map, bool mappedExplicitly = false)
     {
         // Members come from expressions on the mapped object and from its public instance
         // properties and fields, so they're never indexers or static.
         Member = member;
         Map = map;
+        MappedExplicitly = mappedExplicitly;
 
         if (member is PropertyInfo { CanWrite: false } property)
         {
@@ -56,4 +59,10 @@ internal sealed class ClassMapMember
     /// Gets the map used to map the member.
     /// </summary>
     public IMap Map { get; }
+
+    /// <summary>
+    /// Gets whether the member was mapped with <c>Map(...)</c>, so that mapping it again configures
+    /// the same map, rather than by auto-mapping, which <c>Map(...)</c> replaces.
+    /// </summary>
+    public bool MappedExplicitly { get; }
 }

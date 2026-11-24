@@ -18,6 +18,13 @@ internal interface IParentMap : IMap
     IMap? GetChild(object key);
 
     /// <summary>
+    /// Gets the child map with the given key if it was mapped with <c>Map(...)</c>, or null if
+    /// there isn't one or auto-mapping created it: mapping a member again configures the map it
+    /// already has (see <c>ExpressionAutoMapper</c>), but replaces an auto-mapped one.
+    /// </summary>
+    IMap? GetMappedChild(object key);
+
+    /// <summary>
     /// Sets the child map with the given key, replacing any it has.
     /// </summary>
     void SetChild(object key, IMap map);
