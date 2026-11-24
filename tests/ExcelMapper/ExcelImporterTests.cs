@@ -285,6 +285,28 @@ public class ExcelImporterTests
     }
 
     [Fact]
+    public void Dispose_StreamImporter_ClosesStreamUnlessLeaveOpen()
+    {
+        var bytes = System.Text.Encoding.UTF8.GetBytes("A\n1\n");
+
+        var stream = new MemoryStream(bytes);
+        using (var importer = new ExcelImporter(stream, ExcelImporterFileType.Csv))
+        {
+            Assert.Equal("1", importer.ReadSheet().ReadRow<string>());
+        }
+
+        Assert.False(stream.CanRead);
+
+        var leftOpen = new MemoryStream(bytes);
+        using (var importer = new ExcelImporter(leftOpen, ExcelImporterFileType.Csv, new ExcelDataReader.ExcelReaderConfiguration { LeaveOpen = true }))
+        {
+            Assert.Equal("1", importer.ReadSheet().ReadRow<string>());
+        }
+
+        Assert.True(leftOpen.CanRead);
+    }
+
+    [Fact]
     public void ReadSheets_Invoke_ReturnsExpected()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");

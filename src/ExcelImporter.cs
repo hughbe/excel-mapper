@@ -112,7 +112,9 @@ public sealed class ExcelImporter : IDisposable
     }
 
     /// <summary>
-    /// Constructs an importer that reads an Excel file from a stream.
+    /// Constructs an importer that reads an Excel file from a stream. Disposing the importer closes
+    /// the stream: to keep it open, pass an <see cref="ExcelReaderConfiguration"/> with
+    /// <see cref="ExcelReaderConfiguration.LeaveOpen"/> set.
     /// </summary>
     /// <param name="stream">A stream containing the Excel file bytes.</param>
     public ExcelImporter(Stream stream) : this(stream, ExcelImporterFileType.Excel)
@@ -120,7 +122,9 @@ public sealed class ExcelImporter : IDisposable
     }
 
     /// <summary>
-    /// Constructs an importer that reads an Excel or csv file from a stream.
+    /// Constructs an importer that reads an Excel or csv file from a stream. Disposing the importer
+    /// closes the stream: to keep it open, pass an <see cref="ExcelReaderConfiguration"/> with
+    /// <see cref="ExcelReaderConfiguration.LeaveOpen"/> set.
     /// </summary>
     /// <param name="stream">A stream containing the file to read.</param>
     /// <param name="fileType">The type of file.</param>
@@ -131,6 +135,7 @@ public sealed class ExcelImporter : IDisposable
     /// <summary>
     /// Constructs an importer that reads an Excel or csv file from a stream, with options for the
     /// underlying ExcelDataReader reader such as a password, CSV separators or a fallback encoding.
+    /// Disposing the importer closes the stream unless <see cref="ExcelReaderConfiguration.LeaveOpen"/> is set.
     /// </summary>
     /// <param name="stream">A stream containing the file to read.</param>
     /// <param name="fileType">The type of file.</param>

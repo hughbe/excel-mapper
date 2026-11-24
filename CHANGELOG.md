@@ -122,6 +122,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Updated ExcelDataReader to 3.9.0 and ExcelNumberFormat to 1.2.0. ([#115](https://github.com/hughbe/excel-mapper/pull/115))
 - The documentation moved from the README into [`docs/`](docs). ([#132](https://github.com/hughbe/excel-mapper/pull/132))
 - Mapping a member again in a class map (`Map(p => p.Name)` twice) returns the map it already has, so settings made in each call add up, instead of replacing it and losing the first call's settings. A member mapped by `AutoMap()`, or as another kind of map, still gets a new map. ([#238](https://github.com/hughbe/excel-mapper/pull/238))
+- The docs and IntelliSense say that disposing an importer created from a stream closes the stream, and that `ExcelReaderConfiguration.LeaveOpen` keeps it open. ([#243](https://github.com/hughbe/excel-mapper/pull/243))
 
 ### Fixed
 
