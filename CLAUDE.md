@@ -64,6 +64,7 @@ They mirror each other here (each place has a comment pointing at the other):
 | each `GenericTypes.Create` call (a generic type made for a type found at run time) | an `ExcelTypeRegistrar` method that registers it, which `TypeWalker` calls |
 | `CompiledAccessors.GetSetter`: which members are set, and how (a property's public setter, a field that isn't readonly) | `AddSetter`, which registers a generated setter for each |
 | `ConstructionPlan<T>.Create` and `ConstructorUtilities`: which constructors create a type | `AddConstructors`, which registers a generated call for each public constructor with parameters |
+| Why auto-mapping fails for a type: `AutoMapper.CanConstructObjectMap` and `ConstructorUtilities.FindConstructor` (can't create it), `ShouldAutoMapProperty` and `ExcelClassMap.Freeze` (nothing to set), the type stack in `AutoMapper.TryCreateObjectMap` (contains itself) | `CheckObject`, `IsAutoMapped`, `HasConstructorFromMembers` and the object path in `Visit`, which report EXM005, EXM006 and EXM007 |
 
 So:
 

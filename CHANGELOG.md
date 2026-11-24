@@ -101,6 +101,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - `ExcelMappingException` is thrown, instead of `NullReferenceException`, when an empty value can't be assigned to a non-nullable value type. ([#116](https://github.com/hughbe/excel-mapper/pull/116))
 - Trimming annotations for the net8.0 build: the type passed to `ReadRows<T>`, `RegisterClassMap<T>` and `ExcelClassMap<T>`, and types given in attributes, are kept by the trimmer, so mapping works in trimmed apps; reflection-based APIs are marked `[RequiresUnreferencedCode]`/`[RequiresDynamicCode]` so trimmed and AOT apps get warnings where they call them. See [Trimming and Native AOT](docs/trimming.md). ([#138](https://github.com/hughbe/excel-mapper/pull/138))
 - An index or dictionary key in a mapping expression can be a variable or field the expression captures, such as a loop variable in `for (var i = 0; i < 4; i++) c.Map(p => p.Quarters[i])`, as well as a constant. ([#240](https://github.com/hughbe/excel-mapper/pull/240))
+- The source generator warns, on the `[ExcelMappable]` attribute, about types auto-mapping can't map, which would make reading their rows throw: EXM005 for a type with nothing to set, EXM006 for a type it can't create (an interface, an abstract class, or a class without a usable constructor), and EXM007 for a type that contains itself. ([#244](https://github.com/hughbe/excel-mapper/pull/244))
 
 ### Changed
 
