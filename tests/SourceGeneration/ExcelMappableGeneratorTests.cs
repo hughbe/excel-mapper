@@ -143,7 +143,10 @@ public class ExcelMappableGeneratorTests
             }
             """);
 
-        Assert.Empty(diagnostics);
+        // Auto-mapping can't create the abstract Base of Person.Parent, so it can't map Person.
+        var diagnostic = Assert.Single(diagnostics);
+        Assert.Equal("EXM006", diagnostic.Id);
+        Assert.Equal(DiagnosticSeverity.Warning, diagnostic.Severity);
         Assert.Equal(
         [
             "Constructor<global::Person>(new global::System.Type[] { typeof(string), typeof(int) }, static arguments => new global::Person(arguments.Get<string>(0), arguments.Get<int>(1)))",
@@ -259,7 +262,12 @@ public class ExcelMappableGeneratorTests
             }
             """);
 
+#if LIBRARY_NET8
         Assert.Empty(diagnostics);
+#else
+        // The netstandard builds map IParsable<T> types as objects, and Code and Name have no members.
+        Assert.Equal(["EXM005: 'Code'", "EXM005: 'Name'"], diagnostics.Select(d => $"{d.Id}: {d.GetMessage().Split(' ')[0]}"));
+#endif
         Assert.Equal(
         [
 #if LIBRARY_NET8
@@ -349,7 +357,8 @@ public class ExcelMappableGeneratorTests
             }
             """);
 
-        Assert.Empty(diagnostics);
+        // Each row is checked once, as it's registered once.
+        Assert.Equal(["EXM007"], diagnostics.Select(d => d.Id));
         Assert.Equal(["Row<global::Node>", "Collection<global::System.Collections.Generic.List<global::Node>, global::Node>"], Registrations(generated));
         Assert.Single(generated.Split('\n'), line => line.Contains(" Node => "));
     }
@@ -391,12 +400,14 @@ public class ExcelMappableGeneratorTests
 
             public class Item
             {
+                public int Value { get; set; }
             }
 
             namespace Other
             {
                 public class Item
                 {
+                    public int Value { get; set; }
                 }
             }
             """);
@@ -562,6 +573,98 @@ public class ExcelMappableGeneratorTests
         Assert.Equal("EXM004", diagnostic.Id);
         Assert.Contains("List<>", diagnostic.GetMessage());
         Assert.Equal(["Row<int>"], Registrations(generated));
+    }
+
+    [Fact]
+    public void Generate_TypesAutoMappingCantMap_ReportsWarnings()
+    {
+        var (generated, diagnostics) = Generate("""
+            [ExcelMappable(typeof(Empty))]
+            [ExcelMappable(typeof(Shape))]
+            [ExcelMappable(typeof(NoConstructor))]
+            [ExcelMappable(typeof(Tree))]
+            [ExcelMappable(typeof(Fine))]
+            public partial class AppContext : ExcelMappingContext
+            {
+            }
+
+            public class Empty
+            {
+                public int PrivateSet { get; private set; }
+                public string GetOnly => "";
+                [ExcelIgnore]
+                public int Ignored { get; set; }
+            }
+
+            public interface Shape
+            {
+                int Sides { get; set; }
+            }
+
+            public class NoConstructor
+            {
+                public NoConstructor(string other) => Other = other;
+                public string Other { get; }
+                public int Value { get; set; }
+            }
+
+            public class Tree
+            {
+                public Leaf? Leaf { get; set; }
+            }
+
+            public class Leaf
+            {
+                public string? Name { get; set; }
+                public Tree? Parent { get; set; }
+            }
+
+            public class Fine
+            {
+                public string? Name { get; set; }
+                [ExcelIgnore]
+                public Fine? Self { get; set; }
+            }
+            """);
+
+        Assert.Equal(
+        [
+            "EXM005: 'Empty' has no members auto-mapping can set, so reading rows of 'Empty' will throw: give it public setters, or a public constructor whose parameters are its properties",
+            "EXM006: Auto-mapping can't create 'Shape', so reading rows of 'Shape' will throw: it's an interface or abstract class: map a member of a type that can be created",
+            "EXM007: 'Tree' contains itself through member 'Leaf.Parent', so reading rows of 'Tree' will throw: ignore the member with [ExcelIgnore]",
+        ], diagnostics.Select(d => $"{d.Id}: {d.GetMessage()}"));
+        Assert.All(diagnostics, d => Assert.Equal(DiagnosticSeverity.Warning, d.Severity));
+
+        // The registrations are written as before.
+        Assert.Contains("Row<global::Fine>", Registrations(generated));
+    }
+
+    [Fact]
+    public void Generate_TypeWithoutUsableConstructor_ReportsWarning()
+    {
+        var (_, diagnostics) = Generate("""
+            [ExcelMappable(typeof(NoConstructor))]
+            [ExcelMappable(typeof(FromConstructor))]
+            public partial class AppContext : ExcelMappingContext
+            {
+            }
+
+            public class NoConstructor
+            {
+                public NoConstructor(string other) { }
+                public int Value { get; set; }
+            }
+
+            public class FromConstructor
+            {
+                public FromConstructor(string name, int age = 3) => Name = name;
+                public string Name { get; }
+            }
+            """);
+
+        var diagnostic = Assert.Single(diagnostics);
+        Assert.Equal("EXM006", diagnostic.Id);
+        Assert.StartsWith("Auto-mapping can't create 'NoConstructor', so reading rows of 'NoConstructor' will throw: it needs a public parameterless constructor", diagnostic.GetMessage());
     }
 
     [Fact]

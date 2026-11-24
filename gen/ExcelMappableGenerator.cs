@@ -100,6 +100,11 @@ public sealed class ExcelMappableGenerator : IIncrementalGenerator
             }
 
             walker.AddRow(rowType);
+            var rowLocation = attribute.ApplicationSyntaxReference?.GetSyntax(cancellationToken).GetLocation() ?? location;
+            foreach (var (descriptor, arguments) in walker.TakeProblems())
+            {
+                diagnostics.Add(DiagnosticModel.Create(descriptor, rowLocation, arguments));
+            }
 
             // A property named after the type, unless the context already has a member with that name.
             var propertyName = PropertyName(rowType);

@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
@@ -24,16 +26,16 @@ internal sealed record ContextModel(
 internal sealed record PropertyModel(string Name, string TypeName, string DisplayName);
 
 /// <summary>
-/// An error to report, with where it is.
+/// An error or warning to report, with where it is and the arguments of its message.
 /// </summary>
-internal sealed record DiagnosticModel(string Id, string? FilePath, TextSpan Span, LinePositionSpan LineSpan, string Argument)
+internal sealed record DiagnosticModel(string Id, string? FilePath, TextSpan Span, LinePositionSpan LineSpan, EquatableArray<string> Arguments)
 {
-    public static DiagnosticModel Create(DiagnosticDescriptor descriptor, Location? location, string argument)
-        => new(descriptor.Id, location?.SourceTree?.FilePath, location?.SourceSpan ?? default, location?.GetLineSpan().Span ?? default, argument);
+    public static DiagnosticModel Create(DiagnosticDescriptor descriptor, Location? location, params string[] arguments)
+        => new(descriptor.Id, location?.SourceTree?.FilePath, location?.SourceSpan ?? default, location?.GetLineSpan().Span ?? default, new EquatableArray<string>(arguments.ToImmutableArray()));
 
     public Diagnostic ToDiagnostic()
     {
         var location = FilePath is null ? Location.None : Location.Create(FilePath, Span, LineSpan);
-        return Diagnostic.Create(Descriptors.Get(Id), location, Argument);
+        return Diagnostic.Create(Descriptors.Get(Id), location, Arguments.Items.ToArray<object>());
     }
 }

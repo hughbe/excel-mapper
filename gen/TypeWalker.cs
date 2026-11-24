@@ -54,6 +54,13 @@ internal sealed class TypeWalker
     private readonly List<string> _registrations = [];
     private readonly HashSet<string> _registered = [];
 
+    // The object types whose members are being visited, to find a type that contains itself.
+    private readonly HashSet<ITypeSymbol> _objectPath = new(SymbolEqualityComparer.Default);
+
+    // What will make auto-mapping fail for the row being added (see TakeProblems).
+    private readonly List<(DiagnosticDescriptor Descriptor, string[] Arguments)> _problems = [];
+    private string _rowName = "";
+
     public TypeWalker(Compilation compilation)
     {
         _compilation = compilation;
@@ -73,16 +80,32 @@ internal sealed class TypeWalker
     public IReadOnlyList<string> Registrations => _registrations;
 
     /// <summary>
+    /// Gets what will make auto-mapping a row type fail, found while adding it: a type with nothing
+    /// to set, a type that can't be created, or a type that contains itself. Each would make
+    /// <c>GetClassMap</c> throw for the row type.
+    /// </summary>
+    public List<(DiagnosticDescriptor Descriptor, string[] Arguments)> TakeProblems()
+    {
+        var problems = new List<(DiagnosticDescriptor, string[])>(_problems);
+        _problems.Clear();
+        return problems;
+    }
+
+    /// <summary>
     /// Registers a type rows are mapped to, and every type it uses.
     /// </summary>
     public void AddRow(ITypeSymbol type)
     {
+        _rowName = Display(type);
         Add($"Row<{Name(type)}>()");
 
         // Row registers the type as Type does.
         _registered.Add($"Type<{Name(type)}>()");
         Visit(type);
     }
+
+    // A type's name in a message, as written in C#, without a nullable annotation.
+    private static string Display(ITypeSymbol type) => type.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString();
 
     public static string Name(ITypeSymbol type) => type.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString(s_typeFormat);
 
@@ -158,12 +181,104 @@ internal sealed class TypeWalker
 
         Add($"Type<{name}>()");
         AddConstructors(type, name);
+        if (type.TypeKind == TypeKind.TypeParameter)
+        {
+            return;
+        }
+
+        CheckObject(type);
+        _objectPath.Add(type);
         foreach (var member in GetMappedMembers(type))
         {
             var memberType = MemberType(member);
             AddSetter(member, memberType, name);
+
+            // A member of the type being mapped, or of a type it's in, makes auto-mapping recurse
+            // forever (see AutoMapper.TryCreateObjectMap, which throws).
+            var objectType = memberType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableMember ? nullableMember.TypeArguments[0] : memberType;
+            if (_objectPath.Contains(objectType) && IsAutoMapped(type, member))
+            {
+                _problems.Add((Descriptors.ContainsItself, [Display(objectType), $"{Display(type)}.{member.Name}", _rowName]));
+                continue;
+            }
+
             Visit(memberType);
         }
+
+        _objectPath.Remove(type);
+    }
+
+    // Reports why auto-mapping can't map an object type, if it can't: it can't create it (see
+    // AutoMapper.CanConstructObjectMap), or it has nothing to set (see ExcelClassMap.Freeze).
+    private void CheckObject(ITypeSymbol type)
+    {
+        if (type.TypeKind == TypeKind.Interface || (type.IsAbstract && !type.IsValueType))
+        {
+            _problems.Add((Descriptors.CannotCreate, [Display(type), _rowName, "it's an interface or abstract class: map a member of a type that can be created"]));
+            return;
+        }
+
+        if (!CanConstructObject(type) && (Implements(type, _enumerable) || !HasConstructorFromMembers(type)))
+        {
+            _problems.Add((Descriptors.CannotCreate, [Display(type), _rowName, "it needs a public parameterless constructor, or a public constructor whose parameters each match a property or field (by name and type) or have a default value"]));
+            return;
+        }
+
+        if (!GetMappedMembers(type).Any(m => IsAutoMapped(type, m)))
+        {
+            _problems.Add((Descriptors.NothingToMap, [Display(type), _rowName]));
+        }
+    }
+
+    // Whether auto-mapping maps a member GetMappedMembers finds (see AutoMapper.TryAddMembers and
+    // ShouldAutoMapProperty): a field, a property with a public setter, or a read-only property
+    // set through a constructor parameter.
+    private bool IsAutoMapped(ITypeSymbol type, ISymbol member) => member switch
+    {
+        IFieldSymbol => true,
+        IPropertySymbol { SetMethod: { } setter } => setter.DeclaredAccessibility == Accessibility.Public,
+        IPropertySymbol property => property.GetMethod is { DeclaredAccessibility: Accessibility.Public } &&
+            !Implements(type, _enumerable) &&
+            PublicConstructors(type).Any(c => c.Parameters.Any(p => ParameterMatches(p, property.Name, property.Type))),
+        _ => false,
+    };
+
+    // Whether a public constructor's parameters each match a property or field the type has, or
+    // have a default value (see ConstructorUtilities.FindConstructor).
+    private bool HasConstructorFromMembers(ITypeSymbol type)
+    {
+        var readable = new List<(string Name, ITypeSymbol Type)>();
+        foreach (var member in GetAllMembers(type))
+        {
+            switch (member)
+            {
+                case IPropertySymbol { IsStatic: false, IsIndexer: false, GetMethod.DeclaredAccessibility: Accessibility.Public } property:
+                    readable.Add((property.Name, property.Type));
+                    break;
+                case IFieldSymbol { IsStatic: false, IsConst: false, DeclaredAccessibility: Accessibility.Public } field:
+                    readable.Add((field.Name, field.Type));
+                    break;
+            }
+        }
+
+        return PublicConstructors(type).Any(c => c.Parameters.Length > 0 &&
+            c.Parameters.All(p => p.HasExplicitDefaultValue || readable.Any(m => ParameterMatches(p, m.Name, m.Type))));
+    }
+
+    private static IEnumerable<IMethodSymbol> PublicConstructors(ITypeSymbol type)
+        => type is INamedTypeSymbol named ? named.InstanceConstructors.Where(c => c.DeclaredAccessibility == Accessibility.Public) : [];
+
+    // A parameter with the member's name, ignoring case, that the member's value can be passed to
+    // as it is (see ConstructorUtilities.ParameterMatches, which uses Type.IsAssignableFrom).
+    private bool ParameterMatches(IParameterSymbol parameter, string name, ITypeSymbol memberType)
+    {
+        if (!string.Equals(parameter.Name, name, System.StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var conversion = _compilation.ClassifyCommonConversion(memberType, parameter.Type);
+        return conversion.Exists && conversion.IsImplicit && !conversion.IsNumeric && !conversion.IsUserDefined;
     }
 
     // Registers a setter for a member auto-mapping sets: a property with a public setter that
