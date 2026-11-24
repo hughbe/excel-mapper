@@ -22,7 +22,7 @@ A cell's value is read as Excel stores it: numbers, dates, times and booleans fr
 
 Text is parsed with `NumberStyles.Number`: leading and trailing spaces, a sign, thousands separators and a decimal point, so `" -1,234.5 "` is valid. Floating-point types also accept exponents (`1E5`). Change the style for a member with `[ExcelNumberStyle]` or `.WithNumberStyle(...)`:
 
-| Product  | Price     |
+| Name     | Price     |
 |----------|-----------|
 | Widget A | $1,234.56 |
 | Widget B | (250.00)  |
@@ -60,7 +60,7 @@ Text such as `3/4/2024 10:30 AM` matches en-US patterns whether it uses an ordin
 
 To accept exactly the formats you give, and nothing else, set them with `[ExcelFormats]` or `.WithFormats(...)`:
 
-| Event      | Date       | Start   | Duration |
+| Name       | Date       | Start   | Duration |
 |------------|------------|---------|----------|
 | Conference | 2024-03-15 | 09:30   | 02:30:00 |
 | Workshop   | 15/03/2024 | 2:00 PM | 01:15:00 |
@@ -244,6 +244,8 @@ importer.Configuration.RegisterClassMap<Employee>(c => c
 ```
 
 Attributes such as `[ExcelFormats]` and `[ExcelConverter]` on a collection member apply to each element.
+
+Elements are read from cells, so they must be values: strings, numbers, dates, enums and the other types above. A collection of objects, such as `List<Address>`, can't be auto-mapped, and throws an `ExcelMappingException` naming the member; the same goes for a dictionary of objects. Give the element type a converter (`[ExcelConverter]` on the member converts each element), map the objects as [nested objects](#nested-objects) instead, or ignore the member with `[ExcelIgnore]`.
 
 **Collection types.** Arrays (including multidimensional arrays mapped by index, such as `Map(p => p.Grid[0, 1])`), `List<T>` and the list, collection and enumerable interfaces, `Collection<T>`, `ReadOnlyCollection<T>`, `ObservableCollection<T>`, `LinkedList<T>`, `HashSet<T>`, `SortedSet<T>`, `ISet<T>`, `Queue<T>`, `Stack<T>`, the concurrent collections, `BlockingCollection<T>`, the immutable collections, `FrozenSet<T>` (.NET 8), and the non-generic `ArrayList`, `Queue`, `Stack` and `StringCollection`. Your own collection types work if they have a parameterless constructor and an `Add` method, or a constructor that takes an `IEnumerable<T>`, `ICollection<T>` or `IReadOnlyList<T>`.
 

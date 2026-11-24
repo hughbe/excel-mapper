@@ -68,6 +68,26 @@ public class ExcelRangeTests
         yield return new object[] { 2.., 3..8 };
         yield return new object[] { ..4, ..6 };
         yield return new object[] { .., .. };
+        yield return new object[] { 3..3, 2..2 };
+        yield return new object[] { ^5..^2, ^1.. };
+
+        // From the start to the end: whether it's reversed depends on the sheet.
+        yield return new object[] { 5..^2, ^8..3 };
+    }
+
+    public static IEnumerable<object[]> ReversedRange_Data()
+    {
+        yield return new object[] { 5..2, Range.All, "rows" };
+        yield return new object[] { ^2..^5, Range.All, "rows" };
+        yield return new object[] { Range.All, 3..1, "columns" };
+        yield return new object[] { Range.All, ^1..^2, "columns" };
+    }
+
+    [Theory]
+    [MemberData(nameof(ReversedRange_Data))]
+    public void Ctor_ReversedRange_ThrowsArgumentException(Range rows, Range columns, string paramName)
+    {
+        Assert.Throws<ArgumentException>(paramName, () => new ExcelRange(rows, columns));
     }
 
     [Theory]

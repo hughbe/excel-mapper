@@ -261,13 +261,13 @@ public class MapDictionaryTest
     [Fact]
     public void ReadRow_AutoMappedSubICollectionKeyValuePairStringObjectClass_ThrowsExcelMappingException()
     {
-        // Nothing in the type can be mapped, so every row would be an empty object.
+        // Its elements can't be read from a cell, so it isn't mapped as an object through its properties instead.
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SubICollectionKeyValuePairStringObjectClass>());
-        Assert.StartsWith("The class map for type", exception.Message);
+        Assert.StartsWith("Type MapDictionaryTest.SubICollectionKeyValuePairStringObjectClass can't be auto-mapped: its elements are KeyValuePair<string, object>, which can't be read from a cell.", exception.Message);
     }
 
     private class SubICollectionKeyValuePairStringObjectClass : ICollection<KeyValuePair<string, object>>
@@ -443,13 +443,13 @@ public class MapDictionaryTest
     [Fact]
     public void ReadRow_AutoMappedSubIReadOnlyCollectionKeyValuePairStringObjectClass_ThrowsExcelMappingException()
     {
-        // Nothing in the type can be mapped, so every row would be an empty object.
+        // Its elements can't be read from a cell, so it isn't mapped as an object through its properties instead.
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SubIReadOnlyCollectionKeyValuePairStringObjectClass>());
-        Assert.StartsWith("The class map for type", exception.Message);
+        Assert.StartsWith("Type MapDictionaryTest.SubIReadOnlyCollectionKeyValuePairStringObjectClass can't be auto-mapped: its elements are KeyValuePair<string, object>, which can't be read from a cell.", exception.Message);
     }
 
     private class SubIReadOnlyCollectionKeyValuePairStringObjectClass : IReadOnlyCollection<KeyValuePair<string, object>>
@@ -606,13 +606,13 @@ public class MapDictionaryTest
     [Fact]
     public void ReadRow_AutoMappedSubIListKeyValuePairStringObjectClass_ThrowsExcelMappingException()
     {
-        // Nothing in the type can be mapped, so every row would be an empty object.
+        // Its elements can't be read from a cell, so it isn't mapped as an object through its properties instead.
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SubIListKeyValuePairStringObjectClass>());
-        Assert.StartsWith("The class map for type", exception.Message);
+        Assert.StartsWith("Type MapDictionaryTest.SubIListKeyValuePairStringObjectClass can't be auto-mapped: its elements are KeyValuePair<string, object>, which can't be read from a cell.", exception.Message);
     }
 
     private class SubIListKeyValuePairStringObjectClass : IList<KeyValuePair<string, object>>
@@ -673,13 +673,13 @@ public class MapDictionaryTest
     [Fact]
     public void ReadRow_AutoMappedSubIReadOnlyListKeyValuePairStringObjectClass_ThrowsExcelMappingException()
     {
-        // Nothing in the type can be mapped, so every row would be an empty object.
+        // Its elements can't be read from a cell, so it isn't mapped as an object through its properties instead.
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SubIReadOnlyListKeyValuePairStringObjectClass>());
-        Assert.StartsWith("The class map for type", exception.Message);
+        Assert.StartsWith("Type MapDictionaryTest.SubIReadOnlyListKeyValuePairStringObjectClass can't be auto-mapped: its elements are KeyValuePair<string, object>, which can't be read from a cell.", exception.Message);
     }
 
     private class SubIReadOnlyListKeyValuePairStringObjectClass : IReadOnlyList<KeyValuePair<string, object>>
@@ -3475,13 +3475,13 @@ public class MapDictionaryTest
     [Fact]
     public void ReadRow_AutoMappedDictionaryStringInvalidObject_ThrowsExcelMappingException()
     {
-        // Nothing in the type can be mapped, so every row would be an empty object.
+        // Its values can't be read from a cell, so it isn't mapped as an object through its properties instead.
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<DictionaryStringInvalidClass>());
-        Assert.StartsWith("The class map for type", exception.Message);
+        Assert.StartsWith("Member \"Value\" of type Dictionary<string, ExcelSheet> can't be auto-mapped: its values are ExcelSheet, which can't be read from a cell.", exception.Message);
     }
 
     private class DictionaryStringInvalidClass
@@ -3772,13 +3772,13 @@ public class MapDictionaryTest
     [Fact]
     public void ReadRow_AutoMappedConcurrentDictionaryStringInvalidObject_ThrowsExcelMappingException()
     {
-        // Nothing in the type can be mapped, so every row would be an empty object.
+        // Its values can't be read from a cell, so it isn't mapped as an object through its properties instead.
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<ConcurrentDictionaryStringInvalidClass>());
-        Assert.StartsWith("The class map for type", exception.Message);
+        Assert.StartsWith("Member \"Value\" of type ConcurrentDictionary<string, ExcelSheet> can't be auto-mapped: its values are ExcelSheet, which can't be read from a cell.", exception.Message);
     }
 
     private class ConcurrentDictionaryStringInvalidClass
@@ -4663,13 +4663,13 @@ public class MapDictionaryTest
     [Fact]
     public void ReadRow_AutoMappedSortedDictionaryStringInvalidObject_ThrowsExcelMappingException()
     {
-        // Nothing in the type can be mapped, so every row would be an empty object.
+        // Its values can't be read from a cell, so it isn't mapped as an object through its properties instead.
         using var importer = Helpers.GetImporter("DictionaryMap.xlsx");
         var sheet = importer.ReadSheet();
         sheet.ReadHeading();
 
         var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<SortedDictionaryStringInvalidClass>());
-        Assert.StartsWith("The class map for type", exception.Message);
+        Assert.StartsWith("Member \"Value\" of type SortedDictionary<string, ExcelSheet> can't be auto-mapped: its values are ExcelSheet, which can't be read from a cell.", exception.Message);
     }
 
     private class SortedDictionaryStringInvalidClass

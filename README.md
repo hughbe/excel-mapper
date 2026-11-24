@@ -123,6 +123,7 @@ To check a large file without creating an exception for each problem, pass an `I
 Options for ExcelDataReader, such as a password, CSV separators or a fallback encoding, can be passed to the constructor:
 
 ```csharp
+using System.Text;
 using ExcelDataReader;
 
 // A password-protected workbook

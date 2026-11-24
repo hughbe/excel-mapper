@@ -232,7 +232,7 @@ foreach (var employee in sheet.ReadRows<Employee>())
 }
 ```
 
-Row numbers are one-based and count every row in the sheet, as Excel shows them: the heading, rows above it, and blank rows skipped by `SkipBlankLines`. So the first row under a heading in row 1 is row 2, matching the rows in error messages. The member doesn't read a column, and can be any numeric type. For a positional record, use `[property: ExcelRowNumber]`.
+Row numbers are one-based and count every row in the sheet, as Excel shows them: the heading, rows above it, and blank rows skipped by `SkipBlankLines`. So the first row under a heading in row 1 is row 2, matching the rows in error messages. The member doesn't read a column, so it can't also have an attribute that chooses or splits columns (such as `[ExcelColumnName]`), and can be any numeric type. For a positional record, use `[property: ExcelRowNumber]`.
 
 ### Extra columns
 
@@ -261,7 +261,7 @@ importer.Configuration.RegisterClassMap<Employee>(c =>
 });
 ```
 
-A column is extra if no other member of the type being read reads it, including members of nested objects at any depth and members with column attributes or separators. Members with `[ExcelIgnore]`, and members a class map doesn't map, don't read a column, so their columns are extra. Columns with an empty name are skipped, and the sheet must have a heading. The member can be any dictionary with string keys, such as `Dictionary<string, string>`, `Dictionary<string, int>`, `IReadOnlyDictionary<string, object>` (values as Excel stores them) or `ExpandoObject`.
+A column is extra if no other member of the type being read reads it, including members of nested objects at any depth and members with column attributes or separators. Members with `[ExcelIgnore]`, and members a class map doesn't map, don't read a column, so their columns are extra. Columns with an empty name are skipped, and the sheet must have a heading. The member can't also have an attribute that chooses or splits columns, such as `[ExcelColumnNames]`. The member can be any dictionary with string keys, such as `Dictionary<string, string>`, `Dictionary<string, int>`, `IReadOnlyDictionary<string, object>` (values as Excel stores them) or `ExpandoObject`.
 
 ## Converting values yourself
 

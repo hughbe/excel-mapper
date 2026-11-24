@@ -28,6 +28,12 @@ internal abstract class CollectionRule
     public abstract bool TryCreateMap(MemberInfo? member, Type collectionType, Columns columns, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map);
 
     /// <summary>
+    /// Gets whether a collection of type <paramref name="collectionType"/> can be created from its
+    /// elements, whatever they are.
+    /// </summary>
+    public abstract bool CanCreate(Type collectionType);
+
+    /// <summary>
     /// Gets the map for elements mapped one by one, such as <c>Map(p => p.Values[0])</c>.
     /// </summary>
     public abstract IMap GetOrCreateIndexerMap(IMap parentMap, Type collectionType, object? context);
@@ -44,6 +50,8 @@ internal abstract class CollectionRule
 internal sealed class CollectionRule<TElement> : CollectionRule
 {
     public override Type ElementType => typeof(TElement);
+
+    public override bool CanCreate(Type collectionType) => TryGetBuilder(collectionType, out _);
 
     public override bool TryCreateMap(MemberInfo? member, Type collectionType, Columns columns, EmptyValueStrategy emptyValueStrategy, [NotNullWhen(true)] out IMap? map)
     {

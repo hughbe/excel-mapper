@@ -313,23 +313,28 @@ public class ExcelSheetTests
     }
 
     [Fact]
-    public void ReadHeading_CustomDataRangeColumnsLargeStart_ThrowsArgumentOutOfRangeException()
+    public void ReadHeading_CustomDataRangeColumnsLargeStart_ReturnsEmpty()
     {
+        // The range starts after the sheet's last column, so the heading has no columns.
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         var sheet = importer.ReadSheet();
         sheet.DataRange = ExcelRange.Parse("I:J");
 
-        Assert.Throws<ArgumentOutOfRangeException>("length", () => sheet.ReadHeading());
+        var heading = sheet.ReadHeading();
+        Assert.Empty(heading.ColumnNames);
     }
 
     [Fact]
-    public void ReadHeading_CustomDataRangeColumnsLargeEnd_ThrowsArgumentOutOfRangeException()
+    public void ReadHeading_CustomDataRangeColumnsLargeEnd_ReturnsSheetColumns()
     {
+        // The range ends after the sheet's last column, so the heading has the sheet's columns.
         using var importer = Helpers.GetImporter("Primitives.xlsx");
         var sheet = importer.ReadSheet();
         sheet.DataRange = ExcelRange.Parse("A:J");
 
-        Assert.Throws<ArgumentOutOfRangeException>("length", () => sheet.ReadHeading());
+        var heading = sheet.ReadHeading();
+        Assert.Equal(sheet.NumberOfColumns, heading.ColumnNames.Count);
+        Assert.Equal(0, heading.GetColumnIndex(heading.ColumnNames[0]));
     }
 
     [Fact]
@@ -391,9 +396,7 @@ public class ExcelSheetTests
         var sheet = importer.ReadSheet();
 
         var ex = Assert.Throws<ExcelMappingException>(() => sheet.ReadHeading());
-        Assert.Contains("exceeds the maximum", ex.Message);
-        Assert.Contains("8 columns", ex.Message);
-        Assert.Contains("(5)", ex.Message);
+        Assert.StartsWith("Sheet \"Primitives\" has 8 columns, which exceeds the maximum allowed (5).", ex.Message);
     }
 
     [Fact]
@@ -546,33 +549,26 @@ public class ExcelSheetTests
     }
 
     [Fact]
-    public void ReadRows_CustomDataRangeColumnsLargeStart_ThrowsArgumentOutOfRangeException()
+    public void ReadRows_CustomDataRangeColumnsLargeStart_ThrowsMissingColumn()
     {
+        // The range starts after the sheet's last column, so it has none of the columns.
         using var importer = Helpers.GetImporter("Primitives_Range.xlsx");
         var sheet = importer.ReadSheet();
         sheet.DataRange = ExcelRange.Parse("I:J");
 
-        Assert.Throws<ArgumentOutOfRangeException>("length", () => sheet.ReadRows<StringValue>());
-        Assert.Equal(0, sheet.CurrentRowIndex);
-
-        // Read again.
-        Assert.Throws<ArgumentOutOfRangeException>("length", () => sheet.ReadRows<StringValue>());
-        Assert.Equal(0, sheet.CurrentRowIndex);
+        var exception = Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<StringValue>().ToArray());
+        Assert.StartsWith("Can't find column \"Value\"", exception.Message);
     }
 
     [Fact]
-    public void ReadRows_CustomDataRangeColumnsLargeEnd_ThrowsArgumentOutOfRangeException()
+    public void ReadRows_CustomDataRangeColumnsLargeEnd_ReadsSheetColumns()
     {
-        using var importer = Helpers.GetImporter("Primitives_Range.xlsx");
+        // The range ends after the sheet's last column: the columns it has are read.
+        using var importer = Helpers.GetCsvImporter("Value,Other\na,1\nb,2\n");
         var sheet = importer.ReadSheet();
         sheet.DataRange = ExcelRange.Parse("A:J");
 
-        Assert.Throws<ArgumentOutOfRangeException>("length", () => sheet.ReadRows<StringValue>());
-        Assert.Equal(0, sheet.CurrentRowIndex);
-
-        // Read again.
-        Assert.Throws<ArgumentOutOfRangeException>("length", () => sheet.ReadRows<StringValue>());
-        Assert.Equal(0, sheet.CurrentRowIndex);
+        Assert.Equal(new string?[] { "a", "b" }, sheet.ReadRows<StringValue>().Select(r => r.Value).ToArray());
     }
 
     [Fact]
@@ -1833,5 +1829,64 @@ public class ExcelSheetTests
         Assert.Throws<ArgumentNullException>("classMap", () => sheet.FindHeading<MapRow>(null!, 1));
         Assert.Throws<ArgumentNullException>("classMap", () => sheet.TryFindHeading<MapRow>(null!, out _));
         Assert.Throws<ArgumentNullException>("classMap", () => sheet.TryFindHeading<MapRow>(null!, 1, out _));
+    }
+
+    [Fact]
+    public void TryReadRow_RowMapsToNull_ReturnsTrueWithNull()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Other\n,x\n");
+        var sheet = importer.ReadSheet();
+
+        Assert.True(sheet.TryReadRow<string>(out var value));
+        Assert.Null(value);
+        Assert.False(sheet.TryReadRow<string>(out _));
+    }
+
+    [Fact]
+    public void Heading_HasHeadingBeforeReading_ReturnsNull()
+    {
+        using var importer = Helpers.GetCsvImporter("Name\na\n");
+        var sheet = importer.ReadSheet();
+
+        Assert.True(sheet.HasHeading);
+        Assert.Null(sheet.Heading);
+        sheet.ReadHeading();
+        Assert.NotNull(sheet.Heading);
+    }
+
+    [Fact]
+    public void ReadRows_DataRangeColumnsCountedFromEndPastFirstColumn_ReadsSheetColumns()
+    {
+        // ^10 is before the first of the sheet's two columns.
+        using var importer = Helpers.GetCsvImporter("Value,Other\na,1\nb,2\n");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = new ExcelRange(Range.All, ^10..);
+
+        Assert.Equal(["Value", "Other"], sheet.ReadHeading().ColumnNames);
+        Assert.Equal(new string?[] { "a", "b" }, sheet.ReadRows<StringValue>().Select(r => r.Value).ToArray());
+    }
+
+    [Fact]
+    public void ReadRows_DataRangeColumnsPastSheetSkipBlankLines_ReadsSheetColumns()
+    {
+        using var importer = Helpers.GetCsvImporter("Value,Other\na,1\n,\nb,2\n");
+        importer.Configuration.SkipBlankLines = true;
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = ExcelRange.Parse("A:Z");
+
+        Assert.Equal(new string?[] { "a", "b" }, sheet.ReadRows<StringValue>().Select(r => r.Value).ToArray());
+    }
+
+    [Fact]
+    public void HeadingIndex_SetAfterDataRangeEnd_ReadsNoRows()
+    {
+        // The heading is below the data range: there are no rows, rather than an exception about
+        // a range the user didn't create.
+        using var importer = Helpers.GetCsvImporter("Value\na\nb\nValue\nc\n");
+        var sheet = importer.ReadSheet();
+        sheet.DataRange = ExcelRange.Parse("1:2");
+        sheet.HeadingIndex = 3;
+
+        Assert.Empty(sheet.ReadRows<StringValue>());
     }
 }

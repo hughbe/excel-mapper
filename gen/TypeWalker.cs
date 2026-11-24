@@ -48,6 +48,10 @@ internal sealed class TypeWalker
     private readonly INamedTypeSymbol? _parsable;
     private readonly INamedTypeSymbol? _numberBase;
     private readonly INamedTypeSymbol? _ignoreAttribute;
+
+    // Attributes that give a member's elements a conversion, or make it read something other than
+    // cells (see AutoMapper.TryAutoMapAndAddMember and MemberMapper.AddMappers).
+    private readonly INamedTypeSymbol?[] _elementAttributes;
     private readonly bool _canRegisterParsable;
 
     private readonly HashSet<ITypeSymbol> _visited = new(SymbolEqualityComparer.Default);
@@ -72,6 +76,13 @@ internal sealed class TypeWalker
         _parsable = compilation.GetTypeByMetadataName("System.IParsable`1");
         _numberBase = compilation.GetTypeByMetadataName("System.Numerics.INumberBase`1");
         _ignoreAttribute = compilation.GetTypeByMetadataName("ExcelMapper.ExcelIgnoreAttribute");
+        _elementAttributes =
+        [
+            compilation.GetTypeByMetadataName("ExcelMapper.ExcelConverterAttribute"),
+            compilation.GetTypeByMetadataName("ExcelMapper.ExcelMappingDictionaryAttribute"),
+            compilation.GetTypeByMetadataName("ExcelMapper.ExcelRowNumberAttribute"),
+            compilation.GetTypeByMetadataName("ExcelMapper.ExcelExtraColumnsAttribute"),
+        ];
 
         // The library's netstandard builds don't have IParsable<T> registrations.
         _canRegisterParsable = compilation.GetTypeByMetadataName("ExcelMapper.ExcelTypeRegistrar")?.GetMembers("Parsable").Length > 0;
@@ -101,6 +112,7 @@ internal sealed class TypeWalker
 
         // Row registers the type as Type does.
         _registered.Add($"Type<{Name(type)}>()");
+        CheckElements(type, _rowName);
         Visit(type);
     }
 
@@ -202,6 +214,11 @@ internal sealed class TypeWalker
                 continue;
             }
 
+            if (IsAutoMapped(type, member) && !member.GetAttributes().Any(a => _elementAttributes.Contains(a.AttributeClass, SymbolEqualityComparer.Default)))
+            {
+                CheckElements(memberType, $"{Display(type)}.{member.Name}");
+            }
+
             Visit(memberType);
         }
 
@@ -229,6 +246,32 @@ internal sealed class TypeWalker
             _problems.Add((Descriptors.NothingToMap, [Display(type), _rowName]));
         }
     }
+
+    // Reports a collection or dictionary whose elements can't be read from a cell, such as
+    // List<Address>: auto-mapping throws rather than map it as an object (see AutoMapper.TryCreateMap).
+    private void CheckElements(ITypeSymbol type, string where)
+    {
+        if (IsReadable(type))
+        {
+            return;
+        }
+
+        var isDictionary = TryGetKeyValueTypes(type, out _, out var valueType);
+        var isCollection = TryGetElementType(type, out var elementType);
+        if ((isDictionary || isCollection) && !(isDictionary && IsReadable(valueType)) && !(isCollection && IsReadable(elementType)))
+        {
+            _problems.Add((Descriptors.ElementsNotReadable, [where, Display(isDictionary ? valueType : elementType), _rowName]));
+        }
+    }
+
+    // Whether a value of the type is read from a cell: it has a built-in conversion (see
+    // TypeRule<T>.FindDefaultMappers). A type parameter isn't known, so it's assumed to be.
+    private bool IsReadable(ITypeSymbol type) => type switch
+    {
+        INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullable => IsReadable(nullable.TypeArguments[0]),
+        { TypeKind: TypeKind.Enum or TypeKind.TypeParameter or TypeKind.Error } => true,
+        _ => s_builtInTypes.Contains(MetadataName(type)) || (HasConversion(type, out var isParsable) && (!isParsable || _canRegisterParsable)),
+    };
 
     // Whether auto-mapping maps a member GetMappedMembers finds (see AutoMapper.TryAddMembers and
     // ShouldAutoMapProperty): a field, a property with a public setter, or a read-only property

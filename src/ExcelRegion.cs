@@ -270,7 +270,7 @@ public sealed class ExcelRegion
 
         // Columns chosen by position count from the region's first column, and stop at its last.
         var columnCount = Sheet.NumberOfColumns;
-        view.ColumnOffset = Math.Min(Range.Columns.Start.GetOffset(columnCount), columnCount);
+        view.ColumnOffset = Math.Max(0, Math.Min(Range.Columns.Start.GetOffset(columnCount), columnCount));
         view.ColumnEnd = Math.Max(view.ColumnOffset, Math.Min(Range.Columns.End.GetOffset(columnCount), columnCount));
 
         switch (_headingKind)
@@ -282,7 +282,7 @@ public sealed class ExcelRegion
 
             case HeadingKind.AtRow:
                 // The heading is read from its row; the data is the region's rows after it.
-                view.DataRange = new ExcelRange(_headingValue..Range.Rows.End, Range.Columns);
+                view.DataRange = ExcelRange.Create(_headingValue..Range.Rows.End, Range.Columns);
                 view.FirstDataRow = Range.Rows.Start;
                 break;
 

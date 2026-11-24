@@ -149,7 +149,7 @@ public class ErrorMessageTests
         using var importer = Helpers.GetCsvImporter("Value\n1\n");
 
         var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<Func<int?>>().ToArray());
-        Assert.Equal("Cannot auto-map type Func<int?>.", exception.Message);
+        Assert.Equal("Cannot auto-map type Func<int?>: it has neither a public parameterless constructor nor a public constructor whose parameters match its members.", exception.Message);
     }
 
     [Fact]

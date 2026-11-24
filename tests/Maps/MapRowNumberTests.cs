@@ -278,4 +278,36 @@ public class MapRowNumberTests
         sheet.ValidateHeading<RowNumberRow>();
         Assert.Equal(2, sheet.ReadRows<RowNumberRow>().Single().Row);
     }
+
+    [Fact]
+    public void ReadRows_RowNumberWithColumnAttribute_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Row\n5\n");
+
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<RowNumberWithColumnNameRow>().ToArray());
+        Assert.Equal("Member \"Row\" has both [ExcelRowNumber] and [ExcelColumnName], but a row number isn't read from a column, so [ExcelColumnName] would be ignored. Remove it.", exception.Message);
+    }
+
+    public class RowNumberWithColumnNameRow
+    {
+        [ExcelRowNumber]
+        [ExcelColumnName("Row")]
+        public int Row { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_RowNumberWithSeparators_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Row\n5\n");
+
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<RowNumberWithSeparatorsRow>().ToArray());
+        Assert.StartsWith("Member \"Row\" has both [ExcelRowNumber] and [ExcelSeparators]", exception.Message);
+    }
+
+    public class RowNumberWithSeparatorsRow
+    {
+        [ExcelRowNumber]
+        [ExcelSeparators(';')]
+        public int Row { get; set; }
+    }
 }

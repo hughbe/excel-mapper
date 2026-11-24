@@ -47,7 +47,6 @@ internal sealed class SheetView
     private bool _hasHeading = true;
 
     /// <inheritdoc cref="ExcelSheet.HasHeading"/>
-    [MemberNotNullWhen(true, nameof(Heading))]
     public bool HasHeading
     {
         get => _hasHeading;
@@ -80,7 +79,7 @@ internal sealed class SheetView
 
             // Adjust the data range. The data range starts at the heading index.
             var rowsRange = value.._dataRange.Rows.End;
-            _dataRange = new ExcelRange(rowsRange, _dataRange.Columns);
+            _dataRange = ExcelRange.Create(rowsRange, _dataRange.Columns);
         }
     }
 
@@ -177,7 +176,7 @@ internal sealed class SheetView
         }
 
         // Create the heading.
-        var heading = new ExcelHeading(Reader, DataRange, Settings);
+        var heading = new ExcelHeading(Reader, DataRange, Settings, Name);
         Heading = heading;
         return heading;
     }
@@ -304,10 +303,10 @@ internal sealed class SheetView
     /// <inheritdoc cref="ExcelSheet.TryReadRow{T}(out T)"/>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public bool TryReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>([NotNullWhen(true)] out T? value) => TryReadRow(AutoMapped<T>.ClassMap, out value);
+    public bool TryReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>([MaybeNullWhen(false)] out T value) => TryReadRow(AutoMapped<T>.ClassMap, out value);
 
     /// <inheritdoc cref="ExcelSheet.TryReadRow{T}(ExcelClassMap{T}, out T)"/>
-    public bool TryReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, [NotNullWhen(true)] out T? value)
+    public bool TryReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, [MaybeNullWhen(false)] out T value)
     {
         if (!AdvanceToNextRow())
         {
@@ -547,7 +546,7 @@ internal sealed class SheetView
             // Otherwise reading a named column throws a clear error.
             if (!AutoMapper.TryCreateClassMap<T>(EmptyValueStrategy.Error, out var map))
             {
-                throw new ExcelMappingException($"Cannot auto-map type {TypeNames.Get(typeof(T))}.");
+                throw AutoMapper.CannotAutoMap(typeof(T));
             }
 
             classMap = Configuration.RegisterAutoMappedClassMap(typeof(T), map);
@@ -680,7 +679,7 @@ internal sealed class SheetView
     public void UseHeading(int rowIndex, ExcelHeading heading)
     {
         _hasHeading = true;
-        _dataRange = new ExcelRange(rowIndex.._dataRange.Rows.End, _dataRange.Columns);
+        _dataRange = ExcelRange.Create(rowIndex.._dataRange.Rows.End, _dataRange.Columns);
         Heading = heading;
     }
 

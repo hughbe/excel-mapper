@@ -9,12 +9,12 @@ public sealed class ExcelSeparatorsAttribute : Attribute
     /// <summary>
     /// Gets the string separators.
     /// </summary>
-    public string[]? StringSeparators { get; }
+    public IReadOnlyList<string>? StringSeparators { get; }
 
     /// <summary>
     /// Gets the char separators.
     /// </summary>
-    public char[]? CharSeparators { get; }
+    public IReadOnlyList<char>? CharSeparators { get; }
 
     /// <summary>
     /// Gets or sets the string split options.

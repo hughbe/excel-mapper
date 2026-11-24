@@ -493,4 +493,22 @@ public class MapExtraColumnsTests
         [ExcelExtraColumns]
         public Dictionary<int, string> Extra { get; set; } = [];
     }
+
+    [Fact]
+    public void ReadRows_ExtraColumnsWithColumnAttribute_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Team\na,b\n");
+
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<ExtraColumnsWithColumnNamesRow>().ToArray());
+        Assert.Equal("Member \"Extra\" has both [ExcelExtraColumns] and [ExcelColumnNames], but extra columns are the columns no other member reads, so [ExcelColumnNames] would be ignored. Remove it.", exception.Message);
+    }
+
+    public class ExtraColumnsWithColumnNamesRow
+    {
+        public string? Name { get; set; }
+
+        [ExcelExtraColumns]
+        [ExcelColumnNames("Team")]
+        public Dictionary<string, string> Extra { get; set; } = [];
+    }
 }

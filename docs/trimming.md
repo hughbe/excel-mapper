@@ -67,8 +67,9 @@ The generator registers each type and every type its members use (except members
 | EXM005 (warning) | A type, or the type of a member, has nothing auto-mapping can set: no public setters, fields or constructor parameters, or every member is `[ExcelIgnore]`. |
 | EXM006 (warning) | Auto-mapping can't create a type: an interface or abstract class, or a class with neither a public parameterless constructor nor a public constructor whose parameters match its members. |
 | EXM007 (warning) | A type contains itself through its members, such as a `Node` with a `Node Next` property. Ignore the member with `[ExcelIgnore]`. |
+| EXM008 (warning) | A collection or dictionary holds objects, such as `List<Address>`, which can't be read from a cell. Give the member a converter with `[ExcelConverter]`, or ignore it with `[ExcelIgnore]`. |
 
-The warnings are reported on the `[ExcelMappable]` attribute of the row type that uses the type. They're warnings rather than errors so that a difference from auto-mapping can't stop a build; to make them errors, set `<WarningsAsErrors>$(WarningsAsErrors);EXM005;EXM006;EXM007</WarningsAsErrors>`.
+The warnings are reported on the `[ExcelMappable]` attribute of the row type that uses the type. They're warnings rather than errors so that a difference from auto-mapping can't stop a build; to make them errors, set `<WarningsAsErrors>$(WarningsAsErrors);EXM005;EXM006;EXM007;EXM008</WarningsAsErrors>`.
 
 Every reading method takes a class map: `ReadRows(classMap)`, `ReadRow(classMap)`, `ReadRowResults(classMap)`, `ValidateHeading(classMap)`, `FindHeading(classMap)` and the others, on sheets and regions. They read with the class map you give them rather than looking one up or auto-mapping, so they don't warn.
 

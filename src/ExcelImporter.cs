@@ -330,12 +330,14 @@ public sealed class ExcelImporter : IDisposable
     }
 
     /// <summary>
-    /// Reads each sheet in the document. When the enumeration ends, including by leaving a
-    /// <c>foreach</c> loop early, <see cref="ReadSheet()"/> starts from the first sheet again.
+    /// Reads every sheet in the document, from the first, whichever sheets have been read before.
+    /// When the enumeration ends, including by leaving a <c>foreach</c> loop early,
+    /// <see cref="ReadSheet()"/> starts from the first sheet again.
     /// </summary>
     /// <returns>A lazily evaluated list of each sheet in the document.</returns>
     public IEnumerable<ExcelSheet> ReadSheets()
     {
+        ResetReader();
         try
         {
             while (TryReadSheet(out var sheet))

@@ -42,7 +42,7 @@ foreach (var sheet in importer.ReadSheets())
 }
 ```
 
-`ReadSheet()` and `ReadSheet(name)` throw an `ExcelMappingException` if there's no such sheet, and `ReadSheet(index)` an `ArgumentOutOfRangeException`; `TryReadSheet(out sheet)`, `TryReadSheet(name, out sheet)` and `TryReadSheet(index, out sheet)` return `false` instead. `importer.NumberOfSheets` is the number of sheets.
+`ReadSheet()` and `ReadSheet(name)` throw an `ExcelMappingException` if there's no such sheet, and `ReadSheet(index)` an `ArgumentOutOfRangeException`; `TryReadSheet(out sheet)`, `TryReadSheet(name, out sheet)` and `TryReadSheet(index, out sheet)` return `false` instead. `importer.NumberOfSheets` is the number of sheets, and `ReadSheets()` returns every sheet, from the first, whichever have been read before.
 
 You can read several sheets at once, including several `ExcelSheet` objects for the same worksheet: each keeps its own position. The file is read forward only, so going back to an earlier row re-reads it from the start. Reading one sheet's rows at a time is fastest; alternating between sheets row by row works, but re-reads the file each time.
 
@@ -172,7 +172,7 @@ sheet.DataRange = ExcelRange.Parse("A2:B4");   // the heading and two rows, colu
 var employees = sheet.ReadRows<Employee>();
 ```
 
-With a heading, the heading is the first row of the range. Set `DataRange` before reading the heading or any rows. Positions in `[ExcelColumnIndex]` and similar stay the sheet's, even when the range doesn't start at column A.
+With a heading, the heading is the first row of the range. Set `DataRange` before reading the heading or any rows. A range can extend past the sheet's last column (`A:Z` of a sheet with three columns): only the columns the sheet has are read, as for a [region](#reading-part-of-a-sheet). Positions in `[ExcelColumnIndex]` and similar stay the sheet's, even when the range doesn't start at column A.
 
 Ranges can be written in several ways:
 

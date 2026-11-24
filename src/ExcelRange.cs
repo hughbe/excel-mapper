@@ -74,10 +74,36 @@ public readonly struct ExcelRange : IEquatable<ExcelRange>
     /// </summary>
     /// <param name="rows">The row range.</param>
     /// <param name="columns">The column range.</param>
+    /// <exception cref="ArgumentException">A range ends before it starts, such as <c>5..2</c> or <c>^2..^5</c>.</exception>
     public ExcelRange(Range rows, Range columns)
     {
+        ThrowIfReversed(rows, nameof(rows));
+        ThrowIfReversed(columns, nameof(columns));
         _rows = rows;
         _columns = columns;
+    }
+
+    // A range worked out from the user's settings, such as the rows from a heading to the end of
+    // the data: a heading set below the data gives an empty range, rather than an exception that
+    // names a parameter the user didn't pass.
+    internal static ExcelRange Create(Range rows, Range columns) => new(rows, columns, validate: false);
+
+    private ExcelRange(Range rows, Range columns, bool validate)
+    {
+        _ = validate;
+        _rows = rows;
+        _columns = columns;
+    }
+
+    // A range whose ends count from the same end of the sheet can be checked now; one from the
+    // start to the end (such as 5..^2) depends on the sheet's size, and is empty if it's reversed.
+    private static void ThrowIfReversed(Range range, string paramName)
+    {
+        if (range.Start.IsFromEnd == range.End.IsFromEnd
+            && (range.Start.IsFromEnd ? range.Start.Value < range.End.Value : range.Start.Value > range.End.Value))
+        {
+            throw new ArgumentException($"The range {range} ends before it starts.", paramName);
+        }
     }
 
     /// <summary>

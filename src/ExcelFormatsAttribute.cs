@@ -9,7 +9,7 @@ public sealed class ExcelFormatsAttribute : Attribute
     /// <summary>
     /// Gets the formats.
     /// </summary>
-    public string[] Formats { get; }
+    public IReadOnlyList<string> Formats { get; }
 
     /// <summary>
     /// Constructs the attribute with the specified formats.

@@ -9,17 +9,21 @@ namespace ExcelMapper;
 /// </summary>
 public sealed class ExcelHeading
 {
-    internal ExcelHeading(IDataRecord reader, ExcelRange dataRange, ReadSettings settings)
+    internal ExcelHeading(IDataRecord reader, ExcelRange dataRange, ReadSettings settings, string sheetName)
     {
+        var fieldCount = reader.FieldCount;
         var maxColumns = settings.MaxColumnsPerSheet;
-        if (reader.FieldCount > maxColumns)
+        if (fieldCount > maxColumns)
         {
             throw new ExcelMappingException(
-                $"Sheet has {reader.FieldCount} columns which exceeds the maximum allowed " +
+                $"{ExcelMappingException.DescribeSheet(sheetName, capitalize: true)} has {fieldCount} columns, which exceeds the maximum allowed " +
                 $"({maxColumns}). Increase MaxColumnsPerSheet in the configuration if this is a legitimate file.");
         }
 
-        var (offset, length) = dataRange.Columns.GetOffsetAndLength(reader.FieldCount);
+        // The heading is the range's columns that the sheet has: a range can extend past the
+        // sheet's last column ("A:Z" of a sheet with three columns), or start after it.
+        var offset = Math.Max(0, Math.Min(dataRange.Columns.Start.GetOffset(fieldCount), fieldCount));
+        var length = Math.Max(0, Math.Min(dataRange.Columns.End.GetOffset(fieldCount), fieldCount) - offset);
 
         var nameMapping = new Dictionary<string, int>(length, StringComparer.OrdinalIgnoreCase);
         var columnNames = new string[length];
@@ -105,6 +109,10 @@ public sealed class ExcelHeading
     /// Gets the zero-based index in the sheet of the column with the given name. This method throws an ExcelMappingException
     /// if the column does not exist. If more than one column has the name, this is the first.
     /// </summary>
+    /// <remarks>The name is compared ignoring case, but not white space around it: unlike mapping a
+    /// member, which also matches a column named "Name " to "Name", this looks up the name exactly
+    /// as the heading has it. Use <see cref="GetColumnIndex(Func{string, bool})"/> to compare
+    /// names another way.</remarks>
     /// <param name="columnName">The name of the column to get the zero-based index of.</param>
     /// <returns>The zero-based index of the column with the given name.</returns>
     public int GetColumnIndex(string columnName)
@@ -123,7 +131,8 @@ public sealed class ExcelHeading
     private string DescribeColumns() => string.Join(", ", ColumnNames.Select(static c => $"\"{c}\""));
 
     /// <summary>
-    /// Tries to get the zero-based index in the sheet of the column with the given name.
+    /// Tries to get the zero-based index in the sheet of the column with the given name, compared
+    /// ignoring case (see <see cref="GetColumnIndex(string)"/>).
     /// </summary>
     /// <param name="columnName">The name of the column to get the zero-based index of.</param>
     /// <param name="index">The zero-based index of the column with the given name. If more than one

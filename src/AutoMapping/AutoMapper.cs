@@ -138,6 +138,19 @@ internal static class AutoMapper
             return true;
         }
 
+        // A dictionary or collection whose values can't be read from a cell, such as
+        // Dictionary<string, Address> or List<Address>, isn't then mapped as an object through its
+        // own properties (such as Comparer or Capacity).
+        if (rule.Dictionary is { } unreadableDictionary && unreadableDictionary.CanCreate(typeof(T)))
+        {
+            throw ElementsNotReadable(member, typeof(T), unreadableDictionary.ValueType, "values");
+        }
+
+        if (rule.Collection is { } unreadableCollection && unreadableCollection.CanCreate(typeof(T)))
+        {
+            throw ElementsNotReadable(member, typeof(T), unreadableCollection.ElementType, "elements");
+        }
+
         if (TryCreateObjectMap<T>(emptyValueStrategy, out var classMap, typeStack))
         {
             map = classMap;
@@ -146,6 +159,81 @@ internal static class AutoMapper
 
         map = null;
         return false;
+    }
+
+    // Elements and values are read from cells, so they must be values: a collection or dictionary
+    // can't hold objects mapped member by member from the row.
+    private static ExcelMappingException ElementsNotReadable(MemberInfo? member, Type type, Type elementType, string elements)
+    {
+        var what = member is null ? $"Type {TypeNames.Get(type)}" : $"Member \"{member.Name}\" of type {TypeNames.Get(type)}";
+        var fix = member is null
+            ? "Read rows of a type whose members are read from the columns instead."
+            : $"Give {TypeNames.Get(elementType)} a converter ([ExcelConverter] on the member), or ignore the member with [ExcelIgnore].";
+        return new ExcelMappingException($"{what} can't be auto-mapped: its {elements} are {TypeNames.Get(elementType)}, which can't be read from a cell. A collection's elements and a dictionary's values must be values such as strings, numbers, dates or enums. {fix}");
+    }
+
+    /// <summary>
+    /// The exception for a type that can't be auto-mapped, naming the member that can't be and why.
+    /// Only called when auto-mapping has failed, so it can afford to retrace it.
+    /// </summary>
+    internal static ExcelMappingException CannotAutoMap(Type type)
+    {
+        var reason = DescribeFailure(type, path: null, []);
+        return new ExcelMappingException(reason is null
+            ? $"Cannot auto-map type {TypeNames.Get(type)}."
+            : $"Cannot auto-map type {TypeNames.Get(type)}: {reason}");
+    }
+
+    // Why a type can't be mapped through its members, or null if it isn't known.
+    private static string? DescribeFailure(Type type, string? path, HashSet<Type> visited)
+    {
+        var subject = path is null ? "it" : $"member \"{path}\" of type {TypeNames.Get(type)}";
+        if (!CanConstructObjectMap(type))
+        {
+            return type.IsInterface || type.IsAbstract
+                ? $"{subject} is an interface or abstract class, which can't be created."
+                : $"{subject} has neither a public parameterless constructor nor a public constructor whose parameters match its members.";
+        }
+
+        if (!visited.Add(type))
+        {
+            return null;
+        }
+
+        foreach (var (member, memberType) in GetAutoMappedMembers(type))
+        {
+            if (MemberAttributes.IsDefined<ExcelIgnoreAttribute>(member)
+                || MemberAttributes.IsDefined<ExcelRowNumberAttribute>(member)
+                || MemberAttributes.IsDefined<ExcelExtraColumnsAttribute>(member)
+                || TypeRule.For(memberType).TryAutoMapMember(member, EmptyValueStrategy.Error, typeStack: null, out _))
+            {
+                continue;
+            }
+
+            var memberPath = path is null ? member.Name : $"{path}.{member.Name}";
+            return DescribeFailure(memberType, memberPath, visited)
+                ?? $"member \"{memberPath}\" of type {TypeNames.Get(memberType)} can't be mapped.";
+        }
+
+        return null;
+    }
+
+    // The members auto-mapping maps, with their types: public instance properties with a public
+    // setter or set by a constructor, then public instance fields.
+    private static IEnumerable<(MemberInfo Member, Type Type)> GetAutoMappedMembers(Type type)
+    {
+        foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (ShouldAutoMapProperty(type, property))
+            {
+                yield return (property, property.PropertyType);
+            }
+        }
+
+        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
+        {
+            yield return (field, field.FieldType);
+        }
     }
 
     /// <summary>
@@ -225,20 +313,10 @@ internal static class AutoMapper
     // Keep in sync with the source generator's TypeWalker.GetMappedMembers. See "Auto-mapping and the source generator" in CLAUDE.md.
     private static bool TryAddMembers<T>(ExcelClassMap<T> map, EmptyValueStrategy emptyValueStrategy, HashSet<Type> typeStack)
     {
-        var type = typeof(T);
-        foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        foreach (var (member, memberType) in GetAutoMappedMembers(typeof(T)))
         {
-            if (ShouldAutoMapProperty(type, property) && !IsMapped(map, property) &&
-                !TryAutoMapAndAddMember(property, property.PropertyType, map, emptyValueStrategy, typeStack))
-            {
-                return false;
-            }
-        }
-
-        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
-        {
-            if (!IsMapped(map, field) &&
-                !TryAutoMapAndAddMember(field, field.FieldType, map, emptyValueStrategy, typeStack))
+            if (!IsMapped(map, member) &&
+                !TryAutoMapAndAddMember(member, memberType, map, emptyValueStrategy, typeStack))
             {
                 return false;
             }
@@ -272,7 +350,7 @@ internal static class AutoMapper
         var emptyValueStrategy = classMap.EmptyValueStrategy;
         if (!TryCreateMap<T>(null, s_firstColumn, AllColumns.Instance, emptyValueStrategy, isAutoMapping: true, typeStack: null, out var map))
         {
-            throw new ExcelMappingException($"Cannot auto-map type {TypeNames.Get(typeof(T))}.");
+            throw CannotAutoMap(typeof(T));
         }
 
         if (map is not ExcelClassMap<T>)
@@ -302,12 +380,15 @@ internal static class AutoMapper
                 throw new ExcelMappingException($"Member \"{member.Name}\" has the ExcelRowNumber attribute, but its type {TypeNames.Get(memberType)} is not a numeric type such as int or long.");
             }
 
+            MemberMapper.ThrowIfColumnAttributes(member, "ExcelRowNumber", "a row number isn't read from a column");
+
             map.Members.Add(new ClassMapMember(member, new RowNumberMap(memberType)));
             return true;
         }
 
         if (MemberAttributes.IsDefined<ExcelExtraColumnsAttribute>(member))
         {
+            MemberMapper.ThrowIfColumnAttributes(member, "ExcelExtraColumns", "extra columns are the columns no other member reads");
             if (TypeRule.For(memberType).Dictionary is not { } dictionaryRule ||
                 dictionaryRule.KeyType != typeof(string) ||
                 !dictionaryRule.TryCreateMap(member, memberType, emptyValueStrategy, isAutoMapping: true, out var extraColumnsMap))

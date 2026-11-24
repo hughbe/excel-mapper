@@ -116,8 +116,8 @@ internal sealed class RowCursor(Worksheet worksheet)
         {
             // Only consider the columns in the data range when checking for blank rows.
             var fieldCount = worksheet.Reader.FieldCount;
-            var startColumnIndex = Math.Min(dataRange.Columns.Start.GetOffset(fieldCount), fieldCount);
-            var endColumnIndex = Math.Min(dataRange.Columns.End.GetOffset(fieldCount), fieldCount);
+            var startColumnIndex = Math.Max(0, Math.Min(dataRange.Columns.Start.GetOffset(fieldCount), fieldCount));
+            var endColumnIndex = Math.Max(0, Math.Min(dataRange.Columns.End.GetOffset(fieldCount), fieldCount));
 
             while (IsBlankRow(startColumnIndex, endColumnIndex))
             {
