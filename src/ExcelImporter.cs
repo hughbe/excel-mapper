@@ -466,13 +466,14 @@ public sealed class ExcelImporter : IDisposable
     }
 
     /// <summary>
-    /// Throws if the importer's reader has been closed, for example by disposing the importer.
+    /// Throws an <see cref="ObjectDisposedException"/> if the importer's reader has been closed: by
+    /// disposing the importer, or by closing the reader it was created with.
     /// </summary>
     internal void ThrowIfClosed()
     {
         if (Reader.IsClosed)
         {
-            throw new ExcelMappingException("The underlying reader is closed.");
+            throw new ObjectDisposedException(nameof(ExcelImporter), "The importer has been disposed, or the reader it was created with has been closed.");
         }
     }
 

@@ -430,15 +430,15 @@ public class MappingScenarioTests
     }
 
     [Fact]
-    public void ReadRows_AfterDispose_ThrowsExcelMappingException()
+    public void ReadRows_AfterDispose_ThrowsObjectDisposedException()
     {
         var importer = Helpers.GetCsvImporter(PeopleCsv);
         var sheet = importer.ReadSheet();
         importer.Dispose();
 
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRows<InitOnlyClass>().ToArray());
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRow<InitOnlyClass>());
-        Assert.Throws<ExcelMappingException>(() => sheet.TryReadRow<InitOnlyClass>(out _));
+        Assert.Throws<ObjectDisposedException>(() => sheet.ReadRows<InitOnlyClass>().ToArray());
+        Assert.Throws<ObjectDisposedException>(() => sheet.ReadRow<InitOnlyClass>());
+        Assert.Throws<ObjectDisposedException>(() => sheet.TryReadRow<InitOnlyClass>(out _));
     }
 
     [Fact]

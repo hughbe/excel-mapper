@@ -231,7 +231,7 @@ public class ReadRowResultsTests
         var importer = Helpers.GetCsvImporter("Value\n1\n");
         var sheet = importer.ReadSheet();
         importer.Dispose();
-        Assert.Throws<ExcelMappingException>(() => sheet.ReadRowResults<int>());
+        Assert.Throws<ObjectDisposedException>(() => sheet.ReadRowResults<int>());
     }
 
     [Fact]
