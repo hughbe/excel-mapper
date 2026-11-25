@@ -138,4 +138,8 @@ Console.WriteLine($"{counter.Count} problems");
 
 **`HeaderException` when opening a CSV file.** A stream, or a file whose extension isn't `.csv`, `.tsv` or `.txt`, is read as a workbook: open it with `ExcelImporterFileType.Csv` ([Opening a file](reading.md#opening-a-file)).
 
+**`Member "Addresses" of type List<Address> can't be auto-mapped: its elements are Address, which can't be read from a cell`.** A collection's elements, and a dictionary's values, are read from cells, so they must be values such as strings, numbers or dates rather than objects. Give the element type a converter (`[ExcelConverter]` on the member), map the object's members from the row as a [nested object](types.md#nested-objects), or ignore the member with `[ExcelIgnore]`.
+
+**`Cannot auto-map type Order: member "Customer.Address" of type IAddress is an interface or abstract class, which can't be created`.** Auto-mapping creates each object it maps, so every mapped member's type needs a public parameterless constructor, or a public constructor whose parameters match its members. Map a type that can be created, or ignore the member with `[ExcelIgnore]`.
+
 **`Cannot auto-map type` in a trimmed app.** The type's members were removed by the trimmer: see [Trimming](trimming.md).

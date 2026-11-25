@@ -35,14 +35,15 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Authors>Hugh Bellamy</Authors>
     <Title>Excel Mapper</Title>
-    <Description>An extension of ExcelDataReader that supports fluent mapping of rows to C# objects.</Description>
+    <Description>Map the rows of Excel workbooks and CSV files to strongly-typed .NET objects, by convention, with attributes or with a fluent API. Built on ExcelDataReader, with clear errors that name the cell, and native AOT support through a source generator.</Description>
+    <PackageReleaseNotes>https://github.com/hughbe/excel-mapper/blob/main/CHANGELOG.md</PackageReleaseNotes>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/hughbe/excel-mapper</PackageProjectUrl>
     <RepositoryUrl>https://github.com/hughbe/excel-mapper</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>Copyright 2026 (c) Hugh Bellamy. All rights reserved.</Copyright>
-    <PackageTags>excel;mapping;mapper;excel-mapper</PackageTags>
+    <PackageTags>excel;csv;xlsx;mapping;mapper;excel-mapper;exceldatareader</PackageTags>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <!--
       Check the package against the last release for breaking changes (and that the target

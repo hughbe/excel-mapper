@@ -30,6 +30,12 @@ internal abstract class DictionaryRule
     public abstract bool TryCreateMap(MemberInfo? member, Type dictionaryType, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out ICellsMap? map);
 
     /// <summary>
+    /// Gets whether a dictionary of type <paramref name="dictionaryType"/> can be created from its
+    /// values, whatever they are.
+    /// </summary>
+    public abstract bool CanCreate(Type dictionaryType);
+
+    /// <summary>
     /// Gets the map for values mapped one by one, such as <c>Map(p => p.Values["Name"])</c>.
     /// </summary>
     public abstract IMap GetOrCreateIndexerMap(IMap parentMap, Type dictionaryType, object? context);
@@ -101,6 +107,8 @@ internal sealed class DictionaryRule<TKey, TValue> : DictionaryRule where TKey :
     public override Type KeyType => typeof(TKey);
 
     public override Type ValueType => typeof(TValue);
+
+    public override bool CanCreate(Type dictionaryType) => TryGetBuilder(dictionaryType, out _);
 
     public override bool TryCreateMap(MemberInfo? member, Type dictionaryType, EmptyValueStrategy emptyValueStrategy, bool isAutoMapping, [NotNullWhen(true)] out ICellsMap? map)
     {

@@ -357,8 +357,9 @@ public class ExcelMappableGeneratorTests
             }
             """);
 
-        // Each row is checked once, as it's registered once.
-        Assert.Equal(["EXM007"], diagnostics.Select(d => d.Id));
+        // Each row is checked once, as it's registered once. Next contains Node, and Children
+        // holds Nodes, which can't be read from a cell.
+        Assert.Equal(["EXM007", "EXM008"], diagnostics.Select(d => d.Id));
         Assert.Equal(["Row<global::Node>", "Collection<global::System.Collections.Generic.List<global::Node>, global::Node>"], Registrations(generated));
         Assert.Single(generated.Split('\n'), line => line.Contains(" Node => "));
     }
@@ -665,6 +666,56 @@ public class ExcelMappableGeneratorTests
         var diagnostic = Assert.Single(diagnostics);
         Assert.Equal("EXM006", diagnostic.Id);
         Assert.StartsWith("Auto-mapping can't create 'NoConstructor', so reading rows of 'NoConstructor' will throw: it needs a public parameterless constructor", diagnostic.GetMessage());
+    }
+
+    [Fact]
+    public void Generate_CollectionOfObjects_ReportsWarning()
+    {
+        var (_, diagnostics) = Generate("""
+            [ExcelMappable(typeof(Row))]
+            [ExcelMappable(typeof(List<Address>))]
+            public partial class AppContext : ExcelMappingContext
+            {
+            }
+
+            public class Row
+            {
+                public List<Address>? Addresses { get; set; }
+                public Dictionary<string, Address>? ByName { get; set; }
+                public List<List<string>>? Nested { get; set; }
+
+                // Elements that are read from a cell.
+                public List<int?>? Numbers { get; set; }
+                public DayOfWeek[]? Days { get; set; }
+                public Dictionary<string, object>? Values { get; set; }
+
+                // A converter reads each element.
+                [ExcelConverter(typeof(AddressConverter))]
+                public List<Address>? Converted { get; set; }
+
+                [ExcelIgnore]
+                public List<Address>? Ignored { get; set; }
+            }
+
+            public class Address
+            {
+                public string? Street { get; set; }
+            }
+
+            public class AddressConverter : ICellConverter<Address>
+            {
+                public CellConversionResult<Address> Convert(CellValue value, CellContext context) => CellConversionResult<Address>.Success(new Address { Street = value.Text });
+            }
+            """);
+
+        Assert.Equal(
+        [
+            "EXM008: 'Row.Addresses' holds 'Address', which can't be read from a cell, so reading rows of 'Row' will throw: a collection's elements and a dictionary's values must be values such as strings, numbers or dates; give the member a converter with [ExcelConverter], or ignore it with [ExcelIgnore]",
+            "EXM008: 'Row.ByName' holds 'Address', which can't be read from a cell, so reading rows of 'Row' will throw: a collection's elements and a dictionary's values must be values such as strings, numbers or dates; give the member a converter with [ExcelConverter], or ignore it with [ExcelIgnore]",
+            "EXM008: 'Row.Nested' holds 'System.Collections.Generic.List<string>', which can't be read from a cell, so reading rows of 'Row' will throw: a collection's elements and a dictionary's values must be values such as strings, numbers or dates; give the member a converter with [ExcelConverter], or ignore it with [ExcelIgnore]",
+            "EXM008: 'System.Collections.Generic.List<Address>' holds 'Address', which can't be read from a cell, so reading rows of 'System.Collections.Generic.List<Address>' will throw: a collection's elements and a dictionary's values must be values such as strings, numbers or dates; give the member a converter with [ExcelConverter], or ignore it with [ExcelIgnore]",
+        ], diagnostics.Select(d => $"{d.Id}: {d.GetMessage()}"));
+        Assert.All(diagnostics, d => Assert.Equal(DiagnosticSeverity.Warning, d.Severity));
     }
 
     [Fact]

@@ -42,7 +42,7 @@ foreach (var sheet in importer.ReadSheets())
 }
 ```
 
-`ReadSheet()` and `ReadSheet(name)` throw an `ExcelMappingException` if there's no such sheet, and `ReadSheet(index)` an `ArgumentOutOfRangeException`; `TryReadSheet(out sheet)`, `TryReadSheet(name, out sheet)` and `TryReadSheet(index, out sheet)` return `false` instead. `importer.NumberOfSheets` is the number of sheets.
+`ReadSheet()` and `ReadSheet(name)` throw an `ExcelMappingException` if there's no such sheet, and `ReadSheet(index)` an `ArgumentOutOfRangeException`; `TryReadSheet(out sheet)`, `TryReadSheet(name, out sheet)` and `TryReadSheet(index, out sheet)` return `false` instead. `importer.NumberOfSheets` is the number of sheets, and `ReadSheets()` returns every sheet, from the first, whichever have been read before.
 
 You can read several sheets at once, including several `ExcelSheet` objects for the same worksheet: each keeps its own position. The file is read forward only, so going back to an earlier row re-reads it from the start. Reading one sheet's rows at a time is fastest; alternating between sheets row by row works, but re-reads the file each time.
 
@@ -61,7 +61,7 @@ var block = sheet.ReadRows<Employee>(startIndex: 5, count: 10);
 ```
 
 - Every read method reads the heading first if the sheet has one and it hasn't been read, so the heading row is never mapped as data.
-- `ReadRows<T>()` reads the rows after the sheet's position when it's called, so after `ReadRow` it returns the rest. Its result can be enumerated more than once: each enumeration reads the same rows from the file again, so `rows.Any()` followed by `rows.ToList()` doesn't lose a row. To avoid reading the file twice, call `ToList()` once and use the list.
+- `ReadRows<T>()` reads the rows after the sheet's position when it's called, so after `ReadRow` it returns the rest. Its result can be enumerated more than once: each enumeration reads the same rows from the file again, so `rows.Any()` followed by `rows.ToList()` doesn't lose a row. Each enumeration keeps its own position, so enumerations can run at the same time (`rows.Zip(rows.Skip(1))` pairs each row with the next), and `ReadRow` inside a `foreach` over `ReadRows` doesn't make the loop skip a row. Running two at once re-reads the file as they alternate, so to avoid reading it more than once, call `ToList()` once and use the list.
 - `ReadRows(startIndex, count)` reads rows by their zero-based index in the sheet. With the heading in the first row (index 0), the first data row is index 1. It throws if the rows don't exist.
 - To report every invalid cell instead of stopping at the first, use `ReadRowResults<T>()` (see [Collecting errors](errors.md#collecting-errors)).
 
@@ -172,7 +172,7 @@ sheet.DataRange = ExcelRange.Parse("A2:B4");   // the heading and two rows, colu
 var employees = sheet.ReadRows<Employee>();
 ```
 
-With a heading, the heading is the first row of the range. Set `DataRange` before reading the heading or any rows. Positions in `[ExcelColumnIndex]` and similar stay the sheet's, even when the range doesn't start at column A.
+With a heading, the heading is the first row of the range. Set `DataRange` before reading the heading or any rows. A range can extend past the sheet's last column (`A:Z` of a sheet with three columns): only the columns the sheet has are read, as for a [region](#reading-part-of-a-sheet). Positions in `[ExcelColumnIndex]` and similar stay the sheet's, even when the range doesn't start at column A.
 
 Ranges can be written in several ways:
 

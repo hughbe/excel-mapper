@@ -351,6 +351,21 @@ public class ExcelImporterTests
     }
 
     [Fact]
+    public void ReadSheets_AfterReadSheet_ReturnsEverySheet()
+    {
+        using var importer = Helpers.GetImporter("Primitives.xlsx");
+        Assert.Equal("Primitives", importer.ReadSheet().Name);
+        Assert.Equal("Empty", importer.ReadSheet().Name);
+
+        Assert.Equal(["Primitives", "Empty", "Third Sheet"], importer.ReadSheets().Select(sheet => sheet.Name));
+
+        // Each enumeration starts from the first sheet.
+        var sheets = importer.ReadSheets();
+        Assert.Equal(3, sheets.Count());
+        Assert.Equal(3, sheets.Count());
+    }
+
+    [Fact]
     public void ReadSheets_LeftEarly_ReadSheetStartsFromFirstSheet()
     {
         using var importer = Helpers.GetImporter("Primitives.xlsx");
@@ -1431,4 +1446,14 @@ public class ExcelImporterTests
     }
 
     public record StaticReadRowsPerson(string Name, int Age);
+
+    [Fact]
+    public void NumberOfSheets_Disposed_ThrowsObjectDisposedException()
+    {
+        var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Dispose();
+
+        var exception = Assert.Throws<ObjectDisposedException>(() => importer.NumberOfSheets);
+        Assert.Equal(nameof(ExcelImporter), exception.ObjectName);
+    }
 }

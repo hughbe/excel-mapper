@@ -67,6 +67,14 @@ internal static class Descriptors
         DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
 
+    public static DiagnosticDescriptor ElementsNotReadable { get; } = new(
+        "EXM008",
+        "A collection or dictionary holds objects",
+        "'{0}' holds '{1}', which can't be read from a cell, so reading rows of '{2}' will throw: a collection's elements and a dictionary's values must be values such as strings, numbers or dates; give the member a converter with [ExcelConverter], or ignore it with [ExcelIgnore]",
+        Category,
+        DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
+
     public static DiagnosticDescriptor Get(string id) => id switch
     {
         "EXM001" => ContextNotPartial,
@@ -75,6 +83,7 @@ internal static class Descriptors
         "EXM004" => OpenGenericType,
         "EXM005" => NothingToMap,
         "EXM006" => CannotCreate,
-        _ => ContainsItself,
+        "EXM007" => ContainsItself,
+        _ => ElementsNotReadable,
     };
 }

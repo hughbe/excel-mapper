@@ -209,4 +209,33 @@ public class ExcelRegionTests
         Assert.Throws<ArgumentNullException>("errors", () => region.ReadRows<RegionSinkRow>((IExcelErrorSink)null!));
         Assert.Throws<ArgumentNullException>("errors", () => region.ReadRows(new ExcelClassMap<RegionSinkRow>(), null!));
     }
+
+    [Fact]
+    public void ReadRows_RegionPastLastColumn_ReadsSheetColumns()
+    {
+        using var importer = Helpers.GetCsvImporter("Value,Other\n1,a\n2,b\n");
+        var region = importer.ReadSheet().Region("A1:E3");
+
+        Assert.Equal([1, 2], region.ReadRows<RegionSinkRow>().Select(r => r.Value));
+        Assert.True(region.TryValidateHeading<RegionSinkRow>(out _));
+    }
+
+    [Fact]
+    public void ReadRows_RegionAfterLastColumn_ThrowsMissingColumn()
+    {
+        using var importer = Helpers.GetCsvImporter("Value,Other\n1,a\n");
+        var region = importer.ReadSheet().Region("D1:E3");
+
+        var exception = Assert.Throws<ExcelMappingException>(() => region.ReadRows<RegionSinkRow>().ToArray());
+        Assert.StartsWith("Can't find column \"Value\"", exception.Message);
+    }
+
+    [Fact]
+    public void ReadRows_EnumeratedTwiceAtOnce_ReadsEachEnumerationsRows()
+    {
+        using var importer = Helpers.GetCsvImporter("Value,Other\n1,a\n2,b\n3,c\n");
+        var rows = importer.ReadSheet().Region("A1:A4").ReadRows<RegionSinkRow>();
+
+        Assert.Equal([3, 5], rows.Zip(rows.Skip(1), (x, y) => x.Value + y.Value));
+    }
 }

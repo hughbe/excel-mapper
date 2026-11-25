@@ -113,6 +113,22 @@ internal static class MemberMapper
         }
     }
 
+    /// <summary>
+    /// Throws if a member that doesn't read its columns itself, such as one with
+    /// <see cref="ExcelRowNumberAttribute"/>, also has an attribute choosing or splitting its
+    /// columns, which would be ignored.
+    /// </summary>
+    internal static void ThrowIfColumnAttributes(MemberInfo member, string memberAttributeName, string reason)
+    {
+        foreach (var attribute in MemberAttributes.GetMany<Attribute>(member))
+        {
+            if (attribute is ExcelSeparatorsAttribute || Array.Exists(s_columnAttributes, t => t.IsInstanceOfType(attribute)))
+            {
+                throw new ExcelMappingException($"Member \"{member.Name}\" has both [{memberAttributeName}] and [{AttributeName(attribute)}], but {reason}, so [{AttributeName(attribute)}] would be ignored. Remove it.");
+            }
+        }
+    }
+
     // The name an attribute is written with: [ExcelColumnLetter] rather than [ExcelColumnIndex].
     private static string AttributeName(Attribute attribute)
     {

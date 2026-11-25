@@ -112,7 +112,7 @@ public class Product
 
 - Each parameter is matched to a mapped member with the same name (ignoring case) and a compatible type. Every parameter must match a member or have a default value, and the public constructor that matches the most members is used.
 - Mapped members that aren't parameters are set after the object is created, so a record can have extra settable properties.
-- If an optional column is missing, the parameter's default value is used.
+- A parameter with a default value (`int Score = 0`) is optional: if its column is missing, the default is used. This applies to auto-mapped members, including those `AutoMap()` adds; a member you `Map(...)` in a class map is required unless you call `MakeOptional()`. A type with a public parameterless constructor is created with it, so its other constructors' defaults aren't used.
 - If the constructor throws, the `ExcelMappingException` for the row has its exception as `InnerException`.
 
 Put attributes for a positional record's members on the generated property:
@@ -232,7 +232,7 @@ foreach (var employee in sheet.ReadRows<Employee>())
 }
 ```
 
-Row numbers are one-based and count every row in the sheet, as Excel shows them: the heading, rows above it, and blank rows skipped by `SkipBlankLines`. So the first row under a heading in row 1 is row 2, matching the rows in error messages. The member doesn't read a column, and can be any numeric type. For a positional record, use `[property: ExcelRowNumber]`.
+Row numbers are one-based and count every row in the sheet, as Excel shows them: the heading, rows above it, and blank rows skipped by `SkipBlankLines`. So the first row under a heading in row 1 is row 2, matching the rows in error messages. The member doesn't read a column, so it can't also have an attribute that chooses or splits columns (such as `[ExcelColumnName]`), and can be any numeric type. For a positional record, use `[property: ExcelRowNumber]`.
 
 ### Extra columns
 
@@ -261,7 +261,7 @@ importer.Configuration.RegisterClassMap<Employee>(c =>
 });
 ```
 
-A column is extra if no other member of the type being read reads it, including members of nested objects at any depth and members with column attributes or separators. Members with `[ExcelIgnore]`, and members a class map doesn't map, don't read a column, so their columns are extra. Columns with an empty name are skipped, and the sheet must have a heading. The member can be any dictionary with string keys, such as `Dictionary<string, string>`, `Dictionary<string, int>`, `IReadOnlyDictionary<string, object>` (values as Excel stores them) or `ExpandoObject`.
+A column is extra if no other member of the type being read reads it, including members of nested objects at any depth and members with column attributes or separators. Members with `[ExcelIgnore]`, and members a class map doesn't map, don't read a column, so their columns are extra. Columns with an empty name are skipped, and the sheet must have a heading. The member can't also have an attribute that chooses or splits columns, such as `[ExcelColumnNames]`. The member can be any dictionary with string keys, such as `Dictionary<string, string>`, `Dictionary<string, int>`, `IReadOnlyDictionary<string, object>` (values as Excel stores them) or `ExpandoObject`.
 
 ## Converting values yourself
 

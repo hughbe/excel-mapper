@@ -23,5 +23,5 @@ public sealed class ExcelColumnIndicesAttribute : Attribute
     /// <summary>
     /// Gets the indices of the columns.
     /// </summary>
-    public int[] Indices { get; }
+    public IReadOnlyList<int> Indices { get; }
 }

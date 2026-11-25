@@ -131,7 +131,7 @@ ExcelMapper.ExcelColumnIndexAttribute.ExcelColumnIndexAttribute(int index) -> vo
 ExcelMapper.ExcelColumnIndexAttribute.Index.get -> int
 ExcelMapper.ExcelColumnIndicesAttribute
 ExcelMapper.ExcelColumnIndicesAttribute.ExcelColumnIndicesAttribute(params int[]! columnIndices) -> void
-ExcelMapper.ExcelColumnIndicesAttribute.Indices.get -> int[]!
+ExcelMapper.ExcelColumnIndicesAttribute.Indices.get -> System.Collections.Generic.IReadOnlyList<int>!
 ExcelMapper.ExcelColumnLetterAttribute
 ExcelMapper.ExcelColumnLetterAttribute.ExcelColumnLetterAttribute(string! letter) -> void
 ExcelMapper.ExcelColumnLetterAttribute.Letter.get -> string!
@@ -182,7 +182,7 @@ ExcelMapper.ExcelExtraColumnsAttribute
 ExcelMapper.ExcelExtraColumnsAttribute.ExcelExtraColumnsAttribute() -> void
 ExcelMapper.ExcelFormatsAttribute
 ExcelMapper.ExcelFormatsAttribute.ExcelFormatsAttribute(params string![]! formats) -> void
-ExcelMapper.ExcelFormatsAttribute.Formats.get -> string![]!
+ExcelMapper.ExcelFormatsAttribute.Formats.get -> System.Collections.Generic.IReadOnlyList<string!>!
 ExcelMapper.ExcelHeading
 ExcelMapper.ExcelHeading.ColumnNames.get -> System.Collections.Generic.IReadOnlyList<string!>!
 ExcelMapper.ExcelHeading.GetColumnIndex(string! columnName) -> int
@@ -328,12 +328,12 @@ ExcelMapper.ExcelRowResult<T>.IsValid.get -> bool
 ExcelMapper.ExcelRowResult<T>.RowIndex.get -> int
 ExcelMapper.ExcelRowResult<T>.Value.get -> T?
 ExcelMapper.ExcelSeparatorsAttribute
-ExcelMapper.ExcelSeparatorsAttribute.CharSeparators.get -> char[]?
+ExcelMapper.ExcelSeparatorsAttribute.CharSeparators.get -> System.Collections.Generic.IReadOnlyList<char>?
 ExcelMapper.ExcelSeparatorsAttribute.ExcelSeparatorsAttribute(params char[]! separators) -> void
 ExcelMapper.ExcelSeparatorsAttribute.ExcelSeparatorsAttribute(params string![]! separators) -> void
 ExcelMapper.ExcelSeparatorsAttribute.Options.get -> System.StringSplitOptions
 ExcelMapper.ExcelSeparatorsAttribute.Options.set -> void
-ExcelMapper.ExcelSeparatorsAttribute.StringSeparators.get -> string![]?
+ExcelMapper.ExcelSeparatorsAttribute.StringSeparators.get -> System.Collections.Generic.IReadOnlyList<string!>?
 ExcelMapper.ExcelSheet
 ExcelMapper.ExcelSheet.CurrentRowIndex.get -> int
 ExcelMapper.ExcelSheet.DataRange.get -> ExcelMapper.ExcelRange
@@ -368,8 +368,8 @@ ExcelMapper.ExcelSheet.TryFindHeading<T>(ExcelMapper.ExcelClassMap<T>! classMap,
 ExcelMapper.ExcelSheet.TryFindHeading<T>(ExcelMapper.ExcelClassMap<T>! classMap, out ExcelMapper.ExcelHeading? heading) -> bool
 ExcelMapper.ExcelSheet.TryFindHeading<T>(int maxRows, out ExcelMapper.ExcelHeading? heading) -> bool
 ExcelMapper.ExcelSheet.TryFindHeading<T>(out ExcelMapper.ExcelHeading? heading) -> bool
-ExcelMapper.ExcelSheet.TryReadRow<T>(ExcelMapper.ExcelClassMap<T>! classMap, out T? value) -> bool
-ExcelMapper.ExcelSheet.TryReadRow<T>(out T? value) -> bool
+ExcelMapper.ExcelSheet.TryReadRow<T>(ExcelMapper.ExcelClassMap<T>! classMap, out T value) -> bool
+ExcelMapper.ExcelSheet.TryReadRow<T>(out T value) -> bool
 ExcelMapper.ExcelSheet.TryValidateHeading<T>(ExcelMapper.ExcelClassMap<T>! classMap, out System.Collections.Generic.IReadOnlyList<string!>! problems) -> bool
 ExcelMapper.ExcelSheet.TryValidateHeading<T>(out System.Collections.Generic.IReadOnlyList<string!>! problems) -> bool
 ExcelMapper.ExcelSheet.ValidateHeading<T>() -> void

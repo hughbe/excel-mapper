@@ -99,6 +99,82 @@ public class MapConstructorTests
         Assert.Equal(new OptionalColumnRecord("Alice", 42), row);
     }
 
+    public record DefaultedParameterRecord(string Name, int Score = 42);
+
+    [Fact]
+    public void ReadRows_MissingColumnOfParameterWithDefault_UsesParameterDefault()
+    {
+        // A parameter with a default value is optional, without [ExcelOptional].
+        using var importer = Helpers.GetCsvImporter("Name\nAlice\n");
+        var sheet = importer.ReadSheet();
+        sheet.ValidateHeading<DefaultedParameterRecord>();
+        Assert.Equal(new DefaultedParameterRecord("Alice", 42), sheet.ReadRows<DefaultedParameterRecord>().Single());
+    }
+
+    [Fact]
+    public void ReadRows_ColumnOfParameterWithDefault_ReadsColumn()
+    {
+        using var importer = Helpers.GetCsvImporter("Name,Score\nAlice,7\n");
+        Assert.Equal(new DefaultedParameterRecord("Alice", 7), importer.ReadSheet().ReadRows<DefaultedParameterRecord>().Single());
+    }
+
+    [Fact]
+    public void ReadRows_MissingColumnOfParameterWithoutDefault_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Score\n7\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<DefaultedParameterRecord>().ToArray());
+        Assert.StartsWith("Can't find column \"Name\"", exception.Message);
+    }
+
+    [Fact]
+    public void ReadRows_ClassMapMappedParameterWithDefault_IsRequired()
+    {
+        // A member mapped in a class map keeps its settings: it's required unless MakeOptional.
+        using var importer = Helpers.GetCsvImporter("Name\nAlice\n");
+        importer.Configuration.RegisterClassMap<DefaultedParameterRecord>(c =>
+        {
+            c.Map(p => p.Score);
+            c.AutoMap();
+        });
+
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<DefaultedParameterRecord>().ToArray());
+        Assert.StartsWith("Can't find column \"Score\"", exception.Message);
+    }
+
+    [Fact]
+    public void ReadRows_AutoMapParameterWithDefault_IsOptional()
+    {
+        using var importer = Helpers.GetCsvImporter("Name\nAlice\n");
+        importer.Configuration.RegisterClassMap<DefaultedParameterRecord>(c => c.AutoMap());
+
+        Assert.Equal(new DefaultedParameterRecord("Alice", 42), importer.ReadSheet().ReadRows<DefaultedParameterRecord>().Single());
+    }
+
+    public class DefaultedParameterWithParameterlessConstructorClass
+    {
+        public DefaultedParameterWithParameterlessConstructorClass()
+        {
+        }
+
+        public DefaultedParameterWithParameterlessConstructorClass(string name, int score = 42)
+        {
+            Name = name;
+            Score = score;
+        }
+
+        public string? Name { get; set; }
+        public int Score { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_ParameterWithDefaultOfUnusedConstructor_IsRequired()
+    {
+        // The type is created with its parameterless constructor, so the default isn't used.
+        using var importer = Helpers.GetCsvImporter("Name\nAlice\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<DefaultedParameterWithParameterlessConstructorClass>().ToArray());
+        Assert.StartsWith("Can't find column \"Score\"", exception.Message);
+    }
+
     public class UnmappedParameterClass
     {
         public UnmappedParameterClass(string name, string suffix = "!")

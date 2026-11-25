@@ -30,7 +30,15 @@ public sealed class ExcelImporter : IDisposable
     /// <summary>
     /// Gets the number of sheets in the document.
     /// </summary>
-    public int NumberOfSheets => Reader.ResultsCount;
+    /// <exception cref="ObjectDisposedException">The importer has been disposed, or the reader it was created with has been closed.</exception>
+    public int NumberOfSheets
+    {
+        get
+        {
+            ThrowIfClosed();
+            return Reader.ResultsCount;
+        }
+    }
 
     /// <summary>
     /// The index of the last sheet returned by <see cref="TryReadSheet(out ExcelSheet)"/>, which reads
@@ -330,12 +338,14 @@ public sealed class ExcelImporter : IDisposable
     }
 
     /// <summary>
-    /// Reads each sheet in the document. When the enumeration ends, including by leaving a
-    /// <c>foreach</c> loop early, <see cref="ReadSheet()"/> starts from the first sheet again.
+    /// Reads every sheet in the document, from the first, whichever sheets have been read before.
+    /// When the enumeration ends, including by leaving a <c>foreach</c> loop early,
+    /// <see cref="ReadSheet()"/> starts from the first sheet again.
     /// </summary>
     /// <returns>A lazily evaluated list of each sheet in the document.</returns>
     public IEnumerable<ExcelSheet> ReadSheets()
     {
+        ResetReader();
         try
         {
             while (TryReadSheet(out var sheet))

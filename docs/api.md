@@ -9,14 +9,14 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 - `new ExcelImporter(path or stream)` (a path ending in `.csv`, `.tsv` or `.txt` is CSV), `(..., ExcelImporterFileType)`, `(..., ExcelImporterFileType, ExcelReaderConfiguration)` - Open a file, optionally as CSV or with ExcelDataReader options (passwords, CSV separators, fallback encoding); `new ExcelImporter(IExcelDataReader)` wraps a reader you created
 - `ReadSheet()` / `ReadSheet(name)` / `ReadSheet(index)` - The next sheet, or a sheet by name (case-insensitive) or zero-based index
 - `TryReadSheet(out sheet)` / `TryReadSheet(name, out sheet)` / `TryReadSheet(index, out sheet)` - The same, returning false instead of throwing
-- `ReadSheets()` - Every sheet, in order
+- `ReadSheets()` - Every sheet, in order, from the first
 - `NumberOfSheets` - The number of sheets
 - `Configuration` - Settings and class maps (see below)
 
 **`ExcelSheet`** - A worksheet, and a position in it. Not thread-safe.
 - `ReadRows<T>()` - Every row, mapped lazily as you enumerate
 - `ReadRows<T>(startIndex, count)` - A block of rows
-- `ReadRow<T>()` / `TryReadRow<T>(out value)` - The next row
+- `ReadRow<T>()` / `TryReadRow<T>(out value)` - The next row (`TryReadRow` returns false when there are no more; the value can be null for a row that maps to null)
 - `ReadRowResults<T>()` - Every row, with every invalid cell reported in each result instead of thrown ([Collecting errors](errors.md#collecting-errors))
 - `ReadRows<T>(IExcelErrorSink errors)` - The rows without problems, giving each problem to `errors` without creating an exception for it ([Checking large files](errors.md#checking-large-files))
 - `ReadHeading()` - Read the heading row now (the read methods do this when needed)
@@ -25,7 +25,7 @@ The public types, attributes and fluent methods, grouped by what they do. Every 
 - Each of these also takes an `ExcelClassMap<T>`, such as `ReadRows(classMap)`: it reads with that class map rather than the one registered or auto-mapped for `T`, and works with native AOT ([Native AOT apps](trimming.md#native-aot-apps))
 - `Region()` / `Region(ExcelRange)` / `Region("B3:F20")` - A block of the sheet with its own heading ([Reading part of a sheet](reading.md#reading-part-of-a-sheet))
 - `HasHeading` (default true), `HeadingIndex` (default 0), `DataRange` (default all rows and columns) - Where the heading and data are
-- `Heading` - The heading, once read
+- `Heading` - The heading, once read (null until then, even if `HasHeading` is true)
 - `Name`, `Index`, `Visibility`, `NumberOfColumns`, `CurrentRowIndex`
 
 **`ExcelRegion`** - An immutable block of a sheet, read with its own heading. Each read starts at the top of the region.

@@ -54,9 +54,9 @@ public sealed class ExcelSheet
     public int NumberOfColumns => Worksheet.NumberOfColumns;
 
     /// <summary>
-    /// Gets or sets whether the sheet has a heading. This is true by default.
+    /// Gets or sets whether the sheet has a heading. This is true by default. The heading is read
+    /// by the first read (or <see cref="ReadHeading"/>), so <see cref="Heading"/> is null until then.
     /// </summary>
-    [MemberNotNullWhen(true, nameof(Heading))]
     public bool HasHeading
     {
         get => View.HasHeading;
@@ -212,11 +212,12 @@ public sealed class ExcelSheet
     /// heading and the heading has not yet been read.
     /// </summary>
     /// <typeparam name="T">The type of the object to map a single row to.</typeparam>
-    /// <param name="value">An object of type T mapped from a single row in the sheet.</param>
-    /// <returns>False if there are no more rows in the sheet or the row cannot be mapped to an object, else true.</returns>
+    /// <param name="value">An object of type T mapped from a single row in the sheet. This can be null when
+    /// the method returns true, if <typeparamref name="T"/> is a reference or nullable type and the row maps to null.</param>
+    /// <returns>False if there are no more rows in the sheet, else true. A row that can't be mapped throws an <see cref="ExcelMappingException"/>.</returns>
     [RequiresUnreferencedCode(TrimmingConstants.AutoMappingMessage)]
     [RequiresDynamicCode(TrimmingConstants.AutoMappingDynamicCodeMessage)]
-    public bool TryReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>([NotNullWhen(true)] out T? value) => View.TryReadRow(out value);
+    public bool TryReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>([MaybeNullWhen(false)] out T value) => View.TryReadRow(out value);
 
     /// <summary>
     /// Maps a single row of the sheet to an object with <paramref name="classMap"/>. See
@@ -226,9 +227,9 @@ public sealed class ExcelSheet
     /// <param name="classMap">The class map to map rows with, such as one from an
     /// <see cref="ExcelMappingContext"/>. Unlike the overload without one, this doesn't look up or
     /// auto-map a class map, so it works with native AOT.</param>
-    /// <param name="value">The object mapped from the row.</param>
-    /// <returns>False if there are no more rows in the sheet or the row cannot be mapped to an object, else true.</returns>
-    public bool TryReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap, [NotNullWhen(true)] out T? value) => View.TryReadRow(SheetView.Given(classMap), out value);
+    /// <param name="value">The object mapped from the row. See <see cref="TryReadRow{T}(out T)"/>.</param>
+    /// <returns>False if there are no more rows in the sheet, else true. A row that can't be mapped throws an <see cref="ExcelMappingException"/>.</returns>
+    public bool TryReadRow<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap, [MaybeNullWhen(false)] out T value) => View.TryReadRow(SheetView.Given(classMap), out value);
 
     /// <summary>
     /// Maps each row of the sheet to an object, like <see cref="ReadRows{T}()"/>, but reports invalid

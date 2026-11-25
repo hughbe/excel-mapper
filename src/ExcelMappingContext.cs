@@ -72,7 +72,7 @@ public abstract class ExcelMappingContext
         using var scope = GenericTypes.EnterContext(contextType, registeredTypes);
         if (!AutoMapper.TryCreateClassMap<T>(EmptyValueStrategy.Error, out var classMap))
         {
-            throw new ExcelMappingException($"Cannot auto-map type {TypeNames.Get(typeof(T))}.");
+            throw AutoMapper.CannotAutoMap(typeof(T));
         }
 
         classMap.Freeze();

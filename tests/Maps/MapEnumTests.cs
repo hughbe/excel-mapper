@@ -807,4 +807,21 @@ public class MapEnumTests
         importer.Configuration.RegisterClassMap<IgnoreCaseRow>(c => c.Map(r => r.Value).WithConverter(new GreenConverter()).WithIgnoreCase());
         Assert.Equal([Colour.Red, Colour.Blue], importer.ReadSheet().ReadRows<IgnoreCaseRow>().Select(r => r.Value));
     }
+
+    public enum NumberedStatus { FullTime, PartTime }
+
+    public class NumberedStatusRow
+    {
+        public NumberedStatus Status { get; set; }
+    }
+
+    [Fact]
+    public void ReadRows_NumbersAndNameLists_ParsedAsEnumParse()
+    {
+        // As documented: a number is the value with that number, even one without a name, and
+        // names separated by commas are combined.
+        using var importer = Helpers.GetCsvImporter("Status\n1\n99\n\"FullTime, PartTime\"\n");
+        var values = importer.ReadSheet().ReadRows<NumberedStatusRow>().Select(r => r.Status).ToArray();
+        Assert.Equal([NumberedStatus.PartTime, (NumberedStatus)99, NumberedStatus.FullTime | NumberedStatus.PartTime], values);
+    }
 }
