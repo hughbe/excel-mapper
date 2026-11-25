@@ -112,7 +112,7 @@ public class Product
 
 - Each parameter is matched to a mapped member with the same name (ignoring case) and a compatible type. Every parameter must match a member or have a default value, and the public constructor that matches the most members is used.
 - Mapped members that aren't parameters are set after the object is created, so a record can have extra settable properties.
-- If an optional column is missing, the parameter's default value is used.
+- A parameter with a default value (`int Score = 0`) is optional: if its column is missing, the default is used. This applies to auto-mapped members, including those `AutoMap()` adds; a member you `Map(...)` in a class map is required unless you call `MakeOptional()`. A type with a public parameterless constructor is created with it, so its other constructors' defaults aren't used.
 - If the constructor throws, the `ExcelMappingException` for the row has its exception as `InnerException`.
 
 Put attributes for a positional record's members on the generated property:

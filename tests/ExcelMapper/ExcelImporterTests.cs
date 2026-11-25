@@ -1446,4 +1446,14 @@ public class ExcelImporterTests
     }
 
     public record StaticReadRowsPerson(string Name, int Age);
+
+    [Fact]
+    public void NumberOfSheets_Disposed_ThrowsObjectDisposedException()
+    {
+        var importer = Helpers.GetImporter("Primitives.xlsx");
+        importer.Dispose();
+
+        var exception = Assert.Throws<ObjectDisposedException>(() => importer.NumberOfSheets);
+        Assert.Equal(nameof(ExcelImporter), exception.ObjectName);
+    }
 }

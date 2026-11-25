@@ -207,11 +207,12 @@ internal sealed class SheetView
     /// </summary>
     private IEnumerable<T> ReadRowsIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, int rowIndex)
     {
-        // Each enumeration starts from the same row, so the result can be enumerated more than
-        // once, as with any IEnumerable<T>: calling Any() and then ToList() doesn't lose a row.
-        _cursor.MoveTo(rowIndex);
+        // Each enumeration starts from the same row and keeps its own position, so the result can
+        // be enumerated more than once, as with any IEnumerable<T>: calling Any() and then ToList()
+        // doesn't lose a row, and rows.Zip(rows.Skip(1)) pairs each row with the next.
+        var position = rowIndex;
         ExcelClassMap<T>? map = null;
-        while (AdvanceToNextRow())
+        while (AdvanceFrom(ref position))
         {
             map = UseClassMapForRow(map, classMap);
             if (!MapCurrentRow(map, null, out T? row))
@@ -270,12 +271,12 @@ internal sealed class SheetView
     /// </summary>
     private IEnumerable<T> ReadRowsRangeIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, int startIndex, int count)
     {
-        // Each enumeration reads the same rows.
-        _cursor.MoveTo(startIndex - 1);
+        // Each enumeration reads the same rows, from its own position.
+        var position = startIndex - 1;
         ExcelClassMap<T>? map = null;
         for (int i = 0; i < count; i++)
         {
-            if (!AdvanceToNextRow() || !MapCurrentRow(map = UseClassMapForRow(map, classMap), null, out T? row))
+            if (!AdvanceFrom(ref position) || !MapCurrentRow(map = UseClassMapForRow(map, classMap), null, out T? row))
             {
                 throw new ExcelMappingException($"{ExcelMappingException.DescribeSheet(Name, capitalize: true)} does not have row {startIndex + i + 1}.");
             }
@@ -342,15 +343,15 @@ internal sealed class SheetView
 
     private IEnumerable<ExcelRowResult<T>> ReadRowResultsIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, int rowIndex)
     {
-        // Each enumeration starts from the same row, as for ReadRows.
-        _cursor.MoveTo(rowIndex);
+        // Each enumeration starts from the same row and keeps its own position, as for ReadRows.
+        var position = rowIndex;
 
         // Reuse one list for every row: valid rows (usually most of them) then don't allocate, and
         // only rows with errors get their own copy.
         var target = new ExceptionListTarget();
         var errors = target.Exceptions;
         ExcelClassMap<T>? map = null;
-        while (AdvanceToNextRow())
+        while (AdvanceFrom(ref position))
         {
             map = UseClassMapForRow(map, classMap);
             var mapped = MapCurrentRow(map, target, out T? value);
@@ -391,10 +392,10 @@ internal sealed class SheetView
 
     private IEnumerable<T> ReadRowsIterator<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(Func<SheetView, ExcelClassMap<T>> classMap, SinkTarget target, int rowIndex)
     {
-        // Each enumeration starts from the same row, as for ReadRows.
-        _cursor.MoveTo(rowIndex);
+        // Each enumeration starts from the same row and keeps its own position, as for ReadRows.
+        var position = rowIndex;
         ExcelClassMap<T>? map = null;
-        while (AdvanceToNextRow())
+        while (AdvanceFrom(ref position))
         {
             map = UseClassMapForRow(map, classMap);
 
@@ -423,6 +424,28 @@ internal sealed class SheetView
         // Another read of this sheet, between two rows of this one, may have used another map.
         RootMap = map;
         return map;
+    }
+
+    /// <summary>
+    /// Moves to the row after <paramref name="position"/>, the row an enumeration of rows last
+    /// read, and sets <paramref name="position"/> to it. Another enumeration of the same rows, or
+    /// another read of this sheet, may have moved the sheet's cursor since: it's moved back first,
+    /// which only re-reads the file if it moved forward.
+    /// </summary>
+    private bool AdvanceFrom(ref int position)
+    {
+        if (_cursor.RowIndex != position)
+        {
+            _cursor.MoveTo(position);
+        }
+
+        if (!AdvanceToNextRow())
+        {
+            return false;
+        }
+
+        position = CurrentRowIndex;
+        return true;
     }
 
     private bool AdvanceToNextRow()

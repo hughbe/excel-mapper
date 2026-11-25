@@ -229,4 +229,13 @@ public class ExcelRegionTests
         var exception = Assert.Throws<ExcelMappingException>(() => region.ReadRows<RegionSinkRow>().ToArray());
         Assert.StartsWith("Can't find column \"Value\"", exception.Message);
     }
+
+    [Fact]
+    public void ReadRows_EnumeratedTwiceAtOnce_ReadsEachEnumerationsRows()
+    {
+        using var importer = Helpers.GetCsvImporter("Value,Other\n1,a\n2,b\n3,c\n");
+        var rows = importer.ReadSheet().Region("A1:A4").ReadRows<RegionSinkRow>();
+
+        Assert.Equal([3, 5], rows.Zip(rows.Skip(1), (x, y) => x.Value + y.Value));
+    }
 }

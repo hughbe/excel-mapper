@@ -30,7 +30,15 @@ public sealed class ExcelImporter : IDisposable
     /// <summary>
     /// Gets the number of sheets in the document.
     /// </summary>
-    public int NumberOfSheets => Reader.ResultsCount;
+    /// <exception cref="ObjectDisposedException">The importer has been disposed, or the reader it was created with has been closed.</exception>
+    public int NumberOfSheets
+    {
+        get
+        {
+            ThrowIfClosed();
+            return Reader.ResultsCount;
+        }
+    }
 
     /// <summary>
     /// The index of the last sheet returned by <see cref="TryReadSheet(out ExcelSheet)"/>, which reads

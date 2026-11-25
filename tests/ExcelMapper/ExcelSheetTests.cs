@@ -1889,4 +1889,69 @@ public class ExcelSheetTests
 
         Assert.Empty(sheet.ReadRows<StringValue>());
     }
+
+    [Fact]
+    public void ReadRows_EnumeratedTwiceAtOnce_ReadsEachEnumerationsRows()
+    {
+        // Each enumeration keeps its own position, so pairing each row with the next works.
+        using var importer = Helpers.GetCsvImporter("Value\na\nb\nc\n");
+        var rows = importer.ReadSheet().ReadRows<StringValue>();
+
+        Assert.Equal(["ab", "bc"], rows.Zip(rows.Skip(1), (x, y) => x.Value + y.Value));
+    }
+
+    [Fact]
+    public void ReadRowResults_EnumeratedTwiceAtOnce_ReadsEachEnumerationsRows()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\na\nb\nc\n");
+        var rows = importer.ReadSheet().ReadRowResults<StringValue>();
+
+        Assert.Equal(["ab", "bc"], rows.Zip(rows.Skip(1), (x, y) => x.Value!.Value + y.Value!.Value));
+    }
+
+    [Fact]
+    public void ReadRowsSink_EnumeratedTwiceAtOnce_ReadsEachEnumerationsRows()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\na\nb\nc\n");
+        var rows = importer.ReadSheet().ReadRows<StringValue>(new IgnoringErrorSink());
+
+        Assert.Equal(["ab", "bc"], rows.Zip(rows.Skip(1), (x, y) => x.Value + y.Value));
+    }
+
+    private sealed class IgnoringErrorSink : IExcelErrorSink
+    {
+        public void Add(in ExcelMappingError error)
+        {
+        }
+    }
+
+    [Fact]
+    public void ReadRowsStartIndexCount_EnumeratedTwiceAtOnce_ReadsEachEnumerationsRows()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\na\nb\nc\nd\n");
+        var rows = importer.ReadSheet().ReadRows<StringValue>(2, 3);
+
+        Assert.Equal(["bc", "cd"], rows.Zip(rows.Skip(1), (x, y) => x.Value + y.Value));
+    }
+
+    [Fact]
+    public void ReadRows_ReadRowDuringEnumeration_DoesNotSkipRows()
+    {
+        // ReadRow reads the row after the sheet's position, but the enumeration keeps its own.
+        using var importer = Helpers.GetCsvImporter("Value\na\nb\nc\n");
+        var sheet = importer.ReadSheet();
+        var values = new List<string?>();
+        var readRows = new List<string?>();
+        foreach (var row in sheet.ReadRows<StringValue>())
+        {
+            values.Add(row.Value);
+            if (row.Value == "a")
+            {
+                readRows.Add(sheet.ReadRow<StringValue>().Value);
+            }
+        }
+
+        Assert.Equal(["a", "b", "c"], values);
+        Assert.Equal(["b"], readRows);
+    }
 }

@@ -313,6 +313,7 @@ internal static class AutoMapper
     // Keep in sync with the source generator's TypeWalker.GetMappedMembers. See "Auto-mapping and the source generator" in CLAUDE.md.
     private static bool TryAddMembers<T>(ExcelClassMap<T> map, EmptyValueStrategy emptyValueStrategy, HashSet<Type> typeStack)
     {
+        var firstAdded = map.Members.Count;
         foreach (var (member, memberType) in GetAutoMappedMembers(typeof(T)))
         {
             if (!IsMapped(map, member) &&
@@ -322,7 +323,57 @@ internal static class AutoMapper
             }
         }
 
+        MakeDefaultedParametersOptional(map, firstAdded);
         return true;
+    }
+
+    /// <summary>
+    /// Makes the members added from <paramref name="firstAdded"/> optional if the constructor the
+    /// type is created with (see <see cref="ConstructionPlan{T}.Create"/>) gives them a default
+    /// value, such as <c>Age</c> in <c>record Person(string Name, int Age = 7)</c>: a missing column
+    /// gives the default. Members mapped explicitly before <c>AutoMap()</c> keep their settings.
+    /// </summary>
+    private static void MakeDefaultedParametersOptional<T>(ExcelClassMap<T> map, int firstAdded)
+    {
+        var members = map.Members;
+        if (firstAdded == members.Count)
+        {
+            return;
+        }
+
+        var type = typeof(T);
+        var hasReadOnlyMember = false;
+        for (int i = 0; i < members.Count; i++)
+        {
+            hasReadOnlyMember |= members[i].IsReadOnly;
+        }
+
+        // A type with a parameterless constructor is created with it, and its members set.
+        if ((!hasReadOnlyMember && ConstructorUtilities.HasParameterlessConstructor(type)) || type.IsInterface || type.IsAbstract)
+        {
+            return;
+        }
+
+        var memberInfos = new MemberInfo[members.Count];
+        for (int i = 0; i < memberInfos.Length; i++)
+        {
+            memberInfos[i] = members[i].Member;
+        }
+
+        if (ConstructorUtilities.FindConstructor(type, memberInfos, out var parameterMemberIndices) is not { } constructor)
+        {
+            return;
+        }
+
+        var parameters = constructor.GetParameters();
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            var memberIndex = parameterMemberIndices[i];
+            if (parameters[i].HasDefaultValue && memberIndex >= firstAdded && members[memberIndex].Map is IColumnsMap columnsMap)
+            {
+                columnsMap.Settings.Optional = true;
+            }
+        }
     }
 
     private static bool IsMapped(ExcelClassMap map, MemberInfo member)

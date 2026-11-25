@@ -133,6 +133,8 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - A member with attributes that choose its columns in different ways, such as `[ExcelColumnName]` and `[ExcelColumnIndex]`, throws an `ExcelMappingException` naming both when it's mapped, instead of silently ignoring one. ([#241](https://github.com/hughbe/excel-mapper/pull/241))
 - With `ValidateDataAnnotations` on, the nested objects a row maps (with `MapObject`, or auto-mapped members with members of their own) are validated with their data annotations too, where only the row's own object was. A failure names the object, such as `The Street field is required in Address`. ([#242](https://github.com/hughbe/excel-mapper/pull/242))
 - The docs and IntelliSense say that disposing an importer created from a stream closes the stream, and that `ExcelReaderConfiguration.LeaveOpen` keeps it open. ([#243](https://github.com/hughbe/excel-mapper/pull/243))
+- A constructor parameter with a default value, such as `Score` in `record Result(string Name, int Score = 0)`, makes its auto-mapped member optional: a missing column gives the default, where it threw unless the member had `[ExcelOptional]`. A member mapped with `Map(...)` in a class map is still required unless it's `MakeOptional()`. ([#247](https://github.com/hughbe/excel-mapper/pull/247))
+- Each enumeration of the rows `ReadRows`, `ReadRowResults` and `ExcelRegion.ReadRows` return keeps its own position, so `ReadRow` called inside a `foreach` over `ReadRows` no longer makes the loop skip the row it read. ([#247](https://github.com/hughbe/excel-mapper/pull/247))
 
 ### Fixed
 
@@ -170,6 +172,8 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - `ExcelImporter.ReadSheets()` started from the sheet after the last one read with `ReadSheet()`, so it didn't return every sheet as documented. It starts from the first. ([#247](https://github.com/hughbe/excel-mapper/pull/247))
 - "Cannot auto-map type X." didn't say why: it names the member that can't be mapped and the reason, such as `member "Customer.Address" of type IAddress is an interface or abstract class, which can't be created`. The error for a sheet with more columns than `MaxColumnsPerSheet` names the sheet. ([#247](https://github.com/hughbe/excel-mapper/pull/247))
 - Two examples in the types documentation read a column that their tables didn't have. ([#247](https://github.com/hughbe/excel-mapper/pull/247))
+- Two enumerations of the same rows at once, such as `rows.Zip(rows.Skip(1))`, shared the sheet's position, so each read rows the other had moved to and they returned the wrong rows without an error. Each keeps its own position. ([#247](https://github.com/hughbe/excel-mapper/pull/247))
+- `ExcelImporter.NumberOfSheets` returned -1 after the importer was disposed, where the importer's other members throw an `ObjectDisposedException`; it throws too. ([#247](https://github.com/hughbe/excel-mapper/pull/247))
 
 ### Performance
 
