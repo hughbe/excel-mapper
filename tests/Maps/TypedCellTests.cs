@@ -293,7 +293,7 @@ public class TypedCellTests
 
     private sealed class ErrorTextFallback : ICellFallback<string>
     {
-        public string? Fallback(CellValue value, CellContext context, Exception? exception)
+        public string Fallback(CellValue value, CellContext context, Exception? exception)
             => value.Kind == CellKind.Error ? $"error {value.Text} ({value.Value}, {exception is null})" : "other";
     }
 
