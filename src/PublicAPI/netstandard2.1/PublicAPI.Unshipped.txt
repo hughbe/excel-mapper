@@ -25,6 +25,7 @@ ExcelMapper.CellKind.DateTime = 4 -> ExcelMapper.CellKind
 ExcelMapper.CellKind.Empty = 0 -> ExcelMapper.CellKind
 ExcelMapper.CellKind.Number = 2 -> ExcelMapper.CellKind
 ExcelMapper.CellKind.Other = 6 -> ExcelMapper.CellKind
+ExcelMapper.CellKind.Error = 7 -> ExcelMapper.CellKind
 ExcelMapper.CellKind.Text = 1 -> ExcelMapper.CellKind
 ExcelMapper.CellKind.TimeSpan = 5 -> ExcelMapper.CellKind
 ExcelMapper.CellValue

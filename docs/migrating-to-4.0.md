@@ -8,15 +8,16 @@ ExcelMapper 4.0 fixes several long-standing bugs and makes mapping more predicta
 2. [Text is read with the invariant culture](#text-is-read-with-the-invariant-culture)
 3. [Dates don't depend on the machine's time zone](#dates-dont-depend-on-the-machines-time-zone)
 4. [Fractional numbers can't be mapped to integers](#fractional-numbers-cant-be-mapped-to-integers)
-5. [`WithConverter` replaces the built-in conversion](#withconverter-replaces-the-built-in-conversion)
-6. [`ReadRow` reads the heading first](#readrow-reads-the-heading-first)
-7. [Error messages use cell addresses](#error-messages-use-cell-addresses)
-8. [Sheet names are case-insensitive](#sheet-names-are-case-insensitive)
-9. [Extension types](#extension-types)
-10. [Renamed types](#renamed-types)
-11. [Renamed and removed methods](#renamed-and-removed-methods)
-12. [Smaller changes](#smaller-changes)
-13. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
+5. [Formula errors are invalid, not empty](#formula-errors-are-invalid-not-empty)
+6. [`WithConverter` replaces the built-in conversion](#withconverter-replaces-the-built-in-conversion)
+7. [`ReadRow` reads the heading first](#readrow-reads-the-heading-first)
+8. [Error messages use cell addresses](#error-messages-use-cell-addresses)
+9. [Sheet names are case-insensitive](#sheet-names-are-case-insensitive)
+10. [Extension types](#extension-types)
+11. [Renamed types](#renamed-types)
+12. [Renamed and removed methods](#renamed-and-removed-methods)
+13. [Smaller changes](#smaller-changes)
+14. [You can remove the code page registration](#you-can-remove-the-code-page-registration)
 
 ## `object` members receive typed values
 
@@ -97,6 +98,23 @@ importer.Configuration.RegisterClassMap<Product>(c => c.Map(p => p.Quantity)
 ```
 
 To find affected rows without stopping at the first one, use `sheet.ReadRowResults<T>()`.
+
+## Formula errors are invalid, not empty
+
+**Who's affected:** workbooks with formula errors (`#N/A`, `#DIV/0!`, `#REF!`, `#VALUE!`, `#NAME?`, `#NUM!`, `#NULL!`) in cells that are mapped.
+
+**Before:** an error cell was read as empty: a `string`, `object` or nullable member silently became `null`, and other members threw "The cell is empty". A row whose only values were errors was a blank row, so at the end of a sheet it wasn't read at all.
+
+**Now:** an error cell is invalid for every type. By default it throws an `ExcelMappingException` naming the error (`The cell contains the error #DIV/0!, which can't be assigned to member "Total" of type decimal? ...`). Converters and transformers aren't called for it, and a row with an error isn't blank.
+
+**What to do:** fix the formulas, or decide what an error becomes with an invalid fallback:
+
+```csharp
+[ExcelInvalidValue(null)]     // errors are null, as before
+public decimal? Total { get; set; }
+```
+
+For a dictionary or collection, use `WithValueMap(v => v.WithInvalidFallback(null))` or `WithElementMap(...)`. A computed fallback (`ICellFallback<T>`) can tell errors apart with `value.Kind == CellKind.Error`.
 
 ## `WithConverter` replaces the built-in conversion
 

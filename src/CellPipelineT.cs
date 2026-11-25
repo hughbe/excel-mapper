@@ -109,6 +109,13 @@ internal sealed class CellPipeline<T> : CellPipeline
         readResult.Culture = culture;
         var context = new CellContext(sheet, rowIndex, readResult.ColumnIndex, member, Options);
 
+        // A formula error, such as #DIV/0!, isn't a value: it's invalid for every type, so it isn't
+        // transformed or converted, and its invalid fallback decides.
+        if (readResult.IsError())
+        {
+            return MapInvalid(plan, readResult, in context, state: CellConversion.NotHandled, invalidIndex: -1, invalidError: null, sheet, rowIndex, member, errors);
+        }
+
         // Use indexed loops: enumerating through an interface allocates for every cell.
         var transformers = plan.Transformers;
         for (int i = 0; i < transformers.Length; i++)
@@ -158,6 +165,13 @@ internal sealed class CellPipeline<T> : CellPipeline
             return result;
         }
 
+        return MapInvalid(plan, readResult, in context, state, invalidIndex, invalidError, sheet, rowIndex, member, errors);
+    }
+
+    // The invalid fallback's value for a cell no mapper converted.
+    private static T MapInvalid(Plan plan, ReadCellResult readResult, in CellContext context, CellConversion state, int invalidIndex, object? invalidError, SheetView sheet, int rowIndex, MemberInfo? member, ErrorTarget? errors)
+    {
+        var mappers = plan.Mappers;
         if (plan.InvalidFallback is { } invalidFallback)
         {
             // A collected error is reported without creating its exception: the mapper that

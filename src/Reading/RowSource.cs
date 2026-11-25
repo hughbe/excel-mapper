@@ -135,14 +135,15 @@ internal sealed class RowSource
     }
 
     /// <summary>
-    /// Whether the cells of the current row in the given columns are all empty.
+    /// Whether the cells of the current row in the given columns are all empty. A formula error,
+    /// such as #N/A, isn't empty.
     /// </summary>
     public bool IsBlankRow(int startColumnIndex, int endColumnIndex)
     {
+        var reader = CurrentReader;
         for (int i = startColumnIndex; i < endColumnIndex; i++)
         {
-            var value = CurrentReader.GetValue(i);
-            if (value is not null && !(value is string stringValue && string.IsNullOrEmpty(stringValue)))
+            if (!IsBlankCell(reader, i))
             {
                 return false;
             }
@@ -219,13 +220,19 @@ internal sealed class RowSource
     {
         for (int i = 0; i < _reader.FieldCount; i++)
         {
-            var value = _reader.GetValue(i);
-            if (value is not null && !(value is string stringValue && string.IsNullOrEmpty(stringValue)))
+            if (!IsBlankCell(_reader, i))
             {
                 return false;
             }
         }
 
         return true;
+    }
+
+    // Whether a cell is empty or empty text. A formula error, which the reader gives as null, isn't.
+    private static bool IsBlankCell(IExcelDataReader reader, int columnIndex)
+    {
+        var value = reader.GetValue(columnIndex);
+        return value is null ? reader.GetCellError(columnIndex) is null : value is string { Length: 0 };
     }
 }

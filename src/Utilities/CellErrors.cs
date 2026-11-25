@@ -37,6 +37,13 @@ internal static class CellErrors
                 : $"The cell is empty, but member \"{member.Name}\" of type {type} can't be empty";
             hint = emptyHint;
         }
+        else if (value.Kind == CellKind.Error)
+        {
+            message = member is null
+                ? $"The cell contains the error {value.Text}, which can't be assigned to type {type}"
+                : $"The cell contains the error {value.Text}, which can't be assigned to member \"{member.Name}\" of type {type}";
+            hint = " Fix the formula, or give the member an invalid fallback, such as [ExcelInvalidValue].";
+        }
         else
         {
             message = member is null

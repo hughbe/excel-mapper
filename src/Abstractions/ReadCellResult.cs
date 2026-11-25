@@ -53,6 +53,11 @@ internal struct ReadCellResult
         }
 
         var value = GetValue();
+        if (_isError)
+        {
+            return _stringValue;
+        }
+
         if (PreserveFormatting)
         {
             var numberFormatString = Reader.GetNumberFormatString(ColumnIndex);
@@ -77,21 +82,59 @@ internal struct ReadCellResult
 
     public object? GetValue()
     {
-        if (Reader == null || _value != null)
+        if (Reader == null || _value != null || _read)
         {
             return _value;
         }
 
+        // Empty cells are read once too, as checking for an error is a second call.
+        _read = true;
         var value = Reader.GetValue(ColumnIndex);
         // Cache the string value for performance to save us needing to read it again.
         if (value is string stringValue)
         {
             _stringValue = stringValue;
         }
+        else if (value is null && GetErrorText(Reader.GetCellError(ColumnIndex)) is { } errorText)
+        {
+            // A formula error, such as #DIV/0!, which the reader gives as null: it isn't empty, and
+            // its text is the error Excel shows.
+            _isError = true;
+            _stringValue = errorText;
+            value = errorText;
+        }
 
         _value = value;
         return value;
     }
+
+    private bool _isError;
+    private bool _read;
+
+    /// <summary>
+    /// Gets whether the cell holds a formula error, such as <c>#DIV/0!</c> or <c>#N/A</c>, whose
+    /// text is the error.
+    /// </summary>
+    public bool IsError()
+    {
+        GetValue();
+        return _isError;
+    }
+
+    // The text Excel shows for a formula error.
+    internal static string? GetErrorText(CellError? error) => error switch
+    {
+        null => null,
+        CellError.NULL => "#NULL!",
+        CellError.DIV0 => "#DIV/0!",
+        CellError.VALUE => "#VALUE!",
+        CellError.REF => "#REF!",
+        CellError.NAME => "#NAME?",
+        CellError.NUM => "#NUM!",
+        CellError.NA => "#N/A",
+        CellError.GETTING_DATA => "#GETTING_DATA",
+        _ => "#" + error,
+    };
 
     /// <summary>
     /// Gets whether the cell is empty.
