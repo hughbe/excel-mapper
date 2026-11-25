@@ -11,7 +11,7 @@ The types ExcelMapper maps, and how each one is read from a cell. How to choose 
 | Dates and times | `DateTime`, `DateTimeOffset`, `TimeSpan`; on .NET 8 also `DateOnly`, `TimeOnly` |
 | Other values | `bool`, enums, `Guid`, `Uri`, `Version`, `object`; on .NET 8 any `IParsable<T>` type, such as `IPAddress` (created by its `Parse` method, so it needn't have a parameterless constructor); any `IConvertible` type with a parameterless constructor |
 | Collections | Arrays, lists, sets, queues, stacks, immutable and concurrent collections, and your own (see [Collections](#collections)) |
-| Dictionaries | Dictionaries with string keys (or keys of another type, such as `int`, parsed from the column names), `ExpandoObject` and the non-generic dictionaries (see [Dictionaries](#dictionaries)) |
+| Dictionaries | Dictionaries keyed by column name, or by keys of another value type converted from the heading (such as `int`, enums or `DateOnly`), `ExpandoObject` and the non-generic dictionaries (see [Dictionaries](#dictionaries)) |
 | Objects | Classes, structs and records, mapped member by member, including [nested objects](#nested-objects) |
 
 Nullable versions of every value type are supported: an empty cell is `null`. The ".NET 8" types need the library's `net8.0` build, used by .NET 8 and later; on .NET Framework and other platforms that use the netstandard builds they aren't available.
@@ -276,6 +276,24 @@ public class Record
     public Dictionary<string, int> Core { get; set; }
 }
 ```
+
+**Keys of other types.** A dictionary whose keys aren't strings converts each column's heading cell to a key as a cell of the key type would be converted: numbers, enums (by name, `[Description]` or number), dates, `Guid`, `Version`, `Uri` and the other types above. A heading cell that Excel stores as a number or date is converted as itself, so a sheet with a column for each month maps to dates:
+
+| Region | 2024-01-01 | 2024-02-01 |
+|--------|------------|------------|
+| North  | 1200       | 1350       |
+
+```csharp
+public class Sales
+{
+    public string Region { get; set; }
+
+    [ExcelColumnIndices(1, 2)]
+    public Dictionary<DateTime, decimal> Monthly { get; set; }   // { [2024-01-01] = 1200, [2024-02-01] = 1350 }
+}
+```
+
+Keys are converted once for each sheet, with the importer's [culture](#culture). A heading cell that can't be converted throws an `ExcelMappingException` naming the column. `object` keys are the column names.
 
 Values are read like single values of the value type, and configured with `WithValueMap(v => ...)`. To map only the columns nothing else reads, use [extra columns](mapping.md#extra-columns); to map one value by key, `Map(p => p.Scores["Maths"])`.
 

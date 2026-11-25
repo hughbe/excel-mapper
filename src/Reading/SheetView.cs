@@ -746,6 +746,11 @@ internal sealed class SheetView
     public ICellsReader? GetCellsReader(Columns columns) => _bindings.GetCellsReader(columns);
 
     /// <summary>
+    /// Gets what a dictionary map worked out about this sheet's keys, once for this sheet.
+    /// </summary>
+    public TKeys GetDictionaryKeys<TKeys>(IMap map, Func<TKeys> create) where TKeys : class => _bindings.GetDictionaryKeys(map, create);
+
+    /// <summary>
     /// Gets the members of a class map bound to this sheet.
     /// </summary>
     public BoundMember<T>[] GetBoundMembers<[DynamicallyAccessedMembers(TrimmingConstants.MappedType)] T>(ExcelClassMap<T> classMap) => _bindings.GetBoundMembers(classMap);

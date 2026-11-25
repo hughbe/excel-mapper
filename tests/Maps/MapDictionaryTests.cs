@@ -5866,7 +5866,125 @@ public class MapDictionaryTest
         using var importer = Helpers.GetCsvImporter("1,X\na,b\n");
         var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<IntKeysClass>().ToArray());
         Assert.Equal("The name \"X\" of column B can't be converted to int, the type of the dictionary's keys.", exception.Message);
-        Assert.IsType<FormatException>(exception.InnerException);
+        Assert.Equal("Values", exception.Member!.Name);
+    }
+
+    [Fact]
+    public void ReadRows_IntKeysFromNumberHeadingCells_ReturnsExpected()
+    {
+        using var importer = XlsxBuilder.Create([2024, 2025.0], ["a", "b"]);
+        var row = importer.ReadSheet().ReadRows<IntKeysClass>().Single();
+        Assert.Equal(new Dictionary<int, string> { [2024] = "a", [2025] = "b" }, row.Values);
+    }
+
+    [Fact]
+    public void ReadRows_EnumKeys_ReturnsExpected()
+    {
+        // Matched as cells of the enum type are: by name, by [Description] or by number.
+        using var importer = Helpers.GetCsvImporter("Red,Light Green,2\n1,2,3\n");
+        var row = importer.ReadSheet().ReadRows<Dictionary<KeyColor, int>>().Single();
+        Assert.Equal(new Dictionary<KeyColor, int> { [KeyColor.Red] = 1, [KeyColor.Green] = 2, [KeyColor.Blue] = 3 }, row);
+    }
+
+    [Fact]
+    public void ReadRows_EnumKeysOtherDictionaryTypes_ReturnsExpected()
+    {
+        // Keys are converted whatever builds the dictionary.
+        Assert.Equal([new(KeyColor.Red, 1), new(KeyColor.Green, 2)], ReadEnumKeys<IDictionary<KeyColor, int>>());
+        Assert.Equal([new(KeyColor.Red, 1), new(KeyColor.Green, 2)], ReadEnumKeys<IReadOnlyDictionary<KeyColor, int>>());
+        Assert.Equal([new(KeyColor.Red, 1), new(KeyColor.Green, 2)], ReadEnumKeys<IEnumerable<KeyValuePair<KeyColor, int>>>());
+        Assert.Equal([new(KeyColor.Red, 1), new(KeyColor.Green, 2)], ReadEnumKeys<SortedDictionary<KeyColor, int>>());
+        Assert.Equal([new(KeyColor.Red, 1), new(KeyColor.Green, 2)], ReadEnumKeys<ConcurrentDictionary<KeyColor, int>>());
+        Assert.Equal([new(KeyColor.Red, 1), new(KeyColor.Green, 2)], ReadEnumKeys<ReadOnlyDictionary<KeyColor, int>>());
+        Assert.Equal([new(KeyColor.Red, 1), new(KeyColor.Green, 2)], ReadEnumKeys<ImmutableDictionary<KeyColor, int>>());
+        Assert.Equal([new(KeyColor.Red, 1), new(KeyColor.Green, 2)], ReadEnumKeys<ImmutableSortedDictionary<KeyColor, int>>());
+    }
+
+    private static KeyValuePair<KeyColor, int>[] ReadEnumKeys<T>() where T : IEnumerable<KeyValuePair<KeyColor, int>>
+    {
+        using var importer = Helpers.GetCsvImporter("Red,Green\n1,2\n");
+        return [.. importer.ReadSheet().ReadRows<T>().Single().OrderBy(kv => kv.Key)];
+    }
+
+    [Fact]
+    public void ReadRows_EnumKeysNotNames_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Red,Purple\n1,2\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<Dictionary<KeyColor, int>>().ToArray());
+        Assert.Equal("The name \"Purple\" of column B can't be converted to MapDictionaryTest.KeyColor, the type of the dictionary's keys.", exception.Message);
+    }
+
+    [Fact]
+    public void ReadRows_GuidKeys_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("00000000-0000-0000-0000-000000000001\nvalue\n");
+        var row = importer.ReadSheet().ReadRows<Dictionary<Guid, string>>().Single();
+        Assert.Equal("value", row[new Guid("00000000-0000-0000-0000-000000000001")]);
+    }
+
+    [Fact]
+    public void ReadRows_DateTimeKeysFromDateHeadingCells_ReturnsExpected()
+    {
+        using var importer = XlsxBuilder.Create([new DateTime(2024, 1, 1), new DateTime(2024, 2, 1)], [1, 2]);
+        var row = importer.ReadSheet().ReadRows<Dictionary<DateTime, int>>().Single();
+        Assert.Equal(new Dictionary<DateTime, int> { [new DateTime(2024, 1, 1)] = 1, [new DateTime(2024, 2, 1)] = 2 }, row);
+    }
+
+    [Fact]
+    public void ReadRows_ConvertedKeysSeveralRows_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("Red,Green\n1,2\n3,4\n");
+        var rows = importer.ReadSheet().ReadRows<Dictionary<KeyColor, int>>().ToArray();
+        Assert.Equal(new Dictionary<KeyColor, int> { [KeyColor.Red] = 1, [KeyColor.Green] = 2 }, rows[0]);
+        Assert.Equal(new Dictionary<KeyColor, int> { [KeyColor.Red] = 3, [KeyColor.Green] = 4 }, rows[1]);
+    }
+
+    [Fact]
+    public void ReadRows_ObjectKeys_AreColumnNames()
+    {
+        using var importer = XlsxBuilder.Create(["A", 2], [1, 2]);
+        var row = importer.ReadSheet().ReadRows<Dictionary<object, int>>().Single();
+        Assert.Equal(new Dictionary<object, int> { ["A"] = 1, ["2"] = 2 }, row);
+    }
+
+    [Fact]
+    public void ReadRows_KeysWithoutConversion_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("A\n1\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<Dictionary<UnconvertibleKey, int>>().ToArray());
+        Assert.Equal("The name \"A\" of column A can't be converted to MapDictionaryTest.UnconvertibleKey, the type of the dictionary's keys.", exception.Message);
+    }
+
+#if LIBRARY_NET8
+    [Fact]
+    public void ReadRows_DateOnlyKeys_ReturnsExpected()
+    {
+        // Date cells in the heading, as in a sheet with a column for each month, and text.
+        using var importer = XlsxBuilder.Create([new DateTime(2024, 1, 1), new DateOnly(2024, 2, 1), "2024-03-01"], [1.5, 2.5, 3.5]);
+        var row = importer.ReadSheet().ReadRows<Dictionary<DateOnly, decimal>>().Single();
+        Assert.Equal(new Dictionary<DateOnly, decimal> { [new DateOnly(2024, 1, 1)] = 1.5m, [new DateOnly(2024, 2, 1)] = 2.5m, [new DateOnly(2024, 3, 1)] = 3.5m }, row);
+    }
+
+    [Fact]
+    public void ReadRows_ParsableKeys_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("10.0.0.1,10.0.0.2\na,b\n");
+        var row = importer.ReadSheet().ReadRows<Dictionary<System.Net.IPAddress, string>>().Single();
+        Assert.Equal("a", row[System.Net.IPAddress.Parse("10.0.0.1")]);
+        Assert.Equal("b", row[System.Net.IPAddress.Parse("10.0.0.2")]);
+    }
+#endif
+
+    public enum KeyColor
+    {
+        Red,
+        [System.ComponentModel.Description("Light Green")]
+        Green,
+        Blue,
+    }
+
+    public class UnconvertibleKey
+    {
     }
 
     [Fact]

@@ -137,7 +137,7 @@ internal sealed class DictionaryRule<TKey, TValue> : DictionaryRule where TKey :
 
         // A dictionary reads every column by default.
         var columns = MemberMapper.GetDefaultCellsColumns(member) ?? AllColumns.Instance;
-        map = new DictionaryMap<TKey, TValue>(columns, builder);
+        map = new DictionaryMap<TKey, TValue>(columns, builder, KeyMappers);
         if (!AutoMapper.TrySetupMap<TValue>(member, map, emptyValueStrategy, isAutoMapping))
         {
             map = null;
@@ -145,6 +145,26 @@ internal sealed class DictionaryRule<TKey, TValue> : DictionaryRule where TKey :
         }
 
         return true;
+    }
+
+    private static ICellMapper<TKey>[]? s_keyMappers;
+
+    // Column names are converted to keys of another type, such as int, an enum or DateOnly, with
+    // the type's built-in conversion, as its values are. None for string and object keys, which are the names.
+    // A type with no conversion has none, so its keys can't be converted.
+    // The source generator's TypeWalker visits the key type, so a context registers its conversion.
+    private static ICellMapper<TKey>[] KeyMappers => s_keyMappers ??= CreateKeyMappers();
+
+    private static ICellMapper<TKey>[] CreateKeyMappers()
+    {
+        if (DictionaryMap<TKey, TValue>.IsNameKey)
+        {
+            return [];
+        }
+
+        var mappers = new List<ICellMapper<TKey>>();
+        TypeRule<TKey>.Instance.TryAddDefaultMappers(mappers);
+        return [.. mappers];
     }
 
     public override IMap GetOrCreateIndexerMap(IMap parentMap, Type dictionaryType, object? context)
