@@ -73,6 +73,9 @@ internal static class ContextCases
         check("Context: dictionary rows", () => string.Join(",", Csv.Sheet("A,B\n1,2\n").ReadRows(context.DictionaryStringInt32).Single()
             .Select(kv => $"{kv.Key}={kv.Value}")), "A=1,B=2");
 
+        check("Context: dictionary with enum keys", () => string.Join(",", Csv.Sheet("Monday,Friday\n1,2\n").ReadRows(context.DictionaryDayOfWeekInt32).Single()
+            .Select(kv => $"{kv.Key}={kv.Value}")), "Monday=1,Friday=2");
+
         check("Context: nested struct", () =>
         {
             var row = Csv.Sheet("Name,X,Y\np,1,2\n").ReadRows(context.Placed).Single();
@@ -123,6 +126,7 @@ internal static class ContextCases
 [ExcelMappable(typeof(Parsed))]
 [ExcelMappable(typeof(Collected))]
 [ExcelMappable(typeof(Dictionary<string, int>))]
+[ExcelMappable(typeof(Dictionary<DayOfWeek, int>))]
 [ExcelMappable(typeof(Placed))]
 [ExcelMappable(typeof(Priced))]
 internal sealed partial class AppContext : ExcelMappingContext

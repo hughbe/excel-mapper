@@ -53,6 +53,14 @@ public class GeneratedContextTests
     }
 
     [Fact]
+    public void ReadRows_DictionaryWithEnumKeys_MatchesAutoMapping()
+    {
+        // Keys are converted with the key type's conversion, which the context registers.
+        const string Csv = "Monday,Friday\n1,2\n";
+        AssertSame(Csv, GeneratedContext.Default.DictionaryDayOfWeekInt32, r => string.Join(",", r.Select(kv => $"{kv.Key}={kv.Value}")));
+    }
+
+    [Fact]
     public void ReadRows_ArrayRow_MatchesAutoMapping()
     {
         const string Csv = "A,B\n1,2\n";
@@ -110,6 +118,7 @@ public class GeneratedContextTests
 [ExcelMappable(typeof(NestedRow))]
 [ExcelMappable(typeof(RecordRow))]
 [ExcelMappable(typeof(Dictionary<string, int>))]
+[ExcelMappable(typeof(Dictionary<DayOfWeek, int>))]
 [ExcelMappable(typeof(int[]))]
 #if LIBRARY_NET8
 [ExcelMappable(typeof(ParsableRow))]

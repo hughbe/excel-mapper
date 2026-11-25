@@ -27,17 +27,30 @@ public sealed class ExcelHeading
 
         var nameMapping = new Dictionary<string, int>(length, StringComparer.OrdinalIgnoreCase);
         var columnNames = new string[length];
+        object?[]? values = null;
 
         for (var columnIndex = 0; columnIndex < length; columnIndex++)
         {
             // A number or date in the heading is named with the importer's culture, as cells are
             // converted to text, rather than the machine's: 1.5 is "1.5" on every machine.
-            var columnName = reader.GetValue(columnIndex + offset) switch
+            string columnName;
+            switch (reader.GetValue(columnIndex + offset))
             {
-                null => string.Empty,
-                string text => text,
-                var value => Convert.ToString(value, settings.Culture) ?? string.Empty,
-            };
+                case null:
+                    columnName = string.Empty;
+                    break;
+                case string text:
+                    columnName = text;
+                    break;
+                case var value:
+                    columnName = Convert.ToString(value, settings.Culture) ?? string.Empty;
+
+                    // Kept for dictionary keys, so a date heading is a date key, not its text.
+                    values ??= new object?[length];
+                    values[columnIndex] = value;
+                    break;
+            }
+
             columnNames[columnIndex] = columnName;
 
             // A name that appears more than once maps to its first column. Mapping a member to it
@@ -57,6 +70,21 @@ public sealed class ExcelHeading
         ColumnOffset = offset;
         ColumnNames = columnNames;
         NameMapping = nameMapping;
+        _values = values;
+    }
+
+    // The values of heading cells that aren't text, such as numbers and dates, by index into
+    // ColumnNames. Null if every heading cell is text.
+    private readonly object?[]? _values;
+
+    /// <summary>
+    /// Gets the heading cell of the column at the given zero-based index in the sheet, as Excel
+    /// stores it: a number or date as itself, for dictionary keys of that type, otherwise its name.
+    /// </summary>
+    internal object GetColumnValue(int columnIndex)
+    {
+        var relativeIndex = columnIndex - ColumnOffset;
+        return _values?[relativeIndex] ?? ColumnNames[relativeIndex];
     }
 
     /// <summary>

@@ -21,11 +21,16 @@ public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
     /// </summary>
     /// <param name="columns">The columns to read.</param>
     /// <param name="builder">Builds the dictionary.</param>
-    internal DictionaryMap(Columns columns, DictionaryBuilder<TKey, TValue> builder)
+    /// <param name="keyMappers">Convert column names to keys that aren't strings: the built-in
+    /// conversion of <typeparamref name="TKey"/>.</param>
+    internal DictionaryMap(Columns columns, DictionaryBuilder<TKey, TValue> builder, ICellMapper<TKey>[] keyMappers)
     {
         Settings = new ColumnSettings(columns);
         Builder = builder;
+        _keyMappers = keyMappers;
     }
+
+    private readonly ICellMapper<TKey>[] _keyMappers;
 
     /// <summary>
     /// Gets or sets the columns the map reads.
@@ -97,6 +102,10 @@ public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
             return false;
         }
 
+        // String and object keys are the columns' names. Keys of other types are converted once for
+        // the sheet.
+        var keys = IsNameKey ? null : sheet.GetDictionaryKeys(this, s_createKeys);
+
         var items = Builder.Begin(count);
         try
         {
@@ -104,7 +113,7 @@ public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
             {
                 // The key is the column's name.
                 var columnName = heading.GetColumnName(valueResult.ColumnIndex);
-                var key = columnName is TKey stringKey ? stringKey : ConvertKey(columnName, sheet, valueResult.ColumnIndex, member);
+                var key = keys is null ? (TKey)(object)columnName : keys.Get(this, heading, sheet, valueResult.ColumnIndex, member);
                 var elementValue = Values.Pipeline.Map(sheet, rowIndex, valueResult, member, errors);
                 try
                 {
@@ -126,21 +135,80 @@ public sealed class DictionaryMap<TKey, TValue> : ICellsMap where TKey : notnull
         return true;
     }
 
-    // A column name as a key of another type, such as int, parsed with the importer's culture.
-    private static TKey ConvertKey(string columnName, SheetView sheet, int columnIndex, MemberInfo? member)
+    /// <summary>
+    /// Whether the keys are the columns' names, rather than converted from them.
+    /// </summary>
+    internal static bool IsNameKey => typeof(TKey) == typeof(string) || typeof(TKey) == typeof(object);
+
+    private static readonly Func<Keys> s_createKeys = static () => new Keys();
+
+    /// <summary>
+    /// The keys of a sheet's columns, each converted the first time a row reads it.
+    /// </summary>
+    private sealed class Keys
     {
-        var keyType = Nullable.GetUnderlyingType(typeof(TKey)) ?? typeof(TKey);
-        try
+        private ExcelHeading? _heading;
+        private TKey[] _keys = [];
+        private bool[] _converted = [];
+
+        public TKey Get(DictionaryMap<TKey, TValue> map, ExcelHeading heading, SheetView sheet, int columnIndex, MemberInfo? member)
         {
-            return (TKey)Convert.ChangeType(columnName, keyType, sheet.Culture);
-        }
-        catch (Exception exception) when (exception is FormatException or InvalidCastException or OverflowException)
-        {
-            throw new ExcelMappingException($"The name \"{columnName}\" of column {ExcelRange.GetColumnLetters(columnIndex)} can't be converted to {TypeNames.Get(typeof(TKey))}, the type of the dictionary's keys", sheet, -1, -1, exception)
+            if (!ReferenceEquals(heading, _heading))
             {
-                Member = member,
-            };
+                _heading = heading;
+                _keys = new TKey[heading.ColumnNames.Count];
+                _converted = new bool[heading.ColumnNames.Count];
+            }
+
+            var index = columnIndex - heading.ColumnOffset;
+            if (!_converted[index])
+            {
+                _keys[index] = map.ConvertKey(heading, sheet, columnIndex, member);
+                _converted[index] = true;
+            }
+
+            return _keys[index];
         }
+    }
+
+    // A column's heading cell as a key of another type, such as an int, enum or date, converted as
+    // a cell of that type is: a number or date in the heading as itself, and text with the
+    // importer's culture.
+    private TKey ConvertKey(ExcelHeading heading, SheetView sheet, int columnIndex, MemberInfo? member)
+    {
+        var cell = new ReadCellResult(columnIndex, heading.GetColumnValue(columnIndex))
+        {
+            Culture = sheet.Culture,
+        };
+        var context = new CellContext(sheet, -1, columnIndex, member, null);
+
+        var state = CellConversion.NotHandled;
+        TKey result = default!;
+        var mappers = _keyMappers;
+        for (var i = 0; i < mappers.Length; i++)
+        {
+            object? error = null;
+            switch (mappers[i].Convert(cell, in context, out var key, ref error))
+            {
+                case CellConversion.Success:
+                    return key;
+                case CellConversion.SuccessUnlessReplaced:
+                    state = CellConversion.SuccessUnlessReplaced;
+                    result = key;
+                    break;
+            }
+        }
+
+        if (state == CellConversion.SuccessUnlessReplaced)
+        {
+            return result;
+        }
+
+        var columnName = heading.GetColumnName(columnIndex);
+        throw new ExcelMappingException($"The name \"{columnName}\" of column {ExcelRange.GetColumnLetters(columnIndex)} can't be converted to {TypeNames.Get(typeof(TKey))}, the type of the dictionary's keys", sheet, -1, -1, null)
+        {
+            Member = member,
+        };
     }
 
     private static ExcelMappingException DuplicateKey(ExcelHeading heading, SheetView sheet, int columnIndex, string columnName, MemberInfo? member, ArgumentException exception)

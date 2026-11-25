@@ -63,6 +63,25 @@ internal sealed class SheetBindings(SheetView sheet)
         return reader;
     }
 
+    // Each dictionary map's keys for this sheet's columns (see DictionaryMap.GetKeys).
+    private Dictionary<IMap, object>? _dictionaryKeys;
+
+    /// <summary>
+    /// Gets what a dictionary map worked out about this sheet's keys, creating it the first time
+    /// it's asked for.
+    /// </summary>
+    public TKeys GetDictionaryKeys<TKeys>(IMap map, Func<TKeys> create) where TKeys : class
+    {
+        _dictionaryKeys ??= [];
+        if (!_dictionaryKeys.TryGetValue(map, out var keys))
+        {
+            keys = create();
+            _dictionaryKeys[map] = keys;
+        }
+
+        return (TKeys)keys;
+    }
+
     private ICellsReader? CreateCellsReader(Columns columns)
     {
         if (columns is SplitColumns split)
