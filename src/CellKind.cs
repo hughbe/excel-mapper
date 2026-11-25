@@ -25,4 +25,12 @@ public enum CellKind
 
     /// <summary>The cell holds another kind of value: see <see cref="CellValue.Value"/>.</summary>
     Other,
+
+    /// <summary>
+    /// The cell holds a formula error, such as <c>#DIV/0!</c> or <c>#N/A</c>: its
+    /// <see cref="CellValue.Text"/> and <see cref="CellValue.Value"/> are the error's text. Errors
+    /// are invalid for every type, so they're given to a member's invalid fallback rather than
+    /// converted.
+    /// </summary>
+    Error,
 }

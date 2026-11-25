@@ -426,6 +426,7 @@ By default:
 
 - **An empty cell** gives `null` for reference types and nullable types, and an error for other value types (such as `int` and `DateTime`).
 - **An invalid cell**, one that can't be converted to the member's type (such as `"N/A"` for an `int`), is an error.
+- **A formula error**, such as `#N/A`, `#DIV/0!` or `#REF!`, is invalid for every type, including `string` and `object`: it isn't transformed or converted, and goes straight to the invalid fallback. `[ExcelInvalidValue(null)]` reads errors as `null`. A [computed fallback](#computed-fallbacks) sees `value.Kind == CellKind.Error`, with the error in `value.Text`.
 
 An error throws an `ExcelMappingException` that names the cell, or is collected by [`ReadRowResults`](errors.md#collecting-errors) or given to an [`IExcelErrorSink`](errors.md#checking-large-files). Give a fallback to use a value instead:
 

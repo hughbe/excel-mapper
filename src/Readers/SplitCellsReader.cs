@@ -13,6 +13,8 @@ internal sealed class SplitCellsReader(int column, CellSplitter splitter) : ICel
     private int _position;
     // Whether there are more values to return when splitting without allocating an array.
     private bool _hasMore;
+    // Whether the cell is a formula error, which is one value: the error.
+    private bool _isError;
 
     public bool Start(IExcelDataReader reader, bool preserveFormatting, out int count)
     {
@@ -29,6 +31,15 @@ internal sealed class SplitCellsReader(int column, CellSplitter splitter) : ICel
         var readResult = new ReadCellResult(column, reader, preserveFormatting);
 
         _readResult = readResult;
+
+        // A formula error, such as #N/A, isn't text to split: it's one invalid value.
+        _isError = readResult.IsError();
+        if (_isError)
+        {
+            count = 1;
+            _hasMore = true;
+            return true;
+        }
 
         // An empty cell contains no values.
         var stringValue = readResult.GetString();
@@ -58,6 +69,13 @@ internal sealed class SplitCellsReader(int column, CellSplitter splitter) : ICel
     public bool TryGetNext(out ReadCellResult result)
     {
         _currentIndex++;
+        if (_isError)
+        {
+            result = _readResult;
+            var first = _hasMore;
+            _hasMore = false;
+            return first;
+        }
         if (_values == null)
         {
             // Keep going until the last segment has been returned. This includes an empty

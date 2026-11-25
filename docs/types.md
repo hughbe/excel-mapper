@@ -193,6 +193,8 @@ A hyperlink cell maps from its displayed text: ExcelDataReader doesn't read hype
 
 `object` and `IConvertible` members, and `object` values in dictionaries, `ExpandoObject` and non-generic collections such as `ArrayList`, receive the value as Excel stores it: a `double` for numbers, a `DateTime` for dates, a `bool` for booleans, a `TimeSpan` for durations and a `string` for text. With `[ExcelPreserveFormatting]` they receive the displayed text instead. Collections that only hold one type, such as `StringCollection`, convert values to that type.
 
+A formula error, such as `#N/A` or `#DIV/0!`, isn't a value of any type, so it's [invalid](mapping.md#empty-and-invalid-cells) for these members too. A row whose only values are errors isn't blank.
+
 ## Collections
 
 A collection member reads one cell split by separators, or several columns.

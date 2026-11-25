@@ -82,6 +82,11 @@ public readonly struct CellValue
                 return CellKind.Empty;
             }
 
+            if (_cell.IsError())
+            {
+                return CellKind.Error;
+            }
+
             if (_cell.PreserveFormatting)
             {
                 return CellKind.Text;

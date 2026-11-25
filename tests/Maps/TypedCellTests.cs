@@ -249,11 +249,115 @@ public class TypedCellTests
         Assert.Equal("ab", Map<string>(new Formula("\"a\"&\"b\"", "ab")));
     }
 
-    [Fact]
-    public void Map_ErrorCells_AreEmpty()
+    [Theory]
+    [InlineData("#N/A")]
+    [InlineData("#DIV/0!")]
+    [InlineData("#VALUE!")]
+    [InlineData("#REF!")]
+    [InlineData("#NAME?")]
+    [InlineData("#NUM!")]
+    [InlineData("#NULL!")]
+    public void Map_ErrorCells_ThrowsExcelMappingException(string error)
     {
-        Assert.Null(Map<int?>(new Error("#N/A")));
-        MapFails<int>(new Error("#DIV/0!"));
+        // A formula error isn't a value of any type, nor an empty cell.
+        var exception = MapFails<int?>(new Error(error));
+        Assert.Equal($"The cell contains the error {error}, which can't be assigned to member \"Value\" of type int? in column \"Value\" at cell A2 in sheet \"Sheet1\". Fix the formula, or give the member an invalid fallback, such as [ExcelInvalidValue].", exception.Message);
+
+        MapFails<int>(new Error(error));
+        MapFails<string>(new Error(error));
+        MapFails<object>(new Error(error));
+        MapFails<DateTime?>(new Error(error));
+    }
+
+    public class ErrorFallbackRow
+    {
+        [ExcelInvalidValue(null)]
+        public int? Number { get; set; }
+
+        [ExcelInvalidValue("missing")]
+        public string? Text { get; set; }
+
+        [ExcelDefaultValue(-1)]
+        public int Other { get; set; }
+    }
+
+    [Fact]
+    public void Map_ErrorCellsWithInvalidFallback_UseFallback()
+    {
+        using var importer = Create(["Number", "Text", "Other"], [new Error("#N/A"), new Error("#REF!"), 1]);
+        var row = importer.ReadSheet().ReadRows<ErrorFallbackRow>().Single();
+        Assert.Null(row.Number);
+        Assert.Equal("missing", row.Text);
+        Assert.Equal(1, row.Other);
+    }
+
+    private sealed class ErrorTextFallback : ICellFallback<string>
+    {
+        public string? Fallback(CellValue value, CellContext context, Exception? exception)
+            => value.Kind == CellKind.Error ? $"error {value.Text} ({value.Value}, {exception is null})" : "other";
+    }
+
+    [Fact]
+    public void Map_ErrorCellsWithComputedFallback_SeeError()
+    {
+        using var importer = Create(["Value", "Other"], [new Error("#DIV/0!"), 1]);
+        importer.Configuration.RegisterClassMap<Holder<string>>(c => c.Map(r => r.Value).WithInvalidFallback(new ErrorTextFallback()));
+        Assert.Equal("error #DIV/0! (#DIV/0!, True)", importer.ReadSheet().ReadRows<Holder<string>>().Single().Value);
+    }
+
+    [Fact]
+    public void Map_ErrorCellsWithConverterOrTransformer_NotConverted()
+    {
+        // Converters and transformers don't see errors: the invalid fallback does.
+        using var importer = Create(["Value", "Other"], [new Error("#N/A"), 1]);
+        importer.Configuration.RegisterClassMap<Holder<string>>(c => c.Map(r => r.Value).WithTrim().WithConverter(value => "converted").WithInvalidFallback("fallback"));
+        Assert.Equal("fallback", importer.ReadSheet().ReadRows<Holder<string>>().Single().Value);
+    }
+
+    [Fact]
+    public void Map_ErrorCellsPreserveFormatting_ThrowsExcelMappingException()
+    {
+        using var importer = Create(["Value", "Other"], [new Error("#N/A"), 1]);
+        importer.Configuration.RegisterClassMap<Holder<string>>(c => c.Map(r => r.Value).MakePreserveFormatting());
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<Holder<string>>().ToArray());
+        Assert.StartsWith("The cell contains the error #N/A", exception.Message);
+    }
+
+    [Fact]
+    public void Map_ErrorCellsInCollectionsAndDictionaries_ThrowsExcelMappingException()
+    {
+        using var importer = Create(["A", "B"], [1, new Error("#N/A")]);
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<Dictionary<string, int?>>().ToArray());
+        Assert.StartsWith("The cell contains the error #N/A", exception.Message);
+
+        using var split = Create(["Value", "Other"], [new Error("#VALUE!"), 1]);
+        exception = Assert.Throws<ExcelMappingException>(() => split.ReadSheet().ReadRows<Holder<string[]>>().ToArray());
+        Assert.StartsWith("The cell contains the error #VALUE!", exception.Message);
+
+        using var splitFallback = Create(["Value", "Other"], [new Error("#VALUE!"), 1]);
+        splitFallback.Configuration.RegisterClassMap<Holder<string[]>>(c => c.MapCollection<string>(r => r.Value).WithElementMap(e => e.WithInvalidFallback("x")));
+        Assert.Equal(["x"], splitFallback.ReadSheet().ReadRows<Holder<string[]>>().Single().Value);
+    }
+
+    [Fact]
+    public void ReadRowResults_ErrorCells_ReportInvalidValue()
+    {
+        using var importer = Create(["Value", "Other"], [new Error("#REF!"), 1], [2, 1]);
+        var results = importer.ReadSheet().ReadRowResults<Holder<int>>().ToArray();
+        var error = Assert.Single(results[0].Errors);
+        Assert.StartsWith("The cell contains the error #REF!", error.Message);
+        Assert.Equal(2, results[1].Value!.Value);
+    }
+
+    [Fact]
+    public void ReadRows_RowOfOnlyErrors_IsNotBlank()
+    {
+        // A row whose cells are all errors has values, so it isn't a blank row at the end of the
+        // sheet, and SkipBlankLines doesn't skip it.
+        using var importer = Create(["Value"], [1], [new Error("#N/A")]);
+        importer.Configuration.SkipBlankLines = true;
+        importer.Configuration.RegisterClassMap<Holder<int?>>(c => c.Map(r => r.Value).WithInvalidFallback(-1));
+        Assert.Equal([1, -1], importer.ReadSheet().ReadRows<Holder<int?>>().Select(r => r.Value));
     }
 
     // ---------- object members ----------
