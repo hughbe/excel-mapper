@@ -5887,6 +5887,26 @@ public class MapDictionaryTest
     }
 
     [Fact]
+    public void ReadRows_EnumKeysOtherDictionaryTypes_ReturnsExpected()
+    {
+        // Keys are converted whatever builds the dictionary.
+        Assert.Equal([new(KeyColor.Red, 1), new(KeyColor.Green, 2)], ReadEnumKeys<IDictionary<KeyColor, int>>());
+        Assert.Equal([new(KeyColor.Red, 1), new(KeyColor.Green, 2)], ReadEnumKeys<IReadOnlyDictionary<KeyColor, int>>());
+        Assert.Equal([new(KeyColor.Red, 1), new(KeyColor.Green, 2)], ReadEnumKeys<IEnumerable<KeyValuePair<KeyColor, int>>>());
+        Assert.Equal([new(KeyColor.Red, 1), new(KeyColor.Green, 2)], ReadEnumKeys<SortedDictionary<KeyColor, int>>());
+        Assert.Equal([new(KeyColor.Red, 1), new(KeyColor.Green, 2)], ReadEnumKeys<ConcurrentDictionary<KeyColor, int>>());
+        Assert.Equal([new(KeyColor.Red, 1), new(KeyColor.Green, 2)], ReadEnumKeys<ReadOnlyDictionary<KeyColor, int>>());
+        Assert.Equal([new(KeyColor.Red, 1), new(KeyColor.Green, 2)], ReadEnumKeys<ImmutableDictionary<KeyColor, int>>());
+        Assert.Equal([new(KeyColor.Red, 1), new(KeyColor.Green, 2)], ReadEnumKeys<ImmutableSortedDictionary<KeyColor, int>>());
+    }
+
+    private static KeyValuePair<KeyColor, int>[] ReadEnumKeys<T>() where T : IEnumerable<KeyValuePair<KeyColor, int>>
+    {
+        using var importer = Helpers.GetCsvImporter("Red,Green\n1,2\n");
+        return [.. importer.ReadSheet().ReadRows<T>().Single().OrderBy(kv => kv.Key)];
+    }
+
+    [Fact]
     public void ReadRows_EnumKeysNotNames_ThrowsExcelMappingException()
     {
         using var importer = Helpers.GetCsvImporter("Red,Purple\n1,2\n");
