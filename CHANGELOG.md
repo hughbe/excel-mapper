@@ -177,6 +177,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 - Two examples in the types documentation read a column that their tables didn't have. ([#247](https://github.com/hughbe/excel-mapper/pull/247))
 - Two enumerations of the same rows at once, such as `rows.Zip(rows.Skip(1))`, shared the sheet's position, so each read rows the other had moved to and they returned the wrong rows without an error. Each keeps its own position. ([#247](https://github.com/hughbe/excel-mapper/pull/247))
 - `ExcelImporter.NumberOfSheets` returned -1 after the importer was disposed, where the importer's other members throw an `ObjectDisposedException`; it throws too. ([#247](https://github.com/hughbe/excel-mapper/pull/247))
+- An enum with two values that have the same `[Description]` threw `ArgumentException` ("An item with the same key has already been added") when it was mapped, even if the values were aliases of one number. Aliases can share a description, and two different values throw an `ExcelMappingException` that names them. ([#251](https://github.com/hughbe/excel-mapper/pull/251))
 
 ### Performance
 

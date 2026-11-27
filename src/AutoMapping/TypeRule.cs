@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Linq;
 #if NET7_0_OR_GREATER
 using System.Numerics;
 #endif
@@ -301,10 +300,36 @@ internal sealed class TypeRule<T> : TypeRule
 
     private static Dictionary<string, T>? GetEnumDescriptions(Type enumType)
     {
-        var descriptions = enumType.GetFields(BindingFlags.Public | BindingFlags.Static)
-            .Select(f => (Field: f, Description: f.GetCustomAttribute<DescriptionAttribute>()?.Description))
-            .Where(x => !string.IsNullOrEmpty(x.Description))
-            .ToDictionary(x => x.Description!, x => (T)x.Field.GetValue(null)!);
-        return descriptions.Count > 0 ? descriptions : null;
+        Dictionary<string, T>? descriptions = null;
+        Dictionary<string, string>? names = null;
+        foreach (var field in enumType.GetFields(BindingFlags.Public | BindingFlags.Static))
+        {
+            var description = field.GetCustomAttribute<DescriptionAttribute>()?.Description;
+            if (string.IsNullOrEmpty(description))
+            {
+                continue;
+            }
+
+            var value = (T)field.GetValue(null)!;
+            descriptions ??= [];
+            names ??= [];
+            if (descriptions.TryGetValue(description!, out var existing))
+            {
+                // Two names for the same value (an alias) can share a description.
+                if (EqualityComparer<T>.Default.Equals(existing, value))
+                {
+                    continue;
+                }
+
+                throw new ExcelMappingException(
+                    $"The values {names[description!]} and {field.Name} of enum {TypeNames.Get(enumType)} both have the description \"{description}\", " +
+                    "so a cell with that text could be either. Give them different descriptions.");
+            }
+
+            descriptions.Add(description!, value);
+            names.Add(description!, field.Name);
+        }
+
+        return descriptions;
     }
 }

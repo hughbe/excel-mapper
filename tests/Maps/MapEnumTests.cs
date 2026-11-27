@@ -824,4 +824,38 @@ public class MapEnumTests
         var values = importer.ReadSheet().ReadRows<NumberedStatusRow>().Select(r => r.Status).ToArray();
         Assert.Equal([NumberedStatus.PartTime, (NumberedStatus)99, NumberedStatus.FullTime | NumberedStatus.PartTime], values);
     }
+
+    [Fact]
+    public void ReadRows_EnumValuesWithSameDescription_ThrowsExcelMappingException()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\nRed\n");
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRows<SameDescriptionEnum>().ToArray());
+        Assert.Equal("The values Red and Crimson of enum MapEnumTests.SameDescriptionEnum both have the description \"Red\", so a cell with that text could be either. Give them different descriptions.", exception.Message);
+    }
+
+    private enum SameDescriptionEnum
+    {
+        [Description("Red")]
+        Red,
+
+        [Description("Red")]
+        Crimson,
+    }
+
+    [Fact]
+    public void ReadRows_EnumAliasesWithSameDescription_ReturnsExpected()
+    {
+        using var importer = Helpers.GetCsvImporter("Value\nLight grey\nGray\n");
+        var values = importer.ReadSheet().ReadRows<AliasDescriptionEnum>().ToArray();
+        Assert.Equal([AliasDescriptionEnum.Grey, AliasDescriptionEnum.Grey], values);
+    }
+
+    private enum AliasDescriptionEnum
+    {
+        [Description("Light grey")]
+        Grey = 1,
+
+        [Description("Light grey")]
+        Gray = 1,
+    }
 }
