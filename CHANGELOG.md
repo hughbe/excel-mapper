@@ -140,6 +140,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Fixed
 
+- A number cell that's whole to Excel's 15 significant digits but not as a double, such as the result of `=1.15*100` (114.99999999999999, shown as 115), was invalid for an integer member. It maps to the whole number Excel shows. A fraction within 15 digits, such as 2.7, is still invalid.
 - Opening a workbook by path while Excel has it open failed on Windows with "The process cannot access the file because it is being used by another process": the file was opened sharing only reading, and Excel holds it open for writing. It's now opened sharing reading and writing. ([#216](https://github.com/hughbe/excel-mapper/pull/216))
 - The result of `ExcelSheet.ReadRows<T>()` and `ReadRowResults<T>()` can be enumerated more than once: each enumeration reads the same rows, from the row after the sheet's position when the method was called. Before, a second enumeration continued where the first stopped, so `rows.Any()` followed by `rows.ToList()` lost the first row. ([#206](https://github.com/hughbe/excel-mapper/pull/206))
 - With two columns of the same name, `ExcelHeading.GetColumnIndex("Name_2")` found the second, and a column really named "Name_2" after them was found as "Name_2_2". The heading no longer invents names. A case-sensitive column name (`StringComparison.Ordinal`) wasn't found when a column with the same name in another case came before it. ([#207](https://github.com/hughbe/excel-mapper/pull/207))

@@ -72,6 +72,10 @@ internal abstract class NumberMapper
     public Exception CreateException(ReadCellResult cell, in CellContext context, object? error)
     {
         var value = cell.GetValue();
+        if (value is double fractional && IsInteger(_typeCode))
+        {
+            value = MapperUtilities.RemoveFloatingPointError(fractional);
+        }
 
         // Excel stores every number as a double. A fractional number isn't silently truncated for
         // an integer type: "2.7" as text can't be parsed as an int, so neither can 2.7.
@@ -241,10 +245,15 @@ internal sealed class NumberMapper<T> : NumberMapper, ICellMapper<T>, ICellMappe
         {
             if (cellValue is double doubleValue)
             {
-                if (IsInteger(TypeCode) && Math.Floor(doubleValue) != doubleValue && !double.IsNaN(doubleValue) && !double.IsInfinity(doubleValue))
+                if (IsInteger(TypeCode) && Math.Floor(doubleValue) != doubleValue)
                 {
-                    value = default;
-                    return CellConversion.Invalid;
+                    // A formula result such as 114.99999999999999 is 115 in Excel.
+                    doubleValue = MapperUtilities.RemoveFloatingPointError(doubleValue);
+                    if (Math.Floor(doubleValue) != doubleValue && !double.IsNaN(doubleValue) && !double.IsInfinity(doubleValue))
+                    {
+                        value = default;
+                        return CellConversion.Invalid;
+                    }
                 }
 
                 // Checked rather than caught: an exception for every out of range cell is slow.

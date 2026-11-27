@@ -128,6 +128,40 @@ internal static class MapperUtilities
     public static Exception OutOfRange(double value, Type type, IFormatProvider provider)
         => new OverflowException($"The value {value.ToString(provider)} is too large or too small for {TypeNames.Get(type)}.");
 
+    /// <summary>
+    /// Removes floating-point error from a number in a cell that isn't whole, if that makes it
+    /// whole. Excel shows and calculates with 15 significant digits, so a formula such as
+    /// <c>=1.15*100</c>, which Excel stores as the double 114.99999999999999, is 115 to the user:
+    /// the digits past the 15th are rounding error, not a fraction. A number that's still
+    /// fractional with 15 significant digits, such as 2.7, is returned unchanged.
+    /// </summary>
+    public static double RemoveFloatingPointError(double value)
+    {
+        var magnitude = Math.Abs(value);
+
+        // From 1e15 the 15th significant digit is above the units, so rounding to it would change
+        // the whole number. Below 0.1 rounding can't give a whole number other than zero, and a
+        // tiny number such as 5.6E-17 (=0.1+0.2-0.3) is what Excel shows too. NaN and infinity
+        // fail both checks.
+        if (!(magnitude >= 0.1 && magnitude < 1e15))
+        {
+            return value;
+        }
+
+        // A real fraction, such as 2.5, is far from the nearest whole number, so skip the slower
+        // rounding to 15 significant digits below. Rounding error is at most half a unit in the
+        // 15th digit, which is less than 5e-15 of the number.
+        var nearest = Math.Round(value);
+        if (Math.Abs(value - nearest) > magnitude * 1e-14)
+        {
+            return value;
+        }
+
+        var decimals = 14 - (int)Math.Floor(Math.Log10(magnitude));
+        var rounded = Math.Round(value, Math.Max(0, Math.Min(15, decimals)));
+        return rounded == nearest ? nearest : value;
+    }
+
     // The exception for a number in a cell that isn't whole, mapped to an integer type: an
     // OverflowException, as for text such as "2.5" (see InvalidNumber), with the number written
     // in the importer's culture, as the cell's text is.
