@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace ExcelMapper.Tests;
 
 public class PreserveFormattingTests
@@ -487,5 +489,41 @@ public class PreserveFormattingTests
         {
             Map(o => o.Value);
         }
+    }
+
+    [Fact]
+    public void ReadRows_DifferentFormatsInColumn_ReturnsEachFormatted()
+    {
+        using var importer = XlsxBuilder.Create(
+            ["Value"],
+            [new XlsxBuilder.Formatted(1.5, "0.00")],
+            [new XlsxBuilder.Formatted(1.5, "0%")],
+            [new XlsxBuilder.Formatted(7, "000")],
+            [new XlsxBuilder.Formatted(1.5, "0.00")]);
+        var values = importer.ReadSheet().ReadRows<PreservedStringValue>().Select(r => r.Value).ToArray();
+        Assert.Equal(new string?[] { "1.50", "150%", "007", "1.50" }, values);
+    }
+
+    [Fact]
+    public void ReadRows_SplitFormattedCell_ReturnsFormattedValues()
+    {
+        using var importer = XlsxBuilder.Create(
+            ["Value"],
+            [new XlsxBuilder.Formatted(7, "000")],
+            [new XlsxBuilder.Formatted(1234.5, "#,##0.00")]);
+        var values = importer.ReadSheet().ReadRows<PreservedSplitValue>().Select(r => r.Value).ToArray();
+        Assert.Equal([["007"], ["1", "234.50"]], values);
+    }
+
+    public class PreservedStringValue
+    {
+        [ExcelPreserveFormatting]
+        public string? Value { get; set; }
+    }
+
+    public class PreservedSplitValue
+    {
+        [ExcelPreserveFormatting]
+        public string[] Value { get; set; } = [];
     }
 }
