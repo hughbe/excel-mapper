@@ -166,6 +166,8 @@ public class Employee
 }
 ```
 
+Two values can only share a description if they're the same value (aliases): otherwise a cell with that text could be either, so mapping the enum throws an `ExcelMappingException` naming them.
+
 To ignore case, map the member with `Map(e => e.Status).WithIgnoreCase()` in a class map. To map other text, such as codes, use [value mapping](mapping.md#value-mapping).
 
 Values are parsed as `Enum.Parse` parses them, so a number is the enum value with that number: `1` is `PartTime`. A number that isn't one of the enum's values, such as `99`, is accepted too, and gives a value without a name. Names separated by commas are combined, as for a `[Flags]` enum: `"FullTime, PartTime"` is `FullTime | PartTime`. To accept only the names, list them with [value mapping](mapping.md#value-mapping) and `MappingDictionaryBehavior.Required`, or check the value with `Enum.IsDefined` after reading.
