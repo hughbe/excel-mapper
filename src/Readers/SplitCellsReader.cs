@@ -28,12 +28,12 @@ internal sealed class SplitCellsReader(int column, CellSplitter splitter) : ICel
             return false;
         }
 
-        var readResult = new ReadCellResult(column, reader, preserveFormatting);
-
-        _readResult = readResult;
+        // Read through the field, not a copy, so the value and text it caches are kept for
+        // TryGetNext rather than read (and formatted) again.
+        _readResult = new ReadCellResult(column, reader, preserveFormatting);
 
         // A formula error, such as #N/A, isn't text to split: it's one invalid value.
-        _isError = readResult.IsError();
+        _isError = _readResult.IsError();
         if (_isError)
         {
             count = 1;
@@ -42,7 +42,7 @@ internal sealed class SplitCellsReader(int column, CellSplitter splitter) : ICel
         }
 
         // An empty cell contains no values.
-        var stringValue = readResult.GetString();
+        var stringValue = _readResult.GetString();
         if (string.IsNullOrEmpty(stringValue))
         {
             count = 0;

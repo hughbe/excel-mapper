@@ -179,6 +179,7 @@ All notable changes to ExcelMapper (NuGet package [`ExcelDataReader.Mapping`](ht
 
 ### Performance
 
+- `[ExcelPreserveFormatting]` parses each number format once rather than for every cell, and a split cell is read and formatted once rather than twice: preserving formatting allocates 764 bytes per cell instead of 2,180, and splitting a formatted cell 1,010 instead of about 4,200.
 - An `ExcelMappingException` builds its message when it's first read, so `ReadRowResults` over a file with many invalid or empty cells allocates about a fifth less and is about 10% faster. ([#209](https://github.com/hughbe/excel-mapper/pull/209))
 - Dates and times written as ISO 8601 text (`2024-03-04`, `2024-03-04T10:30:15Z`), the most common form in CSV files, are parsed about twice as fast: with the one ISO format the text can match, before the culture's own patterns, rather than trying each format in turn. ([#210](https://github.com/hughbe/excel-mapper/pull/210))
 - With native AOT, a generated `ExcelMappingContext` sets members and calls constructors with generated code rather than reflection, which boxed values and allocated an argument array for every member: rows allocate the same as with the JIT (a 10-member class 58 MB instead of 84 MB for 50,000 rows, a struct 53 MB instead of 129 MB), and map 8 to 21% faster. `ExcelTypeRegistrar` has `Setter` and `Constructor` for this, with `ExcelMemberSetter<TOwner, TValue>`, `ExcelConstructor<TOwner>` and `ExcelConstructorArguments<TOwner>`. ([#202](https://github.com/hughbe/excel-mapper/pull/202))

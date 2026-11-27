@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections.Concurrent;
+using System.Globalization;
 using ExcelDataReader;
 using ExcelNumberFormat;
 
@@ -60,8 +61,7 @@ internal struct ReadCellResult
 
         if (PreserveFormatting)
         {
-            var numberFormatString = Reader.GetNumberFormatString(ColumnIndex);
-            var numberFormat = new NumberFormat(numberFormatString);
+            var numberFormat = GetNumberFormat(Reader.GetNumberFormatString(ColumnIndex));
             _stringValue = numberFormat.Format(value, Culture as CultureInfo ?? CultureInfo.InvariantCulture);
         }
         else
@@ -70,6 +70,37 @@ internal struct ReadCellResult
         }
 
         return _stringValue;
+    }
+
+    // Parsed number formats by format string. Parsing one for every cell was most of the cost of
+    // preserving formatting. A workbook has few formats, but one from an untrusted file could have
+    // any number, so the cache is emptied when it's full rather than growing without limit.
+    // NumberFormat isn't changed after it's parsed, so it can be shared between threads.
+    private const int MaxCachedNumberFormats = 256;
+    private static readonly ConcurrentDictionary<string, NumberFormat> s_numberFormats = new();
+    private static NumberFormat? s_noNumberFormat;
+
+    private static NumberFormat GetNumberFormat(string? formatString)
+    {
+        if (formatString is null)
+        {
+            // CSV files have no formats.
+            return s_noNumberFormat ??= new NumberFormat(null);
+        }
+
+        if (s_numberFormats.TryGetValue(formatString, out var numberFormat))
+        {
+            return numberFormat;
+        }
+
+        if (s_numberFormats.Count >= MaxCachedNumberFormats)
+        {
+            s_numberFormats.Clear();
+        }
+
+        numberFormat = new NumberFormat(formatString);
+        s_numberFormats[formatString] = numberFormat;
+        return numberFormat;
     }
 
     /// <summary>
