@@ -546,4 +546,64 @@ public class MapBuiltInConversionTests
         public string? Name { get; set; }
         public DateTime When { get; set; }
     }
+
+    public static IEnumerable<object[]> FloatingPointErrorNumbers_TestData()
+    {
+        // Formula results that Excel shows (with 15 significant digits) as whole numbers.
+        yield return [0.1 * 3 * 10, 3];
+        yield return [1.15 * 100, 115];
+        yield return [-1.15 * 100, -115];
+        yield return [0.7 * 10, 7];
+        yield return [0.9999999999999999, 1];
+        yield return [1234567.0000000002, 1234567];
+    }
+
+    [Theory]
+    [MemberData(nameof(FloatingPointErrorNumbers_TestData))]
+    public void ReadRows_FloatingPointErrorForInteger_ReturnsWholeNumber(double value, int expected)
+    {
+        using var importer = XlsxBuilder.Create(["Int", "Long", "NullableInt", "Values"], [value, value, value, value]);
+        var row = importer.ReadSheet().ReadRow<FloatingPointErrorRow>();
+        Assert.Equal(expected, row.Int);
+        Assert.Equal(expected, row.Long);
+        Assert.Equal(expected, row.NullableInt);
+        Assert.Equal([expected], row.Values);
+    }
+
+    [Theory]
+    [InlineData(2.9999999999999)]
+    [InlineData(2.000000000001)]
+    [InlineData(0.05)]
+    [InlineData(1e15 + 0.5)]
+    public void ReadRows_FractionWithin15SignificantDigitsForInteger_ThrowsExcelMappingException(double value)
+    {
+        using var importer = XlsxBuilder.Create(["Int"], [value]);
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRow<FloatingPointErrorRow>());
+        Assert.IsType<OverflowException>(exception.InnerException);
+        Assert.Contains("isn't a whole number", exception.InnerException!.Message);
+    }
+
+    [Fact]
+    public void ReadRows_FloatingPointErrorOutOfRangeForInteger_ThrowsExcelMappingException()
+    {
+        using var importer = XlsxBuilder.Create(["Byte"], [2.56 * 100]);
+        var exception = Assert.Throws<ExcelMappingException>(() => importer.ReadSheet().ReadRow<ByteRow>());
+        Assert.Equal("The value 256 is too large or too small for byte.", exception.InnerException!.Message);
+    }
+
+    public class FloatingPointErrorRow
+    {
+        [ExcelOptional]
+        public int Int { get; set; }
+
+        [ExcelOptional]
+        public long Long { get; set; }
+
+        [ExcelOptional]
+        public int? NullableInt { get; set; }
+
+        [ExcelOptional]
+        [ExcelColumnNames("Values")]
+        public int[] Values { get; set; } = [];
+    }
 }

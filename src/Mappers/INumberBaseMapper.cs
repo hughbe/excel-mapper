@@ -53,10 +53,15 @@ internal class INumberBaseMapper<T> : ICellMapper<T> where T : INumberBase<T>
     {
         if (cell.GetValue() is double doubleValue)
         {
-            if (s_isInteger && !double.IsInteger(doubleValue) && double.IsFinite(doubleValue))
+            if (s_isInteger && !double.IsInteger(doubleValue))
             {
-                value = default!;
-                return CellConversion.Invalid;
+                // A formula result such as 114.99999999999999 is 115 in Excel.
+                doubleValue = MapperUtilities.RemoveFloatingPointError(doubleValue);
+                if (!double.IsInteger(doubleValue) && double.IsFinite(doubleValue))
+                {
+                    value = default!;
+                    return CellConversion.Invalid;
+                }
             }
 
             // Out of range values are checked rather than caught, as an exception for every out of
@@ -111,6 +116,11 @@ internal class INumberBaseMapper<T> : ICellMapper<T> where T : INumberBase<T>
     {
         if (cell.GetValue() is double doubleValue)
         {
+            if (s_isInteger)
+            {
+                doubleValue = MapperUtilities.RemoveFloatingPointError(doubleValue);
+            }
+
             // Excel stores every number as a double. A fractional number isn't silently truncated
             // for an integer type: "2.7" as text can't be parsed as an int, so neither can 2.7.
             return s_isInteger && !double.IsInteger(doubleValue) && double.IsFinite(doubleValue)

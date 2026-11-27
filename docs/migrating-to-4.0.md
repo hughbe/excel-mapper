@@ -84,7 +84,7 @@ To get local time, convert after reading: `value.ToLocalTime()`.
 
 **Before:** the fraction was silently dropped: truncated to `2` on .NET 8 and rounded to `3` on .NET Framework and other netstandard runtimes.
 
-**Now:** the cell is invalid, the same as the text `"2.7"`. Whole numbers such as `2.0` still map.
+**Now:** the cell is invalid, the same as the text `"2.7"`. Whole numbers such as `2.0` still map, and so does a number that's whole to Excel's 15 significant digits: the result of a formula such as `=1.15*100`, which Excel stores as 114.99999999999999 and shows as 115, is 115.
 
 **What to do:** if fractions are expected, map to `decimal` or `double`, or decide what an invalid value becomes:
 

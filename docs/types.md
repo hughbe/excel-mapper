@@ -39,7 +39,7 @@ public class Product
 
 The currency symbol and separators are the [culture](#culture)'s, so this example needs an en-US culture. Number styles only affect text: cells Excel stores as numbers aren't parsed.
 
-A fractional number (such as `2.7`) mapped to an integer type is invalid, as the text `"2.7"` would be: it isn't truncated or rounded. Map to `decimal` or `double`, or give the member an [invalid fallback](mapping.md#empty-and-invalid-cells).
+A fractional number (such as `2.7`) mapped to an integer type is invalid, as the text `"2.7"` would be: it isn't truncated or rounded. Excel calculates with 15 significant digits, so floating-point error past them isn't a fraction: `=1.15*100`, which Excel stores as 114.99999999999999 and shows as 115, maps to 115. Map to `decimal` or `double`, or give the member an [invalid fallback](mapping.md#empty-and-invalid-cells).
 
 On the netstandard builds, `.WithNumberStyle(...)` and `.WithFormatProvider(...)` are available for the built-in number types (`int`, `decimal`, `double` and so on, and their nullable versions).
 
